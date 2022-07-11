@@ -1,8 +1,9 @@
 <?php
 
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
-use Ecotone\Modelling\Attribute\TargetAggregateVersion;
+
 use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
+use Ecotone\Modelling\Attribute\TargetAggregateVersion;
 
 /**
  * Class MultiplyAmountCommand
@@ -39,7 +40,7 @@ class MultiplyAmountCommand
      * @param int $amount
      * @return MultiplyAmountCommand
      */
-    public static function create(string $orderId, ?int $version, int $amount) : self
+    public static function create(string $orderId, ?int $version, int $amount): self
     {
         return new self($orderId, $version, $amount);
     }

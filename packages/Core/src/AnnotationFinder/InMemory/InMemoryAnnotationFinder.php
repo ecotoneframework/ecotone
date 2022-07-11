@@ -1,24 +1,21 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\AnnotationFinder\InMemory;
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\AnnotationFinder\AnnotatedMethod;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationResolver\AttributeResolver;
-use Ecotone\AnnotationFinder\AnnotationResolver\CombinedResolver;
-use Ecotone\AnnotationFinder\AnnotationResolver\DoctrineAnnotationResolver;
-use Ecotone\AnnotationFinder\AnnotationResolver\OnlyAvailableResolver;
 use Ecotone\AnnotationFinder\TypeResolver;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\Support\InvalidArgumentException;
+use ReflectionClass;
 
 class InMemoryAnnotationFinder implements AnnotationFinder
 {
-    private const CLASS_ANNOTATIONS = "classAnnotations";
-    private const CLASS_PROPERTIES = "classProperties";
+    private const CLASS_ANNOTATIONS = 'classAnnotations';
+    private const CLASS_PROPERTIES = 'classProperties';
 
     private array $annotationsForClass;
 
@@ -26,13 +23,13 @@ class InMemoryAnnotationFinder implements AnnotationFinder
     {
         $this->annotationsForClass[self::CLASS_ANNOTATIONS] = [];
     }
-    
+
     public static function createEmpty(): self
     {
         return new self();
     }
 
-    public static function createFrom(array $classesWithAnnotationToRegister) : self
+    public static function createFrom(array $classesWithAnnotationToRegister): self
     {
         $annotationRegistrationService = self::createEmpty();
 
@@ -43,11 +40,11 @@ class InMemoryAnnotationFinder implements AnnotationFinder
         return $annotationRegistrationService;
     }
 
-    public function registerClassWithAnnotations(string $className) : self
+    public function registerClassWithAnnotations(string $className): self
     {
         $annotationResolver = new AttributeResolver();
 
-        $reflectionClass = new \ReflectionClass($className);
+        $reflectionClass = new ReflectionClass($className);
         foreach (get_class_methods($className) as $method) {
             $methodOwnerClass = TypeResolver::getMethodOwnerClass($reflectionClass, $method)->getName();
             $this->annotationsForClass[$className][$method] = [];
@@ -62,7 +59,7 @@ class InMemoryAnnotationFinder implements AnnotationFinder
         }
         foreach ($reflectionClass->getProperties() as $property) {
             foreach ($annotationResolver->getAnnotationsForProperty($className, $property->getName()) as $annotation) {
-                if (!$this->hasRegisteredAnnotationForProperty($reflectionClass->getName(), $property->getName(), $annotation)) {
+                if (! $this->hasRegisteredAnnotationForProperty($reflectionClass->getName(), $property->getName(), $annotation)) {
                     $this->addAnnotationToProperty($reflectionClass->getName(), $property->getName(), $annotation);
                 }
             }
@@ -71,15 +68,15 @@ class InMemoryAnnotationFinder implements AnnotationFinder
         do {
             foreach ($parentClass->getProperties() as $property) {
                 foreach ($annotationResolver->getAnnotationsForProperty($parentClass->getName(), $property->getName()) as $annotation) {
-                    if (!$this->hasRegisteredAnnotationForProperty($reflectionClass->getName(), $property->getName(), $annotation)) {
+                    if (! $this->hasRegisteredAnnotationForProperty($reflectionClass->getName(), $property->getName(), $annotation)) {
                         $this->addAnnotationToProperty($reflectionClass->getName(), $property->getName(), $annotation);
                     }
-                    if (!$this->hasRegisteredAnnotationForProperty($parentClass->getName(), $property->getName(), $annotation)) {
+                    if (! $this->hasRegisteredAnnotationForProperty($parentClass->getName(), $property->getName(), $annotation)) {
                         $this->addAnnotationToProperty($parentClass->getName(), $property->getName(), $annotation);
                     }
                 }
             }
-        }while($parentClass = $parentClass->getParentClass());
+        } while ($parentClass = $parentClass->getParentClass());
 
         return $this;
     }
@@ -89,7 +86,7 @@ class InMemoryAnnotationFinder implements AnnotationFinder
      */
     public function getAnnotationsForMethod(string $className, string $methodName): array
     {
-        if (!isset($this->annotationsForClass[$className][$methodName])) {
+        if (! isset($this->annotationsForClass[$className][$methodName])) {
             return [];
         }
 
@@ -101,7 +98,7 @@ class InMemoryAnnotationFinder implements AnnotationFinder
      */
     public function getAnnotationsForClass(string $classNameToFind): array
     {
-        if (!isset($this->annotationsForClass[self::CLASS_ANNOTATIONS][$classNameToFind])) {
+        if (! isset($this->annotationsForClass[self::CLASS_ANNOTATIONS][$classNameToFind])) {
             return [];
         }
 
@@ -113,7 +110,7 @@ class InMemoryAnnotationFinder implements AnnotationFinder
      */
     public function getAnnotationsForProperty(string $className, string $propertyName): array
     {
-        if (!isset($this->annotationsForClass[self::CLASS_PROPERTIES][$className][$propertyName])) {
+        if (! isset($this->annotationsForClass[self::CLASS_PROPERTIES][$className][$propertyName])) {
             return [];
         }
 
@@ -129,7 +126,7 @@ class InMemoryAnnotationFinder implements AnnotationFinder
 
         $registrations = [];
         foreach ($classes as $class) {
-            if (!isset($this->annotationsForClass[$class])) {
+            if (! isset($this->annotationsForClass[$class])) {
                 continue;
             }
 
@@ -154,7 +151,7 @@ class InMemoryAnnotationFinder implements AnnotationFinder
 
     private function getAllClassesWithAnnotation(string $annotationClassName): array
     {
-        if ($annotationClassName === "*") {
+        if ($annotationClassName === '*') {
             return array_keys($this->annotationsForClass[self::CLASS_ANNOTATIONS]);
         }
 
@@ -194,11 +191,11 @@ class InMemoryAnnotationFinder implements AnnotationFinder
      */
     public function findAnnotatedMethods(string $methodAnnotationClassName): array
     {
-        $classes = $this->getAllClassesWithAnnotation("*");
+        $classes = $this->getAllClassesWithAnnotation('*');
 
         $registrations = [];
         foreach ($classes as $class) {
-            if (!isset($this->annotationsForClass[$class])) {
+            if (! isset($this->annotationsForClass[$class])) {
                 continue;
             }
 
@@ -252,7 +249,7 @@ class InMemoryAnnotationFinder implements AnnotationFinder
      *
      * @return InMemoryAnnotationFinder
      */
-    public function addAnnotationToProperty(string $className, string $property, $propertyAnnotationObject) : self
+    public function addAnnotationToProperty(string $className, string $property, $propertyAnnotationObject): self
     {
         $this->annotationsForClass[self::CLASS_PROPERTIES][$className][$property][] = $propertyAnnotationObject;
 

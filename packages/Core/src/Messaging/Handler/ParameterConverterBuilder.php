@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
@@ -13,17 +14,17 @@ interface ParameterConverterBuilder
     /**
      * @return string[]
      */
-    public function getRequiredReferences() : array;
+    public function getRequiredReferences(): array;
 
     /**
      * @param InterfaceParameter $parameter
      * @return bool
      */
-    public function isHandling(InterfaceParameter $parameter) : bool;
+    public function isHandling(InterfaceParameter $parameter): bool;
 
     /**
      * @param ReferenceSearchService $referenceSearchService
      * @return ParameterConverter
      */
-    public function build(ReferenceSearchService $referenceSearchService) : ParameterConverter;
+    public function build(ReferenceSearchService $referenceSearchService): ParameterConverter;
 }

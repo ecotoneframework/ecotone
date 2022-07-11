@@ -1,10 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\ClassReference;
 use Ecotone\Messaging\Attribute\Converter;
 use Ecotone\Messaging\Attribute\MediaTypeConverter;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
@@ -15,7 +15,6 @@ use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Conversion\ConverterBuilder;
 use Ecotone\Messaging\Conversion\ConverterReferenceBuilder;
 use Ecotone\Messaging\Conversion\ReferenceServiceConverterBuilder;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 #[ModuleAnnotation]

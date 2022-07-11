@@ -2,13 +2,11 @@
 
 namespace Ecotone\EventSourcing;
 
-use Ecotone\EventSourcing\Config\EventSourcingModule;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Prooph\EventStore\Pdo\Projection\MariaDbProjectionManager;
 use Prooph\EventStore\Pdo\Projection\MySqlProjectionManager;
 use Prooph\EventStore\Pdo\Projection\PostgresProjectionManager;
-use Prooph\EventStore\Projection\InMemoryProjectionManager;
 use Prooph\EventStore\Projection\ProjectionManager;
 use Prooph\EventStore\Projection\ProjectionStatus;
 use Prooph\EventStore\Projection\Projector;
@@ -27,9 +25,10 @@ class LazyProophProjectionManager implements ProjectionManager
         private EventSourcingConfiguration $eventSourcingConfiguration,
         private array $projectionSetupConfigurations,
         private ReferenceSearchService $referenceSearchService
-    ) {}
+    ) {
+    }
 
-    private function getProjectionManager() : ProjectionManager
+    private function getProjectionManager(): ProjectionManager
     {
         if ($this->lazyInitializedProjectionManager) {
             return $this->lazyInitializedProjectionManager;
@@ -47,7 +46,7 @@ class LazyProophProjectionManager implements ProjectionManager
         return $this->lazyInitializedProjectionManager;
     }
 
-    public function ensureEventStoreIsPrepared() : void
+    public function ensureEventStoreIsPrepared(): void
     {
         $this->getLazyProophEventStore()->prepareEventStore();
     }
@@ -97,35 +96,40 @@ class LazyProophProjectionManager implements ProjectionManager
 
     public function fetchProjectionNames(?string $filter, int $limit = 20, int $offset = 0): array
     {
-        $this->ensureEventStoreIsPrepared();;
+        $this->ensureEventStoreIsPrepared();
+        ;
 
         return $this->getProjectionManager()->fetchProjectionNames($filter, $limit, $offset);
     }
 
     public function fetchProjectionNamesRegex(string $regex, int $limit = 20, int $offset = 0): array
     {
-        $this->ensureEventStoreIsPrepared();;
+        $this->ensureEventStoreIsPrepared();
+        ;
 
         return $this->getProjectionManager()->fetchProjectionNamesRegex($regex, $limit, $offset);
     }
 
     public function fetchProjectionStatus(string $name): ProjectionStatus
     {
-        $this->ensureEventStoreIsPrepared();;
+        $this->ensureEventStoreIsPrepared();
+        ;
 
         return $this->getProjectionManager()->fetchProjectionStatus($name);
     }
 
     public function fetchProjectionStreamPositions(string $name): array
     {
-        $this->ensureEventStoreIsPrepared();;
+        $this->ensureEventStoreIsPrepared();
+        ;
 
         return $this->getProjectionManager()->fetchProjectionStreamPositions($name);
     }
 
     public function fetchProjectionState(string $name): array
     {
-        $this->ensureEventStoreIsPrepared();;
+        $this->ensureEventStoreIsPrepared();
+        ;
 
         return $this->getProjectionManager()->fetchProjectionState($name);
     }
@@ -144,6 +148,6 @@ class LazyProophProjectionManager implements ProjectionManager
 
     public static function getProjectionStreamName(string $name): string
     {
-        return "projection_" . $name;
+        return 'projection_' . $name;
     }
 }

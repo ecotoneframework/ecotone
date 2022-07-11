@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
@@ -40,7 +41,7 @@ class Pointcut
         return new self($expression);
     }
 
-    public static function initializeFrom(InterfaceToCall $interfaceToCall, array $parameterConverters) : self
+    public static function initializeFrom(InterfaceToCall $interfaceToCall, array $parameterConverters): self
     {
         $optionalAttributes = [];
         $requiredAttributes = [];
@@ -52,7 +53,7 @@ class Pointcut
             /** @var UnionTypeDescriptor|TypeDescriptor $type */
             $type = $interfaceParameter->getTypeDescriptor();
             if ($type->isUnionType()) {
-                if (!self::doesContainAnnotation($type)) {
+                if (! self::doesContainAnnotation($type)) {
                     continue;
                 }
 
@@ -60,35 +61,35 @@ class Pointcut
                     if ($interfaceParameter->doesAllowNulls()) {
                         throw InvalidArgumentException::create("Error during initialization of pointcut. Union types can only be non nullable for expressions in {$interfaceToCall} parameter: {$interfaceParameter}");
                     }
-                    if (!$unionType->isClassOrInterface() || !ClassDefinition::createFor($unionType)->isAnnotation()) {
+                    if (! $unionType->isClassOrInterface() || ! ClassDefinition::createFor($unionType)->isAnnotation()) {
                         throw InvalidArgumentException::create("Error during initialization of pointcut. Union types can only combined from attributes, non attribute type given {$unionType->toString()} in {$interfaceToCall} parameter: {$interfaceParameter}");
                     }
 
                     $optionalAttributes[] = $unionType->toString();
                 }
-            }else {
-                if (!$type->isClassNotInterface()) {
+            } else {
+                if (! $type->isClassNotInterface()) {
                     continue;
                 }
-                if (!ClassDefinition::createFor($type)->isAnnotation()) {
+                if (! ClassDefinition::createFor($type)->isAnnotation()) {
                     continue;
                 }
 
                 if ($interfaceParameter->doesAllowNulls()) {
                     $optionalAttributes[] = $type->toString();
-                }else {
+                } else {
                     $requiredAttributes[] = $type->toString();
                 }
             }
         }
 
-        $pointcut = "";
+        $pointcut = '';
         if ($optionalAttributes) {
-            $pointcut = "(" .  implode("||", $optionalAttributes) . ")";
+            $pointcut = '(' .  implode('||', $optionalAttributes) . ')';
         }
         if ($requiredAttributes) {
-            $pointcut .= $pointcut ? "&&" : "";
-            $pointcut .= implode("&&", array_map(fn(string $attribute) => "(" . $attribute . ")", $requiredAttributes));
+            $pointcut .= $pointcut ? '&&' : '';
+            $pointcut .= implode('&&', array_map(fn (string $attribute) => '(' . $attribute . ')', $requiredAttributes));
         }
 
         return Pointcut::createWith($pointcut);
@@ -104,7 +105,7 @@ class Pointcut
 
     public function isEmpty(): bool
     {
-        return $this->expression === "" || is_null($this->expression);
+        return $this->expression === '' || is_null($this->expression);
     }
 
     public function doesItCut(InterfaceToCall $interfaceToCall, array $endpointAnnotations): bool
@@ -137,13 +138,13 @@ class Pointcut
         }
 
         $inBetweenBracketsExpressions = $this->getInBetweenBracketsExpressions($expression);
-        $newExpression                = "";
+        $newExpression                = '';
         for ($index = 0; $index < count($expressionsEvaluations); $index++) {
             if ($index > 0) {
                 $newExpression .= $inBetweenBracketsExpressions[$index - 1];
             }
 
-            $newExpression .= $expressionsEvaluations[$index] ? "true" : "false";
+            $newExpression .= $expressionsEvaluations[$index] ? 'true' : 'false';
         }
 
         return $this->doesItCutWithPossibleBrackets($newExpression, $endpointAnnotations, $interfaceToCall);
@@ -151,7 +152,7 @@ class Pointcut
 
     private function doesItCutWithPossibleORs(string $expressionToVerify, array $endpointAnnotations, InterfaceToCall $interfaceToCall): bool
     {
-        $multipleExpression = explode("||", $expressionToVerify);
+        $multipleExpression = explode('||', $expressionToVerify);
 
         foreach ($multipleExpression as $possibleEndExpressions) {
             if ($this->doesItCutPossibleANDs($possibleEndExpressions, $endpointAnnotations, $interfaceToCall)) {
@@ -164,9 +165,9 @@ class Pointcut
 
     private function doesItCutPossibleANDs(string $expressionToVerify, array $endpointAnnotations, InterfaceToCall $interfaceToCall): bool
     {
-        $expressions = explode("&&", $expressionToVerify);
+        $expressions = explode('&&', $expressionToVerify);
         foreach ($expressions as $expression) {
-            if (!$this->doesItCutThisExpression($expression, $endpointAnnotations, $interfaceToCall)) {
+            if (! $this->doesItCutThisExpression($expression, $endpointAnnotations, $interfaceToCall)) {
                 return false;
             }
         }
@@ -176,10 +177,10 @@ class Pointcut
 
     private function doesItCutThisExpression(mixed $expression, array $endpointAnnotations, InterfaceToCall $interfaceToCall): bool
     {
-        if ($expression === "true") {
+        if ($expression === 'true') {
             return true;
         }
-        if ($expression === "false") {
+        if ($expression === 'false') {
             return false;
         }
 
@@ -207,8 +208,8 @@ class Pointcut
             }
         }
 
-        if (strpos($expression, "::") !== false) {
-            list($class, $method) = explode("::", $expression);
+        if (strpos($expression, '::') !== false) {
+            [$class, $method] = explode('::', $expression);
 
             if ($this->isRelatedClass($class, $interfaceToCall)) {
                 if ($interfaceToCall->hasMethodName($method)) {
@@ -217,9 +218,9 @@ class Pointcut
             }
         }
 
-        if (strpos($expression, "*") !== false) {
-            $expression = "#" . str_replace("*", ".*", $expression) . "#";
-            $expression = str_replace("\\", "\\\\", $expression);
+        if (strpos($expression, '*') !== false) {
+            $expression = '#' . str_replace('*', '.*', $expression) . '#';
+            $expression = str_replace('\\', '\\\\', $expression);
 
             return preg_match($expression, $interfaceToCall->getInterfaceName()) === 1;
         }

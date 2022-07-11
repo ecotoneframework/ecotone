@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
@@ -22,7 +23,6 @@ use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaders
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
 use Ecotone\Messaging\Handler\InterfaceParameter;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 #[ModuleAnnotation]
@@ -92,13 +92,13 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
                 } else {
                     return GatewayPayloadBuilder::create($interfaceParameter->getName());
                 }
-            } else if ($parameterAnnotation instanceof Header) {
+            } elseif ($parameterAnnotation instanceof Header) {
                 if ($parameterAnnotation->getExpression()) {
                     throw ConfigurationException::create("@Header annotation for Gateway ({$referenceName}) cannot be used with expression");
                 } else {
                     return GatewayHeaderBuilder::create($interfaceParameter->getName(), $parameterAnnotation->getHeaderName());
                 }
-            } else if ($parameterAnnotation instanceof Headers) {
+            } elseif ($parameterAnnotation instanceof Headers) {
                 return GatewayHeadersBuilder::create($interfaceParameter->getName());
             }
         }

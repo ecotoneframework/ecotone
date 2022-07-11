@@ -1,7 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\AnnotationFinder;
+
+use InvalidArgumentException;
 
 class AnnotatedDefinition implements AnnotatedFinding
 {
@@ -32,17 +35,17 @@ class AnnotatedDefinition implements AnnotatedFinding
      * @param object[] $classAnnotations
      * @param object[] $methodAnnotations
      */
-    public static function create(object $annotationForClass, object $annotationForMethod, string $className, string $methodName, array $classAnnotations, array $methodAnnotations) : self
+    public static function create(object $annotationForClass, object $annotationForMethod, string $className, string $methodName, array $classAnnotations, array $methodAnnotations): self
     {
         return new self($annotationForClass, $annotationForMethod, $className, $methodName, $classAnnotations, $methodAnnotations);
     }
 
-    public function getAnnotationForClass() : object
+    public function getAnnotationForClass(): object
     {
         return $this->annotationForClass;
     }
 
-    public function getAnnotationForMethod() : object
+    public function getAnnotationForMethod(): object
     {
         return $this->annotationForMethod;
     }
@@ -68,16 +71,16 @@ class AnnotatedDefinition implements AnnotatedFinding
     /**
      * @return object[]
      */
-    public function getClassAnnotations() : array
+    public function getClassAnnotations(): array
     {
         return $this->classAnnotations;
     }
 
     /**
      * @return object[]
-     * @throws \InvalidArgumentException if not found any
+     * @throws InvalidArgumentException if not found any
      */
-    public function getClassAnnotationsWithType(string $type) : array
+    public function getClassAnnotationsWithType(string $type): array
     {
         $annotations = [];
         foreach ($this->classAnnotations as $classAnnotation) {
@@ -87,7 +90,7 @@ class AnnotatedDefinition implements AnnotatedFinding
         }
 
         if (empty($annotations)) {
-            throw new \InvalidArgumentException("Trying to retrieve class annotation {$type}, but there is no any for {$this}");
+            throw new InvalidArgumentException("Trying to retrieve class annotation {$type}, but there is no any for {$this}");
         }
 
         return $annotations;
@@ -95,9 +98,9 @@ class AnnotatedDefinition implements AnnotatedFinding
 
     /**
      * @return object[]
-     * @throws \InvalidArgumentException if not found any
+     * @throws InvalidArgumentException if not found any
      */
-    public function getMethodAnnotationsWithType(string $type) : array
+    public function getMethodAnnotationsWithType(string $type): array
     {
         $annotations = [];
         foreach ($this->methodAnnotations as $methodAnnotation) {
@@ -107,13 +110,13 @@ class AnnotatedDefinition implements AnnotatedFinding
         }
 
         if (empty($annotations)) {
-            throw new \InvalidArgumentException("Trying to retrieve class annotation {$type}, but there is no any for {$this}");
+            throw new InvalidArgumentException("Trying to retrieve class annotation {$type}, but there is no any for {$this}");
         }
 
         return $annotations;
     }
 
-    public function hasMethodAnnotation(string $type) : bool
+    public function hasMethodAnnotation(string $type): bool
     {
         foreach ($this->methodAnnotations as $methodAnnotation) {
             if ($methodAnnotation instanceof $type) {
@@ -124,7 +127,7 @@ class AnnotatedDefinition implements AnnotatedFinding
         return false;
     }
 
-    public function hasClassAnnotation(string $type) : bool
+    public function hasClassAnnotation(string $type): bool
     {
         foreach ($this->classAnnotations as $classAnnotation) {
             if ($classAnnotation instanceof $type) {
@@ -137,6 +140,6 @@ class AnnotatedDefinition implements AnnotatedFinding
 
     public function __toString()
     {
-        return $this->className . "::" . $this->methodName . "::" . get_class($this->annotationForMethod);
+        return $this->className . '::' . $this->methodName . '::' . get_class($this->annotationForMethod);
     }
 }

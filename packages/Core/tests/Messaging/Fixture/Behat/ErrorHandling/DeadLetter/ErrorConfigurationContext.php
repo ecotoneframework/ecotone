@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter;
@@ -11,9 +12,9 @@ use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
 class ErrorConfigurationContext
 {
-    const INPUT_CHANNEL       = "inputChannel";
-    const ERROR_CHANNEL       = "errorChannel";
-    const DEAD_LETTER_CHANNEL = "deadLetterChannel";
+    public const INPUT_CHANNEL       = 'inputChannel';
+    public const ERROR_CHANNEL       = 'errorChannel';
+    public const DEAD_LETTER_CHANNEL = 'deadLetterChannel';
 
     #[ServiceContext]
     public function getInputChannel()
@@ -35,7 +36,7 @@ class ErrorConfigurationContext
     #[ServiceContext]
     public function pollingConfiguration()
     {
-        return PollingMetadata::create("orderService")
+        return PollingMetadata::create('orderService')
             ->setExecutionTimeLimitInMilliseconds(1)
             ->setHandledMessageLimit(1)
             ->setErrorChannelName(ErrorConfigurationContext::ERROR_CHANNEL);

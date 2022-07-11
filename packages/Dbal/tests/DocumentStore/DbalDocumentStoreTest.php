@@ -11,8 +11,16 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Store\Document\DocumentException;
 use Ecotone\Messaging\Store\Document\DocumentStore;
+
+use function json_decode;
+use function json_encode;
+
+use stdClass;
 use Test\Ecotone\Dbal\DbalMessagingTest;
 
+/**
+ * @internal
+ */
 final class DbalDocumentStoreTest extends DbalMessagingTest
 {
     private CachedConnectionFactory $cachedConnectionFactory;
@@ -58,9 +66,9 @@ final class DbalDocumentStoreTest extends DbalMessagingTest
             CachedConnectionFactory::createFor(new DbalReconnectableConnectionFactory($this->getConnectionFactory())),
             true,
             InMemoryConversionService::createWithConversion(
-                new \stdClass(),
+                new stdClass(),
                 MediaType::APPLICATION_X_PHP,
-                \stdClass::class,
+                stdClass::class,
                 MediaType::APPLICATION_JSON,
                 TypeDescriptor::STRING,
                 '{"name":"johny"}'
@@ -69,28 +77,28 @@ final class DbalDocumentStoreTest extends DbalMessagingTest
                 MediaType::APPLICATION_JSON,
                 TypeDescriptor::STRING,
                 MediaType::APPLICATION_X_PHP,
-                \stdClass::class,
-                new \stdClass()
+                stdClass::class,
+                new stdClass()
             )
         );
 
         $this->assertEquals(0, $documentStore->countDocuments('users'));
 
-        $documentStore->addDocument('users', '123', new \stdClass());
+        $documentStore->addDocument('users', '123', new stdClass());
 
-        $this->assertEquals(new \stdClass(), $documentStore->getDocument('users', '123'));
+        $this->assertEquals(new stdClass(), $documentStore->getDocument('users', '123'));
     }
 
     public function test_adding_document_as_collection_of_objects_should_return_object()
     {
-        $document = [new \stdClass(), new \stdClass()];
+        $document = [new stdClass(), new stdClass()];
         $documentStore = new DbalDocumentStore(
             CachedConnectionFactory::createFor(new DbalReconnectableConnectionFactory($this->getConnectionFactory())),
             true,
             InMemoryConversionService::createWithConversion(
                 $document,
                 MediaType::APPLICATION_X_PHP,
-                TypeDescriptor::createCollection(\stdClass::class),
+                TypeDescriptor::createCollection(stdClass::class),
                 MediaType::APPLICATION_JSON,
                 TypeDescriptor::STRING,
                 '[{"name":"johny"},{"name":"franco"}]'
@@ -99,7 +107,7 @@ final class DbalDocumentStoreTest extends DbalMessagingTest
                 MediaType::APPLICATION_JSON,
                 TypeDescriptor::STRING,
                 MediaType::APPLICATION_X_PHP,
-                TypeDescriptor::createCollection(\stdClass::class),
+                TypeDescriptor::createCollection(stdClass::class),
                 $document
             )
         );
@@ -207,15 +215,15 @@ final class DbalDocumentStoreTest extends DbalMessagingTest
     {
         $documentStore = $this->getDocumentStore();
 
-        $this->assertEquals([],$documentStore->getAllDocuments('users'));
+        $this->assertEquals([], $documentStore->getAllDocuments('users'));
 
         $documentStore->addDocument('users', '123', '{"name":"Johny"}');
         $documentStore->addDocument('users', '124', '{"name":"Franco"}');
 
         $this->assertEquals([
             '{"name":"Johny"}',
-            '{"name":"Franco"}'
-        ], array_map(fn(string $document) => \json_encode(\json_decode($document, true)),$documentStore->getAllDocuments('users')));
+            '{"name":"Franco"}',
+        ], array_map(fn (string $document) => json_encode(json_decode($document, true)), $documentStore->getAllDocuments('users')));
     }
 
     public function test_retrieving_whole_collection_of_objects()
@@ -224,9 +232,9 @@ final class DbalDocumentStoreTest extends DbalMessagingTest
             CachedConnectionFactory::createFor(new DbalReconnectableConnectionFactory($this->getConnectionFactory())),
             true,
             InMemoryConversionService::createWithConversion(
-                new \stdClass(),
+                new stdClass(),
                 MediaType::APPLICATION_X_PHP,
-                \stdClass::class,
+                stdClass::class,
                 MediaType::APPLICATION_JSON,
                 TypeDescriptor::STRING,
                 '{"name":"johny"}'
@@ -235,17 +243,17 @@ final class DbalDocumentStoreTest extends DbalMessagingTest
                 MediaType::APPLICATION_JSON,
                 TypeDescriptor::STRING,
                 MediaType::APPLICATION_X_PHP,
-                \stdClass::class,
-                new \stdClass()
+                stdClass::class,
+                new stdClass()
             )
         );
 
         $this->assertEquals(0, $documentStore->countDocuments('users'));
 
-        $documentStore->addDocument('users', '123', new \stdClass());
-        $documentStore->addDocument('users', '124', new \stdClass());
+        $documentStore->addDocument('users', '123', new stdClass());
+        $documentStore->addDocument('users', '124', new stdClass());
 
-        $this->assertEquals([new \stdClass(),new \stdClass()], $documentStore->getAllDocuments('users'));
+        $this->assertEquals([new stdClass(), new stdClass()], $documentStore->getAllDocuments('users'));
     }
 
     public function test_dropping_non_existing_collection()
@@ -297,17 +305,18 @@ final class DbalDocumentStoreTest extends DbalMessagingTest
         $dbalConnection = $this->cachedConnectionFactory->createContext()->getDbalConnection();
 
         $dbalConnection->executeStatement(sprintf(<<<SQL
-    DROP TABLE IF EXISTS %s
-SQL, DbalDocumentStore::ECOTONE_DOCUMENT_STORE));
+                DROP TABLE IF EXISTS %s
+            SQL, DbalDocumentStore::ECOTONE_DOCUMENT_STORE));
 
         $dbalConnection->beginTransaction();
     }
 
     protected function tearDown(): void
     {
-        try{
+        try {
             $this->cachedConnectionFactory->createContext()->getDbalConnection()->rollBack();
-        }catch (\Exception) {}
+        } catch (\Exception) {
+        }
     }
 
     private function getDocumentStore(): DocumentStore
@@ -321,6 +330,6 @@ SQL, DbalDocumentStore::ECOTONE_DOCUMENT_STORE));
 
     private function assertJsons(string $expectedJson, string $givenJson): void
     {
-        $this->assertEquals($expectedJson, \json_encode(\json_decode($givenJson, true)));
+        $this->assertEquals($expectedJson, json_encode(json_decode($givenJson, true)));
     }
 }

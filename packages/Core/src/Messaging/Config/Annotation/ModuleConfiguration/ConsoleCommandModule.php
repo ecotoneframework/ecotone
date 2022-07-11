@@ -1,42 +1,32 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
-
-use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotatedMethod;
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Messaging\Attribute\ConsoleCommand;
 use Ecotone\Messaging\Attribute\ConsoleParameterOption;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
-use Ecotone\Messaging\Attribute\ConsoleCommand;
-use Ecotone\Messaging\Attribute\Scheduled;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Config\Configuration;
-use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ConsoleCommandConfiguration;
 use Ecotone\Messaging\Config\ConsoleCommandParameter;
 use Ecotone\Messaging\Config\ConsoleCommandResultSet;
-use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
-use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
-use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ramsey\Uuid\Uuid;
 
 #[ModuleAnnotation]
 final class ConsoleCommandModule extends NoExternalConfigurationModule implements AnnotationModule
 {
-    const ECOTONE_COMMAND_PARAMETER_PREFIX = "ecotone.oneTimeCommand.";
+    public const ECOTONE_COMMAND_PARAMETER_PREFIX = 'ecotone.oneTimeCommand.';
 
     /**
      * @var ServiceActivatorBuilder[]
@@ -65,7 +55,7 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
             $className    = $annotationRegistration->getClassName();
             $methodName               = $annotationRegistration->getMethodName();
 
-            list($messageHandlerBuilder, $oneTimeCommandConfiguration) = self::prepareConsoleCommand($interfaceToCallRegistry, $annotationRegistration, $className, $methodName, $commandName);
+            [$messageHandlerBuilder, $oneTimeCommandConfiguration] = self::prepareConsoleCommand($interfaceToCallRegistry, $annotationRegistration, $className, $methodName, $commandName);
 
             $messageHandlerBuilders[] = $messageHandlerBuilder;
             $oneTimeConfigurations[]     = $oneTimeCommandConfiguration;
@@ -79,18 +69,18 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
         $parameterConverters = [];
         $parameters          = [];
 
-        list($parameterConverters, $parameters) = self::prepareParameter($interfaceToCallRegistry, $className, $methodName, $parameterConverters, $parameters);
+        [$parameterConverters, $parameters] = self::prepareParameter($interfaceToCallRegistry, $className, $methodName, $parameterConverters, $parameters);
 
-        $inputChannel                = "ecotone.channel." . $commandName;
+        $inputChannel                = 'ecotone.channel.' . $commandName;
 
         $messageHandlerBuilder       = ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($annotatedMethod), $methodName)
-            ->withEndpointId("ecotone.endpoint." . $commandName)
+            ->withEndpointId('ecotone.endpoint.' . $commandName)
             ->withEndpointAnnotations([$annotatedMethod->getAnnotationForMethod()])
             ->withInputChannelName($inputChannel)
             ->withMethodParameterConverters($parameterConverters);
         $oneTimeCommandConfiguration = ConsoleCommandConfiguration::create($inputChannel, $commandName, $parameters);
 
-        return array($messageHandlerBuilder, $oneTimeCommandConfiguration);
+        return [$messageHandlerBuilder, $oneTimeCommandConfiguration];
     }
 
     public static function prepareConsoleCommandForDirectObject(object $directObject, string $methodName, string $commandName, bool $discoverableByConsoleCommandAttribute, InterfaceToCallRegistry $interfaceToCallRegistry)
@@ -99,25 +89,25 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
         $parameterConverters = [];
         $parameters          = [];
 
-        list($parameterConverters, $parameters) = self::prepareParameter($interfaceToCallRegistry, $className, $methodName, $parameterConverters, $parameters);
+        [$parameterConverters, $parameters] = self::prepareParameter($interfaceToCallRegistry, $className, $methodName, $parameterConverters, $parameters);
 
-        $inputChannel                = "ecotone.channel." . $commandName;
+        $inputChannel                = 'ecotone.channel.' . $commandName;
         $messageHandlerBuilder       = ServiceActivatorBuilder::createWithDirectReference($directObject, $methodName)
-            ->withEndpointId("ecotone.endpoint." . $commandName)
+            ->withEndpointId('ecotone.endpoint.' . $commandName)
             ->withEndpointAnnotations($discoverableByConsoleCommandAttribute ? [new ConsoleCommand($commandName)] : [])
             ->withInputChannelName($inputChannel)
             ->withMethodParameterConverters($parameterConverters);
         $oneTimeCommandConfiguration = ConsoleCommandConfiguration::create($inputChannel, $commandName, $parameters);
 
-        return array($messageHandlerBuilder, $oneTimeCommandConfiguration);
+        return [$messageHandlerBuilder, $oneTimeCommandConfiguration];
     }
 
     private static function prepareParameter(InterfaceToCallRegistry $interfaceToCallRegistry, bool|string $className, string $methodName, array $parameterConverters, array $parameters): array
     {
         $interfaceToCall = $interfaceToCallRegistry->getFor($className, $methodName);
 
-        if ($interfaceToCall->canReturnValue() && !$interfaceToCall->getReturnType()->equals(TypeDescriptor::create(ConsoleCommandResultSet::class))) {
-            throw InvalidArgumentException::create("One Time Command {$interfaceToCall} must have void or " . ConsoleCommandResultSet::class . " return type");
+        if ($interfaceToCall->canReturnValue() && ! $interfaceToCall->getReturnType()->equals(TypeDescriptor::create(ConsoleCommandResultSet::class))) {
+            throw InvalidArgumentException::create("One Time Command {$interfaceToCall} must have void or " . ConsoleCommandResultSet::class . ' return type');
         }
 
         foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
@@ -132,10 +122,10 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
             }
         }
 
-        return array($parameterConverters, $parameters);
+        return [$parameterConverters, $parameters];
     }
 
-    public function prepare(Configuration $configuration,array $extensionObjects,ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry) : void
+    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($this->oneTimeCommandHandlers as $oneTimeCommand) {
             $configuration->registerMessageHandler($oneTimeCommand);
@@ -145,7 +135,7 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
         }
     }
 
-    public function canHandle($extensionObject) : bool
+    public function canHandle($extensionObject): bool
     {
         return false;
     }

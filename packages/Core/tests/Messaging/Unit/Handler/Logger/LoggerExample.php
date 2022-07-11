@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Unit\Handler\Logger;
 
 use Psr\Log\LoggerInterface;
@@ -26,7 +25,7 @@ class LoggerExample implements LoggerInterface
     {
     }
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -106,7 +105,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function emergency($message, array $context = array())
+    public function emergency($message, array $context = [])
     {
         $this->emergency[] = $message;
     }
@@ -114,7 +113,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function alert($message, array $context = array())
+    public function alert($message, array $context = [])
     {
         $this->alert[] = $message;
     }
@@ -122,7 +121,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function critical($message, array $context = array())
+    public function critical($message, array $context = [])
     {
         $this->critical[] = $message;
     }
@@ -130,7 +129,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function error($message, array $context = array())
+    public function error($message, array $context = [])
     {
         $this->error[] = $message;
     }
@@ -138,7 +137,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function warning($message, array $context = array())
+    public function warning($message, array $context = [])
     {
         $this->warning[] = $message;
     }
@@ -146,7 +145,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function notice($message, array $context = array())
+    public function notice($message, array $context = [])
     {
         $this->notice[] = $message;
     }
@@ -154,7 +153,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function info($message, array $context = array())
+    public function info($message, array $context = [])
     {
         $this->info[] = $message;
     }
@@ -162,7 +161,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function debug($message, array $context = array())
+    public function debug($message, array $context = [])
     {
         $this->debug[] = $message;
     }
@@ -170,7 +169,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function log($level, $message, array $context = array())
+    public function log($level, $message, array $context = [])
     {
         $this->log[] = $level;
     }

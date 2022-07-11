@@ -1,23 +1,18 @@
 <?php
 
-
 namespace Ecotone\EventSourcing;
-
 
 use Doctrine\DBAL\Driver\PDOConnection;
 use Ecotone\Dbal\DbalReconnectableConnectionFactory;
 use Ecotone\EventSourcing\PersistenceStrategy\InterlopMariaDbSimpleStreamStrategy;
 use Ecotone\EventSourcing\PersistenceStrategy\InterlopMysqlSimpleStreamStrategy;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Enqueue\Dbal\DbalConnectionFactory;
 use Iterator;
+use PDO;
 use Prooph\Common\Messaging\MessageConverter;
 use Prooph\Common\Messaging\MessageFactory;
 use Prooph\EventStore\EventStore;
-use Prooph\EventStore\InMemoryEventStore;
 use Prooph\EventStore\Metadata\MetadataMatcher;
 use Prooph\EventStore\Pdo\MariaDbEventStore;
 use Prooph\EventStore\Pdo\MySqlEventStore;
@@ -32,26 +27,26 @@ use Prooph\EventStore\StreamName;
 
 class LazyProophEventStore implements EventStore
 {
-    const DEFAULT_ENABLE_WRITE_LOCK_STRATEGY = false;
-    const INITIALIZE_ON_STARTUP = true;
-    const LOAD_BATCH_SIZE = 1000;
+    public const DEFAULT_ENABLE_WRITE_LOCK_STRATEGY = false;
+    public const INITIALIZE_ON_STARTUP = true;
+    public const LOAD_BATCH_SIZE = 1000;
 
-    const DEFAULT_STREAM_TABLE = "event_streams";
-    const DEFAULT_PROJECTIONS_TABLE = "projections";
+    public const DEFAULT_STREAM_TABLE = 'event_streams';
+    public const DEFAULT_PROJECTIONS_TABLE = 'projections';
 
-    const EVENT_STORE_TYPE_MYSQL = "mysql";
-    const EVENT_STORE_TYPE_POSTGRES = "postgres";
-    const EVENT_STORE_TYPE_MARIADB = "mariadb";
-    const EVENT_STORE_TYPE_IN_MEMORY = "inMemory";
+    public const EVENT_STORE_TYPE_MYSQL = 'mysql';
+    public const EVENT_STORE_TYPE_POSTGRES = 'postgres';
+    public const EVENT_STORE_TYPE_MARIADB = 'mariadb';
+    public const EVENT_STORE_TYPE_IN_MEMORY = 'inMemory';
 
-    const SINGLE_STREAM_PERSISTENCE = "single";
-    const AGGREGATE_STREAM_PERSISTENCE = "aggregate";
-    const SIMPLE_STREAM_PERSISTENCE = "simple";
-    const CUSTOM_STREAM_PERSISTENCE = "custom";
+    public const SINGLE_STREAM_PERSISTENCE = 'single';
+    public const AGGREGATE_STREAM_PERSISTENCE = 'aggregate';
+    public const SIMPLE_STREAM_PERSISTENCE = 'simple';
+    public const CUSTOM_STREAM_PERSISTENCE = 'custom';
 
-    const AGGREGATE_VERSION = '_aggregate_version';
-    const AGGREGATE_TYPE = '_aggregate_type';
-    const AGGREGATE_ID = '_aggregate_id';
+    public const AGGREGATE_VERSION = '_aggregate_version';
+    public const AGGREGATE_TYPE = '_aggregate_type';
+    public const AGGREGATE_ID = '_aggregate_id';
 
     private ?EventStore $initializedEventStore = null;
     private ReferenceSearchService $referenceSearchService;
@@ -123,9 +118,9 @@ class LazyProophEventStore implements EventStore
 
     public function appendTo(StreamName $streamName, Iterator $streamEvents): void
     {
-        if (!array_key_exists($streamName->toString(), $this->ensuredExistingStreams) && !$this->hasStream($streamName)) {
+        if (! array_key_exists($streamName->toString(), $this->ensuredExistingStreams) && ! $this->hasStream($streamName)) {
             $this->create(new Stream($streamName, $streamEvents, []));
-        }else {
+        } else {
             $this->getEventStore()->appendTo($streamName, $streamEvents);
         }
     }
@@ -136,21 +131,21 @@ class LazyProophEventStore implements EventStore
         unset($this->ensuredExistingStreams[$streamName->toString()]);
     }
 
-    public function prepareEventStore() : void
+    public function prepareEventStore(): void
     {
-        if (!$this->requireInitialization || $this->eventSourcingConfiguration->isInMemory()) {
+        if (! $this->requireInitialization || $this->eventSourcingConfiguration->isInMemory()) {
             return;
         }
 
         $sm = $this->getConnection()->getSchemaManager();
-        if (!$sm->tablesExist([$this->eventSourcingConfiguration->getEventStreamTableName()])) {
+        if (! $sm->tablesExist([$this->eventSourcingConfiguration->getEventStreamTableName()])) {
             match ($this->getEventStoreType()) {
                 self::EVENT_STORE_TYPE_POSTGRES => $this->createPostgresEventStreamTable(),
                 self::EVENT_STORE_TYPE_MARIADB => $this->createMariadbEventStreamTable(),
                 self::EVENT_STORE_TYPE_MYSQL => $this->createMysqlEventStreamTable()
             };
         }
-        if (!$sm->tablesExist([$this->eventSourcingConfiguration->getProjectionsTable()])) {
+        if (! $sm->tablesExist([$this->eventSourcingConfiguration->getProjectionsTable()])) {
             match ($this->getEventStoreType()) {
                 self::EVENT_STORE_TYPE_POSTGRES => $this->createPostgresProjectionTable(),
                 self::EVENT_STORE_TYPE_MARIADB => $this->createMariadbProjectionTable(),
@@ -161,7 +156,7 @@ class LazyProophEventStore implements EventStore
         $this->requireInitialization = false;
     }
 
-    public function getEventStore() : EventStore
+    public function getEventStore(): EventStore
     {
         if ($this->initializedEventStore) {
             return $this->initializedEventStore;
@@ -244,7 +239,7 @@ class LazyProophEventStore implements EventStore
         };
     }
 
-    public function getEventStoreType() : string
+    public function getEventStoreType(): string
     {
         if ($this->eventSourcingConfiguration->isInMemory()) {
             return self::EVENT_STORE_TYPE_IN_MEMORY;
@@ -252,11 +247,11 @@ class LazyProophEventStore implements EventStore
 
         $connection = $this->getWrappedConnection();
 
-        $eventStoreType = $connection->getAttribute(\PDO::ATTR_DRIVER_NAME);
-        if ($eventStoreType === self::EVENT_STORE_TYPE_MYSQL && str_contains($connection->getAttribute(\PDO::ATTR_SERVER_VERSION), "MariaDB")) {
+        $eventStoreType = $connection->getAttribute(PDO::ATTR_DRIVER_NAME);
+        if ($eventStoreType === self::EVENT_STORE_TYPE_MYSQL && str_contains($connection->getAttribute(PDO::ATTR_SERVER_VERSION), 'MariaDB')) {
             $eventStoreType = self::EVENT_STORE_TYPE_MARIADB;
         }
-        if ($eventStoreType === "pgsql") {
+        if ($eventStoreType === 'pgsql') {
             $eventStoreType = self::EVENT_STORE_TYPE_POSTGRES;
         }
         return $eventStoreType;
@@ -270,15 +265,15 @@ class LazyProophEventStore implements EventStore
     }
 
     /** @phpstan-ignore-next-line */
-    public function getWrappedConnection(): PDOConnection|\PDO
+    public function getWrappedConnection(): PDOConnection|PDO
     {
         try {
             return $this->getConnection()->getNativeConnection();
-        }catch (\LogicException) {
+        } catch (\LogicException) {
             /** Case when getNativeConnection is not implemented in nested connection */
             $connection = $this->getConnection()->getWrappedConnection();
 
-            if ($connection instanceof \PDO || is_subclass_of($connection, "Doctrine\DBAL\Driver\PDOConnection") || get_class($connection) === "Doctrine\DBAL\Driver\PDOConnection") {
+            if ($connection instanceof PDO || is_subclass_of($connection, "Doctrine\DBAL\Driver\PDOConnection") || get_class($connection) === "Doctrine\DBAL\Driver\PDOConnection") {
                 return $connection;
             }
 
@@ -287,105 +282,108 @@ class LazyProophEventStore implements EventStore
         }
     }
 
-    private function createMysqlEventStreamTable() : void
+    private function createMysqlEventStreamTable(): void
     {
         $this->getConnection()->executeStatement(<<<SQL
-    CREATE TABLE `event_streams` (
-  `no` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `real_stream_name` VARCHAR(150) NOT NULL,
-  `stream_name` CHAR(41) NOT NULL,
-  `metadata` JSON,
-  `category` VARCHAR(150),
-  PRIMARY KEY (`no`),
-  UNIQUE KEY `ix_rsn` (`real_stream_name`),
-  KEY `ix_cat` (`category`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-SQL);
+                CREATE TABLE `event_streams` (
+              `no` BIGINT(20) NOT NULL AUTO_INCREMENT,
+              `real_stream_name` VARCHAR(150) NOT NULL,
+              `stream_name` CHAR(41) NOT NULL,
+              `metadata` JSON,
+              `category` VARCHAR(150),
+              PRIMARY KEY (`no`),
+              UNIQUE KEY `ix_rsn` (`real_stream_name`),
+              KEY `ix_cat` (`category`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+            SQL);
     }
 
-    private function createMariadbEventStreamTable() : void
+    private function createMariadbEventStreamTable(): void
     {
         $this->getConnection()->executeStatement(<<<SQL
-CREATE TABLE `event_streams` (
-    `no` BIGINT(20) NOT NULL AUTO_INCREMENT,
-    `real_stream_name` VARCHAR(150) NOT NULL,
-    `stream_name` CHAR(41) NOT NULL,
-    `metadata` LONGTEXT NOT NULL,
-    `category` VARCHAR(150),
-    CHECK (`metadata` IS NOT NULL OR JSON_VALID(`metadata`)),
-    PRIMARY KEY (`no`),
-    UNIQUE KEY `ix_rsn` (`real_stream_name`),
-    KEY `ix_cat` (`category`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-SQL);
+            CREATE TABLE `event_streams` (
+                `no` BIGINT(20) NOT NULL AUTO_INCREMENT,
+                `real_stream_name` VARCHAR(150) NOT NULL,
+                `stream_name` CHAR(41) NOT NULL,
+                `metadata` LONGTEXT NOT NULL,
+                `category` VARCHAR(150),
+                CHECK (`metadata` IS NOT NULL OR JSON_VALID(`metadata`)),
+                PRIMARY KEY (`no`),
+                UNIQUE KEY `ix_rsn` (`real_stream_name`),
+                KEY `ix_cat` (`category`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+            SQL);
     }
 
-    private function createPostgresEventStreamTable() : void
+    private function createPostgresEventStreamTable(): void
     {
         $this->getConnection()->executeStatement(<<<SQL
-CREATE TABLE event_streams (
-  no BIGSERIAL,
-  real_stream_name VARCHAR(150) NOT NULL,
-  stream_name CHAR(41) NOT NULL,
-  metadata JSONB,
-  category VARCHAR(150),
-  PRIMARY KEY (no),
-  UNIQUE (stream_name)
-);
-CREATE INDEX on event_streams (category);
-SQL);
+            CREATE TABLE event_streams (
+              no BIGSERIAL,
+              real_stream_name VARCHAR(150) NOT NULL,
+              stream_name CHAR(41) NOT NULL,
+              metadata JSONB,
+              category VARCHAR(150),
+              PRIMARY KEY (no),
+              UNIQUE (stream_name)
+            );
+            CREATE INDEX on event_streams (category);
+            SQL);
     }
 
     private function createMysqlProjectionTable(): void
     {
-        $this->getConnection()->executeStatement(<<<SQL
-CREATE TABLE `projections` (
-  `no` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(150) NOT NULL,
-  `position` JSON,
-  `state` JSON,
-  `status` VARCHAR(28) NOT NULL,
-  `locked_until` CHAR(26),
-  PRIMARY KEY (`no`),
-  UNIQUE KEY `ix_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-SQL
+        $this->getConnection()->executeStatement(
+            <<<SQL
+                CREATE TABLE `projections` (
+                  `no` BIGINT(20) NOT NULL AUTO_INCREMENT,
+                  `name` VARCHAR(150) NOT NULL,
+                  `position` JSON,
+                  `state` JSON,
+                  `status` VARCHAR(28) NOT NULL,
+                  `locked_until` CHAR(26),
+                  PRIMARY KEY (`no`),
+                  UNIQUE KEY `ix_name` (`name`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+                SQL
         );
     }
 
     private function createMariadbProjectionTable(): void
     {
-        $this->getConnection()->executeStatement(<<<SQL
-CREATE TABLE `projections` (
-  `no` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `name` VARCHAR(150) NOT NULL,
-  `position` LONGTEXT,
-  `state` LONGTEXT,
-  `status` VARCHAR(28) NOT NULL,
-  `locked_until` CHAR(26),
-  CHECK (`position` IS NULL OR JSON_VALID(`position`)),
-  CHECK (`state` IS NULL OR JSON_VALID(`state`)),
-  PRIMARY KEY (`no`),
-  UNIQUE KEY `ix_name` (`name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-SQL
+        $this->getConnection()->executeStatement(
+            <<<SQL
+                CREATE TABLE `projections` (
+                  `no` BIGINT(20) NOT NULL AUTO_INCREMENT,
+                  `name` VARCHAR(150) NOT NULL,
+                  `position` LONGTEXT,
+                  `state` LONGTEXT,
+                  `status` VARCHAR(28) NOT NULL,
+                  `locked_until` CHAR(26),
+                  CHECK (`position` IS NULL OR JSON_VALID(`position`)),
+                  CHECK (`state` IS NULL OR JSON_VALID(`state`)),
+                  PRIMARY KEY (`no`),
+                  UNIQUE KEY `ix_name` (`name`)
+                ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+                SQL
         );
     }
 
     private function createPostgresProjectionTable(): void
     {
-        $this->getConnection()->executeStatement(<<<SQL
-CREATE TABLE projections (
-  no BIGSERIAL,
-  name VARCHAR(150) NOT NULL,
-  position JSONB,
-  state JSONB,
-  status VARCHAR(28) NOT NULL,
-  locked_until CHAR(26),
-  PRIMARY KEY (no),
-  UNIQUE (name)
-);
-SQL
+        $this->getConnection()->executeStatement(
+            <<<SQL
+                CREATE TABLE projections (
+                  no BIGSERIAL,
+                  name VARCHAR(150) NOT NULL,
+                  position JSONB,
+                  state JSONB,
+                  status VARCHAR(28) NOT NULL,
+                  locked_until CHAR(26),
+                  PRIMARY KEY (no),
+                  UNIQUE (name)
+                );
+                SQL
         );
     }
 

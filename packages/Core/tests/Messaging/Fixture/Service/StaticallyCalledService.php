@@ -17,7 +17,7 @@ class StaticallyCalledService
      * @param string $something
      * @return string
      */
-    public static function run(string $something) : string
+    public static function run(string $something): string
     {
         return $something;
     }

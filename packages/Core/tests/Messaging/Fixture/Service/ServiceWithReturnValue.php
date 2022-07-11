@@ -14,7 +14,7 @@ class ServiceWithReturnValue implements CallableService
      */
     private $wasCalled = false;
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -22,7 +22,7 @@ class ServiceWithReturnValue implements CallableService
     /**
      * @return string
      */
-    public function getName() : string
+    public function getName(): string
     {
         $this->wasCalled = true;
         return 'johny';

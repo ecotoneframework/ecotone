@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\JMSConverter\Unit;
 
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
@@ -8,11 +7,10 @@ use Ecotone\JMSConverter\Configuration\JMSConverterConfigurationModule;
 use Ecotone\JMSConverter\JMSConverterBuilder;
 use Ecotone\JMSConverter\JMSConverterConfiguration;
 use Ecotone\JMSConverter\JMSHandlerAdapter;
-use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use PHPUnit\Framework\TestCase;
@@ -28,6 +26,9 @@ use Test\Ecotone\JMSConverter\Fixture\Configuration\UnionConverter\AppointmentTy
 use Test\Ecotone\JMSConverter\Fixture\Configuration\UnionConverter\StandardAppointmentType;
 use Test\Ecotone\JMSConverter\Fixture\Configuration\UnionConverter\TrialAppointmentType;
 
+/**
+ * @internal
+ */
 class JMSConverterConfigurationTest extends TestCase
 {
     public function test_registering_converter_and_convert()
@@ -49,15 +50,17 @@ class JMSConverterConfigurationTest extends TestCase
                                 TypeDescriptor::create(Status::class),
                                 TypeDescriptor::createStringType(),
                                 StatusConverter::class,
-                                "convertFrom"
+                                'convertFrom'
                             ),
                             JMSHandlerAdapter::create(
                                 TypeDescriptor::createStringType(),
                                 TypeDescriptor::create(Status::class),
                                 StatusConverter::class,
-                                "convertTo"
-                            )
-                        ], JMSConverterConfiguration::createWithDefaults(), null
+                                'convertTo'
+                            ),
+                        ],
+                        JMSConverterConfiguration::createWithDefaults(),
+                        null
                     )
                 ),
             $configuration,
@@ -83,39 +86,41 @@ class JMSConverterConfigurationTest extends TestCase
                                 TypeDescriptor::create(AppointmentType::class),
                                 TypeDescriptor::createStringType(),
                                 AppointmentTypeConverter::class,
-                                "convertFrom"
+                                'convertFrom'
                             ),
                             JMSHandlerAdapter::create(
                                 TypeDescriptor::create(StandardAppointmentType::class),
                                 TypeDescriptor::createStringType(),
                                 AppointmentTypeConverter::class,
-                                "convertFrom"
+                                'convertFrom'
                             ),
                             JMSHandlerAdapter::create(
                                 TypeDescriptor::create(TrialAppointmentType::class),
                                 TypeDescriptor::createStringType(),
                                 AppointmentTypeConverter::class,
-                                "convertFrom"
+                                'convertFrom'
                             ),
                             JMSHandlerAdapter::create(
                                 TypeDescriptor::createStringType(),
                                 TypeDescriptor::create(AppointmentType::class),
                                 AppointmentTypeConverter::class,
-                                "convertTo"
+                                'convertTo'
                             ),
                             JMSHandlerAdapter::create(
                                 TypeDescriptor::createStringType(),
                                 TypeDescriptor::create(StandardAppointmentType::class),
                                 AppointmentTypeConverter::class,
-                                "convertTo"
+                                'convertTo'
                             ),
                             JMSHandlerAdapter::create(
                                 TypeDescriptor::createStringType(),
                                 TypeDescriptor::create(TrialAppointmentType::class),
                                 AppointmentTypeConverter::class,
-                                "convertTo"
-                            )
-                        ], JMSConverterConfiguration::createWithDefaults(), null
+                                'convertTo'
+                            ),
+                        ],
+                        JMSConverterConfiguration::createWithDefaults(),
+                        null
                     )
                 ),
             $configuration,
@@ -148,13 +153,13 @@ class JMSConverterConfigurationTest extends TestCase
 
         $configuration            = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
         $applicationConfiguration = ServiceConfiguration::createWithDefaults()
-            ->withCacheDirectoryPath("/tmp")
-            ->withEnvironment("dev");
+            ->withCacheDirectoryPath('/tmp')
+            ->withEnvironment('dev');
         $annotationConfiguration->prepare($configuration, [$applicationConfiguration], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $this->assertEquals(
             MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
-                ->registerConverter(new JMSConverterBuilder([], JMSConverterConfiguration::createWithDefaults(), "/tmp")),
+                ->registerConverter(new JMSConverterBuilder([], JMSConverterConfiguration::createWithDefaults(), '/tmp')),
             $configuration,
         );
     }
@@ -212,15 +217,17 @@ class JMSConverterConfigurationTest extends TestCase
                                 TypeDescriptor::createArrayType(),
                                 TypeDescriptor::create(stdClass::class),
                                 ClassToArrayConverter::class,
-                                "convertFrom"
+                                'convertFrom'
                             ),
                             JMSHandlerAdapter::create(
                                 TypeDescriptor::create(stdClass::class),
                                 TypeDescriptor::createArrayType(),
                                 ClassToArrayConverter::class,
-                                "convertTo"
-                            )
-                        ], JMSConverterConfiguration::createWithDefaults(), null
+                                'convertTo'
+                            ),
+                        ],
+                        JMSConverterConfiguration::createWithDefaults(),
+                        null
                     )
                 ),
             $configuration,

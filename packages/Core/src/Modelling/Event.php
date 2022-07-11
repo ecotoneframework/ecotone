@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Modelling;
-
 
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
@@ -16,15 +14,15 @@ class Event
 
     private function __construct(string $eventType, array|object $payload, array $metadata)
     {
-        Assert::notNull($payload, "Event can not be null for " . $eventType);
+        Assert::notNull($payload, 'Event can not be null for ' . $eventType);
 
         $this->eventType = $eventType;
         $this->payload = $payload;
 
-        if (!array_key_exists(MessageHeaders::MESSAGE_ID, $metadata)) {
+        if (! array_key_exists(MessageHeaders::MESSAGE_ID, $metadata)) {
             $metadata[MessageHeaders::MESSAGE_ID] = Uuid::uuid4()->toString();
         }
-        if (!array_key_exists(MessageHeaders::TIMESTAMP, $metadata)) {
+        if (! array_key_exists(MessageHeaders::TIMESTAMP, $metadata)) {
             $metadata[MessageHeaders::TIMESTAMP] = (int)round(microtime(true));
         }
 
@@ -46,7 +44,7 @@ class Event
         return $this->eventType;
     }
 
-    public function getPayload() : array|object
+    public function getPayload(): array|object
     {
         return $this->payload;
     }

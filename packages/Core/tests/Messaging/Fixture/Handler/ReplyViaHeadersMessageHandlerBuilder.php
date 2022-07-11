@@ -1,8 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
-use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
+
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -41,7 +42,7 @@ class ReplyViaHeadersMessageHandlerBuilder extends InputOutputMessageHandlerBuil
      * @param $replyData
      * @return ReplyViaHeadersMessageHandlerBuilder
      */
-    public static function create($replyData) : self
+    public static function create($replyData): self
     {
         return new self($replyData);
     }
@@ -58,7 +59,7 @@ class ReplyViaHeadersMessageHandlerBuilder extends InputOutputMessageHandlerBuil
      * @param bool $canAdd
      * @return ReplyViaHeadersMessageHandlerBuilder
      */
-    public function shouldAddReplyDataToMessagePayload(bool $canAdd) : self
+    public function shouldAddReplyDataToMessagePayload(bool $canAdd): self
     {
         $this->canAdd = $canAdd;
 
@@ -70,14 +71,14 @@ class ReplyViaHeadersMessageHandlerBuilder extends InputOutputMessageHandlerBuil
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return $interfaceToCallRegistry->getFor(ReplyViaHeadersMessageHandler::class, "handle");
+        return $interfaceToCallRegistry->getFor(ReplyViaHeadersMessageHandler::class, 'handle');
     }
 
 
     /**
      * @inheritDoc
      */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return [];
     }

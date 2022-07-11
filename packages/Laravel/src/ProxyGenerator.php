@@ -2,11 +2,11 @@
 
 namespace Ecotone\Laravel;
 
+use Ecotone\Messaging\Config\MessagingSystem;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Illuminate\Contracts\Foundation\Application;
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use ProxyManager\Factory\RemoteObjectFactory;
-use Ecotone\Messaging\Config\MessagingSystem;
 
 /**
  * Class ProxyGenerator
@@ -15,11 +15,10 @@ use Ecotone\Messaging\Config\MessagingSystem;
  */
 class ProxyGenerator
 {
-    public static function createFor(string $referenceName, Application $application, string $interface, string $cacheDirectoryPath) : object
+    public static function createFor(string $referenceName, Application $application, string $interface, string $cacheDirectoryPath): object
     {
         $proxyFactory = ProxyFactory::createWithCache($cacheDirectoryPath);
-        $factory = new RemoteObjectFactory(new class ($application, $referenceName) implements AdapterInterface
-        {
+        $factory = new RemoteObjectFactory(new class ($application, $referenceName) implements AdapterInterface {
             /**
              * @var string
              */

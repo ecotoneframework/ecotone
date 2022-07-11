@@ -38,12 +38,13 @@ final class ExpressionTransformer
      *
      * @return Message
      */
-    public function transform(Message $message) : Message
+    public function transform(Message $message): Message
     {
-        $evaluatedPayload = $this->expressionEvaluationService->evaluate($this->expression,
+        $evaluatedPayload = $this->expressionEvaluationService->evaluate(
+            $this->expression,
             [
-                "payload" => $message->getPayload(),
-                "headers" => $message->getHeaders()->headers()
+                'payload' => $message->getPayload(),
+                'headers' => $message->getHeaders()->headers(),
             ],
             $this->referenceSearchService
         );

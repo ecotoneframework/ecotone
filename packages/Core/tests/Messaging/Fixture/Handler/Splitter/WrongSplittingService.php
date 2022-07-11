@@ -9,8 +9,8 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\Splitter;
  */
 class WrongSplittingService
 {
-    public function splittingWithReturnString() : string
+    public function splittingWithReturnString(): string
     {
-        return "some";
+        return 'some';
     }
 }

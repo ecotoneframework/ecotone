@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\EventSourcing;
 
 use Ecotone\Modelling\Event;

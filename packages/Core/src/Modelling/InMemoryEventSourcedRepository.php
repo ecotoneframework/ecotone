@@ -1,10 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
-
 namespace Ecotone\Modelling;
-
-use Ecotone\Modelling\Event;
 
 /**
  * Class InMemoryEventSourcedRepository
@@ -22,13 +20,13 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
         $this->aggregateTypes = $aggregateTypes;
     }
 
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         /** @phpstan-ignore-next-line */
         return new static([], []);
     }
 
-    public static function createWithExistingAggregate(array $identifiers, string $aggregateClassName, array $events) : self
+    public static function createWithExistingAggregate(array $identifiers, string $aggregateClassName, array $events): self
     {
         $self = static::createEmpty();
 
@@ -55,7 +53,7 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
         if (isset($this->eventsPerAggregate[$aggregateClassName][$key])) {
             $events = $this->eventsPerAggregate[$aggregateClassName][$key];
 
-            return EventStream::createWith(count($events), array_map(fn(object $event) : Event => Event::create($event), $events));
+            return EventStream::createWith(count($events), array_map(fn (object $event): Event => Event::create($event), $events));
         }
 
         return EventStream::createEmpty();
@@ -68,7 +66,7 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
     {
         $key = $this->getKey($identifiers);
 
-        if (!isset($this->eventsPerAggregate[$aggregateClassName][$key])) {
+        if (! isset($this->eventsPerAggregate[$aggregateClassName][$key])) {
             $this->eventsPerAggregate[$aggregateClassName][$key] = $events;
 
             return;
@@ -77,9 +75,9 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
         $this->eventsPerAggregate[$aggregateClassName][$key] = array_merge($this->eventsPerAggregate[$aggregateClassName][$key], $events);
     }
 
-    private function getKey(array $identifiers) : string
+    private function getKey(array $identifiers): string
     {
-        $key = "";
+        $key = '';
         foreach ($identifiers as $identifier) {
             $key .= (string)$identifier;
         }

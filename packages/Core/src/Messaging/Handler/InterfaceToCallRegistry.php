@@ -1,20 +1,16 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
-use Doctrine\Common\Annotations\AnnotationException;
-use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
-use Ecotone\Messaging\MessagingException;
 use InvalidArgumentException;
 use ReflectionClass;
-use ReflectionException;
 use ReflectionMethod;
-use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\MessageBasedQueryBusExample;
 
 /**
  * Class InterfaceToCallBuilder
@@ -23,7 +19,7 @@ use Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages\MessageBas
  */
 class InterfaceToCallRegistry
 {
-    const REFERENCE_NAME = "interfaceToCallRegistry";
+    public const REFERENCE_NAME = 'interfaceToCallRegistry';
 
     /**
      * @var InterfaceToCall[]
@@ -57,7 +53,7 @@ class InterfaceToCallRegistry
 
     public static function createWithBackedBy(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, self $interfaceToCallRegistry): self
     {
-        $self = new self($referenceTypeFromNameResolver,null, false);
+        $self = new self($referenceTypeFromNameResolver, null, false);
         $self->preparedInterfaceToCallRegistry = $interfaceToCallRegistry;
 
         return $self;
@@ -92,14 +88,14 @@ class InterfaceToCallRegistry
     {
         if (array_key_exists(self::getName($interfaceName, $methodName), $this->interfacesToCall)) {
             return $this->interfacesToCall[self::getName($interfaceName, $methodName)];
-        } else if ($this->isLocked) {
+        } elseif ($this->isLocked) {
             $interfaceName = is_object($interfaceName) ? get_class($interfaceName) : $interfaceName;
             throw ConfigurationException::create("There is problem with configuration. Interface to call {$interfaceName}:{$methodName} was never registered via related interfaces.");
         }
 
         if ($this->preparedInterfaceToCallRegistry) {
             $interfaceToCall = $this->preparedInterfaceToCallRegistry->getFor($interfaceName, $methodName);
-        }else {
+        } else {
             if ($this->annotationResolver) {
                 $interfaceToCall = InterfaceToCall::createWithAnnotationFinder($interfaceName, $methodName, $this->annotationResolver);
             } else {
@@ -120,7 +116,7 @@ class InterfaceToCallRegistry
 
         if ($this->annotationResolver) {
             $classDefinition = ClassDefinition::createUsingAnnotationParser($classType, $this->annotationResolver);
-        }else {
+        } else {
             $classDefinition = ClassDefinition::createFor($classType);
         }
 
@@ -133,7 +129,7 @@ class InterfaceToCallRegistry
     {
         $interfaces = [];
         foreach ((new ReflectionClass($interfaceName))->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            if (!$method->isConstructor()) {
+            if (! $method->isConstructor()) {
                 $interfaces[] = $this->getFor($interfaceName, $method->getName());
             }
         }
@@ -149,7 +145,7 @@ class InterfaceToCallRegistry
             throw ConfigurationException::create("Cannot find reference with name `$referenceName` for method {$methodName}. " . $exception->getMessage());
         }
 
-        if (!$objectClassType->isClassOrInterface()) {
+        if (! $objectClassType->isClassOrInterface()) {
             throw new InvalidArgumentException("Reference {$referenceName} is not an object");
         }
 

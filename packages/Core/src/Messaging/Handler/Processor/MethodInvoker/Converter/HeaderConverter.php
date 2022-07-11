@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
@@ -34,7 +35,7 @@ class HeaderConverter implements ParameterConverter
         $this->conversionService = $conversionService;
     }
 
-    public static function create(string $parameterName, string $headerName, bool $isRequired, ConversionService $conversionService) : self
+    public static function create(string $parameterName, string $headerName, bool $isRequired, ConversionService $conversionService): self
     {
         return new self($parameterName, $headerName, $isRequired, $conversionService);
     }
@@ -45,23 +46,23 @@ class HeaderConverter implements ParameterConverter
     public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message, array $endpointAnnotations)
     {
         $isRequired = $this->isRequired;
-        if (!$message->getHeaders()->containsKey($this->headerName)) {
+        if (! $message->getHeaders()->containsKey($this->headerName)) {
             if ($relatedParameter->hasDefaultValue()) {
                 return $relatedParameter->getDefaultValue();
             }
 
-            if (!$isRequired) {
-                return null;
+            if (! $isRequired) {
+                return;
             }
         }
 
         $headerValue = $message->getHeaders()->get($this->headerName);
 
         $sourceValueType = TypeDescriptor::createFromVariable($headerValue);
-        if (!$sourceValueType->isCompatibleWith($relatedParameter->getTypeDescriptor())) {
+        if (! $sourceValueType->isCompatibleWith($relatedParameter->getTypeDescriptor())) {
             if ($sourceValueType->isScalar() && $this->canConvertTo($headerValue, DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE, $relatedParameter)) {
                 $headerValue = $this->doConversion($headerValue, DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE, $relatedParameter);
-            }else if ($this->canConvertTo($headerValue, MediaType::APPLICATION_X_PHP, $relatedParameter)) {
+            } elseif ($this->canConvertTo($headerValue, MediaType::APPLICATION_X_PHP, $relatedParameter)) {
                 $headerValue = $this->doConversion($headerValue, MediaType::APPLICATION_X_PHP, $relatedParameter);
             }
 

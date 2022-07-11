@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Test\Ecotone\Dbal\Fixture\DocumentStoreAggregate;
 
@@ -26,7 +28,7 @@ class Person
         return new self($command->getPersonId(), $command->getName());
     }
 
-    #[QueryHandler("person.getName")]
+    #[QueryHandler('person.getName')]
     public function getName(): string
     {
         return $this->name;

@@ -1,6 +1,6 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
@@ -27,22 +27,22 @@ class NullAcknowledgementCallback implements AcknowledgementCallback
     /**
      * @return NullAcknowledgementCallback
      */
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
 
-    public function isAcked() : bool
+    public function isAcked(): bool
     {
         return $this->status === self::ACKED;
     }
 
-    public function isRejected() : bool
+    public function isRejected(): bool
     {
         return $this->status === self::REJECT;
     }
 
-    public function isRequeued() : bool
+    public function isRequeued(): bool
     {
         return $this->status === self::REQUEUED;
     }

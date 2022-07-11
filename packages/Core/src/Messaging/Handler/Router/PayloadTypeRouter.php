@@ -32,7 +32,7 @@ final class PayloadTypeRouter
      * @param array $typeToChannelMapping
      * @return PayloadTypeRouter
      */
-    public static function create(array $typeToChannelMapping) : self
+    public static function create(array $typeToChannelMapping): self
     {
         return new self($typeToChannelMapping, false);
     }
@@ -40,7 +40,7 @@ final class PayloadTypeRouter
     /**
      * @return PayloadTypeRouter
      */
-    public static function createWithRoutingByClass() : self
+    public static function createWithRoutingByClass(): self
     {
         return new self([], true);
     }
@@ -51,9 +51,9 @@ final class PayloadTypeRouter
      * @return array
      * @throws InvalidArgumentException
      */
-    public function route(Message $message) : array
+    public function route(Message $message): array
     {
-        if (!is_object($message->getPayload())) {
+        if (! is_object($message->getPayload())) {
             throw new InvalidArgumentException("Can't route by payload type, when payload is not object. Got: {$message->getPayload()}");
         }
 

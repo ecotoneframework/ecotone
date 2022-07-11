@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Modelling;
-
 
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -10,17 +8,20 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
+use ReflectionClass;
 
 final class EventSourcingHandlerExecutor
 {
     /**
      * @param InterfaceToCall[] $eventSourcingHandlerMethods
      */
-    private function __construct(private string $aggregateClassName, private array $eventSourcingHandlerMethods) {}
-
-    public function fill(array $events, ?object $existingAggregate) : object
+    private function __construct(private string $aggregateClassName, private array $eventSourcingHandlerMethods)
     {
-        $aggregate = $existingAggregate ?? (new \ReflectionClass($this->aggregateClassName))->newInstance();
+    }
+
+    public function fill(array $events, ?object $existingAggregate): object
+    {
+        $aggregate = $existingAggregate ?? (new ReflectionClass($this->aggregateClassName))->newInstance();
         foreach ($events as $event) {
             if ($event instanceof Event) {
                 $event = $event->getPayload();
@@ -42,21 +43,21 @@ final class EventSourcingHandlerExecutor
         return $aggregate;
     }
 
-    public static function createFor(ClassDefinition $classDefinition, bool $isEventSourced, InterfaceToCallRegistry $interfaceToCallRegistry) : static
+    public static function createFor(ClassDefinition $classDefinition, bool $isEventSourced, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
-        if (!$isEventSourced) {
+        if (! $isEventSourced) {
             return new static($classDefinition->getClassType()->toString(), []);
         }
 
-        $class = new \ReflectionClass($classDefinition->getClassType()->toString());
+        $class = new ReflectionClass($classDefinition->getClassType()->toString());
 
-        if ($class->hasMethod("__construct")) {
-            $constructMethod = $class->getMethod("__construct");
+        if ($class->hasMethod('__construct')) {
+            $constructMethod = $class->getMethod('__construct');
 
             if ($constructMethod->getParameters()) {
                 throw InvalidArgumentException::create("Constructor for Event Sourced {$classDefinition} should not have any parameters");
             }
-            if (!$constructMethod->isPublic()) {
+            if (! $constructMethod->isPublic()) {
                 throw InvalidArgumentException::create("Constructor for Event Sourced {$classDefinition} should be public");
             }
         }
@@ -73,7 +74,7 @@ final class EventSourcingHandlerExecutor
                 if ($methodToCheck->getInterfaceParameterAmount() !== 1) {
                     throw InvalidArgumentException::create("{$methodToCheck} is Event Sourcing Handler and should not be have only one parameter type hinted for handled event.");
                 }
-                if (!$methodToCheck->hasReturnTypeVoid()) {
+                if (! $methodToCheck->hasReturnTypeVoid()) {
                     throw InvalidArgumentException::create("{$methodToCheck} is Event Sourcing Handler and should return void return type");
                 }
 
@@ -81,7 +82,7 @@ final class EventSourcingHandlerExecutor
             }
         }
 
-        if (!$eventSourcingHandlerMethods) {
+        if (! $eventSourcingHandlerMethods) {
             throw InvalidArgumentException::create("Your aggregate {$classDefinition->getClassType()}, is event sourced. You must define atleast one EventSourcingHandler to provide aggregate's identifier after first event.");
         }
 

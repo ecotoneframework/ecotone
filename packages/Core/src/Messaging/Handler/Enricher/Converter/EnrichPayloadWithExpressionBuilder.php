@@ -1,10 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher\Converter;
 
-use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditor;
+use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorBuilder;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
@@ -20,7 +21,7 @@ class EnrichPayloadWithExpressionBuilder implements PropertyEditorBuilder
     private string $propertyPath;
     private string $expression;
     private string $mappingExpression;
-    private string $nullResultExpression = "";
+    private string $nullResultExpression = '';
 
     /**
      * ExpressionSetterBuilder constructor.
@@ -42,16 +43,16 @@ class EnrichPayloadWithExpressionBuilder implements PropertyEditorBuilder
      *
      * @return EnrichPayloadWithExpressionBuilder
      */
-    public static function createWith(string $propertyPath, string $expression) : self
+    public static function createWith(string $propertyPath, string $expression): self
     {
-        return new self($propertyPath, $expression, "");
+        return new self($propertyPath, $expression, '');
     }
 
     /**
      * @param string $nullResultExpression
      * @return EnrichPayloadWithExpressionBuilder
      */
-    public function withNullResultExpression(string $nullResultExpression) : self
+    public function withNullResultExpression(string $nullResultExpression): self
     {
         $this->nullResultExpression = $nullResultExpression;
 
@@ -66,7 +67,7 @@ class EnrichPayloadWithExpressionBuilder implements PropertyEditorBuilder
      * @param string $mappingExpression when evaluates to true, then specific element is put in property path e.g. requestContext['personId'] == replyContext['personId']
      * @return EnrichPayloadWithExpressionBuilder
      */
-    public static function createWithMapping(string $propertyPath, string $expression, string $mappingExpression) : self
+    public static function createWithMapping(string $propertyPath, string $expression, string $mappingExpression): self
     {
         return new self($propertyPath, $expression, $mappingExpression);
     }

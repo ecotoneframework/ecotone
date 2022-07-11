@@ -3,13 +3,11 @@
 namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
 use Ecotone\Messaging\Attribute\ClassReference;
-use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
 
-#[ClassReference("methodInterceptor")]
+#[ClassReference('methodInterceptor')]
 class MethodInterceptorWithoutAspectExample
 {
-    public function doSomething() : void
+    public function doSomething(): void
     {
-
     }
 }

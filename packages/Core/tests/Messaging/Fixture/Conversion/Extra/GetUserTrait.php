@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Conversion\Extra;
 
 use Test\Ecotone\Messaging\Fixture\Conversion\User;
@@ -11,8 +10,7 @@ use Test\Ecotone\Messaging\Fixture\Conversion\User;
  */
 trait GetUserTrait
 {
-    public function getUser(User $user) : User
+    public function getUser(User $user): User
     {
-
     }
 }

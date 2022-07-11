@@ -1,9 +1,11 @@
 <?php
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Ordering;
+
+use Ecotone\Messaging\Support\Assert;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
-use Ecotone\Messaging\Support\Assert;
+use RuntimeException;
 
 /**
  * Class OrderProcessor
@@ -12,10 +14,10 @@ use Ecotone\Messaging\Support\Assert;
  */
 class OrderProcessor
 {
-    public function processOrder(Order $order) : OrderConfirmation
+    public function processOrder(Order $order): OrderConfirmation
     {
-        if (!$this->isCorrectOrder($order)) {
-            throw new \RuntimeException("Order is not correct!");
+        if (! $this->isCorrectOrder($order)) {
+            throw new RuntimeException('Order is not correct!');
         }
 
         return OrderConfirmation::fromOrder($order);
@@ -26,7 +28,7 @@ class OrderProcessor
      * @return OrderConfirmation[]|array
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function buyMultiple(array $ids) : array
+    public function buyMultiple(array $ids): array
     {
         Assert::allInstanceOfType($ids, UuidInterface::class);
         $orders = [];
@@ -41,12 +43,12 @@ class OrderProcessor
      * @param UuidInterface $id
      * @return OrderConfirmation
      */
-    public function buyByName(UuidInterface $id) : OrderConfirmation
+    public function buyByName(UuidInterface $id): OrderConfirmation
     {
         return OrderConfirmation::createFromUuid($id);
     }
 
-    private function isCorrectOrder(Order $order) : bool
+    private function isCorrectOrder(Order $order): bool
     {
         return $order->getProductName() === 'correct';
     }

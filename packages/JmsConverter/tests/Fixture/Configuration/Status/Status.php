@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Test\Ecotone\JMSConverter\Fixture\Configuration\Status;
-
 
 class Status
 {

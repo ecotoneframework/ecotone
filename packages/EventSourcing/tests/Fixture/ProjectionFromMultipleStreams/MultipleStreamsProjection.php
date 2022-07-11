@@ -10,7 +10,7 @@ use Test\Ecotone\EventSourcing\Fixture\Basket\Event\BasketWasCreated;
 use Test\Ecotone\EventSourcing\Fixture\Ticket\Event\TicketWasRegistered;
 use Test\Ecotone\EventSourcing\Fixture\Ticket\Ticket;
 
-#[Projection("multiple_stream_projections", [Ticket::class, Basket::BASKET_STREAM])]
+#[Projection('multiple_stream_projections', [Ticket::class, Basket::BASKET_STREAM])]
 class MultipleStreamsProjection
 {
     private array $actions = [];
@@ -27,8 +27,8 @@ class MultipleStreamsProjection
         $this->actions[] = $event;
     }
 
-    #[QueryHandler("action_collector.getCount")]
-    public function countHappenedActions() : int
+    #[QueryHandler('action_collector.getCount')]
+    public function countHappenedActions(): int
     {
         return count($this->actions);
     }

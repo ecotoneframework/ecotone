@@ -2,7 +2,6 @@
 
 namespace Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut;
 
-use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
@@ -19,13 +18,13 @@ class Twitter
     private string $twitId;
     private string $content;
 
-    #[QueryHandler("getContent")]
+    #[QueryHandler('getContent')]
     public function getContent(): string
     {
         return $this->content;
     }
 
-    #[CommandHandler("changeContent")]
+    #[CommandHandler('changeContent')]
     public function changeContent(string $content): array
     {
         return [new TwitContentWasChanged($this->twitId, $content)];

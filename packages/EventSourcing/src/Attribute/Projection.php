@@ -1,13 +1,12 @@
 <?php
 
-
 namespace Ecotone\EventSourcing\Attribute;
 
+use Attribute;
 use Ecotone\EventSourcing\EventStore;
 use Ecotone\Messaging\Support\Assert;
-use Enqueue\Dbal\DbalConnectionFactory;
 
-#[\Attribute(\Attribute::TARGET_CLASS)]
+#[Attribute(Attribute::TARGET_CLASS)]
 class Projection
 {
     private string $name;
@@ -22,7 +21,7 @@ class Projection
         $fromStreams = is_string($fromStreams) ? [$fromStreams] : $fromStreams;
         $fromCategories = is_string($fromCategories) ? [$fromCategories] : $fromCategories;
         $countDefined = (int)$fromStreams + (int)$fromCategories + (int)$fromAll;
-        Assert::isTrue($countDefined === 1, "Projection should be defined only with one of `fromStreams`, `fromCategories` or `fromALl`");
+        Assert::isTrue($countDefined === 1, 'Projection should be defined only with one of `fromStreams`, `fromCategories` or `fromALl`');
 
         $this->name = $name;
         $this->fromStreams = $fromStreams;

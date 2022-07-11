@@ -1,9 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
-
 namespace Ecotone\Modelling;
-
 
 class InMemoryStandardRepository implements StandardRepository
 {
@@ -20,7 +19,7 @@ class InMemoryStandardRepository implements StandardRepository
     }
 
 
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         /** @phpstan-ignore-next-line */
         return new static([], []);
@@ -58,9 +57,9 @@ class InMemoryStandardRepository implements StandardRepository
         $this->aggregates[get_class($aggregate)][$key] = $aggregate;
     }
 
-    private function getKey(array $identifiers) : string
+    private function getKey(array $identifiers): string
     {
-        $key = "";
+        $key = '';
         foreach ($identifiers as $identifier) {
             $key .= (string)$identifier;
         }

@@ -1,10 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
 
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\PollableChannel;
+use RuntimeException;
 
 class ExceptionalQueueChannel implements PollableChannel
 {
@@ -14,7 +16,7 @@ class ExceptionalQueueChannel implements PollableChannel
     {
     }
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -32,7 +34,7 @@ class ExceptionalQueueChannel implements PollableChannel
     public function receive(): ?Message
     {
         $this->exceptionCount++;
-        throw new \RuntimeException();
+        throw new RuntimeException();
     }
 
     /**

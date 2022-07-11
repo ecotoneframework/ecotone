@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
@@ -6,6 +7,7 @@ namespace Ecotone\Messaging\Handler;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\ErrorMessage;
+use ReflectionException;
 
 /**
  * Class InterfaceParameter
@@ -44,9 +46,9 @@ final class InterfaceParameter
      * @param Type $typeDescriptor
      * @return self
      */
-    public static function createNullable(string $name, Type $typeDescriptor) : self
+    public static function createNullable(string $name, Type $typeDescriptor): self
     {
-        return new self($name, $typeDescriptor, true, false,null, false, []);
+        return new self($name, $typeDescriptor, true, false, null, false, []);
     }
 
     /**
@@ -54,12 +56,12 @@ final class InterfaceParameter
      * @param Type $typeDescriptor
      * @return self
      */
-    public static function createNotNullable(string $name, Type $typeDescriptor) : self
+    public static function createNotNullable(string $name, Type $typeDescriptor): self
     {
         return new self($name, $typeDescriptor, false, false, null, false, []);
     }
 
-    public static function create(string $name, Type $typeDescriptor, bool $doesAllowNull, bool $hasDefaultValue, $defaultValue, bool $isAnnotation, array $annotations) : self
+    public static function create(string $name, Type $typeDescriptor, bool $doesAllowNull, bool $hasDefaultValue, $defaultValue, bool $isAnnotation, array $annotations): self
     {
         return new self($name, $typeDescriptor, $doesAllowNull, $hasDefaultValue, $defaultValue, $isAnnotation, $annotations);
     }
@@ -69,9 +71,9 @@ final class InterfaceParameter
      * @return bool
      * @throws \Ecotone\Messaging\MessagingException
      * @throws \Ecotone\Messaging\Support\InvalidArgumentException
-     * @throws \ReflectionException
+     * @throws ReflectionException
      */
-    public function canBePassedIn(Type $toCompare) : bool
+    public function canBePassedIn(Type $toCompare): bool
     {
         return $toCompare->isCompatibleWith($this->typeDescriptor);
     }
@@ -80,7 +82,7 @@ final class InterfaceParameter
      * @param InterfaceParameter $interfaceParameter
      * @return bool
      */
-    public function hasEqualTypeAs(InterfaceParameter $interfaceParameter) : bool
+    public function hasEqualTypeAs(InterfaceParameter $interfaceParameter): bool
     {
         return $this->typeDescriptor->equals($interfaceParameter->typeDescriptor);
     }
@@ -88,7 +90,7 @@ final class InterfaceParameter
     /**
      * @return string
      */
-    public function getName() : string
+    public function getName(): string
     {
         return $this->name;
     }
@@ -96,12 +98,12 @@ final class InterfaceParameter
     /**
      * @return bool
      */
-    public function doesAllowNulls() : bool
+    public function doesAllowNulls(): bool
     {
         return $this->doesAllowNull;
     }
 
-    public function getTypeHint() : string
+    public function getTypeHint(): string
     {
         return $this->typeDescriptor->toString();
     }
@@ -111,7 +113,7 @@ final class InterfaceParameter
         return $this->annotations;
     }
 
-    public function hasAnnotation(string $type) : bool
+    public function hasAnnotation(string $type): bool
     {
         foreach ($this->annotations as $annotation) {
             if ($annotation instanceof $type) {
@@ -125,7 +127,7 @@ final class InterfaceParameter
     /**
      * @return object[]
      */
-    public function getAnnotationsOfType(string $type) : array
+    public function getAnnotationsOfType(string $type): array
     {
         $foundAnnotations = [];
 
@@ -148,7 +150,7 @@ final class InterfaceParameter
         return $this->defaultValue;
     }
 
-    public function hasDefaultValue() : bool
+    public function hasDefaultValue(): bool
     {
         return $this->hasDefaultValue;
     }
@@ -156,7 +158,7 @@ final class InterfaceParameter
     /**
      * @return Type
      */
-    public function getTypeDescriptor() : Type
+    public function getTypeDescriptor(): Type
     {
         return $this->typeDescriptor;
     }
@@ -164,7 +166,7 @@ final class InterfaceParameter
     /**
      * @return bool
      */
-    public function isMessage() : bool
+    public function isMessage(): bool
     {
         return $this->typeDescriptor->equals(TypeDescriptor::create(Message::class)) || $this->typeDescriptor->equals(TypeDescriptor::create(ErrorMessage::class));
     }
@@ -180,7 +182,7 @@ final class InterfaceParameter
     /**
      * @return bool
      */
-    public function isObjectTypeHint() : bool
+    public function isObjectTypeHint(): bool
     {
         return class_exists($this->getTypeHint());
     }

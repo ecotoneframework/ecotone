@@ -2,8 +2,6 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Service;
 
-use Ecotone\Messaging\Handler\InterfaceToCall;
-
 /**
  * Interface CallableService
  * @package Test\Ecotone\Messaging\Fixture\Service
@@ -14,5 +12,5 @@ interface CallableService
     /**
      * @return bool
      */
-    public function wasCalled() : bool;
+    public function wasCalled(): bool;
 }

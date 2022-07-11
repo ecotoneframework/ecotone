@@ -1,10 +1,8 @@
 <?php
 
-
 namespace Test\Ecotone\JMSConverter\Fixture\Configuration\ArrayConversion;
 
 use Ecotone\Messaging\Attribute\Converter;
-use Ecotone\Messaging\Attribute\ConverterClass;
 use stdClass;
 
 class ClassToArrayConverter
@@ -22,7 +20,7 @@ class ClassToArrayConverter
     public function convertTo(stdClass $class): array
     {
         return [
-            "data" => $class->data
+            'data' => $class->data,
         ];
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config;
@@ -36,5 +37,5 @@ interface Module
      */
     public function getRelatedReferences(): array;
 
-    public function getModuleExtensions(array $serviceExtensions) : array;
+    public function getModuleExtensions(array $serviceExtensions): array;
 }

@@ -1,9 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
-
 namespace Ecotone\Messaging\Config;
-
 
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
@@ -11,16 +10,16 @@ use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
 class ServiceConfiguration
 {
-    public const DEFAULT_SERVICE_NAME = "ecotoneService";
-    const DEFAULT_ENVIRONMENT              = "dev";
-    const DEFAULT_FAIL_FAST                = true;
-    const DEFAULT_SERIALIZATION_MEDIA_TYPE = MediaType::APPLICATION_X_PHP_SERIALIZED;
+    public const DEFAULT_SERVICE_NAME = 'ecotoneService';
+    public const DEFAULT_ENVIRONMENT              = 'dev';
+    public const DEFAULT_FAIL_FAST                = true;
+    public const DEFAULT_SERIALIZATION_MEDIA_TYPE = MediaType::APPLICATION_X_PHP_SERIALIZED;
 
     private string $serviceName = self::DEFAULT_SERVICE_NAME;
     private bool $failFast = self::DEFAULT_FAIL_FAST;
     private ?string $cacheDirectoryPath = null;
     private string $environment = self::DEFAULT_ENVIRONMENT;
-    private ?string $loadCatalog = "";
+    private ?string $loadCatalog = '';
     /**
      * @var string[]
      */
@@ -53,7 +52,7 @@ class ServiceConfiguration
     {
         $self = $this;
 
-        if (!$this->defaultSerializationMediaType) {
+        if (! $this->defaultSerializationMediaType) {
             $defaultSerializationMediaType = null;
             foreach ($applicationConfigurations as $applicationConfiguration) {
                 if ($applicationConfiguration->defaultSerializationMediaType) {
@@ -67,7 +66,7 @@ class ServiceConfiguration
             $self = $self->withDefaultSerializationMediaType($defaultSerializationMediaType ?? self::DEFAULT_SERIALIZATION_MEDIA_TYPE);
         }
 
-        if (!$this->defaultErrorChannel) {
+        if (! $this->defaultErrorChannel) {
             $defaultErrorChannel = null;
             foreach ($applicationConfigurations as $applicationConfiguration) {
                 if ($applicationConfiguration->defaultErrorChannel) {
@@ -98,9 +97,9 @@ class ServiceConfiguration
         return $clone;
     }
 
-    public function withServiceName(string $serviceName) : self
+    public function withServiceName(string $serviceName): self
     {
-        if (!preg_match("#[a-z0-9_]#", $serviceName)) {
+        if (! preg_match('#[a-z0-9_]#', $serviceName)) {
             throw ConfigurationException::create("Service name can only be used with lower case letter, numbers and underline, given: `{$serviceName}`");
         }
 
@@ -116,7 +115,7 @@ class ServiceConfiguration
     public function withCacheDirectoryPath(?string $cacheDirectoryPath): self
     {
         $clone                     = clone $this;
-        $clone->cacheDirectoryPath = rtrim($cacheDirectoryPath, "/");
+        $clone->cacheDirectoryPath = rtrim($cacheDirectoryPath, '/');
 
         return $clone;
     }
@@ -153,7 +152,7 @@ class ServiceConfiguration
 
     public function isLoadingCatalogEnabled(): bool
     {
-        return !is_null($this->loadCatalog);
+        return ! is_null($this->loadCatalog);
     }
 
     /**
@@ -283,6 +282,6 @@ class ServiceConfiguration
 
     public function isProductionConfiguration(): bool
     {
-        return in_array($this->getEnvironment(), ["prod", "production"]);
+        return in_array($this->getEnvironment(), ['prod', 'production']);
     }
 }

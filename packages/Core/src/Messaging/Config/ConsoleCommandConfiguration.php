@@ -23,7 +23,7 @@ class ConsoleCommandConfiguration
         $this->parameterNames = $parameterNames;
     }
 
-    public function getHeaderNameForParameterName(string $parameterName) : string
+    public function getHeaderNameForParameterName(string $parameterName): string
     {
         foreach ($this->parameterNames as $consoleCommandParameter) {
             if ($consoleCommandParameter->getName() == $parameterName) {
@@ -37,7 +37,7 @@ class ConsoleCommandConfiguration
     /**
      * @var ConsoleCommandParameter[] $parameterNames
      */
-    public static function create(string $channelName, string $name, array $parameterNames) : self
+    public static function create(string $channelName, string $name, array $parameterNames): self
     {
         return new self($channelName, $name, $parameterNames);
     }

@@ -10,6 +10,7 @@ use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use stdClass;
 
 /**
  * Class DumbGatewayBuilder
@@ -27,14 +28,14 @@ class DumbGatewayBuilder implements GatewayBuilder
     {
     }
 
-    public function withRequiredReference(string $referenceName) : self
+    public function withRequiredReference(string $referenceName): self
     {
         $this->requiredReferences[] = $referenceName;
 
         return $this;
     }
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -42,7 +43,7 @@ class DumbGatewayBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function withLazyBuild(bool $withLazyBuild) : self
+    public function withLazyBuild(bool $withLazyBuild): self
     {
         return $this;
     }
@@ -58,7 +59,7 @@ class DumbGatewayBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function withMessageConverters(array $messageConverterReferenceNames) : self
+    public function withMessageConverters(array $messageConverterReferenceNames): self
     {
         return $this;
     }
@@ -84,7 +85,7 @@ class DumbGatewayBuilder implements GatewayBuilder
      */
     public function getRelatedMethodName(): string
     {
-        return "";
+        return '';
     }
 
     /**
@@ -92,7 +93,7 @@ class DumbGatewayBuilder implements GatewayBuilder
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return $interfaceToCallRegistry->getFor(self::class, "getInterceptedInterface");
+        return $interfaceToCallRegistry->getFor(self::class, 'getInterceptedInterface');
     }
 
     /**
@@ -114,7 +115,7 @@ class DumbGatewayBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor) : self
+    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor): self
     {
         return $this;
     }
@@ -122,7 +123,7 @@ class DumbGatewayBuilder implements GatewayBuilder
     /**
      * @inheritDoc
      */
-    public function addAfterInterceptor(MethodInterceptor $methodInterceptor) : self
+    public function addAfterInterceptor(MethodInterceptor $methodInterceptor): self
     {
         return $this;
     }
@@ -163,20 +164,20 @@ class DumbGatewayBuilder implements GatewayBuilder
      */
     public function getInterfaceName(): string
     {
-        return \stdClass::class;
+        return stdClass::class;
     }
 
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver) : object
+    public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver): object
     {
-        return new \stdClass();
+        return new stdClass();
     }
 
     public function buildWithoutProxyObject(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver): NonProxyGateway
     {
-        return new class implements NonProxyGateway{
+        return new class () implements NonProxyGateway {
             public function execute(array $methodArgumentValues)
             {
                 // TODO: Implement execute() method.
@@ -187,6 +188,6 @@ class DumbGatewayBuilder implements GatewayBuilder
 
     public function __toString()
     {
-        return "dumb gateway";
+        return 'dumb gateway';
     }
 }

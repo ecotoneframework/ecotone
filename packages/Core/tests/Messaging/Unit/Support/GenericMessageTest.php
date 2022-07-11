@@ -1,22 +1,24 @@
 <?php
 
 namespace Test\Ecotone\Messaging\Unit\Support;
+
 use Ecotone\Messaging\Support\GenericMessage;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
-
 
 /**
  * Class GenericMessageTest
  * @package Ecotone\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class GenericMessageTest extends MessagingTest
 {
     public function test_creating_generic_message_with_headers_as_key_value()
     {
         $payload = '{"name": "johny"}';
-        $headerName = "token";
+        $headerName = 'token';
         $headerValue = '123';
 
         $message = GenericMessage::createWithArrayHeaders($payload, [$headerName => $headerValue]);

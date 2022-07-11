@@ -1,13 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway;
 
-use Ecotone\Messaging\Attribute\ClassReference;
 use Ecotone\Messaging\Attribute\Interceptor\After;
 use Ecotone\Messaging\Attribute\Interceptor\Around;
 use Ecotone\Messaging\Attribute\Interceptor\Before;
-use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 class InterceptorExample

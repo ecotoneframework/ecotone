@@ -1,18 +1,22 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler;
+
+use Countable;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use Ecotone\Messaging\Handler\TypeDefinitionException;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\MessagingException;
-use PHPUnit\Framework\TestCase;
-use Ecotone\Messaging\Handler\TypeDefinitionException;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
+use stdClass;
 use Test\Ecotone\Messaging\Fixture\Dto\OrderExample;
 use Test\Ecotone\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
 
@@ -20,6 +24,8 @@ use Test\Ecotone\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
  * Class TypeDescriptorTest
  * @package Test\Ecotone\Messaging\Unit\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class TypeDescriptorTest extends TestCase
 {
@@ -29,7 +35,7 @@ class TypeDescriptorTest extends TestCase
      */
     public function test_guessing_type_hint_from_compound_type_and_array_of_scalar_type()
     {
-        $typeDescription = TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY,  "array<string>");
+        $typeDescription = TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, 'array<string>');
 
         $this->assertEquals(
             'array<string>',
@@ -45,7 +51,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::NULL,
-            ($typeDescription = TypeDescriptor::create("null"))->getTypeHint()
+            ($typeDescription = TypeDescriptor::create('null'))->getTypeHint()
         );
     }
 
@@ -53,7 +59,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::ANYTHING,
-            ($typeDescription = TypeDescriptor::createWithDocBlock("    ", "    "))->getTypeHint()
+            ($typeDescription = TypeDescriptor::createWithDocBlock('    ', '    '))->getTypeHint()
         );
     }
 
@@ -65,7 +71,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::createArrayType(),
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY,  "array<bla>")
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, 'array<bla>')
         );
     }
 
@@ -77,7 +83,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->expectException(TypeDefinitionException::class);
 
-        TypeDescriptor::createWithDocBlock("bla",  TypeDescriptor::ARRAY);
+        TypeDescriptor::createWithDocBlock('bla', TypeDescriptor::ARRAY);
     }
 
     /**
@@ -88,7 +94,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->expectException(TypeDefinitionException::class);
 
-        TypeDescriptor::create(TypeDescriptor::RESOURCE."|".TypeDescriptor::INTEGER);
+        TypeDescriptor::create(TypeDescriptor::RESOURCE.'|'.TypeDescriptor::INTEGER);
     }
 
     /**
@@ -99,7 +105,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->expectException(TypeDefinitionException::class);
 
-        TypeDescriptor::create(TypeDescriptor::RESOURCE."|".  TypeDescriptor::ARRAY);
+        TypeDescriptor::create(TypeDescriptor::RESOURCE.'|'.  TypeDescriptor::ARRAY);
     }
 
     /**
@@ -110,7 +116,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->expectException(TypeDefinitionException::class);
 
-        TypeDescriptor::create(TypeDescriptor::ITERABLE."|".  TypeDescriptor::RESOURCE);
+        TypeDescriptor::create(TypeDescriptor::ITERABLE.'|'.  TypeDescriptor::RESOURCE);
     }
 
     /**
@@ -120,15 +126,15 @@ class TypeDescriptorTest extends TestCase
     public function test_converting_doc_block_array_type_to_generic()
     {
         $this->assertEquals(
-            "array<stdClass>",
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::ITERABLE,  "\stdClass[]")->getTypeHint()
+            'array<stdClass>',
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::ITERABLE, "\stdClass[]")->getTypeHint()
         );
     }
 
     public function test_when_parameter_is_array_accepting_only_array_like_type_from_docblock()
     {
         $this->assertEquals(
-            "array<stdClass>",
+            'array<stdClass>',
             TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, "\stdClass|array<\stdClass>|int")->toString()
         );
     }
@@ -136,8 +142,8 @@ class TypeDescriptorTest extends TestCase
     public function test_when_parameter_is_union_with_array_accepting_only_array_like_type_from_docblock()
     {
         $this->assertEquals(
-            "array<stdClass>|stdClass",
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY . "|" . \stdClass::class, "string|array<\stdClass>|int")->toString()
+            'array<stdClass>|stdClass',
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY . '|' . stdClass::class, "string|array<\stdClass>|int")->toString()
         );
     }
 
@@ -145,7 +151,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::ARRAY,
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, "array|iterable")->toString()
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, 'array|iterable')->toString()
         );
     }
 
@@ -156,7 +162,7 @@ class TypeDescriptorTest extends TestCase
     public function test_choosing_doc_block_type_hint_over_array()
     {
         $this->assertEquals(
-            "array<stdClass>",
+            'array<stdClass>',
             TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, "array<\stdClass>")->getTypeHint()
         );
     }
@@ -167,15 +173,15 @@ class TypeDescriptorTest extends TestCase
      */
     public function test_choosing_doc_block_collection_type_hint_over_compound()
     {
-        $typeDescriptor = TypeDescriptor::createWithDocBlock(TypeDescriptor::ITERABLE,  "\ArrayCollection<\stdClass>");
+        $typeDescriptor = TypeDescriptor::createWithDocBlock(TypeDescriptor::ITERABLE, "\ArrayCollection<\stdClass>");
 
         $this->assertEquals(
-            "ArrayCollection<stdClass>",
+            'ArrayCollection<stdClass>',
             $typeDescriptor->getTypeHint()
         );
 
         $this->assertEquals(
-            [TypeDescriptor::create(\stdClass::class)],
+            [TypeDescriptor::create(stdClass::class)],
             $typeDescriptor->resolveGenericTypes()
         );
     }
@@ -205,7 +211,7 @@ class TypeDescriptorTest extends TestCase
         );
 
         $this->assertTrue(
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::ITERABLE,  "\stdClass[]")
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::ITERABLE, "\stdClass[]")
                 ->equals(TypeDescriptor::create("array<\stdClass>"))
         );
 
@@ -222,8 +228,8 @@ class TypeDescriptorTest extends TestCase
     public function test_choosing_declaration_type_over_docblock_when_interface()
     {
         $this->assertEquals(
-            \Countable::class,
-            TypeDescriptor::createWithDocBlock(\Countable::class, \stdClass::class)->getTypeHint()
+            Countable::class,
+            TypeDescriptor::createWithDocBlock(Countable::class, stdClass::class)->getTypeHint()
         );
     }
 
@@ -235,7 +241,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::OBJECT,
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::OBJECT, \stdClass::class)->getTypeHint()
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::OBJECT, stdClass::class)->getTypeHint()
         );
     }
 
@@ -247,7 +253,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::ANYTHING,
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::ANYTHING,  TypeDescriptor::ARRAY)->getTypeHint()
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::ANYTHING, TypeDescriptor::ARRAY)->getTypeHint()
         );
     }
 
@@ -255,7 +261,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::ARRAY,
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY,  TypeDescriptor::ANYTHING)->getTypeHint()
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::ARRAY, TypeDescriptor::ANYTHING)->getTypeHint()
         );
     }
 
@@ -266,7 +272,7 @@ class TypeDescriptorTest extends TestCase
     public function test_creating_with_prefixed_type()
     {
         $this->assertEquals(
-            \stdClass::class,
+            stdClass::class,
             TypeDescriptor::create("\stdClass")->getTypeHint()
         );
     }
@@ -316,7 +322,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::ANYTHING,
-            TypeDescriptor::createWithDocBlock(TypeDescriptor::ANYTHING,  "mixed")->getTypeHint()
+            TypeDescriptor::createWithDocBlock(TypeDescriptor::ANYTHING, 'mixed')->getTypeHint()
         );
     }
 
@@ -344,7 +350,7 @@ class TypeDescriptorTest extends TestCase
     public function test_compatibility_when_comparing_class_of_the_same_type()
     {
         $this->assertTrue(
-            TypeDescriptor::create(\stdClass::class)->isCompatibleWith(TypeDescriptor::create(\stdClass::class))
+            TypeDescriptor::create(stdClass::class)->isCompatibleWith(TypeDescriptor::create(stdClass::class))
         );
     }
 
@@ -355,11 +361,11 @@ class TypeDescriptorTest extends TestCase
     public function test_no_compatibility_when_comparing_class_with_scalar()
     {
         $this->assertFalse(
-            TypeDescriptor::create(\stdClass::class)->isCompatibleWith(TypeDescriptor::createIntegerType())
+            TypeDescriptor::create(stdClass::class)->isCompatibleWith(TypeDescriptor::createIntegerType())
         );
 
         $this->assertFalse(
-            TypeDescriptor::createIntegerType()->isCompatibleWith(TypeDescriptor::create(\stdClass::class))
+            TypeDescriptor::createIntegerType()->isCompatibleWith(TypeDescriptor::create(stdClass::class))
         );
     }
 
@@ -370,11 +376,11 @@ class TypeDescriptorTest extends TestCase
     public function test_no_compatibility_when_comparing_class_with_compound()
     {
         $this->assertFalse(
-            TypeDescriptor::create(\stdClass::class)->isCompatibleWith(TypeDescriptor::createArrayType())
+            TypeDescriptor::create(stdClass::class)->isCompatibleWith(TypeDescriptor::createArrayType())
         );
 
         $this->assertFalse(
-            TypeDescriptor::createArrayType()->isCompatibleWith(TypeDescriptor::create(\stdClass::class))
+            TypeDescriptor::createArrayType()->isCompatibleWith(TypeDescriptor::create(stdClass::class))
         );
     }
 
@@ -385,7 +391,7 @@ class TypeDescriptorTest extends TestCase
     public function test_no_compatibility_when_comparing_different_collections()
     {
         $this->assertFalse(
-            TypeDescriptor::createCollection(\stdClass::class)->isCompatibleWith(TypeDescriptor::createCollection(Message::class))
+            TypeDescriptor::createCollection(stdClass::class)->isCompatibleWith(TypeDescriptor::createCollection(Message::class))
         );
     }
 
@@ -396,7 +402,7 @@ class TypeDescriptorTest extends TestCase
     public function test_compatibility_when_comparing_same_collections()
     {
         $this->assertTrue(
-            TypeDescriptor::createCollection(\stdClass::class)->isCompatibleWith(TypeDescriptor::createCollection(\stdClass::class))
+            TypeDescriptor::createCollection(stdClass::class)->isCompatibleWith(TypeDescriptor::createCollection(stdClass::class))
         );
     }
 
@@ -407,7 +413,7 @@ class TypeDescriptorTest extends TestCase
     public function test_no_compatibility_when_comparing_collection_different_types()
     {
         $this->assertFalse(
-            TypeDescriptor::createCollection("string")->isCompatibleWith(TypeDescriptor::createCollection(Uuid::class))
+            TypeDescriptor::createCollection('string')->isCompatibleWith(TypeDescriptor::createCollection(Uuid::class))
         );
     }
 
@@ -448,11 +454,11 @@ class TypeDescriptorTest extends TestCase
     public function test_no_compatibility_when_comparing_scalar_with_object()
     {
         $this->assertFalse(
-            TypeDescriptor::create(\stdClass::class)->isCompatibleWith(TypeDescriptor::createIntegerType())
+            TypeDescriptor::create(stdClass::class)->isCompatibleWith(TypeDescriptor::createIntegerType())
         );
 
         $this->assertFalse(
-            TypeDescriptor::createIntegerType()->isCompatibleWith(TypeDescriptor::create(\stdClass::class))
+            TypeDescriptor::createIntegerType()->isCompatibleWith(TypeDescriptor::create(stdClass::class))
         );
     }
 
@@ -474,11 +480,11 @@ class TypeDescriptorTest extends TestCase
     public function test_no_compatibility_when_comparing_different_classes()
     {
         $this->assertFalse(
-            TypeDescriptor::create(\stdClass::class)->isCompatibleWith(TypeDescriptor::create(DumbMessageHandlerBuilder::class))
+            TypeDescriptor::create(stdClass::class)->isCompatibleWith(TypeDescriptor::create(DumbMessageHandlerBuilder::class))
         );
 
         $this->assertFalse(
-            TypeDescriptor::create(DumbMessageHandlerBuilder::class)->isCompatibleWith(TypeDescriptor::create(\stdClass::class))
+            TypeDescriptor::create(DumbMessageHandlerBuilder::class)->isCompatibleWith(TypeDescriptor::create(stdClass::class))
         );
     }
 
@@ -548,7 +554,7 @@ class TypeDescriptorTest extends TestCase
     public function test_compatibility_when_comparing_actual_class_to_object_type_hint()
     {
         $this->assertTrue(
-            TypeDescriptor::create(\stdClass::class)->isCompatibleWith(TypeDescriptor::create(TypeDescriptor::OBJECT))
+            TypeDescriptor::create(stdClass::class)->isCompatibleWith(TypeDescriptor::create(TypeDescriptor::OBJECT))
         );
     }
 
@@ -559,7 +565,7 @@ class TypeDescriptorTest extends TestCase
     public function test_no_compatibility_when_comparing_object_type_hint_to_actual_class()
     {
         $this->assertFalse(
-            TypeDescriptor::create(TypeDescriptor::OBJECT)->isCompatibleWith(TypeDescriptor::create(\stdClass::class))
+            TypeDescriptor::create(TypeDescriptor::OBJECT)->isCompatibleWith(TypeDescriptor::create(stdClass::class))
         );
     }
 
@@ -571,7 +577,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::createBooleanType(),
-            TypeDescriptor::create("false")
+            TypeDescriptor::create('false')
         );
     }
 
@@ -583,18 +589,19 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(TypeDescriptor::FLOAT, TypeDescriptor::createFromVariable(1.21));
         $this->assertEquals(TypeDescriptor::INTEGER, TypeDescriptor::createFromVariable(121));
-        $this->assertEquals(TypeDescriptor::STRING, TypeDescriptor::createFromVariable("text"));
+        $this->assertEquals(TypeDescriptor::STRING, TypeDescriptor::createFromVariable('text'));
         $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([]));
-        $this->assertEquals(\stdClass::class, TypeDescriptor::createFromVariable(new \stdClass()));
+        $this->assertEquals(stdClass::class, TypeDescriptor::createFromVariable(new stdClass()));
         $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([]));
-        $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([1,2,3]));
-        $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([new \stdClass(), 12]));
-        $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([new \stdClass(), OrderExample::createFromId(1)]));
-        $this->assertEquals(TypeDescriptor::createCollection(\stdClass::class), TypeDescriptor::createFromVariable([new \stdClass()]));
-        $this->assertEquals(TypeDescriptor::createCollection(\stdClass::class), TypeDescriptor::createFromVariable([new \stdClass(),new \stdClass()]));
+        $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([1, 2, 3]));
+        $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([new stdClass(), 12]));
+        $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([new stdClass(), OrderExample::createFromId(1)]));
+        $this->assertEquals(TypeDescriptor::createCollection(stdClass::class), TypeDescriptor::createFromVariable([new stdClass()]));
+        $this->assertEquals(TypeDescriptor::createCollection(stdClass::class), TypeDescriptor::createFromVariable([new stdClass(), new stdClass()]));
         $this->assertEquals(TypeDescriptor::RESOURCE, TypeDescriptor::createFromVariable(fopen('file', 'w+')));
         $this->assertEquals(TypeDescriptor::NULL, TypeDescriptor::createFromVariable(null));
-        $this->assertEquals(TypeDescriptor::CALLABLE, TypeDescriptor::createFromVariable(function (){}));
+        $this->assertEquals(TypeDescriptor::CALLABLE, TypeDescriptor::createFromVariable(function () {
+        }));
     }
 
     /**
@@ -603,7 +610,7 @@ class TypeDescriptorTest extends TestCase
      */
     public function test_creating_collection_type()
     {
-        $this->assertEquals("array<stdClass>", TypeDescriptor::createCollection(\stdClass::class)->toString());
+        $this->assertEquals('array<stdClass>', TypeDescriptor::createCollection(stdClass::class)->toString());
     }
 
     /**
@@ -614,7 +621,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             [TypeDescriptor::createStringType(), TypeDescriptor::createIntegerType()],
-            TypeDescriptor::create("array<string,int>")->resolveGenericTypes()
+            TypeDescriptor::create('array<string,int>')->resolveGenericTypes()
         );
     }
 
@@ -622,7 +629,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::createBooleanType(),
-            TypeDescriptor::create("boolean")
+            TypeDescriptor::create('boolean')
         );
     }
 
@@ -630,7 +637,7 @@ class TypeDescriptorTest extends TestCase
     {
         $this->assertEquals(
             TypeDescriptor::createIntegerType(),
-            TypeDescriptor::create("integer")
+            TypeDescriptor::create('integer')
         );
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
@@ -13,10 +14,10 @@ interface TriggerContext
     /**
      * @return int|null Milliseconds since Epoch
      */
-    public function lastScheduledTime() : ?int;
+    public function lastScheduledTime(): ?int;
 
     /**
      * @return int|null Milliseconds since Epoch
      */
-    public function lastActualExecutionTime() : ?int;
+    public function lastActualExecutionTime(): ?int;
 }

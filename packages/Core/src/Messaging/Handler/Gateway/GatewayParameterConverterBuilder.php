@@ -1,7 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
+
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 
@@ -12,7 +14,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 interface GatewayParameterConverterBuilder
 {
-    public function build(ReferenceSearchService $referenceSearchService) : GatewayParameterConverter;
+    public function build(ReferenceSearchService $referenceSearchService): GatewayParameterConverter;
 
-    public function isHandling(InterfaceParameter $parameter) : bool;
+    public function isHandling(InterfaceParameter $parameter): bool;
 }

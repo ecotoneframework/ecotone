@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Support;
@@ -6,12 +7,18 @@ namespace Test\Ecotone\Messaging\Unit\Support;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
+
+use function json_decode;
+
+use stdClass;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
  * Class MessageBuilderTest
  * @package Ecotone\Messaging\Support
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class MessageBuilderTest extends MessagingTest
 {
@@ -91,19 +98,19 @@ class MessageBuilderTest extends MessagingTest
     {
         $headerName = 'some';
         $message = MessageBuilder::withPayload('somePayload')
-                    ->setHeader($headerName, new \stdClass())
+                    ->setHeader($headerName, new stdClass())
                     ->build();
 
         $this->assertEquals(
             $message->getHeaders()->get($headerName),
-            new \stdClass()
+            new stdClass()
         );
     }
 
     public function test_creating_from_different_message()
     {
         $message = MessageBuilder::withPayload('somePayload')
-            ->setHeader('some', new \stdClass())
+            ->setHeader('some', new stdClass())
             ->setHeader('token', 'johny')
             ->setHeader(MessageHeaders::TIMESTAMP, 1587658787863)
             ->setReplyChannel(QueueChannel::create())
@@ -137,9 +144,9 @@ class MessageBuilderTest extends MessagingTest
     public function test_converting_to_string()
     {
         $this->assertEquals(
-            "some",
-            \json_decode(
-                (string)MessageBuilder::withPayload("some")
+            'some',
+            json_decode(
+                (string)MessageBuilder::withPayload('some')
                     ->build(),
                 true
             )['payload']
@@ -149,14 +156,14 @@ class MessageBuilderTest extends MessagingTest
     public function test_allow_to_manually_set_message_header_id_and_timestamp()
     {
         $this->assertEquals(
-            MessageBuilder::withPayload("some")
+            MessageBuilder::withPayload('some')
                 ->setHeader(MessageHeaders::MESSAGE_ID, 123)
                 ->setHeader(MessageHeaders::TIMESTAMP, 1587658787863)
                 ->build(),
-            MessageBuilder::withPayload("some")
+            MessageBuilder::withPayload('some')
                 ->setMultipleHeaders([
                     MessageHeaders::MESSAGE_ID => 123,
-                    MessageHeaders::TIMESTAMP => 1587658787863
+                    MessageHeaders::TIMESTAMP => 1587658787863,
                 ])
                 ->build()
         );

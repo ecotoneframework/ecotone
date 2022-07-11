@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Transaction\Null;
@@ -28,7 +29,7 @@ class NullTransactionFactory implements TransactionFactory
     /**
      * @return NullTransactionFactory
      */
-    public static function create() : self
+    public static function create(): self
     {
         return new self(null);
     }
@@ -37,7 +38,7 @@ class NullTransactionFactory implements TransactionFactory
      * @param Transaction $transaction
      * @return NullTransactionFactory
      */
-    public static function createWithPredefinedTransaction(Transaction $transaction) : self
+    public static function createWithPredefinedTransaction(Transaction $transaction): self
     {
         return new self($transaction);
     }

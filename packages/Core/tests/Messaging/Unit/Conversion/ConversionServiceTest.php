@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Conversion;
@@ -18,6 +19,8 @@ use stdClass;
  * Class ConversionServiceTest
  * @package Test\Ecotone\Messaging\Unit\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class ConversionServiceTest extends TestCase
 {
@@ -30,12 +33,12 @@ class ConversionServiceTest extends TestCase
     {
         $conversionService = AutoCollectionConversionService::createWith([
             new DeserializingConverter(),
-            new SerializingConverter()
+            new SerializingConverter(),
         ]);
 
 
         $serializedObject = new stdClass();
-        $serializedObject->name = "johny";
+        $serializedObject->name = 'johny';
         $serializedObject->age = 15;
 
         $result = $conversionService->convert(

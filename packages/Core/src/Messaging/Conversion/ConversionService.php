@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
@@ -12,7 +13,7 @@ use Ecotone\Messaging\Handler\Type;
  */
 interface ConversionService
 {
-    const REFERENCE_NAME = self::class;
+    public const REFERENCE_NAME = self::class;
 
     /**
      * @param mixed $source

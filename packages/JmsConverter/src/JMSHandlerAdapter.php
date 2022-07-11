@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\JMSConverter;
-
 
 use Closure;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -31,8 +29,8 @@ class JMSHandlerAdapter
 
     public function __construct(TypeDescriptor $fromType, TypeDescriptor $toType, string $referenceName, string $methodName)
     {
-        Assert::isTrue($fromType->isClassOrInterface() || $toType->isClassOrInterface(), "Atleast one side of converter must be class");
-        Assert::isFalse($fromType->isClassOrInterface() && $toType->isClassOrInterface(), "Both sides of converter cannot to be classes");
+        Assert::isTrue($fromType->isClassOrInterface() || $toType->isClassOrInterface(), 'Atleast one side of converter must be class');
+        Assert::isFalse($fromType->isClassOrInterface() && $toType->isClassOrInterface(), 'Both sides of converter cannot to be classes');
 
         $this->fromType = $fromType;
         $this->toType = $toType;
@@ -41,7 +39,7 @@ class JMSHandlerAdapter
         $this->methodName = $methodName;
     }
 
-    public static function create(TypeDescriptor $fromType, TypeDescriptor $toType, string $referenceName, string $methodName) : self
+    public static function create(TypeDescriptor $fromType, TypeDescriptor $toType, string $referenceName, string $methodName): self
     {
         return new self($fromType, $toType, $referenceName, $methodName);
     }

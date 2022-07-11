@@ -1,11 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Logger;
 
-use Psr\Log\LogLevel;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Psr\Log\LogLevel;
 
 /**
  * Class LogLevel
@@ -35,17 +36,17 @@ class LoggingLevel extends LogLevel
      * @return LoggingLevel
      * @throws MessagingException
      */
-    public static function create(string $logLevel, bool $logFullMessage) : self
+    public static function create(string $logLevel, bool $logFullMessage): self
     {
         return new self($logLevel, $logFullMessage);
     }
 
-    public static function createDebug() : self
+    public static function createDebug(): self
     {
         return new self(self::DEBUG, false);
     }
 
-    public static function createDebugWithFullMessage() : self
+    public static function createDebugWithFullMessage(): self
     {
         return new self(self::DEBUG, true);
     }
@@ -56,8 +57,8 @@ class LoggingLevel extends LogLevel
      */
     private function initialize(string $logLevel): void
     {
-        if (!in_array($logLevel, [LogLevel::DEBUG, LogLevel::ALERT, LogLevel::CRITICAL, LogLevel::EMERGENCY, LogLevel::ERROR, LogLevel::INFO, LogLevel::NOTICE, LogLevel::WARNING])) {
-            throw InvalidArgumentException::create("Wrong log level {$logLevel} passed. Check " . LoggingLevel::class . " for possible log levels");
+        if (! in_array($logLevel, [LogLevel::DEBUG, LogLevel::ALERT, LogLevel::CRITICAL, LogLevel::EMERGENCY, LogLevel::ERROR, LogLevel::INFO, LogLevel::NOTICE, LogLevel::WARNING])) {
+            throw InvalidArgumentException::create("Wrong log level {$logLevel} passed. Check " . LoggingLevel::class . ' for possible log levels');
         }
 
         $this->level = $logLevel;

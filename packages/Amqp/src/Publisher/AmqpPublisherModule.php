@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Amqp\Publisher;
 
 use Ecotone\Amqp\AmqpOutboundChannelAdapterBuilder;
@@ -50,7 +49,7 @@ class AmqpPublisherModule implements AnnotationModule
 
         /** @var AmqpMessagePublisherConfiguration $amqpPublisher */
         foreach ($extensionObjects as $amqpPublisher) {
-            if (!($amqpPublisher instanceof AmqpMessagePublisherConfiguration)) {
+            if (! ($amqpPublisher instanceof AmqpMessagePublisherConfiguration)) {
                 continue;
             }
 
@@ -63,38 +62,38 @@ class AmqpPublisherModule implements AnnotationModule
 
             $configuration = $configuration
                 ->registerGatewayBuilder(
-                    GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), MessagePublisher::class, "send", $amqpPublisher->getReferenceName())
+                    GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), MessagePublisher::class, 'send', $amqpPublisher->getReferenceName())
                         ->withParameterConverters([
-                            GatewayPayloadBuilder::create("data"),
-                            GatewayHeaderBuilder::create("sourceMediaType", MessageHeaders::CONTENT_TYPE)
+                            GatewayPayloadBuilder::create('data'),
+                            GatewayHeaderBuilder::create('sourceMediaType', MessageHeaders::CONTENT_TYPE),
                         ])
                 )
                 ->registerGatewayBuilder(
-                    GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), MessagePublisher::class, "sendWithMetadata", $amqpPublisher->getReferenceName())
+                    GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), MessagePublisher::class, 'sendWithMetadata', $amqpPublisher->getReferenceName())
                         ->withParameterConverters([
-                            GatewayPayloadBuilder::create("data"),
-                            GatewayHeadersBuilder::create("metadata"),
-                            GatewayHeaderBuilder::create("sourceMediaType", MessageHeaders::CONTENT_TYPE)
+                            GatewayPayloadBuilder::create('data'),
+                            GatewayHeadersBuilder::create('metadata'),
+                            GatewayHeaderBuilder::create('sourceMediaType', MessageHeaders::CONTENT_TYPE),
                         ])
                 )
                 ->registerGatewayBuilder(
-                    GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), MessagePublisher::class, "convertAndSend", $amqpPublisher->getReferenceName())
+                    GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), MessagePublisher::class, 'convertAndSend', $amqpPublisher->getReferenceName())
                         ->withParameterConverters([
-                            GatewayPayloadBuilder::create("data"),
-                            GatewayHeaderValueBuilder::create(MessageHeaders::CONTENT_TYPE, MediaType::APPLICATION_X_PHP)
+                            GatewayPayloadBuilder::create('data'),
+                            GatewayHeaderValueBuilder::create(MessageHeaders::CONTENT_TYPE, MediaType::APPLICATION_X_PHP),
                         ])
                 )
                 ->registerGatewayBuilder(
-                    GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), MessagePublisher::class, "convertAndSendWithMetadata", $amqpPublisher->getReferenceName())
+                    GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), MessagePublisher::class, 'convertAndSendWithMetadata', $amqpPublisher->getReferenceName())
                         ->withParameterConverters([
-                            GatewayPayloadBuilder::create("data"),
-                            GatewayHeadersBuilder::create("metadata"),
-                            GatewayHeaderValueBuilder::create(MessageHeaders::CONTENT_TYPE, MediaType::APPLICATION_X_PHP)
+                            GatewayPayloadBuilder::create('data'),
+                            GatewayHeadersBuilder::create('metadata'),
+                            GatewayHeaderValueBuilder::create(MessageHeaders::CONTENT_TYPE, MediaType::APPLICATION_X_PHP),
                         ])
                 )
                 ->registerMessageHandler(
                     AmqpOutboundChannelAdapterBuilder::create($amqpPublisher->getExchangeName(), $amqpPublisher->getAmqpConnectionReference())
-                        ->withEndpointId($amqpPublisher->getReferenceName() . ".handler")
+                        ->withEndpointId($amqpPublisher->getReferenceName() . '.handler')
                         ->withInputChannelName($amqpPublisher->getReferenceName())
                         ->withDefaultPersistentMode($amqpPublisher->getDefaultPersistentDelivery())
                         ->withAutoDeclareOnSend($amqpPublisher->isAutoDeclareQueueOnSend())

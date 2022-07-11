@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Amqp;
 
 use Ecotone\Messaging\Message;

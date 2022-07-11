@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
@@ -37,7 +38,7 @@ class GatewayHeaderValueConverter implements GatewayParameterConverter
      * @param mixed $headerValue
      * @return GatewayHeaderValueConverter
      */
-    public static function create(string $headerName, $headerValue) : self
+    public static function create(string $headerName, $headerValue): self
     {
         return new self($headerName, $headerValue);
     }

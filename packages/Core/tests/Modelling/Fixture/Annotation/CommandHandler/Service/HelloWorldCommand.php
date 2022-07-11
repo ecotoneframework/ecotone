@@ -9,5 +9,4 @@ namespace Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service;
  */
 class HelloWorldCommand
 {
-
 }

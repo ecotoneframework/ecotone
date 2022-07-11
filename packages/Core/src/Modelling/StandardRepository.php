@@ -22,7 +22,7 @@ interface StandardRepository
      *
      * @return object|null
      */
-    public function findBy(string $aggregateClassName, array $identifiers) : ?object;
+    public function findBy(string $aggregateClassName, array $identifiers): ?object;
 
     /**
      * @param array $identifiers

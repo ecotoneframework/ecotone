@@ -7,14 +7,16 @@ use Ecotone\Messaging\Support\MessageBuilder;
 
 final class HeaderMapperTransformer
 {
-    private function __construct(private array $mappedHeaders) {}
+    private function __construct(private array $mappedHeaders)
+    {
+    }
 
-    public static function create(array $mappedHeaders) : self
+    public static function create(array $mappedHeaders): self
     {
         return new self($mappedHeaders);
     }
 
-    public function transform(Message $message) : Message
+    public function transform(Message $message): Message
     {
         $messageToBuild = MessageBuilder::fromMessage($message);
 

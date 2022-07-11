@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
@@ -47,14 +48,14 @@ class GatewayPayloadExpressionConverter implements GatewayParameterConverter
      */
     public function convertToMessage(?MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
     {
-        Assert::notNull($methodArgument, "Gateway header converter can only be called with method argument");
+        Assert::notNull($methodArgument, 'Gateway header converter can only be called with method argument');
 
         return $messageBuilder
                 ->setPayload(
                     $this->expressionEvaluationService->evaluate(
                         $this->expression,
                         [
-                            "value" => $methodArgument->value()
+                            'value' => $methodArgument->value(),
                         ],
                         $this->referenceSearchService
                     )

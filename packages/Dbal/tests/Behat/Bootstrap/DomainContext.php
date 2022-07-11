@@ -2,8 +2,9 @@
 
 namespace Test\Ecotone\Dbal\Behat\Bootstrap;
 
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\Setup;
 use Ecotone\Dbal\DbalConnection;
 use Ecotone\Dbal\DocumentStore\DbalDocumentStore;
 use Ecotone\Dbal\Recoverability\DbalDeadLetter;
@@ -17,7 +18,11 @@ use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
 use Enqueue\Dbal\DbalConnectionFactory;
-use Enqueue\Dbal\ManagerRegistryConnectionFactory;
+use InvalidArgumentException;
+
+use function json_decode;
+use function json_encode;
+
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
@@ -25,11 +30,11 @@ use Test\Ecotone\Dbal\Fixture\DeadLetter\OrderGateway;
 use Test\Ecotone\Dbal\Fixture\DocumentStoreAggregate\PersonJsonConverter;
 use Test\Ecotone\Dbal\Fixture\ORM\RegisterPerson;
 use Test\Ecotone\Dbal\Fixture\Transaction\OrderService;
-use Doctrine\ORM\Tools\Setup;
-use Doctrine\ORM\EntityManager;
 
 /**
  * Defines application features from the specific context.
+ *
+ * @internal
  */
 class DomainContext extends TestCase implements Context
 {
@@ -46,19 +51,19 @@ class DomainContext extends TestCase implements Context
         switch ($namespace) {
             case "Test\Ecotone\Dbal\Fixture\Transaction": {
                 $objects = [
-                    new OrderService()
+                    new OrderService(),
                 ];
                 break;
             }
             case "Test\Ecotone\Dbal\Fixture\AsynchronousChannelTransaction": {
                 $objects = [
-                    new \Test\Ecotone\Dbal\Fixture\AsynchronousChannelTransaction\OrderService()
+                    new \Test\Ecotone\Dbal\Fixture\AsynchronousChannelTransaction\OrderService(),
                 ];
                 break;
             }
             case "Test\Ecotone\Dbal\Fixture\DeadLetter": {
                 $objects = [
-                    new \Test\Ecotone\Dbal\Fixture\DeadLetter\OrderService()
+                    new \Test\Ecotone\Dbal\Fixture\DeadLetter\OrderService(),
                 ];
                 break;
             }
@@ -79,14 +84,14 @@ class DomainContext extends TestCase implements Context
                 break;
             }
             default: {
-                throw new \InvalidArgumentException("Namespace {$namespace} not yet implemented");
+                throw new InvalidArgumentException("Namespace {$namespace} not yet implemented");
             }
         }
 
-        $dsn = getenv("DATABASE_DSN") ? getenv("DATABASE_DSN") : null;
-        $connectionFactory = DbalConnection::fromConnectionFactory(new DbalConnectionFactory(["dsn" => $dsn]));
+        $dsn = getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : null;
+        $connectionFactory = DbalConnection::fromConnectionFactory(new DbalConnectionFactory(['dsn' => $dsn]));
         $connection = $connectionFactory->createContext()->getDbalConnection();
-        $enqueueTable = "enqueue";
+        $enqueueTable = 'enqueue';
         if ($this->checkIfTableExists($connection, $enqueueTable)) {
             $this->deleteFromTableExists($enqueueTable, $connection);
             $this->deleteFromTableExists(OrderService::ORDER_TABLE, $connection);
@@ -94,7 +99,7 @@ class DomainContext extends TestCase implements Context
             $this->deleteFromTableExists(DbalDocumentStore::ECOTONE_DOCUMENT_STORE, $connection);
         }
 
-        $rootProjectDirectoryPath = __DIR__ . "/../../../../";
+        $rootProjectDirectoryPath = __DIR__ . '/../../../../';
         $serviceConfiguration = ServiceConfiguration::createWithDefaults()
             ->withNamespaces([$namespace])
             ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString());
@@ -102,25 +107,25 @@ class DomainContext extends TestCase implements Context
 
         switch ($namespace) {
             case "Test\Ecotone\Dbal\Fixture\ORM": {
-                if (!$this->checkIfTableExists($connection, "persons")) {
+                if (! $this->checkIfTableExists($connection, 'persons')) {
                     $connection->executeStatement(<<<SQL
-    CREATE TABLE persons (
-        person_id INTEGER PRIMARY KEY,
-        name VARCHAR(255)
-    )
-SQL);
+                            CREATE TABLE persons (
+                                person_id INTEGER PRIMARY KEY,
+                                name VARCHAR(255)
+                            )
+                        SQL);
                 }
-                $this->deleteFromTableExists("persons", $connection);
+                $this->deleteFromTableExists('persons', $connection);
 
-                $config = Setup::createAnnotationMetadataConfiguration([$rootProjectDirectoryPath . DIRECTORY_SEPARATOR . "tests/Dbal/Fixture/ORM"], true, null, null, false);
+                $config = Setup::createAnnotationMetadataConfiguration([$rootProjectDirectoryPath . DIRECTORY_SEPARATOR . 'tests/Dbal/Fixture/ORM'], true, null, null, false);
 
                 $objects = [
-                    DbalConnectionFactory::class => DbalConnection::createEntityManager(EntityManager::create(['url' => $dsn], $config))
+                    DbalConnectionFactory::class => DbalConnection::createEntityManager(EntityManager::create(['url' => $dsn], $config)),
                 ];
                 break;
             }
             default: {
-                $objects = array_merge($objects, ["managerRegistry" => $connectionFactory, DbalConnectionFactory::class => $connectionFactory]);
+                $objects = array_merge($objects, ['managerRegistry' => $connectionFactory, DbalConnectionFactory::class => $connectionFactory]);
             }
         }
 
@@ -133,12 +138,12 @@ SQL);
         );
     }
 
-    private function deleteFromTableExists(string $tableName, \Doctrine\DBAL\Connection $connection) : void
+    private function deleteFromTableExists(string $tableName, \Doctrine\DBAL\Connection $connection): void
     {
         $doesExists = $this->checkIfTableExists($connection, $tableName);
 
         if ($doesExists) {
-            $connection->executeStatement("DELETE FROM " . $tableName);
+            $connection->executeStatement('DELETE FROM ' . $tableName);
         }
     }
 
@@ -158,7 +163,7 @@ SQL);
     {
         $this->assertEquals(
             [],
-            $this->getQueryBus()->sendWithRouting("order.getOrders", [])
+            $this->getQueryBus()->sendWithRouting('order.getOrders', [])
         );
     }
 
@@ -167,12 +172,12 @@ SQL);
         return self::$messagingSystem->getGatewayByName(CommandBus::class);
     }
 
-    private function getQueryBus() : QueryBus
+    private function getQueryBus(): QueryBus
     {
         return self::$messagingSystem->getGatewayByName(QueryBus::class);
     }
 
-    private function getDocumentStore() : DocumentStore
+    private function getDocumentStore(): DocumentStore
     {
         return self::$messagingSystem->getGatewayByName(DocumentStore::class);
     }
@@ -186,8 +191,9 @@ SQL);
         $commandBus = self::$messagingSystem->getGatewayByName(CommandBus::class);
 
         try {
-            $commandBus->sendWithRouting("order.register", $order);
-        }catch (\InvalidArgumentException $e) {}
+            $commandBus->sendWithRouting('order.register', $order);
+        } catch (InvalidArgumentException $e) {
+        }
     }
 
     /**
@@ -233,7 +239,7 @@ SQL);
 
         $this->assertEquals(
             $amount,
-            count($gateway->list(100,0))
+            count($gateway->list(100, 0))
         );
     }
 
@@ -255,7 +261,7 @@ SQL);
     {
         $this->assertEquals(
             $amount,
-            count($this->getQueryBus()->sendWithRouting("order.getRegistered", []))
+            count($this->getQueryBus()->sendWithRouting('order.getRegistered', []))
         );
     }
 
@@ -287,7 +293,7 @@ SQL);
     {
         $this->assertEquals(
             $name,
-            $this->getQueryBus()->sendWithRouting("person.getName", ["personId" => $personId])
+            $this->getQueryBus()->sendWithRouting('person.getName', ['personId' => $personId])
         );
     }
 
@@ -310,11 +316,11 @@ SQL);
     {
         Assert::assertEquals(
             $this->convertOrderToJson($order),
-            \json_encode(\json_decode($this->getDocumentStore()->getDocument($shopName, $orderId)))
+            json_encode(json_decode($this->getDocumentStore()->getDocument($shopName, $orderId)))
         );
         Assert::assertEquals(
             $this->convertOrderToJson($order),
-            \json_encode(\json_decode($this->getDocumentStore()->findDocument($shopName, $orderId), true))
+            json_encode(json_decode($this->getDocumentStore()->findDocument($shopName, $orderId), true))
         );
     }
 
@@ -323,7 +329,7 @@ SQL);
      */
     public function thereShouldOrderPlacedIn(int $numberOfOrders, string $shopName)
     {
-        Assert::assertEquals($numberOfOrders,$this->getDocumentStore()->countDocuments($shopName));
+        Assert::assertEquals($numberOfOrders, $this->getDocumentStore()->countDocuments($shopName));
         Assert::assertEquals($numberOfOrders, count($this->getDocumentStore()->getAllDocuments($shopName)));
     }
 
@@ -353,7 +359,7 @@ SQL);
 
     private function convertOrderToJson(string $order): string
     {
-        return \json_encode(["data" => $order]);
+        return json_encode(['data' => $order]);
     }
 
     /**
@@ -371,7 +377,7 @@ SQL);
     {
         Assert::assertEquals(
             $name,
-            $this->getQueryBus()->sendWithRouting("person.getName", metadata: ["aggregate.id" => $id])
+            $this->getQueryBus()->sendWithRouting('person.getName', metadata: ['aggregate.id' => $id])
         );
     }
 
@@ -384,8 +390,9 @@ SQL);
         $commandBus = self::$messagingSystem->getGatewayByName(CommandBus::class);
 
         try {
-            $commandBus->sendWithRouting("order.register_with_table_creation", $order);
-        }catch (\InvalidArgumentException $e) {}
+            $commandBus->sendWithRouting('order.register_with_table_creation', $order);
+        } catch (InvalidArgumentException $e) {
+        }
     }
 
     /**
@@ -396,7 +403,7 @@ SQL);
         /** @var CommandBus $commandBus */
         $commandBus = self::$messagingSystem->getGatewayByName(CommandBus::class);
 
-        $commandBus->sendWithRouting("order.prepare");
+        $commandBus->sendWithRouting('order.prepare');
     }
 
     /**
@@ -408,7 +415,8 @@ SQL);
         $commandBus = self::$messagingSystem->getGatewayByName(CommandBus::class);
 
         try {
-            $commandBus->sendWithRouting("order.prepareWithFailure");
-        }catch (\Exception) {}
+            $commandBus->sendWithRouting('order.prepareWithFailure');
+        } catch (\Exception) {
+        }
     }
 }

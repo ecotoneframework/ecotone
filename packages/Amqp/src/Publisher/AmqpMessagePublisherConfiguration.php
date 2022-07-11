@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Amqp\Publisher;
 
 use Ecotone\Messaging\MessagePublisher;
@@ -36,15 +35,15 @@ class AmqpMessagePublisherConfiguration
     /**
      * @var string
      */
-    private $headerMapper = "";
+    private $headerMapper = '';
     /**
      * @var string
      */
-    private $defaultRoutingKey = "";
+    private $defaultRoutingKey = '';
     /**
      * @var string
      */
-    private $routingKeyFromHeader = "";
+    private $routingKeyFromHeader = '';
     /**
      * @var bool
      */
@@ -72,7 +71,7 @@ class AmqpMessagePublisherConfiguration
      * @param string $amqpConnectionReference
      * @return AmqpMessagePublisherConfiguration
      */
-    public static function create(string $publisherReferenceName = MessagePublisher::class, string $exchangeName = "", ?string $outputDefaultConversionMediaType = null, string $amqpConnectionReference = AmqpConnectionFactory::class): self
+    public static function create(string $publisherReferenceName = MessagePublisher::class, string $exchangeName = '', ?string $outputDefaultConversionMediaType = null, string $amqpConnectionReference = AmqpConnectionFactory::class): self
     {
         return new self($amqpConnectionReference, $exchangeName, $outputDefaultConversionMediaType, $publisherReferenceName);
     }
@@ -96,14 +95,14 @@ class AmqpMessagePublisherConfiguration
         return $this;
     }
 
-    public function withDefaultRoutingKey(string $defaultRoutingKey) : AmqpMessagePublisherConfiguration
+    public function withDefaultRoutingKey(string $defaultRoutingKey): AmqpMessagePublisherConfiguration
     {
         $this->defaultRoutingKey = $defaultRoutingKey;
 
         return $this;
     }
 
-    public function withRoutingKeyFromHeader(string $headerName) : AmqpMessagePublisherConfiguration
+    public function withRoutingKeyFromHeader(string $headerName): AmqpMessagePublisherConfiguration
     {
         $this->routingKeyFromHeader = $headerName;
 
@@ -132,7 +131,7 @@ class AmqpMessagePublisherConfiguration
      *
      * @return AmqpMessagePublisherConfiguration
      */
-    public function withHeaderMapper(string $headerMapper) : AmqpMessagePublisherConfiguration
+    public function withHeaderMapper(string $headerMapper): AmqpMessagePublisherConfiguration
     {
         $this->headerMapper = $headerMapper;
 
@@ -157,7 +156,7 @@ class AmqpMessagePublisherConfiguration
         return $this;
     }
 
-    public function getDefaultPersistentDelivery() : bool
+    public function getDefaultPersistentDelivery(): bool
     {
         return $this->defaultPersistentDelivery;
     }

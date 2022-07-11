@@ -7,9 +7,8 @@ use Ecotone\Messaging\Config\ConsoleCommandResultSet;
 
 class OneTimeWithResultExample
 {
-    #[ConsoleCommand("doSomething")]
-    public function execute() : ConsoleCommandResultSet
+    #[ConsoleCommand('doSomething')]
+    public function execute(): ConsoleCommandResultSet
     {
-
     }
 }

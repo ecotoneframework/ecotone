@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Environment;
@@ -11,8 +12,8 @@ use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\System;
 class SystemContextWithMethodMultipleEnvironmentsExample
 {
     #[Extension]
-    #[Environment(["dev", "prod", "test"])]
-    public function configMultipleEnvironments() : array
+    #[Environment(['dev', 'prod', 'test'])]
+    public function configMultipleEnvironments(): array
     {
         return [];
     }

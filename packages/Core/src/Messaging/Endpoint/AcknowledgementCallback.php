@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
@@ -15,25 +16,25 @@ interface AcknowledgementCallback
     /**
      * @return bool
      */
-    public function isAutoAck() : bool;
+    public function isAutoAck(): bool;
 
     /**
      * Disable auto acknowledgment
      */
-    public function disableAutoAck() : void;
+    public function disableAutoAck(): void;
 
     /**
      * Mark the message as accepted
      */
-    public function accept() : void;
+    public function accept(): void;
 
     /**
      * Mark the message as rejected
      */
-    public function reject() : void;
+    public function reject(): void;
 
     /**
      * Reject the message and requeue so that it will be redelivered
      */
-    public function requeue() : void;
+    public function requeue(): void;
 }

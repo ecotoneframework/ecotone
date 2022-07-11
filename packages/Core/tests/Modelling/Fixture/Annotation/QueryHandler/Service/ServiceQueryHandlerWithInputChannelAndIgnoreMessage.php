@@ -1,18 +1,16 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service;
 
-use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Modelling\Attribute\IgnorePayload;
 use Ecotone\Modelling\Attribute\QueryHandler;
+use stdClass;
 
 class ServiceQueryHandlerWithInputChannelAndIgnoreMessage
 {
-    #[QueryHandler("execute", "queryHandler")]
+    #[QueryHandler('execute', 'queryHandler')]
     #[IgnorePayload]
-    public function execute(\stdClass $class) : int
+    public function execute(stdClass $class): int
     {
-
     }
 }

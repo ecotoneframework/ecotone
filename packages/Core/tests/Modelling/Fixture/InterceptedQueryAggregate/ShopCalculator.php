@@ -26,17 +26,17 @@ class ShopCalculator
         $this->margin = $margin;
     }
 
-    #[CommandHandler("shop.register")]
+    #[CommandHandler('shop.register')]
     public static function register(array $registerShop): self
     {
-        return new self($registerShop["shopId"], $registerShop["margin"]);
+        return new self($registerShop['shopId'], $registerShop['margin']);
     }
 
-    #[QueryHandler("shop.calculatePrice", outputChannelName: "addVat")]
+    #[QueryHandler('shop.calculatePrice', outputChannelName: 'addVat')]
     #[AddFranchise]
     #[ExchangeProductForPrice]
     public function calculatePriceFor(array $query): int
     {
-        return $query["productPrice"] + $this->margin;
+        return $query['productPrice'] + $this->margin;
     }
 }

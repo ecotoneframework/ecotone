@@ -26,12 +26,12 @@ class ServiceExpectingMessageAndReturningMessage
         $this->newPayload = $newPayload;
     }
 
-    public static function create(string $newPayload) : self
+    public static function create(string $newPayload): self
     {
         return new self($newPayload);
     }
 
-    public function send(Message $message) : Message
+    public function send(Message $message): Message
     {
         return MessageBuilder::fromMessage($message)
                 ->setPayload($this->newPayload)

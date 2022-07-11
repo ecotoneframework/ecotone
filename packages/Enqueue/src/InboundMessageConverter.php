@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Enqueue;
 
 use Ecotone\Messaging\MessageConverter\HeaderMapper;

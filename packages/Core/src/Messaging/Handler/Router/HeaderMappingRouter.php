@@ -32,7 +32,7 @@ final class HeaderMappingRouter
      *
      * @return HeaderMappingRouter
      */
-    public static function create(string $headerName, array $typeToChannelMapping) : self
+    public static function create(string $headerName, array $typeToChannelMapping): self
     {
         return new self($headerName, $typeToChannelMapping);
     }
@@ -41,7 +41,7 @@ final class HeaderMappingRouter
      * @param Message $message
      * @return array
      */
-    public function route(Message $message) : array
+    public function route(Message $message): array
     {
         $header = $message->getHeaders()->get($this->headerName);
 

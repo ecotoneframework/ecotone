@@ -1,7 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
+
+use DateTime;
+use DateTimeZone;
 
 /**
  * Class StubClock
@@ -25,7 +29,7 @@ class StubUTCClock implements Clock
      * @param string $currentTime
      * @return StubUTCClock
      */
-    public static function createWithCurrentTime(string $currentTime) : self
+    public static function createWithCurrentTime(string $currentTime): self
     {
         return new self(self::createEpochTimeInMilliseconds($currentTime));
     }
@@ -42,7 +46,7 @@ class StubUTCClock implements Clock
      * @param string $newCurrentTime
      * @return void
      */
-    public function changeCurrentTime(string $newCurrentTime) : void
+    public function changeCurrentTime(string $newCurrentTime): void
     {
         $this->currentTime = self::createEpochTimeInMilliseconds($newCurrentTime);
     }
@@ -51,7 +55,7 @@ class StubUTCClock implements Clock
      * @param string $dateTimeAsString
      * @return int
      */
-    public static function createEpochTimeFromDateTimeString(string $dateTimeAsString) : int
+    public static function createEpochTimeFromDateTimeString(string $dateTimeAsString): int
     {
         return self::createEpochTimeInMilliseconds($dateTimeAsString);
     }
@@ -62,6 +66,6 @@ class StubUTCClock implements Clock
      */
     private static function createEpochTimeInMilliseconds(string $dateTimeAsString): int
     {
-        return (int)round((new \DateTime($dateTimeAsString, new \DateTimeZone('UTC')))->format('U') * 1000);
+        return (int)round((new DateTime($dateTimeAsString, new DateTimeZone('UTC')))->format('U') * 1000);
     }
 }

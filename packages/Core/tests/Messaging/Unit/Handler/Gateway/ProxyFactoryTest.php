@@ -8,12 +8,15 @@ use Ramsey\Uuid\Uuid;
 use Test\Ecotone\Messaging\Fixture\Handler\Gateway\GatewayExecuteClass;
 use Test\Ecotone\Messaging\Fixture\Handler\Gateway\StringReturningGateway;
 
+/**
+ * @internal
+ */
 class ProxyFactoryTest extends TestCase
 {
     public function test_creating_no_cache_proxy()
     {
         $proxyFactory = ProxyFactory::createNoCache();
-        $data = "someReply";
+        $data = 'someReply';
         $proxyFactory = unserialize(serialize($proxyFactory));
 
         /** @var StringReturningGateway $proxy */
@@ -24,12 +27,12 @@ class ProxyFactoryTest extends TestCase
 
     public function test_creating_with_cache_proxy_with_warmup()
     {
-        $cacheDirectoryPath = "/tmp/" . Uuid::uuid4()->toString();
-        if (!is_dir($cacheDirectoryPath)) {
+        $cacheDirectoryPath = '/tmp/' . Uuid::uuid4()->toString();
+        if (! is_dir($cacheDirectoryPath)) {
             mkdir($cacheDirectoryPath);
         }
         $proxyFactory       = ProxyFactory::createWithCache($cacheDirectoryPath);
-        $data               = "someReply";
+        $data               = 'someReply';
         $proxyFactory->warmUpCacheFor([StringReturningGateway::class]);
 
         $proxyFactory = unserialize(serialize($proxyFactory));

@@ -2,13 +2,11 @@
 
 namespace Ecotone\SymfonyBundle\DepedencyInjection\Compiler;
 
-use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\MessagingSystem;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\SymfonyBundle\EcotoneSymfonyBundle;
-use ProxyManager\Configuration;
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use ProxyManager\Factory\RemoteObjectFactory;
-use Ecotone\Messaging\Config\MessagingSystem;
 use Symfony\Component\DependencyInjection\Container;
 
 /**
@@ -21,9 +19,7 @@ class ProxyGenerator
     public static function createFor(string $referenceName, Container $container, string $interface, string $cacheDirectoryPath, bool $isLazyLoaded)
     {
         $proxyFactory = ProxyFactory::createWithCache($cacheDirectoryPath);
-        $factory = new RemoteObjectFactory(new class ($container, $referenceName) implements AdapterInterface
-        {
-
+        $factory = new RemoteObjectFactory(new class ($container, $referenceName) implements AdapterInterface {
             /**
              * @var Container
              */

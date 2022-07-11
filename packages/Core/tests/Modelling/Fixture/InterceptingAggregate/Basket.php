@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\InterceptingAggregate;
 
 use Ecotone\Modelling\Attribute\Aggregate;
@@ -21,20 +20,20 @@ class Basket
         $this->items  = $items;
     }
 
-    #[CommandHandler("basket.add")]
-    public static function start(array $command) : self
+    #[CommandHandler('basket.add')]
+    public static function start(array $command): self
     {
-        return new self($command["userId"], [$command["item"]]);
+        return new self($command['userId'], [$command['item']]);
     }
 
-    #[CommandHandler("basket.add")]
-    public function addToBasket(array $command) : void
+    #[CommandHandler('basket.add')]
+    public function addToBasket(array $command): void
     {
-        $this->items[] = $command["item"];
+        $this->items[] = $command['item'];
     }
 
-    #[QueryHandler("basket.get")]
-    public function getBasket() : array
+    #[QueryHandler('basket.get')]
+    public function getBasket(): array
     {
         return $this->items;
     }

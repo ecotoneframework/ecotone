@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
@@ -29,7 +30,7 @@ class ReferenceServiceConverter implements Converter
      */
     private function __construct($object, string $method, Type $sourceType, Type $targetType)
     {
-        Assert::isObject($object, "");
+        Assert::isObject($object, '');
         $this->object = $object;
         $this->method = $method;
         $this->sourceType = $sourceType;
@@ -44,7 +45,7 @@ class ReferenceServiceConverter implements Converter
      * @return ReferenceServiceConverter
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function create($object, string $method, TypeDescriptor $sourceType, TypeDescriptor $targetType) : self
+    public static function create($object, string $method, TypeDescriptor $sourceType, TypeDescriptor $targetType): self
     {
         return new self($object, $method, $sourceType, $targetType);
     }

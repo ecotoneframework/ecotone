@@ -12,8 +12,8 @@ class AggregateQueryHandlerWithOutputChannelExample
     #[AggregateIdentifier]
     private string $id;
 
-    #[QueryHandler(endpointId: "some-id", outputChannelName: "outputChannel")]
-    public function doStuff(SomeQuery $query) : SomeResult
+    #[QueryHandler(endpointId: 'some-id', outputChannelName: 'outputChannel')]
+    public function doStuff(SomeQuery $query): SomeResult
     {
         return new SomeResult();
     }

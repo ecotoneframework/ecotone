@@ -1,6 +1,7 @@
 <?php
 
 namespace Test\Ecotone\Modelling\Fixture\Blog;
+
 use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
 
 /**
@@ -38,7 +39,7 @@ class PublishArticleCommand
      * @param string $content
      * @return PublishArticleCommand
      */
-    public static function createWith(string $author, string $title, string $content) : self
+    public static function createWith(string $author, string $title, string $content): self
     {
         return new self($author, $title, $content);
     }

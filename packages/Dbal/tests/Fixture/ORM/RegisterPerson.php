@@ -1,10 +1,14 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Test\Ecotone\Dbal\Fixture\ORM;
 
 class RegisterPerson
 {
-    public function __construct(private int $personId, private string $name) {}
+    public function __construct(private int $personId, private string $name)
+    {
+    }
 
     public function getPersonId(): int
     {

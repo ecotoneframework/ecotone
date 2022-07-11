@@ -6,11 +6,11 @@ use Ecotone\Messaging\MessageHeaders;
 
 class ErrorContext
 {
-    const EXCEPTION_STACKTRACE = "exception-stacktrace";
-    const EXCEPTION_FILE = "exception-file";
-    const EXCEPTION_LINE = "exception-line";
-    const EXCEPTION_CODE = "exception-code";
-    const EXCEPTION_MESSAGE = "exception-message";
+    public const EXCEPTION_STACKTRACE = 'exception-stacktrace';
+    public const EXCEPTION_FILE = 'exception-file';
+    public const EXCEPTION_LINE = 'exception-line';
+    public const EXCEPTION_CODE = 'exception-code';
+    public const EXCEPTION_MESSAGE = 'exception-message';
 
     private string $messageId;
     private int $failedTimestamp;
@@ -31,7 +31,7 @@ class ErrorContext
         $this->message    = $message;
     }
 
-    public static function fromHeaders(array $messageHeaders) : self
+    public static function fromHeaders(array $messageHeaders): self
     {
         return new self(
             $messageHeaders[MessageHeaders::MESSAGE_ID],

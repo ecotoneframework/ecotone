@@ -10,13 +10,13 @@ final class NotificationService
     private int $currentTicketCount = 0;
     private int $closedTicketCount = 0;
 
-    #[QueryHandler("ticket.getCurrentCount")]
+    #[QueryHandler('ticket.getCurrentCount')]
     public function getCurrentCounter(): int
     {
         return $this->currentTicketCount;
     }
 
-    #[QueryHandler("ticket.getClosedCount")]
+    #[QueryHandler('ticket.getClosedCount')]
     public function getClosedCounter(): int
     {
         return $this->closedTicketCount;

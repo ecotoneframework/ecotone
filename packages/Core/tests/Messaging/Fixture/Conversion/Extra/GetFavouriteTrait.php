@@ -1,9 +1,6 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Conversion\Extra;
-
-use Test\Ecotone\Messaging\Fixture\Conversion\Extra\PrivateDetails\GetPrivilegeTrait;
 
 /**
  * Class GetFavouriteTrait
@@ -12,13 +9,11 @@ use Test\Ecotone\Messaging\Fixture\Conversion\Extra\PrivateDetails\GetPrivilegeT
  */
 trait GetFavouriteTrait
 {
-    public function getYourVeryBestFavourite(?Favourite $favourite) : ?Favourite
+    public function getYourVeryBestFavourite(?Favourite $favourite): ?Favourite
     {
-
     }
 
-    public function getLessFavourite(Favourite $favourite) : Favourite
+    public function getLessFavourite(Favourite $favourite): Favourite
     {
-
     }
 }

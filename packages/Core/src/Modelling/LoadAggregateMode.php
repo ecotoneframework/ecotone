@@ -15,22 +15,22 @@ class LoadAggregateMode
         $this->type = $type;
     }
 
-    public static function createThrowOnNotFound() : self
+    public static function createThrowOnNotFound(): self
     {
         return new self(self::THROW_ON_NOT_FOUND);
     }
 
-    public static function createDropMessageOnNotFound() : self
+    public static function createDropMessageOnNotFound(): self
     {
         return new self(self::DROP_ON_NOT_FOUND);
     }
 
-    public static function createContinueOnNotFound() : self
+    public static function createContinueOnNotFound(): self
     {
         return new self(self::CONTINUE_ON_NOT_FOUND);
     }
 
-    public function isThrowingOnNotFound() : bool
+    public function isThrowingOnNotFound(): bool
     {
         return $this->type === self::THROW_ON_NOT_FOUND;
     }

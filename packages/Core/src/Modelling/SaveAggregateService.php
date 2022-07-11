@@ -27,8 +27,8 @@ use Ecotone\Modelling\Config\BusModule;
  */
 class SaveAggregateService
 {
-    const NO_SNAPSHOT_THRESHOLD = 0;
-    const SNAPSHOT_COLLECTION = "aggregate_snapshots_";
+    public const NO_SNAPSHOT_THRESHOLD = 0;
+    public const SNAPSHOT_COLLECTION = 'aggregate_snapshots_';
 
     private StandardRepository|EventSourcedRepository $aggregateRepository;
     private PropertyReaderAccessor $propertyReaderAccessor;
@@ -51,13 +51,23 @@ class SaveAggregateService
     private array $aggregateIdentifierGetMethods;
 
     public function __construct(
-        InterfaceToCall|string                    $aggregateInterface, bool $isFactoryMethod, bool $isEventSourced,
-        StandardRepository|EventSourcedRepository $aggregateRepository, PropertyEditorAccessor $propertyEditorAccessor,
-        PropertyReaderAccessor                    $propertyReaderAccessor, NonProxyGateway $objectEventBus, NonProxyGateway $namedEventBus,
-        ?string                                   $aggregateMethodWithEvents, array $aggregateIdentifierMapping, array $aggregateIdentifierGetMethods, ?string $aggregateVersionProperty, bool $isAggregateVersionAutomaticallyIncreased,
-        private int                               $snapshotTriggerThreshold, private array $aggregateClassesToSnapshot, private DocumentStore $documentStore
-    )
-    {
+        InterfaceToCall|string                    $aggregateInterface,
+        bool $isFactoryMethod,
+        bool $isEventSourced,
+        StandardRepository|EventSourcedRepository $aggregateRepository,
+        PropertyEditorAccessor $propertyEditorAccessor,
+        PropertyReaderAccessor                    $propertyReaderAccessor,
+        NonProxyGateway $objectEventBus,
+        NonProxyGateway $namedEventBus,
+        ?string                                   $aggregateMethodWithEvents,
+        array $aggregateIdentifierMapping,
+        array $aggregateIdentifierGetMethods,
+        ?string $aggregateVersionProperty,
+        bool $isAggregateVersionAutomaticallyIncreased,
+        private int                               $snapshotTriggerThreshold,
+        private array $aggregateClassesToSnapshot,
+        private DocumentStore $documentStore
+    ) {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
         $this->objectEventBus = $objectEventBus;
@@ -73,7 +83,7 @@ class SaveAggregateService
         $this->aggregateIdentifierGetMethods = $aggregateIdentifierGetMethods;
     }
 
-    public function save(Message $message, array $metadata) : \Ecotone\Messaging\Message
+    public function save(Message $message, array $metadata): Message
     {
         $aggregate = $message->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT);
         $events = [];
@@ -81,11 +91,11 @@ class SaveAggregateService
         if ($this->isEventSourced) {
             $events = $message->getPayload();
             Assert::isIterable($events, "Return value Event Sourced Aggregate {$this->aggregateInterface} must return array of events");
-        }elseif ($this->aggregateMethodWithEvents) {
+        } elseif ($this->aggregateMethodWithEvents) {
             $events = call_user_func([$aggregate, $this->aggregateMethodWithEvents]);
         }
         foreach ($events as $event) {
-            if (!is_object($event)) {
+            if (! is_object($event)) {
                 $typeDescriptor = TypeDescriptor::createFromVariable($event);
                 throw InvalidArgumentException::create("Events return by after calling {$this->aggregateInterface} must all be objects, {$typeDescriptor->toString()} given");
             }
@@ -126,7 +136,7 @@ class SaveAggregateService
 
         if ($this->isEventSourced) {
             if ($this->snapshotTriggerThreshold !== self::NO_SNAPSHOT_THRESHOLD && in_array(is_string($aggregate) ? $aggregate : $aggregate::class, $this->aggregateClassesToSnapshot)) {
-                if (!is_object($aggregate)) {
+                if (! is_object($aggregate)) {
                     throw MessagingException::create(sprintf("Can't use repository shortcuts together with snapshots for %s", $aggregate));
                 }
 
@@ -135,7 +145,7 @@ class SaveAggregateService
                     $version += 1;
 
                     if ($version % $this->snapshotTriggerThreshold === 0) {
-                        Assert::isTrue(count($aggregateIds) === 1, "Snapshoting is possible only for aggregates having single identifiers");
+                        Assert::isTrue(count($aggregateIds) === 1, 'Snapshoting is possible only for aggregates having single identifiers');
 
                         $this->documentStore->upsertDocument(self::getSnapshotCollectionName($aggregate::class), reset($aggregateIds), $aggregate);
                     }
@@ -143,7 +153,7 @@ class SaveAggregateService
             }
 
             $this->aggregateRepository->save($aggregateIds, is_string($this->aggregateInterface) ? $this->aggregateInterface : $this->aggregateInterface->getInterfaceName(), $events, $metadata, $versionBeforeHandling);
-        }else {
+        } else {
             $this->aggregateRepository->save($aggregateIds, $aggregate, $metadata, $versionBeforeHandling);
         }
 
@@ -192,7 +202,7 @@ class SaveAggregateService
             if (isset($this->aggregateIdentifierGetMethods[$aggregateIdName])) {
                 $id = call_user_func([$aggregate, $this->aggregateIdentifierGetMethods[$aggregateIdName]]);
 
-                if (!is_null($id)) {
+                if (! is_null($id)) {
                     $aggregateIds[$aggregateIdName] = $id;
                 }
 
@@ -203,8 +213,8 @@ class SaveAggregateService
                 ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdName), $aggregate)
                 : null;
 
-            if (!$id) {
-                if (!$throwOnNoIdentifier) {
+            if (! $id) {
+                if (! $throwOnNoIdentifier) {
                     continue;
                 }
 

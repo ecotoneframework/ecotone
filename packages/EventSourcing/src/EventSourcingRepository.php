@@ -2,22 +2,13 @@
 
 namespace Ecotone\EventSourcing;
 
-use DateTimeImmutable;
-use DateTimeZone;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Driver\PDOConnection;
 use Ecotone\Enqueue\OutboundMessageConverter;
-use Ecotone\EventSourcing\StreamConfiguration\SingleStreamConfiguration;
-use Ecotone\Messaging\Conversion\ConversionService;
-use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\Store\Document\DocumentException;
-use Ecotone\Messaging\Store\Document\DocumentNotFound;
 use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\AggregateVersion;
@@ -27,11 +18,9 @@ use Ecotone\Modelling\EventSourcedRepository;
 use Ecotone\Modelling\EventStream;
 use Ecotone\Modelling\SaveAggregateService;
 use Ecotone\Modelling\SnapshotEvent;
-use Prooph\EventStore\EventStore;
 use Prooph\EventStore\Exception\StreamNotFound;
 use Prooph\EventStore\Metadata\MetadataMatcher;
 use Prooph\EventStore\Metadata\Operator;
-use Prooph\EventStore\Stream;
 use Prooph\EventStore\StreamName;
 use Ramsey\Uuid\Uuid;
 
@@ -68,9 +57,9 @@ class EventSourcingRepository implements EventSourcedRepository
         if (in_array($aggregateClassName, $this->snapshotedAggregates)) {
             $aggregate = $this->documentStore->findDocument(SaveAggregateService::getSnapshotCollectionName($aggregateClassName), $aggregateId);
 
-            if (!is_null($aggregate)) {
+            if (! is_null($aggregate)) {
                 $aggregateVersion = $this->getAggregateVersion($aggregate);
-                Assert::isTrue($aggregateVersion > 0, sprintf("Serialization for snapshot of %s is set incorrectly, it does not serialize aggregate version", $aggregate::class));
+                Assert::isTrue($aggregateVersion > 0, sprintf('Serialization for snapshot of %s is set incorrectly, it does not serialize aggregate version', $aggregate::class));
 
                 $snapshotEvent[] = new SnapshotEvent($aggregate);
             }
@@ -98,9 +87,11 @@ class EventSourcingRepository implements EventSourcedRepository
 
         try {
             $streamEvents = $this->eventStore->load($streamName, 1, null, $metadataMatcher);
-        } catch (StreamNotFound) { return EventStream::createEmpty(); }
+        } catch (StreamNotFound) {
+            return EventStream::createEmpty();
+        }
 
-        if (!empty($streamEvents)) {
+        if (! empty($streamEvents)) {
             $aggregateVersion = $streamEvents[array_key_last($streamEvents)]->getMetadata()[LazyProophEventStore::AGGREGATE_VERSION];
         }
 
@@ -110,7 +101,7 @@ class EventSourcingRepository implements EventSourcedRepository
     public function save(array $identifiers, string $aggregateClassName, array $events, array $metadata, int $versionBeforeHandling): void
     {
         $aggregateId = reset($identifiers);
-        Assert::notNullAndEmpty($aggregateId, sprintf("There was a problem when retrieving identifier for %s", $aggregateClassName));
+        Assert::notNullAndEmpty($aggregateId, sprintf('There was a problem when retrieving identifier for %s', $aggregateClassName));
 
         $streamName = $this->getStreamName($aggregateClassName, $aggregateId);
         $aggregateType = $this->getAggregateType($aggregateClassName);
@@ -129,7 +120,7 @@ class EventSourcingRepository implements EventSourcedRepository
                         MessageHeaders::MESSAGE_ID => Uuid::uuid4()->toString(),
                         LazyProophEventStore::AGGREGATE_ID => $aggregateId,
                         LazyProophEventStore::AGGREGATE_TYPE => $aggregateType,
-                        LazyProophEventStore::AGGREGATE_VERSION => $versionBeforeHandling + $eventNumber
+                        LazyProophEventStore::AGGREGATE_VERSION => $versionBeforeHandling + $eventNumber,
                     ]
                 )
             );
@@ -145,7 +136,7 @@ class EventSourcingRepository implements EventSourcedRepository
         }
 
         if ($this->eventSourcingConfiguration->isUsingAggregateStreamStrategy()) {
-            $streamName = $streamName . "-" . $aggregateId;
+            $streamName = $streamName . '-' . $aggregateId;
         }
 
         return new StreamName($streamName);

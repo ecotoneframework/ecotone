@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Amqp\Fixture\DeadLetter;
@@ -11,9 +12,9 @@ use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
 class ErrorConfigurationContext
 {
-    const INPUT_CHANNEL       = "correctOrders";
-    const ERROR_CHANNEL       = "errorChannel";
-    const DEAD_LETTER_CHANNEL = "incorrectOrders";
+    public const INPUT_CHANNEL       = 'correctOrders';
+    public const ERROR_CHANNEL       = 'errorChannel';
+    public const DEAD_LETTER_CHANNEL = 'incorrectOrders';
 
 
     #[ServiceContext]
@@ -47,9 +48,9 @@ class ErrorConfigurationContext
                 ->setExecutionTimeLimitInMilliseconds(3000)
                 ->setHandledMessageLimit(1)
                 ->setErrorChannelName(self::ERROR_CHANNEL),
-            PollingMetadata::create("incorrectOrdersEndpoint")
+            PollingMetadata::create('incorrectOrdersEndpoint')
                 ->setExecutionTimeLimitInMilliseconds(3000)
-                ->setHandledMessageLimit(1)
+                ->setHandledMessageLimit(1),
         ];
     }
 }

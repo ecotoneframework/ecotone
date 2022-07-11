@@ -27,7 +27,7 @@ class RepublishArticleCommand
      * @param string $author
      * @return RepublishArticleCommand
      */
-    public static function createWith(string $author) : self
+    public static function createWith(string $author): self
     {
         return new self($author);
     }

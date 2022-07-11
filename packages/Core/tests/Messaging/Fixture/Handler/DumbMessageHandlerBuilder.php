@@ -2,14 +2,11 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\MessageHandler;
 
@@ -51,20 +48,20 @@ class DumbMessageHandlerBuilder extends InputOutputMessageHandlerBuilder impleme
      * @param string $inputMessageChannelName
      * @return DumbMessageHandlerBuilder
      */
-    public static function create(MessageHandler $messageHandler, string $inputMessageChannelName) : self
+    public static function create(MessageHandler $messageHandler, string $inputMessageChannelName): self
     {
         return new self($messageHandler, $inputMessageChannelName);
     }
 
-    public static function createSimple() : self
+    public static function createSimple(): self
     {
-        return new self(NoReturnMessageHandler::create(), "inputChannel");
+        return new self(NoReturnMessageHandler::create(), 'inputChannel');
     }
 
     /**
      * @inheritDoc
      */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService) : MessageHandler
+    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
         return $this->messageHandler;
     }
@@ -88,7 +85,7 @@ class DumbMessageHandlerBuilder extends InputOutputMessageHandlerBuilder impleme
     /**
      * @inheritDoc
      */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return [];
     }
@@ -106,7 +103,7 @@ class DumbMessageHandlerBuilder extends InputOutputMessageHandlerBuilder impleme
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return $interfaceToCallRegistry->getFor(MessageHandler::class, "handle");
+        return $interfaceToCallRegistry->getFor(MessageHandler::class, 'handle');
     }
 
     /**
@@ -128,6 +125,6 @@ class DumbMessageHandlerBuilder extends InputOutputMessageHandlerBuilder impleme
 
     public function __toString()
     {
-        return "dumb message handler builder";
+        return 'dumb message handler builder';
     }
 }

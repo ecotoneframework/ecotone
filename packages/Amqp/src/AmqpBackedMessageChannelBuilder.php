@@ -1,10 +1,8 @@
 <?php
 
-
 namespace Ecotone\Amqp;
 
 use Ecotone\Enqueue\EnqueueMessageChannelBuilder;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
@@ -33,7 +31,7 @@ class AmqpBackedMessageChannelBuilder extends EnqueueMessageChannelBuilder
             ->withAutoDeclareOnSend(true)
             ->withDefaultPersistentMode(true);
 
-        $this->withHeaderMapper("*");
+        $this->withHeaderMapper('*');
     }
 
     public function withHeaderMapper(string $mapping): self

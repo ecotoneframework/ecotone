@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\AnnotationFinder\FileSystem;
@@ -13,7 +14,7 @@ interface AutoloadNamespaceParser
     /**
      * @return string[]
      */
-    public function getNamespacesForGivenCatalog(array $autoloadData, string $catalogToLoad) : array;
+    public function getNamespacesForGivenCatalog(array $autoloadData, string $catalogToLoad): array;
 
-    public function getFor(array $requiredNamespaces, array $autoload, bool $autoloadPsr4) : array;
+    public function getFor(array $requiredNamespaces, array $autoload, bool $autoloadPsr4): array;
 }

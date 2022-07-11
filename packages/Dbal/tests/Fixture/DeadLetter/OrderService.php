@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Dbal\Fixture\DeadLetter;
 
-use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Messaging\Attribute\ServiceActivator;
+use InvalidArgumentException;
 
 class OrderService
 {
@@ -11,8 +11,8 @@ class OrderService
 
     private int $placedOrders = 0;
 
-    #[ServiceActivator(ErrorConfigurationContext::INPUT_CHANNEL, "orderService")]
-    public function order(string $orderName) : void
+    #[ServiceActivator(ErrorConfigurationContext::INPUT_CHANNEL, 'orderService')]
+    public function order(string $orderName): void
     {
         $this->callCount += 1;
 
@@ -22,11 +22,11 @@ class OrderService
             return;
         }
 
-        throw new \InvalidArgumentException("exception");
+        throw new InvalidArgumentException('exception');
     }
 
-    #[ServiceActivator("getOrderAmount")]
-    public function getOrder() : int
+    #[ServiceActivator('getOrderAmount')]
+    public function getOrder(): int
     {
         return $this->placedOrders;
     }

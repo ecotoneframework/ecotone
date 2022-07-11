@@ -13,7 +13,7 @@ class ConsoleCommandResultSet
         $this->rows          = $rows;
     }
 
-    public static function create(array $columnHeaders, array $rows) : self
+    public static function create(array $columnHeaders, array $rows): self
     {
         return new self($columnHeaders, $rows);
     }

@@ -3,7 +3,6 @@
 namespace Test\Ecotone\Modelling\Fixture\AggregateIdFromMethod;
 
 use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
@@ -24,13 +23,13 @@ class User
         return $self;
     }
 
-    #[AggregateIdentifierMethod("id")]
+    #[AggregateIdentifierMethod('id')]
     public function getIdentifier()
     {
         return $this->internalId;
     }
 
-    #[QueryHandler("user.getName")]
+    #[QueryHandler('user.getName')]
     public function getName(): string
     {
         return $this->name;

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Amqp;
@@ -16,7 +17,7 @@ use Interop\Amqp\AmqpTopic as EnqueueExchange;
  */
 class AmqpAdmin
 {
-    const REFERENCE_NAME = "amqp_admin";
+    public const REFERENCE_NAME = 'amqp_admin';
 
     /**
      * @var EnqueueExchange[]
@@ -62,7 +63,7 @@ class AmqpAdmin
         }
         foreach ($amqpQueues as $amqpQueue) {
             $enqueueQueues[$amqpQueue->getQueueName()] = $amqpQueue->toEnqueueQueue();
-            if (!self::hasBinding($amqpBindings, $amqpQueue)) {
+            if (! self::hasBinding($amqpBindings, $amqpQueue)) {
                 $defaultBindings[] = AmqpBinding::createForDefaultExchange($amqpQueue);
             }
         }
@@ -140,7 +141,7 @@ class AmqpAdmin
      */
     public function getExchangeByName(string $exchangeName): EnqueueExchange
     {
-        if (!$this->hasExchangeWithName($exchangeName)) {
+        if (! $this->hasExchangeWithName($exchangeName)) {
             throw new InvalidArgumentException("Exchange with name {$exchangeName} was not defined");
         }
 
@@ -154,7 +155,7 @@ class AmqpAdmin
      */
     public function declareQueueWithBindings(string $queueName, AmqpContext $amqpContext): void
     {
-        if (!$this->hasQueueWithName($queueName)) {
+        if (! $this->hasQueueWithName($queueName)) {
             throw new \InvalidArgumentException("Can't declare {$queueName} no information about it");
         }
 
@@ -162,7 +163,7 @@ class AmqpAdmin
         $amqpContext->declareQueue($queue);
 
         foreach ($this->amqpBindings as $amqpBinding) {
-            if ($amqpBinding->isRelatedToQueueName($queueName) && !$amqpBinding->isBindToDefaultExchange()) {
+            if ($amqpBinding->isRelatedToQueueName($queueName) && ! $amqpBinding->isBindToDefaultExchange()) {
                 $this->declareExchange($amqpBinding->getExchangeName(), $amqpContext);
                 $amqpContext->bind($amqpBinding->toEnqueueBinding());
             }
@@ -185,7 +186,7 @@ class AmqpAdmin
      */
     public function getQueueByName(string $queueName): EnqueueQueue
     {
-        if (!$this->hasQueueWithName($queueName)) {
+        if (! $this->hasQueueWithName($queueName)) {
             throw new InvalidArgumentException("Queue with name {$queueName} was not defined");
         }
 

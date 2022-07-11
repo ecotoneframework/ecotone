@@ -13,5 +13,5 @@ interface ShoppingService
      * @param string $productName
      * @return BookWasReserved
      */
-    public function reserve(string $productName) : BookWasReserved;
+    public function reserve(string $productName): BookWasReserved;
 }

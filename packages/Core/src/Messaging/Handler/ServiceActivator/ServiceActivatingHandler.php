@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\ServiceActivator;
 
-use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\RequestReplyProducer;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
@@ -37,6 +37,6 @@ final class ServiceActivatingHandler implements MessageHandler
 
     public function __toString()
     {
-        return "Service Activator - " . $this->requestReplyProducer;
+        return 'Service Activator - ' . $this->requestReplyProducer;
     }
 }

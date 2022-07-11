@@ -1,12 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
-use Ecotone\Enqueue\EnqueueAcknowledgeConfirmationInterceptor;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Endpoint\AcknowledgeConfirmationInterceptor;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
@@ -17,9 +16,7 @@ use Ecotone\Messaging\Endpoint\InterceptedMessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\Gateway\ErrorChannelInterceptor;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
@@ -48,17 +45,17 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
     {
         $this->requestChannelName = Uuid::uuid4()->toString();
         $this->entrypointGateway = GatewayProxyBuilder::create(
-            "handler",
+            'handler',
             InboundChannelAdapterEntrypoint::class,
-            "executeEntrypoint",
+            'executeEntrypoint',
             $this->requestChannelName
         );
 
         $this->entrypointGateway->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
             new LoggingInterceptor(null),
-            "logException",
+            'logException',
             Precedence::EXCEPTION_LOGGING_PRECEDENCE,
-            ""
+            ''
         ));
     }
 
@@ -117,7 +114,7 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return array_merge([
-            $interfaceToCallRegistry->getFor(InboundGatewayEntrypoint::class, "executeEntrypoint"),
+            $interfaceToCallRegistry->getFor(InboundGatewayEntrypoint::class, 'executeEntrypoint'),
         ], $this->entrypointGateway->resolveRelatedInterfaces($interfaceToCallRegistry));
     }
 
@@ -154,14 +151,14 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
         $connectionChannel->subscribe($messageHandler);
 
         $pollableChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
-        Assert::isTrue($pollableChannel instanceof PollableChannel, "Channel passed to Polling Consumer must be pollable");
+        Assert::isTrue($pollableChannel instanceof PollableChannel, 'Channel passed to Polling Consumer must be pollable');
 
         $gateway = $this->entrypointGateway
             ->withErrorChannel($pollingMetadata->getErrorChannelName())
             ->buildWithoutProxyObject(
                 $referenceSearchService,
                 InMemoryChannelResolver::createWithChannelResolver($channelResolver, [
-                    $this->requestChannelName => $connectionChannel
+                    $this->requestChannelName => $connectionChannel,
                 ])
             );
 

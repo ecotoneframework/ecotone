@@ -10,22 +10,22 @@ final class StateAndEventConverter
     public function fromState(CounterState $state): array
     {
         return [
-            "ticketCount" => $state->ticketCount,
-            "closedTicketCount" => $state->closedTicketCount
+            'ticketCount' => $state->ticketCount,
+            'closedTicketCount' => $state->closedTicketCount,
         ];
     }
 
     #[Converter]
     public function toState(array $state): CounterState
     {
-        return new CounterState($state["ticketCount"], $state["closedTicketCount"] ?? 0);
+        return new CounterState($state['ticketCount'], $state['closedTicketCount'] ?? 0);
     }
 
     #[Converter]
     public function fromTicketCounterChanged(TicketCounterChanged $event): array
     {
         return [
-            "count" => $event->count
+            'count' => $event->count,
         ];
     }
 
@@ -39,7 +39,7 @@ final class StateAndEventConverter
     public function fromClosedTicketCounterChanged(ClosedTicketCounterChanged $event): array
     {
         return [
-            "count" => $event->count
+            'count' => $event->count,
         ];
     }
 

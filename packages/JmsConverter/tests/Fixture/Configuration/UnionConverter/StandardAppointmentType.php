@@ -1,12 +1,10 @@
 <?php
 
-
 namespace Test\Ecotone\JMSConverter\Fixture\Configuration\UnionConverter;
-
 
 class StandardAppointmentType implements AppointmentType
 {
-    const STANDARD = "standard";
+    public const STANDARD = 'standard';
 
     public function getType(): string
     {

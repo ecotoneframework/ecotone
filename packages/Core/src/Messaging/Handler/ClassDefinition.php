@@ -1,17 +1,16 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
+use Attribute;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Messaging\Attribute\Parameter\Header;
-use Ecotone\Messaging\Attribute\Parameter\Payload;
-use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Test\Ecotone\Messaging\Fixture\Behat\Calculating\BeforeMultiplyCalculation;
-use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\AddExecutorId\AddExecutorId;
+use ReflectionClass;
+use ReflectionMethod;
 
 /**
  * Class ClassDefinition
@@ -37,7 +36,7 @@ class ClassDefinition
 
     private function __construct(TypeDescriptor $classDescriptor, array $properties, array $annotations, array $publicMethodNames, bool $isAnnotation)
     {
-        Assert::isTrue($classDescriptor->isClassOrInterface(), "Cannot create class definition from non class " . $classDescriptor->toString());
+        Assert::isTrue($classDescriptor->isClassOrInterface(), 'Cannot create class definition from non class ' . $classDescriptor->toString());
 
         $this->classDescriptor = $classDescriptor;
         $this->properties = $properties;
@@ -46,34 +45,38 @@ class ClassDefinition
         $this->isAnnotation = $isAnnotation;
     }
 
-    public static function createFor(TypeDescriptor $classType) : self
+    public static function createFor(TypeDescriptor $classType): self
     {
         $annotationParser = InMemoryAnnotationFinder::createFrom([$classType->toString()]);
         $typeResolver = TypeResolver::create();
 
-        $reflectionClass = new \ReflectionClass($classType->toString());
+        $reflectionClass = new ReflectionClass($classType->toString());
 
         return new self(
             $classType,
             $typeResolver->getClassProperties($classType->toString()),
             $annotationParser->getAnnotationsForClass($classType->toString()),
-            array_map(function(\ReflectionMethod $method){return $method->getName();},$reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC)),
-            (bool)!empty($reflectionClass->getAttributes(\Attribute::class))
+            array_map(function (ReflectionMethod $method) {
+                return $method->getName();
+            }, $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC)),
+            (bool)! empty($reflectionClass->getAttributes(Attribute::class))
         );
     }
 
-    public static function createUsingAnnotationParser(TypeDescriptor $classType, AnnotationResolver $annotationParser): \Ecotone\Messaging\Handler\ClassDefinition
+    public static function createUsingAnnotationParser(TypeDescriptor $classType, AnnotationResolver $annotationParser): ClassDefinition
     {
         $typeResolver = TypeResolver::createWithAnnotationParser($annotationParser);
 
-        $reflectionClass = new \ReflectionClass($classType->toString());
+        $reflectionClass = new ReflectionClass($classType->toString());
 
         return new self(
             $classType,
             $typeResolver->getClassProperties($classType->toString()),
             $annotationParser->getAnnotationsForClass($classType->toString()),
-            array_map(function(\ReflectionMethod $method){return $method->getName();},$reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC)),
-            (bool)!empty($reflectionClass->getAttributes(\Attribute::class))
+            array_map(function (ReflectionMethod $method) {
+                return $method->getName();
+            }, $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC)),
+            (bool)! empty($reflectionClass->getAttributes(Attribute::class))
         );
     }
 
@@ -99,7 +102,7 @@ class ClassDefinition
      * @return ClassPropertyDefinition
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function getProperty(string $name) : ClassPropertyDefinition
+    public function getProperty(string $name): ClassPropertyDefinition
     {
         foreach ($this->properties as $property) {
             if ($property->hasName($name)) {
@@ -110,12 +113,12 @@ class ClassDefinition
         throw InvalidArgumentException::create("There is no property with name {$name} in {$this->classDescriptor->toString()}");
     }
 
-    public function getClassType() : TypeDescriptor
+    public function getClassType(): TypeDescriptor
     {
         return $this->classDescriptor;
     }
 
-    public function hasProperty(string $name) : bool
+    public function hasProperty(string $name): bool
     {
         foreach ($this->properties as $property) {
             if ($property->getName() === $name) {
@@ -129,7 +132,7 @@ class ClassDefinition
     /**
      * @return ClassPropertyDefinition[]
      */
-    public function getPropertiesWithAnnotation(Type $annotationClass) : array
+    public function getPropertiesWithAnnotation(Type $annotationClass): array
     {
         $propertiesWithAnnotation = [];
         foreach ($this->properties as $property) {
@@ -149,7 +152,7 @@ class ClassDefinition
         return $this->classAnnotations;
     }
 
-    public function getSingleClassAnnotation(TypeDescriptor $annotationType) : object
+    public function getSingleClassAnnotation(TypeDescriptor $annotationType): object
     {
         $foundAnnotations = [];
         foreach ($this->classAnnotations as $classAnnotation) {
@@ -168,12 +171,12 @@ class ClassDefinition
         return $foundAnnotations[0];
     }
 
-    public function isAnnotation() : bool
+    public function isAnnotation(): bool
     {
         return $this->isAnnotation;
     }
 
-    public function hasClassAnnotation(Type $type) : bool
+    public function hasClassAnnotation(Type $type): bool
     {
         foreach ($this->getClassAnnotations() as $classAnnotation) {
             if (TypeDescriptor::createFromVariable($classAnnotation)->equals($type)) {

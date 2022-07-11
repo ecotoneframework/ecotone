@@ -1,9 +1,9 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use Ecotone\Modelling\Event;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
@@ -11,10 +11,9 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\NullableMessageChannel;
-use Ecotone\Messaging\Support\Assert;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use PHPStan\Rules\Properties\PropertyDescriptor;
+
+use function json_encode;
 
 /**
  * Class LoadAggregateService
@@ -51,7 +50,7 @@ class LoadAggregateService
         $this->aggregateVersionPropertyName = $aggregateVersionPropertyName;
     }
 
-    public function load(Message $message) : ?Message
+    public function load(Message $message): ?Message
     {
         $aggregateIdentifiers = $message->getHeaders()->get(AggregateMessage::AGGREGATE_ID);
 
@@ -73,40 +72,40 @@ class LoadAggregateService
         $aggregateOrEventStream = $this->aggregateRepository->findBy($this->aggregateClassName, $aggregateIdentifiers);
         $aggregateVersion = null;
         if ($this->isEventSourced) {
-            if (!$aggregateOrEventStream->getEvents()) {
+            if (! $aggregateOrEventStream->getEvents()) {
                 $aggregateOrEventStream = null;
-            }else {
+            } else {
                 $aggregateVersion = $aggregateOrEventStream->getAggregateVersion();
                 $aggregateOrEventStream = $this->eventSourcingHandlerExecutor->fill($aggregateOrEventStream->getEvents(), null);
             }
         }
 
-        if (!$aggregateOrEventStream && $this->loadAggregateMode->isDroppingMessageOnNotFound()) {
+        if (! $aggregateOrEventStream && $this->loadAggregateMode->isDroppingMessageOnNotFound()) {
             return null;
         }
 
-        if (!$aggregateOrEventStream && $this->loadAggregateMode->isThrowingOnNotFound()) {
-            throw AggregateNotFoundException::create("Aggregate {$this->aggregateClassName} for calling {$this->aggregateMethod} was not found using identifiers " . \json_encode($aggregateIdentifiers));
+        if (! $aggregateOrEventStream && $this->loadAggregateMode->isThrowingOnNotFound()) {
+            throw AggregateNotFoundException::create("Aggregate {$this->aggregateClassName} for calling {$this->aggregateMethod} was not found using identifiers " . json_encode($aggregateIdentifiers));
         }
 
         $messageBuilder = MessageBuilder::fromMessage($message);
         if ($aggregateOrEventStream) {
-            if (!is_null($aggregateVersion) && $this->isAggregateVersionAutomaticallyIncreased) {
+            if (! is_null($aggregateVersion) && $this->isAggregateVersionAutomaticallyIncreased) {
                 $this->propertyEditorAccessor->enrichDataWith(PropertyPath::createWith($this->aggregateVersionPropertyName), $aggregateOrEventStream, $aggregateVersion, $message, null);
             }
             $messageBuilder = $messageBuilder->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregateOrEventStream);
         }
-        if (!is_null($this->messageMessageVersionPropertyName)) {
+        if (! is_null($this->messageMessageVersionPropertyName)) {
             $messageBuilder = $messageBuilder->setHeader(AggregateMessage::TARGET_VERSION, $expectedVersion);
         }
 
-        if (!$message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
+        if (! $message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
             $messageBuilder = $messageBuilder
                                 ->setReplyChannel(NullableMessageChannel::create());
         }
 
         return $messageBuilder
-            ->setHeader(AggregateMessage::AGGREGATE_OBJECT_EXISTS, !is_null($aggregateOrEventStream))
+            ->setHeader(AggregateMessage::AGGREGATE_OBJECT_EXISTS, ! is_null($aggregateOrEventStream))
             ->build();
     }
 }

@@ -6,6 +6,7 @@ use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
+use InvalidArgumentException;
 
 class OrderService
 {
@@ -14,26 +15,26 @@ class OrderService
     private int $incorrectOrders = 0;
 
     #[Asynchronous(ErrorConfigurationContext::INPUT_CHANNEL)]
-    #[CommandHandler("order.register", "orderService")]
-    public function order(string $orderName) : void
+    #[CommandHandler('order.register', 'orderService')]
+    public function order(string $orderName): void
     {
-        throw new \InvalidArgumentException("exception");
+        throw new InvalidArgumentException('exception');
     }
 
-    #[QueryHandler("getOrderAmount")]
-    public function getOrder() : int
+    #[QueryHandler('getOrderAmount')]
+    public function getOrder(): int
     {
         return $this->placedOrders;
     }
 
-    #[QueryHandler("getIncorrectOrderAmount")]
-    public function getIncorrectOrders() : int
+    #[QueryHandler('getIncorrectOrderAmount')]
+    public function getIncorrectOrders(): int
     {
         return $this->incorrectOrders;
     }
 
-    #[ServiceActivator("incorrectOrders", "incorrectOrdersEndpoint")]
-    public function storeIncorrectOrder(string $orderName) : void
+    #[ServiceActivator('incorrectOrders', 'incorrectOrdersEndpoint')]
+    public function storeIncorrectOrder(string $orderName): void
     {
         $this->incorrectOrders++;
     }

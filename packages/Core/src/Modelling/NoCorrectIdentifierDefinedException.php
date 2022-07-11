@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Modelling;
-
 
 use Ecotone\Messaging\MessagingException;
 

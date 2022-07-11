@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Dbal;
-
 
 use Ecotone\Enqueue\EnqueueMessageChannelBuilder;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
@@ -36,7 +34,7 @@ class DbalBackedMessageChannelBuilder extends EnqueueMessageChannelBuilder
             $channelName,
             $connectionReferenceName
         );
-        $this->withHeaderMapping("*");
+        $this->withHeaderMapping('*');
     }
 
     public function withHeaderMapping(string $headerMapper): self
@@ -105,7 +103,7 @@ class DbalBackedMessageChannelBuilder extends EnqueueMessageChannelBuilder
     {
         $inMemoryChannelResolver = InMemoryChannelResolver::createEmpty();
         return new DbalBackedMessageChannel(
-            $this->inboundChannelAdapter->buildInboundChannelAdapter($inMemoryChannelResolver, $referenceSearchService, PollingMetadata::create("")),
+            $this->inboundChannelAdapter->buildInboundChannelAdapter($inMemoryChannelResolver, $referenceSearchService, PollingMetadata::create('')),
             $this->outboundChannelAdapter->build($inMemoryChannelResolver, $referenceSearchService)
         );
     }

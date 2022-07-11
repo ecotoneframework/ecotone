@@ -2,6 +2,8 @@
 
 namespace Ecotone\Messaging\Store\Document;
 
+use function json_decode;
+
 final class InMemoryDocumentStore implements DocumentStore
 {
     /**
@@ -9,7 +11,9 @@ final class InMemoryDocumentStore implements DocumentStore
      */
     private array $collection = [];
 
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 
     public static function createEmpty(): self
     {
@@ -24,13 +28,13 @@ final class InMemoryDocumentStore implements DocumentStore
     public function addDocument(string $collectionName, string $documentId, object|array|string $document): void
     {
         if (isset($this->collection[$collectionName][$documentId])) {
-            throw DocumentException::create(sprintf("Collection %s already contains document with id %s", $collectionName, $documentId));
+            throw DocumentException::create(sprintf('Collection %s already contains document with id %s', $collectionName, $documentId));
         }
         if (is_string($document)) {
             try {
-                \json_decode($document, flags: JSON_THROW_ON_ERROR);
-            }catch (\JsonException) {
-                throw DocumentException::create(sprintf("Trying to store document in %s collection with incorrect JSON: %s", $documentId, $collectionName));
+                json_decode($document, flags: JSON_THROW_ON_ERROR);
+            } catch (\JsonException) {
+                throw DocumentException::create(sprintf('Trying to store document in %s collection with incorrect JSON: %s', $documentId, $collectionName));
             }
         }
 
@@ -39,8 +43,8 @@ final class InMemoryDocumentStore implements DocumentStore
 
     public function updateDocument(string $collectionName, string $documentId, object|array|string $document): void
     {
-        if (!isset($this->collection[$collectionName][$documentId])) {
-            throw DocumentNotFound::create(sprintf("Collection %s does not contains document with id %s", $collectionName, $documentId));
+        if (! isset($this->collection[$collectionName][$documentId])) {
+            throw DocumentNotFound::create(sprintf('Collection %s does not contains document with id %s', $collectionName, $documentId));
         }
 
         $this->collection[$collectionName][$documentId] = $document;
@@ -60,7 +64,7 @@ final class InMemoryDocumentStore implements DocumentStore
     {
         $document = $this->findDocument($collectionName, $documentId);
         if (is_null($document)) {
-            throw DocumentNotFound::create(sprintf("Collection %s does not have document with id %s", $collectionName, $documentId));
+            throw DocumentNotFound::create(sprintf('Collection %s does not have document with id %s', $collectionName, $documentId));
         }
 
         return $document;
@@ -68,7 +72,7 @@ final class InMemoryDocumentStore implements DocumentStore
 
     public function findDocument(string $collectionName, string $documentId): array|object|string|null
     {
-        if (!isset($this->collection[$collectionName][$documentId])) {
+        if (! isset($this->collection[$collectionName][$documentId])) {
             return null;
         }
 
@@ -77,7 +81,7 @@ final class InMemoryDocumentStore implements DocumentStore
 
     public function getAllDocuments(string $collectionName): array
     {
-        if (!isset($this->collection[$collectionName])) {
+        if (! isset($this->collection[$collectionName])) {
             return [];
         }
 
@@ -86,7 +90,7 @@ final class InMemoryDocumentStore implements DocumentStore
 
     public function countDocuments(string $collectionName): int
     {
-        if (!isset($this->collection[$collectionName])) {
+        if (! isset($this->collection[$collectionName])) {
             return 0;
         }
 

@@ -1,16 +1,19 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Conversion;
 
-use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class MediaTypeTest
  * @package Test\Ecotone\Messaging\Unit\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class MediaTypeTest extends TestCase
 {
@@ -21,17 +24,19 @@ class MediaTypeTest extends TestCase
     public function test_parsing_media_type_from_string()
     {
         $this->assertEquals(
-            MediaType::create("application", "json"), MediaType::parseMediaType(MediaType::APPLICATION_JSON)
+            MediaType::create('application', 'json'),
+            MediaType::parseMediaType(MediaType::APPLICATION_JSON)
         );
 
         $this->assertEquals(
-            MediaType::create("application", "vnc.custom.json"), MediaType::parseMediaType("application/vnc.custom.json")
+            MediaType::create('application', 'vnc.custom.json'),
+            MediaType::parseMediaType('application/vnc.custom.json')
         );
 
         $this->assertEquals(
-            MediaType::createWithParameters("application", "x-php-object", [
-                "type" => "array<\stdClass>",
-                "charset" => "utf-8"
+            MediaType::createWithParameters('application', 'x-php-object', [
+                'type' => "array<\stdClass>",
+                'charset' => 'utf-8',
             ]),
             MediaType::parseMediaType("application/x-php-object;type=array<\stdClass>;charset=utf-8")
         );
@@ -44,9 +49,9 @@ class MediaTypeTest extends TestCase
     {
         $this->assertEquals(
             "application/x-php-object;type=array<\stdClass>;charset=utf-8",
-            (string)MediaType::createWithParameters("application", "x-php-object", [
-                "type" => "array<\stdClass>",
-                "charset" => "utf-8"
+            (string)MediaType::createWithParameters('application', 'x-php-object', [
+                'type' => "array<\stdClass>",
+                'charset' => 'utf-8',
             ])->toString()
         );
     }
@@ -57,11 +62,11 @@ class MediaTypeTest extends TestCase
      */
     public function test_retrieving_parameters()
     {
-        $mediaType = MediaType::parseMediaType("application/json;charset=utf-8");
+        $mediaType = MediaType::parseMediaType('application/json;charset=utf-8');
 
-        $this->assertEquals($mediaType->getParameters(), ["charset" => "utf-8"]);
-        $this->assertTrue($mediaType->hasParameter("charset"));
-        $this->assertEquals($mediaType->getParameter("charset"), "utf-8");
+        $this->assertEquals($mediaType->getParameters(), ['charset' => 'utf-8']);
+        $this->assertTrue($mediaType->hasParameter('charset'));
+        $this->assertEquals($mediaType->getParameter('charset'), 'utf-8');
     }
 
     /**
@@ -70,11 +75,11 @@ class MediaTypeTest extends TestCase
      */
     public function test_throwing_exception_if_retrieving_not_existing_parameter()
     {
-        $mediaType = MediaType::parseMediaType("application/json");
+        $mediaType = MediaType::parseMediaType('application/json');
 
         $this->expectException(InvalidArgumentException::class);
 
-        $mediaType->getParameter("some");
+        $mediaType->getParameter('some');
     }
 
     /**
@@ -84,7 +89,7 @@ class MediaTypeTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        MediaType::create("", "bap");
+        MediaType::create('', 'bap');
     }
 
     /**
@@ -94,7 +99,7 @@ class MediaTypeTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        MediaType::create("test", "");
+        MediaType::create('test', '');
     }
 
     /**
@@ -105,7 +110,7 @@ class MediaTypeTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        MediaType::parseMediaType("test");
+        MediaType::parseMediaType('test');
     }
 
     /**
@@ -116,7 +121,7 @@ class MediaTypeTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        MediaType::parseMediaType("/test");
+        MediaType::parseMediaType('/test');
     }
 
     /**
@@ -132,11 +137,11 @@ class MediaTypeTest extends TestCase
 
         $this->assertTrue(
             MediaType::parseMediaType(MediaType::APPLICATION_JSON)
-                ->isCompatibleWith(MediaType::parseMediaType("application/*"))
+                ->isCompatibleWith(MediaType::parseMediaType('application/*'))
         );
 
         $this->assertTrue(
-            MediaType::parseMediaType("*/json")
+            MediaType::parseMediaType('*/json')
                 ->isCompatibleWith(MediaType::parseMediaType(MediaType::APPLICATION_JSON))
         );
 
@@ -153,8 +158,8 @@ class MediaTypeTest extends TestCase
     public function test_creating_x_php_object_with_type_parameter()
     {
         $this->assertEquals(
-            "array<string>",
-            MediaType::createApplicationXPHPWithTypeParameter("array<string>")->getParameter("type")
+            'array<string>',
+            MediaType::createApplicationXPHPWithTypeParameter('array<string>')->getParameter('type')
         );
     }
 }

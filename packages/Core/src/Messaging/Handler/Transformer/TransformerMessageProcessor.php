@@ -31,7 +31,7 @@ class TransformerMessageProcessor implements MessageProcessor
      * @param MethodInvoker $methodInvoker
      * @return TransformerMessageProcessor
      */
-    public static function createFrom(MethodInvoker $methodInvoker) : self
+    public static function createFrom(MethodInvoker $methodInvoker): self
     {
         return new self($methodInvoker);
     }
@@ -39,7 +39,7 @@ class TransformerMessageProcessor implements MessageProcessor
     /**
      * @inheritDoc
      */
-    public function processMessage(Message $message): ?\Ecotone\Messaging\Message
+    public function processMessage(Message $message): ?Message
     {
         $reply = $this->methodInvoker->processMessage($message);
         $replyBuilder = MessageBuilder::fromMessage($message);
@@ -52,7 +52,7 @@ class TransformerMessageProcessor implements MessageProcessor
             $reply = $replyBuilder
                 ->setMultipleHeaders($reply)
                 ->build();
-        }else if (!($reply instanceof Message)) {
+        } elseif (! ($reply instanceof Message)) {
             $reply = $replyBuilder
                 ->setPayload($reply)
                 ->setContentType(MediaType::createApplicationXPHPWithTypeParameter($this->methodInvoker->getInterfaceToCall()->getReturnType()->toString()))
@@ -65,7 +65,7 @@ class TransformerMessageProcessor implements MessageProcessor
     /**
      * @return string
      */
-    public function __toString() : string
+    public function __toString(): string
     {
         return (string)$this->methodInvoker;
     }

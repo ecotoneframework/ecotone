@@ -1,8 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
-use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
+
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -42,7 +43,7 @@ class ReferenceMessageHandlerBuilderExample extends InputOutputMessageHandlerBui
         $this->channelName = $channelName;
     }
 
-    public static function create(string $channelName, string $referenceNameToRetrieve) : self
+    public static function create(string $channelName, string $referenceNameToRetrieve): self
     {
         return new self($channelName, $referenceNameToRetrieve);
     }
@@ -59,7 +60,7 @@ class ReferenceMessageHandlerBuilderExample extends InputOutputMessageHandlerBui
     {
         $this->module = $referenceSearchService->get($this->moduleName);
 
-        return ReplyViaHeadersMessageHandler::create("some");
+        return ReplyViaHeadersMessageHandler::create('some');
     }
 
     /**
@@ -75,7 +76,7 @@ class ReferenceMessageHandlerBuilderExample extends InputOutputMessageHandlerBui
     /**
      * @inheritDoc
      */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return [];
     }
@@ -85,7 +86,7 @@ class ReferenceMessageHandlerBuilderExample extends InputOutputMessageHandlerBui
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return $interfaceToCallRegistry->getFor(ReplyViaHeadersMessageHandler::class, "handle");
+        return $interfaceToCallRegistry->getFor(ReplyViaHeadersMessageHandler::class, 'handle');
     }
 
     /**
@@ -109,6 +110,6 @@ class ReferenceMessageHandlerBuilderExample extends InputOutputMessageHandlerBui
      */
     public function __toString()
     {
-        return "moduleMessagingHandler";
+        return 'moduleMessagingHandler';
     }
 }

@@ -1,15 +1,11 @@
 <?php
 
-
 namespace Test\Ecotone\Dbal\Fixture\AsynchronousChannelTransaction;
 
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Attribute\Parameter\Reference;
-use Ecotone\Messaging\Attribute\ServiceActivator;
-use Ecotone\Messaging\MessagingException;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Enqueue\Dbal\DbalConnectionFactory;
@@ -23,21 +19,21 @@ class OrderService
 
     private int $callCounter = 0;
 
-    #[Asynchronous("orders")]
-    #[CommandHandler("order.register", "orderRegister")]
+    #[Asynchronous('orders')]
+    #[CommandHandler('order.register', 'orderRegister')]
     public function register(string $order, OrderRegisteringGateway $orderRegisteringGateway): void
     {
         $orderRegisteringGateway->place($order);
 
         if ($this->callCounter === 1) {
             $this->callCounter++;
-            throw new InvalidArgumentException("test");
+            throw new InvalidArgumentException('test');
         }
 
         $this->callCounter++;
     }
 
-    #[CommandHandler("order.register_with_table_creation", "orderRegister2")]
+    #[CommandHandler('order.register_with_table_creation', 'orderRegister2')]
     public function registerWithTableCreation(string $order, OrderRegisteringGateway $orderRegisteringGateway, #[Reference(DbalConnectionFactory::class)] ConnectionFactory $connection): void
     {
         $schemaManager = $connection->createContext()->getDbalConnection()->createSchemaManager();
@@ -57,33 +53,33 @@ class OrderService
         $orderRegisteringGateway->place($order);
     }
 
-    #[Asynchronous("processOrders")]
-    #[CommandHandler("placeOrder", "placeOrderEndpoint")]
-    public function placeOrder(string $order) : void
+    #[Asynchronous('processOrders')]
+    #[CommandHandler('placeOrder', 'placeOrderEndpoint')]
+    public function placeOrder(string $order): void
     {
         $this->orders[] = $order;
     }
 
-    #[QueryHandler("order.getRegistered")]
-    public function getRegistered() : array
+    #[QueryHandler('order.getRegistered')]
+    public function getRegistered(): array
     {
         return $this->orders;
     }
 
-    #[CommandHandler("order.prepareWithFailure")]
+    #[CommandHandler('order.prepareWithFailure')]
     public function prepareWithFailure(#[Reference(DbalConnectionFactory::class)] ManagerRegistryConnectionFactory $connectionFactory)
     {
         $connection = $connectionFactory->createContext()->getDbalConnection();
 
         $connection->executeStatement(<<<SQL
-    DROP TABLE IF EXISTS orders
-SQL);
+                DROP TABLE IF EXISTS orders
+            SQL);
         $connection->executeStatement(<<<SQL
-    CREATE TABLE orders (id VARCHAR(255) PRIMARY KEY)
-SQL);
+                CREATE TABLE orders (id VARCHAR(255) PRIMARY KEY)
+            SQL);
 
         $connection->executeStatement(<<<SQL
-    CREATE TABLE WITH FAILURE SYNTAX orders2 (id VARCHAR(255) PRIMARY KEY)
-SQL);
+                CREATE TABLE WITH FAILURE SYNTAX orders2 (id VARCHAR(255) PRIMARY KEY)
+            SQL);
     }
 }

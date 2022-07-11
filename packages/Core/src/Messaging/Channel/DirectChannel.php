@@ -3,7 +3,6 @@
 namespace Ecotone\Messaging\Channel;
 
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\SubscribableChannel;
 
@@ -26,7 +25,7 @@ class DirectChannel implements SubscribableChannel
     /**
      * @return DirectChannel
      */
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -36,7 +35,7 @@ class DirectChannel implements SubscribableChannel
      */
     public function send(Message $message): void
     {
-        if (!$this->messageHandler) {
+        if (! $this->messageHandler) {
             throw MessageDispatchingException::create("There is no message handler registered for dispatching Message {$message}");
         }
 
@@ -65,6 +64,6 @@ class DirectChannel implements SubscribableChannel
 
     public function __toString()
     {
-        return "direct channel";
+        return 'direct channel';
     }
 }

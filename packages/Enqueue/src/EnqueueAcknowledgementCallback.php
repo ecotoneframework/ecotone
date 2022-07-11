@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Enqueue;
@@ -14,9 +15,9 @@ use Interop\Queue\Message as EnqueueMessage;
  */
 class EnqueueAcknowledgementCallback implements AcknowledgementCallback
 {
-    const AUTO_ACK = "auto";
-    const MANUAL_ACK = "manual";
-    const NONE = "none";
+    public const AUTO_ACK = 'auto';
+    public const MANUAL_ACK = 'manual';
+    public const NONE = 'none';
 
     /**
      * @var bool
@@ -49,7 +50,7 @@ class EnqueueAcknowledgementCallback implements AcknowledgementCallback
      * @param EnqueueMessage $enqueueMessage
      * @return EnqueueAcknowledgementCallback
      */
-    public static function createWithAutoAck(EnqueueConsumer $enqueueConsumer, EnqueueMessage $enqueueMessage) : self
+    public static function createWithAutoAck(EnqueueConsumer $enqueueConsumer, EnqueueMessage $enqueueMessage): self
     {
         return new self(true, $enqueueConsumer, $enqueueMessage);
     }
@@ -59,7 +60,7 @@ class EnqueueAcknowledgementCallback implements AcknowledgementCallback
      * @param EnqueueMessage $enqueueMessage
      * @return EnqueueAcknowledgementCallback
      */
-    public static function createWithManualAck(EnqueueConsumer $enqueueConsumer, EnqueueMessage $enqueueMessage) : self
+    public static function createWithManualAck(EnqueueConsumer $enqueueConsumer, EnqueueMessage $enqueueMessage): self
     {
         return new self(false, $enqueueConsumer, $enqueueMessage);
     }

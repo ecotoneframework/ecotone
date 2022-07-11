@@ -1,11 +1,8 @@
 <?php
 
-
 namespace Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\NotExisting;
 
-
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeGatewayExample;
-use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeHandlerAnnotation;
 
 class NotExistingMethodAttribute
 {
@@ -13,6 +10,5 @@ class NotExistingMethodAttribute
     #[Johny('bla')]
     public function test()
     {
-
     }
 }

@@ -9,5 +9,4 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\Property;
  */
 class ExtendedOrderPropertyExample extends OrderPropertyExample
 {
-
 }

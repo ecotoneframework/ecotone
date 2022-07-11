@@ -2,8 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\VerifyAccessToSavingLogs;
 
-#[\Attribute]
+use Attribute;
+
+#[Attribute]
 class ValidateExecutor
 {
-
 }

@@ -2,8 +2,6 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Property;
 
-use Ecotone\Messaging\Attribute\Parameter\Payload;
-use Ecotone\Messaging\Transaction\Transactional;
 use stdClass as SomeClass;
 
 /**
@@ -23,8 +21,7 @@ class OrderPropertyExample
     #[PropertyAnnotationExample]
     private ?SomeClass $someClass;
 
-    public function doSomething() : void
+    public function doSomething(): void
     {
-
     }
 }

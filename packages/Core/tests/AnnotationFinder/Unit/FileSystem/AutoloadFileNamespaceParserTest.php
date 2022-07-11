@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\AnnotationFinder\Unit\FileSystem;
 
 use Ecotone\AnnotationFinder\FileSystem\AutoloadFileNamespaceParser;
@@ -10,41 +9,43 @@ use PHPUnit\Framework\TestCase;
  * Class GetUsedPathsFromAutoloadTest
  * @package Test\Ecotone\AnnotationFinder\Unit\Unit\Config\Annotation
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class AutoloadFileNamespaceParserTest extends TestCase
 {
     public function test_retrieve_when_psr_4_namespace_is_equal_to_required()
     {
-        $requiredNamepaces = ["Ecotone"];
+        $requiredNamepaces = ['Ecotone'];
         $autoload = [
-            "Ecotone" => ["/src"]
+            'Ecotone' => ['/src'],
         ];
         $autoloadPsr4 = true;
-        $expectedPaths = ["/src"];
+        $expectedPaths = ['/src'];
 
         $this->validateExpectedPaths($requiredNamepaces, $autoload, $autoloadPsr4, $expectedPaths);
     }
 
     public function test_retrieve_when_psr_0_namespace_is_equal_to_required()
     {
-        $requiredNamepaces = ["Ecotone"];
+        $requiredNamepaces = ['Ecotone'];
         $autoload = [
-            "Ecotone" => ["/src"]
+            'Ecotone' => ['/src'],
         ];
         $autoloadPsr4 = false;
-        $expectedPaths = ["/src/Ecotone"];
+        $expectedPaths = ['/src/Ecotone'];
 
         $this->validateExpectedPaths($requiredNamepaces, $autoload, $autoloadPsr4, $expectedPaths);
     }
 
     public function test_retrieve_when_psr_4_namespace_is_longer_than_required()
     {
-        $requiredNamepaces = ["Ecotone"];
+        $requiredNamepaces = ['Ecotone'];
         $autoload = [
-            "Ecotone\Some" => ["/src"]
+            "Ecotone\Some" => ['/src'],
         ];
         $autoloadPsr4 = true;
-        $expectedPaths = ["/src"];
+        $expectedPaths = ['/src'];
 
         $this->validateExpectedPaths($requiredNamepaces, $autoload, $autoloadPsr4, $expectedPaths);
     }
@@ -53,10 +54,10 @@ class AutoloadFileNamespaceParserTest extends TestCase
     {
         $requiredNamepaces = ["Ecotone\Some\Domain"];
         $autoload = [
-            "Ecotone" => ["/src"]
+            'Ecotone' => ['/src'],
         ];
         $autoloadPsr4 = true;
-        $expectedPaths = ["/src/Some/Domain"];
+        $expectedPaths = ['/src/Some/Domain'];
 
         $this->validateExpectedPaths($requiredNamepaces, $autoload, $autoloadPsr4, $expectedPaths);
     }
@@ -65,11 +66,11 @@ class AutoloadFileNamespaceParserTest extends TestCase
     {
         $requiredNamepaces = ["Ecotone\Implementation"];
         $autoload = [
-            "Ecotone\Test" => ["/src1"],
-            "Ecotone\Implementation" => ["/src2"],
+            "Ecotone\Test" => ['/src1'],
+            "Ecotone\Implementation" => ['/src2'],
         ];
         $autoloadPsr4 = true;
-        $expectedPaths = ["/src2"];
+        $expectedPaths = ['/src2'];
 
         $this->validateExpectedPaths($requiredNamepaces, $autoload, $autoloadPsr4, $expectedPaths);
     }
@@ -78,10 +79,10 @@ class AutoloadFileNamespaceParserTest extends TestCase
     {
         $requiredNamepaces = ["Ecotone\Test\Domain"];
         $autoload = [
-            "Ecotone\Test" => ["/src1"]
+            "Ecotone\Test" => ['/src1'],
         ];
         $autoloadPsr4 = true;
-        $expectedPaths = ["/src1/Domain"];
+        $expectedPaths = ['/src1/Domain'];
 
         $this->validateExpectedPaths($requiredNamepaces, $autoload, $autoloadPsr4, $expectedPaths);
     }
@@ -94,10 +95,10 @@ class AutoloadFileNamespaceParserTest extends TestCase
             ["Ecotone\One", "Ecotone\Two"],
             $getUsedPathsFromAutoload->getNamespacesForGivenCatalog(
                 [
-                    "psr-4" => ["Ecotone\One" => "src"],
-                    "psr-0" => ["Ecotone\Two" => "src"]
+                    'psr-4' => ["Ecotone\One" => 'src'],
+                    'psr-0' => ["Ecotone\Two" => 'src'],
                 ],
-                "src"
+                'src'
             )
         );
     }
@@ -110,10 +111,10 @@ class AutoloadFileNamespaceParserTest extends TestCase
             ["Ecotone\One", "Ecotone\Two"],
             $getUsedPathsFromAutoload->getNamespacesForGivenCatalog(
                 [
-                    "psr-4" => ["Ecotone\\One\\" => "src/Ecotone"],
-                    "psr-0" => ["Ecotone\\Two\\" => "src/Ecotone"]
+                    'psr-4' => ['Ecotone\\One\\' => 'src/Ecotone'],
+                    'psr-0' => ['Ecotone\\Two\\' => 'src/Ecotone'],
                 ],
-                "src"
+                'src'
             )
         );
     }
@@ -126,9 +127,9 @@ class AutoloadFileNamespaceParserTest extends TestCase
             [],
             $getUsedPathsFromAutoload->getNamespacesForGivenCatalog(
                 [
-                    "psr-4" => ["" => "src"]
+                    'psr-4' => ['' => 'src'],
                 ],
-                "src"
+                'src'
             )
         );
     }
@@ -141,10 +142,10 @@ class AutoloadFileNamespaceParserTest extends TestCase
             ["Ecotone\One", "Ecotone\Two"],
             $getUsedPathsFromAutoload->getNamespacesForGivenCatalog(
                 [
-                    "psr-4" => ["Ecotone\One" => ["src", "tests"]],
-                    "psr-0" => ["Ecotone\Two" => ["src", "tests"]]
+                    'psr-4' => ["Ecotone\One" => ['src', 'tests']],
+                    'psr-0' => ["Ecotone\Two" => ['src', 'tests']],
                 ],
-                "src"
+                'src'
             )
         );
     }
@@ -157,10 +158,10 @@ class AutoloadFileNamespaceParserTest extends TestCase
             [],
             $getUsedPathsFromAutoload->getNamespacesForGivenCatalog(
                 [
-                    "psr-4" => ["Ecotone\One" => "tests"],
-                    "psr-0" => ["Ecotone\Two" => "tests"]
+                    'psr-4' => ["Ecotone\One" => 'tests'],
+                    'psr-0' => ["Ecotone\Two" => 'tests'],
                 ],
-                "src"
+                'src'
             )
         );
     }

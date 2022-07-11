@@ -9,12 +9,12 @@ use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 
 class MessagingBaseCommand
 {
-    public function executeConsoleCommand(string $commandName, array $parameters, ConfiguredMessagingSystem $configuredMessagingSystem) : mixed
+    public function executeConsoleCommand(string $commandName, array $parameters, ConfiguredMessagingSystem $configuredMessagingSystem): mixed
     {
         return $configuredMessagingSystem->runConsoleCommand($commandName, $parameters);
     }
 
-    public function runAsynchronousEndpointCommand(string $consumerName, ConfiguredMessagingSystem $configuredMessagingSystem, #[ConsoleParameterOption] ?string $handledMessageLimit = null, #[ConsoleParameterOption] ?int $executionTimeLimit = null, #[ConsoleParameterOption] ?int $memoryLimit = null, #[ConsoleParameterOption] ?string $cron = null, #[ConsoleParameterOption] bool $stopOnFailure = false) : void
+    public function runAsynchronousEndpointCommand(string $consumerName, ConfiguredMessagingSystem $configuredMessagingSystem, #[ConsoleParameterOption] ?string $handledMessageLimit = null, #[ConsoleParameterOption] ?int $executionTimeLimit = null, #[ConsoleParameterOption] ?int $memoryLimit = null, #[ConsoleParameterOption] ?string $cron = null, #[ConsoleParameterOption] bool $stopOnFailure = false): void
     {
         $pollingMetadata = ExecutionPollingMetadata::createWithDefaults();
         if ($stopOnFailure) {
@@ -37,13 +37,13 @@ class MessagingBaseCommand
         $configuredMessagingSystem->run($consumerName, $pollingMetadata);
     }
 
-    public function listAsynchronousEndpointsCommand(ConfiguredMessagingSystem $configuredMessagingSystem) : ConsoleCommandResultSet
+    public function listAsynchronousEndpointsCommand(ConfiguredMessagingSystem $configuredMessagingSystem): ConsoleCommandResultSet
     {
         $consumers = [];
         foreach ($configuredMessagingSystem->list() as $consumerName) {
             $consumers[] = [$consumerName];
         }
 
-        return ConsoleCommandResultSet::create(["Name"], $consumers);
+        return ConsoleCommandResultSet::create(['Name'], $consumers);
     }
 }

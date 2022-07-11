@@ -7,6 +7,9 @@ use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagator;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ */
 class MessageHeadersPropagatorTest extends TestCase
 {
     public function test_after_calling_dropping_last_headers()
@@ -15,8 +18,8 @@ class MessageHeadersPropagatorTest extends TestCase
 
         $messageHeadersPropagator->storeHeaders(
             StubMethodInvocation::createEndingImmediately(),
-            MessageBuilder::withPayload("some")
-                ->setHeader("token", 123)
+            MessageBuilder::withPayload('some')
+                ->setHeader('token', 123)
                 ->build()
         );
 

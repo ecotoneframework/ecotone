@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
@@ -57,9 +58,9 @@ class PayloadExpressionConverter implements ParameterConverter
         return $this->expressionEvaluationService->evaluate(
             $this->expression,
             [
-                "value" => $message->getPayload(),
-                "headers" => $message->getHeaders()->headers(),
-                "payload" => $message->getPayload()
+                'value' => $message->getPayload(),
+                'headers' => $message->getHeaders()->headers(),
+                'payload' => $message->getPayload(),
             ],
             $this->referenceSearchService
         );

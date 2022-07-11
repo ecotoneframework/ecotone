@@ -2,7 +2,6 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use Psr\Http\Message\ResponseInterface;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHandler;
@@ -48,12 +47,12 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
         $this->callback = $callback;
     }
 
-    public static function create($replyData) : self
+    public static function create($replyData): self
     {
         return new self($replyData, false, null);
     }
 
-    public static function createReplyWithRequestMessage() : self
+    public static function createReplyWithRequestMessage(): self
     {
         $replyViaHeadersMessageHandler = new self(null, false, null);
         $replyViaHeadersMessageHandler->replyWithRequestMessage = true;
@@ -65,7 +64,7 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
      * @param $callback
      * @return ReplyViaHeadersMessageHandler
      */
-    public static function createWithCallback($callback) : self
+    public static function createWithCallback($callback): self
     {
         return new self(null, false, $callback);
     }
@@ -74,7 +73,7 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
      * @param $toAdd
      * @return ReplyViaHeadersMessageHandler
      */
-    public static function createAdditionToPayload($toAdd) : self
+    public static function createAdditionToPayload($toAdd): self
     {
         return new self($toAdd, true, null);
     }
@@ -96,12 +95,12 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
             }
 
             if ($this->replyData || $this->callback) {
-                $replyData = $this->replyData ? $this->replyData  : call_user_func($this->callback, $message);
+                $replyData = $this->replyData ? $this->replyData : call_user_func($this->callback, $message);
                 if ($this->shouldAdd) {
                     $replyData += $message->getPayload();
                 }
 
-                if (!is_null($replyData)) {
+                if (! is_null($replyData)) {
                     if ($replyData instanceof Message) {
                         $replyChannel->send($replyData);
                         return;
@@ -113,7 +112,7 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
         }
     }
 
-    public function getReceivedMessage() : ?Message
+    public function getReceivedMessage(): ?Message
     {
         return $this->message;
     }

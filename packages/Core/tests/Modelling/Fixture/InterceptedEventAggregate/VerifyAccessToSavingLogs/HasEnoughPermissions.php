@@ -3,8 +3,8 @@
 namespace Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs;
 
 use Ecotone\Messaging\Attribute\Interceptor\Around;
-use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use InvalidArgumentException;
 use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\Logger;
 
 class HasEnoughPermissions
@@ -18,8 +18,8 @@ class HasEnoughPermissions
 
         $data = $methodInvocation->getArguments()[0];
 
-        if (!$logger->hasAccess($data["executorId"])) {
-            throw new \InvalidArgumentException("Not enough permissions");
+        if (! $logger->hasAccess($data['executorId'])) {
+            throw new InvalidArgumentException('Not enough permissions');
         }
 
         return $methodInvocation->proceed();

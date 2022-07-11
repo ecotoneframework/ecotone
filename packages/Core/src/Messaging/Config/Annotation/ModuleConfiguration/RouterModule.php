@@ -12,7 +12,7 @@ use Ecotone\Messaging\Handler\Router\RouterBuilder;
 #[ModuleAnnotation]
 class RouterModule extends MessageHandlerRegisterConfiguration
 {
-    public const MODULE_NAME = "routerModule";
+    public const MODULE_NAME = 'routerModule';
 
     /**
      * @inheritDoc

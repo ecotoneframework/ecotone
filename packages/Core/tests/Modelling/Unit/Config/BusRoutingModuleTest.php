@@ -2,12 +2,10 @@
 
 namespace Test\Ecotone\Modelling\Unit\Config;
 
-use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\PropagateHeaders;
-use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
@@ -20,16 +18,13 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
-use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Precedence;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\BusRouterBuilder;
 use Ecotone\Modelling\Config\BusRoutingModule;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagator;
 use Ecotone\Modelling\QueryBus;
-use ReflectionException;
 use stdClass;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerExample;
@@ -47,7 +42,6 @@ use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service\CommandHand
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Aggregate\AggregateEventHandlerWithClass;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Aggregate\AggregateEventHandlerWithListenToRegex;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\EventHandlerForUnionType;
-use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ProjectionEventHandlerExample;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithClass;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithListenTo;
 use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service\ServiceEventHandlerWithListenToAndObject;
@@ -64,22 +58,23 @@ use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryH
 use Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service\ServiceQueryHandlerWithInputChannelAndObject;
 use Test\Ecotone\Modelling\Fixture\Handler\ServiceWithCommandAndQueryHandlersUnderSameClass;
 use Test\Ecotone\Modelling\Fixture\Handler\ServiceWithCommandAndQueryHandlersUnderSameName;
-use Test\Ecotone\Modelling\Fixture\Order\OrderWasPlaced;
 
 /**
  * Class AggregateMessageRouterModuleTest
  * @package Test\Ecotone\Modelling\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class BusRoutingModuleTest extends MessagingTest
 {
     public function test_registering_service_command_handler_with_endpoint_id()
     {
         $annotatedClasses = [
-            AggregateCommandHandlerWithClass::class
+            AggregateCommandHandlerWithClass::class,
         ];
         $mapping = [
-            stdClass::class => [stdClass::class]
+            stdClass::class => [stdClass::class],
         ];
 
         $this->assertRouting($annotatedClasses, $mapping, $mapping, [], [], [], []);
@@ -91,7 +86,7 @@ class BusRoutingModuleTest extends MessagingTest
 
         $this->prepareModule(
             InMemoryAnnotationFinder::createFrom([
-                CommandHandlerWithUnionType::class
+                CommandHandlerWithUnionType::class,
             ])
         );
     }
@@ -107,21 +102,21 @@ class BusRoutingModuleTest extends MessagingTest
                 ->registerBeforeMethodInterceptor(
                     MethodInterceptor::create(
                         MessageHeadersPropagator::class,
-                        InterfaceToCall::create(MessageHeadersPropagator::class, "propagateHeaders"),
-                        TransformerBuilder::createWithDirectObject(new MessageHeadersPropagator(), "propagateHeaders")
+                        InterfaceToCall::create(MessageHeadersPropagator::class, 'propagateHeaders'),
+                        TransformerBuilder::createWithDirectObject(new MessageHeadersPropagator(), 'propagateHeaders')
                             ->withMethodParameterConverters([
-                                AllHeadersBuilder::createWith("headers")
+                                AllHeadersBuilder::createWith('headers'),
                             ]),
                         Precedence::ENDPOINT_HEADERS_PRECEDENCE - 2,
-                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class . "||" . PropagateHeaders::class . "||" . MessagingEntrypointWithHeadersPropagation::class
+                        CommandBus::class . '||' . EventBus::class . '||' . QueryBus::class . '||' . AsynchronousRunningEndpoint::class . '||' . PropagateHeaders::class . '||' . MessagingEntrypointWithHeadersPropagation::class
                     )
                 )
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                         new MessageHeadersPropagator(),
-                        "storeHeaders",
+                        'storeHeaders',
                         Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,
-                        CommandBus::class . "||" . EventBus::class . "||" . QueryBus::class . "||" . AsynchronousRunningEndpoint::class . "||" . PropagateHeaders::class . "||" . MessagingEntrypointWithHeadersPropagation::class
+                        CommandBus::class . '||' . EventBus::class . '||' . QueryBus::class . '||' . AsynchronousRunningEndpoint::class . '||' . PropagateHeaders::class . '||' . MessagingEntrypointWithHeadersPropagation::class
                     )
                 )
                 ->registerMessageHandler(BusRouterBuilder::createCommandBusByObject($messagePropagator, $commandObjectMapping))
@@ -154,7 +149,7 @@ class BusRoutingModuleTest extends MessagingTest
 
         $this->prepareModule(
             InMemoryAnnotationFinder::createFrom([
-                CommandHandlerWithNoInputChannelName::class
+                CommandHandlerWithNoInputChannelName::class,
             ])
         );
     }
@@ -165,7 +160,7 @@ class BusRoutingModuleTest extends MessagingTest
 
         $this->prepareModule(
             InMemoryAnnotationFinder::createFrom([
-                ServiceQueryHandlersWithNotUniqueClass::class
+                ServiceQueryHandlersWithNotUniqueClass::class,
             ])
         );
     }
@@ -176,7 +171,7 @@ class BusRoutingModuleTest extends MessagingTest
 
         $this->prepareModule(
             InMemoryAnnotationFinder::createFrom([
-                ServiceWithCommandAndQueryHandlersUnderSameClass::class
+                ServiceWithCommandAndQueryHandlersUnderSameClass::class,
             ])
         );
     }
@@ -187,7 +182,7 @@ class BusRoutingModuleTest extends MessagingTest
 
         $this->prepareModule(
             InMemoryAnnotationFinder::createFrom([
-                ServiceWithCommandAndQueryHandlersUnderSameName::class
+                ServiceWithCommandAndQueryHandlersUnderSameName::class,
             ])
         );
     }
@@ -198,7 +193,7 @@ class BusRoutingModuleTest extends MessagingTest
 
         $this->prepareModule(
             InMemoryAnnotationFinder::createFrom([
-                AggregateCommandHandlerWithDoubledFactoryMethod::class
+                AggregateCommandHandlerWithDoubledFactoryMethod::class,
             ])
         );
     }
@@ -209,7 +204,7 @@ class BusRoutingModuleTest extends MessagingTest
 
         $this->prepareModule(
             InMemoryAnnotationFinder::createFrom([
-                AggregateCommandHandlerWithDoubledActionMethod::class
+                AggregateCommandHandlerWithDoubledActionMethod::class,
             ])
         );
     }
@@ -221,7 +216,7 @@ class BusRoutingModuleTest extends MessagingTest
         $this->prepareModule(
             InMemoryAnnotationFinder::createFrom([
                 AggregateCommandHandlerExample::class,
-                AggregateCommandHandlerWithFactoryMethod::class
+                AggregateCommandHandlerWithFactoryMethod::class,
             ])
         );
     }
@@ -230,7 +225,7 @@ class BusRoutingModuleTest extends MessagingTest
     {
         $annotatedClasses = [ServiceQueryHandlersWithAllowedNotUniqueClass::class];
         $mapping = [
-            stdClass::class => [stdClass::class]
+            stdClass::class => [stdClass::class],
         ];
 
         $this->assertRouting($annotatedClasses, [], [], $mapping, $mapping, [], []);
@@ -240,71 +235,95 @@ class BusRoutingModuleTest extends MessagingTest
     {
         $annotatedClasses = [ServiceQueryHandlersWithAllowedNotUniqueClassAndInputChannels::class];
 
-        $this->assertRouting($annotatedClasses,
+        $this->assertRouting(
+            $annotatedClasses,
             [],
             [
-                "some1" => ["some1"],
-                "some2" => ["some2"]
+                'some1' => ['some1'],
+                'some2' => ['some2'],
             ],
-            [], [], [], []);
+            [],
+            [],
+            [],
+            []
+        );
     }
 
     public function test_registering_service_command_handler_with_input_channel()
     {
         $annotatedClasses = [
-            AggregateCommandHandlerWithInputChannelName::class
+            AggregateCommandHandlerWithInputChannelName::class,
         ];
 
-        $this->assertRouting($annotatedClasses, [], ["execute" => ["execute"]], [], [], [], []);
+        $this->assertRouting($annotatedClasses, [], ['execute' => ['execute']], [], [], [], []);
     }
 
     public function test_registering_aggregate_command_handler_with_input_channel()
     {
         $annotatedClasses = [
-            ServiceCommandHandlerWithInputChannelName::class
+            ServiceCommandHandlerWithInputChannelName::class,
         ];
 
-        $this->assertRouting($annotatedClasses, [], ["execute" => ["execute"]], [], [], [], []);
+        $this->assertRouting($annotatedClasses, [], ['execute' => ['execute']], [], [], [], []);
     }
 
     public function test_registering_service_command_handler_with_input_channel_and_class()
     {
         $annotatedClasses = [
-            AggregateCommandHandlerWithInputChannelNameAndObject::class
+            AggregateCommandHandlerWithInputChannelNameAndObject::class,
         ];
 
-        $this->assertRouting($annotatedClasses,
-            [], ["execute" => ["execute"]], [], [], [], []);
+        $this->assertRouting(
+            $annotatedClasses,
+            [],
+            ['execute' => ['execute']],
+            [],
+            [],
+            [],
+            []
+        );
     }
 
     public function test_registering_service_command_handler_with_input_channel_and_ignore_class()
     {
         $annotatedClasses = [
-            AggregateCommandHandlerWithInputChannelNameAndIgnoreMessage::class
+            AggregateCommandHandlerWithInputChannelNameAndIgnoreMessage::class,
         ];
 
-        $this->assertRouting($annotatedClasses,
-            [], ["execute" => ["execute"]], [], [], [], []);
+        $this->assertRouting(
+            $annotatedClasses,
+            [],
+            ['execute' => ['execute']],
+            [],
+            [],
+            [],
+            []
+        );
     }
 
     public function test_registering_aggregate_command_handler_with_input_channel_and_ignore_class()
     {
         $annotatedClasses = [
-            ServiceCommandHandlerWithInputChannelNameAndIgnoreMessage::class
+            ServiceCommandHandlerWithInputChannelNameAndIgnoreMessage::class,
         ];
 
-        $this->assertRouting($annotatedClasses,
+        $this->assertRouting(
+            $annotatedClasses,
             [],
             [
-                "execute" => ["execute"]
-            ]
-            , [], [], [], []);
+                'execute' => ['execute'],
+            ],
+            [],
+            [],
+            [],
+            []
+        );
     }
 
     public function test_registering_service_query_handler()
     {
         $annotatedClasses = [
-            ServiceQueryHandlerWithClass::class
+            ServiceQueryHandlerWithClass::class,
         ];
 
         $this->assertRouting($annotatedClasses, [], [], [stdClass::class => [stdClass::class]], [stdClass::class => [stdClass::class]], [], []);
@@ -313,7 +332,7 @@ class BusRoutingModuleTest extends MessagingTest
     public function test_registering_aggregate_query_handler()
     {
         $annotatedClasses = [
-            AggregateQueryHandlerWithClass::class
+            AggregateQueryHandlerWithClass::class,
         ];
 
         $this->assertRouting($annotatedClasses, [], [], [stdClass::class => [stdClass::class]], [stdClass::class => [stdClass::class]], [], []);
@@ -322,31 +341,34 @@ class BusRoutingModuleTest extends MessagingTest
     public function test_registering_service_query_handler_with_input_channel()
     {
         $annotatedClasses = [
-            ServiceQueryHandlerWithInputChannel::class
+            ServiceQueryHandlerWithInputChannel::class,
         ];
 
-        $this->assertRouting($annotatedClasses, [], [], [], ["execute" => ["execute"]], [], []);
+        $this->assertRouting($annotatedClasses, [], [], [], ['execute' => ['execute']], [], []);
     }
 
     public function test_registering_aggregate_query_handler_with_input_channel()
     {
         $annotatedClasses = [
-            AggregateQueryHandlerWithInputChannel::class
+            AggregateQueryHandlerWithInputChannel::class,
         ];
 
-        $this->assertRouting($annotatedClasses, [], [], [], ["execute" => ["execute"]], [], []);
+        $this->assertRouting($annotatedClasses, [], [], [], ['execute' => ['execute']], [], []);
     }
 
     public function test_registering_service_query_handler_with_input_channel_and_class()
     {
         $annotatedClasses = [
-            ServiceQueryHandlerWithInputChannelAndObject::class
+            ServiceQueryHandlerWithInputChannelAndObject::class,
         ];
 
-        $this->assertRouting($annotatedClasses, [], [],
+        $this->assertRouting(
+            $annotatedClasses,
+            [],
+            [],
             [],
             [
-                "execute" => ["execute"]
+                'execute' => ['execute'],
             ],
             [],
             []
@@ -356,13 +378,16 @@ class BusRoutingModuleTest extends MessagingTest
     public function test_registering_service_query_handler_with_input_channel_and_ignore_message()
     {
         $annotatedClasses = [
-            ServiceQueryHandlerWithInputChannelAndIgnoreMessage::class
+            ServiceQueryHandlerWithInputChannelAndIgnoreMessage::class,
         ];
 
-        $this->assertRouting($annotatedClasses, [], [],
+        $this->assertRouting(
+            $annotatedClasses,
+            [],
+            [],
             [],
             [
-                "execute" => ["execute"]
+                'execute' => ['execute'],
             ],
             [],
             []
@@ -372,13 +397,16 @@ class BusRoutingModuleTest extends MessagingTest
     public function test_registering_aggregate_query_handler_with_input_channel_and_ignore_message()
     {
         $annotatedClasses = [
-            AggregateQueryHandlerWithInputChannelAndIgnoreMessage::class
+            AggregateQueryHandlerWithInputChannelAndIgnoreMessage::class,
         ];
 
-        $this->assertRouting($annotatedClasses, [], [],
+        $this->assertRouting(
+            $annotatedClasses,
+            [],
+            [],
             [],
             [
-                "execute" => ["execute"]
+                'execute' => ['execute'],
             ],
             [],
             []
@@ -388,7 +416,7 @@ class BusRoutingModuleTest extends MessagingTest
     public function test_registering_service_event_handler()
     {
         $annotatedClasses = [
-            ServiceEventHandlerWithClass::class
+            ServiceEventHandlerWithClass::class,
         ];
 
         $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class]], [stdClass::class => [stdClass::class]]);
@@ -398,14 +426,15 @@ class BusRoutingModuleTest extends MessagingTest
     {
         $annotatedClasses = [EventHandlerForUnionType::class];
 
-        $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class . "|" . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class], \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class => [stdClass::class . "|" . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class]], [stdClass::class => [stdClass::class . "|" . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class], \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class => [stdClass::class . "|" . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class]]);
+        $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class . '|' . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class], \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class => [stdClass::class . '|' . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class]], [stdClass::class => [stdClass::class . '|' . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class], \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class => [stdClass::class . '|' . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class]]);
     }
 
     public function test_registering_aggregate_event_handler()
     {
         $annotatedClasses = [
-            AggregateEventHandlerWithClass::class
-        ];;
+            AggregateEventHandlerWithClass::class,
+        ];
+        ;
 
         $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class]], [stdClass::class => [stdClass::class]]);
     }
@@ -414,7 +443,7 @@ class BusRoutingModuleTest extends MessagingTest
     {
         $annotatedClasses = [
             ServiceEventHandlerWithClass::class,
-            AggregateEventHandlerWithClass::class
+            AggregateEventHandlerWithClass::class,
         ];
 
         $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class]], [stdClass::class => [stdClass::class]]);
@@ -423,31 +452,36 @@ class BusRoutingModuleTest extends MessagingTest
     public function test_registering_service_event_handler_with_listen_to()
     {
         $annotatedClasses = [
-            ServiceEventHandlerWithListenTo::class
+            ServiceEventHandlerWithListenTo::class,
         ];
 
-        $this->assertRouting($annotatedClasses, [], [], [], [], [], ["execute" => ["execute"]]);
+        $this->assertRouting($annotatedClasses, [], [], [], [], [], ['execute' => ['execute']]);
     }
 
     public function test_registering_aggregate_event_handler_with_listen_to()
     {
         $annotatedClasses = [
-            ServiceEventHandlerWithListenTo::class
+            ServiceEventHandlerWithListenTo::class,
         ];
 
-        $this->assertRouting($annotatedClasses, [], [], [], [], [], ["execute" => ["execute"]]);
+        $this->assertRouting($annotatedClasses, [], [], [], [], [], ['execute' => ['execute']]);
     }
 
     public function test_registering_service_event_handler_with_listen_to_and_class()
     {
         $annotatedClasses = [
-            ServiceEventHandlerWithListenToAndObject::class
+            ServiceEventHandlerWithListenToAndObject::class,
         ];
 
-        $this->assertRouting($annotatedClasses, [], [], [], [],
+        $this->assertRouting(
+            $annotatedClasses,
+            [],
+            [],
+            [],
+            [],
             [],
             [
-                "execute" => ["execute"]
+                'execute' => ['execute'],
             ]
         );
     }
@@ -455,13 +489,18 @@ class BusRoutingModuleTest extends MessagingTest
     public function test_registering_service_event_handler_with_listen_regex()
     {
         $annotatedClasses = [
-            ServiceEventHandlerWithListenToToRegex::class
+            ServiceEventHandlerWithListenToToRegex::class,
         ];
 
-        $this->assertRouting($annotatedClasses, [], [], [], [],
+        $this->assertRouting(
+            $annotatedClasses,
+            [],
+            [],
+            [],
+            [],
             [],
             [
-                "order.*" => ["order.*"]
+                'order.*' => ['order.*'],
             ]
         );
     }
@@ -472,7 +511,7 @@ class BusRoutingModuleTest extends MessagingTest
 
         $this->prepareModule(
             InMemoryAnnotationFinder::createFrom([
-                AggregateEventHandlerWithListenToRegex::class
+                AggregateEventHandlerWithListenToRegex::class,
             ])
         );
     }

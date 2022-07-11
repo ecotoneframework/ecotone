@@ -2,8 +2,9 @@
 
 namespace Ecotone\Modelling\Attribute;
 
-#[\Attribute(\Attribute::TARGET_PROPERTY)]
+use Attribute;
+
+#[Attribute(Attribute::TARGET_PROPERTY)]
 class TargetAggregateVersion
 {
-
 }

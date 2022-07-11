@@ -20,9 +20,9 @@ abstract class EnqueueMessageChannelBuilder implements MessageChannelBuilder
     {
         /** @var ServiceConfiguration|null $applicationConfiguration */
         $applicationConfiguration = $referenceSearchService->has(ServiceConfiguration::class) ? $referenceSearchService->get(ServiceConfiguration::class) : null;
-        $pollingMetadata = PollingMetadata::create("");
+        $pollingMetadata = PollingMetadata::create('');
 
-        if (!$this->getDefaultConversionMediaType() && $applicationConfiguration && $applicationConfiguration->getDefaultSerializationMediaType()) {
+        if (! $this->getDefaultConversionMediaType() && $applicationConfiguration && $applicationConfiguration->getDefaultSerializationMediaType()) {
             $this->withDefaultConversionMediaType($applicationConfiguration->getDefaultSerializationMediaType());
         }
 
@@ -42,9 +42,9 @@ abstract class EnqueueMessageChannelBuilder implements MessageChannelBuilder
         return $this->prepareProviderChannel($referenceSearchService, $pollingMetadata);
     }
 
-    public abstract function getDefaultConversionMediaType(): ?MediaType;
+    abstract public function getDefaultConversionMediaType(): ?MediaType;
 
-    public abstract function withDefaultConversionMediaType(string $mediaType);
+    abstract public function withDefaultConversionMediaType(string $mediaType);
 
-    public abstract function prepareProviderChannel(ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): MessageChannel;
+    abstract public function prepareProviderChannel(ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): MessageChannel;
 }

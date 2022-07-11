@@ -10,15 +10,10 @@ use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\NullableMessageChannel;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\CallAggregateServiceBuilder;
-use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
-use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateWithoutMessageClassesExample;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
@@ -34,30 +29,33 @@ use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
 use Test\Ecotone\Modelling\Fixture\Ticket\TicketWasStartedEvent;
 use Test\Ecotone\Modelling\Fixture\Ticket\WorkerWasAssignedEvent;
 
+/**
+ * @internal
+ */
 class CallAggregateServiceBuilderTest extends TestCase
 {
     public function test_calling_existing_aggregate_method_with_command_class()
     {
-        $aggregate                      = AggregateWithoutMessageClassesExample::create(["id" => 1]);
+        $aggregate                      = AggregateWithoutMessageClassesExample::create(['id' => 1]);
         $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
-            "doSomething",
+            'doSomething',
             true,
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["repository"]);
+            ->withAggregateRepositoryFactories(['repository']);
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith(
                 [
-                    "repository" => InMemoryStandardRepository::createEmpty()
+                    'repository' => InMemoryStandardRepository::createEmpty(),
                 ]
             )
         );
 
         $aggregateCommandHandler->handle(
-            MessageBuilder::withPayload(["id" => 1])
+            MessageBuilder::withPayload(['id' => 1])
                 ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate)
                 ->build()
         );
@@ -68,22 +66,22 @@ class CallAggregateServiceBuilderTest extends TestCase
     public function test_calling_aggregate_for_query_handler_with_return_value()
     {
         $orderAmount = 5;
-        $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, "Poland"));
+        $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, 'Poland'));
         $order->increaseAggregateVersion();
 
         $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
-            "getAmountWithQuery",
+            'getAmountWithQuery',
             true,
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["orderRepository"]);
+            ->withAggregateRepositoryFactories(['orderRepository']);
 
         $aggregateQueryHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
-                "orderRepository" => InMemoryStandardRepository::createEmpty(),
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                'orderRepository' => InMemoryStandardRepository::createEmpty(),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
             ])
         );
 
@@ -108,7 +106,7 @@ class CallAggregateServiceBuilderTest extends TestCase
 
         $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Storage::class)),
-            "getSmallBoxes",
+            'getSmallBoxes',
             false,
             InterfaceToCallRegistry::createEmpty()
         )
@@ -117,13 +115,13 @@ class CallAggregateServiceBuilderTest extends TestCase
         $aggregateQueryHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
-                InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty()
+                InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty(),
             ])
         );
 
         $replyChannel = QueueChannel::create();
         $aggregateQueryHandler->handle(
-            MessageBuilder::withPayload(["storageId" => $aggregateId])
+            MessageBuilder::withPayload(['storageId' => $aggregateId])
                 ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate)
                 ->setReplyChannel($replyChannel)
                 ->build()
@@ -142,7 +140,7 @@ class CallAggregateServiceBuilderTest extends TestCase
 
         $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Storage::class)),
-            "getBigBoxes",
+            'getBigBoxes',
             false,
             InterfaceToCallRegistry::createEmpty()
         )
@@ -151,13 +149,13 @@ class CallAggregateServiceBuilderTest extends TestCase
         $aggregateQueryHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
-                InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty()
+                InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty(),
             ])
         );
 
         $replyChannel = QueueChannel::create();
         $aggregateQueryHandler->handle(
-            MessageBuilder::withPayload(["storageId" => $aggregateId])
+            MessageBuilder::withPayload(['storageId' => $aggregateId])
                 ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate)
                 ->setReplyChannel($replyChannel)
                 ->build()
@@ -172,28 +170,28 @@ class CallAggregateServiceBuilderTest extends TestCase
     public function test_calling_aggregate_query_handler_returning_null_value()
     {
         $orderAmount = 5;
-        $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, "Poland"));
+        $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, 'Poland'));
         $order->increaseAggregateVersion();
 
         $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
-            "getCustomerId",
+            'getCustomerId',
             false,
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["orderRepository"]);
+            ->withAggregateRepositoryFactories(['orderRepository']);
 
         $aggregateQueryHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
-                "orderRepository" => InMemoryStandardRepository::createEmpty(),
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                'orderRepository' => InMemoryStandardRepository::createEmpty(),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
             ])
         );
 
         $replyChannel = QueueChannel::create();
         $aggregateQueryHandler->handle(
-            MessageBuilder::withPayload(["orderId" => 1])
+            MessageBuilder::withPayload(['orderId' => 1])
                 ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $order)
                 ->setReplyChannel($replyChannel)
                 ->build()
@@ -204,26 +202,26 @@ class CallAggregateServiceBuilderTest extends TestCase
 
     public function test_calling_aggregate_for_query_handler_with_no_query()
     {
-        $aggregate = AggregateWithoutMessageClassesExample::create(["id" => 1]);
+        $aggregate = AggregateWithoutMessageClassesExample::create(['id' => 1]);
         $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
-            "querySomething",
+            'querySomething',
             false,
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["repository"]);
+            ->withAggregateRepositoryFactories(['repository']);
 
         $aggregateQueryHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
-                "repository" => InMemoryStandardRepository::createWith([$aggregate]),
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                'repository' => InMemoryStandardRepository::createWith([$aggregate]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
             ])
         );
 
         $replyChannel = QueueChannel::create();
         $aggregateQueryHandler->handle(
-            MessageBuilder::withPayload(["id" => 1])
+            MessageBuilder::withPayload(['id' => 1])
                 ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate)
                 ->setReplyChannel($replyChannel)
                 ->build()
@@ -241,12 +239,12 @@ class CallAggregateServiceBuilderTest extends TestCase
 
         $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-            "start",
+            'start',
             true,
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["repository"])
-            ->withInputChannelName("inputChannel");
+            ->withAggregateRepositoryFactories(['repository'])
+            ->withInputChannelName('inputChannel');
 
         $replyChannel = QueueChannel::create();
         $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createEmpty();
@@ -254,8 +252,8 @@ class CallAggregateServiceBuilderTest extends TestCase
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
-                "repository" => $inMemoryEventSourcedRepository,
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                'repository' => $inMemoryEventSourcedRepository,
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
             ])
         );
 
@@ -274,21 +272,21 @@ class CallAggregateServiceBuilderTest extends TestCase
 
         $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-            "assignWorker",
+            'assignWorker',
             true,
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["repository"])
-            ->withInputChannelName("inputChannel");
+            ->withAggregateRepositoryFactories(['repository'])
+            ->withInputChannelName('inputChannel');
 
         $queueChannel = QueueChannel::create();
-        $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => $ticketId], Ticket::class, [new TicketWasStartedEvent($ticketId)]);
+        $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createWithExistingAggregate(['ticketId' => $ticketId], Ticket::class, [new TicketWasStartedEvent($ticketId)]);
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
-                "repository" => $inMemoryEventSourcedRepository,
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                'repository' => $inMemoryEventSourcedRepository,
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
             ])
         );
 

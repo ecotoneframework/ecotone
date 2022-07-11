@@ -1,14 +1,11 @@
 <?php
 
-
 namespace Ecotone\Messaging\Handler\Chain;
 
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
-use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -45,7 +42,7 @@ class ChainForwardPublisher
 
         $this->requestChannel->send($requestMessageWithNewChainReply);
 
-        if (!$replyChannel) {
+        if (! $replyChannel) {
             return null;
         }
 

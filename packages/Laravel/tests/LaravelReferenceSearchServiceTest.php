@@ -6,6 +6,9 @@ use Ecotone\Laravel\LaravelReferenceSearchService;
 use Illuminate\Contracts\Foundation\Application;
 use Orchestra\Testbench\TestCase;
 
+/**
+ * @internal
+ */
 class LaravelReferenceSearchServiceTest extends TestCase
 {
     public function test_it_returns_items_from_laravel_container()

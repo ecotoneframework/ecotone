@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Messaging\Endpoint\EventDriven;
-
 
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
@@ -41,6 +39,6 @@ class LazyEventDrivenConsumerBuilder implements MessageHandlerConsumerBuilder
      */
     public function isSupporting(MessageHandlerBuilder $messageHandlerBuilder, MessageChannelBuilder $relatedMessageChannel): bool
     {
-        return $relatedMessageChannel instanceof SimpleMessageChannelBuilder && !$relatedMessageChannel->isPollable();
+        return $relatedMessageChannel instanceof SimpleMessageChannelBuilder && ! $relatedMessageChannel->isPollable();
     }
 }

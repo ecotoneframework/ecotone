@@ -18,7 +18,7 @@ class NoReturnMessageHandler implements MessageHandler
 
     private $callCount = 0;
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -32,13 +32,13 @@ class NoReturnMessageHandler implements MessageHandler
         $this->callCount++;
     }
 
-    public function handleWithMethodInvocation(MethodInvocation $methodInvocation, Message $message) : void
+    public function handleWithMethodInvocation(MethodInvocation $methodInvocation, Message $message): void
     {
         $this->wasCalled = true;
         $this->callCount++;
     }
 
-    public function wasCalled() : bool
+    public function wasCalled(): bool
     {
         return $this->wasCalled;
     }

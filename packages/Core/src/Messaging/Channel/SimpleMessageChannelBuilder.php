@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
 
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\MessageChannel;
@@ -34,27 +34,27 @@ class SimpleMessageChannelBuilder implements MessageChannelBuilder
         $this->isPollable = $isPollable;
     }
 
-    public static function create(string $messageChannelName, MessageChannel $messageChannel) : self
+    public static function create(string $messageChannelName, MessageChannel $messageChannel): self
     {
         return new self($messageChannelName, $messageChannel, $messageChannel instanceof PollableChannel);
     }
 
-    public static function createDirectMessageChannel(string $messageChannelName) : self
+    public static function createDirectMessageChannel(string $messageChannelName): self
     {
         return self::create($messageChannelName, DirectChannel::create());
     }
 
-    public static function createPublishSubscribeChannel(string $messageChannelName) : self
+    public static function createPublishSubscribeChannel(string $messageChannelName): self
     {
         return self::create($messageChannelName, PublishSubscribeChannel::create());
     }
 
-    public static function createQueueChannel(string $messageChannelName) : self
+    public static function createQueueChannel(string $messageChannelName): self
     {
         return self::create($messageChannelName, QueueChannel::create());
     }
 
-    public static function createNullableChannel(string $messageChannelName) : self
+    public static function createNullableChannel(string $messageChannelName): self
     {
         return self::create($messageChannelName, NullableMessageChannel::create());
     }
@@ -70,7 +70,7 @@ class SimpleMessageChannelBuilder implements MessageChannelBuilder
     /**
      * @return string[] empty string means no required reference name exists
      */
-    public function getRequiredReferenceNames() : array
+    public function getRequiredReferenceNames(): array
     {
         return [];
     }
@@ -94,7 +94,7 @@ class SimpleMessageChannelBuilder implements MessageChannelBuilder
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService) : MessageChannel
+    public function build(ReferenceSearchService $referenceSearchService): MessageChannel
     {
         return $this->messageChannel;
     }

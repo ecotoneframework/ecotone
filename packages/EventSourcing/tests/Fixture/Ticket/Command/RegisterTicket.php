@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Test\Ecotone\EventSourcing\Fixture\Ticket\Command;
-
 
 class RegisterTicket
 {

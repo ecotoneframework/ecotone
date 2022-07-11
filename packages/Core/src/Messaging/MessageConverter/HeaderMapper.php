@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\MessageConverter;
@@ -14,11 +15,11 @@ interface HeaderMapper
      * @param array $headersToBeMapped
      * @return array
      */
-    public function mapToMessageHeaders(array $headersToBeMapped) : array;
+    public function mapToMessageHeaders(array $headersToBeMapped): array;
 
     /**
      * @param array $headersToBeMapped
      * @return array
      */
-    public function mapFromMessageHeaders(array $headersToBeMapped) : array;
+    public function mapFromMessageHeaders(array $headersToBeMapped): array;
 }

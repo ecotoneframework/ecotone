@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
 
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 
@@ -37,14 +37,14 @@ class SimpleChannelInterceptorBuilder implements ChannelInterceptorBuilder
      * @param string $referenceName
      * @return SimpleChannelInterceptorBuilder
      */
-    public static function create(string $channelName, string $referenceName) : self
+    public static function create(string $channelName, string $referenceName): self
     {
         return new self(0, $channelName, $referenceName);
     }
 
-    public static function createWithDirectObject(string $channelName, object $object) : self
+    public static function createWithDirectObject(string $channelName, object $object): self
     {
-        $self = new self(0, $channelName, "");
+        $self = new self(0, $channelName, '');
         $self->directObject = $object;
 
         return $self;
@@ -62,7 +62,7 @@ class SimpleChannelInterceptorBuilder implements ChannelInterceptorBuilder
      * @param int $precedence
      * @return SimpleChannelInterceptorBuilder
      */
-    public function withPrecedence(int $precedence) : self
+    public function withPrecedence(int $precedence): self
     {
         $this->precedence = $precedence;
 

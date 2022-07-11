@@ -41,7 +41,7 @@ class CreateOrderCommand
      * @param string $shippingAddress
      * @return CreateOrderCommand
      */
-    public static function createWith(string $aggregateId, int $amount, string $shippingAddress) : self
+    public static function createWith(string $aggregateId, int $amount, string $shippingAddress): self
     {
         return new self($aggregateId, $amount, $shippingAddress);
     }

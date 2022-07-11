@@ -2,15 +2,16 @@
 
 namespace Ecotone\Dbal\DocumentStore;
 
-use Ecotone\Messaging\Store\Document\DocumentNotFound;
 use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Modelling\StandardRepository;
 
 final class DocumentStoreAggregateRepository implements StandardRepository
 {
-    private const COLLECTION_NAME = "aggregates_";
+    private const COLLECTION_NAME = 'aggregates_';
 
-    public function __construct(private DocumentStore $documentStore) {}
+    public function __construct(private DocumentStore $documentStore)
+    {
+    }
 
     public function canHandle(string $aggregateClassName): bool
     {

@@ -29,7 +29,7 @@ class GatewayHeadersBuilder implements GatewayParameterConverterBuilder
      * @param string $parameterName
      * @return self
      */
-    public static function create(string $parameterName) : self
+    public static function create(string $parameterName): self
     {
         return new self($parameterName);
     }

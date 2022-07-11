@@ -10,7 +10,9 @@ use Ecotone\Modelling\StandardRepository;
 
 final class DocumentStoreAggregateRepositoryBuilder implements RepositoryBuilder
 {
-    public function __construct(private string $documentStoreReferenceName) {}
+    public function __construct(private string $documentStoreReferenceName)
+    {
+    }
 
     public function canHandle(string $aggregateClassName): bool
     {

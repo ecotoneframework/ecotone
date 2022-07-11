@@ -9,5 +9,5 @@ namespace Test\Ecotone\Messaging\Fixture\Service\ServiceInterface;
  */
 interface ServiceInterfaceSendAndReceive
 {
-    public function getById(int $id) : ?string;
+    public function getById(int $id): ?string;
 }

@@ -1,7 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Conversion;
+
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Type;
@@ -49,7 +51,7 @@ class FakeConverterService implements Converter
      * @throws \Ecotone\Messaging\MessagingException
      * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
-    public static function create($data, string $requestTypeDescriptor, string $requestMediaType) : self
+    public static function create($data, string $requestTypeDescriptor, string $requestMediaType): self
     {
         return new self($data, TypeDescriptor::create($requestTypeDescriptor), MediaType::parseMediaType($requestMediaType));
     }

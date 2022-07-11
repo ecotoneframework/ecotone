@@ -8,12 +8,10 @@ class OneTimeWithConstructorParametersCommandExample
 {
     public function __construct(string $name)
     {
-
     }
-    
-    #[ConsoleCommand("doSomething")]
-    public function execute() : void
-    {
 
+    #[ConsoleCommand('doSomething')]
+    public function execute(): void
+    {
     }
 }

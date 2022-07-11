@@ -5,13 +5,9 @@ namespace Ecotone\Messaging\Handler\Router;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\DestinationResolutionException;
 use Ecotone\Messaging\Handler\MessageProcessor;
-use Ecotone\Messaging\Handler\ParameterConverter;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -56,7 +52,7 @@ final class Router implements MessageHandler
      *
      * @return Router
      */
-    public static function create(ChannelResolver $channelResolver, MessageProcessor $messageProcessor, bool $isResolutionRequired, ?string $defaultResolutionChannel, bool $applySequence) : self
+    public static function create(ChannelResolver $channelResolver, MessageProcessor $messageProcessor, bool $isResolutionRequired, ?string $defaultResolutionChannel, bool $applySequence): self
     {
         return new self($channelResolver, $messageProcessor, $isResolutionRequired, $defaultResolutionChannel, $applySequence);
     }
@@ -71,7 +67,7 @@ final class Router implements MessageHandler
         if (is_null($resolutionChannels)) {
             $resolutionChannels = [];
         }
-        if (!is_array($resolutionChannels)) {
+        if (! is_array($resolutionChannels)) {
             $resolutionChannels = [$resolutionChannels];
         }
         if (empty($resolutionChannels) && $this->defaultResolutionChannelName) {
@@ -105,6 +101,6 @@ final class Router implements MessageHandler
      */
     public function __toString()
     {
-        return "Router - " . $this->methodInvoker;
+        return 'Router - ' . $this->methodInvoker;
     }
 }

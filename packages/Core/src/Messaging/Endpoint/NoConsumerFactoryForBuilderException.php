@@ -11,7 +11,7 @@ use Ecotone\Messaging\MessagingException;
  */
 class NoConsumerFactoryForBuilderException extends MessagingException
 {
-    const NO_CONSUMER_FACTORY_FOR_BUILDER_EXCEPTION = 130;
+    public const NO_CONSUMER_FACTORY_FOR_BUILDER_EXCEPTION = 130;
 
     /**
      * @inheritDoc

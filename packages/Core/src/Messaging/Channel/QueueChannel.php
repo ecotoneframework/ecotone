@@ -21,7 +21,7 @@ class QueueChannel implements PollableChannel
     {
     }
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -52,6 +52,6 @@ class QueueChannel implements PollableChannel
 
     public function __toString()
     {
-        return "queue channel";
+        return 'queue channel';
     }
 }

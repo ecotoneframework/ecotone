@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher;
@@ -59,16 +60,18 @@ class InternalEnrichingService
      * @throws \Ecotone\Messaging\MessagingException
      * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
-    public function enrich(Message $message) : Message
+    public function enrich(Message $message): Message
     {
         $replyMessage = null;
         if ($this->enrichGateway) {
             $requestMessage = MessageBuilder::fromMessage($message);
 
             if ($this->requestPayloadExpression) {
-                $requestPayload = $this->expressionEvaluationService->evaluate($this->requestPayloadExpression, [
-                        "headers" => $message->getHeaders()->headers(),
-                        "payload" => $message->getPayload()
+                $requestPayload = $this->expressionEvaluationService->evaluate(
+                    $this->requestPayloadExpression,
+                    [
+                        'headers' => $message->getHeaders()->headers(),
+                        'payload' => $message->getPayload(),
                     ],
                     $this->referenceSearchService
                 );
@@ -96,7 +99,7 @@ class InternalEnrichingService
             if ($setter->isPayloadSetter()) {
                 $settedMessage = $settedMessage
                     ->setPayload($setter->evaluate($enrichedMessage, $replyMessage));
-            }else {
+            } else {
                 foreach ($setter->evaluate($enrichedMessage, $replyMessage) as $headerName => $headerValue) {
                     $settedMessage = $settedMessage
                         ->setHeader($headerName, $headerValue);
@@ -116,13 +119,13 @@ class InternalEnrichingService
      * @throws \Ecotone\Messaging\MessagingException
      * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
-    private function getConvertedMessage(Message $message): \Ecotone\Messaging\Message
+    private function getConvertedMessage(Message $message): Message
     {
         $enrichedMessage = MessageBuilder::fromMessage($message);
 
         if ($message->getHeaders()->containsKey(MessageHeaders::CONTENT_TYPE)) {
             $mediaType = MediaType::parseMediaType($message->getHeaders()->get(MessageHeaders::CONTENT_TYPE));
-            if (!$mediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP)) {
+            if (! $mediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP)) {
                 if ($this->conversionService->canConvert(
                     $mediaType->hasTypeParameter() ? $mediaType->getTypeParameter() : TypeDescriptor::createFromVariable($message->getPayload()),
                     $mediaType,

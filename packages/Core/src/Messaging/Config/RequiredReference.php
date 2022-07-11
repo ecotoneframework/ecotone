@@ -24,7 +24,7 @@ class RequiredReference
      * @param string $referenceName
      * @return RequiredReference
      */
-    public static function create(string $referenceName) : self
+    public static function create(string $referenceName): self
     {
         return new self($referenceName);
     }

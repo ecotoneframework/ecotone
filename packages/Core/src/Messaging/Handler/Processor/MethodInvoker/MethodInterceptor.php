@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
@@ -141,7 +142,7 @@ class MethodInterceptor implements InterceptorWithPointCut
      */
     private function initializePointcut(InterfaceToCall $interfaceToCall, Pointcut $pointcut, array $parameterConverters): Pointcut
     {
-        if (!$pointcut->isEmpty()) {
+        if (! $pointcut->isEmpty()) {
             return $pointcut;
         }
 

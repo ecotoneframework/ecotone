@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config;
@@ -33,7 +34,7 @@ class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameReso
      * @param string[] $references
      * @return InMemoryReferenceTypeFromNameResolver
      */
-    public static function createFromAssociativeArray(array $references) : self
+    public static function createFromAssociativeArray(array $references): self
     {
         return new self($references);
     }
@@ -42,7 +43,7 @@ class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameReso
      * @param array $references
      * @return InMemoryReferenceTypeFromNameResolver
      */
-    public static function createFromObjects(array $references) : self
+    public static function createFromObjects(array $references): self
     {
         $objectTypes = [];
 
@@ -53,7 +54,7 @@ class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameReso
         return self::createFromAssociativeArray($objectTypes);
     }
 
-    public static function createFromReferenceSearchService(ReferenceSearchService $referenceSearchService) : self
+    public static function createFromReferenceSearchService(ReferenceSearchService $referenceSearchService): self
     {
         $self = new self([]);
         $self->referenceSearchService = $referenceSearchService;
@@ -64,7 +65,7 @@ class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameReso
     /**
      * @return InMemoryReferenceTypeFromNameResolver
      */
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         return new self([]);
     }
@@ -77,7 +78,7 @@ class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameReso
         if ($this->referenceSearchService) {
             return TypeDescriptor::createFromVariable($this->referenceSearchService->get($referenceName));
         }
-        if (!array_key_exists($referenceName, $this->references)) {
+        if (! array_key_exists($referenceName, $this->references)) {
             throw ConfigurationException::create("Reference not found for name resolver `{$referenceName}`.");
         }
 

@@ -10,17 +10,17 @@ use Ecotone\Messaging\Message;
 
 interface MessagingEntrypoint
 {
-    const ENTRYPOINT = "ecotone.messaging.entrypoint";
+    public const ENTRYPOINT = 'ecotone.messaging.entrypoint';
 
     #[MessageGateway(MessagingEntrypoint::ENTRYPOINT)]
-    public function send(#[Payload] $payload, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel) : mixed;
+    public function send(#[Payload] $payload, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel): mixed;
 
     #[MessageGateway(MessagingEntrypoint::ENTRYPOINT)]
-    public function sendWithHeaders(#[Payload] $payload, #[Headers] array $headers, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel) : mixed;
+    public function sendWithHeaders(#[Payload] $payload, #[Headers] array $headers, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel): mixed;
 
     /**
      * It must contain {MessagingEntrypoint::ENTRYPOINT} header
      */
     #[MessageGateway(MessagingEntrypoint::ENTRYPOINT)]
-    public function sendMessage(Message $message) : mixed;
+    public function sendMessage(Message $message): mixed;
 }

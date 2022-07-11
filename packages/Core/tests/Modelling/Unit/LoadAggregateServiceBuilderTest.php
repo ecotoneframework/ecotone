@@ -10,24 +10,19 @@ use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\AggregateNotFoundException;
-use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Ecotone\Modelling\LoadAggregateMode;
 use Ecotone\Modelling\LoadAggregateServiceBuilder;
-use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use Ecotone\Modelling\SnapshotEvent;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateWithoutMessageClassesExample;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\EventSourcingHandlerMethodWithReturnType;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\EventSourcingHandlerMethodWithWrongParameterCountExample;
-use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\IncorrectEventTypeReturned\CreateIncorrectEventTypeReturnedAggregate;
-use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\IncorrectEventTypeReturned\IncorrectEventTypeReturnedExample;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoFactoryMethodAggregateExample;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\StaticEventSourcingHandlerMethodExample;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\WithConstructorHavingParameters;
@@ -36,40 +31,42 @@ use Test\Ecotone\Modelling\Fixture\Renter\Appointment;
 use Test\Ecotone\Modelling\Fixture\Renter\AppointmentRepositoryBuilder;
 use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
-use Test\Ecotone\Modelling\Fixture\Saga\OrderFulfilment;
 use Test\Ecotone\Modelling\Fixture\Ticket\AssignWorkerCommand;
 use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
 use Test\Ecotone\Modelling\Fixture\Ticket\TicketWasStartedEvent;
 use Test\Ecotone\Modelling\Fixture\Ticket\WorkerWasAssignedEvent;
 
+/**
+ * @internal
+ */
 class LoadAggregateServiceBuilderTest extends TestCase
 {
     public function test_enriching_command_with_aggregate_if_found()
     {
         $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
-            "getAppointmentId",
+            'getAppointmentId',
             null,
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["repository"]);
+            ->withAggregateRepositoryFactories(['repository']);
 
         $appointment = Appointment::create(new CreateAppointmentCommand(123, 1000));
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
-                "repository" => AppointmentStandardRepository::createWith([
-                    $appointment
+                'repository' => AppointmentStandardRepository::createWith([
+                    $appointment,
                 ]),
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
             ])
         );
 
         $replyChannel = QueueChannel::create();
         $aggregateCommandHandler->handle(
             MessageBuilder::withPayload([])
-                ->setHeader(AggregateMessage::AGGREGATE_ID, ["appointmentId" => 123])
+                ->setHeader(AggregateMessage::AGGREGATE_ID, ['appointmentId' => 123])
                 ->setReplyChannel($replyChannel)
                 ->build()
         );
@@ -84,26 +81,26 @@ class LoadAggregateServiceBuilderTest extends TestCase
     {
         $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-            "assignWorker",
+            'assignWorker',
             ClassDefinition::createFor(TypeDescriptor::create(AssignWorkerCommand::class)),
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["repository"]);
+            ->withAggregateRepositoryFactories(['repository']);
 
         $ticketWasStartedEvent = new TicketWasStartedEvent(1);
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
-                "repository" => InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => 1], Ticket::class, [$ticketWasStartedEvent]),
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                'repository' => InMemoryEventSourcedRepository::createWithExistingAggregate(['ticketId' => 1], Ticket::class, [$ticketWasStartedEvent]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
             ])
         );
 
         $replyChannel = QueueChannel::create();
         $aggregateCommandHandler->handle(
             MessageBuilder::withPayload(new AssignWorkerCommand(1, 2))
-                ->setHeader(AggregateMessage::AGGREGATE_ID, ["ticketId" => 1])
+                ->setHeader(AggregateMessage::AGGREGATE_ID, ['ticketId' => 1])
                 ->setReplyChannel($replyChannel)
                 ->build()
         );
@@ -124,12 +121,12 @@ class LoadAggregateServiceBuilderTest extends TestCase
     {
         $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-            "assignWorker",
+            'assignWorker',
             ClassDefinition::createFor(TypeDescriptor::create(AssignWorkerCommand::class)),
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["repository"]);
+            ->withAggregateRepositoryFactories(['repository']);
 
         $ticket = new Ticket();
         $ticket->onTicketWasStarted(new TicketWasStartedEvent(1));
@@ -138,15 +135,15 @@ class LoadAggregateServiceBuilderTest extends TestCase
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
-                "repository" => InMemoryEventSourcedRepository::createWithExistingAggregate(["ticketId" => 1], Ticket::class, [new SnapshotEvent(clone $ticket), $extraEvent]),
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                'repository' => InMemoryEventSourcedRepository::createWithExistingAggregate(['ticketId' => 1], Ticket::class, [new SnapshotEvent(clone $ticket), $extraEvent]),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
             ])
         );
 
         $replyChannel = QueueChannel::create();
         $aggregateCommandHandler->handle(
             MessageBuilder::withPayload(new AssignWorkerCommand(1, 2))
-                ->setHeader(AggregateMessage::AGGREGATE_ID, ["ticketId" => 1])
+                ->setHeader(AggregateMessage::AGGREGATE_ID, ['ticketId' => 1])
                 ->setReplyChannel($replyChannel)
                 ->build()
         );
@@ -166,28 +163,28 @@ class LoadAggregateServiceBuilderTest extends TestCase
     {
         $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
-            "getAppointmentId",
+            'getAppointmentId',
             null,
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["repository"]);
+            ->withAggregateRepositoryFactories(['repository']);
 
         $appointment = Appointment::create(new CreateAppointmentCommand(123, 1000));
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
-                "repository" => AppointmentRepositoryBuilder::createWith([
-                    $appointment
+                'repository' => AppointmentRepositoryBuilder::createWith([
+                    $appointment,
                 ]),
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
             ])
         );
 
         $replyChannel = QueueChannel::create();
         $aggregateCommandHandler->handle(
             MessageBuilder::withPayload([])
-                ->setHeader(AggregateMessage::AGGREGATE_ID, ["appointmentId" => 123])
+                ->setHeader(AggregateMessage::AGGREGATE_ID, ['appointmentId' => 123])
                 ->setReplyChannel($replyChannel)
                 ->build()
         );
@@ -202,18 +199,18 @@ class LoadAggregateServiceBuilderTest extends TestCase
     {
         $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
-            "doSomething",
+            'doSomething',
             null,
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["repository"]);
+            ->withAggregateRepositoryFactories(['repository']);
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
-                "repository" => InMemoryStandardRepository::createEmpty(),
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                'repository' => InMemoryStandardRepository::createEmpty(),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
             ])
         );
 
@@ -232,19 +229,19 @@ class LoadAggregateServiceBuilderTest extends TestCase
 
         $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(NoFactoryMethodAggregateExample::class)),
-            "doSomething",
+            'doSomething',
             null,
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["repository"])
-            ->withInputChannelName("inputChannel");
+            ->withAggregateRepositoryFactories(['repository'])
+            ->withInputChannelName('inputChannel');
 
         $aggregateCallingCommandHandler->build(
             InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith([
-                "repository" => InMemoryEventSourcedRepository::createEmpty(),
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                'repository' => InMemoryEventSourcedRepository::createEmpty(),
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
             ])
         );
     }
@@ -255,13 +252,13 @@ class LoadAggregateServiceBuilderTest extends TestCase
 
         LoadAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(EventSourcingHandlerMethodWithWrongParameterCountExample::class)),
-            "doSomething",
+            'doSomething',
             null,
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["repository"])
-            ->withInputChannelName("inputChannel");
+            ->withAggregateRepositoryFactories(['repository'])
+            ->withInputChannelName('inputChannel');
     }
 
     public function test_throwing_exception_if_construct_having_parameters()
@@ -270,13 +267,13 @@ class LoadAggregateServiceBuilderTest extends TestCase
 
         LoadAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(WithConstructorHavingParameters::class)),
-            "doSomething",
+            'doSomething',
             null,
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["repository"])
-            ->withInputChannelName("inputChannel");
+            ->withAggregateRepositoryFactories(['repository'])
+            ->withInputChannelName('inputChannel');
     }
 
     public function test_throwing_exception_if_construct_is_private()
@@ -285,13 +282,13 @@ class LoadAggregateServiceBuilderTest extends TestCase
 
         LoadAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(WithPrivateConstructor::class)),
-            "doSomething",
+            'doSomething',
             null,
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["repository"])
-            ->withInputChannelName("inputChannel");
+            ->withAggregateRepositoryFactories(['repository'])
+            ->withInputChannelName('inputChannel');
     }
 
     public function test_throwing_exception_if_event_sourcing_handler_is_non_void()
@@ -300,13 +297,13 @@ class LoadAggregateServiceBuilderTest extends TestCase
 
         LoadAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(EventSourcingHandlerMethodWithReturnType::class)),
-            "doSomething",
+            'doSomething',
             null,
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["repository"])
-            ->withInputChannelName("inputChannel");
+            ->withAggregateRepositoryFactories(['repository'])
+            ->withInputChannelName('inputChannel');
     }
 
     public function test_throwing_exception_if_event_sourcing_handler_is_static()
@@ -315,12 +312,12 @@ class LoadAggregateServiceBuilderTest extends TestCase
 
         LoadAggregateServiceBuilder::create(
             ClassDefinition::createFor(TypeDescriptor::create(StaticEventSourcingHandlerMethodExample::class)),
-            "doSomething",
+            'doSomething',
             null,
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(["repository"])
-            ->withInputChannelName("inputChannel");
+            ->withAggregateRepositoryFactories(['repository'])
+            ->withInputChannelName('inputChannel');
     }
 }

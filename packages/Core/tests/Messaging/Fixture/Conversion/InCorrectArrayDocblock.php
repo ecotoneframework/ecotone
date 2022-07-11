@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Conversion;
-
 
 class InCorrectArrayDocblock
 {
@@ -14,16 +12,14 @@ class InCorrectArrayDocblock
     /**
      * @param rabbitMq[] $data
      */
-    public function incorrectParameter(array $data) : void
+    public function incorrectParameter(array $data): void
     {
-
     }
 
     /**
      * @return rabbitMq[]
      */
-    public function incorrectReturnType() : array
+    public function incorrectReturnType(): array
     {
-
     }
 }

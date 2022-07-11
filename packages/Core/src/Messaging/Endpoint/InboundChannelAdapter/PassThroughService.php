@@ -2,6 +2,8 @@
 
 namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
 
+use DateTimeImmutable;
+
 class PassThroughService
 {
     private object $serviceToCall;
@@ -13,10 +15,10 @@ class PassThroughService
         $this->method = $method;
     }
 
-    public function execute(): \DateTimeImmutable
+    public function execute(): DateTimeImmutable
     {
         call_user_func_array([$this->serviceToCall, $this->method], []);
 
-        return new \DateTimeImmutable();
+        return new DateTimeImmutable();
     }
 }

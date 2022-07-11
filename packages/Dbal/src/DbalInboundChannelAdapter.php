@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Dbal;
-
 
 use Ecotone\Enqueue\CachedConnectionFactory;
 use Ecotone\Enqueue\InboundMessageConverter;
@@ -65,7 +63,7 @@ class DbalInboundChannelAdapter implements TaskExecutor
 
     public function receiveMessage(): ?Message
     {
-        if (!$this->initialized) {
+        if (! $this->initialized) {
             /** @var DbalContext $context */
             $context = $this->cachedConnectionFactory->createContext();
 
@@ -79,7 +77,7 @@ class DbalInboundChannelAdapter implements TaskExecutor
         /** @var DbalMessage $dbalMessage */
         $dbalMessage = $consumer->receive($this->receiveTimeoutInMilliseconds);
 
-        if (!$dbalMessage) {
+        if (! $dbalMessage) {
             return null;
         }
 

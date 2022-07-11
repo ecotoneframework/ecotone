@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Amqp;
@@ -31,7 +32,7 @@ class AmqpQueue
     /**
      * @return string
      */
-    public function getQueueName() : string
+    public function getQueueName(): string
     {
         return $this->enqueueQueue->getQueueName();
     }
@@ -40,7 +41,7 @@ class AmqpQueue
      * @param string $queueName
      * @return AmqpQueue
      */
-    public static function createWith(string $queueName) : self
+    public static function createWith(string $queueName): self
     {
         return new self($queueName);
     }
@@ -48,14 +49,14 @@ class AmqpQueue
     /**
      * @return EnqueueQueue
      */
-    public function toEnqueueQueue() : EnqueueQueue
+    public function toEnqueueQueue(): EnqueueQueue
     {
         $amqpQueue = clone $this->enqueueQueue;
 
         if ($this->withDurability) {
             $amqpQueue->addFlag(EnqueueQueue::FLAG_DURABLE);
         }
-        if (!is_null($this->withDeadLetterExchange)) {
+        if (! is_null($this->withDeadLetterExchange)) {
             $amqpQueue->setArgument('x-dead-letter-exchange', $this->withDeadLetterExchange);
         }
         if ($this->withDeadLetterRoutingKey) {
@@ -65,7 +66,7 @@ class AmqpQueue
         return $amqpQueue;
     }
 
-    public function withDeadLetterExchangeTarget(AmqpExchange $amqpExchange, ?string $routingKey = null) : self
+    public function withDeadLetterExchangeTarget(AmqpExchange $amqpExchange, ?string $routingKey = null): self
     {
         $this->withDeadLetterExchange = $amqpExchange->getExchangeName();
         $this->withDeadLetterRoutingKey = $routingKey;
@@ -73,9 +74,9 @@ class AmqpQueue
         return $this;
     }
 
-    public function withDeadLetterForDefaultExchange(AmqpQueue $amqpQueue) : self
+    public function withDeadLetterForDefaultExchange(AmqpQueue $amqpQueue): self
     {
-        $this->withDeadLetterExchange = "";
+        $this->withDeadLetterExchange = '';
         $this->withDeadLetterRoutingKey = $amqpQueue->getQueueName();
 
         return $this;
@@ -87,7 +88,7 @@ class AmqpQueue
      * @param bool $isDurable
      * @return AmqpQueue
      */
-    public function withDurability(bool $isDurable) : self
+    public function withDurability(bool $isDurable): self
     {
         $this->withDurability = $isDurable;
 
@@ -99,7 +100,7 @@ class AmqpQueue
      *
      * @return AmqpQueue
      */
-    public function withExclusivity() : self
+    public function withExclusivity(): self
     {
         $this->enqueueQueue->addFlag(EnqueueQueue::FLAG_EXCLUSIVE);
 
@@ -111,7 +112,7 @@ class AmqpQueue
      *
      * @return AmqpQueue
      */
-    public function withAutoDeletion() : self
+    public function withAutoDeletion(): self
     {
         $this->enqueueQueue->addFlag(EnqueueQueue::FLAG_AUTODELETE);
 
@@ -125,7 +126,7 @@ class AmqpQueue
      * @param $value
      * @return AmqpQueue
      */
-    public function withArgument(string $name, $value) : self
+    public function withArgument(string $name, $value): self
     {
         $this->enqueueQueue->setArgument($name, $value);
 

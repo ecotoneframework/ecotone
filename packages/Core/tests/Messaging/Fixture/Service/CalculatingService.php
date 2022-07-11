@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Service;
@@ -21,7 +22,7 @@ class CalculatingService
      * @param int $secondValueForMathOperations
      * @return CalculatingService
      */
-    public static function create(int $secondValueForMathOperations) : self
+    public static function create(int $secondValueForMathOperations): self
     {
         $calculatingService = new self();
         $calculatingService->secondValueForMathOperations = $secondValueForMathOperations;
@@ -29,23 +30,23 @@ class CalculatingService
         return $calculatingService;
     }
 
-    public function result(int $amount) : int
+    public function result(int $amount): int
     {
         $this->lastResult = $amount;
         return $amount;
     }
 
-    public function sum(int $amount) : int
+    public function sum(int $amount): int
     {
         return $amount + $this->secondValueForMathOperations;
     }
 
-    public function subtract(int $amount) : int
+    public function subtract(int $amount): int
     {
         return $amount - $this->secondValueForMathOperations;
     }
 
-    public function multiply(int $amount) : int
+    public function multiply(int $amount): int
     {
         return $amount * $this->secondValueForMathOperations;
     }

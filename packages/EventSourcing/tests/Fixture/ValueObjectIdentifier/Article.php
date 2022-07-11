@@ -32,7 +32,7 @@ class Article
         $this->content = $event->content;
     }
 
-    #[QueryHandler("article.getContent")]
+    #[QueryHandler('article.getContent')]
     public function getContent(): string
     {
         return $this->content;

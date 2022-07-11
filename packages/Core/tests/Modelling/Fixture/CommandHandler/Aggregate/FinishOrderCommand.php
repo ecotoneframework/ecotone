@@ -27,7 +27,7 @@ class FinishOrderCommand
      * @param string $orderId
      * @return FinishOrderCommand
      */
-    public static function create(string $orderId) : self
+    public static function create(string $orderId): self
     {
         return new self($orderId);
     }

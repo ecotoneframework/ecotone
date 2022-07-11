@@ -1,10 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher\Converter;
 
-use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditor;
+use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorBuilder;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
@@ -19,7 +20,7 @@ class EnrichHeaderWithExpressionBuilder implements PropertyEditorBuilder
 {
     private string $propertyPath;
     private string $expression;
-    private string $nullResultExpression = "";
+    private string $nullResultExpression = '';
 
     /**
      * ExpressionSetterBuilder constructor.
@@ -39,7 +40,7 @@ class EnrichHeaderWithExpressionBuilder implements PropertyEditorBuilder
      *
      * @return self
      */
-    public static function createWith(string $propertyPath, string $expression) : self
+    public static function createWith(string $propertyPath, string $expression): self
     {
         return new self($propertyPath, $expression);
     }
@@ -48,7 +49,7 @@ class EnrichHeaderWithExpressionBuilder implements PropertyEditorBuilder
      * @param string $nullResultExpression
      * @return EnrichHeaderWithExpressionBuilder
      */
-    public function withNullResultExpression(string $nullResultExpression) : self
+    public function withNullResultExpression(string $nullResultExpression): self
     {
         $this->nullResultExpression = $nullResultExpression;
 
@@ -68,7 +69,7 @@ class EnrichHeaderWithExpressionBuilder implements PropertyEditorBuilder
             $referenceSearchService,
             PropertyEditorAccessor::createWithMapping(
                 $referenceSearchService,
-                ""
+                ''
             ),
             PropertyPath::createWith($this->propertyPath),
             $this->nullResultExpression,

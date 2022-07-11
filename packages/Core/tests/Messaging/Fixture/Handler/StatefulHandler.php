@@ -17,7 +17,7 @@ class StatefulHandler implements MessageHandler
      */
     private $message;
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -30,7 +30,7 @@ class StatefulHandler implements MessageHandler
         $this->message = $message;
     }
 
-    public function message() : ?Message
+    public function message(): ?Message
     {
         return $this->message;
     }

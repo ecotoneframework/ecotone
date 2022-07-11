@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\Renter;
@@ -29,7 +30,7 @@ class Appointment
     }
 
     #[CommandHandler]
-    public static function create(CreateAppointmentCommand $command) : self
+    public static function create(CreateAppointmentCommand $command): self
     {
         return new self($command);
     }

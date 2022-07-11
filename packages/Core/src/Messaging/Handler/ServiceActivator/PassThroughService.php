@@ -1,9 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\ServiceActivator;
+
 use Ecotone\Messaging\Handler\MessageProcessor;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Message;
 
 /**
@@ -29,7 +30,7 @@ class PassThroughService
      * @param Message $message
      * @return Message
      */
-    public function invoke(Message $message) : Message
+    public function invoke(Message $message): Message
     {
         $this->methodInvoker->processMessage($message);
 

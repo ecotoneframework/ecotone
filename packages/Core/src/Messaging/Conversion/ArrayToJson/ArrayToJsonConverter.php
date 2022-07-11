@@ -1,12 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion\ArrayToJson;
 
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+
+use function json_encode;
 
 /**
  * Class ArrayToJsonConverter
@@ -20,7 +22,7 @@ class ArrayToJsonConverter implements Converter
      */
     public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
     {
-        return \json_encode($source);
+        return json_encode($source);
     }
 
     /**
@@ -29,7 +31,7 @@ class ArrayToJsonConverter implements Converter
     public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
     {
         return
-            $sourceType->isIterable() && !$sourceType->isCollection()
+            $sourceType->isIterable() && ! $sourceType->isCollection()
             && $sourceMediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP)
             && $targetMediaType->isCompatibleWithParsed(MediaType::APPLICATION_JSON);
     }

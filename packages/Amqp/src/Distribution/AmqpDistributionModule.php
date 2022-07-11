@@ -1,21 +1,18 @@
 <?php
 
-
 namespace Ecotone\Amqp\Distribution;
 
 use Ecotone\Amqp\AmqpBackedMessageChannelBuilder;
+use Ecotone\Amqp\AmqpBinding;
+use Ecotone\Amqp\AmqpExchange;
 use Ecotone\Amqp\AmqpOutboundChannelAdapterBuilder;
 use Ecotone\Amqp\AmqpQueue;
 use Ecotone\Amqp\Publisher\AmqpMessagePublisherConfiguration;
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
@@ -23,23 +20,17 @@ use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaders
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\MessagePublisher;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Config\DistributedGatewayModule;
 use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\DistributionEntrypoint;
-use Ecotone\Amqp\AmqpBinding;
-use Ecotone\Amqp\AmqpExchange;
 
 class AmqpDistributionModule
 {
-    const AMQP_DISTRIBUTED_EXCHANGE = "ecotone.distributed";
-    const AMQP_ROUTING_KEY = "ecotone.amqp.distributed.service_target";
-    const CHANNEL_PREFIX   = "distributed_";
+    public const AMQP_DISTRIBUTED_EXCHANGE = 'ecotone.distributed';
+    public const AMQP_ROUTING_KEY = 'ecotone.amqp.distributed.service_target';
+    public const CHANNEL_PREFIX   = 'distributed_';
 
     private array $distributedEventHandlers;
     private array $distributedCommandHandlers;
@@ -50,7 +41,7 @@ class AmqpDistributionModule
         $this->distributedCommandHandlers = $distributedCommandHandlers;
     }
 
-    public static function create(AnnotationFinder $annotationFinder, InterfaceToCallRegistry $interfaceToCallRegistry) : self
+    public static function create(AnnotationFinder $annotationFinder, InterfaceToCallRegistry $interfaceToCallRegistry): self
     {
         return new self(
             DistributedGatewayModule::getDistributedEventHandlerRoutingKeys($annotationFinder, $interfaceToCallRegistry),
@@ -58,13 +49,13 @@ class AmqpDistributionModule
         );
     }
 
-    public function getAmqpConfiguration(array $extensionObjects) : array
+    public function getAmqpConfiguration(array $extensionObjects): array
     {
         $applicationConfiguration = $this->getServiceConfiguration($extensionObjects);
         $amqpConfiguration = [];
         /** @var AmqpMessagePublisherConfiguration $distributedBusConfiguration */
         foreach ($extensionObjects as $distributedBusConfiguration) {
-            if (!($distributedBusConfiguration instanceof AmqpDistributedBusConfiguration)) {
+            if (! ($distributedBusConfiguration instanceof AmqpDistributedBusConfiguration)) {
                 continue;
             }
 
@@ -97,7 +88,7 @@ class AmqpDistributionModule
 
         /** @var AmqpDistributedBusConfiguration $distributedBusConfiguration */
         foreach ($extensionObjects as $distributedBusConfiguration) {
-            if (!($distributedBusConfiguration instanceof AmqpDistributedBusConfiguration)) {
+            if (! ($distributedBusConfiguration instanceof AmqpDistributedBusConfiguration)) {
                 continue;
             }
 
@@ -141,58 +132,58 @@ class AmqpDistributionModule
 
         $configuration
             ->registerGatewayBuilder(
-                GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), DistributedBus::class, "sendCommand", $amqpPublisher->getReferenceName())
+                GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), DistributedBus::class, 'sendCommand', $amqpPublisher->getReferenceName())
                     ->withParameterConverters(
                         [
-                            GatewayPayloadBuilder::create("command"),
-                            GatewayHeadersBuilder::create("metadata"),
-                            GatewayHeaderBuilder::create("sourceMediaType",MessageHeaders::CONTENT_TYPE),
-                            GatewayHeaderBuilder::create("routingKey", DistributionEntrypoint::DISTRIBUTED_ROUTING_KEY),
-                            GatewayHeaderBuilder::create("destination", self::AMQP_ROUTING_KEY),
-                            GatewayHeaderValueBuilder::create(DistributionEntrypoint::DISTRIBUTED_PAYLOAD_TYPE, "command")
+                            GatewayPayloadBuilder::create('command'),
+                            GatewayHeadersBuilder::create('metadata'),
+                            GatewayHeaderBuilder::create('sourceMediaType', MessageHeaders::CONTENT_TYPE),
+                            GatewayHeaderBuilder::create('routingKey', DistributionEntrypoint::DISTRIBUTED_ROUTING_KEY),
+                            GatewayHeaderBuilder::create('destination', self::AMQP_ROUTING_KEY),
+                            GatewayHeaderValueBuilder::create(DistributionEntrypoint::DISTRIBUTED_PAYLOAD_TYPE, 'command'),
                         ]
                     )
             )
             ->registerGatewayBuilder(
-                GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), DistributedBus::class, "convertAndSendCommand", $amqpPublisher->getReferenceName())
+                GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), DistributedBus::class, 'convertAndSendCommand', $amqpPublisher->getReferenceName())
                     ->withParameterConverters(
                         [
-                            GatewayPayloadBuilder::create("command"),
-                            GatewayHeadersBuilder::create("metadata"),
-                            GatewayHeaderBuilder::create("routingKey", DistributionEntrypoint::DISTRIBUTED_ROUTING_KEY),
-                            GatewayHeaderBuilder::create("destination", self::AMQP_ROUTING_KEY),
-                            GatewayHeaderValueBuilder::create(DistributionEntrypoint::DISTRIBUTED_PAYLOAD_TYPE, "command")
+                            GatewayPayloadBuilder::create('command'),
+                            GatewayHeadersBuilder::create('metadata'),
+                            GatewayHeaderBuilder::create('routingKey', DistributionEntrypoint::DISTRIBUTED_ROUTING_KEY),
+                            GatewayHeaderBuilder::create('destination', self::AMQP_ROUTING_KEY),
+                            GatewayHeaderValueBuilder::create(DistributionEntrypoint::DISTRIBUTED_PAYLOAD_TYPE, 'command'),
                         ]
                     )
             )
             ->registerGatewayBuilder(
-                GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), DistributedBus::class, "publishEvent", $amqpPublisher->getReferenceName())
+                GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), DistributedBus::class, 'publishEvent', $amqpPublisher->getReferenceName())
                     ->withParameterConverters(
                         [
-                            GatewayPayloadBuilder::create("event"),
-                            GatewayHeadersBuilder::create("metadata"),
-                            GatewayHeaderBuilder::create("sourceMediaType",MessageHeaders::CONTENT_TYPE),
-                            GatewayHeaderBuilder::create("routingKey", DistributionEntrypoint::DISTRIBUTED_ROUTING_KEY),
-                            GatewayHeaderBuilder::create("routingKey", self::AMQP_ROUTING_KEY),
-                            GatewayHeaderValueBuilder::create(DistributionEntrypoint::DISTRIBUTED_PAYLOAD_TYPE, "event")
+                            GatewayPayloadBuilder::create('event'),
+                            GatewayHeadersBuilder::create('metadata'),
+                            GatewayHeaderBuilder::create('sourceMediaType', MessageHeaders::CONTENT_TYPE),
+                            GatewayHeaderBuilder::create('routingKey', DistributionEntrypoint::DISTRIBUTED_ROUTING_KEY),
+                            GatewayHeaderBuilder::create('routingKey', self::AMQP_ROUTING_KEY),
+                            GatewayHeaderValueBuilder::create(DistributionEntrypoint::DISTRIBUTED_PAYLOAD_TYPE, 'event'),
                         ]
                     )
             )
             ->registerGatewayBuilder(
-                GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), DistributedBus::class, "convertAndPublishEvent", $amqpPublisher->getReferenceName())
+                GatewayProxyBuilder::create($amqpPublisher->getReferenceName(), DistributedBus::class, 'convertAndPublishEvent', $amqpPublisher->getReferenceName())
                     ->withParameterConverters(
                         [
-                            GatewayPayloadBuilder::create("event"),
-                            GatewayHeadersBuilder::create("metadata"),
-                            GatewayHeaderBuilder::create("routingKey", DistributionEntrypoint::DISTRIBUTED_ROUTING_KEY),
-                            GatewayHeaderBuilder::create("routingKey", self::AMQP_ROUTING_KEY),
-                            GatewayHeaderValueBuilder::create(DistributionEntrypoint::DISTRIBUTED_PAYLOAD_TYPE, "event")
+                            GatewayPayloadBuilder::create('event'),
+                            GatewayHeadersBuilder::create('metadata'),
+                            GatewayHeaderBuilder::create('routingKey', DistributionEntrypoint::DISTRIBUTED_ROUTING_KEY),
+                            GatewayHeaderBuilder::create('routingKey', self::AMQP_ROUTING_KEY),
+                            GatewayHeaderValueBuilder::create(DistributionEntrypoint::DISTRIBUTED_PAYLOAD_TYPE, 'event'),
                         ]
                     )
             )
             ->registerMessageHandler(
                 AmqpOutboundChannelAdapterBuilder::create(self::AMQP_DISTRIBUTED_EXCHANGE, $amqpPublisher->getAmqpConnectionReference())
-                    ->withEndpointId($amqpPublisher->getReferenceName() . ".handler")
+                    ->withEndpointId($amqpPublisher->getReferenceName() . '.handler')
                     ->withInputChannelName($amqpPublisher->getReferenceName())
                     ->withDefaultPersistentMode($amqpPublisher->getDefaultPersistentDelivery())
                     ->withAutoDeclareOnSend(true)

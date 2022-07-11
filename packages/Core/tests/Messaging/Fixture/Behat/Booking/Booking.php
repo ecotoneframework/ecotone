@@ -17,7 +17,7 @@ class Booking
     /**
      * @param string $flatNumber
      */
-    public function book(string $flatNumber) : void
+    public function book(string $flatNumber): void
     {
         $this->bookedFlats[] = $flatNumber;
     }
@@ -26,7 +26,7 @@ class Booking
      * @param string $flatNumber
      * @return bool
      */
-    public function isBooked(string $flatNumber) : bool
+    public function isBooked(string $flatNumber): bool
     {
         foreach ($this->bookedFlats as $bookedFlat) {
             if ($bookedFlat == $flatNumber) {

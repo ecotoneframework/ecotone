@@ -36,8 +36,8 @@ use Ecotone\Modelling\QueryBus;
  */
 final class MessagingSystem implements ConfiguredMessagingSystem
 {
-    const POLLING_CONSUMER_BUILDER = "builder";
-    const POLLING_CONSUMER_HANDLER = "handler";
+    public const POLLING_CONSUMER_BUILDER = 'builder';
+    public const POLLING_CONSUMER_HANDLER = 'handler';
 
     /**
      * Application constructor.
@@ -60,8 +60,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         private ReferenceSearchService $referenceSearchService,
         private array                  $pollingMetadataConfigurations,
         private array                  $consoleCommands
-    )
-    {
+    ) {
         foreach ($eventDrivenConsumers as $consumer) {
             $consumer->run();
         }
@@ -82,16 +81,19 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      */
     public static function createFrom(
         ReferenceSearchService $referenceSearchService,
-        array                  $messageChannelBuilders, array $messageChannelInterceptors,
-        array                  $gatewayBuilders, array $messageHandlerConsumerFactories,
-        array                  $pollingMetadataConfigurations, array $messageHandlerBuilders, array $channelAdapterConsumerBuilders,
+        array                  $messageChannelBuilders,
+        array $messageChannelInterceptors,
+        array                  $gatewayBuilders,
+        array $messageHandlerConsumerFactories,
+        array                  $pollingMetadataConfigurations,
+        array $messageHandlerBuilders,
+        array $channelAdapterConsumerBuilders,
         bool                   $isLazyConfiguration,
         array                  $consoleCommands
-    ): MessagingSystem
-    {
+    ): MessagingSystem {
         $channelResolver = self::createChannelResolver($messageChannelInterceptors, $messageChannelBuilders, $referenceSearchService);
 
-        list($gateways, $nonProxyGateways) = self::configureGateways($gatewayBuilders, $referenceSearchService, $channelResolver, $isLazyConfiguration);
+        [$gateways, $nonProxyGateways] = self::configureGateways($gatewayBuilders, $referenceSearchService, $channelResolver, $isLazyConfiguration);
 
         $gatewayReferences = [];
         foreach ($gateways as $gateway) {
@@ -110,7 +112,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
                     if ($messageHandlerConsumerBuilder->isPollingConsumer()) {
                         $pollingConsumerBuilders[$messageHandlerBuilder->getEndpointId()] = [
                             self::POLLING_CONSUMER_BUILDER => $messageHandlerConsumerBuilder,
-                            self::POLLING_CONSUMER_HANDLER => $messageHandlerBuilder
+                            self::POLLING_CONSUMER_HANDLER => $messageHandlerBuilder,
                         ];
                     } else {
                         $eventDrivenConsumers[] = $messageHandlerConsumerBuilder->build($channelResolver, $referenceSearchService, $messageHandlerBuilder, self::getPollingMetadata($messageHandlerBuilder->getEndpointId(), $pollingMetadataConfigurations));
@@ -141,7 +143,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             $messageChannel = $channelsBuilder->build($referenceSearchService);
             $interceptorsForChannel = [];
             foreach ($channelInterceptorBuilders as $channelName => $interceptors) {
-                $regexChannel = str_replace("*", ".*", $channelName);
+                $regexChannel = str_replace('*', '.*', $channelName);
                 if (preg_match("#^{$regexChannel}$#", $channelsBuilder->getMessageChannelName())) {
                     $interceptorsForChannel = array_merge($interceptorsForChannel, array_map(function (ChannelInterceptorBuilder $channelInterceptorBuilder) use ($referenceSearchService) {
                         return $channelInterceptorBuilder->build($referenceSearchService);
@@ -151,7 +153,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
 
             if ($messageChannel instanceof PollableChannel && $interceptorsForChannel) {
                 $messageChannel = new PollableChannelInterceptorAdapter($messageChannel, $interceptorsForChannel);
-            } else if ($interceptorsForChannel) {
+            } elseif ($interceptorsForChannel) {
                 $messageChannel = new EventDrivenChannelInterceptorAdapter($messageChannel, $interceptorsForChannel);
             }
 
@@ -225,7 +227,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
                 $this->pollingConsumerBuilders[$name][self::POLLING_CONSUMER_HANDLER],
                 $pollingMetadata
             )->run();
-        } else if (array_key_exists($name, $this->inboundChannelAdapterBuilders)) {
+        } elseif (array_key_exists($name, $this->inboundChannelAdapterBuilders)) {
             $this->inboundChannelAdapterBuilders[$name]->build(
                 $this->channelResolver,
                 $this->referenceSearchService,
@@ -279,15 +281,15 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         $arguments = [];
 
         foreach ($parameters as $argumentName => $value) {
-            if (!$this->hasParameterWithGivenName($consoleCommandConfiguration, $argumentName)) {
+            if (! $this->hasParameterWithGivenName($consoleCommandConfiguration, $argumentName)) {
                 continue;
             }
 
             $arguments[$consoleCommandConfiguration->getHeaderNameForParameterName($argumentName)] = $value;
         }
         foreach ($consoleCommandConfiguration->getParameters() as $commandParameter) {
-            if (!array_key_exists($consoleCommandConfiguration->getHeaderNameForParameterName($commandParameter->getName()), $arguments)) {
-                if (!$commandParameter->hasDefaultValue()) {
+            if (! array_key_exists($consoleCommandConfiguration->getHeaderNameForParameterName($commandParameter->getName()), $arguments)) {
+                if (! $commandParameter->hasDefaultValue()) {
                     throw InvalidArgumentException::create("Missing argument with name {$commandParameter->getName()} for console command {$commandName}");
                 }
 

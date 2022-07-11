@@ -1,12 +1,11 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\TaskExecutorChannelAdapter;
 
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapter;
-use Ecotone\Messaging\Endpoint\InterceptedConsumer;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Scheduling\CronTrigger;
 use Ecotone\Messaging\Scheduling\EpochBasedClock;
@@ -51,7 +50,7 @@ class TaskExecutorChannelAdapter implements ConsumerLifecycle
      * @throws \Ecotone\Messaging\MessagingException
      * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
-    public static function createFrom(string $endpointId, PollingMetadata $pollingMetadata, TaskExecutor $taskExecutor) : self
+    public static function createFrom(string $endpointId, PollingMetadata $pollingMetadata, TaskExecutor $taskExecutor): self
     {
         return
             new self(

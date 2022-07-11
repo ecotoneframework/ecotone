@@ -11,18 +11,18 @@ class ServiceExpectingTwoArguments
 {
     private $wasCalled = false;
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
 
-    public function withReturnValue(string $name, string $surname) : string
+    public function withReturnValue(string $name, string $surname): string
     {
         $this->wasCalled = true;
         return $name . $surname;
     }
 
-    public function withoutReturnValue(string $name, string $surname) : void
+    public function withoutReturnValue(string $name, string $surname): void
     {
         $this->wasCalled = true;
     }

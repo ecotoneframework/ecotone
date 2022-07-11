@@ -3,6 +3,7 @@
 namespace Test\Ecotone\Messaging\Fixture\Handler\Selector;
 
 use Ecotone\Messaging\Message;
+use stdClass;
 
 /**
  * Class TrueMessageSelector
@@ -18,7 +19,7 @@ class MessageSelectorExample
     /**
      * @return MessageSelectorExample
      */
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -28,7 +29,7 @@ class MessageSelectorExample
      *
      * @return bool
      */
-    public function accept(Message $message) : bool
+    public function accept(Message $message): bool
     {
         return false;
     }
@@ -38,16 +39,16 @@ class MessageSelectorExample
      *
      * @return bool
      */
-    public function refuse(Message $message) : bool
+    public function refuse(Message $message): bool
     {
         return true;
     }
 
     /**
-     * @return \stdClass
+     * @return stdClass
      */
-    public function wrongReturnType() : \stdClass
+    public function wrongReturnType(): stdClass
     {
-        return new \stdClass();
+        return new stdClass();
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
@@ -28,7 +29,7 @@ class SyncTaskScheduler implements TaskScheduler
      * @param Clock $clock
      * @return SyncTaskScheduler
      */
-    public static function createWithEmptyTriggerContext(Clock $clock) : self
+    public static function createWithEmptyTriggerContext(Clock $clock): self
     {
         return new self($clock, SimpleTriggerContext::createEmpty());
     }
@@ -38,7 +39,7 @@ class SyncTaskScheduler implements TaskScheduler
      * @param SimpleTriggerContext $triggerContext
      * @return SyncTaskScheduler
      */
-    public static function createWith(Clock $clock, SimpleTriggerContext $triggerContext) : self
+    public static function createWith(Clock $clock, SimpleTriggerContext $triggerContext): self
     {
         return new self($clock, $triggerContext);
     }
@@ -51,10 +52,10 @@ class SyncTaskScheduler implements TaskScheduler
         $nextExecution = $trigger->nextExecutionTime($this->clock, $this->triggerContext);
         $this->triggerContext = $this->triggerContext->withLastScheduledExecutionTime($nextExecution);
 
-        if (!$this->isScheduleAndNextEqual() && $this->isItTimeForNextExecution()) {
+        if (! $this->isScheduleAndNextEqual() && $this->isItTimeForNextExecution()) {
             $this->triggerContext = $this->triggerContext->withLastActualExecutionTime($this->triggerContext->lastScheduledTime());
             $taskExecutor->execute();
-        }else {
+        } else {
             usleep($this->howMuchMicrosecondsTimeToWait());
         }
     }
@@ -64,7 +65,7 @@ class SyncTaskScheduler implements TaskScheduler
      */
     private function isScheduleAndNextEqual(): bool
     {
-        if (!$this->triggerContext->lastScheduledTime() || !$this->triggerContext->lastActualExecutionTime()) {
+        if (! $this->triggerContext->lastScheduledTime() || ! $this->triggerContext->lastActualExecutionTime()) {
             return false;
         }
 
@@ -82,7 +83,7 @@ class SyncTaskScheduler implements TaskScheduler
     /**
      * @return int
      */
-    private function howMuchMicrosecondsTimeToWait() : int
+    private function howMuchMicrosecondsTimeToWait(): int
     {
         $toWait = $this->triggerContext->lastScheduledTime() - $this->clock->unixTimeInMilliseconds();
 

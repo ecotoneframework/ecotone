@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Dto;
@@ -46,7 +47,7 @@ class OrderExample
      *
      * @return OrderExample
      */
-    public static function createWith(int $orderId, int $quantity, string $buyName) : self
+    public static function createWith(int $orderId, int $quantity, string $buyName): self
     {
         return new self($orderId, $quantity, $buyName);
     }
@@ -55,7 +56,7 @@ class OrderExample
      * @param OrderExample $orderExample
      * @return bool
      */
-    public function isSameAs(OrderExample $orderExample) : bool
+    public function isSameAs(OrderExample $orderExample): bool
     {
         return $this == $orderExample;
     }
@@ -63,7 +64,7 @@ class OrderExample
     /**
      * @param Customer $customer
      */
-    public function changeBuyer(Customer $customer) : void
+    public function changeBuyer(Customer $customer): void
     {
         $this->buyerName = $customer->getUsername();
     }
@@ -73,9 +74,9 @@ class OrderExample
      *
      * @return OrderExample
      */
-    public static function createFromId(int $orderId) : self
+    public static function createFromId(int $orderId): self
     {
-        return new self($orderId, 1, "");
+        return new self($orderId, 1, '');
     }
 
     /**

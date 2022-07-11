@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging;
@@ -7,11 +8,11 @@ use Ecotone\Messaging\Conversion\MediaType;
 
 interface MessagePublisher
 {
-    public function send(string $data, string $sourceMediaType = MediaType::TEXT_PLAIN) : void;
+    public function send(string $data, string $sourceMediaType = MediaType::TEXT_PLAIN): void;
 
-    public function sendWithMetadata(string $data, string $sourceMediaType = MediaType::TEXT_PLAIN, array $metadata = []) : void;
+    public function sendWithMetadata(string $data, string $sourceMediaType = MediaType::TEXT_PLAIN, array $metadata = []): void;
 
-    public function convertAndSend(object|array $data) : void;
+    public function convertAndSend(object|array $data): void;
 
-    public function convertAndSendWithMetadata(object|array $data, array $metadata) : void;
+    public function convertAndSendWithMetadata(object|array $data, array $metadata): void;
 }

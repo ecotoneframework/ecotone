@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\MessageConverter;
@@ -6,10 +7,10 @@ namespace Test\Ecotone\Messaging\Fixture\MessageConverter;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\MessageConverter\MessageConverter;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
+use stdClass;
 
 /**
  * Class FakeMessageConverter
@@ -18,8 +19,8 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class FakeMessageConverter implements MessageConverter
 {
-    const ORIGIN_HEADER = "origin";
-    const ORIGIN_HEADER_VALUE = "messaging.example";
+    public const ORIGIN_HEADER = 'origin';
+    public const ORIGIN_HEADER_VALUE = 'messaging.example';
 
     /**
      * @inheritDoc
@@ -28,7 +29,7 @@ class FakeMessageConverter implements MessageConverter
     {
         Assert::isTrue(is_string($message->getPayload()), "Wrong message payload conversion: {$message->getPayload()} " . TypeDescriptor::createFromVariable($message->getPayload()));
 
-        return new \stdClass();
+        return new stdClass();
     }
 
     /**

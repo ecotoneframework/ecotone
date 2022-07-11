@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
-use Ecotone\Messaging\InvalidMessageHeaderException;
 use Ecotone\Messaging\Message;
 
 /**
@@ -26,5 +26,5 @@ interface ParameterConverter
      * @param InterfaceParameter $parameter
      * @return bool
      */
-    public function isHandling(InterfaceParameter $parameter) : bool;
+    public function isHandling(InterfaceParameter $parameter): bool;
 }

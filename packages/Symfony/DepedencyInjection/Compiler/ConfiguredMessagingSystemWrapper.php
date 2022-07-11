@@ -12,7 +12,6 @@ use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
 use Ecotone\SymfonyBundle\EcotoneSymfonyBundle;
-use InvalidArgumentException;
 use Symfony\Component\DependencyInjection\Container;
 
 class ConfiguredMessagingSystemWrapper implements ConfiguredMessagingSystem

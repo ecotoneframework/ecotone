@@ -9,5 +9,4 @@ namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
  */
 class Notification
 {
-
 }

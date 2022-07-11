@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
@@ -40,7 +41,7 @@ class HeaderBuilder implements ParameterConverterBuilder
      *
      * @return HeaderBuilder
      */
-    public static function create(string $parameterName, string $headerName) : self
+    public static function create(string $parameterName, string $headerName): self
     {
         return new self($parameterName, $headerName, true);
     }
@@ -50,7 +51,7 @@ class HeaderBuilder implements ParameterConverterBuilder
      * @param string $headerName
      * @return HeaderBuilder
      */
-    public static function createOptional(string $parameterName, string $headerName) : self
+    public static function createOptional(string $parameterName, string $headerName): self
     {
         return new self($parameterName, $headerName, false);
     }

@@ -9,7 +9,7 @@ namespace Test\Ecotone\Messaging\Fixture\Service;
  */
 class ServiceWithoutAnyMethods
 {
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }

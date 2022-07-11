@@ -24,12 +24,12 @@ final class HeaderEnricher
         $this->headers = $headers;
     }
 
-    public static function create(array $headers) : self
+    public static function create(array $headers): self
     {
         return new self($headers);
     }
 
-    public function transform(Message $message) : Message
+    public function transform(Message $message): Message
     {
         $messageToBuild = MessageBuilder::fromMessage($message);
 

@@ -30,7 +30,6 @@ class DomainContext implements Context
      */
     public function thereIsCar()
     {
-
     }
 
     /**

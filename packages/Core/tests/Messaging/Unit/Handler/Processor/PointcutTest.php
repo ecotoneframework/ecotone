@@ -1,17 +1,17 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\ClassReference;
-use Ecotone\Messaging\Support\InvalidArgumentException;
-use PHPUnit\Framework\TestCase;
 use Ecotone\Messaging\Attribute\Interceptor\Around;
-use Ecotone\Messaging\Attribute\Interceptor\MethodInterceptor;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut;
-use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AroundInterceptorExample;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
+use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeOne;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeTwo;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\AspectWithoutMethodInterceptorExample;
@@ -23,19 +23,21 @@ use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\MethodIntercept
  * Class PointcutTest
  * @package Test\Ecotone\Messaging\Unit\Handler\Processor
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class PointcutTest extends TestCase
 {
     public function test_if_empty_point_cut_it_should_no_cut()
     {
-        $this->assertFalse(Pointcut::createEmpty()->doesItCut(InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation"), []));
+        $this->assertFalse(Pointcut::createEmpty()->doesItCut(InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, 'callMultipleUnorderedArgumentsInvocation'), []));
     }
 
     public function test_pointing_to_exact_class()
     {
         $this->itShouldCut(
             CallMultipleUnorderedArgumentsInvocationInterceptorExample::class,
-            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation")
+            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, 'callMultipleUnorderedArgumentsInvocation')
         );
     }
 
@@ -43,31 +45,31 @@ class PointcutTest extends TestCase
     {
         $this->itShouldCut(
             BaseInterceptorExample::class,
-            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation")
+            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, 'callMultipleUnorderedArgumentsInvocation')
         );
     }
 
     public function test_pointing_to_class_with_or()
     {
         $this->itShouldCut(
-            \stdClass::class . "||" . CallMultipleUnorderedArgumentsInvocationInterceptorExample::class,
-            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation")
+            stdClass::class . '||' . CallMultipleUnorderedArgumentsInvocationInterceptorExample::class,
+            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, 'callMultipleUnorderedArgumentsInvocation')
         );
     }
 
     public function test_pointing_to_exact_method_in_class()
     {
         $this->itShouldCut(
-            CallMultipleUnorderedArgumentsInvocationInterceptorExample::class . "::callMultipleUnorderedArgumentsInvocation",
-            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation")
+            CallMultipleUnorderedArgumentsInvocationInterceptorExample::class . '::callMultipleUnorderedArgumentsInvocation',
+            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, 'callMultipleUnorderedArgumentsInvocation')
         );
     }
 
     public function test_not_pointing_to_if_method_name_is_different()
     {
         $this->itShouldNotCut(
-            CallMultipleUnorderedArgumentsInvocationInterceptorExample::class . "::notCall()",
-            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, "callMultipleUnorderedArgumentsInvocation")
+            CallMultipleUnorderedArgumentsInvocationInterceptorExample::class . '::notCall()',
+            InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, 'callMultipleUnorderedArgumentsInvocation')
         );
     }
 
@@ -75,12 +77,12 @@ class PointcutTest extends TestCase
     {
         $this->itShouldCut(
             Around::class,
-            InterfaceToCall::create(AspectWithoutMethodInterceptorExample::class, "doSomething")
+            InterfaceToCall::create(AspectWithoutMethodInterceptorExample::class, 'doSomething')
         );
 
         $this->itShouldNotCut(
             ClassReference::class,
-            InterfaceToCall::create(AspectWithoutMethodInterceptorExample::class, "doSomething")
+            InterfaceToCall::create(AspectWithoutMethodInterceptorExample::class, 'doSomething')
         );
     }
 
@@ -88,12 +90,12 @@ class PointcutTest extends TestCase
     {
         $this->itShouldNotCut(
             Around::class,
-            InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
+            InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething')
         );
 
         $this->itShouldCut(
             ClassReference::class,
-            InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
+            InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething')
         );
     }
 
@@ -101,7 +103,7 @@ class PointcutTest extends TestCase
     {
         $this->itShouldCut(
             "Test\Ecotone\Messaging\Fixture\Handler\Processor\*",
-            InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
+            InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething')
         );
     }
 
@@ -109,7 +111,7 @@ class PointcutTest extends TestCase
     {
         $this->itShouldCut(
             "*\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\MethodInterceptorWithoutAspectExample",
-            InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
+            InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething')
         );
     }
 
@@ -117,25 +119,25 @@ class PointcutTest extends TestCase
     {
         $this->itShouldCut(
             "Test\Ecotone\Messaging\Fixture\*\Interceptor\MethodInterceptorWithoutAspectExample",
-            InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething")
+            InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething')
         );
     }
 
-    public function test_cutting_with_AND_pointcut()
+    public function test_cutting_with__an_d_pointcut()
     {
         $this->assertTrue(
-            Pointcut::createWith(AttributeOne::class . "&&" . AttributeTwo::class)->doesItCut(
-                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething"),
+            Pointcut::createWith(AttributeOne::class . '&&' . AttributeTwo::class)->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
                 [new AttributeOne(), new AttributeTwo()]
             )
         );
     }
 
-    public function test_not_cutting_with_AND_pointcut()
+    public function test_not_cutting_with__an_d_pointcut()
     {
         $this->assertFalse(
-            Pointcut::createWith(AttributeOne::class . "&&" . AttributeTwo::class)->doesItCut(
-                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething"),
+            Pointcut::createWith(AttributeOne::class . '&&' . AttributeTwo::class)->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
                 [new AttributeTwo()]
             )
         );
@@ -144,38 +146,38 @@ class PointcutTest extends TestCase
     public function test_cutting_with_single_bracket()
     {
         $this->assertTrue(
-            Pointcut::createWith("(" . AttributeOne::class . ")")->doesItCut(
-                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething"),
+            Pointcut::createWith('(' . AttributeOne::class . ')')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
                 [new AttributeOne()]
             )
         );
     }
 
-    public function test_cutting_with_OR_and_brackets()
+    public function test_cutting_with__o_r_and_brackets()
     {
         $this->assertTrue(
-            Pointcut::createWith("(" . AttributeOne::class . ")||(" . AttributeTwo::class . ")")->doesItCut(
-                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething"),
+            Pointcut::createWith('(' . AttributeOne::class . ')||(' . AttributeTwo::class . ')')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
                 [new AttributeTwo()]
             )
         );
     }
 
-    public function test_not_cutting_with_AND_and_brackets()
+    public function test_not_cutting_with__an_d_and_brackets()
     {
         $this->assertFalse(
-            Pointcut::createWith("(" . AttributeOne::class . ")&&(" . AttributeTwo::class . ")")->doesItCut(
-                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething"),
+            Pointcut::createWith('(' . AttributeOne::class . ')&&(' . AttributeTwo::class . ')')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
                 [new AttributeTwo()]
             )
         );
     }
 
-    public function test_cutting_with_AND_and_brackets()
+    public function test_cutting_with__an_d_and_brackets()
     {
         $this->assertTrue(
-            Pointcut::createWith("(" . AttributeOne::class . ")&&(" . AttributeTwo::class . ")")->doesItCut(
-                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething"),
+            Pointcut::createWith('(' . AttributeOne::class . ')&&(' . AttributeTwo::class . ')')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
                 [new AttributeOne(), new AttributeTwo()]
             )
         );
@@ -197,8 +199,9 @@ class PointcutTest extends TestCase
 
     public function test_targeting_on_endpoint_annotations()
     {
-        $this->assertTrue(Pointcut::createWith(AsynchronousRunningEndpoint::class)->doesItCut(
-                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, "doSomething"),
+        $this->assertTrue(
+            Pointcut::createWith(AsynchronousRunningEndpoint::class)->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
                 [new AsynchronousRunningEndpoint()]
             )
         );

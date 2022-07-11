@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
@@ -27,7 +28,7 @@ class SimpleTriggerContext implements TriggerContext
     /**
      * @return SimpleTriggerContext
      */
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         return new self(null, null);
     }
@@ -37,7 +38,7 @@ class SimpleTriggerContext implements TriggerContext
      * @param int|null $lastActualExecutionTime
      * @return SimpleTriggerContext
      */
-    public static function createWith(?int $lastScheduledExecutionTime, ?int $lastActualExecutionTime) : self
+    public static function createWith(?int $lastScheduledExecutionTime, ?int $lastActualExecutionTime): self
     {
         return new self($lastScheduledExecutionTime, $lastActualExecutionTime);
     }

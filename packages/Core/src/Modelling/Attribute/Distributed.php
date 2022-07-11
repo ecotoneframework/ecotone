@@ -1,11 +1,11 @@
 <?php
 
-
 namespace Ecotone\Modelling\Attribute;
 
+use Attribute;
 use Ecotone\Modelling\DistributedBus;
 
-#[\Attribute]
+#[Attribute]
 class Distributed
 {
     private string $distributionReference;

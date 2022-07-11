@@ -29,7 +29,7 @@ class GetShippingAddressQuery
      *
      * @return GetShippingAddressQuery
      */
-    public static function create(int $orderId) : self
+    public static function create(int $orderId): self
     {
         return new self($orderId);
     }

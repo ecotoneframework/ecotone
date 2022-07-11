@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Enqueue;
-
 
 class OutboundMessage
 {

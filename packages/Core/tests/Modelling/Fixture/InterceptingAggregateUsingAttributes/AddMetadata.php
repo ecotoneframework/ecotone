@@ -1,9 +1,10 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes;
 
-#[\Attribute]
+use Attribute;
+
+#[Attribute]
 class AddMetadata
 {
     private string $name;

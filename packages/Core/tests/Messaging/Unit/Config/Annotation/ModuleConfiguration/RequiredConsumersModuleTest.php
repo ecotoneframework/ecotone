@@ -1,12 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Messaging\Attribute\Scheduled;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\RequiredConsumersModule;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -14,7 +13,6 @@ use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilde
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Test\Ecotone\Messaging\Fixture\Annotation\Consumer\ExampleConsumer;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
 use Test\Ecotone\Messaging\Fixture\Handler\DataReturningService;
@@ -23,6 +21,8 @@ use Test\Ecotone\Messaging\Fixture\Handler\DataReturningService;
  * Class ConverterModuleTest
  * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class RequiredConsumersModuleTest extends AnnotationConfigurationTest
 {
@@ -50,11 +50,11 @@ class RequiredConsumersModuleTest extends AnnotationConfigurationTest
         );
         $configuration = $this->createMessagingSystemConfiguration()
             ->registerConsumerFactory(new PollingConsumerBuilder())
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("requestChannel"))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel('requestChannel'))
             ->registerMessageHandler(
                 DataReturningService::createExceptionalServiceActivatorBuilder()
-                    ->withEndpointId("someId")
-                    ->withInputChannelName("requestChannel")
+                    ->withEndpointId('someId')
+                    ->withInputChannelName('requestChannel')
             );
         $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
@@ -71,13 +71,13 @@ class RequiredConsumersModuleTest extends AnnotationConfigurationTest
             InterfaceToCallRegistry::createEmpty()
         );
         $configuration = $this->createMessagingSystemConfiguration()
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel("requestChannel"))
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel('requestChannel'))
             ->registerConsumer(
                 InboundChannelAdapterBuilder::createWithDirectObject(
-                    "requestChannel",
+                    'requestChannel',
                     ConsumerContinuouslyWorkingService::createWithReturn(5),
-                    "executeReturn"
-                )->withEndpointId("someId")
+                    'executeReturn'
+                )->withEndpointId('someId')
             );
         $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 

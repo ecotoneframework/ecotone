@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Amqp\Configuration;
@@ -48,18 +49,20 @@ class AmqpModule implements AnnotationModule
         foreach ($extensionObjects as $extensionObject) {
             if ($extensionObject instanceof AmqpBackedMessageChannelBuilder) {
                 $amqpQueues[] = AmqpQueue::createWith($extensionObject->getMessageChannelName());
-            } else if ($extensionObject instanceof AmqpExchange) {
+            } elseif ($extensionObject instanceof AmqpExchange) {
                 $amqpExchanges[] = $extensionObject;
-            } else if ($extensionObject instanceof AmqpQueue) {
+            } elseif ($extensionObject instanceof AmqpQueue) {
                 $amqpQueues[] = $extensionObject;
-            } else if ($extensionObject instanceof AmqpBinding) {
+            } elseif ($extensionObject instanceof AmqpBinding) {
                 $amqpBindings[] = $extensionObject;
             }
         }
 
         $this->amqpDistributionModule->prepare($configuration, $extensionObjects);
         $moduleReferenceSearchService->store(AmqpAdmin::REFERENCE_NAME, AmqpAdmin::createWith(
-            $amqpExchanges, $amqpQueues, $amqpBindings
+            $amqpExchanges,
+            $amqpQueues,
+            $amqpBindings
         ));
     }
 

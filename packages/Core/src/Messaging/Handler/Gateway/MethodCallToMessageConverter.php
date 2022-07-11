@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
@@ -35,18 +36,18 @@ class MethodCallToMessageConverter
     /**
      * @param MethodArgument[] $methodArguments
      */
-    public function convertFor(MessageBuilder $messageBuilder, array $methodArguments) : MessageBuilder
+    public function convertFor(MessageBuilder $messageBuilder, array $methodArguments): MessageBuilder
     {
         Assert::allInstanceOfType($methodArguments, MethodArgument::class);
 
         foreach ($this->methodArgumentConverters as $methodParameterConverter) {
-            if (empty($methodArguments) && $methodParameterConverter->isSupporting(null) && !$this->isPayloadConverter($methodParameterConverter)) {
+            if (empty($methodArguments) && $methodParameterConverter->isSupporting(null) && ! $this->isPayloadConverter($methodParameterConverter)) {
                 $messageBuilder = $methodParameterConverter->convertToMessage(null, $messageBuilder);
                 break;
             }
 
             foreach ($methodArguments as $methodArgument) {
-                if ($methodParameterConverter->isSupporting($methodArgument) && !$this->isPayloadConverter($methodParameterConverter)) {
+                if ($methodParameterConverter->isSupporting($methodArgument) && ! $this->isPayloadConverter($methodParameterConverter)) {
                     $messageBuilder = $methodParameterConverter->convertToMessage($methodArgument, $messageBuilder);
                     break;
                 }
@@ -60,9 +61,9 @@ class MethodCallToMessageConverter
      * @param MethodArgument[] $methodArguments
      * @return MessageBuilder
      */
-    public function getMessageBuilderUsingPayloadConverter(array $methodArguments) : MessageBuilder
+    public function getMessageBuilderUsingPayloadConverter(array $methodArguments): MessageBuilder
     {
-        $defaultBuilder = MessageBuilder::withPayload("");
+        $defaultBuilder = MessageBuilder::withPayload('');
         foreach ($methodArguments as $methodArgument) {
             foreach ($this->methodArgumentConverters as $methodParameterConverter) {
                 if ($methodParameterConverter->isSupporting($methodArgument) && $this->isPayloadConverter($methodParameterConverter)) {
@@ -80,7 +81,7 @@ class MethodCallToMessageConverter
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function initialize(InterfaceToCall $interfaceToCall, array $methodArgumentConverters) : void
+    private function initialize(InterfaceToCall $interfaceToCall, array $methodArgumentConverters): void
     {
         Assert::allInstanceOfType($methodArgumentConverters, GatewayParameterConverter::class);
 

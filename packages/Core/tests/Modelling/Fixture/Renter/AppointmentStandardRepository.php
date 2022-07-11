@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\Renter;
 
-use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\StandardRepository;
 
@@ -23,12 +23,12 @@ class AppointmentStandardRepository implements StandardRepository
         }
     }
 
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         return new self([]);
     }
 
-    public static function createWith(array $appointments) : self
+    public static function createWith(array $appointments): self
     {
         return new self($appointments);
     }
@@ -44,7 +44,7 @@ class AppointmentStandardRepository implements StandardRepository
     /**
      * @inheritDoc
      */
-    public function findBy(string $aggregateClassName, array $identifiers) : ?object
+    public function findBy(string $aggregateClassName, array $identifiers): ?object
     {
         foreach ($this->appointments as $appointment) {
             if ($appointment->getAppointmentId() == $identifiers['appointmentId']) {

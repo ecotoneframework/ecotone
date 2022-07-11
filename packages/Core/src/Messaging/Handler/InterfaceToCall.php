@@ -1,20 +1,16 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
-use Doctrine\Common\Annotations\AnnotationException;
-use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Future;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use ReflectionClass;
-use ReflectionException;
-use ReflectionMethod;
 
 /**
  * Class InterfaceToCall
@@ -179,7 +175,7 @@ class InterfaceToCall
      */
     public function canReturnValue(): bool
     {
-        return !$this->getReturnType()->isVoid();
+        return ! $this->getReturnType()->isVoid();
     }
 
     public function getReturnType(): ?Type
@@ -283,7 +279,7 @@ class InterfaceToCall
      */
     public function getParameterAtIndex(int $index): InterfaceParameter
     {
-        if (!array_key_exists($index, $this->getInterfaceParameters())) {
+        if (! array_key_exists($index, $this->getInterfaceParameters())) {
             throw InvalidArgumentException::create("There is no parameter at index {$index} for {$this}");
         }
 
@@ -442,9 +438,9 @@ class InterfaceToCall
             $this->interfaceName = $this->interfaceType->toString();
             $this->methodName    = $methodName;
             try {
-                $reflectionClass = new \ReflectionClass($interfaceName);
+                $reflectionClass = new ReflectionClass($interfaceName);
                 $reflectionMethod = $reflectionClass->getMethod($methodName);
-            }catch (\ReflectionException) {
+            } catch (\ReflectionException) {
                 throw InvalidArgumentException::create("Interface {$interfaceName} has no method named {$methodName}");
             }
 

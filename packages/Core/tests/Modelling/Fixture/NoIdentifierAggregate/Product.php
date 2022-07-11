@@ -8,7 +8,7 @@ use Ecotone\Modelling\Attribute\CommandHandler;
 #[Aggregate]
 class Product
 {
-    #[CommandHandler("create")]
+    #[CommandHandler('create')]
     public static function create(array $payload): self
     {
         return new self();

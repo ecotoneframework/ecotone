@@ -19,7 +19,7 @@ class PublicIdentifierGetMethodForEventSourcedAggregate
         return [new stdClass()];
     }
 
-    #[AggregateIdentifierMethod("id")]
+    #[AggregateIdentifierMethod('id')]
     public function getId()
     {
         return $this->internalId;

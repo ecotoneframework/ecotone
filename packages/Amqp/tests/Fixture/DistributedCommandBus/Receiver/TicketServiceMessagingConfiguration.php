@@ -8,7 +8,7 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 class TicketServiceMessagingConfiguration
 {
-    const SERVICE_NAME = "ticket_service";
+    public const SERVICE_NAME = 'ticket_service';
 
     #[ServiceContext]
     public function configure()
@@ -17,7 +17,7 @@ class TicketServiceMessagingConfiguration
             AmqpDistributedBusConfiguration::createConsumer(),
             PollingMetadata::create(self::SERVICE_NAME)
                 ->setHandledMessageLimit(1)
-                ->setExecutionTimeLimitInMilliseconds(1)
+                ->setExecutionTimeLimitInMilliseconds(1),
         ];
     }
 }

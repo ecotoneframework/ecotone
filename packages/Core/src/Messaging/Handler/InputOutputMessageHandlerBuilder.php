@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler;
 
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
 
 /**
  * Class InputOutputMessageHandlerBuilder
@@ -14,9 +13,9 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
  */
 abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithOutputChannel
 {
-    protected string $inputMessageChannelName = "";
-    protected string $outputMessageChannelName = "";
-    private ?string $name = "";
+    protected string $inputMessageChannelName = '';
+    protected string $outputMessageChannelName = '';
+    private ?string $name = '';
     /**
      * @var string[]
      */
@@ -139,6 +138,6 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
 
     public function __toString()
     {
-        return sprintf("Handler of type %s with name `%s` for input channel `%s`", get_class($this), $this->getEndpointId(), $this->getInputMessageChannelName());
+        return sprintf('Handler of type %s with name `%s` for input channel `%s`', get_class($this), $this->getEndpointId(), $this->getInputMessageChannelName());
     }
 }

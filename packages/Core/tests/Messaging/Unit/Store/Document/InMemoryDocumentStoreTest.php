@@ -5,7 +5,11 @@ namespace Test\Ecotone\Dbal\Store\Document;
 use Ecotone\Messaging\Store\Document\DocumentException;
 use Ecotone\Messaging\Store\Document\DocumentStore;
 use PHPUnit\Framework\TestCase;
+use stdClass;
 
+/**
+ * @internal
+ */
 class InMemoryDocumentStoreTest extends TestCase
 {
     public function test_adding_document_to_collection()
@@ -60,9 +64,9 @@ class InMemoryDocumentStoreTest extends TestCase
 
         $this->assertEquals(0, $documentStore->countDocuments('users'));
 
-        $documentStore->addDocument('users', '123', new \stdClass());
+        $documentStore->addDocument('users', '123', new stdClass());
 
-        $this->assertEquals(new \stdClass(), $documentStore->getDocument('users', '123'));
+        $this->assertEquals(new stdClass(), $documentStore->getDocument('users', '123'));
     }
 
     public function test_adding_non_json_document_should_fail()
@@ -104,7 +108,7 @@ class InMemoryDocumentStoreTest extends TestCase
     {
         $documentStore = $this->getMemoryDocumentStore();
 
-        $this->assertEquals([],$documentStore->getAllDocuments('users'));
+        $this->assertEquals([], $documentStore->getAllDocuments('users'));
 
         $documentStore->addDocument('users', '123', '{"name":"Johny"}');
         $documentStore->addDocument('users', '124', '{"name":"Franco"}');

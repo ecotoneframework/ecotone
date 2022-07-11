@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\Ticket;
 
 use Ecotone\Modelling\Attribute\AggregateIdentifier;

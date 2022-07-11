@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging;
@@ -16,5 +17,5 @@ interface MessageChannel
      * @param Message $message
      * @return void
      */
-    public function send(Message $message) : void;
+    public function send(Message $message): void;
 }

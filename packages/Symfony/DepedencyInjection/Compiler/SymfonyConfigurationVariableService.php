@@ -7,7 +7,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class SymfonyConfigurationVariableService implements ConfigurationVariableService
 {
-    public function __construct(private ContainerInterface $container){}
+    public function __construct(private ContainerInterface $container)
+    {
+    }
 
     public function getByName(string $name)
     {

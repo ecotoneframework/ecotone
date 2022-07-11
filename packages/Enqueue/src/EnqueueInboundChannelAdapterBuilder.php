@@ -13,12 +13,10 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
-use Ecotone\Messaging\MessageConverter\HeaderMapper;
 
 abstract class EnqueueInboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
 {
-    const DEFAULT_RECEIVE_TIMEOUT = 10000;
+    public const DEFAULT_RECEIVE_TIMEOUT = 10000;
 
     /**
      * @var string
@@ -42,18 +40,18 @@ abstract class EnqueueInboundChannelAdapterBuilder extends InterceptedChannelAda
 
     protected $withAckInterceptor = false;
 
-    protected function initialize(string $endpointId, ?string $requestChannelName, string $connectionReferenceName) : void
+    protected function initialize(string $endpointId, ?string $requestChannelName, string $connectionReferenceName): void
     {
         $this->requiredReferenceNames[] = $connectionReferenceName;
         $this->endpointId = $endpointId;
         $this->inboundEntrypoint = $requestChannelName
-            ? GatewayProxyBuilder::create($endpointId, InboundChannelAdapterEntrypoint::class, "executeEntrypoint", $requestChannelName)
+            ? GatewayProxyBuilder::create($endpointId, InboundChannelAdapterEntrypoint::class, 'executeEntrypoint', $requestChannelName)
             : NullEntrypointGateway::create();
     }
 
-    protected function buildGatewayFor(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver, PollingMetadata $pollingMetadata) : InboundChannelAdapterEntrypoint
+    protected function buildGatewayFor(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver, PollingMetadata $pollingMetadata): InboundChannelAdapterEntrypoint
     {
-        if (!$this->isNullableGateway()) {
+        if (! $this->isNullableGateway()) {
             if ($this->withAckInterceptor) {
                 $this->inboundEntrypoint->addAroundInterceptor(AcknowledgeConfirmationInterceptor::createAroundInterceptor($pollingMetadata));
             }
@@ -105,7 +103,7 @@ abstract class EnqueueInboundChannelAdapterBuilder extends InterceptedChannelAda
      */
     public function withHeaderMapper(string $headerMapper): self
     {
-        $this->headerMapper = explode(",", $headerMapper);
+        $this->headerMapper = explode(',', $headerMapper);
 
         return $this;
     }
@@ -205,7 +203,7 @@ abstract class EnqueueInboundChannelAdapterBuilder extends InterceptedChannelAda
 
     public function __toString()
     {
-        return "Inbound Adapter with id " . $this->endpointId;
+        return 'Inbound Adapter with id ' . $this->endpointId;
     }
 
     /**

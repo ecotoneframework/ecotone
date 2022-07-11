@@ -1,7 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
+
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
@@ -14,25 +16,25 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 final class MediaType
 {
-    const TEXT_XML = "text/xml";
-    const TEXT_JSON = "text/json";
-    const TEXT_PLAIN = "text/plain";
-    const TEXT_HTML = "text/html";
-    const MULTIPART_FORM_DATA = "multipart/form-data";
-    const IMAGE_PNG = "image/png";
-    const IMAGE_JPEG = "image/jpeg";
-    const IMAGE_GIF = "image/gif";
-    const APPLICATION_XML = "application/xml";
-    const APPLICATION_JSON = "application/json";
-    const APPLICATION_FORM_URLENCODED = "application/x-www-form-urlencoded";
-    const APPLICATION_ATOM_XML = "application/atom+xml";
-    const APPLICATION_XHTML_XML = "application/xhtml+xml";
-    const APPLICATION_OCTET_STREAM = "application/octet-stream";
-    const APPLICATION_X_PHP = "application/x-php";
-    const APPLICATION_X_PHP_ARRAY = "application/x-php;type=array";
-    const APPLICATION_X_PHP_SERIALIZED = "application/x-php-serialized";
+    public const TEXT_XML = 'text/xml';
+    public const TEXT_JSON = 'text/json';
+    public const TEXT_PLAIN = 'text/plain';
+    public const TEXT_HTML = 'text/html';
+    public const MULTIPART_FORM_DATA = 'multipart/form-data';
+    public const IMAGE_PNG = 'image/png';
+    public const IMAGE_JPEG = 'image/jpeg';
+    public const IMAGE_GIF = 'image/gif';
+    public const APPLICATION_XML = 'application/xml';
+    public const APPLICATION_JSON = 'application/json';
+    public const APPLICATION_FORM_URLENCODED = 'application/x-www-form-urlencoded';
+    public const APPLICATION_ATOM_XML = 'application/atom+xml';
+    public const APPLICATION_XHTML_XML = 'application/xhtml+xml';
+    public const APPLICATION_OCTET_STREAM = 'application/octet-stream';
+    public const APPLICATION_X_PHP = 'application/x-php';
+    public const APPLICATION_X_PHP_ARRAY = 'application/x-php;type=array';
+    public const APPLICATION_X_PHP_SERIALIZED = 'application/x-php-serialized';
 
-    private const TYPE_PARAMETER = "type";
+    private const TYPE_PARAMETER = 'type';
 
     private string $type;
     private string $subtype;
@@ -64,7 +66,7 @@ final class MediaType
      * @return MediaType
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function create(string $type, string $subtype) : self
+    public static function create(string $type, string $subtype): self
     {
         return new self($type, $subtype, []);
     }
@@ -73,7 +75,7 @@ final class MediaType
      * @return MediaType
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createApplicationJson() : self
+    public static function createApplicationJson(): self
     {
         return self::parseMediaType(self::APPLICATION_JSON);
     }
@@ -82,7 +84,7 @@ final class MediaType
      * @return MediaType
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createApplicationXml() : self
+    public static function createApplicationXml(): self
     {
         return self::parseMediaType(self::APPLICATION_XML);
     }
@@ -91,7 +93,7 @@ final class MediaType
      * @return MediaType
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createMultipartFormData() : self
+    public static function createMultipartFormData(): self
     {
         return self::parseMediaType(self::MULTIPART_FORM_DATA);
     }
@@ -101,7 +103,7 @@ final class MediaType
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createApplicationOcetStream() : self
+    public static function createApplicationOcetStream(): self
     {
         return self::parseMediaType(self::APPLICATION_OCTET_STREAM);
     }
@@ -111,7 +113,7 @@ final class MediaType
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createApplicationXPHP() : self
+    public static function createApplicationXPHP(): self
     {
         return self::parseMediaType(self::APPLICATION_X_PHP);
     }
@@ -121,7 +123,7 @@ final class MediaType
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createApplicationXPHPArray() : self
+    public static function createApplicationXPHPArray(): self
     {
         return self::parseMediaType(self::APPLICATION_X_PHP_ARRAY);
     }
@@ -132,7 +134,7 @@ final class MediaType
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createApplicationXPHPWithTypeParameter(string $type) : self
+    public static function createApplicationXPHPWithTypeParameter(string $type): self
     {
         if ($type === TypeDescriptor::ANYTHING) {
             return self::parseMediaType(self::APPLICATION_X_PHP);
@@ -147,7 +149,7 @@ final class MediaType
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createApplicationXPHPSerialized() : self
+    public static function createApplicationXPHPSerialized(): self
     {
         return self::parseMediaType(self::APPLICATION_X_PHP_SERIALIZED);
     }
@@ -157,7 +159,7 @@ final class MediaType
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createTextPlain() : self
+    public static function createTextPlain(): self
     {
         return self::parseMediaType(self::TEXT_PLAIN);
     }
@@ -169,7 +171,7 @@ final class MediaType
      * @return MediaType
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createWithParameters(string $type, string $subtype, array $parameters) : self
+    public static function createWithParameters(string $type, string $subtype, array $parameters): self
     {
         return new self($type, $subtype, $parameters);
     }
@@ -180,17 +182,17 @@ final class MediaType
      * @throws \Ecotone\Messaging\MessagingException
      * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
-    public static function parseMediaType(string $mediaType) : self
+    public static function parseMediaType(string $mediaType): self
     {
-        $parsedMediaType = explode("/", $mediaType);
+        $parsedMediaType = explode('/', $mediaType);
 
         Assert::keyExists($parsedMediaType, 0, "Passed media type {$mediaType} has no type");
         Assert::keyExists($parsedMediaType, 1, "Passed media type {$mediaType} has no subtype");
-        $parametersToParse = explode(";", $parsedMediaType[1]);
+        $parametersToParse = explode(';', $parsedMediaType[1]);
         $subtype = array_shift($parametersToParse);
         $parameters = [];
         foreach ($parametersToParse as $parameterToParse) {
-            $parameter = explode("=", $parameterToParse);
+            $parameter = explode('=', $parameterToParse);
             $parameters[$parameter[0]] = $parameter[1];
         }
 
@@ -201,7 +203,7 @@ final class MediaType
      * @param string $mediaType
      * @return bool
      */
-    public function hasType(string $mediaType) : bool
+    public function hasType(string $mediaType): bool
     {
         return $this->type === $mediaType;
     }
@@ -212,7 +214,7 @@ final class MediaType
      * @return MediaType
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function addParameter(string $name, string $value) : self
+    public function addParameter(string $name, string $value): self
     {
         return self::createWithParameters(
             $this->type,
@@ -226,7 +228,7 @@ final class MediaType
      *
      * @return string
      */
-    public function getType() : string
+    public function getType(): string
     {
         return $this->type;
     }
@@ -234,7 +236,7 @@ final class MediaType
     /**
      * @return string
      */
-    public function getSubtype() : string
+    public function getSubtype(): string
     {
         return $this->subtype;
     }
@@ -242,17 +244,17 @@ final class MediaType
     /**
      * @return bool
      */
-    public function isWildcardType() : bool
+    public function isWildcardType(): bool
     {
-        return $this->type === "*";
+        return $this->type === '*';
     }
 
     /**
      * @return bool
      */
-    public function isWildcardSubtype() : bool
+    public function isWildcardSubtype(): bool
     {
-        return $this->subtype === "*";
+        return $this->subtype === '*';
     }
 
     /**
@@ -267,7 +269,7 @@ final class MediaType
      * @param string $name
      * @return bool
      */
-    public function hasParameter(string $name) : bool
+    public function hasParameter(string $name): bool
     {
         return array_key_exists($name, $this->parameters);
     }
@@ -275,7 +277,7 @@ final class MediaType
     /**
      * @return bool
      */
-    public function hasTypeParameter() : bool
+    public function hasTypeParameter(): bool
     {
         return $this->hasParameter(self::TYPE_PARAMETER);
     }
@@ -285,7 +287,7 @@ final class MediaType
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function getTypeParameter() : Type
+    public function getTypeParameter(): Type
     {
         return TypeDescriptor::create($this->getParameter(self::TYPE_PARAMETER));
     }
@@ -296,7 +298,7 @@ final class MediaType
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function getParameter(string $name) : string
+    public function getParameter(string $name): string
     {
         foreach ($this->parameters as $key => $value) {
             if ($key === $name) {
@@ -311,7 +313,7 @@ final class MediaType
      * @param MediaType $other
      * @return bool
      */
-    public function isCompatibleWith(MediaType $other) : bool
+    public function isCompatibleWith(MediaType $other): bool
     {
         return ($this->type === $other->type || $this->isWildcardType() || $other->isWildcardType()) && ($this->subtype === $other->subtype || $this->isWildcardSubtype() || $other->isWildcardSubtype());
     }
@@ -322,7 +324,7 @@ final class MediaType
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function isCompatibleWithParsed(string $otherMediaTypeToParse) : bool
+    public function isCompatibleWithParsed(string $otherMediaTypeToParse): bool
     {
         $other = self::parseMediaType($otherMediaTypeToParse);
 
@@ -332,7 +334,7 @@ final class MediaType
     /**
      * @return string
      */
-    public function toString() : string
+    public function toString(): string
     {
         return (string)$this;
     }
@@ -342,7 +344,7 @@ final class MediaType
      */
     public function __toString()
     {
-        $parameters = "";
+        $parameters = '';
         foreach ($this->parameters as $key => $value) {
             $parameters .= ";{$key}={$value}";
         }

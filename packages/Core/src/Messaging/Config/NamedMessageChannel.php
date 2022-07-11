@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config;
@@ -31,7 +32,7 @@ class NamedMessageChannel
      * @param MessageChannel $messageChannel
      * @return NamedMessageChannel
      */
-    public static function create(string $channelName, MessageChannel $messageChannel) : self
+    public static function create(string $channelName, MessageChannel $messageChannel): self
     {
         return new self($channelName, $messageChannel);
     }
@@ -39,7 +40,7 @@ class NamedMessageChannel
     /**
      * @return MessageChannel
      */
-    public function getMessageChannel() : MessageChannel
+    public function getMessageChannel(): MessageChannel
     {
         return $this->messageChannel;
     }
@@ -48,12 +49,12 @@ class NamedMessageChannel
      * @param string|null $channelName
      * @return bool
      */
-    public function hasName(?string $channelName) : bool
+    public function hasName(?string $channelName): bool
     {
         return $this->channelName == $channelName;
     }
 
-    public function getName() : string
+    public function getName(): string
     {
         return $this->channelName;
     }

@@ -3,7 +3,6 @@
 namespace Ecotone\Messaging\Transaction\Null;
 
 use Ecotone\Messaging\Transaction\Transaction;
-use Ecotone\Messaging\Transaction\TransactionException;
 
 /**
  * Class NullTransaction
@@ -12,8 +11,8 @@ use Ecotone\Messaging\Transaction\TransactionException;
  */
 class NullTransaction implements Transaction
 {
-    const COMMITTED = "committed";
-    const ROLLED_BACK = "rolledBack";
+    public const COMMITTED = 'committed';
+    public const ROLLED_BACK = 'rolledBack';
     private ?string $status;
     private bool $isRollbackOnly = false;
 
@@ -24,7 +23,7 @@ class NullTransaction implements Transaction
     /**
      * @return NullTransaction
      */
-    public static function start() : self
+    public static function start(): self
     {
         return new self();
     }
@@ -46,7 +45,7 @@ class NullTransaction implements Transaction
     /**
      * @return bool
      */
-    public function isCommitted() : bool
+    public function isCommitted(): bool
     {
         return $this->status == self::COMMITTED;
     }
@@ -54,7 +53,7 @@ class NullTransaction implements Transaction
     /**
      * @return bool
      */
-    public function isRolledBack() : bool
+    public function isRolledBack(): bool
     {
         return $this->status == self::ROLLED_BACK;
     }

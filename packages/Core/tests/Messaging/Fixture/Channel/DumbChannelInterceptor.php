@@ -1,9 +1,11 @@
 <?php
 
 namespace Test\Ecotone\Messaging\Fixture\Channel;
+
 use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
+use Throwable;
 
 /**
  * Class DumbChannelInterceptor
@@ -25,7 +27,7 @@ class DumbChannelInterceptor implements ChannelInterceptor
      */
     private $postSendWasCalledWithSuccessful = false;
 
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -49,7 +51,7 @@ class DumbChannelInterceptor implements ChannelInterceptor
     /**
      * @inheritDoc
      */
-    public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?\Throwable $exception): void
+    public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?Throwable $exception): void
     {
         // TODO: Implement afterSendCompletion() method.
     }
@@ -73,7 +75,7 @@ class DumbChannelInterceptor implements ChannelInterceptor
     /**
      * @inheritDoc
      */
-    public function afterReceiveCompletion(?Message $message, MessageChannel $messageChannel, ?\Throwable $exception) : void
+    public function afterReceiveCompletion(?Message $message, MessageChannel $messageChannel, ?Throwable $exception): void
     {
         // TODO: Implement afterReceiveCompletion() method.
     }

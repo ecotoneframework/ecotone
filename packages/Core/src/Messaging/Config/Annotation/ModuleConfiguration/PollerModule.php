@@ -1,11 +1,9 @@
 <?php
 
-
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\ChannelAdapter;
-use Ecotone\Messaging\Attribute\EndpointAnnotation;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\Poller;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
@@ -36,7 +34,7 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
         foreach ($pollers as $pollerAnnotation) {
             /** @var Poller $poller */
             $poller = $pollerAnnotation->getAnnotationForMethod();
-            if (!$pollerAnnotation->hasMethodAnnotation(ChannelAdapter::class)) {
+            if (! $pollerAnnotation->hasMethodAnnotation(ChannelAdapter::class)) {
                 throw ConfigurationException::create("Poller {$pollerAnnotation} attribute is not connected with any endpoint");
             }
 

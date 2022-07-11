@@ -3,7 +3,6 @@
 namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
 use Ecotone\Messaging\Attribute\Interceptor\Around;
-use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
@@ -14,8 +13,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 class CallWithReferenceSearchServiceExample extends BaseInterceptorExample
 {
     #[Around]
-    public function call(ReferenceSearchService $referenceSearchService) : void
+    public function call(ReferenceSearchService $referenceSearchService): void
     {
-
     }
 }

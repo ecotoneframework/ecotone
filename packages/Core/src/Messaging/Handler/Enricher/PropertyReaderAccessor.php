@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher;
@@ -67,13 +68,13 @@ class PropertyReaderAccessor
     private function getValueForCurrentState($fromData, string $currentAccessProperty)
     {
         if (is_array($fromData)) {
-            if (!array_key_exists($currentAccessProperty, $fromData)) {
+            if (! array_key_exists($currentAccessProperty, $fromData)) {
                 throw InvalidArgumentException::create("Can't access property at `{$currentAccessProperty}`");
             }
 
             return $fromData[$currentAccessProperty];
         } elseif (is_object($fromData)) {
-            $getterMethod = "get" . ucfirst($currentAccessProperty);
+            $getterMethod = 'get' . ucfirst($currentAccessProperty);
 
             if (method_exists($fromData, $getterMethod)) {
                 return call_user_func([$fromData, $getterMethod]);

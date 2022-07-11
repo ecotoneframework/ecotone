@@ -1,11 +1,10 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
 use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class UnionTypeDescriptor
@@ -29,7 +28,7 @@ class UnionTypeDescriptor implements Type
         $this->initialize($typeDescriptors);
     }
 
-    private function initialize(array $typeDescriptors) : void
+    private function initialize(array $typeDescriptors): void
     {
         foreach ($typeDescriptors as $typeDescriptor) {
             foreach ($typeDescriptors as $typeToCompare) {
@@ -88,18 +87,18 @@ class UnionTypeDescriptor implements Type
      */
     public function equals(Type $toCompare): bool
     {
-        if (!$toCompare->isUnionType()) {
+        if (! $toCompare->isUnionType()) {
             return false;
         }
 
         foreach ($this->typeDescriptors as $typeDescriptor) {
-            if (!in_array($typeDescriptor->toString(), $toCompare->getUnionTypes())) {
+            if (! in_array($typeDescriptor->toString(), $toCompare->getUnionTypes())) {
                 return false;
             }
         }
 
         foreach ($toCompare->getUnionTypes() as $typeDescriptor) {
-            if (!in_array($typeDescriptor->toString(), $this->getUnionTypes())) {
+            if (! in_array($typeDescriptor->toString(), $this->getUnionTypes())) {
                 return false;
             }
         }
@@ -291,7 +290,7 @@ class UnionTypeDescriptor implements Type
         return false;
     }
 
-    public function isAbstractClass() : bool
+    public function isAbstractClass(): bool
     {
         foreach ($this->typeDescriptors as $typeDescriptor) {
             if ($typeDescriptor->isAbstractClass()) {
@@ -335,7 +334,7 @@ class UnionTypeDescriptor implements Type
      */
     public function toString(): string
     {
-        $asString = "";
+        $asString = '';
 
         foreach ($this->typeDescriptors as $typeDescriptor) {
             $asString .= $asString ? "|{$typeDescriptor->toString()}" : $typeDescriptor->toString();

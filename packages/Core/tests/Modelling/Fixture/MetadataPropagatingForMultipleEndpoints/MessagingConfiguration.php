@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints;
 
 use Ecotone\Messaging\Attribute\ServiceContext;
@@ -13,10 +12,10 @@ class MessagingConfiguration
     public function asyncChannel()
     {
         return [
-            SimpleMessageChannelBuilder::createQueueChannel("notifications"),
-            PollingMetadata::create("notifications")
+            SimpleMessageChannelBuilder::createQueueChannel('notifications'),
+            PollingMetadata::create('notifications')
                 ->setHandledMessageLimit(1)
-                ->setExecutionTimeLimitInMilliseconds(1)
+                ->setExecutionTimeLimitInMilliseconds(1),
         ];
     }
 }

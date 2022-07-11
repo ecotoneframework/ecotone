@@ -12,21 +12,23 @@ class GuestBook
 {
     use WithAggregateEvents;
 
-    private function __construct(#[AggregateIdentifier] private string $bookId, private array $guests) {}
+    private function __construct(#[AggregateIdentifier] private string $bookId, private array $guests)
+    {
+    }
 
     #[CommandHandler]
-    public static function registerBook(RegisterBook $command) : self
+    public static function registerBook(RegisterBook $command): self
     {
         return new self($command->getBookId(), []);
     }
 
     #[CommandHandler]
-    public function addGuest(AddGuest $command) : void
+    public function addGuest(AddGuest $command): void
     {
         $this->recordThat(new GuestWasAddedToBook($this->bookId, $command->getName()));
     }
 
-    public function getId() : string
+    public function getId(): string
     {
         return $this->bookId;
     }

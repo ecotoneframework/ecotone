@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\EventSourcing;
-
 
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\ChannelResolver;
@@ -33,7 +31,7 @@ final class EventSourcingRepositoryBuilder implements RepositoryBuilder
         return in_array($aggregateClassName, $this->handledAggregateClassNames);
     }
 
-    public function withAggregateClassesToHandle(array $aggregateClassesToHandle) : self
+    public function withAggregateClassesToHandle(array $aggregateClassesToHandle): self
     {
         $this->handledAggregateClassNames = $aggregateClassesToHandle;
 
@@ -42,7 +40,7 @@ final class EventSourcingRepositoryBuilder implements RepositoryBuilder
 
     public function withMetadataMapper(string $headerMapper): self
     {
-        $this->headerMapper = explode(",", $headerMapper);
+        $this->headerMapper = explode(',', $headerMapper);
 
         return $this;
     }

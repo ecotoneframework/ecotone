@@ -1,8 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
-
 namespace Ecotone\Messaging\Endpoint;
+
+use Throwable;
 
 /**
  * Interface ConsumerExtension
@@ -24,7 +26,7 @@ interface ConsumerInterceptor
     /**
      * handle exception
      */
-    public function shouldBeThrown(\Throwable $exception) : bool;
+    public function shouldBeThrown(Throwable $exception): bool;
 
     /**
      *  Called before each run
@@ -39,5 +41,5 @@ interface ConsumerInterceptor
     /**
      * Called after each sending message to request channel
      */
-    public function postSend() : void;
+    public function postSend(): void;
 }

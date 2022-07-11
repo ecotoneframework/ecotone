@@ -1,18 +1,18 @@
 <?php
 
-
 namespace Ecotone\Messaging\Attribute\Interceptor;
 
+use Attribute;
 use Ecotone\Messaging\Precedence;
 
-#[\Attribute(\Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_METHOD)]
 class Presend
 {
     public int $precedence;
     public string $pointcut;
     public bool $changeHeaders;
 
-    public function __construct(int $precedence = Precedence::DEFAULT_PRECEDENCE, string $pointcut = "", bool $changeHeaders = false)
+    public function __construct(int $precedence = Precedence::DEFAULT_PRECEDENCE, string $pointcut = '', bool $changeHeaders = false)
     {
         $this->precedence    = $precedence;
         $this->pointcut      = $pointcut;

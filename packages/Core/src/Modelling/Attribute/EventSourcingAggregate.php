@@ -1,12 +1,13 @@
 <?php
 
-
 namespace Ecotone\Modelling\Attribute;
 
-#[\Attribute(\Attribute::TARGET_CLASS)]
+use Attribute;
+
+#[Attribute(Attribute::TARGET_CLASS)]
 class EventSourcingAggregate extends Aggregate
 {
-    const DEFAULT_INTERNAL_EVENT_RECORDER = false;
+    public const DEFAULT_INTERNAL_EVENT_RECORDER = false;
 
     private bool $withInternalEventRecorder;
 

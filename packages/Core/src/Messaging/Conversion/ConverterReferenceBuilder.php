@@ -1,7 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
+
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
@@ -26,7 +28,7 @@ class ConverterReferenceBuilder implements ConverterBuilder
      * @param string $referenceName
      * @return ConverterReferenceBuilder
      */
-    public static function create(string $referenceName) : self
+    public static function create(string $referenceName): self
     {
         return new self($referenceName);
     }

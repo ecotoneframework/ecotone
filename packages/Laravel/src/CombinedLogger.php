@@ -17,7 +17,7 @@ class CombinedLogger extends AbstractLogger implements LoggerInterface
         $this->consoleLogger = $consoleLogger;
     }
 
-    public function log($level, $message, array $context = array()): void
+    public function log($level, $message, array $context = []): void
     {
         $this->applicationLogger->log($level, $message, $context);
         $this->consoleLogger->log($level, $message, $context);

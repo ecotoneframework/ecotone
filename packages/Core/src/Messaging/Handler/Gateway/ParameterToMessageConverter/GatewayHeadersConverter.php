@@ -33,7 +33,7 @@ class GatewayHeadersConverter implements GatewayParameterConverter
      * @param string $parameterName
      * @return self
      */
-    public static function create(string $parameterName) : self
+    public static function create(string $parameterName): self
     {
         return new self($parameterName);
     }
@@ -43,11 +43,11 @@ class GatewayHeadersConverter implements GatewayParameterConverter
      */
     public function convertToMessage(?MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
     {
-        Assert::notNull($methodArgument, "Gateway header converter can only be called with method argument");
+        Assert::notNull($methodArgument, 'Gateway header converter can only be called with method argument');
 
         $headers = $methodArgument->value();
 
-        if (!TypeDescriptor::createFromVariable($headers)->isIterable()) {
+        if (! TypeDescriptor::createFromVariable($headers)->isIterable()) {
             throw InvalidArgumentException::create("Gateway @Headers expect parameter to be iterable. Given non iterable value for parameter with name {$this->parameterName}");
         }
 
@@ -58,15 +58,15 @@ class GatewayHeadersConverter implements GatewayParameterConverter
             if ($headerName === MessageHeaders::CONTENT_TYPE) {
                 $messagePayloadType = TypeDescriptor::createFromVariable($messageBuilder->getPayload());
                 $mediaType = MediaType::parseMediaType($headerValue);
-                if (!$messagePayloadType->isScalar() && !$mediaType->isCompatibleWith(MediaType::createApplicationXPHP())) {
+                if (! $messagePayloadType->isScalar() && ! $mediaType->isCompatibleWith(MediaType::createApplicationXPHP())) {
                     continue;
                 }
 
-                if ($mediaType->hasTypeParameter() && !$messagePayloadType->isCompatibleWith($mediaType->getTypeParameter())) {
+                if ($mediaType->hasTypeParameter() && ! $messagePayloadType->isCompatibleWith($mediaType->getTypeParameter())) {
                     continue;
                 }
             }
-            if (!is_null($headerValue)) {
+            if (! is_null($headerValue)) {
                 $messageBuilder = $messageBuilder->setHeader($headerName, $headerValue);
             }
         }
@@ -81,5 +81,4 @@ class GatewayHeadersConverter implements GatewayParameterConverter
     {
         return $methodArgument && ($this->parameterName == $methodArgument->getParameterName());
     }
-
 }

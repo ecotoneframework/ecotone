@@ -9,12 +9,12 @@ namespace Ecotone\Messaging;
  */
 final class NullableMessageChannel implements SubscribableChannel
 {
-    const CHANNEL_NAME = 'nullChannel';
+    public const CHANNEL_NAME = 'nullChannel';
 
     /**
      * @return NullableMessageChannel
      */
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }
@@ -44,8 +44,8 @@ final class NullableMessageChannel implements SubscribableChannel
     /**
      * @inheritDoc
      */
-    function __toString()
+    public function __toString()
     {
-        return "nullable channel";
+        return 'nullable channel';
     }
 }

@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Splitter;
 
-use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -62,12 +62,12 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
     /**
      * @inheritDoc
      */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry) : iterable
+    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return [
             $this->directObject
                 ? $interfaceToCallRegistry->getFor($this->directObject, $this->methodName)
-                : $interfaceToCallRegistry->getForReferenceName($this->referenceName, $this->methodName)
+                : $interfaceToCallRegistry->getForReferenceName($this->referenceName, $this->methodName),
         ];
     }
 
@@ -77,9 +77,9 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
      * @return SplitterBuilder
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createMessagePayloadSplitter() : self
+    public static function createMessagePayloadSplitter(): self
     {
-        return self::createWithDirectObject(new DirectMessageSplitter(), "split");
+        return self::createWithDirectObject(new DirectMessageSplitter(), 'split');
     }
 
     /**
@@ -90,9 +90,9 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
      */
     public static function createWithDirectObject($directReferenceObject, string $methodName): self
     {
-        Assert::isObject($directReferenceObject, "Direct reference must be object");
+        Assert::isObject($directReferenceObject, 'Direct reference must be object');
 
-        $splitterBuilder = new self("", $methodName);
+        $splitterBuilder = new self('', $methodName);
         $splitterBuilder->setDirectObject($directReferenceObject);
 
         return $splitterBuilder;
@@ -142,7 +142,7 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
         $objectToInvokeOn = $this->directObject ? $this->directObject : $referenceSearchService->get($this->referenceName);
         $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($objectToInvokeOn, $this->methodName);
 
-        if (!$interfaceToCall->doesItReturnIterable()) {
+        if (! $interfaceToCall->doesItReturnIterable()) {
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
         }
 
@@ -166,7 +166,7 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
     /**
      * @param object $object
      */
-    private function setDirectObject($object) : void
+    private function setDirectObject($object): void
     {
         $this->directObject = $object;
     }
@@ -175,6 +175,6 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
     {
         $reference = $this->referenceName ? $this->referenceName : get_class($this->directObject);
 
-        return sprintf("Splitter - %s:%s with name `%s` for input channel `%s`", $reference, $this->methodName, $this->getEndpointId(), $this->getInputMessageChannelName());
+        return sprintf('Splitter - %s:%s with name `%s` for input channel `%s`', $reference, $this->methodName, $this->getEndpointId(), $this->getInputMessageChannelName());
     }
 }

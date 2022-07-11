@@ -16,7 +16,7 @@ class ServiceSplittingArrayPayload
      * @param Message $message
      * @return array
      */
-    public function splitToPayload(Message $message) : array
+    public function splitToPayload(Message $message): array
     {
         return $message->getPayload();
     }
@@ -25,7 +25,7 @@ class ServiceSplittingArrayPayload
      * @param Message $message
      * @return array
      */
-    public function splitToMessages(Message $message) : array
+    public function splitToMessages(Message $message): array
     {
         $splittedMessages = [];
 

@@ -1,9 +1,8 @@
 <?php
+
 declare(strict_types=1);
 
-
 namespace Ecotone\Messaging\Handler\Gateway;
-
 
 use Ecotone\Messaging\MessagingException;
 

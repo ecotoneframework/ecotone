@@ -34,7 +34,7 @@ class Order
      * @param string $productName
      * @return Order
      */
-    public static function create(string $orderId, string $productName) : self
+    public static function create(string $orderId, string $productName): self
     {
         return new self($orderId, $productName);
     }

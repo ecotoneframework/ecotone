@@ -1,16 +1,15 @@
 <?php
 
-
 namespace Ecotone\Amqp;
 
-
+use AMQPConnection;
 use Ecotone\Enqueue\ReconnectableConnectionFactory;
-use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
 use Enqueue\AmqpExt\AmqpConnectionFactory;
 use Enqueue\AmqpExt\AmqpContext;
 use Interop\Queue\Context;
 use ReflectionClass;
+use ReflectionProperty;
 
 class AmqpConsumerConnectionFactory implements ReconnectableConnectionFactory
 {
@@ -26,8 +25,9 @@ class AmqpConsumerConnectionFactory implements ReconnectableConnectionFactory
 
     public function createContext(): Context
     {
-        if (!$this->isConnected()) {
-            $this->reconnect();;
+        if (! $this->isConnected()) {
+            $this->reconnect();
+            ;
         }
 
         return $this->connectionFactory->createContext();
@@ -43,20 +43,20 @@ class AmqpConsumerConnectionFactory implements ReconnectableConnectionFactory
      */
     public function isDisconnected(?Context $context): bool
     {
-        if (!$context) {
+        if (! $context) {
             return false;
         }
 
-        Assert::isSubclassOf($context, AmqpContext::class, "Context must be " . AmqpContext::class);
+        Assert::isSubclassOf($context, AmqpContext::class, 'Context must be ' . AmqpContext::class);
 
-        return !$context->getExtChannel()->isConnected();
+        return ! $context->getExtChannel()->isConnected();
     }
 
     public function reconnect(): void
     {
         $connectionProperty = $this->getConnectionProperty();
 
-        /** @var \AMQPConnection $connection */
+        /** @var AMQPConnection $connection */
         $connection = $connectionProperty->getValue($this->connectionFactory);
         if ($connection) {
             $connection->disconnect();
@@ -65,20 +65,20 @@ class AmqpConsumerConnectionFactory implements ReconnectableConnectionFactory
         $connectionProperty->setValue($this->connectionFactory, null);
     }
 
-    private function isConnected() : bool
+    private function isConnected(): bool
     {
         $connectionProperty = $this->getConnectionProperty();
-        /** @var \AMQPConnection $connection */
+        /** @var AMQPConnection $connection */
         $connection = $connectionProperty->getValue($this->connectionFactory);
 
         return $connection ? $connection->isConnected() : false;
     }
 
-    private function getConnectionProperty(): \ReflectionProperty
+    private function getConnectionProperty(): ReflectionProperty
     {
         $reflectionClass = new ReflectionClass($this->connectionFactory);
 
-        $connectionProperty = $reflectionClass->getProperty("connection");
+        $connectionProperty = $reflectionClass->getProperty('connection');
         $connectionProperty->setAccessible(true);
 
         return $connectionProperty;

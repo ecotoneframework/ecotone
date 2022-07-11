@@ -24,6 +24,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Exception;
 use Test\Ecotone\Messaging\Fixture\Conversion\FakeConverterService;
 use Test\Ecotone\Messaging\Fixture\Dto\OrderExample;
 use Test\Ecotone\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
@@ -33,6 +34,8 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * Class PayloadEnricherBuilderTest
  * @package Test\Ecotone\Messaging\Unit\Handler\Transformer
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class EnricherBuilderTest extends MessagingTest
 {
@@ -51,7 +54,7 @@ class EnricherBuilderTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_enriching_array_with_multiple_static_properties()
@@ -62,15 +65,15 @@ class EnricherBuilderTest extends MessagingTest
             MessageBuilder::withPayload([]),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("token", "123"),
-                EnrichPayloadWithValueBuilder::createWith("password", "secret")
+                EnrichPayloadWithValueBuilder::createWith('token', '123'),
+                EnrichPayloadWithValueBuilder::createWith('password', 'secret'),
             ]
         );
 
         $this->assertEquals(
             [
-                "token" => 123,
-                "password" => "secret"
+                'token' => 123,
+                'password' => 'secret',
             ],
             $outputChannel->receive()->getPayload()
         );
@@ -81,7 +84,7 @@ class EnricherBuilderTest extends MessagingTest
      * @param QueueChannel $outputChannel
      * @param array $setterBuilders
      * @throws ConfigurationException
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     private function createEnricherAndHandle(MessageBuilder $inputMessage, QueueChannel $outputChannel, array $setterBuilders): void
@@ -91,12 +94,12 @@ class EnricherBuilderTest extends MessagingTest
             ->build();
 
         $enricher = EnricherBuilder::create($setterBuilders)
-            ->withInputChannelName("some")
+            ->withInputChannelName('some')
             ->build(
                 InMemoryChannelResolver::createEmpty(),
                 InMemoryReferenceSearchService::createWith(
                     [
-                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
                     ]
                 )
             );
@@ -106,7 +109,7 @@ class EnricherBuilderTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_enriching_message_with_content_type_conversion()
@@ -118,10 +121,10 @@ class EnricherBuilderTest extends MessagingTest
                 ->setContentType(MediaType::createApplicationJson()),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("token", "123")
+                EnrichPayloadWithValueBuilder::createWith('token', '123'),
             ],
             [
-                new JsonToArrayConverter()
+                new JsonToArrayConverter(),
             ]
         );
 
@@ -129,14 +132,14 @@ class EnricherBuilderTest extends MessagingTest
 
         $this->assertEquals(
             [
-                "name" => "Franco",
-                "token" => "123"
+                'name' => 'Franco',
+                'token' => '123',
             ],
             $transformedMessage->getPayload()
         );
         $this->assertEquals(
             MediaType::parseMediaType(MediaType::APPLICATION_X_PHP)
-                ->addParameter("type", TypeDescriptor::ARRAY)->toString(),
+                ->addParameter('type', TypeDescriptor::ARRAY)->toString(),
             $transformedMessage->getHeaders()->get(MessageHeaders::CONTENT_TYPE)
         );
     }
@@ -148,7 +151,7 @@ class EnricherBuilderTest extends MessagingTest
      * @param Converter[] $converters
      * @throws ConfigurationException
      * @throws MessagingException
-     * @throws \Exception
+     * @throws Exception
      */
     private function createEnricherWithConvertersAndHandle(MessageBuilder $inputMessage, QueueChannel $outputChannel, array $setterBuilders, array $converters): void
     {
@@ -157,13 +160,13 @@ class EnricherBuilderTest extends MessagingTest
             ->build();
 
         $enricher = EnricherBuilder::create($setterBuilders)
-            ->withInputChannelName("some")
+            ->withInputChannelName('some')
             ->build(
                 InMemoryChannelResolver::createEmpty(),
                 InMemoryReferenceSearchService::createWith(
                     [
                         ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                        ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters)
+                        ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters),
                     ]
                 )
             );
@@ -174,26 +177,26 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws MessagingException
-     * @throws \Exception
+     * @throws Exception
      */
     public function test_not_converting_request_message_if_php_related_payload()
     {
         $outputChannel = QueueChannel::create();
 
         $this->createEnricherWithConvertersAndHandle(
-            MessageBuilder::withPayload(["name" => "Franco"])
+            MessageBuilder::withPayload(['name' => 'Franco'])
                 ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::OBJECT)),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("token", "123")
+                EnrichPayloadWithValueBuilder::createWith('token', '123'),
             ],
-            [FakeConverterService::create(["wrong" => 12], TypeDescriptor::OBJECT, MediaType::APPLICATION_X_PHP)]
+            [FakeConverterService::create(['wrong' => 12], TypeDescriptor::OBJECT, MediaType::APPLICATION_X_PHP)]
         );
 
         $this->assertEquals(
             [
-                "name" => "Franco",
-                "token" => "123"
+                'name' => 'Franco',
+                'token' => '123',
             ],
             $outputChannel->receive()->getPayload()
         );
@@ -201,7 +204,7 @@ class EnricherBuilderTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_enriching_property_with_quotes_in_names()
@@ -212,15 +215,15 @@ class EnricherBuilderTest extends MessagingTest
             MessageBuilder::withPayload([]),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("'token'", "123"),
-                EnrichPayloadWithValueBuilder::createWith('"password"', "secret")
+                EnrichPayloadWithValueBuilder::createWith("'token'", '123'),
+                EnrichPayloadWithValueBuilder::createWith('"password"', 'secret'),
             ]
         );
 
         $this->assertEquals(
             [
-                "token" => 123,
-                "password" => "secret"
+                'token' => 123,
+                'password' => 'secret',
             ],
             $outputChannel->receive()->getPayload()
         );
@@ -228,7 +231,7 @@ class EnricherBuilderTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_copying_headers_from_input_message()
@@ -237,54 +240,54 @@ class EnricherBuilderTest extends MessagingTest
 
         $this->createEnricherAndHandle(
             MessageBuilder::withPayload([])
-                ->setHeader("user", 1),
+                ->setHeader('user', 1),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("token", "123")
+                EnrichPayloadWithValueBuilder::createWith('token', '123'),
             ]
         );
 
 
-        $this->assertEquals(1, $outputChannel->receive()->getHeaders()->get("user"));
+        $this->assertEquals(1, $outputChannel->receive()->getHeaders()->get('user'));
     }
 
     /**
      * @throws ConfigurationException
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_enriching_with_static_headers()
     {
         $outputChannel = QueueChannel::create();
-        $this->createEnricherAndHandle(MessageBuilder::withPayload("some"), $outputChannel, [
-            EnrichHeaderWithValueBuilder::create("token", "123")
+        $this->createEnricherAndHandle(MessageBuilder::withPayload('some'), $outputChannel, [
+            EnrichHeaderWithValueBuilder::create('token', '123'),
         ]);
 
         $this->assertEquals(
-            "123",
-            $outputChannel->receive()->getHeaders()->get("token")
+            '123',
+            $outputChannel->receive()->getHeaders()->get('token')
         );
     }
 
     /**
      * @throws ConfigurationException
      * @throws MessagingException
-     * @throws \Exception
+     * @throws Exception
      */
     public function test_enriching_with_expression_setter_from_external_message()
     {
         $outputChannel = QueueChannel::create();
-        $inputMessage = MessageBuilder::withPayload(["surname" => "levis"]);
-        $replyPayload = "johny";
+        $inputMessage = MessageBuilder::withPayload(['surname' => 'levis']);
+        $replyPayload = 'johny';
         $setterBuilders = [
-            EnrichPayloadWithExpressionBuilder::createWith("name", "payload")
+            EnrichPayloadWithExpressionBuilder::createWith('name', 'payload'),
         ];
         $this->createEnricherWithRequestChannelAndHandle($inputMessage, $outputChannel, $replyPayload, $setterBuilders);
 
         $this->assertEquals(
             [
-                "surname" => "levis",
-                "name" => "johny"
+                'surname' => 'levis',
+                'name' => 'johny',
             ],
             $outputChannel->receive()->getPayload()
         );
@@ -296,7 +299,7 @@ class EnricherBuilderTest extends MessagingTest
      * @param mixed $replyPayload
      * @param array $setterBuilders
      * @throws ConfigurationException
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     private function createEnricherWithRequestChannelAndHandle(MessageBuilder $inputMessage, QueueChannel $outputChannel, $replyPayload, array $setterBuilders): void
@@ -304,22 +307,22 @@ class EnricherBuilderTest extends MessagingTest
         $inputMessage = $inputMessage
             ->setReplyChannel($outputChannel)
             ->build();
-        $requestChannelName = "requestChannel";
+        $requestChannelName = 'requestChannel';
         $requestChannel = DirectChannel::create();
         $requestChannel->subscribe(ReplyViaHeadersMessageHandler::create($replyPayload));
 
         $enricher = EnricherBuilder::create($setterBuilders)
-            ->withInputChannelName("some")
+            ->withInputChannelName('some')
             ->withRequestMessageChannel($requestChannelName)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray(
                     [
-                        $requestChannelName => $requestChannel
+                        $requestChannelName => $requestChannel,
                     ]
                 ),
                 InMemoryReferenceSearchService::createWith(
                     [
-                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
                     ]
                 )
             );
@@ -331,12 +334,12 @@ class EnricherBuilderTest extends MessagingTest
     {
         $outputChannel = QueueChannel::create();
 
-        $buyerNameToSet = "johny levis";
+        $buyerNameToSet = 'johny levis';
         $this->createEnricherAndHandle(
             MessageBuilder::withPayload(OrderExample::createFromId(100)),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("buyerName", $buyerNameToSet)
+                EnrichPayloadWithValueBuilder::createWith('buyerName', $buyerNameToSet),
             ]
         );
 
@@ -357,7 +360,7 @@ class EnricherBuilderTest extends MessagingTest
             MessageBuilder::withPayload(OrderExample::createFromId(100)),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("orderId", $newOrderId)
+                EnrichPayloadWithValueBuilder::createWith('orderId', $newOrderId),
             ]
         );
 
@@ -379,7 +382,7 @@ class EnricherBuilderTest extends MessagingTest
             MessageBuilder::withPayload(OrderExample::createFromId(100)),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("notExisting", "some")
+                EnrichPayloadWithValueBuilder::createWith('notExisting', 'some'),
             ]
         );
     }
@@ -387,7 +390,7 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws MessagingException
-     * @throws \Exception
+     * @throws Exception
      */
     public function test_enriching_array_by_array_setter_definition()
     {
@@ -395,18 +398,17 @@ class EnricherBuilderTest extends MessagingTest
 
         $newWorkerId = 1000;
         $this->createEnricherAndHandle(
-            MessageBuilder::withPayload(["workerId" => 123]),
+            MessageBuilder::withPayload(['workerId' => 123]),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("[workerId]", $newWorkerId)
+                EnrichPayloadWithValueBuilder::createWith('[workerId]', $newWorkerId),
             ]
         );
 
         $this->assertEquals(
             [
-                "workerId" => 1000
-            ]
-            ,
+                'workerId' => 1000,
+            ],
             $outputChannel->receive()->getPayload()
         );
     }
@@ -414,7 +416,7 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws MessagingException
-     * @throws \Exception
+     * @throws Exception
      */
     public function test_enriching_array_by_array_of_array_by_setter_definition()
     {
@@ -422,20 +424,19 @@ class EnricherBuilderTest extends MessagingTest
 
         $newWorkerId = 1000;
         $this->createEnricherAndHandle(
-            MessageBuilder::withPayload([["workerId" => 123]]),
+            MessageBuilder::withPayload([['workerId' => 123]]),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("[0][workerId]", $newWorkerId)
+                EnrichPayloadWithValueBuilder::createWith('[0][workerId]', $newWorkerId),
             ]
         );
 
         $this->assertEquals(
             [
                 [
-                    "workerId" => 1000
-                ]
-            ]
-            ,
+                    'workerId' => 1000,
+                ],
+            ],
             $outputChannel->receive()->getPayload()
         );
     }
@@ -444,18 +445,18 @@ class EnricherBuilderTest extends MessagingTest
     {
         $outputChannel = QueueChannel::create();
 
-        $buyerName = "Johny";
+        $buyerName = 'Johny';
         $this->createEnricherAndHandle(
-            MessageBuilder::withPayload(["order" => OrderExample::createFromId(1)]),
+            MessageBuilder::withPayload(['order' => OrderExample::createFromId(1)]),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("[order][buyerName]", $buyerName)
+                EnrichPayloadWithValueBuilder::createWith('[order][buyerName]', $buyerName),
             ]
         );
 
         $this->assertEquals(
             [
-                "order" => OrderExample::createWith(1, 1, $buyerName)
+                'order' => OrderExample::createWith(1, 1, $buyerName),
             ],
             $outputChannel->receive()->getPayload()
         );
@@ -466,33 +467,33 @@ class EnricherBuilderTest extends MessagingTest
         $outputChannel = QueueChannel::create();
 
         $workerData = [
-            "name" => "johny",
-            "surname" => "franco"
+            'name' => 'johny',
+            'surname' => 'franco',
         ];
         $this->createEnricherAndHandle(
             MessageBuilder::withPayload(
                 [
                     [
-                        "data" => [
-                            "workerIdentifier" => ["workerId" => 123]
-                        ]
-                    ]
+                        'data' => [
+                            'workerIdentifier' => ['workerId' => 123],
+                        ],
+                    ],
                 ]
             ),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("[0][data][worker]", $workerData)
+                EnrichPayloadWithValueBuilder::createWith('[0][data][worker]', $workerData),
             ]
         );
 
         $this->assertEquals(
             [
                 [
-                    "data" => [
-                        "workerIdentifier" => ["workerId" => 123],
-                        "worker" => $workerData
-                    ]
-                ]
+                    'data' => [
+                        'workerIdentifier' => ['workerId' => 123],
+                        'worker' => $workerData,
+                    ],
+                ],
             ],
             $outputChannel->receive()->getPayload()
         );
@@ -502,17 +503,17 @@ class EnricherBuilderTest extends MessagingTest
     {
         $outputChannel = QueueChannel::create();
 
-        $workerName = "johny";
+        $workerName = 'johny';
         $this->createEnricherAndHandle(
-            MessageBuilder::withPayload(["worker" => []]),
+            MessageBuilder::withPayload(['worker' => []]),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("worker[name]", $workerName)
+                EnrichPayloadWithValueBuilder::createWith('worker[name]', $workerName),
             ]
         );
 
         $this->assertEquals(
-            ["worker" => ["name" => $workerName]],
+            ['worker' => ['name' => $workerName]],
             $outputChannel->receive()->getPayload()
         );
     }
@@ -521,17 +522,17 @@ class EnricherBuilderTest extends MessagingTest
     {
         $outputChannel = QueueChannel::create();
 
-        $workerName = "johny";
+        $workerName = 'johny';
         $this->createEnricherAndHandle(
-            MessageBuilder::withPayload(["worker" => ["names" => ["Edward"]]]),
+            MessageBuilder::withPayload(['worker' => ['names' => ['Edward']]]),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("worker[names][]", $workerName)
+                EnrichPayloadWithValueBuilder::createWith('worker[names][]', $workerName),
             ]
         );
 
         $this->assertEquals(
-            ["worker" => ["names" => ["Edward", $workerName]]],
+            ['worker' => ['names' => ['Edward', $workerName]]],
             $outputChannel->receive()->getPayload()
         );
     }
@@ -540,14 +541,14 @@ class EnricherBuilderTest extends MessagingTest
     {
         $outputChannel = QueueChannel::create();
 
-        $workerName = "johny";
+        $workerName = 'johny';
         $this->expectException(EnrichException::class);
 
         $this->createEnricherAndHandle(
-            MessageBuilder::withPayload(["worker" => ["names" => "Edward"]]),
+            MessageBuilder::withPayload(['worker' => ['names' => 'Edward']]),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("worker[names][]", $workerName)
+                EnrichPayloadWithValueBuilder::createWith('worker[names][]', $workerName),
             ]
         );
     }
@@ -560,12 +561,12 @@ class EnricherBuilderTest extends MessagingTest
             MessageBuilder::withPayload([]),
             $outputChannel,
             [
-                EnrichPayloadWithValueBuilder::createWith("order.orderId", "some")
+                EnrichPayloadWithValueBuilder::createWith('order.orderId', 'some'),
             ]
         );
 
         $this->assertEquals(
-            ["order.orderId" => "some"],
+            ['order.orderId' => 'some'],
             $outputChannel->receive()->getPayload()
         );
     }
@@ -573,57 +574,55 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws MessagingException
-     * @throws \Exception
+     * @throws Exception
      */
     public function test_enriching_array_with_multiple_values_at_once_by_mapping()
     {
         $outputChannel = QueueChannel::create();
         $inputMessage = MessageBuilder::withPayload(
             [
-                "orders" => [
-                    ["orderId" => 1, "personId" => 1],
-                    ["orderId" => 2, "personId" => 4]
-                ]
+                'orders' => [
+                    ['orderId' => 1, 'personId' => 1],
+                    ['orderId' => 2, 'personId' => 4],
+                ],
             ]
         );
         $replyPayload = [
             [
-                "personId" => 1,
-                "name" => "johny"
+                'personId' => 1,
+                'name' => 'johny',
             ],
             [
-                "personId" => 4,
-                "name" => "franco"
-            ]
+                'personId' => 4,
+                'name' => 'franco',
+            ],
         ];
         $setterBuilders = [
-            EnrichPayloadWithExpressionBuilder::createWithMapping("[orders][*][person]", "payload", "requestContext['personId'] == replyContext['personId']")
+            EnrichPayloadWithExpressionBuilder::createWithMapping('[orders][*][person]', 'payload', "requestContext['personId'] == replyContext['personId']"),
         ];
 
         $this->createEnricherWithRequestChannelAndHandle($inputMessage, $outputChannel, $replyPayload, $setterBuilders);
 
         $this->assertEquals(
             [
-                "orders" => [
+                'orders' => [
                     [
-                        "orderId" => 1,
-                        "personId" => 1,
-                        "person" =>
-                            [
-                                "personId" => 1,
-                                "name" => "johny"
-                            ]
+                        'orderId' => 1,
+                        'personId' => 1,
+                        'person' => [
+                            'personId' => 1,
+                            'name' => 'johny',
+                        ],
                     ],
                     [
-                        "orderId" => 2,
-                        "personId" => 4,
-                        "person" =>
-                            [
-                                "personId" => 4,
-                                "name" => "franco"
-                            ]
-                    ]
-                ]
+                        'orderId' => 2,
+                        'personId' => 4,
+                        'person' => [
+                            'personId' => 4,
+                            'name' => 'franco',
+                        ],
+                    ],
+                ],
             ],
             $outputChannel->receive()->getPayload()
         );
@@ -632,24 +631,24 @@ class EnricherBuilderTest extends MessagingTest
     public function test_if_no_request_channel_passed_then_evaluate_for_request_message()
     {
         $outputChannel = QueueChannel::create();
-        $inputMessage = MessageBuilder::withPayload(["surname" => "levis"]);
+        $inputMessage = MessageBuilder::withPayload(['surname' => 'levis']);
         $setterBuilders = [
-            EnrichPayloadWithExpressionBuilder::createWith("name", "payload"),
-            EnrichHeaderWithExpressionBuilder::createWith("toUpload", "request['payload']['surname']")
+            EnrichPayloadWithExpressionBuilder::createWith('name', 'payload'),
+            EnrichHeaderWithExpressionBuilder::createWith('toUpload', "request['payload']['surname']"),
         ];
         $this->createEnricherAndHandle($inputMessage, $outputChannel, $setterBuilders);
 
         $message = $outputChannel->receive();
         $this->assertEquals(
             [
-                "surname" => "levis",
-                "name" => null
+                'surname' => 'levis',
+                'name' => null,
             ],
             $message->getPayload()
         );
         $this->assertEquals(
             'levis',
-            $message->getHeaders()->get("toUpload")
+            $message->getHeaders()->get('toUpload')
         );
     }
 
@@ -658,14 +657,14 @@ class EnricherBuilderTest extends MessagingTest
         $outputChannel = QueueChannel::create();
         $inputMessage = MessageBuilder::withPayload(
             [
-                "orders" => [
-                    ["orderId" => 1, "personId" => 1]
-                ]
+                'orders' => [
+                    ['orderId' => 1, 'personId' => 1],
+                ],
             ]
         );
         $replyPayload = [];
         $setterBuilders = [
-            EnrichPayloadWithExpressionBuilder::createWithMapping("[orders][*][person]", "payload", "requestContext['personId'] == replyContext['personId']")
+            EnrichPayloadWithExpressionBuilder::createWithMapping('[orders][*][person]', 'payload', "requestContext['personId'] == replyContext['personId']"),
         ];
 
         $this->expectException(MessagingException::class);
@@ -678,19 +677,19 @@ class EnricherBuilderTest extends MessagingTest
         $outputChannel = QueueChannel::create();
         $inputMessage = MessageBuilder::withPayload(
             [
-                "orders" => []
+                'orders' => [],
             ]
         );
         $replyPayload = [];
         $setterBuilders = [
-            EnrichPayloadWithExpressionBuilder::createWithMapping("[orders][*][person]", "payload", "requestContext['personId'] == replyContext['personId']")
+            EnrichPayloadWithExpressionBuilder::createWithMapping('[orders][*][person]', 'payload', "requestContext['personId'] == replyContext['personId']"),
         ];
 
         $this->createEnricherWithRequestChannelAndHandle($inputMessage, $outputChannel, $replyPayload, $setterBuilders);
 
         $this->assertEquals(
             [
-                "orders" => []
+                'orders' => [],
             ],
             $outputChannel->receive()->getPayload()
         );
@@ -699,21 +698,21 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws MessagingException
-     * @throws \Exception
+     * @throws Exception
      */
     public function test_using_null_expression_when_no_reply_available_on_payload_setter()
     {
         $outputChannel = QueueChannel::create();
-        $inputMessage = MessageBuilder::withPayload(["personId" => 1]);
+        $inputMessage = MessageBuilder::withPayload(['personId' => 1]);
         $setterBuilders = [
-            EnrichPayloadWithExpressionBuilder::createWith("name", "payload")
-                ->withNullResultExpression("'unknown'")
+            EnrichPayloadWithExpressionBuilder::createWith('name', 'payload')
+                ->withNullResultExpression("'unknown'"),
         ];
 
         $this->createEnricherWithRequestChannelAndHandle($inputMessage, $outputChannel, null, $setterBuilders);
 
         $this->assertEquals(
-            ["personId" => 1, "name" => "unknown"],
+            ['personId' => 1, 'name' => 'unknown'],
             $outputChannel->receive()->getPayload()
         );
     }
@@ -721,22 +720,22 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws MessagingException
-     * @throws \Exception
+     * @throws Exception
      */
     public function test_using_null_expression_when_no_reply_available_on_header_setter()
     {
         $outputChannel = QueueChannel::create();
-        $inputMessage = MessageBuilder::withPayload(["personId" => 1]);
+        $inputMessage = MessageBuilder::withPayload(['personId' => 1]);
         $setterBuilders = [
-            EnrichHeaderWithExpressionBuilder::createWith("name", "payload")
-                ->withNullResultExpression("'unknown'")
+            EnrichHeaderWithExpressionBuilder::createWith('name', 'payload')
+                ->withNullResultExpression("'unknown'"),
         ];
 
         $this->createEnricherWithRequestChannelAndHandle($inputMessage, $outputChannel, null, $setterBuilders);
 
         $this->assertEquals(
-            "unknown",
-            $outputChannel->receive()->getHeaders()->get("name")
+            'unknown',
+            $outputChannel->receive()->getHeaders()->get('name')
         );
     }
 
@@ -745,35 +744,35 @@ class EnricherBuilderTest extends MessagingTest
         $outputChannel = QueueChannel::create();
         $inputMessage = MessageBuilder::withPayload(
             [
-                "orders" => []
+                'orders' => [],
             ]
         );
         $replyPayload = [];
         $setterBuilders = [
-            EnrichPayloadWithExpressionBuilder::createWithMapping("[orders][*][person]", "payload", "requestContext['personId'] == replyContext['personId']")
+            EnrichPayloadWithExpressionBuilder::createWithMapping('[orders][*][person]', 'payload', "requestContext['personId'] == replyContext['personId']"),
         ];
 
         $inputMessage = $inputMessage
             ->setReplyChannel($outputChannel)
             ->build();
-        $requestChannelName = "requestChannel";
+        $requestChannelName = 'requestChannel';
         $requestChannel = DirectChannel::create();
         $messageHandler = ReplyViaHeadersMessageHandler::create($replyPayload);
         $requestChannel->subscribe($messageHandler);
 
         $enricher = EnricherBuilder::create($setterBuilders)
-            ->withInputChannelName("some")
+            ->withInputChannelName('some')
             ->withRequestMessageChannel($requestChannelName)
             ->withRequestPayloadExpression("payload['orders']")
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray(
                     [
-                        $requestChannelName => $requestChannel
+                        $requestChannelName => $requestChannel,
                     ]
                 ),
                 InMemoryReferenceSearchService::createWith(
                     [
-                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
                     ]
                 )
             );
@@ -785,7 +784,7 @@ class EnricherBuilderTest extends MessagingTest
 
     /**
      * @throws ConfigurationException
-     * @throws \Exception
+     * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function TODO_test_converting_reply_message_for_evaluation()
@@ -793,18 +792,18 @@ class EnricherBuilderTest extends MessagingTest
         $outputChannel = QueueChannel::create();
         $inputMessage = MessageBuilder::withPayload(
             [
-                "name" => "Johny"
+                'name' => 'Johny',
             ]
         );
         $replyMessage = MessageBuilder::withPayload('{"surname": "Franco"}')
             ->setContentType(MediaType::createApplicationJson())
             ->build();
-        $setterBuilders = [EnrichPayloadWithExpressionBuilder::createWith("surname", "payload['surname']")];
+        $setterBuilders = [EnrichPayloadWithExpressionBuilder::createWith('surname', "payload['surname']")];
 
         $inputMessage = $inputMessage
             ->setReplyChannel($outputChannel)
             ->build();
-        $requestChannelName = "requestChannel";
+        $requestChannelName = 'requestChannel';
         $requestChannel = DirectChannel::create();
         $messageHandler = ReplyViaHeadersMessageHandler::create($replyMessage);
         $requestChannel->subscribe($messageHandler);
@@ -814,15 +813,15 @@ class EnricherBuilderTest extends MessagingTest
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray(
                     [
-                        $requestChannelName => $requestChannel
+                        $requestChannelName => $requestChannel,
                     ]
                 ),
                 InMemoryReferenceSearchService::createWith(
                     [
                         ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
                         ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([
-                            new JsonToArrayConverter()
-                        ])
+                            new JsonToArrayConverter(),
+                        ]),
                     ]
                 )
             );
@@ -831,58 +830,58 @@ class EnricherBuilderTest extends MessagingTest
 
         $transformedMessage = $outputChannel->receive();
         $this->assertEquals([
-            "name" => "Johny",
-            "surname" => "Franco"
+            'name' => 'Johny',
+            'surname' => 'Franco',
         ], $transformedMessage->getPayload());
     }
 
     /**
      * @throws ConfigurationException
      * @throws MessagingException
-     * @throws \Exception
+     * @throws Exception
      */
     public function test_extracting_unique_values_from_arrays_for_request_message()
     {
         $outputChannel = QueueChannel::create();
         $inputMessage = MessageBuilder::withPayload(
             [
-                "orders" => [
+                'orders' => [
                     [
-                        "orderId" => 1
+                        'orderId' => 1,
                     ],
                     [
-                        "orderId" => 2
+                        'orderId' => 2,
                     ],
                     [
-                        "orderId" => 2
-                    ]
-                ]
+                        'orderId' => 2,
+                    ],
+                ],
             ]
         );
         $replyPayload = [];
-        $setterBuilders = [EnrichPayloadWithExpressionBuilder::createWith("test", "1")];
+        $setterBuilders = [EnrichPayloadWithExpressionBuilder::createWith('test', '1')];
 
         $inputMessage = $inputMessage
             ->setReplyChannel($outputChannel)
             ->build();
-        $requestChannelName = "requestChannel";
+        $requestChannelName = 'requestChannel';
         $requestChannel = DirectChannel::create();
         $messageHandler = ReplyViaHeadersMessageHandler::create($replyPayload);
         $requestChannel->subscribe($messageHandler);
 
         $enricher = EnricherBuilder::create($setterBuilders)
-            ->withInputChannelName("some")
+            ->withInputChannelName('some')
             ->withRequestMessageChannel($requestChannelName)
             ->withRequestPayloadExpression("extract(payload['orders'], 'orderId')")
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray(
                     [
-                        $requestChannelName => $requestChannel
+                        $requestChannelName => $requestChannel,
                     ]
                 ),
                 InMemoryReferenceSearchService::createWith(
                     [
-                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
                     ]
                 )
             );
@@ -895,50 +894,50 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws MessagingException
-     * @throws \Exception
+     * @throws Exception
      */
     public function test_extracting_not_unique_values_from_arrays_for_request_message()
     {
         $outputChannel = QueueChannel::create();
         $inputMessage = MessageBuilder::withPayload(
             [
-                "orders" => [
+                'orders' => [
                     [
-                        "orderId" => 1
+                        'orderId' => 1,
                     ],
                     [
-                        "orderId" => 2
+                        'orderId' => 2,
                     ],
                     [
-                        "orderId" => 2
-                    ]
-                ]
+                        'orderId' => 2,
+                    ],
+                ],
             ]
         );
         $replyPayload = [];
-        $setterBuilders = [EnrichPayloadWithExpressionBuilder::createWith("test", "1")];
+        $setterBuilders = [EnrichPayloadWithExpressionBuilder::createWith('test', '1')];
 
         $inputMessage = $inputMessage
             ->setReplyChannel($outputChannel)
             ->build();
-        $requestChannelName = "requestChannel";
+        $requestChannelName = 'requestChannel';
         $requestChannel = DirectChannel::create();
         $messageHandler = ReplyViaHeadersMessageHandler::create($replyPayload);
         $requestChannel->subscribe($messageHandler);
 
         $enricher = EnricherBuilder::create($setterBuilders)
-            ->withInputChannelName("some")
+            ->withInputChannelName('some')
             ->withRequestMessageChannel($requestChannelName)
             ->withRequestPayloadExpression("createArray('ids', extract(payload['orders'], 'orderId', false))")
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray(
                     [
-                        $requestChannelName => $requestChannel
+                        $requestChannelName => $requestChannel,
                     ]
                 ),
                 InMemoryReferenceSearchService::createWith(
                     [
-                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create()
+                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
                     ]
                 )
             );

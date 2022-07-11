@@ -6,12 +6,9 @@ use Ecotone\Messaging\Endpoint\Interceptor\ConnectionExceptionRetryInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitExecutionAmountInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
-use Ecotone\Messaging\Endpoint\Interceptor\TimeLimitInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
+use Ecotone\Messaging\Endpoint\Interceptor\TimeLimitInterceptor;
 use Ecotone\Messaging\Endpoint\PollingConsumer\ConnectionException;
-use Ecotone\Messaging\Handler\Gateway\ErrorChannelInterceptor;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use Ecotone\Messaging\Precedence;
 
 /**
  * Class ContinuouslyRunningConsumer
@@ -26,7 +23,9 @@ class InterceptedConsumer implements ConsumerLifecycle
      * @param ConsumerLifecycle $interceptedConsumer
      * @param ConsumerInterceptor[] $consumerInterceptors
      */
-    public function __construct(private ConsumerLifecycle $interceptedConsumer, private array $consumerInterceptors) {}
+    public function __construct(private ConsumerLifecycle $interceptedConsumer, private array $consumerInterceptors)
+    {
+    }
 
     /**
      * @inheritDoc
@@ -39,7 +38,7 @@ class InterceptedConsumer implements ConsumerLifecycle
 
         while ($this->shouldBeRunning()) {
             $runResultedInConnectionException = false;
-            if (!$runResultedInConnectionException) {
+            if (! $runResultedInConnectionException) {
                 foreach ($this->consumerInterceptors as $consumerInterceptor) {
                     $consumerInterceptor->preRun();
                 }
@@ -47,15 +46,15 @@ class InterceptedConsumer implements ConsumerLifecycle
             try {
                 $this->interceptedConsumer->run();
                 $runResultedInConnectionException = false;
-            }catch (ConnectionException $exception) {
+            } catch (ConnectionException $exception) {
                 $runResultedInConnectionException = true;
                 foreach ($this->consumerInterceptors as $consumerInterceptor) {
-                    if($consumerInterceptor->shouldBeThrown($exception)) {
+                    if ($consumerInterceptor->shouldBeThrown($exception)) {
                         throw $exception->getPrevious();
                     }
                 }
             }
-            if (!$runResultedInConnectionException) {
+            if (! $runResultedInConnectionException) {
                 foreach ($this->consumerInterceptors as $consumerInterceptor) {
                     $consumerInterceptor->postRun();
                 }
@@ -119,9 +118,9 @@ class InterceptedConsumer implements ConsumerLifecycle
     /**
      * @return bool
      */
-    private function shouldBeRunning() : bool
+    private function shouldBeRunning(): bool
     {
-        if (!$this->shouldBeRunning) {
+        if (! $this->shouldBeRunning) {
             return false;
         }
 

@@ -6,6 +6,6 @@ use Ecotone\Messaging\Attribute\MessageGateway;
 
 interface OrderRegisteringGateway
 {
-    #[MessageGateway("placeOrder")]
+    #[MessageGateway('placeOrder')]
     public function place(string $order): void;
 }

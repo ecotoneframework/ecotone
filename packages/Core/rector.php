@@ -29,7 +29,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
         Rector\DeadCode\Rector\Property\RemoveSetterOnlyPropertyAndMethodCallRector::class,
         Rector\DeadCode\Rector\ClassMethod\RemoveEmptyClassMethodRector::class,
         Rector\DeadCode\Rector\ClassMethod\RemoveEmptyClassMethodRector::class,
-        Rector\DeadCode\Rector\ClassMethod\RemoveDeadConstructorRector::class
+        Rector\DeadCode\Rector\ClassMethod\RemoveDeadConstructorRector::class,
     ]);
 
     // get services (needed for register a single rule)

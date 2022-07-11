@@ -2,9 +2,9 @@
 
 namespace Ecotone\Messaging\Handler\Transformer;
 
-use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Handler\RequestReplyProducer;
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHandler;
 
 /**
  * Class TransformerHandler
@@ -34,6 +34,6 @@ class Transformer implements MessageHandler
 
     public function __toString()
     {
-        return "Transformer - " . $this->requestReplyProducer;
+        return 'Transformer - ' . $this->requestReplyProducer;
     }
 }

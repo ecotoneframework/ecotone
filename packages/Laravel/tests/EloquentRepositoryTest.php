@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User;
 use Orchestra\Testbench\TestCase;
 
+/**
+ * @internal
+ */
 class EloquentRepositoryTest extends TestCase
 {
     public function test_it_does_not_support_non_models()
@@ -33,7 +36,10 @@ class EloquentRepositoryTest extends TestCase
             ->method('save');
 
         $repository->save(
-            [1], $model, [], 1
+            [1],
+            $model,
+            [],
+            1
         );
     }
 }

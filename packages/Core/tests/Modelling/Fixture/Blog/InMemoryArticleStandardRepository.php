@@ -1,6 +1,7 @@
 <?php
 
 namespace Test\Ecotone\Modelling\Fixture\Blog;
+
 use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\StandardRepository;
 
@@ -30,7 +31,7 @@ class InMemoryArticleStandardRepository implements StandardRepository
     /**
      * @return InMemoryArticleStandardRepository
      */
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         return new self([]);
     }
@@ -39,7 +40,7 @@ class InMemoryArticleStandardRepository implements StandardRepository
      * @param array $articles
      * @return InMemoryArticleStandardRepository
      */
-    public static function createWith(array $articles) : self
+    public static function createWith(array $articles): self
     {
         return new self($articles);
     }
@@ -47,12 +48,12 @@ class InMemoryArticleStandardRepository implements StandardRepository
     /**
      * @inheritDoc
      */
-    public function findBy(string $aggregateClassName, array $identifiers) : ?object
+    public function findBy(string $aggregateClassName, array $identifiers): ?object
     {
         $identifier = $identifiers['author'] . $identifiers['title'];
 
-        if (!array_key_exists($identifier, $this->articles)) {
-            throw AggregateNotFoundException::create("Article with id {$identifier} doesn't exists having: " . implode(",", array_keys($this->articles)));
+        if (! array_key_exists($identifier, $this->articles)) {
+            throw AggregateNotFoundException::create("Article with id {$identifier} doesn't exists having: " . implode(',', array_keys($this->articles)));
         }
 
         return $this->articles[$identifier];

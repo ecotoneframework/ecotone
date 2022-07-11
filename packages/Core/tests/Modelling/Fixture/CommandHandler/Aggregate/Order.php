@@ -4,10 +4,10 @@ namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
+use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\IgnorePayload;
 use Ecotone\Modelling\Attribute\QueryHandler;
-use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\WithAggregateEvents;
 
 #[Aggregate]
@@ -47,24 +47,24 @@ class Order implements VersionAggregate
     }
 
     #[CommandHandler]
-    public static function createWith(CreateOrderCommand $command) : self
+    public static function createWith(CreateOrderCommand $command): self
     {
         return new self($command);
     }
 
     #[CommandHandler]
-    public function increaseAmount(CreateOrderCommand $command) : void
+    public function increaseAmount(CreateOrderCommand $command): void
     {
         $this->amount += $command->getAmount();
     }
-    
-    public function increaseAmountUsingDifferentClass(IncreaseAmountCommand $command) : void
+
+    public function increaseAmountUsingDifferentClass(IncreaseAmountCommand $command): void
     {
         $this->amount += $command->getAmount();
     }
 
     #[CommandHandler]
-    public function changeShippingAddress(ChangeShippingAddressCommand $command) : void
+    public function changeShippingAddress(ChangeShippingAddressCommand $command): void
     {
         $this->shippingAddress = $command->getShippingAddress();
 
@@ -73,7 +73,7 @@ class Order implements VersionAggregate
 
 
     #[CommandHandler]
-    public function multiplyOrder(MultiplyAmountCommand $command) : void
+    public function multiplyOrder(MultiplyAmountCommand $command): void
     {
         $this->amount *= $command->getAmount();
     }
@@ -82,7 +82,7 @@ class Order implements VersionAggregate
      * @param FinishOrderCommand $command
      * @param string $customerId
      */
-    public function finish(FinishOrderCommand $command, string $customerId) : void
+    public function finish(FinishOrderCommand $command, string $customerId): void
     {
         $this->customerId = $customerId;
     }
@@ -98,7 +98,7 @@ class Order implements VersionAggregate
     /**
      * @return int
      */
-    public function getId() : int
+    public function getId(): int
     {
         return $this->orderId;
     }
@@ -111,31 +111,31 @@ class Order implements VersionAggregate
         return $this->amount;
     }
 
-    #[QueryHandler("get_order_amount_channel")]
-    public function getAmountWithQuery(GetOrderAmountQuery $query) : int
+    #[QueryHandler('get_order_amount_channel')]
+    public function getAmountWithQuery(GetOrderAmountQuery $query): int
     {
         return $this->amount;
     }
 
-    public function hasVersion(int $version) : bool
+    public function hasVersion(int $version): bool
     {
         return $this->version == $version;
     }
 
-    #[QueryHandler(endpointId: "getShipping")]
+    #[QueryHandler(endpointId: 'getShipping')]
     public function getShippingAddress(GetShippingAddressQuery $query): string
     {
         return $this->shippingAddress;
     }
 
-    #[QueryHandler("getVersion")]
+    #[QueryHandler('getVersion')]
     #[IgnorePayload]
     public function getVersion(): ?int
     {
         return $this->version;
     }
 
-    public function increaseAggregateVersion() : void
+    public function increaseAggregateVersion(): void
     {
         $this->version += 1;
     }

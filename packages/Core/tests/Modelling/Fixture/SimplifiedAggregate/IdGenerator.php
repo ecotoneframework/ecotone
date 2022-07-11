@@ -2,8 +2,6 @@
 
 namespace Test\Ecotone\Modelling\Fixture\SimplifiedAggregate;
 
-use Ramsey\Uuid\Uuid;
-
 class IdGenerator
 {
     private int $counter = 0;

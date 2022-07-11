@@ -4,8 +4,6 @@ namespace Ecotone\Messaging\Handler\Gateway;
 
 use Ecotone\Messaging\Future;
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\PollableChannel;
-use Ecotone\Messaging\Support\ErrorMessage;
 
 /**
  * Class FutureReplySender
@@ -33,7 +31,7 @@ class FutureReplyReceiver implements Future
      * @param callable $replyCallable
      * @return FutureReplyReceiver
      */
-    public static function create(callable $replyCallable) : self
+    public static function create(callable $replyCallable): self
     {
         return new self($replyCallable);
     }

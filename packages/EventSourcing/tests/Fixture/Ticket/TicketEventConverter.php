@@ -1,11 +1,8 @@
 <?php
 
-
 namespace Test\Ecotone\EventSourcing\Fixture\Ticket;
 
 use Ecotone\Messaging\Attribute\Converter;
-use Ecotone\Messaging\Attribute\MediaTypeConverter;
-use Test\Ecotone\EventSourcing\Fixture\Ticket\Command\ChangeAssignedPerson;
 use Test\Ecotone\EventSourcing\Fixture\Ticket\Event\AssignedPersonWasChanged;
 use Test\Ecotone\EventSourcing\Fixture\Ticket\Event\TicketWasClosed;
 use Test\Ecotone\EventSourcing\Fixture\Ticket\Event\TicketWasRegistered;
@@ -13,47 +10,47 @@ use Test\Ecotone\EventSourcing\Fixture\Ticket\Event\TicketWasRegistered;
 class TicketEventConverter
 {
     #[Converter]
-    public function fromTicketWasRegistered(TicketWasRegistered $event) : array
+    public function fromTicketWasRegistered(TicketWasRegistered $event): array
     {
         return [
-            "ticketId" => $event->getTicketId(),
-            "ticketType" => $event->getTicketType(),
-            "assignedPerson" => $event->getAssignedPerson()
+            'ticketId' => $event->getTicketId(),
+            'ticketType' => $event->getTicketType(),
+            'assignedPerson' => $event->getAssignedPerson(),
         ];
     }
 
     #[Converter]
-    public function toTicketWasRegistered(array $event) : TicketWasRegistered
+    public function toTicketWasRegistered(array $event): TicketWasRegistered
     {
-        return new TicketWasRegistered($event["ticketId"], $event["assignedPerson"], $event["ticketType"]);
+        return new TicketWasRegistered($event['ticketId'], $event['assignedPerson'], $event['ticketType']);
     }
 
     #[Converter]
-    public function fromAssignedPersonWasChanged(AssignedPersonWasChanged $event) : array
+    public function fromAssignedPersonWasChanged(AssignedPersonWasChanged $event): array
     {
         return [
-            "ticketId" => $event->getTicketId(),
-            "assignedPerson" => $event->getAssignedPerson()
+            'ticketId' => $event->getTicketId(),
+            'assignedPerson' => $event->getAssignedPerson(),
         ];
     }
 
     #[Converter]
-    public function toAssignedPersonWasChanged(array $event) : AssignedPersonWasChanged
+    public function toAssignedPersonWasChanged(array $event): AssignedPersonWasChanged
     {
-        return new AssignedPersonWasChanged($event["ticketId"], $event["assignedPerson"]);
+        return new AssignedPersonWasChanged($event['ticketId'], $event['assignedPerson']);
     }
 
     #[Converter]
-    public function fromTicketWasClosed(TicketWasClosed $event) : array
+    public function fromTicketWasClosed(TicketWasClosed $event): array
     {
         return [
-            "ticketId" => $event->getTicketId()
+            'ticketId' => $event->getTicketId(),
         ];
     }
 
     #[Converter]
-    public function toTicketWasClosed(array $event) : TicketWasClosed
+    public function toTicketWasClosed(array $event): TicketWasClosed
     {
-        return new TicketWasClosed($event["ticketId"]);
+        return new TicketWasClosed($event['ticketId']);
     }
 }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Amqp;
@@ -36,7 +37,7 @@ class AmqpBinding
     /**
      * @return string
      */
-    public function getQueueName() : string
+    public function getQueueName(): string
     {
         return $this->queueName;
     }
@@ -44,7 +45,7 @@ class AmqpBinding
     /**
      * @return string
      */
-    public function getExchangeName() : string
+    public function getExchangeName(): string
     {
         return $this->exchangeName;
     }
@@ -52,16 +53,16 @@ class AmqpBinding
     /**
      * @return bool
      */
-    public function isBindToDefaultExchange() : bool
+    public function isBindToDefaultExchange(): bool
     {
-        return $this->exchangeName === "";
+        return $this->exchangeName === '';
     }
 
     /**
      * @param string $amqpQueueName
      * @return bool
      */
-    public function isRelatedToQueueName(string $amqpQueueName) : bool
+    public function isRelatedToQueueName(string $amqpQueueName): bool
     {
         return $this->queueName == $amqpQueueName;
     }
@@ -70,7 +71,7 @@ class AmqpBinding
      * @param string $amqpExchangeName
      * @return bool
      */
-    public function isRelatedToExchangeName(string $amqpExchangeName) : bool
+    public function isRelatedToExchangeName(string $amqpExchangeName): bool
     {
         return $this->exchangeName == $amqpExchangeName;
     }
@@ -78,7 +79,7 @@ class AmqpBinding
     /**
      * @return EnqueueBinding
      */
-    public function toEnqueueBinding() : EnqueueBinding
+    public function toEnqueueBinding(): EnqueueBinding
     {
         return $this->enqueueBinding;
     }
@@ -89,7 +90,7 @@ class AmqpBinding
      * @param string|null $routingKey
      * @return AmqpBinding
      */
-    public static function createWith(AmqpExchange $amqpExchange, AmqpQueue $amqpQueue, ?string $routingKey) : self
+    public static function createWith(AmqpExchange $amqpExchange, AmqpQueue $amqpQueue, ?string $routingKey): self
     {
         return new self($amqpExchange, $amqpQueue, $routingKey, []);
     }
@@ -99,9 +100,9 @@ class AmqpBinding
      * @return AmqpBinding
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createForDefaultExchange(AmqpQueue $amqpQueue) : self
+    public static function createForDefaultExchange(AmqpQueue $amqpQueue): self
     {
-        return new self(AmqpExchange::createDirectExchange(""), $amqpQueue, $amqpQueue->getQueueName(), []);
+        return new self(AmqpExchange::createDirectExchange(''), $amqpQueue, $amqpQueue->getQueueName(), []);
     }
 
     /**
@@ -111,7 +112,7 @@ class AmqpBinding
      * @return AmqpBinding
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createFromNames(string $amqpExchangeName, string $amqpQueueName, ?string $routingKey) : self
+    public static function createFromNames(string $amqpExchangeName, string $amqpQueueName, ?string $routingKey): self
     {
         return new self(AmqpExchange::createDirectExchange($amqpExchangeName), AmqpQueue::createWith($amqpQueueName), $routingKey, []);
     }
@@ -123,12 +124,12 @@ class AmqpBinding
      * @return AmqpBinding
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createFromNamesWithoutRoutingKey(string $amqpExchangeName, string $amqpQueueName) : self
+    public static function createFromNamesWithoutRoutingKey(string $amqpExchangeName, string $amqpQueueName): self
     {
         return new self(AmqpExchange::createDirectExchange($amqpExchangeName), AmqpQueue::createWith($amqpQueueName), null, []);
     }
 
-    public static function createHeadersBinding(AmqpExchange $amqpExchange, AmqpQueue $amqpQueueName, array $bindings) : self
+    public static function createHeadersBinding(AmqpExchange $amqpExchange, AmqpQueue $amqpQueueName, array $bindings): self
     {
         Assert::isTrue($amqpExchange->isHeadersExchange(), "Header binding can only be done on headers exchange {$amqpExchange->getExchangeName()} to {$amqpQueueName->getQueueName()}");
 

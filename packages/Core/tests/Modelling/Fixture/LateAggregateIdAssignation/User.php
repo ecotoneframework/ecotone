@@ -14,7 +14,7 @@ class User
 
     public $name;
 
-    #[CommandHandler("user.create")]
+    #[CommandHandler('user.create')]
     public static function create(CreateUser $command): self
     {
         $self = new self();

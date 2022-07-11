@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Gateway\Converter;
@@ -26,14 +27,14 @@ class SerializerHandlerBuilder extends InputOutputMessageHandlerBuilder
         $this->methodName = $methodName;
     }
 
-    public static function createFromPHP() : self
+    public static function createFromPHP(): self
     {
-        return new self("convertFromPHP");
+        return new self('convertFromPHP');
     }
 
-    public static function createToPHP() : self
+    public static function createToPHP(): self
     {
-        return new self("convertToPHP");
+        return new self('convertToPHP');
     }
 
     /**
@@ -65,7 +66,7 @@ class SerializerHandlerBuilder extends InputOutputMessageHandlerBuilder
     {
         return [
             $interfaceToCallRegistry->getFor(Serializer::class, $this->methodName),
-            $interfaceToCallRegistry->getFor(SerializerHandler::class, $this->methodName)
+            $interfaceToCallRegistry->getFor(SerializerHandler::class, $this->methodName),
         ];
     }
 

@@ -12,5 +12,5 @@ interface BlackListedUser
     /**
      * @return Admin
      */
-    public function bannedBy() : Admin;
+    public function bannedBy(): Admin;
 }

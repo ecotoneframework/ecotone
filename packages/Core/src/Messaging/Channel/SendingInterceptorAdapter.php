@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
@@ -6,6 +7,7 @@ namespace Ecotone\Messaging\Channel;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\Support\Assert;
+use Throwable;
 
 /**
  * Class ChannelInterceptorAdapter
@@ -48,13 +50,13 @@ abstract class SendingInterceptorAdapter implements MessageChannelInterceptorAda
             $messageToSend = $channelInterceptor->preSend($messageToSend, $this->messageChannel);
         }
 
-        if (!$messageToSend) {
+        if (! $messageToSend) {
             return;
         }
 
         try {
             $this->messageChannel->send($messageToSend);
-        }catch (\Throwable $e) {
+        } catch (Throwable $e) {
             foreach ($this->sortedChannelInterceptors as $channelInterceptor) {
                 $channelInterceptor->afterSendCompletion($messageToSend, $this->messageChannel, $e);
             }
@@ -84,7 +86,7 @@ abstract class SendingInterceptorAdapter implements MessageChannelInterceptorAda
     /**
      * @param MessageChannel $messageChannel
      */
-    protected function initialize(MessageChannel $messageChannel) : void
+    protected function initialize(MessageChannel $messageChannel): void
     {
         $this->messageChannel = $messageChannel;
     }

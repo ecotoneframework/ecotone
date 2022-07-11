@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Messaging\Handler;
 
 interface NonProxyGateway

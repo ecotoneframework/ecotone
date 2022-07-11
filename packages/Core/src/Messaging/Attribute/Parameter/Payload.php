@@ -1,14 +1,17 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Attribute\Parameter;
 
-#[\Attribute(\Attribute::TARGET_PARAMETER)]
+use Attribute;
+
+#[Attribute(Attribute::TARGET_PARAMETER)]
 class Payload
 {
-    public string $expression = "";
+    public string $expression = '';
 
-    public function __construct(string $expression = "")
+    public function __construct(string $expression = '')
     {
         $this->expression = $expression;
     }

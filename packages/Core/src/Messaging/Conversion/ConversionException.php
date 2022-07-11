@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Messaging\Conversion;
-
 
 use Ecotone\Messaging\MessagingException;
 

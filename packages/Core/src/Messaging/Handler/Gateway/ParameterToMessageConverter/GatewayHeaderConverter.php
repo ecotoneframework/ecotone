@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
@@ -35,7 +36,7 @@ class GatewayHeaderConverter implements GatewayParameterConverter
      * @param string $headerName
      * @return GatewayHeaderConverter
      */
-    public static function create(string $parameterName, string $headerName) : self
+    public static function create(string $parameterName, string $headerName): self
     {
         return new self($parameterName, $headerName);
     }
@@ -53,7 +54,7 @@ class GatewayHeaderConverter implements GatewayParameterConverter
      */
     public function convertToMessage(?MethodArgument $methodArgument, MessageBuilder $messageBuilder): MessageBuilder
     {
-        Assert::notNull($methodArgument, "Gateway header converter can only be called with method argument");
+        Assert::notNull($methodArgument, 'Gateway header converter can only be called with method argument');
         return $messageBuilder
                     ->setHeader($this->headerName, $methodArgument->value());
     }

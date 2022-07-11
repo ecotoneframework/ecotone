@@ -2,19 +2,13 @@
 
 namespace Ecotone\SymfonyBundle\DepedencyInjection\Compiler;
 
-use Doctrine\Common\Annotations\AnnotationException;
-use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Gateway\ConsoleCommandRunner;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
-use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\SymfonyBundle\DepedencyInjection\MessagingEntrypointCommand;
 use Ecotone\SymfonyBundle\EcotoneSymfonyBundle;
-use ReflectionException;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -23,17 +17,17 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class EcotoneCompilerPass implements CompilerPassInterface
 {
-    const         FRAMEWORK_NAMESPACE                = 'Ecotone';
-    public const  SERVICE_NAME                           = "ecotone.service_name";
-    public const  WORKING_NAMESPACES_CONFIG          = "ecotone.namespaces";
-    public const  FAIL_FAST_CONFIG                   = "ecotone.fail_fast";
-    public const  LOAD_SRC                           = "ecotone.load_src";
-    public const  DEFAULT_SERIALIZATION_MEDIA_TYPE   = "ecotone.serializationMediaType";
-    public const  ERROR_CHANNEL                      = "ecotone.errorChannel";
-    public const  DEFAULT_MEMORY_LIMIT               = "ecotone.defaultMemoryLimit";
-    public const  DEFAULT_CONNECTION_EXCEPTION_RETRY = "ecotone.defaultChannelPollRetry";
-    const         SRC_CATALOG                        = "src";
-    const         CACHE_DIRECTORY_SUFFIX             = DIRECTORY_SEPARATOR . "ecotone";
+    public const         FRAMEWORK_NAMESPACE                = 'Ecotone';
+    public const  SERVICE_NAME                           = 'ecotone.service_name';
+    public const  WORKING_NAMESPACES_CONFIG          = 'ecotone.namespaces';
+    public const  FAIL_FAST_CONFIG                   = 'ecotone.fail_fast';
+    public const  LOAD_SRC                           = 'ecotone.load_src';
+    public const  DEFAULT_SERIALIZATION_MEDIA_TYPE   = 'ecotone.serializationMediaType';
+    public const  ERROR_CHANNEL                      = 'ecotone.errorChannel';
+    public const  DEFAULT_MEMORY_LIMIT               = 'ecotone.defaultMemoryLimit';
+    public const  DEFAULT_CONNECTION_EXCEPTION_RETRY = 'ecotone.defaultChannelPollRetry';
+    public const         SRC_CATALOG                        = 'src';
+    public const         CACHE_DIRECTORY_SUFFIX             = DIRECTORY_SEPARATOR . 'ecotone';
 
     /**
      * @param Container $container
@@ -42,16 +36,16 @@ class EcotoneCompilerPass implements CompilerPassInterface
      */
     public static function getRootProjectPath(Container $container)
     {
-        return realpath(($container->hasParameter('kernel.project_dir') ? $container->getParameter('kernel.project_dir') : $container->getParameter('kernel.root_dir') . "/.."));
+        return realpath(($container->hasParameter('kernel.project_dir') ? $container->getParameter('kernel.project_dir') : $container->getParameter('kernel.root_dir') . '/..'));
     }
 
     public function process(ContainerBuilder $container)
     {
-        $ecotoneCacheDirectory    = $container->getParameter("kernel.cache_dir") . self::CACHE_DIRECTORY_SUFFIX;
+        $ecotoneCacheDirectory    = $container->getParameter('kernel.cache_dir') . self::CACHE_DIRECTORY_SUFFIX;
         $applicationConfiguration = ServiceConfiguration::createWithDefaults()
-            ->withEnvironment($container->getParameter("kernel.environment"))
-            ->withFailFast($container->getParameter("kernel.environment") === "prod" ? false : $container->getParameter(self::FAIL_FAST_CONFIG))
-            ->withLoadCatalog($container->getParameter(self::LOAD_SRC) ? "src" : "")
+            ->withEnvironment($container->getParameter('kernel.environment'))
+            ->withFailFast($container->getParameter('kernel.environment') === 'prod' ? false : $container->getParameter(self::FAIL_FAST_CONFIG))
+            ->withLoadCatalog($container->getParameter(self::LOAD_SRC) ? 'src' : '')
             ->withNamespaces(
                 array_merge(
                     $container->getParameter(self::WORKING_NAMESPACES_CONFIG),
@@ -78,9 +72,9 @@ class EcotoneCompilerPass implements CompilerPassInterface
             $applicationConfiguration = $applicationConfiguration
                 ->withConnectionRetryTemplate(
                     RetryTemplateBuilder::exponentialBackoffWithMaxDelay(
-                        $retryTemplate["initialDelay"],
-                        $retryTemplate["maxAttempts"],
-                        $retryTemplate["multiplier"]
+                        $retryTemplate['initialDelay'],
+                        $retryTemplate['maxAttempts'],
+                        $retryTemplate['multiplier']
                     )
                 );
         }
@@ -104,17 +98,17 @@ class EcotoneCompilerPass implements CompilerPassInterface
         $definition->addArgument(new Reference('service_container'));
         $container->setDefinition(ConfigurationVariableService::REFERENCE_NAME, $definition);
 
-        $definition = new $definition;
+        $definition = new $definition();
         $definition->setClass(CacheCleaner::class);
         $definition->setPublic(true);
-        $definition->addTag("kernel.cache_clearer");
+        $definition->addTag('kernel.cache_clearer');
         $container->setDefinition(CacheCleaner::class, $definition);
 
         $definition = new Definition();
         $definition->setClass(SymfonyReferenceSearchService::class);
         $definition->setPublic(true);
         $definition->addArgument(new Reference('service_container'));
-        $container->setDefinition("symfonyReferenceSearchService", $definition);
+        $container->setDefinition('symfonyReferenceSearchService', $definition);
 
         foreach ($messagingConfiguration->getRegisteredGateways() as $gatewayProxyBuilder) {
             $definition = new Definition();
@@ -154,7 +148,7 @@ class EcotoneCompilerPass implements CompilerPassInterface
             $definition->addArgument($oneTimeCommandConfiguration->getName());
             $definition->addArgument(serialize($oneTimeCommandConfiguration->getParameters()));
             $definition->addArgument(new Reference(ConsoleCommandRunner::class));
-            $definition->addTag("console.command", ["command" => $oneTimeCommandConfiguration->getName()]);
+            $definition->addTag('console.command', ['command' => $oneTimeCommandConfiguration->getName()]);
 
             $container->setDefinition($oneTimeCommandConfiguration->getChannelName(), $definition);
         }

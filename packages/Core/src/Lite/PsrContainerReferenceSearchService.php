@@ -1,6 +1,6 @@
 <?php
-declare(strict_types=1);
 
+declare(strict_types=1);
 
 namespace Ecotone\Lite;
 
@@ -24,7 +24,7 @@ class PsrContainerReferenceSearchService implements ReferenceSearchService
      */
     public function get(string $reference): object
     {
-        if (!$this->container->has($reference)) {
+        if (! $this->container->has($reference)) {
             if (array_key_exists($reference, $this->defaults)) {
                 return $this->defaults[$reference];
             }
@@ -37,7 +37,7 @@ class PsrContainerReferenceSearchService implements ReferenceSearchService
 
     public function has(string $referenceName): bool
     {
-        if (!$this->container->has($referenceName)) {
+        if (! $this->container->has($referenceName)) {
             if (array_key_exists($referenceName, $this->defaults)) {
                 return true;
             }

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
@@ -6,7 +7,7 @@ namespace Ecotone\Messaging\Handler\Gateway;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
-use ProxyManager\Factory\LazyLoadingValueHolderFactory;
+use InvalidArgumentException;
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use ProxyManager\Factory\RemoteObjectFactory;
 
@@ -48,8 +49,7 @@ class CombinedGatewayBuilder
     public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver): \ProxyManager\Proxy\RemoteObjectInterface
     {
         $gatewaysToPass = $this->gatewayBuilders;
-        $factory = new RemoteObjectFactory(new class($gatewaysToPass) implements AdapterInterface
-        {
+        $factory = new RemoteObjectFactory(new class ($gatewaysToPass) implements AdapterInterface {
             /**
              * @var NonProxyGateway[]
              */
@@ -70,11 +70,11 @@ class CombinedGatewayBuilder
              */
             public function call(string $wrappedClass, string $method, array $params = [])
             {
-                if (!isset($this->gateways[$method])) {
-                    throw new \InvalidArgumentException("{$wrappedClass}:{$method} has not registered gateway");
+                if (! isset($this->gateways[$method])) {
+                    throw new InvalidArgumentException("{$wrappedClass}:{$method} has not registered gateway");
                 }
 
-                return call_user_func_array([$this->gateways[$method], "execute"], [$params]);
+                return call_user_func_array([$this->gateways[$method], 'execute'], [$params]);
             }
         });
 

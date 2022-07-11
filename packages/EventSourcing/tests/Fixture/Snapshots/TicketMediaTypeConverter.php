@@ -6,6 +6,10 @@ use Ecotone\Messaging\Attribute\MediaTypeConverter;
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+
+use function json_decode;
+use function json_encode;
+
 use Test\Ecotone\EventSourcing\Fixture\Ticket\Ticket;
 
 #[MediaTypeConverter]
@@ -17,10 +21,10 @@ final class TicketMediaTypeConverter implements Converter
     public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
     {
         if ($targetMediaType->isCompatibleWith(MediaType::createApplicationJson())) {
-            return \json_encode($source->toArray());
+            return json_encode($source->toArray());
         }
 
-        return Ticket::fromArray(\json_decode($source, true));
+        return Ticket::fromArray(json_decode($source, true));
     }
 
     public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool

@@ -1,7 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
+
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
@@ -31,7 +33,7 @@ class AutoCollectionConversionService implements ConversionService
      * @param Converter[] $converters
      * @return AutoCollectionConversionService
      */
-    public static function createWith(array $converters) : self
+    public static function createWith(array $converters): self
     {
         return new self($converters);
     }
@@ -39,7 +41,7 @@ class AutoCollectionConversionService implements ConversionService
     /**
      * @return AutoCollectionConversionService
      */
-    public static function createEmpty() : self
+    public static function createEmpty(): self
     {
         return new self([]);
     }
@@ -58,7 +60,7 @@ class AutoCollectionConversionService implements ConversionService
         return $converter->convert($source, $sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
     }
 
-    public function canConvert(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType) : bool
+    public function canConvert(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
     {
         return (bool)$this->getConverter($sourceType, $sourceMediaType, $targetType, $targetMediaType);
     }
@@ -70,10 +72,10 @@ class AutoCollectionConversionService implements ConversionService
      * @param MediaType $targetMediaType
      * @return Converter|null
      */
-    private function getConverter(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType) : ?Converter
+    private function getConverter(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): ?Converter
     {
         $targetType = $this->getTargetType($sourceType, $sourceMediaType, $targetType, $targetMediaType);
-        if (!$targetType) {
+        if (! $targetType) {
             return null;
         }
 
@@ -86,14 +88,14 @@ class AutoCollectionConversionService implements ConversionService
         return null;
     }
 
-    private function getTargetType(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType) : TypeDescriptor
+    private function getTargetType(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): TypeDescriptor
     {
         foreach ($this->converters as $converter) {
             /** @var TypeDescriptor[] $targetTypesToCheck */
             $targetTypesToCheck = [];
-            if (!$targetType->isUnionType()) {
+            if (! $targetType->isUnionType()) {
                 $targetTypesToCheck[] = $targetType;
-            }else {
+            } else {
                 $targetTypesToCheck = $targetType->getUnionTypes();
             }
 
@@ -114,7 +116,7 @@ class AutoCollectionConversionService implements ConversionService
     /**
      * @param Converter[] $converters
      */
-    private function initialize(array $converters) : void
+    private function initialize(array $converters): void
     {
         $this->converters = $converters;
 

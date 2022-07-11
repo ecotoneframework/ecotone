@@ -14,17 +14,17 @@ interface Transaction
      *
      * @return void
      */
-    public function commit() : void;
+    public function commit(): void;
 
     /**
      * Roll back the transaction
      * @return void
      */
-    public function rollback() : void;
+    public function rollback(): void;
 
     /**
      * Changes the transaction that the only possible outcome of the transaction is to roll back the transaction
      * @throws TransactionException
      */
-    public function setRollbackOnly() : void;
+    public function setRollbackOnly(): void;
 }

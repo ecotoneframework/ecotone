@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\BeforeSend;
@@ -8,7 +9,6 @@ use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -27,7 +27,7 @@ class BeforeSendChannelInterceptorBuilder implements ChannelInterceptorBuilder
         $this->methodInterceptor = $methodInterceptor;
 
         $this->internalRequestChannelName = Uuid::uuid4()->toString();
-        $this->gateway                    = GatewayProxyBuilder::create(BeforeSendGateway::class, BeforeSendGateway::class, "execute", $this->internalRequestChannelName);
+        $this->gateway                    = GatewayProxyBuilder::create(BeforeSendGateway::class, BeforeSendGateway::class, 'execute', $this->internalRequestChannelName);
     }
 
     /**
@@ -76,11 +76,12 @@ class BeforeSendChannelInterceptorBuilder implements ChannelInterceptorBuilder
         $directChannel->subscribe($messageHandler);
         /** @var BeforeSendGateway $gateway */
         $gateway = $this->gateway->buildWithoutProxyObject(
-            $referenceSearchService, InMemoryChannelResolver::createFromAssociativeArray(
-            [
-                $this->internalRequestChannelName => $directChannel
-            ]
-        )
+            $referenceSearchService,
+            InMemoryChannelResolver::createFromAssociativeArray(
+                [
+                    $this->internalRequestChannelName => $directChannel,
+                ]
+            )
         );
 
         return new BeforeSendChannelInterceptor($gateway);

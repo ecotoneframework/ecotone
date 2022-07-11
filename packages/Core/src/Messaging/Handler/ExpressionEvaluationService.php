@@ -9,7 +9,7 @@ namespace Ecotone\Messaging\Handler;
  */
 interface ExpressionEvaluationService
 {
-    public const REFERENCE = "expressionEvaluationService";
+    public const REFERENCE = 'expressionEvaluationService';
 
     /**
      * @param string $expression

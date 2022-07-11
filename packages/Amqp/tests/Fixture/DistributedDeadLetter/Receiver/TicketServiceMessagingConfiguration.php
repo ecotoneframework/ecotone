@@ -10,9 +10,9 @@ use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
 class TicketServiceMessagingConfiguration
 {
-    const SERVICE_NAME = "ticket_service";
-    const ERROR_CHANNEL = "error_channel";
-    const DEAD_LETTER_CHANNEL = "dead_letter";
+    public const SERVICE_NAME = 'ticket_service';
+    public const ERROR_CHANNEL = 'error_channel';
+    public const DEAD_LETTER_CHANNEL = 'dead_letter';
 
     #[ServiceContext]
     public function configure()
@@ -22,7 +22,7 @@ class TicketServiceMessagingConfiguration
             PollingMetadata::create(self::SERVICE_NAME)
                 ->setHandledMessageLimit(1)
                 ->setExecutionTimeLimitInMilliseconds(1000)
-                ->setErrorChannelName(self::ERROR_CHANNEL)
+                ->setErrorChannelName(self::ERROR_CHANNEL),
         ];
     }
 

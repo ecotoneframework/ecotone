@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion;
 
 /**
@@ -10,16 +9,16 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion;
  */
 class OrderConverter
 {
-    public function convertFromArrayToObject(array $data) : Order
+    public function convertFromArrayToObject(array $data): Order
     {
         return new Order($data['orderId'], $data['name']);
     }
 
-    public function fromObjectToArray(Order $order) : array
+    public function fromObjectToArray(Order $order): array
     {
         return [
-            "orderId" => $order->getOrderId(),
-            "name" => $order->getName()
+            'orderId' => $order->getOrderId(),
+            'name' => $order->getName(),
         ];
     }
 }

@@ -1,30 +1,25 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Conversion\ConversionException;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersConverter;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConverterBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverter;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadConverter;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
-use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -33,7 +28,6 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use ReflectionException;
 
 /**
  * Class MethodInvocation
@@ -122,7 +116,7 @@ final class MethodInvoker implements MessageProcessor
 
         if ($missingParametersAmount > 0) {
             foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
-                if (!self::hasParameterConverter($passedMethodParameterConverters, $interfaceParameter) && $interfaceParameter->getTypeDescriptor()->isClassOrInterface()) {
+                if (! self::hasParameterConverter($passedMethodParameterConverters, $interfaceParameter) && $interfaceParameter->getTypeDescriptor()->isClassOrInterface()) {
                     if ($interceptedInterface && ($interfaceParameter->isAnnotation() || $interceptedInterface->getInterfaceType()->equals($interfaceParameter->getTypeDescriptor()))) {
                         $passedMethodParameterConverters[] = InterceptorConverterBuilder::create($interfaceParameter->getName(), $interceptedInterface, $endpointAnnotations);
                         $missingParametersAmount--;
@@ -131,11 +125,11 @@ final class MethodInvoker implements MessageProcessor
             }
 
             if ($missingParametersAmount >= 2 && $interfaceToCall->getSecondParameter()->getTypeDescriptor()->isNonCollectionArray()) {
-                if (!$ignorePayload && !self::hasPayloadConverter($passedMethodParameterConverters) && !$interfaceToCall->getFirstParameter()->isAnnotation()) {
+                if (! $ignorePayload && ! self::hasPayloadConverter($passedMethodParameterConverters) && ! $interfaceToCall->getFirstParameter()->isAnnotation()) {
                     $passedMethodParameterConverters[] = self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter());
                 }
                 $passedMethodParameterConverters[] = AllHeadersBuilder::createWith($interfaceToCall->getSecondParameter()->getName());
-            } elseif (!$ignorePayload && !self::hasPayloadConverter($passedMethodParameterConverters) && !$interfaceToCall->getFirstParameter()->isAnnotation()) {
+            } elseif (! $ignorePayload && ! self::hasPayloadConverter($passedMethodParameterConverters) && ! $interfaceToCall->getFirstParameter()->isAnnotation()) {
                 $passedMethodParameterConverters[] = self::createPayloadOrMessageParameter($interfaceToCall->getFirstParameter());
             }
 
@@ -143,9 +137,9 @@ final class MethodInvoker implements MessageProcessor
                 if ($interfaceParameter->isAnnotation()) {
                     continue;
                 }
-                if (!self::hasParameterConverter($passedMethodParameterConverters, $interfaceParameter) && $interfaceParameter->isMessage()) {
+                if (! self::hasParameterConverter($passedMethodParameterConverters, $interfaceParameter) && $interfaceParameter->isMessage()) {
                     $passedMethodParameterConverters[] = MessageConverterBuilder::create($interfaceParameter->getName());
-                }elseif (!self::hasParameterConverter($passedMethodParameterConverters, $interfaceParameter) && $interfaceParameter->getTypeDescriptor()->isClassOrInterface()) {
+                } elseif (! self::hasParameterConverter($passedMethodParameterConverters, $interfaceParameter) && $interfaceParameter->getTypeDescriptor()->isClassOrInterface()) {
                     $passedMethodParameterConverters[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeHint());
                 }
             }
@@ -228,7 +222,7 @@ final class MethodInvoker implements MessageProcessor
     {
         $methodCall = $this->getMethodCall($message);
 
-        if (!$this->aroundMethodInterceptors) {
+        if (! $this->aroundMethodInterceptors) {
             return call_user_func_array([$this->objectToInvokeOn, $this->objectMethodName], $methodCall->getMethodArgumentValues());
         }
 
@@ -271,40 +265,40 @@ final class MethodInvoker implements MessageProcessor
             );
             $isPayloadConverter = $this->orderedMethodArguments[$index] instanceof PayloadConverter;
             $sourceTypeDescriptor = $isPayloadConverter && $sourceMediaType->hasTypeParameter()
-                ? TypeDescriptor::create($sourceMediaType->getParameter("type"))
+                ? TypeDescriptor::create($sourceMediaType->getParameter('type'))
                 : TypeDescriptor::createFromVariable($data);
 
             $currentParameterMediaType = $isPayloadConverter ? $sourceMediaType : MediaType::createApplicationXPHP();
             $parameterType = $this->interfaceToCall->getParameterAtIndex($index)->getTypeDescriptor();
 
-            if (!($sourceTypeDescriptor->isCompatibleWith($parameterType))) {
+            if (! ($sourceTypeDescriptor->isCompatibleWith($parameterType))) {
                 $convertedData = null;
-                if (!$parameterType->isCompoundObjectType() && !$parameterType->isAbstractClass() && !$parameterType->isInterface() && !$parameterType->isAnything() && !$parameterType->isUnionType() && $this->canConvertParameter(
+                if (! $parameterType->isCompoundObjectType() && ! $parameterType->isAbstractClass() && ! $parameterType->isInterface() && ! $parameterType->isAnything() && ! $parameterType->isUnionType() && $this->canConvertParameter(
                     $sourceTypeDescriptor,
                     $currentParameterMediaType,
                     $parameterType,
                     $parameterMediaType
                 )) {
                     $convertedData = $this->doConversion($this->interfaceToCall, $interfaceParameter, $data, $sourceTypeDescriptor, $currentParameterMediaType, $parameterType, $parameterMediaType);
-                } else if ($message->getHeaders()->containsKey(MessageHeaders::TYPE_ID)) {
+                } elseif ($message->getHeaders()->containsKey(MessageHeaders::TYPE_ID)) {
                     $resolvedTargetParameterType = $message->getHeaders()->containsKey(MessageHeaders::TYPE_ID) ? TypeDescriptor::create($message->getHeaders()->get(MessageHeaders::TYPE_ID)) : $parameterType;
                     if ($this->canConvertParameter(
-                            $sourceTypeDescriptor,
-                            $currentParameterMediaType,
-                            $resolvedTargetParameterType,
-                            $parameterMediaType
-                        )
+                        $sourceTypeDescriptor,
+                        $currentParameterMediaType,
+                        $resolvedTargetParameterType,
+                        $parameterMediaType
+                    )
                     ) {
                         $convertedData = $this->doConversion($this->interfaceToCall, $interfaceParameter, $data, $sourceTypeDescriptor, $currentParameterMediaType, $resolvedTargetParameterType, $parameterMediaType);
                     }
                 }
 
-                if (!is_null($convertedData)) {
+                if (! is_null($convertedData)) {
                     $data = $convertedData;
-                }else {
+                } else {
                     if ($parameterType->isUnionType()) {
                         throw InvalidArgumentException::create("Can not call {$this->interfaceToCall} lack of information which type should be used to deserialization. Consider adding __TYPE__ header to indicate which union type it should be resolved to.");
-                    }elseif (!$currentParameterMediaType->isCompatibleWith($parameterMediaType) && !$sourceTypeDescriptor->isCompatibleWith($parameterType)) {
+                    } elseif (! $currentParameterMediaType->isCompatibleWith($parameterMediaType) && ! $sourceTypeDescriptor->isCompatibleWith($parameterType)) {
                         throw InvalidArgumentException::create("Can not call {$this->interfaceToCall}. Lack of Media Type Converter for {$currentParameterMediaType}:{$sourceTypeDescriptor} to {$parameterMediaType}:{$parameterType}");
                     }
                 }
@@ -343,7 +337,7 @@ final class MethodInvoker implements MessageProcessor
                 $parameterType,
                 $parameterMediaType
             );
-        }catch (ConversionException $exception) {
+        } catch (ConversionException $exception) {
             throw ConversionException::createFromPreviousException("There is a problem with conversion for {$interfaceToCall} on parameter {$interfaceParameterToConvert->getName()}: " . $exception->getMessage(), $exception);
         }
     }
@@ -391,8 +385,8 @@ final class MethodInvoker implements MessageProcessor
     private function init($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters, InterfaceToCall $interfaceToCall): void
     {
         $this->isCalledStatically = false;
-        if (!is_object($objectToInvokeOn)) {
-            if (!$interfaceToCall->isStaticallyCalled()) {
+        if (! is_object($objectToInvokeOn)) {
+            if (! $interfaceToCall->isStaticallyCalled()) {
                 throw InvalidArgumentException::create("Reference to invoke must be object given {$objectToInvokeOn}");
             }
             $this->isCalledStatically = true;

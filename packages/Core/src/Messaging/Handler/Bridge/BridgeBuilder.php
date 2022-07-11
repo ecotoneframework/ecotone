@@ -1,10 +1,8 @@
 <?php
 
-
 namespace Ecotone\Messaging\Handler\Bridge;
 
 use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
@@ -24,13 +22,13 @@ class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
 
     private function __construct()
     {
-        $this->bridgeBuilder = ServiceActivatorBuilder::createWithDirectReference(new Bridge(), "handle");
+        $this->bridgeBuilder = ServiceActivatorBuilder::createWithDirectReference(new Bridge(), 'handle');
     }
 
     /**
      * @inheritDoc
      */
-    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference): \Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder
+    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference): ServiceActivatorBuilder
     {
         $self = clone $this;
 
@@ -40,7 +38,7 @@ class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
     /**
      * @inheritDoc
      */
-    public function withEndpointAnnotations(iterable $endpointAnnotations): \Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder
+    public function withEndpointAnnotations(iterable $endpointAnnotations): ServiceActivatorBuilder
     {
         $self = clone $this;
 
@@ -66,7 +64,7 @@ class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
     /**
      * @inheritDoc
      */
-    public function withRequiredInterceptorNames(iterable $interceptorNames): \Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder
+    public function withRequiredInterceptorNames(iterable $interceptorNames): ServiceActivatorBuilder
     {
         return $this->bridgeBuilder->withRequiredInterceptorNames($interceptorNames);
     }
@@ -74,7 +72,7 @@ class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
     /**
      * @inheritDoc
      */
-    public function withInputChannelName(string $inputChannelName): \Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder
+    public function withInputChannelName(string $inputChannelName): ServiceActivatorBuilder
     {
         $self = clone $this;
 
@@ -92,7 +90,7 @@ class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
     /**
      * @inheritDoc
      */
-    public function withEndpointId(string $endpointId): \Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder
+    public function withEndpointId(string $endpointId): ServiceActivatorBuilder
     {
         return $this->bridgeBuilder->withEndpointId($endpointId);
     }
@@ -108,7 +106,7 @@ class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
     /**
      * @inheritDoc
      */
-    public function withOutputMessageChannel(string $messageChannelName): \Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder
+    public function withOutputMessageChannel(string $messageChannelName): ServiceActivatorBuilder
     {
         $self = clone $this;
 
@@ -127,7 +125,7 @@ class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
     /**
      * @return BridgeBuilder
      */
-    public static function create() : self
+    public static function create(): self
     {
         return new self();
     }

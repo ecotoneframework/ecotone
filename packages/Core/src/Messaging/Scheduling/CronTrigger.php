@@ -1,8 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
 
+use DateTime;
+use DateTimeZone;
 use Ecotone\Messaging\Scheduling\CronIntegration\CronExpression;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
@@ -26,7 +29,7 @@ class CronTrigger implements Trigger
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createWith(string $cronExpression) : self
+    public static function createWith(string $cronExpression): self
     {
         return new self($cronExpression);
     }
@@ -38,19 +41,19 @@ class CronTrigger implements Trigger
     {
         $cron = CronExpression::factory($this->cronExpression);
 
-        if (!$triggerContext->lastActualExecutionTime() && $triggerContext->lastScheduledTime()) {
+        if (! $triggerContext->lastActualExecutionTime() && $triggerContext->lastScheduledTime()) {
             return $triggerContext->lastScheduledTime();
         }
         if ($this->hasScheduledButNotYetExecuted($triggerContext)) {
             return $triggerContext->lastScheduledTime();
         }
 
-        $dateTime = new \DateTime("now", new \DateTimeZone("UTC"));
+        $dateTime = new DateTime('now', new DateTimeZone('UTC'));
         $dateTime->setTimestamp((int)($clock->unixTimeInMilliseconds() / 1000));
 
-        $nextExecutionTime = $cron->getNextRunDate($dateTime, 0, true, "UTC")->getTimestamp();
+        $nextExecutionTime = $cron->getNextRunDate($dateTime, 0, true, 'UTC')->getTimestamp();
         if ($nextExecutionTime < $dateTime->getTimestamp()) {
-            $nextExecutionTime = $cron->getNextRunDate($dateTime, 1, true, "UTC")->getTimestamp();
+            $nextExecutionTime = $cron->getNextRunDate($dateTime, 1, true, 'UTC')->getTimestamp();
         }
 
         return $nextExecutionTime * 1000;
@@ -61,9 +64,9 @@ class CronTrigger implements Trigger
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function initialize(string $cronExpression) : void
+    private function initialize(string $cronExpression): void
     {
-        if (!CronExpression::isValidExpression($cronExpression)) {
+        if (! CronExpression::isValidExpression($cronExpression)) {
             throw InvalidArgumentException::create("Passed cron expression {$cronExpression} is not correct");
         }
 

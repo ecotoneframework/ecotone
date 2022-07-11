@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\QueryHandlerAggregate;
-
 
 class SmallBox implements Box
 {
@@ -13,7 +11,7 @@ class SmallBox implements Box
         $this->boxId = $boxId;
     }
 
-    public static function create(string $boxId) : static
+    public static function create(string $boxId): static
     {
         return new self($boxId);
     }

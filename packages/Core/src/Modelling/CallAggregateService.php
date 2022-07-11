@@ -113,7 +113,7 @@ class CallAggregateService
             $interfaceReturnType = $this->aggregateInterface->getReturnType();
             if ($interfaceReturnType->isUnionType()) {
                 $resultType = TypeDescriptor::createCollection(TypeDescriptor::OBJECT);
-            }else {
+            } else {
                 $resultType = $interfaceReturnType;
             }
         }
@@ -132,17 +132,17 @@ class CallAggregateService
             }
 
             $resultMessage = $resultMessage->setHeader(AggregateMessage::AGGREGATE_OBJECT, $aggregate);
-        }elseif ($this->isCommandHandler && $this->isEventSourced) {
+        } elseif ($this->isCommandHandler && $this->isEventSourced) {
             $resultMessage->setHeader(AggregateMessage::AGGREGATE_OBJECT, $this->eventSourcingHandlerExecutor->fill($result, $aggregate));
         }
 
-        if (!is_null($result)) {
+        if (! is_null($result)) {
             $resultMessage = $resultMessage
                 ->setContentType(MediaType::createApplicationXPHPWithTypeParameter($resultType->toString()))
                 ->setPayload($result);
         }
 
-        if ($this->isCommandHandler || !is_null($result)) {
+        if ($this->isCommandHandler || ! is_null($result)) {
             return $resultMessage
                 ->build();
         }

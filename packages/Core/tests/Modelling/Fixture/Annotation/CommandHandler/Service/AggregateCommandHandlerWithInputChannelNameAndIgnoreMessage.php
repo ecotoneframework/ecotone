@@ -2,15 +2,15 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service;
 
-use Ecotone\Messaging\Attribute\MessageEndpoint;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\IgnorePayload;
+use stdClass;
 
 class AggregateCommandHandlerWithInputChannelNameAndIgnoreMessage
 {
-    #[CommandHandler("execute", "commandHandler")]
+    #[CommandHandler('execute', 'commandHandler')]
     #[IgnorePayload]
-    public function execute(\stdClass $class) : int
+    public function execute(stdClass $class): int
     {
         return 1;
     }

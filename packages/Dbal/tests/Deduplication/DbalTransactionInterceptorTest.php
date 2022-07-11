@@ -9,12 +9,15 @@ use Enqueue\Dbal\DbalConnectionFactory;
 use Test\Ecotone\Dbal\DbalMessagingTest;
 use Test\Ecotone\Dbal\Fixture\StubMethodInvocation;
 
+/**
+ * @internal
+ */
 class DbalTransactionInterceptorTest extends DbalMessagingTest
 {
     /**
      * @BeforeScenario
      */
-    public function before() : void
+    public function before(): void
     {
         $this->getConnectionFactory()->createContext()->getDbalConnection()->beginTransaction();
     }
@@ -35,14 +38,14 @@ class DbalTransactionInterceptorTest extends DbalMessagingTest
 
         $dbalTransactionInterceptor->deduplicate($methodInvocation, [], [
             MessageHeaders::MESSAGE_ID => 1,
-            MessageHeaders::CONSUMER_ENDPOINT_ID => "endpoint1"
+            MessageHeaders::CONSUMER_ENDPOINT_ID => 'endpoint1',
         ], $this->getReferenceSearchServiceWithConnection());
 
         $this->assertEquals(1, $methodInvocation->getCalledTimes());
 
         $dbalTransactionInterceptor->deduplicate($methodInvocation, [], [
             MessageHeaders::MESSAGE_ID => 1,
-            MessageHeaders::CONSUMER_ENDPOINT_ID => "endpoint1"
+            MessageHeaders::CONSUMER_ENDPOINT_ID => 'endpoint1',
         ], $this->getReferenceSearchServiceWithConnection());
 
         $this->assertEquals(1, $methodInvocation->getCalledTimes());
@@ -56,14 +59,14 @@ class DbalTransactionInterceptorTest extends DbalMessagingTest
 
         $dbalTransactionInterceptor->deduplicate($methodInvocation, [], [
             MessageHeaders::MESSAGE_ID => 1,
-            MessageHeaders::CONSUMER_ENDPOINT_ID => "endpoint1"
+            MessageHeaders::CONSUMER_ENDPOINT_ID => 'endpoint1',
         ], $this->getReferenceSearchServiceWithConnection());
 
         $this->assertEquals(1, $methodInvocation->getCalledTimes());
 
         $dbalTransactionInterceptor->deduplicate($methodInvocation, [], [
             MessageHeaders::MESSAGE_ID => 1,
-            MessageHeaders::CONSUMER_ENDPOINT_ID => "endpoint2"
+            MessageHeaders::CONSUMER_ENDPOINT_ID => 'endpoint2',
         ], $this->getReferenceSearchServiceWithConnection());
 
         $this->assertEquals(2, $methodInvocation->getCalledTimes());
@@ -77,7 +80,7 @@ class DbalTransactionInterceptorTest extends DbalMessagingTest
 
         $dbalTransactionInterceptor->deduplicate($methodInvocation, [], [
             MessageHeaders::MESSAGE_ID => 1,
-            MessageHeaders::CONSUMER_ENDPOINT_ID => "endpoint1"
+            MessageHeaders::CONSUMER_ENDPOINT_ID => 'endpoint1',
         ], $this->getReferenceSearchServiceWithConnection());
 
         $this->assertEquals(1, $methodInvocation->getCalledTimes());
@@ -85,10 +88,9 @@ class DbalTransactionInterceptorTest extends DbalMessagingTest
         usleep(2000);
         $dbalTransactionInterceptor->deduplicate($methodInvocation, [], [
             MessageHeaders::MESSAGE_ID => 1,
-            MessageHeaders::CONSUMER_ENDPOINT_ID => "endpoint1"
+            MessageHeaders::CONSUMER_ENDPOINT_ID => 'endpoint1',
         ], $this->getReferenceSearchServiceWithConnection());
 
         $this->assertEquals(2, $methodInvocation->getCalledTimes());
     }
-
 }

@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Dbal;
 
 use Ecotone\Enqueue\CachedConnectionFactory;

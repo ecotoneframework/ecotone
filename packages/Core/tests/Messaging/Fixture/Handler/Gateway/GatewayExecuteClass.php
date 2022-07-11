@@ -1,7 +1,8 @@
 <?php
 
-
 namespace Test\Ecotone\Messaging\Fixture\Handler\Gateway;
+
+use Closure;
 
 class GatewayExecuteClass
 {
@@ -12,9 +13,9 @@ class GatewayExecuteClass
         $this->returnData = $returnData;
     }
 
-    public static function createBuildClosure($returnData) : \Closure
+    public static function createBuildClosure($returnData): Closure
     {
-        return function() use($returnData) {
+        return function () use ($returnData) {
             return new self($returnData);
         };
     }

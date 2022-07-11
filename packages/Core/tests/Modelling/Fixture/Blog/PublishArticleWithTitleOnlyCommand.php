@@ -35,7 +35,7 @@ class PublishArticleWithTitleOnlyCommand
      *
      * @return PublishArticleWithTitleOnlyCommand
      */
-    public static function createWith(string $author, string $title) : self
+    public static function createWith(string $author, string $title): self
     {
         return new self($author, $title);
     }

@@ -1,11 +1,13 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace Test\Ecotone\Dbal\Fixture\ORM;
 
+use Doctrine\ORM\Mapping as ORM;
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
-use Doctrine\ORM\Mapping as ORM;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
 /**
@@ -39,7 +41,7 @@ class Person
         return new self($command->getPersonId(), $command->getName());
     }
 
-    #[QueryHandler("person.getName")]
+    #[QueryHandler('person.getName')]
     public function getName(): string
     {
         return $this->name;

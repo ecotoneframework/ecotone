@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\ErrorHandler;
@@ -6,6 +7,9 @@ namespace Test\Ecotone\Messaging\Unit\Handler\ErrorHandler;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ */
 class RetryTemplateTest extends TestCase
 {
     public function test_calculating_fixed_back_off_with_max_attempts()

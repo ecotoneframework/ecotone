@@ -13,11 +13,11 @@ interface BookingService
      * @param string $flatNumber
      * @return bool
      */
-    public function checkIfIsBooked(string $flatNumber) : bool;
+    public function checkIfIsBooked(string $flatNumber): bool;
 
     /**
      * @param string $flatNumber
      * @return void
      */
-    public function bookFlat(string $flatNumber) : void;
+    public function bookFlat(string $flatNumber): void;
 }

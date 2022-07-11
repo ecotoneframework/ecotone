@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\SymfonyBundle\DepedencyInjection;
 
 use Ecotone\SymfonyBundle\DepedencyInjection\Compiler\EcotoneCompilerPass;
@@ -9,7 +8,6 @@ use Symfony\Component\DependencyInjection\Extension\Extension;
 
 class EcotoneExtension extends Extension
 {
-
     public function load(array $configs, ContainerBuilder $container)
     {
         $configuration = new Configuration();
@@ -22,6 +20,6 @@ class EcotoneExtension extends Extension
         $container->setParameter(EcotoneCompilerPass::DEFAULT_SERIALIZATION_MEDIA_TYPE, $config['defaultSerializationMediaType']);
         $container->setParameter(EcotoneCompilerPass::ERROR_CHANNEL, $config['defaultErrorChannel']);
         $container->setParameter(EcotoneCompilerPass::DEFAULT_MEMORY_LIMIT, $config['defaultMemoryLimit']);
-        $container->setParameter(EcotoneCompilerPass::DEFAULT_CONNECTION_EXCEPTION_RETRY, isset($config['defaultConnectionExceptionRetry']) ? $config['defaultConnectionExceptionRetry'] : null);
+        $container->setParameter(EcotoneCompilerPass::DEFAULT_CONNECTION_EXCEPTION_RETRY, $config['defaultConnectionExceptionRetry'] ?? null);
     }
 }

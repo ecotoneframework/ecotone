@@ -1,9 +1,9 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Logger;
 
-use Psr\Log\LoggerInterface;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
@@ -14,6 +14,10 @@ use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
 use Ecotone\Messaging\Support\MessageBuilder;
+
+use function json_encode;
+
+use Psr\Log\LoggerInterface;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithLogger\ServiceActivatorWithLoggerExample;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
 
@@ -21,6 +25,8 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * Class LoggingHandlerBuilderTest
  * @package Test\Ecotone\Messaging\Unit\Handler\Logger
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class LoggingHandlerBuilderTest extends MessagingTest
 {
@@ -29,22 +35,22 @@ class LoggingHandlerBuilderTest extends MessagingTest
         $logger = LoggerExample::create();
         $queueChannel = QueueChannel::create();
         $loggingHandler = LoggingHandlerBuilder::createForAfter()
-                            ->withOutputMessageChannel("outputChannel")
+                            ->withOutputMessageChannel('outputChannel')
                             ->withMethodParameterConverters([
-                                MessageConverterBuilder::create("message"),
-                                InterceptorConverterBuilder::create("log", InterfaceToCall::create(ServiceActivatorWithLoggerExample::class, "sendMessage"), [])
+                                MessageConverterBuilder::create('message'),
+                                InterceptorConverterBuilder::create('log', InterfaceToCall::create(ServiceActivatorWithLoggerExample::class, 'sendMessage'), []),
                             ])
                             ->build(
                                 InMemoryChannelResolver::createFromAssociativeArray([
-                                    "outputChannel" => $queueChannel
+                                    'outputChannel' => $queueChannel,
                                 ]),
                                 InMemoryReferenceSearchService::createWith([
                                     ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([]),
-                                    LoggingHandlerBuilder::LOGGER_REFERENCE => $logger
+                                    LoggingHandlerBuilder::LOGGER_REFERENCE => $logger,
                                 ])
                             );
 
-        $message = MessageBuilder::withPayload("some")->build();
+        $message = MessageBuilder::withPayload('some')->build();
         $loggingHandler->handle($message);
 
         $this->assertMessages(
@@ -61,31 +67,31 @@ class LoggingHandlerBuilderTest extends MessagingTest
 
         $queueChannel = QueueChannel::create();
         $loggingHandler = LoggingHandlerBuilder::createForBefore()
-            ->withOutputMessageChannel("outputChannel")
+            ->withOutputMessageChannel('outputChannel')
             ->withMethodParameterConverters([
-                MessageConverterBuilder::create("message"),
-                InterceptorConverterBuilder::create("log", InterfaceToCall::create(ServiceActivatorWithLoggerExample::class, "sendMessage"), [])
+                MessageConverterBuilder::create('message'),
+                InterceptorConverterBuilder::create('log', InterfaceToCall::create(ServiceActivatorWithLoggerExample::class, 'sendMessage'), []),
             ])
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
-                    "outputChannel" => $queueChannel
+                    'outputChannel' => $queueChannel,
                 ]),
                 InMemoryReferenceSearchService::createWith([
                     ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createEmpty(),
-                    LoggingHandlerBuilder::LOGGER_REFERENCE => $logger
+                    LoggingHandlerBuilder::LOGGER_REFERENCE => $logger,
                 ])
             );
 
-        $message = MessageBuilder::withPayload("some")->build();
+        $message = MessageBuilder::withPayload('some')->build();
 
         $logger
             ->expects($this->once())
-            ->method("info")
-            ->with("some", [
-                "headers" => \json_encode([
-                    "id" => $message->getHeaders()->getMessageId(),
-                    "timestamp" => $message->getHeaders()->getTimestamp()
-                ])
+            ->method('info')
+            ->with('some', [
+                'headers' => json_encode([
+                    'id' => $message->getHeaders()->getMessageId(),
+                    'timestamp' => $message->getHeaders()->getTimestamp(),
+                ]),
             ]);
 
         $loggingHandler->handle($message);

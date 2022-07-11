@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor;
@@ -29,7 +30,7 @@ use Ecotone\Modelling\Attribute\IgnorePayload;
 #[ModuleAnnotation]
 class MethodInterceptorModule extends NoExternalConfigurationModule implements AnnotationModule
 {
-    public const MODULE_NAME = "methodInterceptorModule";
+    public const MODULE_NAME = 'methodInterceptorModule';
     private array $postCallInterceptors;
     private array $preCallInterceptors;
     private array $aroundInterceptors;

@@ -2,7 +2,6 @@
 
 namespace Test\Ecotone\EventSourcing\Behat\Bootstrap;
 
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\TableNode;
 use Doctrine\DBAL\Connection;
@@ -21,11 +20,12 @@ use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
 use Enqueue\Dbal\DbalConnectionFactory;
-use Illuminate\Database\PDO\PostgresDriver;
 use InvalidArgumentException;
+
+use function json_decode;
+
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
-use Test\Ecotone\Dbal\Fixture\Transaction\OrderService;
 use Test\Ecotone\EventSourcing\Fixture\Basket\BasketEventConverter;
 use Test\Ecotone\EventSourcing\Fixture\Basket\Command\AddProduct;
 use Test\Ecotone\EventSourcing\Fixture\Basket\Command\CreateBasket;
@@ -50,6 +50,9 @@ use Test\Ecotone\EventSourcing\Fixture\TicketWithPollingProjection\InProgressTic
 use Test\Ecotone\EventSourcing\Fixture\ValueObjectIdentifier\ArticleEventConverter;
 use Test\Ecotone\EventSourcing\Fixture\ValueObjectIdentifier\PublishArticle;
 
+/**
+ * @internal
+ */
 class DomainContext extends TestCase implements Context
 {
     private static ConfiguredMessagingSystem $messagingSystem;
@@ -114,7 +117,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertEquals(
             $table->getHash(),
-            $this->getQueryBus()->sendWithRouting("getInProgressTickets", [])
+            $this->getQueryBus()->sendWithRouting('getInProgressTickets', [])
         );
     }
 
@@ -131,7 +134,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iDeleteProjectionForAllInProgressTickets()
     {
-        self::$messagingSystem->runConsoleCommand(EventSourcingModule::ECOTONE_ES_DELETE_PROJECTION, ["name" => InProgressTicketList::IN_PROGRESS_TICKET_PROJECTION]);
+        self::$messagingSystem->runConsoleCommand(EventSourcingModule::ECOTONE_ES_DELETE_PROJECTION, ['name' => InProgressTicketList::IN_PROGRESS_TICKET_PROJECTION]);
     }
 
     /**
@@ -141,16 +144,16 @@ class DomainContext extends TestCase implements Context
     {
         $wasProjectionDeleted = false;
         try {
-            $result = $this->getQueryBus()->sendWithRouting("getInProgressTickets", []);
-        }catch (TableNotFoundException $exception) {
+            $result = $this->getQueryBus()->sendWithRouting('getInProgressTickets', []);
+        } catch (TableNotFoundException $exception) {
             $result = [];
         }
 
-        if (!$result) {
+        if (! $result) {
             $wasProjectionDeleted = true;
         }
 
-        $this->assertTrue($wasProjectionDeleted, "Projection was not deleted");
+        $this->assertTrue($wasProjectionDeleted, 'Projection was not deleted');
     }
 
     /**
@@ -158,7 +161,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iResetTheProjectionForInProgressTickets()
     {
-        self::$messagingSystem->runConsoleCommand(EventSourcingModule::ECOTONE_ES_RESET_PROJECTION, ["name" => InProgressTicketList::IN_PROGRESS_TICKET_PROJECTION]);
+        self::$messagingSystem->runConsoleCommand(EventSourcingModule::ECOTONE_ES_RESET_PROJECTION, ['name' => InProgressTicketList::IN_PROGRESS_TICKET_PROJECTION]);
     }
 
     /**
@@ -166,7 +169,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iStopTheProjectionForInProgressTickets()
     {
-        self::$messagingSystem->runConsoleCommand(EventSourcingModule::ECOTONE_ES_STOP_PROJECTION, ["name" => InProgressTicketList::IN_PROGRESS_TICKET_PROJECTION]);
+        self::$messagingSystem->runConsoleCommand(EventSourcingModule::ECOTONE_ES_STOP_PROJECTION, ['name' => InProgressTicketList::IN_PROGRESS_TICKET_PROJECTION]);
     }
 
     /**
@@ -184,12 +187,12 @@ class DomainContext extends TestCase implements Context
     {
         $resultsSet = [];
         foreach ($table->getHash() as $row) {
-            $resultsSet[$row["id"]] = \json_decode($row["products"], true, 512, JSON_THROW_ON_ERROR);
+            $resultsSet[$row['id']] = json_decode($row['products'], true, 512, JSON_THROW_ON_ERROR);
         }
 
         $this->assertEquals(
             $resultsSet,
-            $this->getQueryBus()->sendWithRouting("getALlBaskets", [])
+            $this->getQueryBus()->sendWithRouting('getALlBaskets', [])
         );
     }
 
@@ -207,7 +210,7 @@ class DomainContext extends TestCase implements Context
 
     private function prepareMessaging(array $namespaces, bool $failFast): void
     {
-        $dbalConnectionFactory = new DbalConnectionFactory(["dsn" => getenv("DATABASE_DSN") ? getenv("DATABASE_DSN") : null]);
+        $dbalConnectionFactory = new DbalConnectionFactory(['dsn' => getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : null]);
         $managerRegistryConnectionFactory = CachedConnectionFactory::createFor(new DbalReconnectableConnectionFactory($dbalConnectionFactory));
         self::$connection                 = $managerRegistryConnectionFactory->createContext()->getDbalConnection();
 
@@ -215,40 +218,40 @@ class DomainContext extends TestCase implements Context
         foreach ($namespaces as $namespace) {
             switch ($namespace) {
                 case "Test\Ecotone\EventSourcing\Fixture\Ticket":
-                {
-                    $objects = array_merge($objects, [new TicketEventConverter()]);
-                    break;
-                }
+                    {
+                        $objects = array_merge($objects, [new TicketEventConverter()]);
+                        break;
+                    }
                 case "Test\Ecotone\EventSourcing\Fixture\Basket":
-                {
-                    $objects = array_merge($objects, [new BasketEventConverter()]);
-                    break;
-                }
+                    {
+                        $objects = array_merge($objects, [new BasketEventConverter()]);
+                        break;
+                    }
                 case "Test\Ecotone\EventSourcing\Fixture\BasketListProjection":
-                {
-                    $objects = array_merge($objects, [new BasketList()]);
-                    break;
-                }
+                    {
+                        $objects = array_merge($objects, [new BasketList()]);
+                        break;
+                    }
                 case "Test\Ecotone\EventSourcing\Fixture\Snapshots":
-                {
-                    $objects = array_merge($objects, [new TicketMediaTypeConverter(), new BasketMediaTypeConverter()]);
-                    break;
-                }
+                    {
+                        $objects = array_merge($objects, [new TicketMediaTypeConverter(), new BasketMediaTypeConverter()]);
+                        break;
+                    }
                 case "Test\Ecotone\EventSourcing\Fixture\SpecificEventStream":
-                {
-                    $objects = array_merge($objects, [new SpecificEventStreamProjection()]);
-                    break;
-                }
+                    {
+                        $objects = array_merge($objects, [new SpecificEventStreamProjection()]);
+                        break;
+                    }
                 case "Test\Ecotone\EventSourcing\Fixture\CustomEventStream":
-                {
-                    $objects = array_merge($objects, [new CustomEventStreamProjection()]);
-                    break;
-                }
+                    {
+                        $objects = array_merge($objects, [new CustomEventStreamProjection()]);
+                        break;
+                    }
                 case "Test\Ecotone\EventSourcing\Fixture\ProjectionFromCategoryUsingAggregatePerStream":
-                {
-                    $objects = array_merge($objects, [new FromCategoryUsingAggregatePerStreamProjection()]);
-                    break;
-                }
+                    {
+                        $objects = array_merge($objects, [new FromCategoryUsingAggregatePerStreamProjection()]);
+                        break;
+                    }
                 case "Test\Ecotone\EventSourcing\Fixture\TicketWithPollingProjection": {
                     $objects = array_merge($objects, [new InProgressTicketList(self::$connection)]);
                     break;
@@ -280,42 +283,42 @@ class DomainContext extends TestCase implements Context
                     break;
                 }
                 default:
-                {
-                    throw new InvalidArgumentException("Namespace {$namespace} not yet implemented");
-                }
+                    {
+                        throw new InvalidArgumentException("Namespace {$namespace} not yet implemented");
+                    }
             }
         }
 
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
-            __DIR__ . "/../../../../",
+            __DIR__ . '/../../../../',
             InMemoryPSRContainer::createFromObjects(
                 array_merge(
                     $objects,
                     [
-                        "managerRegistry" => $managerRegistryConnectionFactory,
-                        DbalConnectionFactory::class => $dbalConnectionFactory
+                        'managerRegistry' => $managerRegistryConnectionFactory,
+                        DbalConnectionFactory::class => $dbalConnectionFactory,
                     ]
                 )
             ),
             ServiceConfiguration::createWithDefaults()
-                ->withEnvironment("prod")
+                ->withEnvironment('prod')
                 ->withNamespaces($namespaces)
                 ->withFailFast($failFast)
                 ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString()),
             [
-                "isPostgres" => $dbalConnectionFactory->createContext()->getDbalConnection()->getDriver() instanceof Driver
+                'isPostgres' => $dbalConnectionFactory->createContext()->getDbalConnection()->getDriver() instanceof Driver,
             ],
             false
         );
 
-        $this->deleteFromTableExists("enqueue", self::$connection);
+        $this->deleteFromTableExists('enqueue', self::$connection);
         $this->deleteFromTableExists(DbalDeadLetter::DEFAULT_DEAD_LETTER_TABLE, self::$connection);
         $this->deleteFromTableExists(DbalDocumentStore::ECOTONE_DOCUMENT_STORE, self::$connection);
-        $this->deleteTable("in_progress_tickets", self::$connection);
+        $this->deleteTable('in_progress_tickets', self::$connection);
 
         if ($this->checkIfTableExists(self::$connection, 'event_streams')) {
             $projections = self::$connection->createQueryBuilder()
-                ->select("*")
+                ->select('*')
                 ->from('event_streams')
                 ->executeQuery()
                 ->fetchAllAssociative();
@@ -324,8 +327,8 @@ class DomainContext extends TestCase implements Context
                 $this->deleteTable($projection['stream_name'], self::$connection);
             }
         }
-        $this->deleteTable("event_streams", self::$connection);
-        $this->deleteTable("projections", self::$connection);
+        $this->deleteTable('event_streams', self::$connection);
+        $this->deleteTable('projections', self::$connection);
 
         self::$projectionManager = self::$messagingSystem->getGatewayByName(ProjectionManager::class);
     }
@@ -372,7 +375,7 @@ class DomainContext extends TestCase implements Context
     {
         $this->assertEquals(
             $content,
-            $this->getQueryBus()->sendWithRouting("article.getContent", metadata: ["aggregate.id" => Uuid::fromString($id)])
+            $this->getQueryBus()->sendWithRouting('article.getContent', metadata: ['aggregate.id' => Uuid::fromString($id)])
         );
     }
 
@@ -390,7 +393,7 @@ class DomainContext extends TestCase implements Context
     public function basketWithIdShouldContains(int $basketId, string $basket)
     {
         $this->assertEquals(
-            implode(",",$this->getQueryBus()->sendWithRouting("basket.getCurrent", metadata: ["aggregate.id" => $basketId])),
+            implode(',', $this->getQueryBus()->sendWithRouting('basket.getCurrent', metadata: ['aggregate.id' => $basketId])),
             $basket
         );
     }
@@ -400,8 +403,8 @@ class DomainContext extends TestCase implements Context
      */
     public function iShouldBeNotifiedWithUpdatedTickets(string $ticketId, int $count)
     {
-        $this->assertEquals($ticketId, $this->getQueryBus()->sendWithRouting("get.notifications"));
-        $this->assertCount($count, $this->getQueryBus()->sendWithRouting("get.published_events"));
+        $this->assertEquals($ticketId, $this->getQueryBus()->sendWithRouting('get.notifications'));
+        $this->assertCount($count, $this->getQueryBus()->sendWithRouting('get.published_events'));
     }
 
     /**
@@ -409,7 +412,7 @@ class DomainContext extends TestCase implements Context
      */
     public function thereShouldNoNotifiedEvent()
     {
-        $this->assertNull($this->getQueryBus()->sendWithRouting("get.notifications"));
+        $this->assertNull($this->getQueryBus()->sendWithRouting('get.notifications'));
     }
 
     /**
@@ -417,8 +420,8 @@ class DomainContext extends TestCase implements Context
      */
     public function iShouldSeeTicketCountEqualAndTicketClosedCountEqual(int $ticketCount, int $closedTicketCount)
     {
-        $this->assertEquals($ticketCount, $this->getQueryBus()->sendWithRouting("ticket.getCurrentCount"));
-        $this->assertEquals($closedTicketCount, $this->getQueryBus()->sendWithRouting("ticket.getClosedCount"));
+        $this->assertEquals($ticketCount, $this->getQueryBus()->sendWithRouting('ticket.getCurrentCount'));
+        $this->assertEquals($closedTicketCount, $this->getQueryBus()->sendWithRouting('ticket.getClosedCount'));
 
         /** @var CounterStateGateway $gateway */
         $gateway = $this->getGateway(CounterStateGateway::class);
@@ -430,7 +433,7 @@ class DomainContext extends TestCase implements Context
      */
     public function iResetTheProjection(string $projectionName)
     {
-        self::$messagingSystem->runConsoleCommand(EventSourcingModule::ECOTONE_ES_RESET_PROJECTION, ["name" => $projectionName]);
+        self::$messagingSystem->runConsoleCommand(EventSourcingModule::ECOTONE_ES_RESET_PROJECTION, ['name' => $projectionName]);
     }
 
     /**
@@ -438,19 +441,19 @@ class DomainContext extends TestCase implements Context
      */
     public function iDeleteProjection(string $projectionName)
     {
-        self::$messagingSystem->runConsoleCommand(EventSourcingModule::ECOTONE_ES_DELETE_PROJECTION, ["name" => $projectionName]);
+        self::$messagingSystem->runConsoleCommand(EventSourcingModule::ECOTONE_ES_DELETE_PROJECTION, ['name' => $projectionName]);
     }
 
-    private function deleteFromTableExists(string $tableName, \Doctrine\DBAL\Connection $connection) : void
+    private function deleteFromTableExists(string $tableName, Connection $connection): void
     {
         $doesExists = $this->checkIfTableExists($connection, $tableName);
 
         if ($doesExists) {
-            $connection->executeStatement("DELETE FROM " . $tableName);
+            $connection->executeStatement('DELETE FROM ' . $tableName);
         }
     }
 
-    private function deleteTable(string $tableName, \Doctrine\DBAL\Connection $connection) : void
+    private function deleteTable(string $tableName, Connection $connection): void
     {
         $doesExists = $this->checkIfTableExists($connection, $tableName);
 
@@ -461,7 +464,7 @@ class DomainContext extends TestCase implements Context
         }
     }
 
-    private function checkIfTableExists(\Doctrine\DBAL\Connection $connection, string $table): mixed
+    private function checkIfTableExists(Connection $connection, string $table): mixed
     {
         $schemaManager = $connection->createSchemaManager();
 

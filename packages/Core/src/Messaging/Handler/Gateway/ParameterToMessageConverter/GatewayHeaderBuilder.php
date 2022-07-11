@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
@@ -34,7 +35,7 @@ class GatewayHeaderBuilder implements GatewayParameterConverterBuilder
      * @param string $headerName
      * @return self
      */
-    public static function create(string $parameterName, string $headerName) : self
+    public static function create(string $parameterName, string $headerName): self
     {
         return new self($parameterName, $headerName);
     }

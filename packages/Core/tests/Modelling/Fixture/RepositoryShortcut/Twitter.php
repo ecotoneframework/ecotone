@@ -20,13 +20,13 @@ class Twitter
         $this->content = $content;
     }
 
-    #[QueryHandler("getContent")]
+    #[QueryHandler('getContent')]
     public function getContent(): string
     {
         return $this->content;
     }
 
-    #[CommandHandler("changeContent")]
+    #[CommandHandler('changeContent')]
     public function changeContent(string $content): void
     {
         $this->content = $content;

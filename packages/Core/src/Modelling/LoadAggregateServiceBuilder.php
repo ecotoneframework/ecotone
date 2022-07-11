@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Modelling;
-
 
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ClassDefinition;
@@ -15,13 +13,8 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHandler;
-use Ecotone\Messaging\Support\Assert;
-use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Modelling\Attribute\AggregateEvents;
-use Ecotone\Modelling\Attribute\AggregateFactory;
 use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
-use Ecotone\Modelling\Attribute\EventSourcingHandler;
 use Ecotone\Modelling\Attribute\TargetAggregateVersion;
 
 class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
@@ -88,7 +81,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
                 $this->eventSourcingHandlerExecutor,
                 $this->loadAggregateMode
             ),
-            "load"
+            'load'
         )
             ->withOutputMessageChannel($this->getOutputMessageChannelName())
             ->build($channelResolver, $referenceSearchService);
@@ -107,7 +100,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return [
-            $interfaceToCallRegistry->getFor(LoadAggregateService::class, "load")
+            $interfaceToCallRegistry->getFor(LoadAggregateService::class, 'load'),
         ];
     }
 

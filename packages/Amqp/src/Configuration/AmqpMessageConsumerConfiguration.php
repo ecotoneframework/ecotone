@@ -25,7 +25,7 @@ class AmqpMessageConsumerConfiguration
      *
      * @var string
      */
-    private $headerMapper = "";
+    private $headerMapper = '';
     /**
      * @var int
      */
@@ -38,7 +38,7 @@ class AmqpMessageConsumerConfiguration
         $this->amqpConnectionReferenceName = $amqpConnectionReferenceName;
     }
 
-    public static function create(string $endpointId, string $queueName, string $amqpConnectionReferenceName = AmqpConnectionFactory::class) : self
+    public static function create(string $endpointId, string $queueName, string $amqpConnectionReferenceName = AmqpConnectionFactory::class): self
     {
         return new self($endpointId, $queueName, $amqpConnectionReferenceName);
     }

@@ -1,11 +1,11 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Messaging\Config\Annotation\InMemoryAnnotationRegistrationService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConverterModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\SerializerModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -15,17 +15,17 @@ use Ecotone\Messaging\Gateway\Converter\Serializer;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessagingException;
 use ReflectionException;
 use stdClass;
-use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
 use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleSingleConverterService;
 
 /**
  * Class ConverterModuleTest
  * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class SerializerModuleTest extends AnnotationConfigurationTest
 {
@@ -49,14 +49,14 @@ class SerializerModuleTest extends AnnotationConfigurationTest
 
         $configuration->registerConsumerFactory(new EventDrivenConsumerBuilder());
         $messagingSystem = $configuration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([
-            ExampleSingleConverterService::class => new ExampleSingleConverterService()
+            ExampleSingleConverterService::class => new ExampleSingleConverterService(),
         ]));
         /** @var Serializer $gateway */
         $gateway = $messagingSystem->getGatewayByName(Serializer::class);
 
         $this->assertEquals(
-            new \stdClass(),
-            $gateway->convertFromPHP("test", MediaType::createApplicationXPHPWithTypeParameter(\stdClass::class)->toString())
+            new stdClass(),
+            $gateway->convertFromPHP('test', MediaType::createApplicationXPHPWithTypeParameter(stdClass::class)->toString())
         );
     }
 
@@ -74,14 +74,14 @@ class SerializerModuleTest extends AnnotationConfigurationTest
 
         $configuration->registerConsumerFactory(new EventDrivenConsumerBuilder());
         $messagingSystem = $configuration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([
-            ExampleSingleConverterService::class => new ExampleSingleConverterService()
+            ExampleSingleConverterService::class => new ExampleSingleConverterService(),
         ]));
         /** @var Serializer $gateway */
         $gateway = $messagingSystem->getGatewayByName(Serializer::class);
 
         $this->assertEquals(
-            new \stdClass(),
-            $gateway->convertToPHP("test", MediaType::APPLICATION_X_PHP, \stdClass::class)
+            new stdClass(),
+            $gateway->convertToPHP('test', MediaType::APPLICATION_X_PHP, stdClass::class)
         );
     }
 }

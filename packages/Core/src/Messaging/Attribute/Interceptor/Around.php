@@ -1,18 +1,20 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Attribute\Interceptor;
 
+use Attribute;
 use Ecotone\Messaging\Precedence;
 
-#[\Attribute(\Attribute::TARGET_METHOD)]
+#[Attribute(Attribute::TARGET_METHOD)]
 class Around
 {
     public int $precedence;
 
     public string $pointcut;
 
-    public function __construct(int $precedence = Precedence::DEFAULT_PRECEDENCE, string $pointcut = "")
+    public function __construct(int $precedence = Precedence::DEFAULT_PRECEDENCE, string $pointcut = '')
     {
         $this->precedence = $precedence;
         $this->pointcut   = $pointcut;

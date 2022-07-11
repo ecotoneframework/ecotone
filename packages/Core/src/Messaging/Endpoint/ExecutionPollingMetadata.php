@@ -10,9 +10,11 @@ final class ExecutionPollingMetadata
     private ?string $cron = null;
     private ?bool $stopOnError = null;
 
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 
-    public static function createWithDefaults() : self
+    public static function createWithDefaults(): self
     {
         return new self();
     }

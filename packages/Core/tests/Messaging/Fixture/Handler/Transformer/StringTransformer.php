@@ -9,8 +9,8 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\Transformer;
  */
 class StringTransformer
 {
-    public function transform() : string
+    public function transform(): string
     {
-        return "some";
+        return 'some';
     }
 }

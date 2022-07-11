@@ -1,14 +1,13 @@
 <?php
 
-
 namespace Test\Ecotone\Dbal;
-
 
 use Ecotone\Dbal\DbalConnection;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Enqueue\Dbal\DbalConnectionFactory;
 use Enqueue\Dbal\ManagerRegistryConnectionFactory;
 use Interop\Queue\ConnectionFactory;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 abstract class DbalMessagingTest extends TestCase
@@ -18,12 +17,12 @@ abstract class DbalMessagingTest extends TestCase
      */
     private $dbalConnectionFactory;
 
-    public function getConnectionFactory(bool $isRegistry = false) : ConnectionFactory
+    public function getConnectionFactory(bool $isRegistry = false): ConnectionFactory
     {
-        if (!$this->dbalConnectionFactory) {
-            $dsn = getenv("DATABASE_DSN") ? getenv("DATABASE_DSN") : null;
-            if (!$dsn) {
-                throw new \InvalidArgumentException("Missing env `DATABASE_DSN` pointing to test database");
+        if (! $this->dbalConnectionFactory) {
+            $dsn = getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : null;
+            if (! $dsn) {
+                throw new InvalidArgumentException('Missing env `DATABASE_DSN` pointing to test database');
             }
             $dbalConnectionFactory = new DbalConnectionFactory($dsn);
             $this->dbalConnectionFactory = $isRegistry
@@ -37,7 +36,7 @@ abstract class DbalMessagingTest extends TestCase
     protected function getReferenceSearchServiceWithConnection()
     {
         return InMemoryReferenceSearchService::createWith([
-            DbalConnectionFactory::class => $this->getConnectionFactory()
+            DbalConnectionFactory::class => $this->getConnectionFactory(),
         ]);
     }
 }

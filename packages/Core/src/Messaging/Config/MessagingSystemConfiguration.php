@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config;
@@ -165,7 +166,7 @@ final class MessagingSystemConfiguration implements Configuration
             }
         }
         $applicationConfiguration = $applicationConfiguration->mergeWith($extensionApplicationConfiguration);
-        if (!$applicationConfiguration->getConnectionRetryTemplate()) {
+        if (! $applicationConfiguration->getConnectionRetryTemplate()) {
             if ($applicationConfiguration->isProductionConfiguration()) {
                 $applicationConfiguration->withConnectionRetryTemplate(
                     RetryTemplateBuilder::exponentialBackoff(1000, 3)
@@ -179,18 +180,19 @@ final class MessagingSystemConfiguration implements Configuration
             }
         }
 
-        $this->isLazyConfiguration = !$applicationConfiguration->isFailingFast();
+        $this->isLazyConfiguration = ! $applicationConfiguration->isFailingFast();
         $this->rootPathToSearchConfigurationFor = $rootPathToSearchConfigurationFor;
         $this->applicationConfiguration = $applicationConfiguration;
 
         $extensionObjects = array_filter(
-            $extensionObjects, function ($extensionObject) {
-            if (is_null($extensionObject)) {
-                return false;
-            }
+            $extensionObjects,
+            function ($extensionObject) {
+                if (is_null($extensionObject)) {
+                    return false;
+                }
 
-            return !($extensionObject instanceof ServiceConfiguration);
-        }
+                return ! ($extensionObject instanceof ServiceConfiguration);
+            }
         );
         $extensionObjects[] = $applicationConfiguration;
         $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver, $applicationConfiguration->getCacheDirectoryPath() ? ProxyFactory::createWithCache($applicationConfiguration->getCacheDirectoryPath()) : ProxyFactory::createNoCache(), $preparationInterfaceRegistry, $applicationConfiguration);
@@ -316,7 +318,8 @@ final class MessagingSystemConfiguration implements Configuration
             array_map(
                 function (MethodInterceptor $methodInterceptor) {
                     return $methodInterceptor->getInterceptingObject();
-                }, $this->beforeCallMethodInterceptors
+                },
+                $this->beforeCallMethodInterceptors
             )
         );
         foreach ($this->beforeCallMethodInterceptors as $interceptor) {
@@ -337,7 +340,8 @@ final class MessagingSystemConfiguration implements Configuration
             array_map(
                 function (MethodInterceptor $methodInterceptor) {
                     return $methodInterceptor->getInterceptingObject();
-                }, $this->afterCallMethodInterceptors
+                },
+                $this->afterCallMethodInterceptors
             )
         );
         foreach ($this->messageHandlerBuilders as $key => $messageHandlerBuilder) {
@@ -366,12 +370,12 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         foreach ($this->requiredConsumerEndpointIds as $requiredConsumerEndpointId) {
-            if (!array_key_exists($requiredConsumerEndpointId, $this->messageHandlerBuilders) && !array_key_exists($requiredConsumerEndpointId, $this->channelAdapters)) {
+            if (! array_key_exists($requiredConsumerEndpointId, $this->messageHandlerBuilders) && ! array_key_exists($requiredConsumerEndpointId, $this->channelAdapters)) {
                 throw ConfigurationException::create("Consumer with id {$requiredConsumerEndpointId} has no configuration defined. Define consumer configuration and retry.");
             }
         }
         foreach ($this->pollingMetadata as $pollingMetadata) {
-            if (!$this->hasMessageHandlerWithName($pollingMetadata) && !$this->hasChannelAdapterWithName($pollingMetadata)) {
+            if (! $this->hasMessageHandlerWithName($pollingMetadata) && ! $this->hasChannelAdapterWithName($pollingMetadata)) {
                 throw ConfigurationException::create("Trying to register polling meta data for non existing endpoint {$pollingMetadata->getEndpointId()}. Verify if there is any asynchronous endpoint with such name.");
             }
         }
@@ -390,7 +394,7 @@ final class MessagingSystemConfiguration implements Configuration
     {
         $relatedInterceptors = [];
         foreach ($requiredInterceptorNames as $requiredInterceptorName) {
-            if (!$this->doesInterceptorWithNameExists($requiredInterceptorName)) {
+            if (! $this->doesInterceptorWithNameExists($requiredInterceptorName)) {
                 throw ConfigurationException::create("Can't find interceptor with name {$requiredInterceptorName} for {$interceptedInterface}");
             }
         }
@@ -447,7 +451,7 @@ final class MessagingSystemConfiguration implements Configuration
         $asynchronousChannels = [];
 
         foreach ($this->asynchronousEndpoints as $targetEndpointId => $asynchronousMessageChannel) {
-            if (!isset($this->channelBuilders[$asynchronousMessageChannel]) && !isset($this->defaultChannelBuilders[$asynchronousMessageChannel])) {
+            if (! isset($this->channelBuilders[$asynchronousMessageChannel]) && ! isset($this->defaultChannelBuilders[$asynchronousMessageChannel])) {
                 throw ConfigurationException::create("Registered asynchronous endpoint `{$targetEndpointId}`, however channel configuration for `{$asynchronousMessageChannel}` was not provided.");
             }
 
@@ -460,19 +464,19 @@ final class MessagingSystemConfiguration implements Configuration
                     $this->messageHandlerBuilders[$key] = $messageHandlerBuilder->withInputChannelName($targetChannelName);
 
                     $this->messageHandlerBuilders[$targetChannelName] = (
-                    TransformerBuilder::createHeaderEnricher(
-                        [
-                            BusModule::COMMAND_CHANNEL_NAME_BY_NAME => null,
-                            BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT => null,
-                            BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => null,
-                            BusModule::EVENT_CHANNEL_NAME_BY_NAME => null,
-                            MessageHeaders::REPLY_CHANNEL => null,
-                            MessageHeaders::ROUTING_SLIP => $targetChannelName
-                        ]
-                    )
-                        ->withEndpointId($targetChannelName)
-                        ->withInputChannelName($originalInputChannelName)
-                        ->withOutputMessageChannel($asynchronousMessageChannel)
+                        TransformerBuilder::createHeaderEnricher(
+                            [
+                                BusModule::COMMAND_CHANNEL_NAME_BY_NAME => null,
+                                BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT => null,
+                                BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => null,
+                                BusModule::EVENT_CHANNEL_NAME_BY_NAME => null,
+                                MessageHeaders::REPLY_CHANNEL => null,
+                                MessageHeaders::ROUTING_SLIP => $targetChannelName,
+                            ]
+                        )
+                            ->withEndpointId($targetChannelName)
+                            ->withInputChannelName($originalInputChannelName)
+                            ->withOutputMessageChannel($asynchronousMessageChannel)
                     );
 
                     if (array_key_exists($messageHandlerBuilder->getEndpointId(), $this->pollingMetadata)) {
@@ -484,7 +488,7 @@ final class MessagingSystemConfiguration implements Configuration
                 }
             }
 
-            if (!$foundEndpoint) {
+            if (! $foundEndpoint) {
                 throw ConfigurationException::create("Registered asynchronous endpoint for not existing id {$targetEndpointId}");
             }
         }
@@ -492,8 +496,8 @@ final class MessagingSystemConfiguration implements Configuration
         foreach (array_unique($asynchronousChannels) as $asynchronousChannel) {
             //        needed for correct around intercepting, otherwise requestReply is outside of around interceptor scope
             $bridgeBuilder = ChainMessageHandlerBuilder::create()
-                ->chain(ServiceActivatorBuilder::createWithDirectReference(new Bridge(), "handle"))
-                ->chain(ServiceActivatorBuilder::createWithDirectReference(new Bridge(), "handle"));
+                ->chain(ServiceActivatorBuilder::createWithDirectReference(new Bridge(), 'handle'))
+                ->chain(ServiceActivatorBuilder::createWithDirectReference(new Bridge(), 'handle'));
             $this->messageHandlerBuilders[$asynchronousChannel] = $bridgeBuilder
                 ->withInputChannelName($asynchronousChannel)
                 ->withEndpointId($asynchronousChannel);
@@ -508,7 +512,7 @@ final class MessagingSystemConfiguration implements Configuration
     private function configureDefaultMessageChannels(): void
     {
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
-            if (!array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->channelBuilders)) {
+            if (! array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->channelBuilders)) {
                 if (array_key_exists($messageHandlerBuilder->getInputMessageChannelName(), $this->defaultChannelBuilders)) {
                     $this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()] = $this->defaultChannelBuilders[$messageHandlerBuilder->getInputMessageChannelName()];
                 } else {
@@ -518,7 +522,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         foreach ($this->defaultChannelBuilders as $name => $defaultChannelBuilder) {
-            if (!array_key_exists($name, $this->channelBuilders)) {
+            if (! array_key_exists($name, $this->channelBuilders)) {
                 $this->channelBuilders[$name] = $defaultChannelBuilder;
             }
         }
@@ -616,7 +620,7 @@ final class MessagingSystemConfiguration implements Configuration
                 }
                 if ($beforeCallInterceptors || $afterCallInterceptors) {
                     $outputChannel = $messageHandlerBuilder->getOutputMessageChannelName();
-                    $messageHandlerBuilder = $messageHandlerBuilder->withOutputMessageChannel("");
+                    $messageHandlerBuilder = $messageHandlerBuilder->withOutputMessageChannel('');
                     $messageHandlerBuilderToUse = ChainMessageHandlerBuilder::create()
                         ->withEndpointId($messageHandlerBuilder->getEndpointId())
                         ->withInputChannelName($messageHandlerBuilder->getInputMessageChannelName())
@@ -697,15 +701,15 @@ final class MessagingSystemConfiguration implements Configuration
             $pollingMetadata = $this->pollingMetadata[$endpointId];
         }
 
-        if ($this->applicationConfiguration->getDefaultErrorChannel() && $pollingMetadata->isErrorChannelEnabled() && !$pollingMetadata->getErrorChannelName()) {
+        if ($this->applicationConfiguration->getDefaultErrorChannel() && $pollingMetadata->isErrorChannelEnabled() && ! $pollingMetadata->getErrorChannelName()) {
             $pollingMetadata = $pollingMetadata
                 ->setErrorChannelName($this->applicationConfiguration->getDefaultErrorChannel());
         }
-        if ($this->applicationConfiguration->getDefaultMemoryLimitInMegabytes() && !$pollingMetadata->getMemoryLimitInMegabytes()) {
+        if ($this->applicationConfiguration->getDefaultMemoryLimitInMegabytes() && ! $pollingMetadata->getMemoryLimitInMegabytes()) {
             $pollingMetadata = $pollingMetadata
                 ->setMemoryLimitInMegaBytes($this->applicationConfiguration->getDefaultMemoryLimitInMegabytes());
         }
-        if ($this->applicationConfiguration->getConnectionRetryTemplate() && !$pollingMetadata->getConnectionRetryTemplate()) {
+        if ($this->applicationConfiguration->getConnectionRetryTemplate() && ! $pollingMetadata->getConnectionRetryTemplate()) {
             $pollingMetadata = $pollingMetadata
                 ->setConnectionRetryTemplate($this->applicationConfiguration->getConnectionRetryTemplate());
         }
@@ -754,7 +758,7 @@ final class MessagingSystemConfiguration implements Configuration
             realpath($rootPathToSearchConfigurationFor),
             $applicationConfiguration->getNamespaces(),
             $applicationConfiguration->getEnvironment(),
-            $applicationConfiguration->getLoadedCatalog() ?? ""
+            $applicationConfiguration->getLoadedCatalog() ?? ''
         );
 
         $preparationInterfaceRegistry = InterfaceToCallRegistry::createWith($referenceTypeFromNameResolver, $annotationFinder);
@@ -773,11 +777,11 @@ final class MessagingSystemConfiguration implements Configuration
 
     private static function getCachedVersion(ServiceConfiguration $applicationConfiguration): ?MessagingSystemConfiguration
     {
-        if (!$applicationConfiguration->getCacheDirectoryPath()) {
+        if (! $applicationConfiguration->getCacheDirectoryPath()) {
             return null;
         }
 
-        $messagingSystemCachePath = $applicationConfiguration->getCacheDirectoryPath() . DIRECTORY_SEPARATOR . "messaging_system";
+        $messagingSystemCachePath = $applicationConfiguration->getCacheDirectoryPath() . DIRECTORY_SEPARATOR . 'messaging_system';
         if (file_exists($messagingSystemCachePath)) {
             return unserialize(file_get_contents($messagingSystemCachePath));
         }
@@ -795,7 +799,7 @@ final class MessagingSystemConfiguration implements Configuration
 
         if ($cacheDirectoryPath) {
             $serializedMessagingSystemConfiguration = serialize($messagingSystemConfiguration);
-            file_put_contents($cacheDirectoryPath . DIRECTORY_SEPARATOR . "messaging_system", $serializedMessagingSystemConfiguration);
+            file_put_contents($cacheDirectoryPath . DIRECTORY_SEPARATOR . 'messaging_system', $serializedMessagingSystemConfiguration);
         }
 
         return $messagingSystemConfiguration;
@@ -803,12 +807,12 @@ final class MessagingSystemConfiguration implements Configuration
 
     private static function prepareCacheDirectory(string $cacheDirectoryPath): void
     {
-        if (!is_dir($cacheDirectoryPath)) {
+        if (! is_dir($cacheDirectoryPath)) {
             @mkdir($cacheDirectoryPath, 0775, true);
         }
         Assert::isTrue(is_writable($cacheDirectoryPath), "Not enough permissions to write into cache directory {$cacheDirectoryPath}");
 
-        Assert::isFalse(is_file($cacheDirectoryPath), "Cache directory is file, should be directory");
+        Assert::isFalse(is_file($cacheDirectoryPath), 'Cache directory is file, should be directory');
     }
 
     public static function cleanCache(string $cacheDirectoryPath): void
@@ -913,17 +917,18 @@ final class MessagingSystemConfiguration implements Configuration
     private function orderMethodInterceptors(array $methodInterceptors): array
     {
         usort(
-            $methodInterceptors, function (MethodInterceptor $methodInterceptor, MethodInterceptor $toCompare) {
-            if ($methodInterceptor->getPrecedence() === $toCompare->getPrecedence()) {
-                return 0;
-            }
+            $methodInterceptors,
+            function (MethodInterceptor $methodInterceptor, MethodInterceptor $toCompare) {
+                if ($methodInterceptor->getPrecedence() === $toCompare->getPrecedence()) {
+                    return 0;
+                }
 
-            if ($methodInterceptor->getPrecedence() > $toCompare->getPrecedence()) {
-                return 1;
-            }
+                if ($methodInterceptor->getPrecedence() > $toCompare->getPrecedence()) {
+                    return 1;
+                }
 
-            return -1;
-        }
+                return -1;
+            }
         );
 
         return $methodInterceptors;
@@ -1009,7 +1014,7 @@ final class MessagingSystemConfiguration implements Configuration
     public function registerMessageHandler(MessageHandlerBuilder $messageHandlerBuilder): Configuration
     {
         Assert::notNullAndEmpty($messageHandlerBuilder->getInputMessageChannelName(), "Lack information about input message channel for {$messageHandlerBuilder}");
-        if (is_null($messageHandlerBuilder->getEndpointId()) || $messageHandlerBuilder->getEndpointId() === "") {
+        if (is_null($messageHandlerBuilder->getEndpointId()) || $messageHandlerBuilder->getEndpointId() === '') {
             $messageHandlerBuilder->withEndpointId(Uuid::uuid4()->toString());
         }
         if (array_key_exists($messageHandlerBuilder->getEndpointId(), $this->messageHandlerBuilders)) {
@@ -1185,7 +1190,7 @@ final class MessagingSystemConfiguration implements Configuration
     public function buildMessagingSystemFromConfiguration(ReferenceSearchService $referenceSearchService): ConfiguredMessagingSystem
     {
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWithInterfaces($this->interfacesToCall, $this->isLazyConfiguration, $referenceSearchService);
-        if (!$this->isLazyConfiguration) {
+        if (! $this->isLazyConfiguration) {
             $this->prepareAndOptimizeConfiguration($interfaceToCallRegistry, $this->applicationConfiguration);
         }
 
@@ -1247,7 +1252,7 @@ final class MessagingSystemConfiguration implements Configuration
                 [
                     ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters),
                     InterfaceToCallRegistry::REFERENCE_NAME => $interfaceToCallRegistry,
-                    ServiceConfiguration::class => $this->applicationConfiguration
+                    ServiceConfiguration::class => $this->applicationConfiguration,
                 ]
             )
         );

@@ -16,7 +16,7 @@ class PassThroughTransformer
      *
      * @return Message
      */
-    public function transform(Message $message) : Message
+    public function transform(Message $message): Message
     {
         return $message;
     }

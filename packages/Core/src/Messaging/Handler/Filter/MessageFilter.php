@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Filter;
@@ -39,7 +40,7 @@ class MessageFilter
      */
     public function handle(Message $message): ?Message
     {
-        if (!$this->messageSelector->processMessage($message)) {
+        if (! $this->messageSelector->processMessage($message)) {
             return $message;
         }
 

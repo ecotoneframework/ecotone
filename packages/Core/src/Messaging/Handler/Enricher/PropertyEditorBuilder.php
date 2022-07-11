@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher;
@@ -17,5 +18,5 @@ interface PropertyEditorBuilder
      *
      * @return PropertyEditor
      */
-    public function build(ReferenceSearchService $referenceSearchService) : PropertyEditor;
+    public function build(ReferenceSearchService $referenceSearchService): PropertyEditor;
 }

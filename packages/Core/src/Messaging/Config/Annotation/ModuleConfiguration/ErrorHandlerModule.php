@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
@@ -7,7 +8,6 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Config\Annotation\AnnotationRegistrationService;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -20,7 +20,7 @@ use Ecotone\Messaging\MessageHeaders;
 #[ModuleAnnotation]
 class ErrorHandlerModule extends NoExternalConfigurationModule implements AnnotationModule
 {
-    public const MODULE_NAME = "errorHandlerModule";
+    public const MODULE_NAME = 'errorHandlerModule';
 
     private function __construct()
     {
@@ -42,9 +42,10 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
         /** @var ErrorHandlerConfiguration $extensionObject */
         foreach ($extensionObjects as $extensionObject) {
             $errorHandler = ServiceActivatorBuilder::createWithDirectReference(
-                new ErrorHandler($extensionObject->getDelayedRetryTemplate(), (bool)$extensionObject->getDeadLetterQueueChannel()), "handle"
+                new ErrorHandler($extensionObject->getDelayedRetryTemplate(), (bool)$extensionObject->getDeadLetterQueueChannel()),
+                'handle'
             )
-                ->withEndpointId("error_handler." . $extensionObject->getErrorChannelName())
+                ->withEndpointId('error_handler.' . $extensionObject->getErrorChannelName())
                 ->withInputChannelName($extensionObject->getErrorChannelName());
             if ($extensionObject->getDeadLetterQueueChannel()) {
                 $errorHandler = $errorHandler->withOutputMessageChannel($extensionObject->getDeadLetterQueueChannel());
@@ -56,7 +57,7 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
                 ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($extensionObject->getErrorChannelName()))
                 ->registerMessageHandler(
                     RouterBuilder::createHeaderRouter(MessageHeaders::POLLED_CHANNEL_NAME)
-                        ->withInputChannelName("ecotone.recoverability.reply")
+                        ->withInputChannelName('ecotone.recoverability.reply')
                 );
         }
     }

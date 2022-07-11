@@ -1,15 +1,13 @@
 <?php
+
 declare(strict_types=1);
 
-
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
-
 
 use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\Scheduled;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
-use Ecotone\Messaging\Config\Annotation\AnnotationRegistration;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 

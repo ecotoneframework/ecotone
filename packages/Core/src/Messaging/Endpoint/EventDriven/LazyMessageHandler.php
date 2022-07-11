@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Ecotone\Messaging\Endpoint\EventDriven;
 
 use Ecotone\Messaging\Handler\ChannelResolver;
@@ -36,9 +35,9 @@ class LazyMessageHandler implements MessageHandler
         $this->getMessageHandler()->handle($message);
     }
 
-    private function getMessageHandler() : MessageHandler
+    private function getMessageHandler(): MessageHandler
     {
-        if (!$this->initializedMessageHandler) {
+        if (! $this->initializedMessageHandler) {
             $this->initializedMessageHandler = $this->messageHandlerBuilder->build($this->channelResolver, $this->referenceSearchService);
         }
 

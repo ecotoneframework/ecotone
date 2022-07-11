@@ -9,5 +9,5 @@ namespace Test\Ecotone\Messaging\Fixture\Service\ServiceInterface;
  */
 interface ServiceInterfaceSendOnlyWithThreeArguments
 {
-    public function calculate(int $number, int $multiplyBy, float $percentage) : void;
+    public function calculate(int $number, int $multiplyBy, float $percentage): void;
 }

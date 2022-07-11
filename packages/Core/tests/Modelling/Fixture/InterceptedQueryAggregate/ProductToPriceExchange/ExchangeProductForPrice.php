@@ -1,10 +1,10 @@
 <?php
 
-
 namespace Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange;
 
-#[\Attribute]
+use Attribute;
+
+#[Attribute]
 class ExchangeProductForPrice
 {
-
 }

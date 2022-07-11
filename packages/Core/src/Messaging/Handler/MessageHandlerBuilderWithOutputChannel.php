@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
@@ -20,5 +21,5 @@ interface MessageHandlerBuilderWithOutputChannel extends MessageHandlerBuilder, 
     /**
      * @return string
      */
-    public function getOutputMessageChannelName() : string;
+    public function getOutputMessageChannelName(): string;
 }

@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Ecotone\Dbal\Recoverability;
-
 
 use Ecotone\Dbal\DbalReconnectableConnectionFactory;
 use Ecotone\Enqueue\CachedConnectionFactory;
@@ -23,15 +21,15 @@ use Ecotone\Messaging\MessageHeaders;
 
 class DbalDeadLetterBuilder extends InputOutputMessageHandlerBuilder
 {
-    const LIMIT_HEADER  = "ecotone.dbal.deadletter.limit";
-    const OFFSET_HEADER = "ecotone.dbal.deadletter.offset";
+    public const LIMIT_HEADER  = 'ecotone.dbal.deadletter.limit';
+    public const OFFSET_HEADER = 'ecotone.dbal.deadletter.offset';
 
-    const LIST_CHANNEL  = "ecotone.dbal.deadletter.list";
-    const SHOW_CHANNEL       = "ecotone.dbal.deadletter.show";
-    const REPLAY_CHANNEL     = "ecotone.dbal.deadletter.reply";
-    const REPLAY_ALL_CHANNEL = "ecotone.dbal.deadletter.replyAll";
-    const DELETE_CHANNEL     = "ecotone.dbal.deadletter.delete";
-    const STORE_CHANNEL     = "dbal_dead_letter";
+    public const LIST_CHANNEL  = 'ecotone.dbal.deadletter.list';
+    public const SHOW_CHANNEL       = 'ecotone.dbal.deadletter.show';
+    public const REPLAY_CHANNEL     = 'ecotone.dbal.deadletter.reply';
+    public const REPLAY_ALL_CHANNEL = 'ecotone.dbal.deadletter.replyAll';
+    public const DELETE_CHANNEL     = 'ecotone.dbal.deadletter.delete';
+    public const STORE_CHANNEL     = 'dbal_dead_letter';
 
     private string $methodName;
     private string $connectionReferenceName;
@@ -48,43 +46,49 @@ class DbalDeadLetterBuilder extends InputOutputMessageHandlerBuilder
     public static function createList(string $connectionReferenceName): self
     {
         return new self(
-            "list", $connectionReferenceName, self::LIST_CHANNEL, [
-            HeaderBuilder::create("limit", self::LIMIT_HEADER),
-            HeaderBuilder::create("offset", self::OFFSET_HEADER)
-        ]
+            'list',
+            $connectionReferenceName,
+            self::LIST_CHANNEL,
+            [
+                HeaderBuilder::create('limit', self::LIMIT_HEADER),
+                HeaderBuilder::create('offset', self::OFFSET_HEADER),
+            ]
         );
     }
 
     public static function createShow(string $connectionReferenceName): self
     {
-        return new self("show", $connectionReferenceName, self::SHOW_CHANNEL, [
-            PayloadBuilder::create("messageId"),
-            HeaderBuilder::createOptional("replyChannel", MessageHeaders::REPLY_CHANNEL)
+        return new self('show', $connectionReferenceName, self::SHOW_CHANNEL, [
+            PayloadBuilder::create('messageId'),
+            HeaderBuilder::createOptional('replyChannel', MessageHeaders::REPLY_CHANNEL),
         ]);
     }
 
     public static function createReply(string $connectionReferenceName): self
     {
-        return new self("reply", $connectionReferenceName, self::REPLAY_CHANNEL, []);
+        return new self('reply', $connectionReferenceName, self::REPLAY_CHANNEL, []);
     }
 
     public static function createReplyAll(string $connectionReferenceName): self
     {
         return new self(
-            "replyAll", $connectionReferenceName, self::REPLAY_ALL_CHANNEL, [
-            ReferenceBuilder::create("messagingEntrypoint", MessagingEntrypoint::class)
-        ]
+            'replyAll',
+            $connectionReferenceName,
+            self::REPLAY_ALL_CHANNEL,
+            [
+                ReferenceBuilder::create('messagingEntrypoint', MessagingEntrypoint::class),
+            ]
         );
     }
 
     public static function createDelete(string $connectionReferenceName): self
     {
-        return new self("delete", $connectionReferenceName, self::DELETE_CHANNEL, []);
+        return new self('delete', $connectionReferenceName, self::DELETE_CHANNEL, []);
     }
 
     public static function createStore(string $connectionReferenceName): self
     {
-        return new self("store", $connectionReferenceName, self::STORE_CHANNEL, []);
+        return new self('store', $connectionReferenceName, self::STORE_CHANNEL, []);
     }
 
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
@@ -117,18 +121,18 @@ class DbalDeadLetterBuilder extends InputOutputMessageHandlerBuilder
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return [
-            $interfaceToCallRegistry->getFor(DbalDeadLetter::class, "list"),
-            $interfaceToCallRegistry->getFor(DbalDeadLetter::class, "show"),
-            $interfaceToCallRegistry->getFor(DbalDeadLetter::class, "reply"),
-            $interfaceToCallRegistry->getFor(DbalDeadLetter::class, "replyAll"),
-            $interfaceToCallRegistry->getFor(DbalDeadLetter::class, "delete"),
-            $interfaceToCallRegistry->getFor(DbalDeadLetter::class, "store"),
+            $interfaceToCallRegistry->getFor(DbalDeadLetter::class, 'list'),
+            $interfaceToCallRegistry->getFor(DbalDeadLetter::class, 'show'),
+            $interfaceToCallRegistry->getFor(DbalDeadLetter::class, 'reply'),
+            $interfaceToCallRegistry->getFor(DbalDeadLetter::class, 'replyAll'),
+            $interfaceToCallRegistry->getFor(DbalDeadLetter::class, 'delete'),
+            $interfaceToCallRegistry->getFor(DbalDeadLetter::class, 'store'),
         ];
     }
 
     public function getEndpointId(): ?string
     {
-        return $this->getInputMessageChannelName() . ".endpoint";
+        return $this->getInputMessageChannelName() . '.endpoint';
     }
 
     public function withEndpointId(string $endpointId): self

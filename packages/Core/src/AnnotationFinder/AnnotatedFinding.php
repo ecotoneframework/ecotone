@@ -4,7 +4,7 @@ namespace Ecotone\AnnotationFinder;
 
 interface AnnotatedFinding
 {
-    public function getAnnotationForMethod() : object;
+    public function getAnnotationForMethod(): object;
 
     public function getClassName(): string;
 
@@ -13,7 +13,7 @@ interface AnnotatedFinding
     /**
      * @return object[]
      */
-    public function getClassAnnotations() : array;
+    public function getClassAnnotations(): array;
 
     /**
      * @return object[]
@@ -23,14 +23,14 @@ interface AnnotatedFinding
     /**
      * @return object[]
      */
-    public function getMethodAnnotationsWithType(string $type) : array;
+    public function getMethodAnnotationsWithType(string $type): array;
 
     /**
      * @return object[]
      */
-    public function getClassAnnotationsWithType(string $type) : array;
+    public function getClassAnnotationsWithType(string $type): array;
 
-    public function hasMethodAnnotation(string $type) : bool;
+    public function hasMethodAnnotation(string $type): bool;
 
-    public function hasClassAnnotation(string $type) : bool;
+    public function hasClassAnnotation(string $type): bool;
 }

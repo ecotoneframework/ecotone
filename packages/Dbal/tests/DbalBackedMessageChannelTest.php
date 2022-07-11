@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Test\Ecotone\Dbal;
-
 
 use Ecotone\Dbal\DbalBackedMessageChannelBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
@@ -13,6 +11,9 @@ use Enqueue\Dbal\DbalConnectionFactory;
 use Enqueue\Dbal\DbalContext;
 use Ramsey\Uuid\Uuid;
 
+/**
+ * @internal
+ */
 class DbalBackedMessageChannelTest extends DbalMessagingTest
 {
     public function test_sending_and_receiving_via_channel()
@@ -24,8 +25,8 @@ class DbalBackedMessageChannelTest extends DbalMessagingTest
                             ->withReceiveTimeout(1)
                             ->build($this->getReferenceSearchServiceWithConnection());
 
-        $payload = "some";
-        $headerName = "token";
+        $payload = 'some';
+        $headerName = 'token';
         $messageChannel->send(
             MessageBuilder::withPayload($payload)
                 ->setHeader($headerName, 123)
@@ -34,8 +35,8 @@ class DbalBackedMessageChannelTest extends DbalMessagingTest
 
         $receivedMessage = $messageChannel->receive();
 
-        $this->assertNotNull($receivedMessage, "Not received message");
-        $this->assertEquals($payload, $receivedMessage->getPayload(), "Payload of received is different that sent one");
+        $this->assertNotNull($receivedMessage, 'Not received message');
+        $this->assertEquals($payload, $receivedMessage->getPayload(), 'Payload of received is different that sent one');
         $this->assertEquals(123, $receivedMessage->getHeaders()->get($headerName));
     }
 
@@ -44,14 +45,14 @@ class DbalBackedMessageChannelTest extends DbalMessagingTest
         $channelName = Uuid::uuid4()->toString();
 
         /** @var PollableChannel $messageChannel */
-        $messageChannel = DbalBackedMessageChannelBuilder::create($channelName, "managerRegistry")
+        $messageChannel = DbalBackedMessageChannelBuilder::create($channelName, 'managerRegistry')
             ->withReceiveTimeout(1)
             ->build(InMemoryReferenceSearchService::createWith([
-                "managerRegistry" => $this->getConnectionFactory(true)
+                'managerRegistry' => $this->getConnectionFactory(true),
             ]));
 
-        $payload = "some";
-        $headerName = "token";
+        $payload = 'some';
+        $headerName = 'token';
         $messageChannel->send(
             MessageBuilder::withPayload($payload)
                 ->setHeader($headerName, 123)
@@ -60,8 +61,8 @@ class DbalBackedMessageChannelTest extends DbalMessagingTest
 
         $receivedMessage = $messageChannel->receive();
 
-        $this->assertNotNull($receivedMessage, "Not received message");
-        $this->assertEquals($payload, $receivedMessage->getPayload(), "Payload of received is different that sent one");
+        $this->assertNotNull($receivedMessage, 'Not received message');
+        $this->assertEquals($payload, $receivedMessage->getPayload(), 'Payload of received is different that sent one');
         $this->assertEquals(123, $receivedMessage->getHeaders()->get($headerName));
     }
 
@@ -73,11 +74,11 @@ class DbalBackedMessageChannelTest extends DbalMessagingTest
         $messageChannel = DbalBackedMessageChannelBuilder::create($channelName)
             ->withReceiveTimeout(1)
             ->build(InMemoryReferenceSearchService::createWith([
-                DbalConnectionFactory::class => $this->getConnectionFactory(true)
+                DbalConnectionFactory::class => $this->getConnectionFactory(true),
             ]));
 
-        $payload = "some";
-        $headerName = "token";
+        $payload = 'some';
+        $headerName = 'token';
         $messageChannel->send(
             MessageBuilder::withPayload($payload)
                 ->setHeader($headerName, 123)
@@ -86,8 +87,8 @@ class DbalBackedMessageChannelTest extends DbalMessagingTest
 
         $receivedMessage = $messageChannel->receive();
 
-        $this->assertNotNull($receivedMessage, "Not received message");
-        $this->assertEquals($payload, $receivedMessage->getPayload(), "Payload of received is different that sent one");
+        $this->assertNotNull($receivedMessage, 'Not received message');
+        $this->assertEquals($payload, $receivedMessage->getPayload(), 'Payload of received is different that sent one');
         $this->assertEquals(123, $receivedMessage->getHeaders()->get($headerName));
     }
 
@@ -98,17 +99,17 @@ class DbalBackedMessageChannelTest extends DbalMessagingTest
         $messageChannel = DbalBackedMessageChannelBuilder::create(Uuid::uuid4()->toString())
             ->withReceiveTimeout(1)
             ->build(InMemoryReferenceSearchService::createWith([
-                DbalConnectionFactory::class => $connectionFactory
+                DbalConnectionFactory::class => $connectionFactory,
             ]));
 
         /** @var DbalContext $dbalContext */
         $dbalContext = $connectionFactory->createContext();
         $dbalContext->getDbalConnection()->close();
 
-        $messageChannel->send(MessageBuilder::withPayload("some")->build());
+        $messageChannel->send(MessageBuilder::withPayload('some')->build());
         $receivedMessage = $messageChannel->receive();
 
-        $this->assertNotNull($receivedMessage, "Not received message");
+        $this->assertNotNull($receivedMessage, 'Not received message');
     }
 
     public function test_reconnecting_on_disconnected_channel_with_manager_registry()
@@ -118,17 +119,17 @@ class DbalBackedMessageChannelTest extends DbalMessagingTest
         $messageChannel = DbalBackedMessageChannelBuilder::create(Uuid::uuid4()->toString())
             ->withReceiveTimeout(1)
             ->build(InMemoryReferenceSearchService::createWith([
-                DbalConnectionFactory::class => $connectionFactory
+                DbalConnectionFactory::class => $connectionFactory,
             ]));
 
         /** @var DbalContext $dbalContext */
         $dbalContext = $connectionFactory->createContext();
         $dbalContext->getDbalConnection()->close();
 
-        $messageChannel->send(MessageBuilder::withPayload("some")->build());
+        $messageChannel->send(MessageBuilder::withPayload('some')->build());
         $receivedMessage = $messageChannel->receive();
 
-        $this->assertNotNull($receivedMessage, "Not received message");
+        $this->assertNotNull($receivedMessage, 'Not received message');
     }
 
     public function test_delaying_the_message()
@@ -136,10 +137,10 @@ class DbalBackedMessageChannelTest extends DbalMessagingTest
         $messageChannel = DbalBackedMessageChannelBuilder::create(Uuid::uuid4()->toString())
             ->withReceiveTimeout(1)
             ->build(InMemoryReferenceSearchService::createWith([
-                DbalConnectionFactory::class => $this->getConnectionFactory(true)
+                DbalConnectionFactory::class => $this->getConnectionFactory(true),
             ]));
         $messageChannel->send(
-            MessageBuilder::withPayload("some")
+            MessageBuilder::withPayload('some')
                 ->setHeader(MessageHeaders::DELIVERY_DELAY, 1000)
                 ->build()
         );

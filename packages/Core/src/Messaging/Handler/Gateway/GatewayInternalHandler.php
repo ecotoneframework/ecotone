@@ -7,7 +7,6 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
-use Ecotone\Messaging\MessageConverter\MessageConverter;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
@@ -61,7 +60,7 @@ class GatewayInternalHandler
         if ($replyChannel) {
             $requestMessage = $requestMessage
                 ->setReplyChannel($replyChannel);
-        }else {
+        } else {
             $requestMessage = $requestMessage->removeHeader(MessageHeaders::REPLY_CHANNEL);
         }
 
@@ -82,7 +81,7 @@ class GatewayInternalHandler
 
         if ($replyMessage) {
             if ($this->interfaceToCall->getReturnType()->equals(TypeDescriptor::create(Message::class))) {
-                if  ($previousReplyChannel) {
+                if ($previousReplyChannel) {
                     return MessageBuilder::fromMessage($replyMessage)
                             ->setReplyChannel($previousReplyChannel)
                             ->build();
@@ -102,10 +101,9 @@ class GatewayInternalHandler
     private function getReply(PollableChannel $replyChannel): callable
     {
         return function () use ($replyChannel) {
-
             $replyMessage = $this->replyMilliSecondsTimeout > 0 ? $replyChannel->receiveWithTimeout($this->replyMilliSecondsTimeout) : $replyChannel->receive();
 
-            if (is_null($replyMessage) && !$this->interfaceToCall->canItReturnNull()) {
+            if (is_null($replyMessage) && ! $this->interfaceToCall->canItReturnNull()) {
                 throw InvalidArgumentException::create("{$this->interfaceToCall} expects value, but null was returned. Have you consider changing return value to nullable?");
             }
             if ($replyMessage instanceof ErrorMessage) {

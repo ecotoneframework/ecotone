@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Recoverability;
@@ -10,7 +11,7 @@ use Ecotone\Messaging\Support\Assert;
  */
 final class RetryTemplate
 {
-    const FIRST_RETRY = 1;
+    public const FIRST_RETRY = 1;
     /**
      * @var int in milliseconds
      */
@@ -30,16 +31,16 @@ final class RetryTemplate
     /**
      * @return int delay in milliseconds
      */
-    public function calculateNextDelay(int $retryNumber) : int
+    public function calculateNextDelay(int $retryNumber): int
     {
         Assert::isTrue($this->canBeCalledNextTime($retryNumber), "Retry template exceed number of possible tries {$retryNumber} of {$this->maxAttempts}. Should not be called anymore.");
 
         return $this->delayForRetryNumber($retryNumber);
     }
 
-    public function canBeCalledNextTime(int $retryNumber) : bool
+    public function canBeCalledNextTime(int $retryNumber): bool
     {
-        if (!is_null($this->maxDelay) && $this->delayForRetryNumber($retryNumber) > $this->maxDelay) {
+        if (! is_null($this->maxDelay) && $this->delayForRetryNumber($retryNumber) > $this->maxDelay) {
             return false;
         }
         if (is_null($this->maxAttempts)) {
@@ -49,7 +50,7 @@ final class RetryTemplate
         return $retryNumber <= $this->maxAttempts;
     }
 
-    private function delayForRetryNumber(int $retryNumber) : int
+    private function delayForRetryNumber(int $retryNumber): int
     {
         if ($retryNumber === 0) {
             return 0;

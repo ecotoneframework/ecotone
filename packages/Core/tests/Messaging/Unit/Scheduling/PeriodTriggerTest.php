@@ -1,16 +1,20 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Scheduling;
-use PHPUnit\Framework\TestCase;
+
 use Ecotone\Messaging\Scheduling\PeriodicTrigger;
 use Ecotone\Messaging\Scheduling\SimpleTriggerContext;
 use Ecotone\Messaging\Scheduling\StubUTCClock;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Class PeriodTriggerTest
  * @package Test\Ecotone\Messaging\Unit\Scheduling
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ *
+ * @internal
  */
 class PeriodTriggerTest extends TestCase
 {
@@ -19,9 +23,9 @@ class PeriodTriggerTest extends TestCase
         $periodTrigger = PeriodicTrigger::create(1, 0);
 
         $this->assertEquals(
-            StubUTCClock::createEpochTimeFromDateTimeString("2017-01-01 00:00:00"),
+            StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 00:00:00'),
             $periodTrigger->nextExecutionTime(
-                StubUTCClock::createWithCurrentTime("2017-01-01 00:00:00"),
+                StubUTCClock::createWithCurrentTime('2017-01-01 00:00:00'),
                 SimpleTriggerContext::createEmpty()
             )
         );
@@ -32,9 +36,9 @@ class PeriodTriggerTest extends TestCase
         $periodTrigger = PeriodicTrigger::create(1000, 0);
 
         $this->assertEquals(
-            StubUTCClock::createEpochTimeFromDateTimeString("2017-01-01 12:00:01"),
+            StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 12:00:01'),
             $periodTrigger->nextExecutionTime(
-                StubUTCClock::createWithCurrentTime("2017-01-01 00:00:00"),
+                StubUTCClock::createWithCurrentTime('2017-01-01 00:00:00'),
                 SimpleTriggerContext::createWith(null, StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 12:00:00'))
             )
         );
@@ -45,9 +49,9 @@ class PeriodTriggerTest extends TestCase
         $periodTrigger = PeriodicTrigger::create(1000, 0);
 
         $this->assertEquals(
-            StubUTCClock::createEpochTimeFromDateTimeString("2017-01-01 14:00:00"),
+            StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 14:00:00'),
             $periodTrigger->nextExecutionTime(
-                StubUTCClock::createWithCurrentTime("2017-01-01 00:00:00"),
+                StubUTCClock::createWithCurrentTime('2017-01-01 00:00:00'),
                 SimpleTriggerContext::createWith(StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 14:00:00'), null)
             )
         );
@@ -58,9 +62,9 @@ class PeriodTriggerTest extends TestCase
         $periodTrigger = PeriodicTrigger::create(1000, 100);
 
         $this->assertEquals(
-            StubUTCClock::createEpochTimeFromDateTimeString("2017-01-01 14:30:01"),
+            StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 14:30:01'),
             $periodTrigger->nextExecutionTime(
-                StubUTCClock::createWithCurrentTime("2017-01-01 12:00:00"),
+                StubUTCClock::createWithCurrentTime('2017-01-01 12:00:00'),
                 SimpleTriggerContext::createWith(StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 14:30:00'), StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 14:30:00'))
             )
         );
@@ -71,9 +75,9 @@ class PeriodTriggerTest extends TestCase
         $periodTrigger = PeriodicTrigger::create(1000, 10000);
 
         $this->assertEquals(
-            StubUTCClock::createEpochTimeFromDateTimeString("2017-01-01 00:00:10"),
+            StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 00:00:10'),
             $periodTrigger->nextExecutionTime(
-                StubUTCClock::createWithCurrentTime("2017-01-01 00:00:00"),
+                StubUTCClock::createWithCurrentTime('2017-01-01 00:00:00'),
                 SimpleTriggerContext::createEmpty()
             )
         );
@@ -84,9 +88,9 @@ class PeriodTriggerTest extends TestCase
         $periodTrigger = PeriodicTrigger::create(600, 10);
 
         $this->assertEquals(
-            StubUTCClock::createEpochTimeFromDateTimeString("2017-01-01 00:30:00"),
+            StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 00:30:00'),
             $periodTrigger->nextExecutionTime(
-                StubUTCClock::createWithCurrentTime("2017-01-01 00:21:00"),
+                StubUTCClock::createWithCurrentTime('2017-01-01 00:21:00'),
                 SimpleTriggerContext::createWith(StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 00:30:00'), StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 00:20:00'))
             )
         );

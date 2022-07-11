@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
@@ -35,7 +36,7 @@ class ReferenceBuilder implements ParameterConverterBuilder
      * @param string $referenceServiceName
      * @return ReferenceBuilder
      */
-    public static function create(string $parameterName, string $referenceServiceName) : self
+    public static function create(string $parameterName, string $referenceServiceName): self
     {
         return new self($parameterName, $referenceServiceName);
     }
@@ -52,9 +53,9 @@ class ReferenceBuilder implements ParameterConverterBuilder
      * @param string $parameterName
      * @return ReferenceBuilder
      */
-    public static function createWithDynamicResolve(string $parameterName) : self
+    public static function createWithDynamicResolve(string $parameterName): self
     {
-        return new self($parameterName, "");
+        return new self($parameterName, '');
     }
 
     /**
@@ -64,7 +65,7 @@ class ReferenceBuilder implements ParameterConverterBuilder
      * @throws \Ecotone\Messaging\MessagingException
      * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
-    public static function createFromParameterTypeHint(string $parameterName, InterfaceToCall $referenceClass) : self
+    public static function createFromParameterTypeHint(string $parameterName, InterfaceToCall $referenceClass): self
     {
         return new self($parameterName, $referenceClass->getParameterWithName($parameterName)->getTypeHint());
     }

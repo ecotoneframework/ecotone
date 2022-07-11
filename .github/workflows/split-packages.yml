@@ -3,7 +3,8 @@ name: 'Split Packages'
 on:
   push:
     branches:
-      - main
+      - '*'
+#      - main
     tags:
       - '*'
 

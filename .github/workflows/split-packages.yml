@@ -1,10 +1,9 @@
-name: 'Packages Split'
+name: 'Split Packages'
 
 on:
   push:
     branches:
-      - '*'
-#      - main
+      - main
     tags:
       - '*'
 
@@ -36,7 +35,7 @@ jobs:
     outputs:
       matrix: ${{ steps.get_json.outputs.json }}
 
-  packages_split:
+  split_packages:
     name: Split Packages
     needs: get_packages
     runs-on: ubuntu-latest

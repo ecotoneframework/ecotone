@@ -7,15 +7,28 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+
       - name: Checkout code
         uses: actions/checkout@v2
         with:
           ref: ${{ github.head_ref }}
 
+      - name: Install PHP-CS-Fixer
+        run: |
+          composer global require friendsofphp/php-cs-fixer
+          export PATH="$PATH:$HOME/.composer/vendor/bin"
+
       - name: Run PHP CS Fixer
-        uses: docker://oskarstark/php-cs-fixer-ga
-        with:
-          args: --config=.php-cs-fixer.dist.php --allow-risky=yes
+        run: php-cs-fixer --config=.php-cs-fixer.dist.php --allow-risky=yes
+
+#  Should be reverted to when a release for 3.9 is made. It eliminates a lot of the above steps.
+#        uses: docker://oskarstark/php-cs-fixer-ga
+#        with:
+#          args: --config=.php-cs-fixer.dist.php --allow-risky=yes
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4

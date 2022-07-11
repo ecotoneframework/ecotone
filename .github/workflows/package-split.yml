@@ -14,6 +14,7 @@ env:
 
 jobs:
   get_packages:
+    name: Get Packages
     runs-on: ubuntu-latest
 
     steps:
@@ -25,7 +26,7 @@ jobs:
 
       - name: Get Packages
         id: get-packages
-        run: echo "::set-output name=matrix::$(bin/get-packages)
+        run: echo "::set-output name=matrix::$(php ./bin/get-packages)
 
     outputs:
       matrix: ${{ steps.get-packages.outputs.matrix }}

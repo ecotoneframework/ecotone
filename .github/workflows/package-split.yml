@@ -26,12 +26,16 @@ jobs:
 
       - name: Get Packages
         id: get_json
-        run: echo "::set-output name=matrix::$(php ./bin/get-packages)"
+        run: echo "::set-output name=json::$(./bin/get-packages)"
+
+      - name: Output Packages
+        run: echo "${{ steps.get_json.outputs.json }}"
 
     outputs:
-      matrix: ${{ steps.get_json.outputs.matrix }}
+      matrix: ${{ steps.get_json.outputs.json }}
 
   packages_split:
+    needs: get_packages
     runs-on: ubuntu-latest
 
     strategy:

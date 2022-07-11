@@ -1,7 +1,6 @@
 name: 'Packages Split'
 
 on:
-  workflow_dispatch: []
   push:
     branches:
       - '*'

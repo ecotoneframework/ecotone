@@ -86,8 +86,8 @@
         "queue-interop/queue-interop": "^0.8",
         "ramsey/uuid": "^4.0",
         "symfony/cache": "^5.4|^6.1",
-        "symfony/console": "^6.0",
-        "symfony/framework-bundle": "^6.0"
+        "symfony/console": "^5.4|^6.0",
+        "symfony/framework-bundle": "^5.4|^6.0"
     },
     "require-dev": {
         "behat/behat": "^3.10",

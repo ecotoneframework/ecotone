@@ -37,6 +37,7 @@ jobs:
       matrix: ${{ steps.get_json.outputs.json }}
 
   packages_split:
+    name: Split Packages
     needs: get_packages
     runs-on: ubuntu-latest
 

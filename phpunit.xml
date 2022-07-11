@@ -32,5 +32,20 @@
     <testsuite name="Dbal tests">
       <directory>packages/Dbal/tests</directory>
     </testsuite>
+    <testsuite name="Event Sourcing tests">
+      <directory>packages/EventSourcing/tests</directory>
+    </testsuite>
+    <testsuite name="Jms Converter tests">
+      <directory>packages/JmsConverter/tests</directory>
+    </testsuite>
+    <testsuite name="Laravel tests">
+      <directory>packages/Laravel/tests</directory>
+    </testsuite>
+    <testsuite name="Symfony tests">
+      <directory>packages/Symfony/tests</directory>
+    </testsuite>
+    <testsuite name="Amqp tests">
+      <directory>packages/Amqp/tests</directory>
+    </testsuite>
   </testsuites>
 </phpunit>

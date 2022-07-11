@@ -1,0 +1,49 @@
+#!/usr/bin/env php
+<?php
+
+$overrides = [
+    // For unique situations, this array may be added to in the format:
+    // Path Name => Package Name
+];
+
+function camelToKebabCase(string $string): string
+{
+    if (ctype_lower($string)) {
+        return $string;
+    }
+
+    $string = preg_replace('/\s+/u', '', $string);
+    $string = preg_replace('/(.)(?=[A-Z])/u', '$1' . '-', $string);
+
+    return strtolower($string);
+}
+
+function getPackageDirectories(): array
+{
+    $directories = [];
+    $directoryIterator = new RecursiveDirectoryIterator(__DIR__ . '/../packages', RecursiveDirectoryIterator::SKIP_DOTS);
+
+    foreach ($directoryIterator as $directory) {
+        if (! $directory->isDir()) {
+            continue;
+        }
+
+        $directories[] = $directory->getFilename();
+    }
+
+    sort($directories);
+
+    return $directories;
+}
+
+$directories = getPackageDirectories();
+$jsonArray = [];
+
+foreach ($directories as $directory) {
+    $jsonArray[] = [
+        'path' => $directory,
+        'name' => $overrides[$directory] ?? camelToKebabCase($directory),
+    ];
+}
+
+echo json_encode($jsonArray, JSON_PRETTY_PRINT);

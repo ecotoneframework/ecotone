@@ -1,6 +1,7 @@
 name: 'Packages Split'
 
 on:
+  workflow_dispatch: []
   push:
     branches:
       - main
@@ -12,51 +13,67 @@ env:
   GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}
 
 jobs:
+  get_packages:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Set Up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          coverage: none
+
+      - name: Get Packages
+        id: get-packages
+        run: echo "::set-output name=matrix::$(bin/get-packages)
+
+      outputs:
+        matrix: ${{ steps.get-packages.outputs.matrix }}
+
   packages_split:
     runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
       matrix:
-        # define package to repository map
-        package:
-          -
-            local_path: 'Core'
-            split_repository: 'core'
+        package: ${{fromJson(needs.provide_packages_json.outputs.matrix)}}
 
     steps:
       -   uses: actions/checkout@v2
 
+      - name: Test
+        run: echo "${{ matrix.package.path }} - ${{ matrix.package.name }}"
+
       # no tag
-      -
-        if: "!startsWith(github.ref, 'refs/tags/')"
-        uses: "symplify/monorepo-split-github-action@2.1"
-        with:
-          # ↓ split "packages/easy-coding-standard" directory
-          package_directory: 'packages/${{ matrix.package.local_path }}'
-
-          # ↓ into https://github.com/symplify/easy-coding-standard repository
-          repository_organization: 'ecotoneframework'
-          repository_name: '${{ matrix.package.split_repository }}'
-
-          # ↓ the user signed under the split commit
-          user_name: "Dariusz Gafka"
-          user_email: "dgafka.mail@gmail.com"
+#      -
+#        if: "!startsWith(github.ref, 'refs/tags/')"
+#        uses: "symplify/monorepo-split-github-action@2.1"
+#        with:
+#          # ↓ split "packages/easy-coding-standard" directory
+#          package_directory: 'packages/${{ matrix.package.path }}'
+#
+#          # ↓ into https://github.com/symplify/easy-coding-standard repository
+#          repository_organization: 'ecotoneframework'
+#          repository_name: '${{ matrix.package.name }}'
+#
+#          # ↓ the user signed under the split commit
+#          user_name: "Dariusz Gafka"
+#          user_email: "dgafka.mail@gmail.com"
 
       # with tag
-      -
-        if: "startsWith(github.ref, 'refs/tags/')"
-        uses: "symplify/monorepo-split-github-action@2.1"
-        with:
-          tag: ${GITHUB_REF#refs/tags/}
-
-          # ↓ split "packages/easy-coding-standard" directory
-          package_directory: 'packages/${{ matrix.package.local_path }}'
-
-          # ↓ into https://github.com/symplify/easy-coding-standard repository
-          repository_organization: 'ecotoneframework'
-          repository_name: '${{ matrix.package.split_repository }}'
-
-          # ↓ the user signed under the split commit
-          user_name: "Dariusz Gafka"
-          user_email: "dgafka.mail@gmail.com"
+#      -
+#        if: "startsWith(github.ref, 'refs/tags/')"
+#        uses: "symplify/monorepo-split-github-action@2.1"
+#        with:
+#          tag: ${GITHUB_REF#refs/tags/}
+#
+#          # ↓ split "packages/easy-coding-standard" directory
+#          package_directory: 'packages/${{ matrix.package.path }}'
+#
+#          # ↓ into https://github.com/symplify/easy-coding-standard repository
+#          repository_organization: 'ecotoneframework'
+#          repository_name: '${{ matrix.package.name }}'
+#
+#          # ↓ the user signed under the split commit
+#          user_name: "Dariusz Gafka"
+#          user_email: "dgafka.mail@gmail.com"

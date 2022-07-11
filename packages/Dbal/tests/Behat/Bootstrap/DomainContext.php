@@ -54,35 +54,35 @@ class DomainContext extends TestCase implements Context
                     new OrderService(),
                 ];
                 break;
-            }
+                }
             case "Test\Ecotone\Dbal\Fixture\AsynchronousChannelTransaction": {
                 $objects = [
                     new \Test\Ecotone\Dbal\Fixture\AsynchronousChannelTransaction\OrderService(),
                 ];
                 break;
-            }
+                }
             case "Test\Ecotone\Dbal\Fixture\DeadLetter": {
                 $objects = [
                     new \Test\Ecotone\Dbal\Fixture\DeadLetter\OrderService(),
                 ];
                 break;
-            }
+                }
             case "Test\Ecotone\Dbal\Fixture\ORM": {
                 $objects = [];
                 break;
-            }
+                }
             case "Test\Ecotone\Dbal\Fixture\DocumentStore": {
                 $objects = [];
                 break;
-            }
+                }
             case "Test\Ecotone\Dbal\Fixture\InMemoryDocumentStore": {
                 $objects = [];
                 break;
-            }
+                }
             case "Test\Ecotone\Dbal\Fixture\DocumentStoreAggregate": {
                 $objects = [new PersonJsonConverter()];
                 break;
-            }
+                }
             default: {
                 throw new InvalidArgumentException("Namespace {$namespace} not yet implemented");
             }
@@ -123,7 +123,7 @@ class DomainContext extends TestCase implements Context
                     DbalConnectionFactory::class => DbalConnection::createEntityManager(EntityManager::create(['url' => $dsn], $config)),
                 ];
                 break;
-            }
+                }
             default: {
                 $objects = array_merge($objects, ['managerRegistry' => $connectionFactory, DbalConnectionFactory::class => $connectionFactory]);
             }

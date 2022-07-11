@@ -158,7 +158,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
                     'routeByObject'
                 )   ->setResolutionRequired(false)
                     ->build($channelResolver, $referenceSearchService);
-            }
+                }
             case 'eventByName': {
                 return RouterBuilder::createRouterFromObject(
                     new EventBusRouter($this->channelNamesRouting),
@@ -169,13 +169,13 @@ class BusRouterBuilder implements MessageHandlerBuilder
                         HeaderBuilder::createOptional('routedName', BusModule::EVENT_CHANNEL_NAME_BY_NAME),
                     ])
                     ->build($channelResolver, $referenceSearchService);
-            }
+                }
             case 'commandByObject': {
                 return RouterBuilder::createRouterFromObject(
                     new CommandBusRouter($this->channelNamesRouting),
                     'routeByObject'
                 )->build($channelResolver, $referenceSearchService);
-            }
+                }
             case 'commandByName': {
                 return RouterBuilder::createRouterFromObject(
                     new CommandBusRouter($this->channelNamesRouting),
@@ -185,13 +185,13 @@ class BusRouterBuilder implements MessageHandlerBuilder
                         HeaderBuilder::createOptional('name', BusModule::COMMAND_CHANNEL_NAME_BY_NAME),
                     ])
                     ->build($channelResolver, $referenceSearchService);
-            }
+                }
             case 'queryByObject': {
                 return RouterBuilder::createRouterFromObject(
                     new QueryBusRouter($this->channelNamesRouting),
                     'routeByObject'
                 )->build($channelResolver, $referenceSearchService);
-            }
+                }
             case 'queryByName': {
                 return RouterBuilder::createRouterFromObject(
                     new QueryBusRouter($this->channelNamesRouting),

@@ -26,7 +26,7 @@ jobs:
 
       - name: Get Packages
         id: get-packages
-        run: echo "::set-output name=matrix::$(php ./bin/get-packages)
+        run: echo "::set-output name=matrix::$(./bin/get-packages)"
 
     outputs:
       matrix: ${{ steps.get-packages.outputs.matrix }}

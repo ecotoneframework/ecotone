@@ -25,11 +25,11 @@ jobs:
           coverage: none
 
       - name: Get Packages
-        id: get-packages
+        id: get_packages
         run: echo "::set-output name=matrix::$(./bin/get-packages)"
 
     outputs:
-      matrix: ${{ steps.get-packages.outputs.matrix }}
+      matrix: ${{ steps.get_packages.outputs.matrix }}
 
   packages_split:
     runs-on: ubuntu-latest
@@ -37,7 +37,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: ${{fromJson(needs.get_packages.outputs.matrix)}}
+        package: ${{ fromJson(needs.get_packages.outputs.matrix) }}
 
     steps:
       -   uses: actions/checkout@v2

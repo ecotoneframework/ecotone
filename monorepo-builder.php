@@ -2,19 +2,12 @@
 
 declare(strict_types=1);
 
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
 use Symplify\ComposerJsonManipulator\ValueObject\ComposerJsonSection;
-use Symplify\MonorepoBuilder\ValueObject\Option;
+use Symplify\MonorepoBuilder\Config\MBConfig;
 
-return static function (ContainerConfigurator $containerConfigurator): void {
-    $parameters = $containerConfigurator->parameters();
-
-    // where are the packages located?
-    $parameters->set(Option::PACKAGE_DIRECTORIES, [
-        __DIR__ . '/packages'
-    ]);
-
-    $parameters->set(Option::DATA_TO_APPEND, [
+return static function (MBConfig $containerConfigurator): void {
+    $containerConfigurator->packageDirectories([__DIR__ . '/packages']);
+    $containerConfigurator->dataToAppend([
         ComposerJsonSection::AUTOLOAD_DEV => [
             'psr-4' => [
                 "Tests\\Ecotone\\" => "tests",

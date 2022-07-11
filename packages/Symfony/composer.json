@@ -24,7 +24,7 @@
   "description": "Extends Ecotone with Symfony integration",
   "require": {
     "php": "^8.0",
-    "ecotone/ecotone": "2.0.0-dev",
+    "ecotone/core": "2.0.0-dev",
     "symfony/console": ">=4.0",
     "symfony/framework-bundle": ">=4.0",
     "laminas/laminas-zendframework-bridge": "^1.0.0"

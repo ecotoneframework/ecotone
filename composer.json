@@ -71,7 +71,6 @@
     },
     "require": {
         "doctrine/dbal": "^3.1",
-        "ecotone/ecotone": "2.0.0-dev",
         "enqueue/amqp-ext": "^0.10.4",
         "enqueue/dbal": "^0.10.0",
         "enqueue/dsn": "*",

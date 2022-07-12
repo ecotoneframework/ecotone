@@ -10,6 +10,43 @@ jobs:
         operating-system: [ ubuntu-latest ]
         php-versions: [ '8.0', '8.1' ]
         stability: [prefer-lowest, prefer-stable]
+    services:
+      rabbitmq:
+        image: rabbitmq:3.8-alpine
+        env:
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: guest
+        ports:
+          - 5672:5672
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: "secret"
+          MYSQL_USER: "ecotone"
+          MYSQL_PASSWORD: "secret"
+          MYSQL_DATABASE: "ecotone"
+          DB_PORT: 3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+        ports:
+          - 3306:3306
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: ecotone
+          POSTGRES_PASSWORD: secret
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    env:
+      RABBIT_HOST: 127.0.0.1
     steps:
     - name: PHP ${{ matrix.php-versions }} - ${{ matrix.stability }}
       uses: shivammathur/setup-php@v2
@@ -33,11 +70,25 @@ jobs:
     - name: Install dependencies
       run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
-    - name: Test PHPUnit
+    - name: Test PHPUnit on Postgres
       run: vendor/bin/phpunit
+      env:
+        DATABASE_DSN: pgsql://ecotone:secret@localhost:5432/ecotone
 
-    - name: Test Behat
+    - name: Test Behat on Postgres
       run: vendor/bin/behat
+      env:
+        DATABASE_DSN: pgsql://ecotone:secret@localhost:5432/ecotone
+
+    - name: Test PHPUnit on Mysql
+      run: vendor/bin/phpunit
+      env:
+        DATABASE_DSN: mysql://ecotone:secret@127.0.0.1:3306/ecotone
+
+    - name: Test Behat on Mysql
+      run: vendor/bin/behat
+      env:
+        DATABASE_DSN: mysql://ecotone:secret@127.0.0.1:3306/ecotone
 
     - name: Test PHPStan
       run: vendor/bin/phpstan

@@ -1,0 +1,10 @@
+.github/                    export-ignore
+.gitattributes              export-ignore
+.gitignore                  export-ignore
+.php-cs-fixer.dist.php      export-ignore
+behat.yml                   export-ignore
+docker-compose.yml          export-ignore
+ecotone_small.png           export-ignore
+monorepo-builder.php        export-ignore
+phpstan.neon                export-ignore
+phpunit.xml                 export-ignore

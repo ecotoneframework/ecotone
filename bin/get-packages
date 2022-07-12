@@ -1,49 +1,47 @@
 #!/usr/bin/env php
 <?php
 
-$overrides = [
-    // For unique situations, this array may be added to in the format:
-    // Path Name => Package Name
-];
+const PACKAGES_DIRECTORY = __DIR__ . '/../packages/';
 
-function camelToKebabCase(string $string): string
+function getPackagePathFromComposerFile(SplFileInfo $composerFile): string
 {
-    if (ctype_lower($string)) {
-        return $string;
-    }
-
-    $string = preg_replace('/\s+/u', '', $string);
-    $string = preg_replace('/(.)(?=[A-Z])/u', '$1' . '-', $string);
-
-    return strtolower($string);
+    return str_replace(PACKAGES_DIRECTORY, '', $composerFile->getPath());
 }
 
-function getPackageDirectories(): array
+function getPackageNameFromComposerFile(SplFileInfo $composerFile)
 {
-    $directories = [];
-    $directoryIterator = new RecursiveDirectoryIterator(__DIR__ . '/../packages', RecursiveDirectoryIterator::SKIP_DOTS);
+    $composer = json_decode(file_get_contents($composerFile->getRealPath()), true);
+    $name = $composer['name'] ?? throw new UnexpectedValueException(
+        'The referenced package is invalid because it is missing a name.'
+    );
 
-    foreach ($directoryIterator as $directory) {
-        if (! $directory->isDir()) {
+    return str_replace('ecotone/', '', $name);
+}
+
+/**
+ * @return array<array-key, array{path: string, name: string}>
+ */
+function getPackages(): array {
+    $packages = [];
+    $directoryIterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(PACKAGES_DIRECTORY, RecursiveDirectoryIterator::SKIP_DOTS)
+    );
+
+    /**
+     * @var SplFileInfo $file
+     */
+    foreach ($directoryIterator as $file) {
+        if ($file->getFilename() !== 'composer.json') {
             continue;
         }
 
-        $directories[] = $directory->getFilename();
+        $packages[] = [
+            'path' => getPackagePathFromComposerFile($file),
+            'name' => getPackageNameFromComposerFile($file),
+        ];
     }
 
-    sort($directories);
-
-    return $directories;
+    return $packages;
 }
 
-$directories = getPackageDirectories();
-$jsonArray = [];
-
-foreach ($directories as $directory) {
-    $jsonArray[] = [
-        'path' => $directory,
-        'name' => $overrides[$directory] ?? camelToKebabCase($directory),
-    ];
-}
-
-echo json_encode($jsonArray);
+echo json_encode(getPackages());

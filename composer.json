@@ -70,7 +70,7 @@
         }
     },
     "require": {
-        "doctrine/dbal": "^3.1",
+        "doctrine/dbal": "^3.3",
         "enqueue/amqp-ext": "^0.10.4",
         "enqueue/dbal": "^0.10.0",
         "enqueue/dsn": "^0.10.4",

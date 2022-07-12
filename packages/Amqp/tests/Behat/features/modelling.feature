@@ -61,23 +61,25 @@ Feature: activating as aggregate order entity
     Then there should be 0 orders
     Then there should be 1 incorrect orders
 
-  Scenario: Distributing command to another service
-    Given I active messaging distributed services:
-      | name            | namespace |
-      | user_service    | Test\Ecotone\Amqp\Fixture\DistributedCommandBus\Publisher |
-      | ticket_service  | Test\Ecotone\Amqp\Fixture\DistributedCommandBus\Receiver  |
-    When using "ticket_service" I should have 0 remaining ticket
-    And using "user_service" I change billing details
-    Then using "ticket_service" I should have 1 remaining ticket
+#    @TODO
+#  Scenario: Distributing command to another service
+#    Given I active messaging distributed services:
+#      | name            | namespace |
+#      | user_service    | Test\Ecotone\Amqp\Fixture\DistributedCommandBus\Publisher |
+#      | ticket_service  | Test\Ecotone\Amqp\Fixture\DistributedCommandBus\Receiver  |
+#    When using "ticket_service" I should have 0 remaining ticket
+#    And using "user_service" I change billing details
+#    Then using "ticket_service" I should have 1 remaining ticket
 
-  Scenario: Distributing event to another service
-    Given I active messaging distributed services:
-      | name            | namespace |
-      | user_service    | Test\Ecotone\Amqp\Fixture\DistributedEventBus\Publisher |
-      | ticket_service  | Test\Ecotone\Amqp\Fixture\DistributedEventBus\Receiver  |
-    When using "ticket_service" I should have 0 remaining ticket
-    And using "user_service" I change billing details
-    Then using "ticket_service" I should have 1 remaining ticket
+#    @TODO
+#  Scenario: Distributing event to another service
+#    Given I active messaging distributed services:
+#      | name            | namespace |
+#      | user_service    | Test\Ecotone\Amqp\Fixture\DistributedEventBus\Publisher |
+#      | ticket_service  | Test\Ecotone\Amqp\Fixture\DistributedEventBus\Receiver  |
+#    When using "ticket_service" I should have 0 remaining ticket
+#    And using "user_service" I change billing details
+#    Then using "ticket_service" I should have 1 remaining ticket
 
     Scenario: Distributing command to another service
     Given I active messaging distributed services:

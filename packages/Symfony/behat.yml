@@ -14,5 +14,5 @@ default:
       default:
           paths:    [ tests/Behat/features ]
           contexts:
-            - Behat\Bootstrap\DomainContext:
+            - Test\Ecotone\Symfony\Behat\Bootstrap\DomainContext:
 

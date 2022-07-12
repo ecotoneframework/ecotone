@@ -4,7 +4,10 @@ namespace Test\Ecotone\Amqp\Behat\Bootstrap;
 
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\TableNode;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Tools\Setup;
 use Ecotone\Amqp\Distribution\AmqpDistributionModule;
+use Ecotone\Dbal\DbalConnection;
 use Ecotone\Lite\EcotoneLiteConfiguration;
 use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
@@ -13,6 +16,7 @@ use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
 use Enqueue\AmqpExt\AmqpConnectionFactory;
+use Enqueue\Dbal\DbalConnectionFactory;
 use Interop\Amqp\Impl\AmqpQueue;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -105,9 +109,12 @@ class DomainContext extends TestCase implements Context
             ->withNamespaces([$namespace])
             ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString());
         MessagingSystemConfiguration::cleanCache($serviceConfiguration->getCacheDirectoryPath());
+
+        $databaseDsn = getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : null;;
+
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
             __DIR__ . '/../../../../',
-            InMemoryPSRContainer::createFromObjects(array_merge($objects, [$amqpConnectionFactory])),
+            InMemoryPSRContainer::createFromObjects(array_merge($objects, [$amqpConnectionFactory, DbalConnectionFactory::class => DbalConnection::createEntityManager(EntityManager::create(['url' => $databaseDsn], Setup::createAnnotationMetadataConfiguration([], true, null, null, false)))])),
             $serviceConfiguration,
             [],
             true
@@ -183,10 +190,12 @@ class DomainContext extends TestCase implements Context
                     }
             }
 
+            $databaseDsn = getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : null;;
+
             $amqpConnectionFactory         = new AmqpConnectionFactory(['dsn' => "amqp://{$host}:5672"]);
             self::$messagingSystems[$serviceName] = EcotoneLiteConfiguration::createWithConfiguration(
                 __DIR__ . '/../../../../',
-                InMemoryPSRContainer::createFromObjects(array_merge($objects, [$amqpConnectionFactory])),
+                InMemoryPSRContainer::createFromObjects(array_merge($objects, [$amqpConnectionFactory, DbalConnectionFactory::class => DbalConnection::createEntityManager(EntityManager::create(['url' => $databaseDsn], Setup::createAnnotationMetadataConfiguration([], true, null, null, false)))])),
                 ServiceConfiguration::createWithDefaults()
                     ->withNamespaces([$namespace])
                     ->withServiceName($serviceName)

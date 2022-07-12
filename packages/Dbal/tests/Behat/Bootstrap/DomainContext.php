@@ -9,6 +9,7 @@ use Ecotone\Dbal\DbalConnection;
 use Ecotone\Dbal\DocumentStore\DbalDocumentStore;
 use Ecotone\Dbal\Recoverability\DbalDeadLetter;
 use Ecotone\Dbal\Recoverability\DeadLetterGateway;
+use Ecotone\Laravel\EloquentRepository;
 use Ecotone\Lite\EcotoneLiteConfiguration;
 use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
@@ -17,6 +18,7 @@ use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
+use Enqueue\AmqpExt\AmqpConnectionFactory;
 use Enqueue\Dbal\DbalConnectionFactory;
 use InvalidArgumentException;
 
@@ -129,9 +131,10 @@ class DomainContext extends TestCase implements Context
             }
         }
 
+        $rabbitMqHost = getenv('RABBIT_HOST') ? getenv('RABBIT_HOST') : 'localhost';
         self::$messagingSystem            = EcotoneLiteConfiguration::createWithConfiguration(
             $rootProjectDirectoryPath,
-            InMemoryPSRContainer::createFromObjects($objects),
+            InMemoryPSRContainer::createFromObjects(array_merge($objects, [new AmqpConnectionFactory(['dsn' => "amqp://{$rabbitMqHost}:5672"]), new EloquentRepository()])),
             $serviceConfiguration,
             [],
             true

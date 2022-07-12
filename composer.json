@@ -70,9 +70,10 @@
         }
     },
     "require": {
-        "doctrine/dbal": "^3.3",
+        "doctrine/dbal": "^3.3.7",
+        "doctrine/persistence": "^2.5",
         "enqueue/amqp-ext": "^0.10.4",
-        "enqueue/dbal": "^0.10.0",
+        "enqueue/dbal": "^0.10.17",
         "enqueue/dsn": "^0.10.4",
         "enqueue/enqueue": "^0.10.0",
         "ext-amqp": "*",
@@ -94,7 +95,6 @@
         "doctrine/annotations": "^1.13",
         "doctrine/cache": "^1.0.0",
         "doctrine/orm": "^2.0|^3.0",
-        "doctrine/persistence": "^2.0",
         "friends-of-behat/symfony-extension": "^2.1",
         "friendsofphp/php-cs-fixer": "^3.9",
         "guzzlehttp/psr7": "^2.0",

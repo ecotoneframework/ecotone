@@ -110,7 +110,8 @@ class DomainContext extends TestCase implements Context
             ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString());
         MessagingSystemConfiguration::cleanCache($serviceConfiguration->getCacheDirectoryPath());
 
-        $databaseDsn = getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : null;;
+        $databaseDsn = getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : null;
+        ;
 
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
             __DIR__ . '/../../../../',
@@ -190,7 +191,8 @@ class DomainContext extends TestCase implements Context
                     }
             }
 
-            $databaseDsn = getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : null;;
+            $databaseDsn = getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : null;
+            ;
 
             $amqpConnectionFactory         = new AmqpConnectionFactory(['dsn' => "amqp://{$host}:5672"]);
             self::$messagingSystems[$serviceName] = EcotoneLiteConfiguration::createWithConfiguration(

@@ -302,7 +302,7 @@ class DomainContext extends TestCase implements Context
                         'managerRegistry' => $managerRegistryConnectionFactory,
                         DbalConnectionFactory::class => $dbalConnectionFactory,
                         AmqpConnectionFactory::class => $amqpConnectionFactory,
-                        new EloquentRepository()
+                        new EloquentRepository(),
                     ]
                 )
             ),

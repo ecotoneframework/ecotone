@@ -76,7 +76,7 @@ jobs:
         DATABASE_DSN: pgsql://ecotone:secret@localhost:5432/ecotone
 
     - name: Test Behat on Postgres
-      run: vendor/bin/behat
+      run: vendor/bin/behat -vvv
       env:
         DATABASE_DSN: pgsql://ecotone:secret@localhost:5432/ecotone
 
@@ -86,7 +86,7 @@ jobs:
         DATABASE_DSN: mysql://ecotone:secret@127.0.0.1:3306/ecotone
 
     - name: Test Behat on Mysql
-      run: vendor/bin/behat
+      run: vendor/bin/behat -vvv
       env:
         DATABASE_DSN: mysql://ecotone:secret@127.0.0.1:3306/ecotone
 

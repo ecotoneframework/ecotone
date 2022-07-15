@@ -79,4 +79,9 @@ class SerializerModule extends NoExternalConfigurationModule implements Annotati
     {
         return false;
     }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
+    }
 }

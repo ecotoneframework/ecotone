@@ -131,4 +131,9 @@ class DbalPublisherModule implements AnnotationModule
     {
         return [];
     }
+
+    public function getModulePackageName(): string
+    {
+        return DbalModule::NAME;
+    }
 }

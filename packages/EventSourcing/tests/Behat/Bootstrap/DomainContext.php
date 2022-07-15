@@ -291,8 +291,6 @@ class DomainContext extends TestCase implements Context
             }
         }
 
-        $amqpHost = getenv('RABBIT_HOST') ? getenv('RABBIT_HOST') : 'localhost';
-        $amqpConnectionFactory         = new AmqpConnectionFactory(['dsn' => "amqp://{$amqpHost}:5672"]);
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
             __DIR__ . '/../../../../',
             InMemoryPSRContainer::createFromObjects(
@@ -300,9 +298,7 @@ class DomainContext extends TestCase implements Context
                     $objects,
                     [
                         'managerRegistry' => $managerRegistryConnectionFactory,
-                        DbalConnectionFactory::class => $dbalConnectionFactory,
-                        AmqpConnectionFactory::class => $amqpConnectionFactory,
-                        new EloquentRepository(),
+                        DbalConnectionFactory::class => $dbalConnectionFactory
                     ]
                 )
             ),
@@ -310,6 +306,7 @@ class DomainContext extends TestCase implements Context
                 ->withEnvironment('prod')
                 ->withNamespaces($namespaces)
                 ->withFailFast($failFast)
+                ->withSkippedModulePackageNames(["jmsConverter","amqp"])
                 ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString()),
             [
                 'isPostgres' => $dbalConnectionFactory->createContext()->getDbalConnection()->getDriver() instanceof Driver,

@@ -20,6 +20,8 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 #[ModuleAnnotation]
 class AmqpModule implements AnnotationModule
 {
+    public const NAME = "amqp";
+
     private AmqpDistributionModule $amqpDistributionModule;
 
     private function __construct(AmqpDistributionModule $amqpDistributionModule)
@@ -90,5 +92,10 @@ class AmqpModule implements AnnotationModule
     public function getRelatedReferences(): array
     {
         return [];
+    }
+
+    public function getModulePackageName(): string
+    {
+        return AmqpModule::NAME;
     }
 }

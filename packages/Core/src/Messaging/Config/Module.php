@@ -38,4 +38,6 @@ interface Module
     public function getRelatedReferences(): array;
 
     public function getModuleExtensions(array $serviceExtensions): array;
+
+    public function getModulePackageName(): string;
 }

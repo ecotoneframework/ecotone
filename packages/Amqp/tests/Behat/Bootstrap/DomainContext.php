@@ -107,15 +107,13 @@ class DomainContext extends TestCase implements Context
         $amqpConnectionFactory = new AmqpConnectionFactory(['dsn' => "amqp://{$host}:5672"]);
         $serviceConfiguration = ServiceConfiguration::createWithDefaults()
             ->withNamespaces([$namespace])
-            ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString());
+            ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString())
+            ->withSkippedModulePackageNames(["jmsConverter","dbal","eventSourcing"]);
         MessagingSystemConfiguration::cleanCache($serviceConfiguration->getCacheDirectoryPath());
-
-        $databaseDsn = getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : null;
-        ;
 
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
             __DIR__ . '/../../../../',
-            InMemoryPSRContainer::createFromObjects(array_merge($objects, [$amqpConnectionFactory, DbalConnectionFactory::class => DbalConnection::createEntityManager(EntityManager::create(['url' => $databaseDsn], Setup::createAnnotationMetadataConfiguration([], true, null, null, false)))])),
+            InMemoryPSRContainer::createFromObjects(array_merge($objects, [$amqpConnectionFactory])),
             $serviceConfiguration,
             [],
             true
@@ -191,16 +189,14 @@ class DomainContext extends TestCase implements Context
                     }
             }
 
-            $databaseDsn = getenv('DATABASE_DSN') ? getenv('DATABASE_DSN') : null;
-            ;
-
             $amqpConnectionFactory         = new AmqpConnectionFactory(['dsn' => "amqp://{$host}:5672"]);
             self::$messagingSystems[$serviceName] = EcotoneLiteConfiguration::createWithConfiguration(
                 __DIR__ . '/../../../../',
-                InMemoryPSRContainer::createFromObjects(array_merge($objects, [$amqpConnectionFactory, DbalConnectionFactory::class => DbalConnection::createEntityManager(EntityManager::create(['url' => $databaseDsn], Setup::createAnnotationMetadataConfiguration([], true, null, null, false)))])),
+                InMemoryPSRContainer::createFromObjects(array_merge($objects, [$amqpConnectionFactory])),
                 ServiceConfiguration::createWithDefaults()
                     ->withNamespaces([$namespace])
                     ->withServiceName($serviceName)
+                    ->withSkippedModulePackageNames(["jmsConverter","dbal","eventSourcing"])
                     ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString()),
                 [],
                 false

@@ -104,7 +104,8 @@ class DomainContext extends TestCase implements Context
         $rootProjectDirectoryPath = __DIR__ . '/../../../../';
         $serviceConfiguration = ServiceConfiguration::createWithDefaults()
             ->withNamespaces([$namespace])
-            ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString());
+            ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString())
+            ->withSkippedModulePackageNames(["jmsConverter","amqp","eventSourcing"]);
         MessagingSystemConfiguration::cleanCache($serviceConfiguration->getCacheDirectoryPath());
 
         switch ($namespace) {
@@ -131,10 +132,9 @@ class DomainContext extends TestCase implements Context
             }
         }
 
-        $rabbitMqHost = getenv('RABBIT_HOST') ? getenv('RABBIT_HOST') : 'localhost';
         self::$messagingSystem            = EcotoneLiteConfiguration::createWithConfiguration(
             $rootProjectDirectoryPath,
-            InMemoryPSRContainer::createFromObjects(array_merge($objects, [new AmqpConnectionFactory(['dsn' => "amqp://{$rabbitMqHost}:5672"]), new EloquentRepository()])),
+            InMemoryPSRContainer::createFromObjects($objects),
             $serviceConfiguration,
             [],
             true

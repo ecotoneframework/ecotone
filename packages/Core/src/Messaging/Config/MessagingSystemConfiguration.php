@@ -142,23 +142,12 @@ final class MessagingSystemConfiguration implements Configuration
     private array $consoleCommands = [];
 
     /**
-     * Only one instance at time
-     *
-     * Configuration constructor.
-     *
-     * @param string|null $rootPathToSearchConfigurationFor
-     * @param ModuleRetrievingService $moduleConfigurationRetrievingService
      * @param object[] $extensionObjects
-     * @param ReferenceTypeFromNameResolver $referenceTypeFromNameResolver
-     * @param ServiceConfiguration $applicationConfiguration
-     *
-     * @throws ConfigurationException
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws ReflectionException
+     * @param string[] $skippedModulesPackages
      */
     private function __construct(?string $rootPathToSearchConfigurationFor, ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, InterfaceToCallRegistry $preparationInterfaceRegistry, ServiceConfiguration $applicationConfiguration)
     {
+        $extensionObjects = array_merge($extensionObjects, $applicationConfiguration->getExtensionObjects());
         $extensionApplicationConfiguration = [];
         foreach ($extensionObjects as $extensionObject) {
             if ($extensionObject instanceof ServiceConfiguration) {
@@ -198,12 +187,15 @@ final class MessagingSystemConfiguration implements Configuration
         $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver, $applicationConfiguration->getCacheDirectoryPath() ? ProxyFactory::createWithCache($applicationConfiguration->getCacheDirectoryPath()) : ProxyFactory::createNoCache(), $preparationInterfaceRegistry, $applicationConfiguration);
     }
 
+    /**
+     * @param string[] $skippedModulesPackages
+     */
     private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $serviceExtensions, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ProxyFactory $proxyFactory, InterfaceToCallRegistry $preparationInterfaceRegistry, ServiceConfiguration $applicationConfiguration): void
     {
         $moduleReferenceSearchService = ModuleReferenceSearchService::createEmpty();
         $moduleReferenceSearchService->store(ProxyFactory::REFERENCE_NAME, $proxyFactory);
 
-        $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations();
+        $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations($applicationConfiguration->getSkippedModulesPackages());
         $moduleExtensions = [];
 
         $extensionObjects = $serviceExtensions;
@@ -739,9 +731,9 @@ final class MessagingSystemConfiguration implements Configuration
         return false;
     }
 
-    public static function prepareWithDefaults(ModuleRetrievingService $moduleConfigurationRetrievingService): MessagingSystemConfiguration
+    public static function prepareWithDefaults(ModuleRetrievingService $moduleConfigurationRetrievingService, ?ServiceConfiguration $serviceConfiguration = null): MessagingSystemConfiguration
     {
-        return new self(null, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), InterfaceToCallRegistry::createEmpty(), ServiceConfiguration::createWithDefaults());
+        return new self(null, $moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), InterfaceToCallRegistry::createEmpty(), $serviceConfiguration ?? ServiceConfiguration::createWithDefaults());
     }
 
     public static function prepare(string $rootPathToSearchConfigurationFor, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $applicationConfiguration, bool $useCachedVersion): Configuration

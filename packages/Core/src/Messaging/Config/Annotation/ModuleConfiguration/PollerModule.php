@@ -68,4 +68,9 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
     {
         return false;
     }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
+    }
 }

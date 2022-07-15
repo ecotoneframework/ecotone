@@ -82,7 +82,7 @@
         "laminas/laminas-zendframework-bridge": "^1.0.0",
         "laravel/framework": "^9.0",
         "php": "^8.0",
-        "prooph/pdo-event-store": "^1.13",
+        "prooph/pdo-event-store": "^1.14.2",
         "psr/log": "^1.0|^2.0|^3.0",
         "queue-interop/queue-interop": "^0.8",
         "ramsey/uuid": "^4.0",

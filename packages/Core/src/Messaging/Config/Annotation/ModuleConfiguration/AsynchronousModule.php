@@ -130,4 +130,9 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
             }
         }
     }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
+    }
 }

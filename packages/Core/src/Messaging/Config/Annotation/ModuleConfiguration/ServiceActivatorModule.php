@@ -14,8 +14,6 @@ use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 #[ModuleAnnotation]
 class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
 {
-    public const MODULE_NAME = 'serviceActivatorModule';
-
     /**
      * @inheritDoc
      */
@@ -38,5 +36,10 @@ class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
     public static function getMessageHandlerAnnotation(): string
     {
         return ServiceActivator::class;
+    }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
     }
 }

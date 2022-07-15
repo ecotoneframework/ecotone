@@ -35,4 +35,9 @@ class RouterModule extends MessageHandlerRegisterConfiguration
     {
         return Router::class;
     }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
+    }
 }

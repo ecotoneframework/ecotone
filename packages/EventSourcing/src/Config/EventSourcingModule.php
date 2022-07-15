@@ -64,6 +64,8 @@ use Ramsey\Uuid\Uuid;
 #[ModuleAnnotation]
 class EventSourcingModule extends NoExternalConfigurationModule
 {
+    public const NAME = 'eventSourcing';
+
     public const ECOTONE_ES_STOP_PROJECTION   = 'ecotone:es:stop-projection';
     public const ECOTONE_ES_RESET_PROJECTION  = 'ecotone:es:reset-projection';
     public const ECOTONE_ES_DELETE_PROJECTION = 'ecotone:es:delete-projection';
@@ -626,5 +628,10 @@ class EventSourcingModule extends NoExternalConfigurationModule
                 ->withEndpointAnnotations([new PropagateHeaders()])
                 ->withParameterConverters([GatewayPayloadBuilder::create('streamEvents')])
         );
+    }
+
+    public function getModulePackageName(): string
+    {
+        return self::NAME;
     }
 }

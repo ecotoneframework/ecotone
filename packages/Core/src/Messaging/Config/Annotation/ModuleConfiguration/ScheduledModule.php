@@ -34,4 +34,9 @@ class ScheduledModule extends ConsumerRegisterConfiguration
             ->withEndpointId($annotation->getEndpointId())
             ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames());
     }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
+    }
 }

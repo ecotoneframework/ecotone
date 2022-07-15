@@ -24,10 +24,16 @@ class ServiceConfiguration
      * @var string[]
      */
     private array $namespaces = [];
+    /**
+     * @var string[]
+     */
+    private array $skippedModulesPackages = [];
     private ?string $defaultSerializationMediaType = null;
     private ?string $defaultErrorChannel = null;
     private ?int $defaultMemoryLimitInMegabytes = PollingMetadata::DEFAULT_MEMORY_LIMIT_MEGABYTES;
     private ?RetryTemplateBuilder $connectionRetryTemplate = null;
+    /** @var object[] */
+    private array $extensionObjects = [];
 
     /**
      * @var object[]
@@ -142,6 +148,14 @@ class ServiceConfiguration
         return $clone;
     }
 
+    public function withExtensionObjects(array $extensionObjects): self
+    {
+        $clone              = clone $this;
+        $clone->extensionObjects = $extensionObjects;
+
+        return $clone;
+    }
+
     public function doNotLoadCatalog(): self
     {
         $clone              = clone $this;
@@ -192,6 +206,16 @@ class ServiceConfiguration
         return $this;
     }
 
+    /**
+     * @param string[] $modulePackageNames
+     */
+    public function withSkippedModulePackageNames(array $modulePackageNames): self
+    {
+        $this->skippedModulesPackages = $modulePackageNames;
+
+        return $this;
+    }
+
     public function getConnectionRetryTemplate(): ?RetryTemplateBuilder
     {
         return $this->connectionRetryTemplate;
@@ -207,6 +231,22 @@ class ServiceConfiguration
         $this->defaultMemoryLimitInMegabytes = $memoryLimitInMegabytes;
 
         return $this;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getSkippedModulesPackages(): array
+    {
+        return $this->skippedModulesPackages;
+    }
+
+    /**
+     * @return object[]
+     */
+    public function getExtensionObjects(): array
+    {
+        return $this->extensionObjects;
     }
 
     public function getDefaultMemoryLimitInMegabytes(): ?int

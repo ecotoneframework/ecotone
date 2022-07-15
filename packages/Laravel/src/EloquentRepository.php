@@ -2,11 +2,9 @@
 
 namespace Ecotone\Laravel;
 
-use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\StandardRepository;
 use Illuminate\Database\Eloquent\Model;
 
-#[Repository]
 class EloquentRepository implements StandardRepository
 {
     public function canHandle(string $aggregateClassName): bool

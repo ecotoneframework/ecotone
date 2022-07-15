@@ -77,7 +77,7 @@ class ExampleModuleConfiguration implements AnnotationModule
      */
     public function getRelatedReferences(): array
     {
-        return [];
+        return [stdClass::class];
     }
 
     /**
@@ -91,5 +91,10 @@ class ExampleModuleConfiguration implements AnnotationModule
     public function getModuleExtensions(array $serviceExtensions): array
     {
         return [];
+    }
+
+    public function getModulePackageName(): string
+    {
+        return 'example';
     }
 }

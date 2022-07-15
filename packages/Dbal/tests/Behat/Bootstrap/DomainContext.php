@@ -102,7 +102,8 @@ class DomainContext extends TestCase implements Context
         $rootProjectDirectoryPath = __DIR__ . '/../../../../';
         $serviceConfiguration = ServiceConfiguration::createWithDefaults()
             ->withNamespaces([$namespace])
-            ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString());
+            ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString())
+            ->withSkippedModulePackageNames(['jmsConverter', 'amqp', 'eventSourcing']);
         MessagingSystemConfiguration::cleanCache($serviceConfiguration->getCacheDirectoryPath());
 
         switch ($namespace) {

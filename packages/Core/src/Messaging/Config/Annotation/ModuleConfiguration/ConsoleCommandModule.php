@@ -139,4 +139,9 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
     {
         return false;
     }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
+    }
 }

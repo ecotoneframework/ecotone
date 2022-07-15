@@ -50,7 +50,7 @@
   "autoload-dev": {
     "psr-4": {
       "Test\\": "tests/phpunit",
-      "Behat\\Bootstrap\\": "tests/Behat/Bootstrap",
+      "Test\\Ecotone\\Symfony\\Behat\\Bootstrap\\": "tests/Behat/Bootstrap",
       "Fixture\\": "tests/Fixture",
       "Ecotone\\SymfonyBundle\\App\\": "App"
     }

@@ -39,9 +39,12 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
     /**
      * @inheritDoc
      */
-    public function findAllModuleConfigurations(): array
+    public function findAllModuleConfigurations(array $skippedModulePackageNames): array
     {
-        return $this->createAnnotationClasses(ModuleAnnotation::class);
+        return array_filter(
+            $this->createAnnotationClasses(ModuleAnnotation::class),
+            fn (Module $module) => ! in_array($module->getModulePackageName(), $skippedModulePackageNames)
+        );
     }
 
     /**

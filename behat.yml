@@ -27,8 +27,21 @@ default:
             - packages/EventSourcing/tests/Behat/features
           contexts:
             - Test\Ecotone\EventSourcing\Behat\Bootstrap\DomainContext
+symfony:
+  extensions:
+    FriendsOfBehat\SymfonyExtension:
+      bootstrap: ~
+      kernel:
+        class: Ecotone\SymfonyBundle\App\Kernel
+        environment: ~
+        debug: ~
+    translation:
+      locale: en
+    formatters:
+      pretty: true
+    suites:
       symfony:
-          paths:
-            - packages/Symfony/tests/Behat/features
-          contexts:
-            - Test\Ecotone\Symfony\Behat\Bootstrap\DomainContext
+        paths:
+          - packages/Symfony/tests/Behat/features
+        contexts:
+          - Test\Ecotone\Symfony\Behat\Bootstrap\DomainContext

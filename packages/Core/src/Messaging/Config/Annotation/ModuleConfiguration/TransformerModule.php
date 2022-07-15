@@ -14,8 +14,6 @@ use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 #[ModuleAnnotation]
 class TransformerModule extends MessageHandlerRegisterConfiguration
 {
-    public const MODULE_NAME = 'transformerModule';
-
     /**
      * @inheritDoc
      */
@@ -40,5 +38,10 @@ class TransformerModule extends MessageHandlerRegisterConfiguration
     public static function getMessageHandlerAnnotation(): string
     {
         return Transformer::class;
+    }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
     }
 }

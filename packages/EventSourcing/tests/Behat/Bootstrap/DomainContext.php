@@ -8,8 +8,6 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\PDO\PgSQL\Driver;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Ecotone\Dbal\DbalReconnectableConnectionFactory;
-use Ecotone\Dbal\DocumentStore\DbalDocumentStore;
-use Ecotone\Dbal\Recoverability\DbalDeadLetter;
 use Ecotone\Enqueue\CachedConnectionFactory;
 use Ecotone\EventSourcing\Config\EventSourcingModule;
 use Ecotone\EventSourcing\ProjectionManager;
@@ -25,7 +23,9 @@ use InvalidArgumentException;
 use function json_decode;
 
 use PHPUnit\Framework\TestCase;
+
 use Ramsey\Uuid\Uuid;
+use Test\Ecotone\EventSourcing\EventSourcingMessagingTest;
 use Test\Ecotone\EventSourcing\Fixture\Basket\BasketEventConverter;
 use Test\Ecotone\EventSourcing\Fixture\Basket\Command\AddProduct;
 use Test\Ecotone\EventSourcing\Fixture\Basket\Command\CreateBasket;
@@ -304,6 +304,7 @@ class DomainContext extends TestCase implements Context
                 ->withEnvironment('prod')
                 ->withNamespaces($namespaces)
                 ->withFailFast($failFast)
+                ->withSkippedModulePackageNames(['jmsConverter', 'amqp'])
                 ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString()),
             [
                 'isPostgres' => $dbalConnectionFactory->createContext()->getDbalConnection()->getDriver() instanceof Driver,
@@ -311,24 +312,7 @@ class DomainContext extends TestCase implements Context
             false
         );
 
-        $this->deleteFromTableExists('enqueue', self::$connection);
-        $this->deleteFromTableExists(DbalDeadLetter::DEFAULT_DEAD_LETTER_TABLE, self::$connection);
-        $this->deleteFromTableExists(DbalDocumentStore::ECOTONE_DOCUMENT_STORE, self::$connection);
-        $this->deleteTable('in_progress_tickets', self::$connection);
-
-        if ($this->checkIfTableExists(self::$connection, 'event_streams')) {
-            $projections = self::$connection->createQueryBuilder()
-                ->select('*')
-                ->from('event_streams')
-                ->executeQuery()
-                ->fetchAllAssociative();
-
-            foreach ($projections as $projection) {
-                $this->deleteTable($projection['stream_name'], self::$connection);
-            }
-        }
-        $this->deleteTable('event_streams', self::$connection);
-        $this->deleteTable('projections', self::$connection);
+        EventSourcingMessagingTest::clearDataTables(self::$connection);
 
         self::$projectionManager = self::$messagingSystem->getGatewayByName(ProjectionManager::class);
     }
@@ -442,32 +426,5 @@ class DomainContext extends TestCase implements Context
     public function iDeleteProjection(string $projectionName)
     {
         self::$messagingSystem->runConsoleCommand(EventSourcingModule::ECOTONE_ES_DELETE_PROJECTION, ['name' => $projectionName]);
-    }
-
-    private function deleteFromTableExists(string $tableName, Connection $connection): void
-    {
-        $doesExists = $this->checkIfTableExists($connection, $tableName);
-
-        if ($doesExists) {
-            $connection->executeStatement('DELETE FROM ' . $tableName);
-        }
-    }
-
-    private function deleteTable(string $tableName, Connection $connection): void
-    {
-        $doesExists = $this->checkIfTableExists($connection, $tableName);
-
-        if ($doesExists) {
-            $schemaManager = $connection->createSchemaManager();
-
-            $schemaManager->dropTable($tableName);
-        }
-    }
-
-    private function checkIfTableExists(Connection $connection, string $table): mixed
-    {
-        $schemaManager = $connection->createSchemaManager();
-
-        return $schemaManager->tablesExist([$table]);
     }
 }

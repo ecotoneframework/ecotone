@@ -123,4 +123,9 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
             $configuration->registerGatewayBuilder($gatewayBuilder);
         }
     }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
+    }
 }

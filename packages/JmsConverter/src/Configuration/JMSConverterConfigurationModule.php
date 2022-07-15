@@ -94,4 +94,9 @@ class JMSConverterConfigurationModule extends NoExternalConfigurationModule impl
         return $extensionObject instanceof ServiceConfiguration
                || $extensionObject instanceof JMSConverterConfiguration;
     }
+
+    public function getModulePackageName(): string
+    {
+        return JMSConverterModule::NAME;
+    }
 }

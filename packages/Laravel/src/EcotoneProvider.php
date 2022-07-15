@@ -88,6 +88,8 @@ class EcotoneProvider extends ServiceProvider
                 );
         }
 
+        $applicationConfiguration = $applicationConfiguration->withExtensionObjects([new EloquentRepositoryBuilder()]);
+
         $configuration = MessagingSystemConfiguration::prepare(
             $rootCatalog,
             new LaravelReferenceSearchService($this->app),

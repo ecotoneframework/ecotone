@@ -25,13 +25,13 @@
   },
   "require": {
     "ecotone/enqueue": "2.0.0-dev",
-    "enqueue/dbal": "^0.10.0",
-    "doctrine/dbal": "^3.1"
+    "enqueue/dbal": "^0.10.17",
+    "doctrine/dbal": "^3.3.7"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5",
     "behat/behat": "^3.10",
-    "doctrine/persistence": "^1.3|^2.0",
+    "doctrine/persistence": "^2.5",
     "phpstan/phpstan": "^1.8",
     "doctrine/orm": "^2.0|^3.0",
     "doctrine/cache": "^1.0.0",

@@ -70,4 +70,9 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
     {
         return false;
     }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
+    }
 }

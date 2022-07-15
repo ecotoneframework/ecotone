@@ -23,7 +23,8 @@ class EcotoneLiteConfigurationTest extends TestCase
     public function test_creating_with_cache()
     {
         $applicationConfiguration = ServiceConfiguration::createWithDefaults()
-                                        ->withCacheDirectoryPath('/tmp/' . Uuid::uuid4()->toString());
+                                        ->withCacheDirectoryPath('/tmp/' . Uuid::uuid4()->toString())
+                                        ->withSkippedModulePackageNames(['amqp', 'dbal', 'jmsConverter', 'eventSourcing']);
         $configuration1 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . '/../../', InMemoryPSRContainer::createEmpty(), $applicationConfiguration, [], true);
         $configuration2 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . '/../../', InMemoryPSRContainer::createEmpty(), $applicationConfiguration, [], true);
 
@@ -36,7 +37,9 @@ class EcotoneLiteConfigurationTest extends TestCase
             new MultiplyCoins(), new Shop(),
         ]);
         $serviceConfiguration = ServiceConfiguration::createWithDefaults()
-                                ->withNamespaces(["Test\Ecotone\Messaging\Fixture\Behat\Presend"]);
+                                ->withNamespaces(["Test\Ecotone\Messaging\Fixture\Behat\Presend"])
+                                ->withSkippedModulePackageNames(['amqp', 'dbal', 'jmsConverter', 'eventSourcing']);
+
         $configuration = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . '/../../', $container, $serviceConfiguration, [], false);
 
         $this->assertEquals(

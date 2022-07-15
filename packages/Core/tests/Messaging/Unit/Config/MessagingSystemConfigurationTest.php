@@ -118,6 +118,48 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
     }
 
+    /**
+     * @throws MessagingException
+     */
+    public function test_registering_extension_object_from_service_configuration()
+    {
+        $exampleModuleConfiguration = ExampleModuleConfiguration::createEmpty();
+        MessagingSystemConfiguration::prepareWithDefaults(
+            InMemoryModuleMessaging::createWith(
+                [$exampleModuleConfiguration],
+                []
+            ),
+            ServiceConfiguration::createWithDefaults()
+                ->withExtensionObjects([new stdClass()])
+        );
+
+        $this->assertEquals(
+            ExampleModuleConfiguration::createWithExtensions([new stdClass()]),
+            $exampleModuleConfiguration
+        );
+    }
+
+    /**
+     * @throws MessagingException
+     */
+    public function test_skipping_module_registration()
+    {
+        $exampleModuleConfiguration = ExampleModuleConfiguration::createEmpty();
+        MessagingSystemConfiguration::prepareWithDefaults(
+            InMemoryModuleMessaging::createWith(
+                [$exampleModuleConfiguration],
+                [new stdClass(), ServiceWithoutReturnValue::create()]
+            ),
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(['example'])
+        );
+
+        $this->assertEquals(
+            ExampleModuleConfiguration::createWithExtensions([]),
+            $exampleModuleConfiguration
+        );
+    }
+
     public function test_running_pollable_consumer()
     {
         $messageChannelName = 'pollableChannel';
@@ -594,7 +636,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
 
         $this->assertEquals(
-            ['reference0', 'reference2', 'reference1'],
+            [stdClass::class, 'reference0', 'reference2', 'reference1'],
             $messagingSystem->getRequiredReferences()
         );
     }

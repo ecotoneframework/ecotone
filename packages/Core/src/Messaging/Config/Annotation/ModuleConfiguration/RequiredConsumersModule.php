@@ -74,4 +74,9 @@ class RequiredConsumersModule extends NoExternalConfigurationModule implements A
     {
         return [];
     }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
+    }
 }

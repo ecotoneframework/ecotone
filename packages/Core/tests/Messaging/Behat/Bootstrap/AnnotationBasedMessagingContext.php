@@ -353,7 +353,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
             ->withCacheDirectoryPath($cacheDirectoryPath)
             ->withFailFast(false)
             ->withNamespaces([$namespace])
-            ->withSkippedModulePackageNames(["jmsConverter","dbal","amqp","eventSourcing"]);
+            ->withSkippedModulePackageNames(['jmsConverter', 'dbal', 'amqp', 'eventSourcing']);
 
         MessagingSystemConfiguration::cleanCache($applicationConfiguration->getCacheDirectoryPath());
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(

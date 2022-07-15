@@ -5,10 +5,8 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\JMSConverter\Configuration\JMSConverterModule;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\CoreModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -79,7 +77,7 @@ class ExampleModuleConfiguration implements AnnotationModule
      */
     public function getRelatedReferences(): array
     {
-        return [\stdClass::class];
+        return [stdClass::class];
     }
 
     /**
@@ -97,6 +95,6 @@ class ExampleModuleConfiguration implements AnnotationModule
 
     public function getModulePackageName(): string
     {
-        return "example";
+        return 'example';
     }
 }

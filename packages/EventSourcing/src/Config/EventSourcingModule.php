@@ -64,7 +64,7 @@ use Ramsey\Uuid\Uuid;
 #[ModuleAnnotation]
 class EventSourcingModule extends NoExternalConfigurationModule
 {
-    public const NAME = "eventSourcing";
+    public const NAME = 'eventSourcing';
 
     public const ECOTONE_ES_STOP_PROJECTION   = 'ecotone:es:stop-projection';
     public const ECOTONE_ES_RESET_PROJECTION  = 'ecotone:es:reset-projection';

@@ -43,7 +43,7 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
     {
         return array_filter(
             $this->createAnnotationClasses(ModuleAnnotation::class),
-            fn (Module $module) => !in_array($module->getModulePackageName(), $skippedModulePackageNames)
+            fn (Module $module) => ! in_array($module->getModulePackageName(), $skippedModulePackageNames)
         );
     }
 

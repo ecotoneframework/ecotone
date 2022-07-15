@@ -4,10 +4,7 @@ namespace Test\Ecotone\Amqp\Behat\Bootstrap;
 
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\TableNode;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Tools\Setup;
 use Ecotone\Amqp\Distribution\AmqpDistributionModule;
-use Ecotone\Dbal\DbalConnection;
 use Ecotone\Lite\EcotoneLiteConfiguration;
 use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
@@ -16,7 +13,6 @@ use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
 use Enqueue\AmqpExt\AmqpConnectionFactory;
-use Enqueue\Dbal\DbalConnectionFactory;
 use Interop\Amqp\Impl\AmqpQueue;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -108,7 +104,7 @@ class DomainContext extends TestCase implements Context
         $serviceConfiguration = ServiceConfiguration::createWithDefaults()
             ->withNamespaces([$namespace])
             ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString())
-            ->withSkippedModulePackageNames(["jmsConverter","dbal","eventSourcing"]);
+            ->withSkippedModulePackageNames(['jmsConverter', 'dbal', 'eventSourcing']);
         MessagingSystemConfiguration::cleanCache($serviceConfiguration->getCacheDirectoryPath());
 
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
@@ -196,7 +192,7 @@ class DomainContext extends TestCase implements Context
                 ServiceConfiguration::createWithDefaults()
                     ->withNamespaces([$namespace])
                     ->withServiceName($serviceName)
-                    ->withSkippedModulePackageNames(["jmsConverter","dbal","eventSourcing"])
+                    ->withSkippedModulePackageNames(['jmsConverter', 'dbal', 'eventSourcing'])
                     ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString()),
                 [],
                 false

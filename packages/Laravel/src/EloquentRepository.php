@@ -2,7 +2,6 @@
 
 namespace Ecotone\Laravel;
 
-use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\StandardRepository;
 use Illuminate\Database\Eloquent\Model;
 

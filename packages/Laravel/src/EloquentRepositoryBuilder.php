@@ -12,7 +12,8 @@ final class EloquentRepositoryBuilder implements RepositoryBuilder
 {
     private EloquentRepository $eloquentRepository;
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->eloquentRepository = new EloquentRepository();
     }
 

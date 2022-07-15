@@ -123,5 +123,19 @@
         "ecotone/symfony-bundle": "self.version"
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "scripts": {
+      "tests:phpstan": "vendor/bin/phpstan",
+      "tests:phpunit-postgres": "vendor/bin/phpunit",
+      "tests:phpunit-mysql": "DATABASE_DSN=mysql://ecotone:secret@database-mysql/ecotone vendor/bin/phpunit",
+      "tests:phpunit": ["@tests:phpunit-postgres","@tests:phpunit-mysql"],
+      "tests:behat-postgres": "vendor/bin/behat",
+      "tests:behat-mysql": "DATABASE_DSN=mysql://ecotone:secret@database-mysql/ecotone vendor/bin/behat",
+      "tests:behat": ["@tests:behat-postgres","@tests:behat-mysql"],
+      "tests:ci": [
+        "@tests:phpstan",
+        "@tests:phpunit",
+        "@tests:behat"
+      ]
+    }
 }

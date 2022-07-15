@@ -2,6 +2,10 @@
 
 namespace Test\Ecotone\EventSourcing;
 
+use Doctrine\DBAL\Connection;
+use Ecotone\Dbal\DbalConnection;
+use Ecotone\Dbal\DocumentStore\DbalDocumentStore;
+use Ecotone\Dbal\Recoverability\DbalDeadLetter;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Enqueue\Dbal\DbalConnectionFactory;
 use Enqueue\Dbal\ManagerRegistryConnectionFactory;
@@ -16,17 +20,9 @@ abstract class EventSourcingMessagingTest extends TestCase
      */
     private $dbalConnectionFactory;
 
-    protected function setUp(): void
-    {
-        $this->getConnectionFactory()->createContext()->getDbalConnection()->beginTransaction();
-    }
-
     protected function tearDown(): void
     {
-        try {
-            $this->getConnectionFactory()->createContext()->getDbalConnection()->rollBack();
-        } catch (\Exception) {
-        }
+        self::clearDataTables($this->getConnectionFactory()->createContext()->getDbalConnection());
     }
 
     public function getConnectionFactory(bool $isRegistry = false): ConnectionFactory
@@ -38,9 +34,7 @@ abstract class EventSourcingMessagingTest extends TestCase
             }
             $dbalConnectionFactory = new DbalConnectionFactory($dsn);
             $this->dbalConnectionFactory = $isRegistry
-                ? new ManagerRegistryConnectionFactory(
-                    new DbalConnectionManagerRegistryWrapper($dbalConnectionFactory)
-                )
+                ? DbalConnection::fromConnectionFactory($dbalConnectionFactory)
                 : $dbalConnectionFactory;
         }
 
@@ -55,5 +49,59 @@ abstract class EventSourcingMessagingTest extends TestCase
                 $objects
             )
         );
+    }
+
+    public static function clearDataTables(Connection $connection): void
+    {
+        EventSourcingMessagingTest::deleteFromTableExists('enqueue', $connection);
+        EventSourcingMessagingTest::deleteFromTableExists(DbalDeadLetter::DEFAULT_DEAD_LETTER_TABLE, $connection);
+        EventSourcingMessagingTest::deleteFromTableExists(DbalDocumentStore::ECOTONE_DOCUMENT_STORE, $connection);
+        EventSourcingMessagingTest::deleteTable('in_progress_tickets', $connection);
+        EventSourcingMessagingTest::deleteEventStreamTables($connection);
+    }
+
+    private static function deleteEventStreamTables(Connection $connection): void
+    {
+        if (self::checkIfTableExists($connection, 'event_streams')) {
+            $projections = $connection->createQueryBuilder()
+                ->select('*')
+                ->from('event_streams')
+                ->executeQuery()
+                ->fetchAllAssociative();
+
+            foreach ($projections as $projection) {
+                self::deleteTable($projection['stream_name'], $connection);
+            }
+        }
+
+        self::deleteTable('event_streams', $connection);
+        self::deleteTable('projections', $connection);
+    }
+
+    private static function deleteFromTableExists(string $tableName, Connection $connection): void
+    {
+        $doesExists = self::checkIfTableExists($connection, $tableName);
+
+        if ($doesExists) {
+            $connection->executeStatement('DELETE FROM ' . $tableName);
+        }
+    }
+
+    private static function deleteTable(string $tableName, Connection $connection): void
+    {
+        $doesExists = self::checkIfTableExists($connection, $tableName);
+
+        if ($doesExists) {
+            $schemaManager = $connection->createSchemaManager();
+
+            $schemaManager->dropTable($tableName);
+        }
+    }
+
+    private static function checkIfTableExists(Connection $connection, string $table): bool
+    {
+        $schemaManager = $connection->createSchemaManager();
+
+        return $schemaManager->tablesExist([$table]);
     }
 }

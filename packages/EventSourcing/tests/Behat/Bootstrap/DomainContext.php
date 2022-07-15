@@ -24,6 +24,7 @@ use Enqueue\AmqpExt\AmqpConnectionFactory;
 use Enqueue\Dbal\DbalConnectionFactory;
 use InvalidArgumentException;
 
+use Test\Ecotone\EventSourcing\EventSourcingMessagingTest;
 use function json_decode;
 
 use PHPUnit\Framework\TestCase;
@@ -314,24 +315,7 @@ class DomainContext extends TestCase implements Context
             false
         );
 
-        $this->deleteFromTableExists('enqueue', self::$connection);
-        $this->deleteFromTableExists(DbalDeadLetter::DEFAULT_DEAD_LETTER_TABLE, self::$connection);
-        $this->deleteFromTableExists(DbalDocumentStore::ECOTONE_DOCUMENT_STORE, self::$connection);
-        $this->deleteTable('in_progress_tickets', self::$connection);
-
-        if ($this->checkIfTableExists(self::$connection, 'event_streams')) {
-            $projections = self::$connection->createQueryBuilder()
-                ->select('*')
-                ->from('event_streams')
-                ->executeQuery()
-                ->fetchAllAssociative();
-
-            foreach ($projections as $projection) {
-                $this->deleteTable($projection['stream_name'], self::$connection);
-            }
-        }
-        $this->deleteTable('event_streams', self::$connection);
-        $this->deleteTable('projections', self::$connection);
+        EventSourcingMessagingTest::clearDataTables(self::$connection);
 
         self::$projectionManager = self::$messagingSystem->getGatewayByName(ProjectionManager::class);
     }
@@ -445,32 +429,5 @@ class DomainContext extends TestCase implements Context
     public function iDeleteProjection(string $projectionName)
     {
         self::$messagingSystem->runConsoleCommand(EventSourcingModule::ECOTONE_ES_DELETE_PROJECTION, ['name' => $projectionName]);
-    }
-
-    private function deleteFromTableExists(string $tableName, Connection $connection): void
-    {
-        $doesExists = $this->checkIfTableExists($connection, $tableName);
-
-        if ($doesExists) {
-            $connection->executeStatement('DELETE FROM ' . $tableName);
-        }
-    }
-
-    private function deleteTable(string $tableName, Connection $connection): void
-    {
-        $doesExists = $this->checkIfTableExists($connection, $tableName);
-
-        if ($doesExists) {
-            $schemaManager = $connection->createSchemaManager();
-
-            $schemaManager->dropTable($tableName);
-        }
-    }
-
-    private function checkIfTableExists(Connection $connection, string $table): mixed
-    {
-        $schemaManager = $connection->createSchemaManager();
-
-        return $schemaManager->tablesExist([$table]);
     }
 }

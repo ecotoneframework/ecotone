@@ -628,9 +628,9 @@ class AmqpChannelAdapterTest extends AmqpMessagingTest
     }
 
     /**
-     * @throws MessagingException
+     * @todo
      */
-    public function test_sending_with_time_to_live()
+    public function TODO_test_sending_with_time_to_live()
     {
         $queueName = Uuid::uuid4()->toString();
         $amqpQueues = [AmqpQueue::createWith($queueName)->withExclusivity()];

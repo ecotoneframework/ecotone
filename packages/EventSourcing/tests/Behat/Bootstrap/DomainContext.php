@@ -8,8 +8,6 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\PDO\PgSQL\Driver;
 use Doctrine\DBAL\Exception\TableNotFoundException;
 use Ecotone\Dbal\DbalReconnectableConnectionFactory;
-use Ecotone\Dbal\DocumentStore\DbalDocumentStore;
-use Ecotone\Dbal\Recoverability\DbalDeadLetter;
 use Ecotone\Enqueue\CachedConnectionFactory;
 use Ecotone\EventSourcing\Config\EventSourcingModule;
 use Ecotone\EventSourcing\ProjectionManager;
@@ -22,11 +20,12 @@ use Ecotone\Modelling\QueryBus;
 use Enqueue\Dbal\DbalConnectionFactory;
 use InvalidArgumentException;
 
-use Test\Ecotone\EventSourcing\EventSourcingMessagingTest;
 use function json_decode;
 
 use PHPUnit\Framework\TestCase;
+
 use Ramsey\Uuid\Uuid;
+use Test\Ecotone\EventSourcing\EventSourcingMessagingTest;
 use Test\Ecotone\EventSourcing\Fixture\Basket\BasketEventConverter;
 use Test\Ecotone\EventSourcing\Fixture\Basket\Command\AddProduct;
 use Test\Ecotone\EventSourcing\Fixture\Basket\Command\CreateBasket;

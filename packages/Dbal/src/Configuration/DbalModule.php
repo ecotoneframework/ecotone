@@ -4,5 +4,5 @@ namespace Ecotone\Dbal\Configuration;
 
 interface DbalModule
 {
-    public const NAME = "dbal";
+    public const NAME = 'dbal';
 }

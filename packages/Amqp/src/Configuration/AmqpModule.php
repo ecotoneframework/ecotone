@@ -20,7 +20,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 #[ModuleAnnotation]
 class AmqpModule implements AnnotationModule
 {
-    public const NAME = "amqp";
+    public const NAME = 'amqp';
 
     private AmqpDistributionModule $amqpDistributionModule;
 

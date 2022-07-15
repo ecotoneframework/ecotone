@@ -55,7 +55,7 @@ class InMemoryModuleMessaging implements ModuleRetrievingService
     {
         $modulesToReturn = [];
         foreach ($this->moduleConfigurations as $moduleConfiguration) {
-            if (!in_array($moduleConfiguration->getModulePackageName(), $skippedModulePackageNames)) {
+            if (! in_array($moduleConfiguration->getModulePackageName(), $skippedModulePackageNames)) {
                 $modulesToReturn[] = $moduleConfiguration;
             }
         }

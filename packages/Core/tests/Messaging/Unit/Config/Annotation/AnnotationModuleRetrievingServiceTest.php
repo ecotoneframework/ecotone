@@ -47,7 +47,7 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
 
         $this->assertEquals(
             [],
-            $annotationModuleRetrievingServie->findAllModuleConfigurations(["example"])
+            $annotationModuleRetrievingServie->findAllModuleConfigurations(['example'])
         );
     }
 

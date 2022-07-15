@@ -13,14 +13,12 @@ use Ecotone\Dbal\Recoverability\DbalDeadLetter;
 use Ecotone\Enqueue\CachedConnectionFactory;
 use Ecotone\EventSourcing\Config\EventSourcingModule;
 use Ecotone\EventSourcing\ProjectionManager;
-use Ecotone\Laravel\EloquentRepository;
 use Ecotone\Lite\EcotoneLiteConfiguration;
 use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\QueryBus;
-use Enqueue\AmqpExt\AmqpConnectionFactory;
 use Enqueue\Dbal\DbalConnectionFactory;
 use InvalidArgumentException;
 
@@ -298,7 +296,7 @@ class DomainContext extends TestCase implements Context
                     $objects,
                     [
                         'managerRegistry' => $managerRegistryConnectionFactory,
-                        DbalConnectionFactory::class => $dbalConnectionFactory
+                        DbalConnectionFactory::class => $dbalConnectionFactory,
                     ]
                 )
             ),
@@ -306,7 +304,7 @@ class DomainContext extends TestCase implements Context
                 ->withEnvironment('prod')
                 ->withNamespaces($namespaces)
                 ->withFailFast($failFast)
-                ->withSkippedModulePackageNames(["jmsConverter","amqp"])
+                ->withSkippedModulePackageNames(['jmsConverter', 'amqp'])
                 ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString()),
             [
                 'isPostgres' => $dbalConnectionFactory->createContext()->getDbalConnection()->getDriver() instanceof Driver,

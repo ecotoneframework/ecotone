@@ -130,11 +130,11 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 []
             ),
             ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([new \stdClass()])
+                ->withExtensionObjects([new stdClass()])
         );
 
         $this->assertEquals(
-            ExampleModuleConfiguration::createWithExtensions([new \stdClass()]),
+            ExampleModuleConfiguration::createWithExtensions([new stdClass()]),
             $exampleModuleConfiguration
         );
     }
@@ -146,12 +146,12 @@ class MessagingSystemConfigurationTest extends MessagingTest
     {
         $exampleModuleConfiguration = ExampleModuleConfiguration::createEmpty();
         MessagingSystemConfiguration::prepareWithDefaults(
-                InMemoryModuleMessaging::createWith(
-                    [$exampleModuleConfiguration],
-                    [new stdClass(), ServiceWithoutReturnValue::create()]
-                ),
+            InMemoryModuleMessaging::createWith(
+                [$exampleModuleConfiguration],
+                [new stdClass(), ServiceWithoutReturnValue::create()]
+            ),
             ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(["example"])
+                ->withSkippedModulePackageNames(['example'])
         );
 
         $this->assertEquals(
@@ -636,7 +636,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         );
 
         $this->assertEquals(
-            [\stdClass::class, 'reference0', 'reference2', 'reference1'],
+            [stdClass::class, 'reference0', 'reference2', 'reference1'],
             $messagingSystem->getRequiredReferences()
         );
     }

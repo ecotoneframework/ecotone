@@ -24,7 +24,7 @@ class EcotoneLiteConfigurationTest extends TestCase
     {
         $applicationConfiguration = ServiceConfiguration::createWithDefaults()
                                         ->withCacheDirectoryPath('/tmp/' . Uuid::uuid4()->toString())
-                                        ->withSkippedModulePackageNames(["amqp","dbal","jmsConverter","eventSourcing"]);
+                                        ->withSkippedModulePackageNames(['amqp', 'dbal', 'jmsConverter', 'eventSourcing']);
         $configuration1 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . '/../../', InMemoryPSRContainer::createEmpty(), $applicationConfiguration, [], true);
         $configuration2 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . '/../../', InMemoryPSRContainer::createEmpty(), $applicationConfiguration, [], true);
 
@@ -38,7 +38,7 @@ class EcotoneLiteConfigurationTest extends TestCase
         ]);
         $serviceConfiguration = ServiceConfiguration::createWithDefaults()
                                 ->withNamespaces(["Test\Ecotone\Messaging\Fixture\Behat\Presend"])
-                                ->withSkippedModulePackageNames(["amqp","dbal","jmsConverter","eventSourcing"]);
+                                ->withSkippedModulePackageNames(['amqp', 'dbal', 'jmsConverter', 'eventSourcing']);
 
         $configuration = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . '/../../', $container, $serviceConfiguration, [], false);
 

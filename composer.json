@@ -26,7 +26,10 @@
                 "packages/Core/src/Enqueue/",
                 "packages/Enqueue/src"
             ],
-            "Ecotone\\EventSourcing\\": "packages/EventSourcing/src",
+            "Ecotone\\EventSourcing\\": [
+                "packages/PdoEventSourcing/src",
+                "packages/PdoEventSourcing/src"
+            ],
             "Ecotone\\JMSConverter\\": "packages/JmsConverter/src",
             "Ecotone\\Laravel\\": "packages/Laravel/src",
             "Ecotone\\Lite\\": "packages/Core/src/Lite/",
@@ -59,7 +62,8 @@
                 "packages/Dbal/tests"
             ],
             "Test\\Ecotone\\EventSourcing\\": [
-                "packages/EventSourcing/tests"
+                "packages/EventSourcing/tests",
+                "packages/PdoEventSourcing/tests"
             ],
             "Test\\Ecotone\\JMSConverter\\": [
                 "packages/JmsConverter/tests"
@@ -122,20 +126,26 @@
         "ecotone/pdo-event-sourcing": "self.version",
         "ecotone/symfony-bundle": "self.version"
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "scripts": {
-      "tests:phpstan": "vendor/bin/phpstan",
-      "tests:phpunit-postgres": "vendor/bin/phpunit",
-      "tests:phpunit-mysql": "DATABASE_DSN=mysql://ecotone:secret@database-mysql/ecotone vendor/bin/phpunit",
-      "tests:phpunit": ["@tests:phpunit-postgres","@tests:phpunit-mysql"],
-      "tests:behat-postgres": "vendor/bin/behat",
-      "tests:behat-mysql": "DATABASE_DSN=mysql://ecotone:secret@database-mysql/ecotone vendor/bin/behat",
-      "tests:behat": ["@tests:behat-postgres","@tests:behat-mysql"],
-      "tests:ci": [
-        "@tests:phpstan",
-        "@tests:phpunit",
-        "@tests:behat"
-      ]
-    }
+        "tests:phpstan": "vendor/bin/phpstan",
+        "tests:phpunit-postgres": "vendor/bin/phpunit",
+        "tests:phpunit-mysql": "DATABASE_DSN=mysql://ecotone:secret@database-mysql/ecotone vendor/bin/phpunit",
+        "tests:phpunit": [
+            "@tests:phpunit-postgres",
+            "@tests:phpunit-mysql"
+        ],
+        "tests:behat-postgres": "vendor/bin/behat",
+        "tests:behat-mysql": "DATABASE_DSN=mysql://ecotone:secret@database-mysql/ecotone vendor/bin/behat",
+        "tests:behat": [
+            "@tests:behat-postgres",
+            "@tests:behat-mysql"
+        ],
+        "tests:ci": [
+            "@tests:phpstan",
+            "@tests:phpunit",
+            "@tests:behat"
+        ]
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }

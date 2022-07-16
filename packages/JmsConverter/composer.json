@@ -33,7 +33,7 @@
   },
   "require": {
     "php": "^8.0",
-    "ecotone/core": "2.0.0-dev",
+    "ecotone/core": "2.0.0.x-dev",
     "jms/serializer": "^3.17",
     "symfony/cache": "^5.4|^6.1"
   },

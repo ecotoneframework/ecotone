@@ -33,7 +33,7 @@
   },
   "require": {
     "php": "^8.0",
-    "ecotone/core": "2.0.0-dev",
+    "ecotone/core": "2.0.0.x-dev",
     "laravel/framework": "^9.0"
   },
   "require-dev": {

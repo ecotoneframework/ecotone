@@ -105,7 +105,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function emergency($message, array $context = [])
+    public function emergency(string|\Stringable $message, array $context = [])
     {
         $this->emergency[] = $message;
     }
@@ -113,7 +113,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function alert($message, array $context = [])
+    public function alert(string|\Stringable $message, array $context = [])
     {
         $this->alert[] = $message;
     }
@@ -121,7 +121,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function critical($message, array $context = [])
+    public function critical(string|\Stringable $message, array $context = [])
     {
         $this->critical[] = $message;
     }
@@ -129,7 +129,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function error($message, array $context = [])
+    public function error(string|\Stringable $message, array $context = [])
     {
         $this->error[] = $message;
     }
@@ -137,7 +137,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function warning($message, array $context = [])
+    public function warning(string|\Stringable $message, array $context = [])
     {
         $this->warning[] = $message;
     }
@@ -145,7 +145,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function notice($message, array $context = [])
+    public function notice(string|\Stringable $message, array $context = [])
     {
         $this->notice[] = $message;
     }
@@ -153,7 +153,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function info($message, array $context = [])
+    public function info(string|\Stringable $message, array $context = [])
     {
         $this->info[] = $message;
     }
@@ -161,7 +161,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function debug($message, array $context = [])
+    public function debug(string|\Stringable $message, array $context = [])
     {
         $this->debug[] = $message;
     }
@@ -169,7 +169,7 @@ class LoggerExample implements LoggerInterface
     /**
      * @inheritDoc
      */
-    public function log($level, $message, array $context = [])
+    public function log($level, string|\Stringable $message, array $context = [])
     {
         $this->log[] = $level;
     }

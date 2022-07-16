@@ -64,6 +64,9 @@
 #    - name: Validate composer.json and composer.lock
 #      run: composer validate --strict
 #
+#    - name: Validate cross package versions
+#      run: vendor/bin/monorepo-builder validate
+#
 #    - name: Install dependencies
 #      run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 #

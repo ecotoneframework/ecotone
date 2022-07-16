@@ -89,7 +89,7 @@ jobs:
         working-directory: ${{ matrix.package.directory }}
 
       - name: Install dependencies
-        run: composer update --no-interaction
+        run: composer update --no-interaction -vvv
         working-directory: ${{ matrix.package.directory }}
 
       - name: Run tests

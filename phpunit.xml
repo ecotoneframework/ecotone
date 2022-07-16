@@ -33,7 +33,7 @@
       <directory>packages/Dbal/tests</directory>
     </testsuite>
     <testsuite name="Event Sourcing tests">
-      <directory>packages/EventSourcing/tests</directory>
+      <directory>packages/PdoEventSourcing/tests</directory>
     </testsuite>
     <testsuite name="Jms Converter tests">
       <directory>packages/JmsConverter/tests</directory>

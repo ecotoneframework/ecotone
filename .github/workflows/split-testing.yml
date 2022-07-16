@@ -1,4 +1,4 @@
-name: 'Split Testing'
+name: 'Ecotone Framework'
 
 on:
   pull_request:

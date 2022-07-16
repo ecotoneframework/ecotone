@@ -1,4 +1,4 @@
-name: Ecotone Framework
+name: 'Ecotone Framework'
 
 on:
   push:
@@ -10,6 +10,7 @@ on:
 
 jobs:
   run:
+    name: "Testing Monorepo"
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:

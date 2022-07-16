@@ -1,9 +1,10 @@
-name: Check & fix styling
+name: 'Ecotone Framework'
 
 on: [push]
 
 jobs:
   php-cs-fixer:
+    name: "Fix PHP CS"
     runs-on: ubuntu-latest
 
     steps:

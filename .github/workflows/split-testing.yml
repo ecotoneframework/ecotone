@@ -85,11 +85,11 @@ jobs:
           coverage: none
 
       - name: Enable merge-plugin
-        run: composer global config --no-interaction allow-plugins.wikimedia/composer-merge-plugin true
+        run: composer global config --no-interaction allow-plugins.wikimedia/composer-merge-plugin true && composer global require wikimedia/composer-merge-plugin
         working-directory: ${{ matrix.package.directory }}
 
       - name: Install dependencies
-        run: composer config --no-plugins allow-plugins.wikimedia/composer-merge-plugin true && composer global require wikimedia/composer-merge-plugin && composer update --no-interaction
+        run: composer update --no-interaction
         working-directory: ${{ matrix.package.directory }}
 
       - name: Run tests

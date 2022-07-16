@@ -71,7 +71,8 @@
     },
     "merge-plugin": {
       "include": [
-        "../config.json"
+        "../config.json",
+        "config.json"
       ]
     }
   }

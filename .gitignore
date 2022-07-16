@@ -1,6 +1,5 @@
 .idea/
 vendor/
-bin/
 tests/coverage
 !tests/coverage/.gitkeep
 file

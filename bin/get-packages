@@ -1,0 +1,47 @@
+#!/usr/bin/env php
+<?php
+
+const PACKAGES_DIRECTORY = __DIR__ . '/../packages/';
+
+function getPackagePathFromComposerFile(SplFileInfo $composerFile): string
+{
+    return str_replace(PACKAGES_DIRECTORY, '', $composerFile->getPath());
+}
+
+function getPackageNameFromComposerFile(SplFileInfo $composerFile)
+{
+    $composer = json_decode(file_get_contents($composerFile->getRealPath()), true);
+    $name = $composer['name'] ?? throw new UnexpectedValueException(
+        'The referenced package is invalid because it is missing a name.'
+    );
+
+    return str_replace('ecotone/', '', $name);
+}
+
+/**
+ * @return array<array-key, array{path: string, name: string}>
+ */
+function getPackages(): array {
+    $packages = [];
+    $directoryIterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator(PACKAGES_DIRECTORY, RecursiveDirectoryIterator::SKIP_DOTS)
+    );
+
+    /**
+     * @var SplFileInfo $file
+     */
+    foreach ($directoryIterator as $file) {
+        if ($file->getFilename() !== 'composer.json') {
+            continue;
+        }
+
+        $packages[] = [
+            'path' => getPackagePathFromComposerFile($file),
+            'name' => getPackageNameFromComposerFile($file),
+        ];
+    }
+
+    return $packages;
+}
+
+echo json_encode(getPackages());

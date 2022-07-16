@@ -10,3 +10,4 @@ composer.lock
 .htaccess
 .php-cs-fixer.cache
 cache
+auth.json

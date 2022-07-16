@@ -49,5 +49,10 @@
       "@tests:phpstan",
       "@tests:phpunit"
     ]
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-main": "2.0.0.x-dev"
+    }
   }
 }

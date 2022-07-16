@@ -1,36 +1,61 @@
 {
+    "config": {},
     "repositories": [
       {
         "type": "path",
-        "url": "../Amqp"
+        "url": "../Amqp",
+        "options": {
+          "symlink": true
+        }
       },
       {
         "type": "path",
-        "url": "../Core"
+        "url": "../Core",
+        "options": {
+          "symlink": true
+        }
       },
       {
         "type": "path",
-        "url": "../Dbal"
+        "url": "../Dbal",
+        "options": {
+          "symlink": true
+        }
       },
       {
         "type": "path",
-        "url": "../Enqueue"
+        "url": "../Enqueue",
+        "options": {
+          "symlink": true
+        }
       },
       {
         "type": "path",
-        "url": "../EventSourcing"
+        "url": "../PdoEventSourcing",
+        "options": {
+          "symlink": true
+        }
       },
       {
         "type": "path",
-        "url": "../JmsConverter"
+        "url": "../JmsConverter",
+        "options": {
+          "symlink": true
+        }
       },
       {
         "type": "path",
-        "url": "../Laravel"
+        "url": "../Laravel",
+        "options": {
+          "symlink": true
+        }
       },
       {
         "type": "path",
-        "url": "../Symfony"
+        "url": "../Symfony",
+        "options": {
+          "symlink": true
+        }
       }
     ]
 }

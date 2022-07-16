@@ -48,6 +48,9 @@
       "providers": [
         "Ecotone\\Laravel\\EcotoneProvider"
       ]
+    },
+    "branch-alias": {
+      "dev-main": "2.0.0.x-dev"
     }
   },
   "scripts": {

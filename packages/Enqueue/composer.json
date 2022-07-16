@@ -24,7 +24,7 @@
     }
   },
   "require": {
-    "ecotone/core": "2.0.0-dev",
+    "ecotone/core": "2.0.0.x-dev",
     "queue-interop/queue-interop": "^0.8",
     "enqueue/dsn": "^0.10.4"
   },
@@ -38,5 +38,10 @@
     "tests:ci": [
       "@tests:phpstan"
     ]
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-main": "2.0.0.x-dev"
+    }
   }
 }

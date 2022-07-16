@@ -64,11 +64,14 @@ jobs:
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
 
+    - name: Install dependencies
+      run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction
+
     - name: Validate cross package versions
       run: vendor/bin/monorepo-builder validate
 
-    - name: Install dependencies
-      run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction
+    - name: Test PHPStan
+      run: vendor/bin/phpstan
 
     - name: Test PHPUnit on Postgres
       run: vendor/bin/phpunit
@@ -89,6 +92,3 @@ jobs:
       run: vendor/bin/behat -vvv
       env:
         DATABASE_DSN: mysql://ecotone:secret@127.0.0.1:3306/ecotone
-
-    - name: Test PHPStan
-      run: vendor/bin/phpstan

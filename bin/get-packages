@@ -3,16 +3,16 @@
 
 const PACKAGES_DIRECTORY = __DIR__ . '/../packages/';
 
-function getPackagePathFromComposerFile(SplFileInfo $composerFile): string
+function getPackagePathFromComposerFile(string $composerFile): string
 {
-    return str_replace(PACKAGES_DIRECTORY, '', $composerFile->getPath());
+    return str_replace(PACKAGES_DIRECTORY, '', $composerFile);
 }
 
-function getPackageNameFromComposerFile(SplFileInfo $composerFile)
+function getPackageNameFromComposerFile(string $composerFile)
 {
-    $composer = json_decode(file_get_contents($composerFile->getRealPath()), true);
+    $composer = json_decode(file_get_contents($composerFile), true);
     $name = $composer['name'] ?? throw new UnexpectedValueException(
-        'The referenced package is invalid because it is missing a name.'
+        'The referenced package is invalid because it is missing a name: ' . $composerFile
     );
 
     return str_replace('ecotone/', '', $name);
@@ -23,19 +23,23 @@ function getPackageNameFromComposerFile(SplFileInfo $composerFile)
  */
 function getPackages(): array {
     $packages = [];
-    $directoryIterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator(PACKAGES_DIRECTORY, RecursiveDirectoryIterator::SKIP_DOTS)
-    );
+    $directoryIterator = new DirectoryIterator(realpath(PACKAGES_DIRECTORY));
 
     /**
-     * @var SplFileInfo $file
+     * @var DirectoryIterator $directory
      */
-    foreach ($directoryIterator as $file) {
-        if ($file->getFilename() !== 'composer.json') {
+    foreach ($directoryIterator as $directory) {
+        if ($directory->isDot()) {
+            continue;
+        }
+
+        $file = $directory->getRealPath() . DIRECTORY_SEPARATOR . 'composer.json';
+        if (!file_exists($file)) {
             continue;
         }
 
         $packages[] = [
+            'directory'  => $directory->getRealPath(),
             'path' => getPackagePathFromComposerFile($file),
             'name' => getPackageNameFromComposerFile($file),
         ];

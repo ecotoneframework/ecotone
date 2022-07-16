@@ -32,7 +32,6 @@
     }
   },
   "require": {
-    "php": "^8.0",
     "ecotone/core": "2.0.0.x-dev",
     "jms/serializer": "^3.17",
     "symfony/cache": "^5.4|^6.1"
@@ -40,7 +39,8 @@
   "require-dev": {
     "phpunit/phpunit": "^9.5",
     "behat/behat": "^3.10",
-    "phpstan/phpstan": "^1.8"
+    "phpstan/phpstan": "^1.8",
+    "wikimedia/composer-merge-plugin": "^2.0"
   },
   "scripts": {
     "tests:phpstan": "vendor/bin/phpstan",
@@ -53,6 +53,16 @@
   "extra": {
     "branch-alias": {
       "dev-main": "2.0.0.x-dev"
+    },
+    "merge-plugin": {
+      "include": [
+        "../config.json"
+      ]
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "wikimedia/composer-merge-plugin": true
     }
   }
 }

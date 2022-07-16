@@ -35,7 +35,8 @@
     "phpstan/phpstan": "^1.8",
     "doctrine/orm": "^2.0|^3.0",
     "doctrine/cache": "^1.0.0",
-    "doctrine/annotations": "^1.13"
+    "doctrine/annotations": "^1.13",
+    "wikimedia/composer-merge-plugin": "^2.0"
   },
   "scripts": {
     "tests:phpstan": "vendor/bin/phpstan",
@@ -54,6 +55,16 @@
   "extra": {
     "branch-alias": {
       "dev-main": "2.0.0.x-dev"
+    },
+    "merge-plugin": {
+      "include": [
+        "../config.json"
+      ]
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "wikimedia/composer-merge-plugin": true
     }
   }
 }

@@ -255,33 +255,33 @@ class DomainContext extends TestCase implements Context
                 case "Test\Ecotone\EventSourcing\Fixture\TicketWithPollingProjection": {
                     $objects = array_merge($objects, [new InProgressTicketList(self::$connection)]);
                     break;
-                    }
+                }
                 case "Test\Ecotone\EventSourcing\Fixture\TicketWithAsynchronousEventDrivenProjection": {
                     $objects = array_merge($objects, [new \Test\Ecotone\EventSourcing\Fixture\TicketWithAsynchronousEventDrivenProjection\InProgressTicketList(self::$connection)]);
                     break;
-                    }
+                }
                 case "Test\Ecotone\EventSourcing\Fixture\TicketWithSynchronousEventDrivenProjection": {
                     $objects = array_merge($objects, [new \Test\Ecotone\EventSourcing\Fixture\TicketWithSynchronousEventDrivenProjection\InProgressTicketList(self::$connection)]);
                     break;
-                    }
+                }
                 case "Test\Ecotone\EventSourcing\Fixture\ProjectionFromMultipleStreams": {
                     $objects = array_merge($objects, [new MultipleStreamsProjection()]);
                     break;
-                    }
+                }
                 case "Test\Ecotone\EventSourcing\Fixture\TicketWithLimitedLoad": {break;}
                 case "Test\Ecotone\EventSourcing\Fixture\InMemoryEventStore": {break;}
                 case "Test\Ecotone\EventSourcing\Fixture\ValueObjectIdentifier": {
                     $objects = array_merge($objects, [new ArticleEventConverter()]);
                     break;
-                    }
+                }
                 case "Test\Ecotone\EventSourcing\Fixture\TicketEmittingProjection": {
                     $objects = array_merge($objects, [new \Test\Ecotone\EventSourcing\Fixture\TicketEmittingProjection\InProgressTicketList(self::$connection), new NotificationService(), new TicketListUpdatedConverter()]);
                     break;
-                    }
+                }
                 case "Test\Ecotone\EventSourcing\Fixture\TicketProjectionState": {
                     $objects = array_merge($objects, [new \Test\Ecotone\EventSourcing\Fixture\TicketProjectionState\NotificationService(), new TicketCounterProjection(), new StateAndEventConverter()]);
                     break;
-                    }
+                }
                 default:
                     {
                         throw new InvalidArgumentException("Namespace {$namespace} not yet implemented");

@@ -26,14 +26,14 @@
     "ecotone/core": "2.0.0.x-dev",
     "laminas/laminas-zendframework-bridge": "^1.0.0",
     "symfony/console": "^5.4|^6.0",
-    "symfony/framework-bundle": "^5.4|^6.0",
-    "wikimedia/composer-merge-plugin": "^2.0"
+    "symfony/framework-bundle": "^5.4|^6.0"
   },
   "require-dev": {
     "behat/behat": "^3.10",
     "friends-of-behat/symfony-extension": "^2.1",
     "phpstan/phpstan": "^1.8",
-    "phpunit/phpunit": "^9.5"
+    "phpunit/phpunit": "^9.5",
+    "wikimedia/composer-merge-plugin": "^2.0"
   },
   "config": {
     "sort-packages": true,

@@ -88,7 +88,7 @@ jobs:
         run: echo "${{ matrix.package.path }} - ${{ matrix.package.name }}"
 
       - name: Enable merge-plugin
-        run: composer config allow-plugins.wikimedia/composer-merge-plugin true
+        run: composer config --no-interaction allow-plugins.wikimedia/composer-merge-plugin true
 
       - name: Install dependencies
         run: composer global require wikimedia/composer-merge-plugin && composer update --no-interaction

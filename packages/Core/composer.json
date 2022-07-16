@@ -35,5 +35,15 @@
     "behat/behat": "^3.10",
     "phpstan/phpstan": "^1.8",
     "symfony/expression-language": "^6.0"
+  },
+  "scripts": {
+    "tests:phpstan": "vendor/bin/phpstan",
+    "tests:phpunit": ["vendor/bin/phpunit"],
+    "tests:behat": ["vendor/bin/behat -vvv"],
+    "tests:ci": [
+      "@tests:phpstan",
+      "@tests:phpunit",
+      "@tests:behat"
+    ]
   }
 }

@@ -87,31 +87,10 @@ jobs:
       - name: Echo testing
         run: echo "${{ matrix.package.path }} - ${{ matrix.package.name }}"
 
-      - name: Enter catalog
-        run: cd ${{ matrix.package.directory }}
-
       - name: Install dependencies
         run: composer update --prefer-stable --prefer-dist --no-interaction
-
-      - name: Test PHPUnit on Postgres
-        run: vendor/bin/phpunit
-        env:
-          DATABASE_DSN: pgsql://ecotone:secret@localhost:5432/ecotone
-
-      - name: Test Behat on Postgres
-        run: vendor/bin/behat -vvv
-        env:
-          DATABASE_DSN: pgsql://ecotone:secret@localhost:5432/ecotone
-
-      - name: Test PHPUnit on Mysql
-        run: vendor/bin/phpunit
-        env:
-          DATABASE_DSN: mysql://ecotone:secret@127.0.0.1:3306/ecotone
-
-      - name: Test Behat on Mysql
-        run: vendor/bin/behat -vvv
-        env:
-          DATABASE_DSN: mysql://ecotone:secret@127.0.0.1:3306/ecotone
+        working-directory: ${{ matrix.package.directory }}
 
       - name: Test PHPStan
-        run: vendor/bin/phpstan
+        run: composer tests:ci
+        working-directory: ${{ matrix.package.directory }}

@@ -56,11 +56,15 @@
     }
   },
   "replace": {},
-  "scripts": {},
   "conflict": {},
-  "extra": {
-    "branch-alias": {
-      "dev-master": "1.32.2-dev"
-    }
+  "scripts": {
+    "tests:phpstan": "vendor/bin/phpstan",
+    "tests:phpunit": ["vendor/bin/phpunit"],
+    "tests:behat": ["vendor/bin/behat -vvv"],
+    "tests:ci": [
+      "@tests:phpstan",
+      "@tests:phpunit",
+      "@tests:behat"
+    ]
   }
 }

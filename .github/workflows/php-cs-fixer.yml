@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   php-cs-fixer:
-    name: "Fix PHP CS"
+    name: "Auto fix PHP CS"
     runs-on: ubuntu-latest
 
     steps:

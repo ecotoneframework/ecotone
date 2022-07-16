@@ -30,7 +30,7 @@ jobs:
       matrix: ${{ steps.get_json.outputs.json }}
 
   split_testing:
-    name: Test ${{ matrix.package.name }} separately
+    name: Testing ${{ matrix.package.name }} separately
     needs: get_packages
     runs-on: ubuntu-latest
 

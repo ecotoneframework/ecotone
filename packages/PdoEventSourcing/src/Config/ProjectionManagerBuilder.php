@@ -37,8 +37,7 @@ class ProjectionManagerBuilder extends InputOutputMessageHandlerBuilder
         array $parameterConverters,
         EventSourcingConfiguration $eventSourcingConfiguration,
         array $projectionSetupConfigurations
-    ): static
-    {
+    ): static {
         return new self($methodName, $parameterConverters, $eventSourcingConfiguration, $projectionSetupConfigurations);
     }
 

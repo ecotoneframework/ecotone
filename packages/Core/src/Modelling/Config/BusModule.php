@@ -5,6 +5,7 @@ namespace Ecotone\Modelling\Config;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\CoreModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -94,5 +95,10 @@ class BusModule extends NoExternalConfigurationModule implements AnnotationModul
     public function canHandle($extensionObject): bool
     {
         return false;
+    }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
     }
 }

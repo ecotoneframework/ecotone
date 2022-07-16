@@ -4,6 +4,7 @@ namespace Ecotone\Dbal\Deduplication;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Dbal\Configuration\DbalConfiguration;
+use Ecotone\Dbal\Configuration\DbalModule;
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
@@ -88,5 +89,10 @@ class DeduplicationModule implements AnnotationModule
     public function getRelatedReferences(): array
     {
         return [];
+    }
+
+    public function getModulePackageName(): string
+    {
+        return DbalModule::NAME;
     }
 }

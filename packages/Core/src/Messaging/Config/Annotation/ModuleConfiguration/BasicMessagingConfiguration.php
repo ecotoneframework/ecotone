@@ -143,4 +143,9 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
             RequiredReference::create(InterfaceToCallRegistry::REFERENCE_NAME),
         ];
     }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
+    }
 }

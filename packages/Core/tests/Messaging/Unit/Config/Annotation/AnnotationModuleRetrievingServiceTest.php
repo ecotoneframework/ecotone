@@ -25,10 +25,6 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  */
 class AnnotationModuleRetrievingServiceTest extends MessagingTest
 {
-    /**
-     * @throws \Doctrine\Common\Annotations\AnnotationException
-     * @throws ReflectionException
-     */
     public function test_creating_module()
     {
         $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationFinder::createFrom([
@@ -39,7 +35,19 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
             [
                 ExampleModuleConfiguration::createEmpty(),
             ],
-            $annotationModuleRetrievingServie->findAllModuleConfigurations()
+            $annotationModuleRetrievingServie->findAllModuleConfigurations([])
+        );
+    }
+
+    public function test_skipping_module()
+    {
+        $annotationModuleRetrievingServie = new AnnotationModuleRetrievingService(InMemoryAnnotationFinder::createFrom([
+            ExampleModuleConfiguration::class,
+        ]), InterfaceToCallRegistry::createEmpty(), InMemoryConfigurationVariableService::createEmpty());
+
+        $this->assertEquals(
+            [],
+            $annotationModuleRetrievingServie->findAllModuleConfigurations(['example'])
         );
     }
 
@@ -53,7 +61,7 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
             [
                 new stdClass(),
             ],
-            $annotationModuleRetrievingServie->findAllExtensionObjects()
+            $annotationModuleRetrievingServie->findAllExtensionObjects([])
         );
     }
 
@@ -112,7 +120,7 @@ class AnnotationModuleRetrievingServiceTest extends MessagingTest
             [
                 ExampleModuleConfiguration::createEmpty(),
             ],
-            $annotationModuleRetrievingService->findAllModuleConfigurations()
+            $annotationModuleRetrievingService->findAllModuleConfigurations([])
         );
 
         $this->assertEquals(

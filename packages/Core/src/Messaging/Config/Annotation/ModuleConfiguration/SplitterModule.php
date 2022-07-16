@@ -13,8 +13,6 @@ use Ecotone\Messaging\Handler\Splitter\SplitterBuilder;
 #[ModuleAnnotation]
 class SplitterModule extends MessageHandlerRegisterConfiguration
 {
-    public const MODULE_NAME = 'splitterModule';
-
     /**
      * @inheritDoc
      */
@@ -40,5 +38,10 @@ class SplitterModule extends MessageHandlerRegisterConfiguration
     public static function getMessageHandlerAnnotation(): string
     {
         return Splitter::class;
+    }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
     }
 }

@@ -116,4 +116,9 @@ class AmqpConsumerModule implements AnnotationModule
     {
         return [];
     }
+
+    public function getModulePackageName(): string
+    {
+        return AmqpModule::NAME;
+    }
 }

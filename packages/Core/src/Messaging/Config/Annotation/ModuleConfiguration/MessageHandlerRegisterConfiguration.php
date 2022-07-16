@@ -79,4 +79,9 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
     {
         return false;
     }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
+    }
 }

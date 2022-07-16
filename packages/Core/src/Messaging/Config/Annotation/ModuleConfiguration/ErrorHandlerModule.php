@@ -69,4 +69,9 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
     {
         return $extensionObject instanceof ErrorHandlerConfiguration;
     }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
+    }
 }

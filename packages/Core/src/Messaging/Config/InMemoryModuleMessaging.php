@@ -51,9 +51,16 @@ class InMemoryModuleMessaging implements ModuleRetrievingService
     /**
      * @inheritDoc
      */
-    public function findAllModuleConfigurations(): array
+    public function findAllModuleConfigurations(array $skippedModulePackageNames): array
     {
-        return $this->moduleConfigurations;
+        $modulesToReturn = [];
+        foreach ($this->moduleConfigurations as $moduleConfiguration) {
+            if (! in_array($moduleConfiguration->getModulePackageName(), $skippedModulePackageNames)) {
+                $modulesToReturn[] = $moduleConfiguration;
+            }
+        }
+
+        return $modulesToReturn;
     }
 
     /**

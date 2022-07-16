@@ -70,4 +70,9 @@ abstract class ConsumerRegisterConfiguration extends NoExternalConfigurationModu
     {
         return false;
     }
+
+    public function getModulePackageName(): string
+    {
+        return CoreModule::NAME;
+    }
 }

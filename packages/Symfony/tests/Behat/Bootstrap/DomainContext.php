@@ -1,6 +1,6 @@
 <?php
 
-namespace Behat\Bootstrap;
+namespace Test\Ecotone\Symfony\Behat\Bootstrap;
 
 use Behat\Behat\Context\Context;
 use Fixture\Car\CarService;

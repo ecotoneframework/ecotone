@@ -3,6 +3,7 @@
 namespace Ecotone\Amqp\Publisher;
 
 use Ecotone\Amqp\AmqpOutboundChannelAdapterBuilder;
+use Ecotone\Amqp\Configuration\AmqpModule;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
@@ -127,5 +128,10 @@ class AmqpPublisherModule implements AnnotationModule
     public function getRelatedReferences(): array
     {
         return [];
+    }
+
+    public function getModulePackageName(): string
+    {
+        return AmqpModule::NAME;
     }
 }

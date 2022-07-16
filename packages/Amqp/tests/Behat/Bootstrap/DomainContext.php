@@ -103,8 +103,10 @@ class DomainContext extends TestCase implements Context
         $amqpConnectionFactory = new AmqpConnectionFactory(['dsn' => "amqp://{$host}:5672"]);
         $serviceConfiguration = ServiceConfiguration::createWithDefaults()
             ->withNamespaces([$namespace])
-            ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString());
+            ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString())
+            ->withSkippedModulePackageNames(['jmsConverter', 'dbal', 'eventSourcing']);
         MessagingSystemConfiguration::cleanCache($serviceConfiguration->getCacheDirectoryPath());
+
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
             __DIR__ . '/../../../../',
             InMemoryPSRContainer::createFromObjects(array_merge($objects, [$amqpConnectionFactory])),
@@ -190,6 +192,7 @@ class DomainContext extends TestCase implements Context
                 ServiceConfiguration::createWithDefaults()
                     ->withNamespaces([$namespace])
                     ->withServiceName($serviceName)
+                    ->withSkippedModulePackageNames(['jmsConverter', 'dbal', 'eventSourcing'])
                     ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString()),
                 [],
                 false

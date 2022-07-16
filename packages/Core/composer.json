@@ -50,5 +50,14 @@
     "branch-alias": {
       "dev-main": "2.0.0.x-dev"
     }
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "wikimedia/composer-merge-plugin": true
+    }
+  },
+  "conflict": {
+    "ecotone/ecotone": "*"
   }
 }

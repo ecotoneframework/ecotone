@@ -36,9 +36,6 @@
     "wikimedia/composer-merge-plugin": "^2.0"
   },
   "config": {
-    "preferred-install": {
-      "*": "dist"
-    },
     "sort-packages": true,
     "allow-plugins": {
       "wikimedia/composer-merge-plugin": true
@@ -58,8 +55,6 @@
       "Ecotone\\SymfonyBundle\\App\\": "App"
     }
   },
-  "replace": {},
-  "conflict": {},
   "scripts": {
     "tests:phpstan": "vendor/bin/phpstan",
     "tests:phpunit": ["vendor/bin/phpunit"],

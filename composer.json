@@ -92,7 +92,8 @@
         "ramsey/uuid": "^4.0",
         "symfony/cache": "^5.4|^6.1",
         "symfony/console": "^5.4|^6.0",
-        "symfony/framework-bundle": "^5.4|^6.0"
+        "symfony/framework-bundle": "^5.4|^6.0",
+        "wikimedia/composer-merge-plugin": "^2.0"
     },
     "require-dev": {
         "behat/behat": "^3.10",
@@ -147,5 +148,10 @@
         ]
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "wikimedia/composer-merge-plugin": true
+        }
+    }
 }

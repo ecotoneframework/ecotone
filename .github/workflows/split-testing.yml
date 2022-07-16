@@ -88,9 +88,9 @@ jobs:
         run: echo "${{ matrix.package.path }} - ${{ matrix.package.name }}"
 
       - name: Install dependencies
-        run: composer update --no-interaction
+        run: composer global require wikimedia/composer-merge-plugin && composer update --no-interaction
         working-directory: ${{ matrix.package.directory }}
 
-      - name: Test PHPStan
+      - name: Run tests
         run: composer tests:ci
         working-directory: ${{ matrix.package.directory }}

@@ -32,8 +32,7 @@
     "behat/behat": "^3.10",
     "friends-of-behat/symfony-extension": "^2.1",
     "phpstan/phpstan": "^1.8",
-    "phpunit/phpunit": "^9.5",
-    "wikimedia/composer-merge-plugin": "^2.0"
+    "phpunit/phpunit": "^9.5"
   },
   "config": {
     "sort-packages": true,

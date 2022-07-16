@@ -88,7 +88,7 @@ jobs:
         run: echo "${{ matrix.package.path }} - ${{ matrix.package.name }}"
 
       - name: Install dependencies
-        run: composer update --no-interaction
+        run: ls -l ../ && composer update --no-interaction
         working-directory: ${{ matrix.package.directory }}
 
       - name: Test PHPStan

@@ -89,7 +89,7 @@ jobs:
         working-directory: ${{ matrix.package.directory }}
 
       - name: Install dependencies
-        run: composer update --no-interaction
+        run: composer require wikimedia/composer-merge-plugin && composer update --no-interaction
         working-directory: ${{ matrix.package.directory }}
 
       - name: Run tests

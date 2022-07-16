@@ -24,9 +24,10 @@
   "description": "Extends Ecotone with Symfony integration",
   "require": {
     "ecotone/core": "2.0.0.x-dev",
+    "laminas/laminas-zendframework-bridge": "^1.0.0",
     "symfony/console": "^5.4|^6.0",
     "symfony/framework-bundle": "^5.4|^6.0",
-    "laminas/laminas-zendframework-bridge": "^1.0.0"
+    "wikimedia/composer-merge-plugin": "^2.0"
   },
   "require-dev": {
     "behat/behat": "^3.10",

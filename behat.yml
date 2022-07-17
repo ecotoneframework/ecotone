@@ -35,13 +35,13 @@ symfony:
         class: Ecotone\SymfonyBundle\App\Kernel
         environment: ~
         debug: ~
-    translation:
-      locale: en
-    formatters:
-      pretty: true
-    suites:
-      symfony:
-        paths:
-          - packages/Symfony/tests/Behat/features
-        contexts:
-          - Test\Ecotone\Symfony\Behat\Bootstrap\DomainContext
+  translation:
+    locale: en
+  formatters:
+    pretty: true
+  suites:
+    symfony:
+      paths:
+        - packages/Symfony/tests/Behat/features
+      contexts:
+        - Test\Ecotone\Symfony\Behat\Bootstrap\DomainContext

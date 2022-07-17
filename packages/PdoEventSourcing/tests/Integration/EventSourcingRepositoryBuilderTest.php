@@ -17,9 +17,9 @@ use Ecotone\Modelling\SaveAggregateService;
 use Ecotone\Modelling\SnapshotEvent;
 use Ramsey\Uuid\Uuid;
 use Test\Ecotone\EventSourcing\EventSourcingMessagingTest;
+use Test\Ecotone\EventSourcing\Fixture\Ticket\Event\AssignedPersonWasChanged;
 use Test\Ecotone\EventSourcing\Fixture\Ticket\Event\TicketWasRegistered;
 use Test\Ecotone\EventSourcing\Fixture\Ticket\Ticket;
-use Test\Ecotone\Modelling\Fixture\Ticket\WorkerWasAssignedEvent;
 
 /**
  * @internal
@@ -76,7 +76,7 @@ class EventSourcingRepositoryBuilderTest extends EventSourcingMessagingTest
             'ticketId' => $ticketId,
             'ticketType' => 'standard',
         ];
-        $workerWasAssigned = new WorkerWasAssignedEvent($ticketId, 100);
+        $workerWasAssigned = new AssignedPersonWasChanged($ticketId, 100);
         $workerWasAssignedAsArray = [
             'ticketId' => $ticketId,
             'assignedWorkerId' => 100,
@@ -123,7 +123,7 @@ class EventSourcingRepositoryBuilderTest extends EventSourcingMessagingTest
             'ticketId' => $ticketId,
             'ticketType' => 'standard',
         ];
-        $workerWasAssigned = new WorkerWasAssignedEvent($ticketId, 100);
+        $workerWasAssigned = new AssignedPersonWasChanged($ticketId, 100);
         $workerWasAssignedAsArray = [
             'ticketId' => $ticketId,
             'assignedWorkerId' => 100,

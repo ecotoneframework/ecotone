@@ -92,7 +92,7 @@ jobs:
         run: composer update --no-interaction -vvv
         working-directory: ${{ matrix.package.directory }}
         env:
-          COMPOSER_ROOT_VERSION: 'main'
+          COMPOSER_ROOT_VERSION: 'dev-main'
 
       - name: Run tests
         run: composer tests:ci

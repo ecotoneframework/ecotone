@@ -11,6 +11,7 @@ use Ecotone\AnnotationFinder\ConfigurationException;
 use Ecotone\AnnotationFinder\FileSystem\AutoloadFileNamespaceParser;
 use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
 use Ecotone\AnnotationFinder\FileSystem\InMemoryAutoloadNamespaceParser;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\EndpointAnnotationExample;
@@ -96,29 +97,17 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
 
     public function test_throwing_exception_if_autoload_not_found()
     {
-        $gatewayAnnotation = new SomeGatewayExample();
-        $messageEndpoint   = new MessageEndpoint();
-        $this->assertEquals(
+        $this->expectException(InvalidArgumentException::class);
+        
+        new FileSystemAnnotationFinder(
+            $this->getAnnotationResolver(),
+            new AutoloadFileNamespaceParser(),
+            sys_get_temp_dir(),
             [
-                AnnotatedDefinition::create(
-                    $messageEndpoint,
-                    $gatewayAnnotation,
-                    GatewayWithReplyChannelExample::class,
-                    'buy',
-                    [$messageEndpoint],
-                    [$gatewayAnnotation]
-                ),
+                $this->getAnnotationNamespacePrefix() . '\\MessageEndpoint\\Gateway\\FileSystem'
             ],
-            (new FileSystemAnnotationFinder(
-                $this->getAnnotationResolver(),
-                new AutoloadFileNamespaceParser(),
-                sys_get_temp_dir(),
-                [
-                    $this->getAnnotationNamespacePrefix() . '\\MessageEndpoint\\Gateway\\FileSystem'
-                ],
-                'prod',
-                ''
-            ))->findCombined(MessageEndpoint::class, SomeGatewayExample::class)
+            'prod',
+            ''
         );
     }
 

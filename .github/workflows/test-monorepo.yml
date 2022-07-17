@@ -1,14 +1,15 @@
-name: Ecotone Framework
+name: 'Ecotone Framework'
 
 on: [push, pull_request]
 
 jobs:
   run:
+    name: "Testing Monorepo"
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
         operating-system: [ ubuntu-latest ]
-        php-versions: [ '8.0', '8.1' ]
+        php-versions: [ '8.1' ]
         stability: [prefer-lowest, prefer-stable]
     services:
       rabbitmq:
@@ -54,21 +55,18 @@ jobs:
         php-version: ${{ matrix.php-versions }}
 
     - uses: actions/checkout@v2
-    
+
     - name: Validate composer.json and composer.lock
       run: composer validate --strict
-    
-#    - name: Cache Composer packages
-#      id: composer-cache
-#      uses: actions/cache@v2
-#      with:
-#        path: vendor
-#        key: ${{ runner.os }}-php-${{ matrix.php-versions }}-${{ matrix.stability }}-${{ hashFiles('**/composer.lock') }}
-#        restore-keys: |
-#          ${{ runner.os }}-php-${{ matrix.php-versions }}-${{ matrix.stability }}-
 
     - name: Install dependencies
       run: composer update --${{ matrix.stability }} --prefer-dist --no-interaction
+
+    - name: Validate cross package versions
+      run: vendor/bin/monorepo-builder validate
+
+    - name: Test PHPStan
+      run: vendor/bin/phpstan
 
     - name: Test PHPUnit on Postgres
       run: vendor/bin/phpunit
@@ -89,6 +87,3 @@ jobs:
       run: vendor/bin/behat -vvv
       env:
         DATABASE_DSN: mysql://ecotone:secret@127.0.0.1:3306/ecotone
-
-    - name: Test PHPStan
-      run: vendor/bin/phpstan

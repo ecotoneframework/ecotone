@@ -1,4 +1,4 @@
-name: 'Split Packages'
+name: 'Ecotone Framework'
 
 on:
   push:
@@ -52,20 +52,20 @@ jobs:
         run: echo "${{ matrix.package.path }} - ${{ matrix.package.name }}"
 
       # no tag
-#      -
-#        if: "!startsWith(github.ref, 'refs/tags/')"
-#        uses: "symplify/monorepo-split-github-action@2.1"
-#        with:
-#          # ↓ split "packages/easy-coding-standard" directory
-#          package_directory: 'packages/${{ matrix.package.path }}'
-#
-#          # ↓ into https://github.com/symplify/easy-coding-standard repository
-#          repository_organization: 'ecotoneframework'
-#          repository_name: '${{ matrix.package.name }}'
-#
-#          # ↓ the user signed under the split commit
-#          user_name: "Dariusz Gafka"
-#          user_email: "dgafka.mail@gmail.com"
+      -
+        if: "!startsWith(github.ref, 'refs/tags/')"
+        uses: "symplify/monorepo-split-github-action@2.1"
+        with:
+          # ↓ split "packages/easy-coding-standard" directory
+          package_directory: 'packages/${{ matrix.package.path }}'
+
+          # ↓ into https://github.com/symplify/easy-coding-standard repository
+          repository_organization: 'ecotoneframework'
+          repository_name: '${{ matrix.package.name }}'
+
+          # ↓ the user signed under the split commit
+          user_name: "Dariusz Gafka"
+          user_email: "dgafka.mail@gmail.com"
 
       # with tag
 #      -

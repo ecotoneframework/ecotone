@@ -11,6 +11,7 @@ use Ecotone\AnnotationFinder\ConfigurationException;
 use Ecotone\AnnotationFinder\FileSystem\AutoloadFileNamespaceParser;
 use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
 use Ecotone\AnnotationFinder\FileSystem\InMemoryAutoloadNamespaceParser;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\EndpointAnnotationExample;
@@ -63,6 +64,50 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
             ],
             $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . '\\MessageEndpoint\\Gateway\\FileSystem', 'prod')
                 ->findCombined(MessageEndpoint::class, SomeGatewayExample::class)
+        );
+    }
+
+    public function test_moving_back_in_catalog_in_case_autoload_was_not_found()
+    {
+        $gatewayAnnotation = new SomeGatewayExample();
+        $messageEndpoint   = new MessageEndpoint();
+        $this->assertEquals(
+            [
+                AnnotatedDefinition::create(
+                    $messageEndpoint,
+                    $gatewayAnnotation,
+                    GatewayWithReplyChannelExample::class,
+                    'buy',
+                    [$messageEndpoint],
+                    [$gatewayAnnotation]
+                ),
+            ],
+            (new FileSystemAnnotationFinder(
+                $this->getAnnotationResolver(),
+                new AutoloadFileNamespaceParser(),
+                self::ROOT_DIR . DIRECTORY_SEPARATOR . 'tests',
+                [
+                    $this->getAnnotationNamespacePrefix() . '\\MessageEndpoint\\Gateway\\FileSystem',
+                ],
+                'prod',
+                ''
+            ))->findCombined(MessageEndpoint::class, SomeGatewayExample::class)
+        );
+    }
+
+    public function test_throwing_exception_if_autoload_not_found()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new FileSystemAnnotationFinder(
+            $this->getAnnotationResolver(),
+            new AutoloadFileNamespaceParser(),
+            sys_get_temp_dir(),
+            [
+                $this->getAnnotationNamespacePrefix() . '\\MessageEndpoint\\Gateway\\FileSystem',
+            ],
+            'prod',
+            ''
         );
     }
 
@@ -338,7 +383,7 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
 
     private function createAnnotationRegistrationService(string $namespace, string $environmentName): AnnotationFinder
     {
-        $fileSystemAnnotationRegistrationService = new FileSystemAnnotationFinder(
+        return new FileSystemAnnotationFinder(
             $this->getAnnotationResolver(),
             new AutoloadFileNamespaceParser(),
             self::ROOT_DIR,
@@ -348,7 +393,5 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
             $environmentName,
             ''
         );
-
-        return $fileSystemAnnotationRegistrationService;
     }
 }

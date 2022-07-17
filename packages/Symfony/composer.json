@@ -23,23 +23,23 @@
   ],
   "description": "Extends Ecotone with Symfony integration",
   "require": {
-    "php": "^8.0",
-    "ecotone/core": "2.0.0-dev",
+    "ecotone/core": "2.0.0.x-dev",
+    "laminas/laminas-zendframework-bridge": "^1.0.0",
     "symfony/console": "^5.4|^6.0",
-    "symfony/framework-bundle": "^5.4|^6.0",
-    "laminas/laminas-zendframework-bridge": "^1.0.0"
+    "symfony/framework-bundle": "^5.4|^6.0"
   },
   "require-dev": {
-    "phpunit/phpunit": "^9.5",
     "behat/behat": "^3.10",
     "friends-of-behat/symfony-extension": "^2.1",
-    "phpstan/phpstan": "^1.8"
+    "phpstan/phpstan": "^1.8",
+    "phpunit/phpunit": "^9.5",
+    "wikimedia/composer-merge-plugin": "^2.0"
   },
   "config": {
-    "preferred-install": {
-      "*": "dist"
-    },
-    "sort-packages": true
+    "sort-packages": true,
+    "allow-plugins": {
+      "wikimedia/composer-merge-plugin": true
+    }
   },
   "autoload": {
     "psr-4": {
@@ -55,12 +55,24 @@
       "Ecotone\\SymfonyBundle\\App\\": "App"
     }
   },
-  "replace": {},
-  "scripts": {},
-  "conflict": {},
+  "scripts": {
+    "tests:phpstan": "vendor/bin/phpstan",
+    "tests:phpunit": ["vendor/bin/phpunit"],
+    "tests:behat": ["vendor/bin/behat -vvv"],
+    "tests:ci": [
+      "@tests:phpstan",
+      "@tests:phpunit",
+      "@tests:behat"
+    ]
+  },
   "extra": {
     "branch-alias": {
-      "dev-master": "1.32.2-dev"
+      "dev-main": "2.0.0.x-dev"
+    },
+    "merge-plugin": {
+      "include": [
+        "../config.json"
+      ]
     }
   }
 }

@@ -32,8 +32,7 @@
     }
   },
   "require": {
-    "php": "^8.0",
-    "ecotone/core": "2.0.0-dev",
+    "ecotone/core": "2.0.0.x-dev",
     "laravel/framework": "^9.0"
   },
   "require-dev": {
@@ -41,7 +40,8 @@
     "behat/behat": "^3.10",
     "guzzlehttp/psr7": "^2.0",
     "phpstan/phpstan": "^1.8",
-    "orchestra/testbench": "^7.6"
+    "orchestra/testbench": "^7.6",
+    "wikimedia/composer-merge-plugin": "^2.0"
   },
   "extra": {
     "laravel": {
@@ -50,7 +50,25 @@
       ]
     },
     "branch-alias": {
-      "dev-master": "1.32.2-dev"
+      "dev-main": "2.0.0.x-dev"
+    },
+    "merge-plugin": {
+      "include": [
+        "../config.json"
+      ]
+    }
+  },
+  "scripts": {
+    "tests:phpstan": "vendor/bin/phpstan",
+    "tests:phpunit": ["vendor/bin/phpunit"],
+    "tests:ci": [
+      "@tests:phpstan",
+      "@tests:phpunit"
+    ]
+  },
+  "config": {
+    "allow-plugins": {
+      "wikimedia/composer-merge-plugin": true
     }
   }
 }

@@ -8,6 +8,7 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 class ChannelConfiguration
 {
+    public const ERROR_CHANNEL = 'errorChannel';
     public const QUEUE_NAME = 'orders';
 
     #[ServiceContext]
@@ -19,7 +20,7 @@ class ChannelConfiguration
             PollingMetadata::create(self::QUEUE_NAME)
                 ->setExecutionTimeLimitInMilliseconds(1)
                 ->setHandledMessageLimit(1)
-                ->setErrorChannelName('errorChannel'),
+                ->setErrorChannelName(self::ERROR_CHANNEL),
         ];
     }
 }

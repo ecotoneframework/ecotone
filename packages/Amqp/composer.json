@@ -38,7 +38,7 @@
   },
   "require": {
     "ext-amqp": "*",
-    "ecotone/enqueue": "2.0.0-dev",
+    "ecotone/enqueue": "2.0.0.x-dev",
     "enqueue/amqp-ext": "^0.10.4",
     "enqueue/dsn": "^0.10.4",
     "enqueue/enqueue": "^0.10.0"
@@ -47,11 +47,32 @@
     "phpunit/phpunit": "^9.5",
     "behat/behat": "^3.10",
     "phpstan/phpstan": "^1.8",
-    "doctrine/annotations": "^1.13"
+    "doctrine/annotations": "^1.13",
+    "wikimedia/composer-merge-plugin": "^2.0"
+  },
+  "scripts": {
+    "tests:phpstan": "vendor/bin/phpstan",
+    "tests:phpunit": ["vendor/bin/phpunit"],
+    "tests:behat": ["vendor/bin/behat -vvv"],
+    "tests:ci": [
+      "@tests:phpstan",
+      "@tests:phpunit",
+      "@tests:behat"
+    ]
   },
   "extra": {
     "branch-alias": {
-      "dev-master": "1.32.2-dev"
+      "dev-main": "2.0.0.x-dev"
+    },
+    "merge-plugin": {
+      "include": [
+        "../config.json"
+      ]
+    }
+  },
+  "config": {
+    "allow-plugins": {
+      "wikimedia/composer-merge-plugin": true
     }
   }
 }

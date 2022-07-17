@@ -22,10 +22,10 @@ use Test\Ecotone\Amqp\Fixture\DistributedCommandBus\Receiver\TicketServiceMessag
 use Test\Ecotone\Amqp\Fixture\DistributedCommandBus\Receiver\TicketServiceReceiver;
 use Test\Ecotone\Amqp\Fixture\ErrorChannel\ErrorConfigurationContext;
 use Test\Ecotone\Amqp\Fixture\FailureTransactionWithFatalError\ChannelConfiguration;
+use Test\Ecotone\Amqp\Fixture\Order\OrderErrorHandler;
 use Test\Ecotone\Amqp\Fixture\Order\OrderService;
 use Test\Ecotone\Amqp\Fixture\Shop\MessagingConfiguration;
 use Test\Ecotone\Amqp\Fixture\Shop\ShoppingCart;
-use Test\Ecotone\Modelling\Fixture\OrderAggregate\OrderErrorHandler;
 
 /**
  * Defines application features from the specific context.
@@ -108,7 +108,7 @@ class DomainContext extends TestCase implements Context
         MessagingSystemConfiguration::cleanCache($serviceConfiguration->getCacheDirectoryPath());
 
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
-            __DIR__ . '/../../../../',
+            __DIR__ . '/../../../',
             InMemoryPSRContainer::createFromObjects(array_merge($objects, [$amqpConnectionFactory])),
             $serviceConfiguration,
             [],
@@ -187,7 +187,7 @@ class DomainContext extends TestCase implements Context
 
             $amqpConnectionFactory         = new AmqpConnectionFactory(['dsn' => "amqp://{$host}:5672"]);
             self::$messagingSystems[$serviceName] = EcotoneLiteConfiguration::createWithConfiguration(
-                __DIR__ . '/../../../../',
+                __DIR__ . '/../../../',
                 InMemoryPSRContainer::createFromObjects(array_merge($objects, [$amqpConnectionFactory])),
                 ServiceConfiguration::createWithDefaults()
                     ->withNamespaces([$namespace])

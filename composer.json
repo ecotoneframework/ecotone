@@ -74,6 +74,7 @@
         }
     },
     "require": {
+        "php": "^8.1",
         "doctrine/dbal": "^3.3.7",
         "doctrine/persistence": "^2.5",
         "enqueue/amqp-ext": "^0.10.4",
@@ -85,14 +86,14 @@
         "jms/serializer": "^3.17",
         "laminas/laminas-zendframework-bridge": "^1.0.0",
         "laravel/framework": "^9.0",
-        "php": "^8.0",
         "prooph/pdo-event-store": "^1.14.2",
-        "psr/log": "^1.0|^2.0|^3.0",
+        "psr/log": "^2.0|^3.0",
         "queue-interop/queue-interop": "^0.8",
         "ramsey/uuid": "^4.0",
         "symfony/cache": "^5.4|^6.1",
         "symfony/console": "^5.4|^6.0",
-        "symfony/framework-bundle": "^5.4|^6.0"
+        "symfony/framework-bundle": "^5.4|^6.0",
+        "wikimedia/composer-merge-plugin": "^2.0"
     },
     "require-dev": {
         "behat/behat": "^3.10",
@@ -128,14 +129,14 @@
     },
     "scripts": {
         "tests:phpstan": "vendor/bin/phpstan",
-        "tests:phpunit-postgres": "vendor/bin/phpunit",
-        "tests:phpunit-mysql": "DATABASE_DSN=mysql://ecotone:secret@database-mysql/ecotone vendor/bin/phpunit",
+        "tests:phpunit-postgres": "DATABASE_DSN=pgsql://ecotone:secret@localhost:5432/ecotone vendor/bin/phpunit",
+        "tests:phpunit-mysql": "DATABASE_DSN=mysql://ecotone:secret@127.0.0.1:3306/ecotone vendor/bin/phpunit",
         "tests:phpunit": [
             "@tests:phpunit-postgres",
             "@tests:phpunit-mysql"
         ],
-        "tests:behat-postgres": "vendor/bin/behat",
-        "tests:behat-mysql": "DATABASE_DSN=mysql://ecotone:secret@database-mysql/ecotone vendor/bin/behat",
+        "tests:behat-postgres": "DATABASE_DSN=pgsql://ecotone:secret@localhost:5432/ecotone vendor/bin/behat -p symfony -vvv",
+        "tests:behat-mysql": "DATABASE_DSN=mysql://ecotone:secret@127.0.0.1:3306/ecotone vendor/bin/behat -p symfony -vvv",
         "tests:behat": [
             "@tests:behat-postgres",
             "@tests:behat-mysql"
@@ -147,5 +148,10 @@
         ]
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "wikimedia/composer-merge-plugin": true
+        }
+    }
 }

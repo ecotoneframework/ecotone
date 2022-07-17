@@ -16,10 +16,6 @@ class DomainContext implements Context
      */
     private $carService;
 
-    /**
-     * DomainContext constructor.
-     * @param CarService $carService
-     */
     public function __construct(CarService $carService)
     {
         $this->carService = $carService;

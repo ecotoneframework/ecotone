@@ -25,8 +25,8 @@
     }
   },
   "require": {
-    "php": "^8.0",
-    "psr/log": "^1.0|^2.0|^3.0",
+    "php": "^8.1",
+    "psr/log": "^2.0|^3.0",
     "ramsey/uuid": "^4.0",
     "friendsofphp/proxy-manager-lts": "^1.0.12"
   },
@@ -35,5 +35,29 @@
     "behat/behat": "^3.10",
     "phpstan/phpstan": "^1.8",
     "symfony/expression-language": "^6.0"
+  },
+  "scripts": {
+    "tests:phpstan": "vendor/bin/phpstan",
+    "tests:phpunit": ["vendor/bin/phpunit"],
+    "tests:behat": ["vendor/bin/behat -vvv"],
+    "tests:ci": [
+      "@tests:phpstan",
+      "@tests:phpunit",
+      "@tests:behat"
+    ]
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-main": "2.0.0.x-dev"
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "wikimedia/composer-merge-plugin": true
+    }
+  },
+  "conflict": {
+    "ecotone/ecotone": "*"
   }
 }

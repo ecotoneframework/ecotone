@@ -15,6 +15,7 @@ services:
     environment:
       COMPOSER_HOME: /data/app
       COMPOSE_HTTP_TIMEOUT: 9999
+      COMPOSER_ROOT_VERSION: 'dev-main'
       RABBIT_HOST: "rabbitmq"
       DATABASE_DSN: pgsql://ecotone:secret@database:5432/ecotone
   app_8_0:
@@ -31,6 +32,7 @@ services:
     environment:
       COMPOSER_HOME: /data/app
       COMPOSE_HTTP_TIMEOUT: 9999
+      COMPOSER_ROOT_VERSION: 'dev-main'
       RABBIT_HOST: "rabbitmq"
       DATABASE_DSN: pgsql://ecotone:secret@database:5432/ecotone
   database:

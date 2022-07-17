@@ -144,19 +144,6 @@ class EcotoneEventStoreProophWrapper implements EventStore
         return $events;
     }
 
-    public function loadReverse(string $streamName, int $fromNumber = null, int $count = null, MetadataMatcher $metadataMatcher = null, bool $deserialize = true): array
-    {
-        $streamEvents = $this->eventStore->loadReverse(new StreamName($streamName), $fromNumber, $count, $metadataMatcher);
-        if (! $streamEvents->valid()) {
-            $streamEvents = new ArrayIterator([]);
-        }
-
-        return $this->convertToEcotoneEvents(
-            $streamEvents,
-            $deserialize
-        );
-    }
-
     public function fetchCategoryNames(?string $filter, int $limit = 20, int $offset = 0): array
     {
         return $this->eventStore->fetchCategoryNames($filter, $limit, $offset);

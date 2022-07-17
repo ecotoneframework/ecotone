@@ -394,14 +394,6 @@ class EventSourcingModule extends NoExternalConfigurationModule
         );
 
         $this->registerEventStoreAction(
-            'loadReverse',
-            [HeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName'), HeaderBuilder::createOptional('fromNumber', 'ecotone.eventSourcing.eventStore.fromNumber'), HeaderBuilder::createOptional('count', 'ecotone.eventSourcing.eventStore.count'), HeaderBuilder::createOptional('metadataMatcher', 'ecotone.eventSourcing.eventStore.metadataMatcher'), HeaderBuilder::create('deserialize', 'ecotone.eventSourcing.eventStore.deserialize')],
-            [GatewayHeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName'), GatewayHeaderBuilder::create('fromNumber', 'ecotone.eventSourcing.eventStore.fromNumber'), GatewayHeaderBuilder::create('count', 'ecotone.eventSourcing.eventStore.count'), GatewayHeaderBuilder::create('metadataMatcher', 'ecotone.eventSourcing.eventStore.metadataMatcher'), GatewayHeaderBuilder::create('deserialize', 'ecotone.eventSourcing.eventStore.deserialize')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerEventStoreAction(
             'fetchCategoryNames',
             [HeaderBuilder::createOptional('filter', 'ecotone.eventSourcing.eventStore.filter'), HeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), HeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
             [GatewayHeaderBuilder::create('filter', 'ecotone.eventSourcing.eventStore.filter'), GatewayHeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), GatewayHeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],

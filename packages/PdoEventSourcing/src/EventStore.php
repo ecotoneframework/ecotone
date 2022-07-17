@@ -32,17 +32,6 @@ interface EventStore
     ): iterable;
 
     /**
-     * @return Event[]
-     */
-    public function loadReverse(
-        string $streamName,
-        int $fromNumber = null,
-        int $count = null,
-        MetadataMatcher $metadataMatcher = null,
-        bool $deserialize = true
-    ): iterable;
-
-    /**
      * @return string[]
      */
     public function fetchCategoryNames(?string $filter, int $limit = 20, int $offset = 0): array;

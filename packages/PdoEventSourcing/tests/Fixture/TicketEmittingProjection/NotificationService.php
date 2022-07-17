@@ -22,9 +22,9 @@ final class NotificationService
         }
 
         /** @var Event[] $events */
-        $events = $eventStore->loadReverse($projectionStreamName, count: 1);
+        $events = $eventStore->load($projectionStreamName);
 
-        return $events[0]->getPayload()->ticketId;
+        return \end($events)->getPayload()->ticketId;
     }
 
     #[EventHandler]

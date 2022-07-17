@@ -400,16 +400,6 @@ class EventSourcingModule extends NoExternalConfigurationModule
 
     private function registerProjectionManager(Configuration $configuration, EventSourcingConfiguration $eventSourcingConfiguration): void
     {
-        $this->registerProjectionManagerAction('createQuery', [], [], $eventSourcingConfiguration, $configuration);
-
-        $this->registerProjectionManagerAction(
-            'createProjection',
-            [HeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name'), HeaderBuilder::create('options', 'ecotone.eventSourcing.manager.options')],
-            [GatewayHeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name'), GatewayHeaderBuilder::create('options', 'ecotone.eventSourcing.manager.options')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
         $this->registerProjectionManagerAction(
             'createReadModelProjection',
             [HeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name'), PayloadBuilder::create('readModel'), HeaderBuilder::create('options', 'ecotone.eventSourcing.manager.options')],

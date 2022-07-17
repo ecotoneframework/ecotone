@@ -11,13 +11,6 @@ use Prooph\EventStore\Projection\ReadModelProjector;
 
 interface ProjectionManager
 {
-    public function createQuery(): Query;
-
-    public function createProjection(
-        string $name,
-        array $options = []
-    ): Projector;
-
     public function createReadModelProjection(
         string $name,
         ReadModel $readModel,

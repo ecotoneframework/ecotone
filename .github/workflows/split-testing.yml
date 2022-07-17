@@ -91,6 +91,8 @@ jobs:
       - name: Install dependencies
         run: composer update --no-interaction -vvv
         working-directory: ${{ matrix.package.directory }}
+        env:
+          COMPOSER_ROOT_VERSION: 'main'
 
       - name: Run tests
         run: composer tests:ci

@@ -17,7 +17,7 @@ final class NotificationService
     public function getNotifications(#[Reference] EventStore $eventStore): ?string
     {
         $projectionStreamName = LazyProophProjectionManager::getProjectionStreamName(InProgressTicketList::NAME);
-        if (! $eventStore->fetchStreamNames($projectionStreamName, null)) {
+        if (! $eventStore->hasStream($projectionStreamName)) {
             return null;
         }
 

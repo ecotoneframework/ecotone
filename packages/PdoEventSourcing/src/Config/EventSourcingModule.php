@@ -402,22 +402,6 @@ class EventSourcingModule extends NoExternalConfigurationModule
         );
 
         $this->registerEventStoreAction(
-            'fetchStreamNames',
-            [HeaderBuilder::createOptional('filter', 'ecotone.eventSourcing.eventStore.filter'), HeaderBuilder::createOptional('metadataMatcher', 'ecotone.eventSourcing.eventStore.metadataMatcher'), HeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), HeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            [GatewayHeaderBuilder::create('filter', 'ecotone.eventSourcing.eventStore.filter'), GatewayHeaderBuilder::create('metadataMatcher', 'ecotone.eventSourcing.eventStore.metadataMatcher'), GatewayHeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), GatewayHeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerEventStoreAction(
-            'fetchStreamNamesRegex',
-            [HeaderBuilder::createOptional('filter', 'ecotone.eventSourcing.eventStore.filter'), HeaderBuilder::createOptional('metadataMatcher', 'ecotone.eventSourcing.eventStore.metadataMatcher'), HeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), HeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            [GatewayHeaderBuilder::create('filter', 'ecotone.eventSourcing.eventStore.filter'), GatewayHeaderBuilder::create('metadataMatcher', 'ecotone.eventSourcing.eventStore.metadataMatcher'), GatewayHeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), GatewayHeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerEventStoreAction(
             'fetchCategoryNames',
             [HeaderBuilder::createOptional('filter', 'ecotone.eventSourcing.eventStore.filter'), HeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), HeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
             [GatewayHeaderBuilder::create('filter', 'ecotone.eventSourcing.eventStore.filter'), GatewayHeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), GatewayHeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],

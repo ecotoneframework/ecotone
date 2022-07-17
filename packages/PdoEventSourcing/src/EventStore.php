@@ -45,26 +45,6 @@ interface EventStore
     /**
      * @return string[]
      */
-    public function fetchStreamNames(
-        ?string $filter,
-        ?MetadataMatcher $metadataMatcher,
-        int $limit = 20,
-        int $offset = 0
-    ): array;
-
-    /**
-     * @return string[]
-     */
-    public function fetchStreamNamesRegex(
-        string $filter,
-        ?MetadataMatcher $metadataMatcher,
-        int $limit = 20,
-        int $offset = 0
-    ): array;
-
-    /**
-     * @return string[]
-     */
     public function fetchCategoryNames(?string $filter, int $limit = 20, int $offset = 0): array;
 
     /**

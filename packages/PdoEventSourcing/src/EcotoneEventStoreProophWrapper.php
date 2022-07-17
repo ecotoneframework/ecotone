@@ -157,16 +157,6 @@ class EcotoneEventStoreProophWrapper implements EventStore
         );
     }
 
-    public function fetchStreamNames(?string $filter, ?MetadataMatcher $metadataMatcher, int $limit = 20, int $offset = 0): array
-    {
-        return $this->eventStore->fetchStreamNames($filter, $metadataMatcher, $limit, $offset);
-    }
-
-    public function fetchStreamNamesRegex(string $filter, ?MetadataMatcher $metadataMatcher, int $limit = 20, int $offset = 0): array
-    {
-        return $this->eventStore->fetchStreamNamesRegex($filter, $metadataMatcher, $limit, $offset);
-    }
-
     public function fetchCategoryNames(?string $filter, int $limit = 20, int $offset = 0): array
     {
         return $this->eventStore->fetchCategoryNames($filter, $limit, $offset);

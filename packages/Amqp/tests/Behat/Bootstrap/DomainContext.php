@@ -187,7 +187,7 @@ class DomainContext extends TestCase implements Context
 
             $amqpConnectionFactory         = new AmqpConnectionFactory(['dsn' => "amqp://{$host}:5672"]);
             self::$messagingSystems[$serviceName] = EcotoneLiteConfiguration::createWithConfiguration(
-                __DIR__ . '/../../../../',
+                __DIR__ . '/../../../',
                 InMemoryPSRContainer::createFromObjects(array_merge($objects, [$amqpConnectionFactory])),
                 ServiceConfiguration::createWithDefaults()
                     ->withNamespaces([$namespace])

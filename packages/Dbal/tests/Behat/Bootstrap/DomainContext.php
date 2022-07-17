@@ -99,7 +99,7 @@ class DomainContext extends TestCase implements Context
             $this->deleteFromTableExists(DbalDocumentStore::ECOTONE_DOCUMENT_STORE, $connection);
         }
 
-        $rootProjectDirectoryPath = __DIR__ . '/../../../../';
+        $rootProjectDirectoryPath = __DIR__ . '/../../../';
         $serviceConfiguration = ServiceConfiguration::createWithDefaults()
             ->withNamespaces([$namespace])
             ->withCacheDirectoryPath(sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString())

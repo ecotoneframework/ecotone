@@ -5,5 +5,5 @@ default:
         pretty: true
     suites:
       default:
-          paths:    [ tests/EventSourcing/Behat/features ]
+          paths:    [ tests/Behat/features ]
           contexts: [ Test\Ecotone\EventSourcing\Behat\Bootstrap\DomainContext ]

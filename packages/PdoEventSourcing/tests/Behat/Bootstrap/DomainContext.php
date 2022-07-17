@@ -290,7 +290,7 @@ class DomainContext extends TestCase implements Context
         }
 
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(
-            __DIR__ . '/../../../../',
+            __DIR__ . '/../../../',
             InMemoryPSRContainer::createFromObjects(
                 array_merge(
                     $objects,

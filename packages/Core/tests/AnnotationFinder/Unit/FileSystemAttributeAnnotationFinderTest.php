@@ -84,9 +84,9 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
             (new FileSystemAnnotationFinder(
                 $this->getAnnotationResolver(),
                 new AutoloadFileNamespaceParser(),
-                self::ROOT_DIR . DIRECTORY_SEPARATOR . "tests",
+                self::ROOT_DIR . DIRECTORY_SEPARATOR . 'tests',
                 [
-                    $this->getAnnotationNamespacePrefix() . '\\MessageEndpoint\\Gateway\\FileSystem'
+                    $this->getAnnotationNamespacePrefix() . '\\MessageEndpoint\\Gateway\\FileSystem',
                 ],
                 'prod',
                 ''
@@ -114,7 +114,7 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
                 new AutoloadFileNamespaceParser(),
                 sys_get_temp_dir(),
                 [
-                    $this->getAnnotationNamespacePrefix() . '\\MessageEndpoint\\Gateway\\FileSystem'
+                    $this->getAnnotationNamespacePrefix() . '\\MessageEndpoint\\Gateway\\FileSystem',
                 ],
                 'prod',
                 ''

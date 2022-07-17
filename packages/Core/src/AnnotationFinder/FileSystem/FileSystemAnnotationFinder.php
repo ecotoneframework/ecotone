@@ -11,7 +11,6 @@ use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\Attribute\Environment;
 use Ecotone\AnnotationFinder\ConfigurationException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
 use InvalidArgumentException;
 
@@ -57,7 +56,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
             /** @var Environment $environment */
             $environment = $this->getAnnotationForClass($classNameWithEnvironment, Environment::class);
 
-            if (!in_array($environmentName, $environment->getNames())) {
+            if (! in_array($environmentName, $environment->getNames())) {
                 $key = array_search($classNameWithEnvironment, $this->registeredClasses);
                 if ($key !== false) {
                     unset($this->registeredClasses[$key]);
@@ -94,11 +93,11 @@ class FileSystemAnnotationFinder implements AnnotationFinder
                 );
 
                 if ($methodAnnotations) {
-                    if (!in_array($environmentName, $methodAnnotations[0]->getNames())) {
+                    if (! in_array($environmentName, $methodAnnotations[0]->getNames())) {
                         $this->bannedEnvironmentClassMethods[$className][$method] = true;
                     }
                 } elseif ($classAnnotations) {
-                    if (!in_array($environmentName, $classAnnotations[0]->getNames())) {
+                    if (! in_array($environmentName, $classAnnotations[0]->getNames())) {
                         $this->bannedEnvironmentClassMethods[$className][$method] = true;
                     }
                 }
@@ -112,7 +111,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         $originalRootProjectDir = $rootProjectDir;
         $rootProjectDir = realpath(rtrim($rootProjectDir, '/'));
 
-        while ($rootProjectDir !== false && !file_exists($rootProjectDir . DIRECTORY_SEPARATOR . '/vendor/autoload.php')) {
+        while ($rootProjectDir !== false && ! file_exists($rootProjectDir . DIRECTORY_SEPARATOR . '/vendor/autoload.php')) {
             if ($rootProjectDir === DIRECTORY_SEPARATOR) {
                 throw \Ecotone\Messaging\Support\InvalidArgumentException::create(sprintf("Can't find autoload file in given path `%s/vendor/autoload.php` and any preceding ones.", $originalRootProjectDir));
             }
@@ -122,7 +121,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
 
         $composerPath = $rootProjectDir . DIRECTORY_SEPARATOR . 'composer.json';
 
-        if ($catalogToLoad && !file_exists($composerPath)) {
+        if ($catalogToLoad && ! file_exists($composerPath)) {
             throw new InvalidArgumentException("Ecotone requires psr-4 or psr-0 compatible autoload. Can't load src, composer.json not found in {$composerPath}");
         }
         $catalogRelatedNamespaces = [];
@@ -137,10 +136,10 @@ class FileSystemAnnotationFinder implements AnnotationFinder
             }
         }
 
-        $namespacesToUse = array_map(fn(string $namespace) => trim($namespace, "\t\n\r\\"), $namespacesToUse);
-        $catalogRelatedNamespaces = array_map(fn(string $namespace) => trim($namespace, "\t\n\r\\"), $catalogRelatedNamespaces);
+        $namespacesToUse = array_map(fn (string $namespace) => trim($namespace, "\t\n\r\\"), $namespacesToUse);
+        $catalogRelatedNamespaces = array_map(fn (string $namespace) => trim($namespace, "\t\n\r\\"), $catalogRelatedNamespaces);
 
-        if (!$catalogRelatedNamespaces && $catalogToLoad && ($namespacesToUse == ['Ecotone'] || $namespacesToUse == [])) {
+        if (! $catalogRelatedNamespaces && $catalogToLoad && ($namespacesToUse == ['Ecotone'] || $namespacesToUse == [])) {
             throw ConfigurationException::create("Ecotone cannot resolve namespaces in {$rootProjectDir}/$catalogToLoad. Please provide namespaces manually via configuration. If you do not know how to do it, read Modules section related to your framework at https://docs.ecotone.tech");
         }
 
@@ -182,7 +181,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
 
     private function getDirContents(string $dir, array &$results = []): array
     {
-        if (!is_dir($dir)) {
+        if (! is_dir($dir)) {
             return [];
         }
 
@@ -192,7 +191,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
             $fullPath = realpath($dir . DIRECTORY_SEPARATOR . $value);
             Assert::isTrue($fullPath !== false, "Can't parse contents of " . $dir . DIRECTORY_SEPARATOR . $value);
 
-            if (!is_dir($fullPath)) {
+            if (! is_dir($fullPath)) {
                 if (pathinfo($fullPath, PATHINFO_EXTENSION) === self::FILE_EXTENSION) {
                     $results[] = $fullPath;
                 }

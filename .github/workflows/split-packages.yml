@@ -36,7 +36,7 @@ jobs:
       matrix: ${{ steps.get_json.outputs.json }}
 
   split_packages:
-    name: Split Packages
+    name: Split Package ${{ matrix.package.name }}
     needs: get_packages
     runs-on: ubuntu-latest
 
@@ -48,16 +48,13 @@ jobs:
     steps:
       -   uses: actions/checkout@v2
 
-      - name: Test
-        run: echo "${{ matrix.package.path }} - ${{ matrix.package.name }}"
-
       # no tag
       -
         if: "!startsWith(github.ref, 'refs/tags/')"
         uses: "symplify/monorepo-split-github-action@2.1"
         with:
           # ↓ split "packages/easy-coding-standard" directory
-          package_directory: 'packages/${{ matrix.package.path }}'
+          package_directory: '${{ matrix.package.directory }}'
 
           # ↓ into https://github.com/symplify/easy-coding-standard repository
           repository_organization: 'ecotoneframework'

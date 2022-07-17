@@ -354,17 +354,9 @@ class EventSourcingModule extends NoExternalConfigurationModule
     private function registerEventStore(Configuration $configuration, EventSourcingConfiguration $eventSourcingConfiguration): void
     {
         $this->registerEventStoreAction(
-            'updateStreamMetadata',
-            [HeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName'), HeaderBuilder::create('newMetadata', 'ecotone.eventSourcing.eventStore.newMetadata')],
-            [GatewayHeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName'), GatewayHeaderBuilder::create('newMetadata', 'ecotone.eventSourcing.eventStore.newMetadata')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerEventStoreAction(
             'create',
-            [HeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName'), PayloadBuilder::create('streamEvents'), HeaderBuilder::create('streamMetadata', 'ecotone.eventSourcing.eventStore.streamMetadata')],
-            [GatewayHeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName'), GatewayPayloadBuilder::create('streamEvents'), GatewayHeaderBuilder::create('streamMetadata', 'ecotone.eventSourcing.eventStore.streamMetadata')],
+            [HeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName'), PayloadBuilder::create('streamEvents')],
+            [GatewayHeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName'), GatewayPayloadBuilder::create('streamEvents')],
             $eventSourcingConfiguration,
             $configuration
         );
@@ -379,14 +371,6 @@ class EventSourcingModule extends NoExternalConfigurationModule
 
         $this->registerEventStoreAction(
             'delete',
-            [HeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName')],
-            [GatewayHeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerEventStoreAction(
-            'fetchStreamMetadata',
             [HeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName')],
             [GatewayHeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName')],
             $eventSourcingConfiguration,

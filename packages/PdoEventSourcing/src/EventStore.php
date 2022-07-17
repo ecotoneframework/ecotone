@@ -7,21 +7,16 @@ use Prooph\EventStore\Metadata\MetadataMatcher;
 
 interface EventStore
 {
-    public function updateStreamMetadata(string $streamName, array $newMetadata): void;
-
     /**
      * @param Event[]|object[]|array[] $streamEvents
-     * @param string[] $streamMetadata
      */
-    public function create(string $streamName, array $streamEvents, array $streamMetadata): void;
+    public function create(string $streamName, array $streamEvents): void;
     /**
      * @param Event[]|object[]|array[] $streamEvents
      */
     public function appendTo(string $streamName, array $streamEvents): void;
 
     public function delete(string $streamName): void;
-
-    public function fetchStreamMetadata(string $streamName): array;
 
     public function hasStream(string $streamName): bool;
 

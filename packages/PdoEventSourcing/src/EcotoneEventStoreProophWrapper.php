@@ -44,17 +44,9 @@ class EcotoneEventStoreProophWrapper implements EventStore
     /**
      * @inheritDoc
      */
-    public function updateStreamMetadata(string $streamName, array $newMetadata): void
+    public function create(string $streamName, array $streamEvents): void
     {
-        $this->eventStore->updateStreamMetadata(new StreamName($streamName), $newMetadata);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function create(string $streamName, array $streamEvents, array $streamMetadata): void
-    {
-        $this->eventStore->create(new Stream(new StreamName($streamName), $this->convertProophEvents($streamEvents), $streamMetadata));
+        $this->eventStore->create(new Stream(new StreamName($streamName), $this->convertProophEvents($streamEvents)));
     }
 
     /**
@@ -109,11 +101,6 @@ class EcotoneEventStoreProophWrapper implements EventStore
     public function delete(string $streamName): void
     {
         $this->eventStore->delete(new StreamName($streamName));
-    }
-
-    public function fetchStreamMetadata(string $streamName): array
-    {
-        return $this->eventStore->fetchStreamMetadata(new StreamName($streamName));
     }
 
     public function hasStream(string $streamName): bool

@@ -13,7 +13,7 @@ env:
 
 jobs:
   get_packages:
-    name: Get Packages
+    name: Package splitting
     runs-on: ubuntu-latest
 
     steps:

@@ -48,7 +48,7 @@
   },
   "extra": {
     "branch-alias": {
-      "dev-feature/split-testing": "2.0.0.x-dev"
+      "dev-main": "2.0.0.x-dev"
     }
   },
   "config": {

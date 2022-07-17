@@ -2,7 +2,7 @@
     <img src="https://github.com/ecotoneframework/ecotone/blob/main/ecotone_small.png?raw=true">
 </a></p>
 
-![Github Actions](https://github.com/ecotoneFramework/ecotone/actions/workflows/test-monorepo.yml/badge.svg)
+![Github Actions](https://github.com/ecotoneFramework/ecotone/actions/workflows/split-testing.yml/badge.svg)
 [![Latest Stable Version](https://poser.pugx.org/ecotone/ecotone/v/stable)](https://packagist.org/packages/ecotone/ecotone)
 [![License](http://poser.pugx.org/ecotone/ecotone/license)](https://packagist.org/packages/ecotone/ecotone)
 [![Total Downloads](http://poser.pugx.org/ecotone/ecotone/downloads)](https://packagist.org/packages/ecotone/ecotone)

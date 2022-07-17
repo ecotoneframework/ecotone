@@ -143,14 +143,4 @@ class EcotoneEventStoreProophWrapper implements EventStore
 
         return $events;
     }
-
-    public function fetchCategoryNames(?string $filter, int $limit = 20, int $offset = 0): array
-    {
-        return $this->eventStore->fetchCategoryNames($filter, $limit, $offset);
-    }
-
-    public function fetchCategoryNamesRegex(string $filter, int $limit = 20, int $offset = 0): array
-    {
-        return $this->fetchCategoryNamesRegex($filter, $limit, $offset);
-    }
 }

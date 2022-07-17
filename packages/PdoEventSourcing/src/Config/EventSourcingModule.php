@@ -393,22 +393,6 @@ class EventSourcingModule extends NoExternalConfigurationModule
             $configuration
         );
 
-        $this->registerEventStoreAction(
-            'fetchCategoryNames',
-            [HeaderBuilder::createOptional('filter', 'ecotone.eventSourcing.eventStore.filter'), HeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), HeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            [GatewayHeaderBuilder::create('filter', 'ecotone.eventSourcing.eventStore.filter'), GatewayHeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), GatewayHeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerEventStoreAction(
-            'fetchCategoryNamesRegex',
-            [HeaderBuilder::createOptional('filter', 'ecotone.eventSourcing.eventStore.filter'), HeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), HeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            [GatewayHeaderBuilder::create('filter', 'ecotone.eventSourcing.eventStore.filter'), GatewayHeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), GatewayHeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
         foreach ($this->projectionStateGateways as $projectionStateGateway) {
             $configuration->registerGatewayBuilder($projectionStateGateway);
         }

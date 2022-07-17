@@ -30,14 +30,4 @@ interface EventStore
         MetadataMatcher $metadataMatcher = null,
         bool $deserialize = true
     ): iterable;
-
-    /**
-     * @return string[]
-     */
-    public function fetchCategoryNames(?string $filter, int $limit = 20, int $offset = 0): array;
-
-    /**
-     * @return string[]
-     */
-    public function fetchCategoryNamesRegex(string $filter, int $limit = 20, int $offset = 0): array;
 }

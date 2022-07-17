@@ -1,9 +1,6 @@
 name: 'Ecotone Framework'
 
-on:
-  pull_request:
-    branches:
-      - main
+on: [push, pull_request]
 
 jobs:
   get_packages:

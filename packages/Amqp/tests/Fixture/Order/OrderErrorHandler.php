@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Modelling\Fixture\OrderAggregate;
+namespace Test\Ecotone\Amqp\Fixture\Order;
 
 use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\MessagingException;

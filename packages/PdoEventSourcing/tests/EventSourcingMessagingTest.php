@@ -20,7 +20,7 @@ abstract class EventSourcingMessagingTest extends TestCase
      */
     private $dbalConnectionFactory;
 
-    protected function tearDown(): void
+    protected function setUp(): void
     {
         self::clearDataTables($this->getConnectionFactory()->createContext()->getDbalConnection());
     }

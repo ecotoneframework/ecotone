@@ -98,13 +98,13 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
     public function test_throwing_exception_if_autoload_not_found()
     {
         $this->expectException(InvalidArgumentException::class);
-        
+
         new FileSystemAnnotationFinder(
             $this->getAnnotationResolver(),
             new AutoloadFileNamespaceParser(),
             sys_get_temp_dir(),
             [
-                $this->getAnnotationNamespacePrefix() . '\\MessageEndpoint\\Gateway\\FileSystem'
+                $this->getAnnotationNamespacePrefix() . '\\MessageEndpoint\\Gateway\\FileSystem',
             ],
             'prod',
             ''

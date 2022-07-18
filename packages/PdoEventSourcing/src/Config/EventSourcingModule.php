@@ -457,23 +457,7 @@ class EventSourcingModule extends NoExternalConfigurationModule
         );
 
         $this->registerProjectionManagerAction(
-            'fetchProjectionNamesRegex',
-            [HeaderBuilder::create('regex', 'ecotone.eventSourcing.manager.regex'), HeaderBuilder::create('limit', 'ecotone.eventSourcing.manager.limit'), HeaderBuilder::create('offset', 'ecotone.eventSourcing.manager.offset')],
-            [GatewayHeaderBuilder::create('regex', 'ecotone.eventSourcing.manager.regex'), GatewayHeaderBuilder::create('limit', 'ecotone.eventSourcing.manager.limit'), GatewayHeaderBuilder::create('offset', 'ecotone.eventSourcing.manager.offset')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerProjectionManagerAction(
             'fetchProjectionStatus',
-            [HeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name')],
-            [GatewayHeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerProjectionManagerAction(
-            'fetchProjectionStreamPositions',
             [HeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name')],
             [GatewayHeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name')],
             $eventSourcingConfiguration,

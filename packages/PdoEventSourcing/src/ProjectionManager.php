@@ -4,18 +4,24 @@ namespace Ecotone\EventSourcing;
 
 use Prooph\EventStore\Exception\ProjectionNotFound;
 use Prooph\EventStore\Projection\ProjectionStatus;
-use Prooph\EventStore\Projection\Projector;
-use Prooph\EventStore\Projection\Query;
 use Prooph\EventStore\Projection\ReadModel;
 use Prooph\EventStore\Projection\ReadModelProjector;
 
 interface ProjectionManager
 {
     public function createReadModelProjection(
-        string $name,
+        string    $name,
         ReadModel $readModel,
-        array $options = []
+        array     $options = []
     ): ReadModelProjector;
+
+    /**
+     * @param string $name
+     * @param array<class-string, callable> $handlers callable should be called with (array payload, array metadata = [], array projectionState = []): ?array (state)
+     * @param ProjectionSource $projectionSource
+     * @return void
+     */
+    public function run(string $name, array $handlers, ProjectionSource $projectionSource): void;
 
     /**
      * @throws ProjectionNotFound
@@ -43,19 +49,9 @@ interface ProjectionManager
     public function fetchProjectionNames(?string $filter, int $limit = 20, int $offset = 0): array;
 
     /**
-     * @return string[]
-     */
-    public function fetchProjectionNamesRegex(string $regex, int $limit = 20, int $offset = 0): array;
-
-    /**
      * @throws ProjectionNotFound
      */
     public function fetchProjectionStatus(string $name): ProjectionStatus;
-
-    /**
-     * @throws ProjectionNotFound
-     */
-    public function fetchProjectionStreamPositions(string $name): array;
 
     /**
      * @throws ProjectionNotFound

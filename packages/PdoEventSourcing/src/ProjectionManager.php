@@ -3,7 +3,6 @@
 namespace Ecotone\EventSourcing;
 
 use Prooph\EventStore\Exception\ProjectionNotFound;
-use Prooph\EventStore\Projection\ProjectionStatus;
 use Prooph\EventStore\Projection\ReadModel;
 use Prooph\EventStore\Projection\ReadModelProjector;
 
@@ -43,18 +42,15 @@ interface ProjectionManager
      */
     public function initializeProjection(string $name): void;
 
-    /**
-     * @return string[]
-     */
-    public function fetchProjectionNames(?string $filter, int $limit = 20, int $offset = 0): array;
+    public function hasInitializedProjectionWithName(string $name): bool;
 
     /**
-     * @throws ProjectionNotFound
+     * @throws ProjectionNotFoundException
      */
-    public function fetchProjectionStatus(string $name): ProjectionStatus;
+    public function getProjectionStatus(string $name): ProjectionStatus;
 
     /**
-     * @throws ProjectionNotFound
+     * @throws ProjectionNotFoundException
      */
-    public function fetchProjectionState(string $name): array;
+    public function getProjectionState(string $name): array;
 }

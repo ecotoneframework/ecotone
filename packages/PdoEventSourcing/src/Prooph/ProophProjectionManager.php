@@ -3,6 +3,7 @@
 namespace Ecotone\EventSourcing\Prooph;
 
 use Ecotone\EventSourcing\ProjectionManager;
+use Ecotone\EventSourcing\ProjectionNotFoundException;
 use Ecotone\EventSourcing\ProjectionSource;
 use Prooph\EventStore\Exception\ProjectionNotFound;
 use Prooph\EventStore\Projection\ProjectionStatus;
@@ -36,19 +37,19 @@ final class ProophProjectionManager implements ProjectionManager
         // TODO: Implement initializeProjection() method.
     }
 
-    public function fetchProjectionNames(?string $filter, int $limit = 20, int $offset = 0): array
+    public function hasInitializedProjectionWithName(string $name): bool
     {
-        // TODO: Implement fetchProjectionNames() method.
+        // TODO: Implement hasInitializedProjectionWithName() method.
     }
 
-    public function fetchProjectionStatus(string $name): ProjectionStatus
+    public function getProjectionStatus(string $name): \Ecotone\EventSourcing\ProjectionStatus
     {
-        // TODO: Implement fetchProjectionStatus() method.
+        // TODO: Implement getProjectionStatus() method.
     }
 
-    public function fetchProjectionState(string $name): array
+    public function getProjectionState(string $name): array
     {
-        // TODO: Implement fetchProjectionState() method.
+        // TODO: Implement getProjectionState() method.
     }
 
     public function deleteProjection(string $name, bool $deleteEmittedEvents = true): void

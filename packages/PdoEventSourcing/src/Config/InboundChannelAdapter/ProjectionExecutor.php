@@ -5,19 +5,19 @@ namespace Ecotone\EventSourcing\Config\InboundChannelAdapter;
 use Ecotone\EventSourcing\LazyProophProjectionManager;
 use Ecotone\EventSourcing\ProjectionRunningConfiguration;
 use Ecotone\EventSourcing\ProjectionSetupConfiguration;
+use Ecotone\EventSourcing\ProjectionStatus;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Prooph\Common\Messaging\Message;
 use Prooph\EventStore\Exception\RuntimeException;
-use Prooph\EventStore\Projection\ProjectionStatus;
 use Prooph\EventStore\StreamName;
 
 class ProjectionExecutor
 {
     public const PROJECTION_STATE            = 'projection.state';
-    public const PROJECTION_IS_RESETTING            = 'projection.is_resetting';
+    public const PROJECTION_IS_REBUILDING            = 'projection.is_rebuilding';
     public const PROJECTION_NAME             = 'projection.name';
     public const PROJECTION_IS_POLLING = 'projection.isPolling';
 
@@ -54,9 +54,9 @@ class ProjectionExecutor
 
 
         $status = ProjectionStatus::RUNNING;
-        $projectHasRelatedStream = $this->lazyProophProjectionManager->fetchProjectionNames($projection->getName());
+        $projectHasRelatedStream = $this->lazyProophProjectionManager->hasInitializedProjectionWithName($projection->getName());
         if ($projectHasRelatedStream) {
-            $status = $this->lazyProophProjectionManager->fetchProjectionStatus($projection->getName())->getValue();
+            $status = $this->lazyProophProjectionManager->getProjectionStatus($projection->getName());
         }
 
         $handlers = [];
@@ -71,7 +71,7 @@ class ProjectionExecutor
                         $event->metadata(),
                         [
                             self::PROJECTION_STATE => $state,
-                            self::PROJECTION_IS_RESETTING => $status === ProjectionStatus::RESETTING,
+                            self::PROJECTION_IS_REBUILDING => $status === ProjectionStatus::REBUILDING,
                             self::PROJECTION_NAME => $projectionConfiguration->getProjectionName(),
                             self::PROJECTION_IS_POLLING => true,
                         ]
@@ -119,7 +119,7 @@ class ProjectionExecutor
             $projection->run(false);
         }
 
-        if ($status === ProjectionStatus::DELETING_INCL_EMITTED_EVENTS && $projectHasRelatedStream) {
+        if ($status === ProjectionStatus::DELETING && $projectHasRelatedStream) {
             $projectionStreamName = new StreamName(LazyProophProjectionManager::getProjectionStreamName($projection->getName()));
             if ($this->lazyProophProjectionManager->getLazyProophEventStore()->hasStream($projectionStreamName)) {
                 $this->lazyProophProjectionManager->getLazyProophEventStore()->delete($projectionStreamName);

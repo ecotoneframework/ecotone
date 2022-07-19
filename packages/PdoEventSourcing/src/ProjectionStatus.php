@@ -2,7 +2,9 @@
 
 namespace Ecotone\EventSourcing;
 
-final class ProjectionStatus
+enum ProjectionStatus
 {
-
+    case RUNNING;
+    case DELETING;
+    case REBUILDING;
 }

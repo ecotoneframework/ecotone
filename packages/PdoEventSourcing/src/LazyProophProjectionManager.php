@@ -94,6 +94,24 @@ class LazyProophProjectionManager implements ProjectionManager
         $this->triggerActionOnProjection($name);
     }
 
+    public function hasInitializedProjectionWithName(string $name): bool
+    {
+        $this->ensureEventStoreIsPrepared();
+
+        return (bool)$this->getProjectionManager()->fetchProjectionNames($name, 1, 0);
+    }
+
+    public function getProjectionStatus(string $name): \Ecotone\EventSourcing\ProjectionStatus
+    {
+        $this->ensureEventStoreIsPrepared();
+
+        return match ($this->getProjectionManager()->fetchProjectionStatus($name)->getValue()) {
+            ProjectionStatus::DELETING, ProjectionStatus::DELETING_INCL_EMITTED_EVENTS => \Ecotone\EventSourcing\ProjectionStatus::DELETING,
+            ProjectionStatus::STOPPING, ProjectionStatus::IDLE, ProjectionStatus::RUNNING => \Ecotone\EventSourcing\ProjectionStatus::RUNNING,
+            ProjectionStatus::RESETTING => \Ecotone\EventSourcing\ProjectionStatus::REBUILDING
+        };
+    }
+
     public function fetchProjectionNames(?string $filter, int $limit = 20, int $offset = 0): array
     {
         $this->ensureEventStoreIsPrepared();
@@ -124,6 +142,11 @@ class LazyProophProjectionManager implements ProjectionManager
         ;
 
         return $this->getProjectionManager()->fetchProjectionStreamPositions($name);
+    }
+
+    public function getProjectionState(string $name): array
+    {
+        return $this->getProjectionManager()->fetchProjectionState($name);
     }
 
     public function fetchProjectionState(string $name): array

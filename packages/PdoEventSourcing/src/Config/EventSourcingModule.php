@@ -411,7 +411,7 @@ class EventSourcingModule extends NoExternalConfigurationModule
         $this->registerProjectionManagerAction(
             'deleteProjection',
             [HeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name'), HeaderBuilder::create('deleteEmittedEvents', 'ecotone.eventSourcing.manager.deleteEmittedEvents')],
-            [GatewayHeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name'), GatewayHeaderBuilder::create('deleteEmittedEvents', 'ecotone.eventSourcing.manager.deleteEmittedEvents')],
+            [GatewayHeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name')],
             $eventSourcingConfiguration,
             $configuration,
             self::ECOTONE_ES_DELETE_PROJECTION,

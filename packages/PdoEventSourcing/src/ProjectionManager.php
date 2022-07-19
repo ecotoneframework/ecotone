@@ -26,7 +26,7 @@ interface ProjectionManager
     /**
      * @throws ProjectionNotFound
      */
-    public function deleteProjection(string $name, bool $deleteEmittedEvents = true): void;
+    public function deleteProjection(string $name): void;
 
     /**
      * @throws ProjectionNotFound

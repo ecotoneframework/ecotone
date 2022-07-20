@@ -23,22 +23,22 @@ interface ProjectionManager
     public function run(string $name, array $handlers, ProjectionSource $projectionSource): void;
 
     /**
-     * @throws ProjectionNotFound
+     * @throws ProjectionNotFoundException
      */
     public function deleteProjection(string $name): void;
 
     /**
-     * @throws ProjectionNotFound
+     * @throws ProjectionNotFoundException
      */
     public function resetProjection(string $name): void;
 
     /**
-     * @throws ProjectionNotFound
+     * @throws ProjectionNotFoundException
      */
     public function stopProjection(string $name): void;
 
     /**
-     * @throws ProjectionNotFound
+     * @throws ProjectionNotFoundException
      */
     public function initializeProjection(string $name): void;
 

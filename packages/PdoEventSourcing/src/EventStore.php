@@ -10,7 +10,7 @@ interface EventStore
     /**
      * @param Event[]|object[]|array[] $streamEvents
      */
-    public function create(string $streamName, array $streamEvents): void;
+    public function create(string $streamName, array $streamEvents = [], array $streamMetadata = []): void;
     /**
      * @param Event[]|object[]|array[] $streamEvents
      */

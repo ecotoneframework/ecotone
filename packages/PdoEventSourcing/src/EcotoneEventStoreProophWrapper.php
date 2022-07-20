@@ -44,9 +44,9 @@ class EcotoneEventStoreProophWrapper implements EventStore
     /**
      * @inheritDoc
      */
-    public function create(string $streamName, array $streamEvents): void
+    public function create(string $streamName, array $streamEvents = [], array $streamMetadata = []): void
     {
-        $this->eventStore->create(new Stream(new StreamName($streamName), $this->convertProophEvents($streamEvents)));
+        $this->eventStore->create(new Stream(new StreamName($streamName), $this->convertProophEvents($streamEvents), $streamMetadata));
     }
 
     /**

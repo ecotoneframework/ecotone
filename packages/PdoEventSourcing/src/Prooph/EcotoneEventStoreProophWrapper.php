@@ -1,10 +1,14 @@
 <?php
 
-namespace Ecotone\EventSourcing;
+namespace Ecotone\EventSourcing\Prooph;
 
 use ArrayIterator;
 use DateTimeImmutable;
 use DateTimeZone;
+use Ecotone\EventSourcing\EventMapper;
+use Ecotone\EventSourcing\EventStore;
+use Ecotone\EventSourcing\Prooph\LazyProophEventStore;
+use Ecotone\EventSourcing\Prooph\ProophMessage;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\InMemoryConversionService;
 use Ecotone\Messaging\Conversion\MediaType;

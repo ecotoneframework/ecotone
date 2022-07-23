@@ -13,7 +13,7 @@ use Ecotone\EventSourcing\Attribute\ProjectionReset;
 use Ecotone\EventSourcing\Attribute\ProjectionStateGateway;
 use Ecotone\EventSourcing\Attribute\Stream;
 use Ecotone\EventSourcing\Config\InboundChannelAdapter\ProjectionChannelAdapter;
-use Ecotone\EventSourcing\Config\InboundChannelAdapter\ProjectionExecutor;
+use Ecotone\EventSourcing\Config\InboundChannelAdapter\ProjectionEventHandler;
 use Ecotone\EventSourcing\Config\InboundChannelAdapter\ProjectionExecutorBuilder;
 use Ecotone\EventSourcing\EventMapper;
 use Ecotone\EventSourcing\EventSourcingConfiguration;
@@ -24,6 +24,7 @@ use Ecotone\EventSourcing\ProjectionLifeCycleConfiguration;
 use Ecotone\EventSourcing\ProjectionManager;
 use Ecotone\EventSourcing\ProjectionRunningConfiguration;
 use Ecotone\EventSourcing\ProjectionSetupConfiguration;
+use Ecotone\EventSourcing\ProjectionStreamSource;
 use Ecotone\Messaging\Attribute\EndpointAnnotation;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\PropagateHeaders;
@@ -207,24 +208,25 @@ class EventSourcingModule extends NoExternalConfigurationModule
             Assert::keyNotExists($projectionSetupConfigurations, $projectionAttribute->getName(), "Can't define projection with name {$projectionAttribute->getName()} twice");
 
             if ($projectionAttribute->isFromAll()) {
-                $projectionConfiguration = ProjectionSetupConfiguration::fromAll(
+                $projectionConfiguration = ProjectionSetupConfiguration::create(
                     $projectionAttribute->getName(),
                     $projectionLifeCycle,
-                    $projectionAttribute->getEventStoreReferenceName()
+                    $projectionAttribute->getEventStoreReferenceName(),
+                    ProjectionStreamSource::forAllStreams()
                 );
             } elseif ($projectionAttribute->getFromStreams()) {
-                $projectionConfiguration = ProjectionSetupConfiguration::fromStreams(
+                $projectionConfiguration = ProjectionSetupConfiguration::create(
                     $projectionAttribute->getName(),
                     $projectionLifeCycle,
                     $projectionAttribute->getEventStoreReferenceName(),
-                    ...$projectionAttribute->getFromStreams()
+                    ProjectionStreamSource::fromStreams($projectionAttribute->getFromStreams())
                 );
             } else {
-                $projectionConfiguration = ProjectionSetupConfiguration::fromCategories(
+                $projectionConfiguration = ProjectionSetupConfiguration::create(
                     $projectionAttribute->getName(),
                     $projectionLifeCycle,
                     $projectionAttribute->getEventStoreReferenceName(),
-                    ...$projectionAttribute->getFromCategories()
+                    ProjectionStreamSource::fromCategories($projectionAttribute->getFromCategories())
                 );
             }
 
@@ -289,7 +291,7 @@ class EventSourcingModule extends NoExternalConfigurationModule
             $projectionExecutorBuilder = $projectionExecutorBuilder->withInputChannelName($generatedChannelName);
             $configuration->registerMessageHandler($projectionExecutorBuilder);
 
-            foreach ($projectionSetupConfiguration->getProjectionEventHandlers() as $projectionEventHandler) {
+            foreach ($projectionSetupConfiguration->getProjectionEventHandlerConfigurations() as $projectionEventHandler) {
                 $configuration->registerBeforeSendInterceptor(MethodInterceptor::create(
                     Uuid::uuid4()->toString(),
                     $interfaceToCallRegistry->getFor(ProjectionFlowController::class, 'preSend'),
@@ -299,7 +301,7 @@ class EventSourcingModule extends NoExternalConfigurationModule
                 ));
                 $configuration->registerBeforeMethodInterceptor(MethodInterceptor::create(
                     Uuid::uuid4()->toString(),
-                    $interfaceToCallRegistry->getFor(ProjectionExecutor::class, 'beforeEventHandler'),
+                    $interfaceToCallRegistry->getFor(ProjectionEventHandler::class, 'beforeEventHandler'),
                     new ProjectionExecutorBuilder($eventSourcingConfiguration, $projectionSetupConfiguration, $this->projectionSetupConfigurations, $projectionRunningConfiguration, 'beforeEventHandler'),
                     Precedence::SYSTEM_PRECEDENCE_BEFORE,
                     $projectionEventHandler->getClassName() . '::' . $projectionEventHandler->getMethodName()
@@ -400,14 +402,6 @@ class EventSourcingModule extends NoExternalConfigurationModule
 
     private function registerProjectionManager(Configuration $configuration, EventSourcingConfiguration $eventSourcingConfiguration): void
     {
-        $this->registerProjectionManagerAction(
-            'createReadModelProjection',
-            [HeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name'), PayloadBuilder::create('readModel'), HeaderBuilder::create('options', 'ecotone.eventSourcing.manager.options')],
-            [GatewayHeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name'), GatewayPayloadBuilder::create('readModel'), GatewayHeaderBuilder::create('options', 'ecotone.eventSourcing.manager.options')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
         $this->registerProjectionManagerAction(
             'deleteProjection',
             [HeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name'), HeaderBuilder::create('deleteEmittedEvents', 'ecotone.eventSourcing.manager.deleteEmittedEvents')],
@@ -522,7 +516,7 @@ class EventSourcingModule extends NoExternalConfigurationModule
         $routerHandler =
             ChainMessageHandlerBuilder::create()
                 ->withInputChannelName(Uuid::uuid4()->toString())
-                ->chain(MessageFilterBuilder::createBoolHeaderFilter(ProjectionExecutor::PROJECTION_IS_REBUILDING))
+                ->chain(MessageFilterBuilder::createBoolHeaderFilter(ProjectionEventHandler::PROJECTION_IS_REBUILDING))
                 ->withOutputMessageHandler(RouterBuilder::createRecipientListRouter([
                     $eventStoreHandler->getInputMessageChannelName(),
                     $eventBusChannelName,

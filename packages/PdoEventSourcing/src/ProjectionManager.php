@@ -2,25 +2,16 @@
 
 namespace Ecotone\EventSourcing;
 
-use Prooph\EventStore\Exception\ProjectionNotFound;
 use Prooph\EventStore\Projection\ReadModel;
 use Prooph\EventStore\Projection\ReadModelProjector;
 
 interface ProjectionManager
 {
-    public function createReadModelProjection(
-        string    $name,
-        ReadModel $readModel,
-        array     $options = []
-    ): ReadModelProjector;
-
     /**
-     * @param string $name
-     * @param array<class-string, callable> $handlers callable should be called with (array payload, array metadata = [], array projectionState = []): ?array (state)
-     * @param ProjectionSource $projectionSource
-     * @return void
+     * @param ProjectionExecutor $projectionExecutor to be called with
+     * @param string[] $relatedEventClassNames events that projection is interested in. May be used for filtering the stream.
      */
-    public function run(string $name, array $handlers, ProjectionSource $projectionSource): void;
+    public function run(string $projectionName, ProjectionStreamSource $projectionStreamSource, ProjectionExecutor $projectionExecutor, array $relatedEventClassNames, array $projectionConfiguration): void;
 
     /**
      * @throws ProjectionNotFoundException

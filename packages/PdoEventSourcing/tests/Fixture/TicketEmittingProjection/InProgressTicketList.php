@@ -8,7 +8,7 @@ use Ecotone\EventSourcing\Attribute\ProjectionDelete;
 use Ecotone\EventSourcing\Attribute\ProjectionInitialization;
 use Ecotone\EventSourcing\Attribute\ProjectionReset;
 use Ecotone\EventSourcing\EventStreamEmitter;
-use Ecotone\EventSourcing\LazyProophProjectionManager;
+use Ecotone\EventSourcing\Prooph\LazyProophProjectionManager;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Test\Ecotone\EventSourcing\Fixture\Ticket\Event\TicketWasClosed;

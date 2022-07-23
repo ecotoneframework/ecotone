@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\EventSourcing;
+namespace Ecotone\EventSourcing\Prooph;
 
 use DateTimeImmutable;
 use Ecotone\Messaging\Support\Assert;

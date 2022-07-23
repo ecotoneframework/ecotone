@@ -1,11 +1,14 @@
 <?php
 
-namespace Ecotone\EventSourcing;
+namespace Ecotone\EventSourcing\Prooph;
 
 use Doctrine\DBAL\Driver\PDOConnection;
 use Ecotone\Dbal\DbalReconnectableConnectionFactory;
-use Ecotone\EventSourcing\PersistenceStrategy\InterlopMariaDbSimpleStreamStrategy;
-use Ecotone\EventSourcing\PersistenceStrategy\InterlopMysqlSimpleStreamStrategy;
+use Ecotone\EventSourcing\EventMapper;
+use Ecotone\EventSourcing\EventSourcingConfiguration;
+use Ecotone\EventSourcing\Prooph\PersistenceStrategy\InterlopMariaDbSimpleStreamStrategy;
+use Ecotone\EventSourcing\Prooph\PersistenceStrategy\InterlopMysqlSimpleStreamStrategy;
+use Ecotone\EventSourcing\Prooph\FromProophMessageToArrayConverter;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Iterator;
@@ -248,7 +251,7 @@ class LazyProophEventStore implements EventStore
         $connection = $this->getWrappedConnection();
 
         $eventStoreType = $connection->getAttribute(PDO::ATTR_DRIVER_NAME);
-        if ($eventStoreType === self::EVENT_STORE_TYPE_MYSQL && str_contains($connection->getAttribute(PDO::ATTR_SERVER_VERSION), 'MariaDB')) {
+        if ($eventStoreType === self::EVENT_STORE_TYPE_MYSQL && \str_contains($connection->getAttribute(PDO::ATTR_SERVER_VERSION), 'MariaDB')) {
             $eventStoreType = self::EVENT_STORE_TYPE_MARIADB;
         }
         if ($eventStoreType === 'pgsql') {

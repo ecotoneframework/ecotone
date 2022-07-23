@@ -2,6 +2,7 @@
 
 namespace Ecotone\EventSourcing;
 
+use Ecotone\EventSourcing\Prooph\LazyProophEventStore;
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
 use Enqueue\Dbal\DbalConnectionFactory;
 use Prooph\EventStore\InMemoryEventStore;

@@ -3,6 +3,8 @@
 namespace Ecotone\EventSourcing;
 
 use Ecotone\Enqueue\OutboundMessageConverter;
+use Ecotone\EventSourcing\Prooph\EcotoneEventStoreProophWrapper;
+use Ecotone\EventSourcing\Prooph\LazyProophEventStore;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;

@@ -3,7 +3,7 @@
 namespace Test\Ecotone\EventSourcing\Fixture\TicketEmittingProjection;
 
 use Ecotone\EventSourcing\EventStore;
-use Ecotone\EventSourcing\LazyProophProjectionManager;
+use Ecotone\EventSourcing\Prooph\LazyProophProjectionManager;
 use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;

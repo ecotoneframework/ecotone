@@ -2,7 +2,7 @@
 
 namespace Ecotone\EventSourcing\Config;
 
-use Ecotone\EventSourcing\Config\InboundChannelAdapter\ProjectionExecutor;
+use Ecotone\EventSourcing\Config\InboundChannelAdapter\ProjectionEventHandler;
 use Ecotone\Messaging\Message;
 
 class ProjectionFlowController
@@ -25,8 +25,8 @@ class ProjectionFlowController
 
     private function isPolling(Message $message)
     {
-        return $message->getHeaders()->containsKey(ProjectionExecutor::PROJECTION_IS_POLLING)
-            ? $message->getHeaders()->get(ProjectionExecutor::PROJECTION_IS_POLLING)
+        return $message->getHeaders()->containsKey(ProjectionEventHandler::PROJECTION_IS_POLLING)
+            ? $message->getHeaders()->get(ProjectionEventHandler::PROJECTION_IS_POLLING)
             : false;
     }
 }

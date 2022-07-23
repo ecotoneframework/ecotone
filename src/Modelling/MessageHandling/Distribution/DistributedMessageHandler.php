@@ -24,7 +24,7 @@ class DistributedMessageHandler
     public function handle(
         $payload,
         array $metadata,
-        string $payloadType,
+        #[Header(DistributionEntrypoint::DISTRIBUTED_PAYLOAD_TYPE)] string $payloadType,
         #[Header(DistributionEntrypoint::DISTRIBUTED_ROUTING_KEY)] string $routingKey,
         #[Header(MessageHeaders::CONTENT_TYPE)] string $contentType,
         CommandBus $commandBus,

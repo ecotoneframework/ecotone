@@ -600,8 +600,8 @@ class TypeDescriptorTest extends TestCase
         $this->assertEquals(TypeDescriptor::createCollection(stdClass::class), TypeDescriptor::createFromVariable([new stdClass(), new stdClass()]));
         $this->assertEquals(TypeDescriptor::RESOURCE, TypeDescriptor::createFromVariable(fopen('file', 'w+')));
         $this->assertEquals(TypeDescriptor::NULL, TypeDescriptor::createFromVariable(null));
-        $this->assertEquals(TypeDescriptor::CALLABLE, TypeDescriptor::createFromVariable(function () {
-        }));
+        $this->assertEquals(TypeDescriptor::CLOSURE, TypeDescriptor::createFromVariable(function () {
+        })->toString());
     }
 
     /**

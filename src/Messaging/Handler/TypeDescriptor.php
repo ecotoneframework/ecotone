@@ -31,7 +31,7 @@ final class TypeDescriptor implements Type
 //    compound types
     public const ARRAY                     = 'array';
     public const         ITERABLE          = 'iterable';
-    public const CALLABLE                  = 'callable';
+    public const CLOSURE                  = 'Closure';
     public const         OBJECT            = 'object';
 
 //    resource
@@ -68,7 +68,7 @@ final class TypeDescriptor implements Type
      */
     public function isCompoundType(): bool
     {
-        return in_array($this->type, [self::ARRAY, self::ITERABLE, self::CALLABLE, self::OBJECT]);
+        return in_array($this->type, [self::ARRAY, self::ITERABLE, self::CLOSURE, self::OBJECT]);
     }
 
     /**
@@ -354,8 +354,6 @@ final class TypeDescriptor implements Type
             return self::createCollection($collectionType->toString());
         } elseif ($type === self::ITERABLE) {
             $type = self::ITERABLE;
-        } elseif (is_callable($variable)) {
-            $type = self::CALLABLE;
         } elseif ($type === self::OBJECT) {
             $type = get_class($variable);
         } elseif ($type === self::STRING) {
@@ -744,7 +742,7 @@ final class TypeDescriptor implements Type
      */
     public static function isItTypeOfCompoundType(string $type): bool
     {
-        return in_array($type, [self::ARRAY, self::ITERABLE, self::CALLABLE, self::OBJECT]);
+        return in_array($type, [self::ARRAY, self::ITERABLE, self::CLOSURE, self::OBJECT]);
     }
 
     /**

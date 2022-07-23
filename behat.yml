@@ -4,44 +4,6 @@ default:
     formatters:
         pretty: true
     suites:
-      core:
-          paths:
-            - packages/Ecotone/tests/Messaging/Behat/features
-            - packages/Ecotone/tests/Modelling/Behat/features
-          contexts:
-            - Test\Ecotone\Messaging\Behat\Bootstrap\DomainContext
-            - Test\Ecotone\Modelling\Behat\Bootstrap\DomainContext
-            - Test\Ecotone\Messaging\Behat\Bootstrap\AnnotationBasedMessagingContext
-      dbal:
-          paths:
-            - packages/Dbal/tests/Behat/features
-          contexts:
-            - Test\Ecotone\Dbal\Behat\Bootstrap\DomainContext
-      amqp:
-          paths:
-            - packages/Amqp/tests/Behat/features
-          contexts:
-            - Test\Ecotone\Amqp\Behat\Bootstrap\DomainContext
-      event-sourcing:
-          paths:
-            - packages/PdoEventSourcing/tests/Behat/features
-          contexts:
-            - Test\Ecotone\EventSourcing\Behat\Bootstrap\DomainContext
-symfony:
-  extensions:
-    FriendsOfBehat\SymfonyExtension:
-      bootstrap: ~
-      kernel:
-        class: Ecotone\SymfonyBundle\App\Kernel
-        environment: ~
-        debug: ~
-  translation:
-    locale: en
-  formatters:
-    pretty: true
-  suites:
-    symfony:
-      paths:
-        - packages/Symfony/tests/Behat/features
-      contexts:
-        - Test\Ecotone\Symfony\Behat\Bootstrap\DomainContext
+      default:
+          paths:    [ tests/Messaging/Behat/features, tests/Modelling/Behat/features ]
+          contexts: [ Test\Ecotone\Messaging\Behat\Bootstrap\DomainContext, Test\Ecotone\Modelling\Behat\Bootstrap\DomainContext, Test\Ecotone\Messaging\Behat\Bootstrap\AnnotationBasedMessagingContext ]

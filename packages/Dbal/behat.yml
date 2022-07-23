@@ -1,9 +1,0 @@
-default:
-    translation:
-        locale: en
-    formatters:
-        pretty: true
-    suites:
-      default:
-          paths:    [ tests/Behat/features ]
-          contexts: [ Test\Ecotone\Dbal\Behat\Bootstrap\DomainContext ]

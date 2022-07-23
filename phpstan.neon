@@ -1,6 +1,11 @@
 parameters:
 	level: 1
 	paths:
-		- packages/Core/src
+		- packages/Ecotone/src
 		- packages/Enqueue/src
 		- packages/Dbal/src
+		- packages/Amqp/src
+		- packages/JmsConverter/src
+		- packages/PdoEventSourcing/src
+		- packages/Laravel/src
+		- packages/Symfony/DepedencyInjection

@@ -6,8 +6,8 @@ default:
     suites:
       core:
           paths:
-            - packages/Core/tests/Messaging/Behat/features
-            - packages/Core/tests/Modelling/Behat/features
+            - packages/Ecotone/tests/Messaging/Behat/features
+            - packages/Ecotone/tests/Modelling/Behat/features
           contexts:
             - Test\Ecotone\Messaging\Behat\Bootstrap\DomainContext
             - Test\Ecotone\Modelling\Behat\Bootstrap\DomainContext

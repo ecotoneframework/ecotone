@@ -14,16 +14,16 @@
     "autoload": {
         "psr-4": {
             "Ecotone\\": [
-                "packages/Core/src"
+                "packages/Ecotone/src"
             ],
             "Ecotone\\Amqp\\": "packages/Amqp/src",
-            "Ecotone\\AnnotationFinder\\": "packages/Core/src/AnnotationFinder/",
+            "Ecotone\\AnnotationFinder\\": "packages/Ecotone/src/AnnotationFinder/",
             "Ecotone\\Dbal\\": [
-                "packages/Core/src/Dbal/",
+                "packages/Ecotone/src/Dbal/",
                 "packages/Dbal/src"
             ],
             "Ecotone\\Enqueue\\": [
-                "packages/Core/src/Enqueue/",
+                "packages/Ecotone/src/Enqueue/",
                 "packages/Enqueue/src"
             ],
             "Ecotone\\EventSourcing\\": [
@@ -32,9 +32,9 @@
             ],
             "Ecotone\\JMSConverter\\": "packages/JmsConverter/src",
             "Ecotone\\Laravel\\": "packages/Laravel/src",
-            "Ecotone\\Lite\\": "packages/Core/src/Lite/",
-            "Ecotone\\Messaging\\": "packages/Core/src/Messaging/",
-            "Ecotone\\Modelling\\": "packages/Core/src/Modelling/",
+            "Ecotone\\Lite\\": "packages/Ecotone/src/Lite/",
+            "Ecotone\\Messaging\\": "packages/Ecotone/src/Messaging/",
+            "Ecotone\\Modelling\\": "packages/Ecotone/src/Modelling/",
             "Ecotone\\SymfonyBundle\\": "packages/Symfony/SymfonyBundle",
             "Ecotone\\SymfonyBundle\\DepedencyInjection\\": "packages/Symfony/DepedencyInjection"
         }
@@ -45,13 +45,13 @@
             "Ecotone\\SymfonyBundle\\App\\": "packages/Symfony/App",
             "Fixture\\": "packages/Symfony/tests/Fixture",
             "IncorrectAttribute\\": [
-                "packages/Core/tests/AnnotationFinder/Fixture/Usage/Attribute/TestingNamespace/IncorrectAttribute/TestingNamespace",
+                "packages/Ecotone/tests/AnnotationFinder/Fixture/Usage/Attribute/TestingNamespace/IncorrectAttribute/TestingNamespace",
                 "packages\\Core\\tests\\AnnotationFinder\\Fixture\\Usage\\Attribute\\TestingNamespace\\IncorrectAttribute\\TestingNamespace",
                 "tests\\AnnotationFinder\\Fixture\\Usage\\Attribute\\TestingNamespace\\IncorrectAttribute\\TestingNamespace"
             ],
             "Test\\": "packages/Symfony/tests/phpunit",
             "Test\\Ecotone\\": [
-                "packages/Core/tests",
+                "packages/Ecotone/tests",
                 "packages/Enqueue/tests",
                 "packages\\Core\\tests"
             ],

@@ -27,7 +27,7 @@
   </coverage>
   <testsuites>
     <testsuite name="Core tests">
-      <directory>packages/Core/tests</directory>
+      <directory>packages/Ecotone/tests</directory>
     </testsuite>
     <testsuite name="Dbal tests">
       <directory>packages/Dbal/tests</directory>

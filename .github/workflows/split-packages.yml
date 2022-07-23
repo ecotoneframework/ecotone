@@ -72,7 +72,7 @@ jobs:
 #          tag: ${GITHUB_REF#refs/tags/}
 #
 #          # ↓ split "packages/easy-coding-standard" directory
-#          package_directory: 'packages/${{ matrix.package.path }}'
+#          package_directory: 'packages/${{ matrix.package.directory }}'
 #
 #          # ↓ into https://github.com/symplify/easy-coding-standard repository
 #          repository_organization: 'ecotoneframework'

@@ -44,6 +44,9 @@
     "branch-alias": {
       "dev-main": "2.0.0.x-dev"
     },
+    "ecotone": {
+      "repository": "enqueue"
+    },
     "merge-plugin": {
       "include": [
         "../config.json"

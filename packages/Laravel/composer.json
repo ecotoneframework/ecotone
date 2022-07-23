@@ -52,6 +52,9 @@
     "branch-alias": {
       "dev-main": "2.0.0.x-dev"
     },
+    "ecotone": {
+      "repository": "laravel"
+    },
     "merge-plugin": {
       "include": [
         "../config.json"

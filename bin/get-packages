@@ -3,11 +3,6 @@
 
 const PACKAGES_DIRECTORY = __DIR__ . '/../packages/';
 
-function getPackagePathFromComposerFile(string $composerFile): string
-{
-    return str_replace(PACKAGES_DIRECTORY, '', $composerFile);
-}
-
 function getPackageNameFromComposerFile(string $composerFile)
 {
     $composer = json_decode(file_get_contents($composerFile), true);
@@ -16,6 +11,14 @@ function getPackageNameFromComposerFile(string $composerFile)
     );
 
     return str_replace('ecotone/', '', $name);
+}
+
+function getRepositoryFromComposerFile(string $composerFile)
+{
+    $composer = json_decode(file_get_contents($composerFile), true);
+    return $composer['extra']['ecotone']['repository'] ?? throw new UnexpectedValueException(
+            'The referenced package is invalid because it is missing a name: ' . $composerFile
+        );
 }
 
 /**
@@ -40,8 +43,8 @@ function getPackages(): array {
 
         $packages[] = [
             'directory'  => $directory->getRealPath(),
-            'path' => getPackagePathFromComposerFile($file),
             'name' => getPackageNameFromComposerFile($file),
+            'repository' => getRepositoryFromComposerFile($file)
         ];
     }
 

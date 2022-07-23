@@ -2,21 +2,17 @@
 
 namespace Ecotone\EventSourcing\Config\InboundChannelAdapter;
 
-use Ecotone\EventSourcing\Prooph\LazyProophProjectionManager;
-use Ecotone\EventSourcing\ProjectionEventHandlerConfiguration;
 use Ecotone\EventSourcing\ProjectionExecutor;
 use Ecotone\EventSourcing\ProjectionRunningConfiguration;
 use Ecotone\EventSourcing\ProjectionSetupConfiguration;
 use Ecotone\EventSourcing\ProjectionStatus;
-use Ecotone\EventSourcing\Prooph\ProophReadModel;
+use Ecotone\EventSourcing\Prooph\LazyProophProjectionManager;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Event;
-use Prooph\Common\Messaging\Message;
-use Prooph\EventStore\Exception\RuntimeException;
 use Prooph\EventStore\StreamName;
 
 class ProjectionEventHandler
@@ -56,16 +52,14 @@ class ProjectionEventHandler
             $status = $this->lazyProophProjectionManager->getProjectionStatus($this->projectionSetupConfiguration->getProjectionName());
         }
 
-        $projectionExecutor = new class($this->projectionSetupConfiguration, $this->conversionService, $messagingEntrypoint, $status) implements ProjectionExecutor
-        {
+        $projectionExecutor = new class ($this->projectionSetupConfiguration, $this->conversionService, $messagingEntrypoint, $status) implements ProjectionExecutor {
             public function __construct(private ProjectionSetupConfiguration $projectionSetupConfiguration, private ConversionService $conversionService, private MessagingEntrypoint $messagingEntrypoint, private ProjectionStatus $projectionStatus)
             {
-
             }
 
             public function executeWith(string $eventName, Event $event, ?array $state = null): ?array
             {
-                if (!isset($this->projectionSetupConfiguration->getProjectionEventHandlerConfigurations()[$eventName])) {
+                if (! isset($this->projectionSetupConfiguration->getProjectionEventHandlerConfigurations()[$eventName])) {
                     return $state;
                 }
 
@@ -99,7 +93,6 @@ class ProjectionEventHandler
 
                 return $this->projectionSetupConfiguration->isKeepingStateBetweenEvents() ? $state : null;
             }
-
         };
 
         if ($status === ProjectionStatus::REBUILDING && $this->projectionSetupConfiguration->getProjectionLifeCycleConfiguration()->getRebuildRequestChannel()) {

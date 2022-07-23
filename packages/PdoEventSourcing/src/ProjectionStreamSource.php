@@ -8,7 +8,9 @@ final class ProjectionStreamSource
      * @param string[] $streams
      * @param string[] $categories
      */
-    private function __construct(private bool $forAllStreams, private array $streams, private array $categories) {}
+    private function __construct(private bool $forAllStreams, private array $streams, private array $categories)
+    {
+    }
 
     /**
      * @param string[] $streamNames

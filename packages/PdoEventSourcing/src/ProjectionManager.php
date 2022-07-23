@@ -2,9 +2,6 @@
 
 namespace Ecotone\EventSourcing;
 
-use Prooph\EventStore\Projection\ReadModel;
-use Prooph\EventStore\Projection\ReadModelProjector;
-
 interface ProjectionManager
 {
     /**

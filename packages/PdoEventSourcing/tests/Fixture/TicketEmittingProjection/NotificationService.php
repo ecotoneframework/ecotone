@@ -9,6 +9,8 @@ use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\Event;
 
+use function end;
+
 final class NotificationService
 {
     private array $publishedEvents = [];
@@ -24,7 +26,7 @@ final class NotificationService
         /** @var Event[] $events */
         $events = $eventStore->load($projectionStreamName);
 
-        return \end($events)->getPayload()->ticketId;
+        return end($events)->getPayload()->ticketId;
     }
 
     #[EventHandler]

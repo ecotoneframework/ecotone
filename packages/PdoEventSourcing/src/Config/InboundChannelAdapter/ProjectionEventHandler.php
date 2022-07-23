@@ -2,6 +2,7 @@
 
 namespace Ecotone\EventSourcing\Config\InboundChannelAdapter;
 
+use Ecotone\EventSourcing\ChannelProjectionExecutor;
 use Ecotone\EventSourcing\ProjectionExecutor;
 use Ecotone\EventSourcing\ProjectionRunningConfiguration;
 use Ecotone\EventSourcing\ProjectionSetupConfiguration;
@@ -52,48 +53,7 @@ class ProjectionEventHandler
             $status = $this->lazyProophProjectionManager->getProjectionStatus($this->projectionSetupConfiguration->getProjectionName());
         }
 
-        $projectionExecutor = new class ($this->projectionSetupConfiguration, $this->conversionService, $messagingEntrypoint, $status) implements ProjectionExecutor {
-            public function __construct(private ProjectionSetupConfiguration $projectionSetupConfiguration, private ConversionService $conversionService, private MessagingEntrypoint $messagingEntrypoint, private ProjectionStatus $projectionStatus)
-            {
-            }
-
-            public function executeWith(string $eventName, Event $event, ?array $state = null): ?array
-            {
-                if (! isset($this->projectionSetupConfiguration->getProjectionEventHandlerConfigurations()[$eventName])) {
-                    return $state;
-                }
-
-                $projectionEventHandler = $this->projectionSetupConfiguration->getProjectionEventHandlerConfigurations()[$eventName];
-                $state = $this->messagingEntrypoint->sendWithHeaders(
-                    $event->getPayload(),
-                    array_merge(
-                        $event->getMetadata(),
-                        [
-                            ProjectionEventHandler::PROJECTION_STATE => $state,
-                            ProjectionEventHandler::PROJECTION_IS_REBUILDING => $this->projectionStatus === ProjectionStatus::REBUILDING,
-                            ProjectionEventHandler::PROJECTION_NAME => $this->projectionSetupConfiguration->getProjectionName(),
-                            ProjectionEventHandler::PROJECTION_IS_POLLING => true,
-                        ]
-                    ),
-                    $projectionEventHandler->getSynchronousRequestChannelName()
-                );
-
-                if (! is_null($state)) {
-                    $stateType = TypeDescriptor::createFromVariable($state);
-                    if (! $stateType->isNonCollectionArray()) {
-                        $state = $this->conversionService->convert(
-                            $state,
-                            $stateType,
-                            MediaType::createApplicationXPHP(),
-                            TypeDescriptor::createArrayType(),
-                            MediaType::createApplicationXPHP()
-                        );
-                    }
-                }
-
-                return $this->projectionSetupConfiguration->isKeepingStateBetweenEvents() ? $state : null;
-            }
-        };
+        $projectionExecutor = new ChannelProjectionExecutor($this->projectionSetupConfiguration, $this->conversionService, $messagingEntrypoint, $status);
 
         if ($status === ProjectionStatus::REBUILDING && $this->projectionSetupConfiguration->getProjectionLifeCycleConfiguration()->getRebuildRequestChannel()) {
             $messagingEntrypoint->send([], $this->projectionSetupConfiguration->getProjectionLifeCycleConfiguration()->getRebuildRequestChannel());

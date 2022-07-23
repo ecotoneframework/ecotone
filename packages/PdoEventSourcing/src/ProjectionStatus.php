@@ -4,12 +4,14 @@ namespace Ecotone\EventSourcing;
 
 final class ProjectionStatus
 {
-    public const RUNNING = "running";
-    public const DELETING = "deleting";
-    public const REBUILDING = "rebuilding";
+    public const RUNNING = 'running';
+    public const DELETING = 'deleting';
+    public const REBUILDING = 'rebuilding';
 
-    public function __construct(private string $type
-    ) {}
+    public function __construct(
+        private string $type
+    ) {
+    }
 
     public function getStatus(): string
     {

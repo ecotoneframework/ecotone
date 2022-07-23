@@ -42,7 +42,7 @@ class ProjectionEventHandler
             $this->wasInitialized = true;
         }
 
-        $status = ProjectionStatus::RUNNING;
+        $status = ProjectionStatus::RUNNING();
         $projectHasRelatedStream = $this->lazyProophProjectionManager->hasInitializedProjectionWithName($this->projectionSetupConfiguration->getProjectionName());
         if ($projectHasRelatedStream) {
             $status = $this->lazyProophProjectionManager->getProjectionStatus($this->projectionSetupConfiguration->getProjectionName());
@@ -50,17 +50,17 @@ class ProjectionEventHandler
 
         $projectionExecutor = new ChannelProjectionExecutor($this->projectionSetupConfiguration, $this->conversionService, $messagingEntrypoint, $status);
 
-        if ($status === ProjectionStatus::REBUILDING && $this->projectionSetupConfiguration->getProjectionLifeCycleConfiguration()->getRebuildRequestChannel()) {
+        if ($status == ProjectionStatus::REBUILDING() && $this->projectionSetupConfiguration->getProjectionLifeCycleConfiguration()->getRebuildRequestChannel()) {
             $messagingEntrypoint->send([], $this->projectionSetupConfiguration->getProjectionLifeCycleConfiguration()->getRebuildRequestChannel());
         }
 
-        if ($status === ProjectionStatus::DELETING && $this->projectionSetupConfiguration->getProjectionLifeCycleConfiguration()->getDeleteRequestChannel()) {
+        if ($status == ProjectionStatus::DELETING() && $this->projectionSetupConfiguration->getProjectionLifeCycleConfiguration()->getDeleteRequestChannel()) {
             $messagingEntrypoint->send([], $this->projectionSetupConfiguration->getProjectionLifeCycleConfiguration()->getDeleteRequestChannel());
         }
 
         $this->lazyProophProjectionManager->run($this->projectionSetupConfiguration->getProjectionName(), $this->projectionSetupConfiguration->getProjectionStreamSource(), $projectionExecutor, array_keys($this->projectionSetupConfiguration->getProjectionEventHandlerConfigurations()), $this->projectionSetupConfiguration->getProjectionOptions());
 
-        if ($status === ProjectionStatus::DELETING && $projectHasRelatedStream) {
+        if ($status == ProjectionStatus::DELETING() && $projectHasRelatedStream) {
             $projectionStreamName = new StreamName(LazyProophProjectionManager::getProjectionStreamName($this->projectionSetupConfiguration->getProjectionName()));
             if ($this->lazyProophProjectionManager->getLazyProophEventStore()->hasStream($projectionStreamName)) {
                 $this->lazyProophProjectionManager->getLazyProophEventStore()->delete($projectionStreamName);

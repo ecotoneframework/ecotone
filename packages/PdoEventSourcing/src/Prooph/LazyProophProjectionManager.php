@@ -115,9 +115,9 @@ class LazyProophProjectionManager implements ProjectionManager
         $this->ensureEventStoreIsPrepared();
 
         return match ($this->getProjectionManager()->fetchProjectionStatus($name)->getValue()) {
-            ProjectionStatus::DELETING, ProjectionStatus::DELETING_INCL_EMITTED_EVENTS => \Ecotone\EventSourcing\ProjectionStatus::DELETING,
-            ProjectionStatus::STOPPING, ProjectionStatus::IDLE, ProjectionStatus::RUNNING => \Ecotone\EventSourcing\ProjectionStatus::RUNNING,
-            ProjectionStatus::RESETTING => \Ecotone\EventSourcing\ProjectionStatus::REBUILDING
+            ProjectionStatus::DELETING, ProjectionStatus::DELETING_INCL_EMITTED_EVENTS => \Ecotone\EventSourcing\ProjectionStatus::DELETING(),
+            ProjectionStatus::STOPPING, ProjectionStatus::IDLE, ProjectionStatus::RUNNING => \Ecotone\EventSourcing\ProjectionStatus::RUNNING(),
+            ProjectionStatus::RESETTING => \Ecotone\EventSourcing\ProjectionStatus::REBUILDING()
         };
     }
 

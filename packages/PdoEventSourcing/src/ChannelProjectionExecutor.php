@@ -28,7 +28,7 @@ final class ChannelProjectionExecutor implements ProjectionExecutor
                 $event->getMetadata(),
                 [
                     ProjectionEventHandler::PROJECTION_STATE => $state,
-                    ProjectionEventHandler::PROJECTION_IS_REBUILDING => $this->projectionStatus === ProjectionStatus::REBUILDING,
+                    ProjectionEventHandler::PROJECTION_IS_REBUILDING => $this->projectionStatus == ProjectionStatus::REBUILDING(),
                     ProjectionEventHandler::PROJECTION_NAME => $this->projectionSetupConfiguration->getProjectionName(),
                     ProjectionEventHandler::PROJECTION_IS_POLLING => true,
                 ]

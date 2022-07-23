@@ -74,7 +74,7 @@
         }
     },
     "require": {
-        "php": "^8.1",
+        "php": "^8.0",
         "doctrine/dbal": "^3.3.7",
         "doctrine/persistence": "^2.5",
         "enqueue/amqp-ext": "^0.10.4",
@@ -89,7 +89,7 @@
         "prooph/pdo-event-store": "^1.14.2",
         "psr/log": "^2.0|^3.0",
         "queue-interop/queue-interop": "^0.8",
-        "ramsey/uuid": "^4.0",
+        "ramsey/uuid": "^3.0|^4.0",
         "symfony/cache": "^5.4|^6.1",
         "symfony/console": "^5.4|^6.0",
         "symfony/framework-bundle": "^5.4|^6.0",

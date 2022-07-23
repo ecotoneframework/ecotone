@@ -8,7 +8,6 @@ use Ecotone\EventSourcing\EventMapper;
 use Ecotone\EventSourcing\EventSourcingConfiguration;
 use Ecotone\EventSourcing\Prooph\PersistenceStrategy\InterlopMariaDbSimpleStreamStrategy;
 use Ecotone\EventSourcing\Prooph\PersistenceStrategy\InterlopMysqlSimpleStreamStrategy;
-use Ecotone\EventSourcing\Prooph\FromProophMessageToArrayConverter;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Iterator;
@@ -27,6 +26,8 @@ use Prooph\EventStore\Pdo\WriteLockStrategy\NoLockStrategy;
 use Prooph\EventStore\Pdo\WriteLockStrategy\PostgresAdvisoryLockStrategy;
 use Prooph\EventStore\Stream;
 use Prooph\EventStore\StreamName;
+
+use function str_contains;
 
 class LazyProophEventStore implements EventStore
 {
@@ -251,7 +252,7 @@ class LazyProophEventStore implements EventStore
         $connection = $this->getWrappedConnection();
 
         $eventStoreType = $connection->getAttribute(PDO::ATTR_DRIVER_NAME);
-        if ($eventStoreType === self::EVENT_STORE_TYPE_MYSQL && \str_contains($connection->getAttribute(PDO::ATTR_SERVER_VERSION), 'MariaDB')) {
+        if ($eventStoreType === self::EVENT_STORE_TYPE_MYSQL && str_contains($connection->getAttribute(PDO::ATTR_SERVER_VERSION), 'MariaDB')) {
             $eventStoreType = self::EVENT_STORE_TYPE_MARIADB;
         }
         if ($eventStoreType === 'pgsql') {

@@ -12,7 +12,6 @@ class ProophReadModel implements ReadModel
 
     public function init(): void
     {
-
     }
 
     public function isInitialized(): bool
@@ -22,12 +21,10 @@ class ProophReadModel implements ReadModel
 
     public function reset(): void
     {
-
     }
 
     public function delete(): void
     {
-
     }
 
     public function stack(string $operation, ...$args): void

@@ -2,6 +2,8 @@
 
 namespace Ecotone\EventSourcing;
 
+use Ecotone\EventSourcing\Prooph\EcotoneEventStoreProophWrapper;
+use Ecotone\EventSourcing\Prooph\LazyProophEventStore;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ReferenceSearchService;

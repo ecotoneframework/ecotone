@@ -13,7 +13,7 @@ use Ecotone\EventSourcing\Attribute\ProjectionReset;
 use Ecotone\EventSourcing\Attribute\ProjectionStateGateway;
 use Ecotone\EventSourcing\Attribute\Stream;
 use Ecotone\EventSourcing\Config\InboundChannelAdapter\ProjectionChannelAdapter;
-use Ecotone\EventSourcing\Config\InboundChannelAdapter\ProjectionExecutor;
+use Ecotone\EventSourcing\Config\InboundChannelAdapter\ProjectionEventHandler;
 use Ecotone\EventSourcing\Config\InboundChannelAdapter\ProjectionExecutorBuilder;
 use Ecotone\EventSourcing\EventMapper;
 use Ecotone\EventSourcing\EventSourcingConfiguration;
@@ -24,6 +24,7 @@ use Ecotone\EventSourcing\ProjectionLifeCycleConfiguration;
 use Ecotone\EventSourcing\ProjectionManager;
 use Ecotone\EventSourcing\ProjectionRunningConfiguration;
 use Ecotone\EventSourcing\ProjectionSetupConfiguration;
+use Ecotone\EventSourcing\ProjectionStreamSource;
 use Ecotone\Messaging\Attribute\EndpointAnnotation;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\PropagateHeaders;
@@ -139,7 +140,7 @@ class EventSourcingModule extends NoExternalConfigurationModule
                 $projectionStateGatewayConfiguration->getMethodName(),
                 ProjectionManagerBuilder::getProjectionManagerActionChannel(
                     $attribute->getProjectioManagerReference(),
-                    'fetchProjectionState'
+                    'getProjectionState'
                 )
             )->withParameterConverters([
                 GatewayHeaderValueBuilder::create('ecotone.eventSourcing.manager.name', $attribute->getProjectionName()),
@@ -207,24 +208,25 @@ class EventSourcingModule extends NoExternalConfigurationModule
             Assert::keyNotExists($projectionSetupConfigurations, $projectionAttribute->getName(), "Can't define projection with name {$projectionAttribute->getName()} twice");
 
             if ($projectionAttribute->isFromAll()) {
-                $projectionConfiguration = ProjectionSetupConfiguration::fromAll(
+                $projectionConfiguration = ProjectionSetupConfiguration::create(
                     $projectionAttribute->getName(),
                     $projectionLifeCycle,
-                    $projectionAttribute->getEventStoreReferenceName()
+                    $projectionAttribute->getEventStoreReferenceName(),
+                    ProjectionStreamSource::forAllStreams()
                 );
             } elseif ($projectionAttribute->getFromStreams()) {
-                $projectionConfiguration = ProjectionSetupConfiguration::fromStreams(
+                $projectionConfiguration = ProjectionSetupConfiguration::create(
                     $projectionAttribute->getName(),
                     $projectionLifeCycle,
                     $projectionAttribute->getEventStoreReferenceName(),
-                    ...$projectionAttribute->getFromStreams()
+                    ProjectionStreamSource::fromStreams($projectionAttribute->getFromStreams())
                 );
             } else {
-                $projectionConfiguration = ProjectionSetupConfiguration::fromCategories(
+                $projectionConfiguration = ProjectionSetupConfiguration::create(
                     $projectionAttribute->getName(),
                     $projectionLifeCycle,
                     $projectionAttribute->getEventStoreReferenceName(),
-                    ...$projectionAttribute->getFromCategories()
+                    ProjectionStreamSource::fromCategories($projectionAttribute->getFromCategories())
                 );
             }
 
@@ -289,7 +291,7 @@ class EventSourcingModule extends NoExternalConfigurationModule
             $projectionExecutorBuilder = $projectionExecutorBuilder->withInputChannelName($generatedChannelName);
             $configuration->registerMessageHandler($projectionExecutorBuilder);
 
-            foreach ($projectionSetupConfiguration->getProjectionEventHandlers() as $projectionEventHandler) {
+            foreach ($projectionSetupConfiguration->getProjectionEventHandlerConfigurations() as $projectionEventHandler) {
                 $configuration->registerBeforeSendInterceptor(MethodInterceptor::create(
                     Uuid::uuid4()->toString(),
                     $interfaceToCallRegistry->getFor(ProjectionFlowController::class, 'preSend'),
@@ -299,7 +301,7 @@ class EventSourcingModule extends NoExternalConfigurationModule
                 ));
                 $configuration->registerBeforeMethodInterceptor(MethodInterceptor::create(
                     Uuid::uuid4()->toString(),
-                    $interfaceToCallRegistry->getFor(ProjectionExecutor::class, 'beforeEventHandler'),
+                    $interfaceToCallRegistry->getFor(ProjectionEventHandler::class, 'beforeEventHandler'),
                     new ProjectionExecutorBuilder($eventSourcingConfiguration, $projectionSetupConfiguration, $this->projectionSetupConfigurations, $projectionRunningConfiguration, 'beforeEventHandler'),
                     Precedence::SYSTEM_PRECEDENCE_BEFORE,
                     $projectionEventHandler->getClassName() . '::' . $projectionEventHandler->getMethodName()
@@ -354,14 +356,6 @@ class EventSourcingModule extends NoExternalConfigurationModule
     private function registerEventStore(Configuration $configuration, EventSourcingConfiguration $eventSourcingConfiguration): void
     {
         $this->registerEventStoreAction(
-            'updateStreamMetadata',
-            [HeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName'), HeaderBuilder::create('newMetadata', 'ecotone.eventSourcing.eventStore.newMetadata')],
-            [GatewayHeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName'), GatewayHeaderBuilder::create('newMetadata', 'ecotone.eventSourcing.eventStore.newMetadata')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerEventStoreAction(
             'create',
             [HeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName'), PayloadBuilder::create('streamEvents'), HeaderBuilder::create('streamMetadata', 'ecotone.eventSourcing.eventStore.streamMetadata')],
             [GatewayHeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName'), GatewayPayloadBuilder::create('streamEvents'), GatewayHeaderBuilder::create('streamMetadata', 'ecotone.eventSourcing.eventStore.streamMetadata')],
@@ -386,14 +380,6 @@ class EventSourcingModule extends NoExternalConfigurationModule
         );
 
         $this->registerEventStoreAction(
-            'fetchStreamMetadata',
-            [HeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName')],
-            [GatewayHeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerEventStoreAction(
             'hasStream',
             [HeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName')],
             [GatewayHeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName')],
@@ -409,46 +395,6 @@ class EventSourcingModule extends NoExternalConfigurationModule
             $configuration
         );
 
-        $this->registerEventStoreAction(
-            'loadReverse',
-            [HeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName'), HeaderBuilder::createOptional('fromNumber', 'ecotone.eventSourcing.eventStore.fromNumber'), HeaderBuilder::createOptional('count', 'ecotone.eventSourcing.eventStore.count'), HeaderBuilder::createOptional('metadataMatcher', 'ecotone.eventSourcing.eventStore.metadataMatcher'), HeaderBuilder::create('deserialize', 'ecotone.eventSourcing.eventStore.deserialize')],
-            [GatewayHeaderBuilder::create('streamName', 'ecotone.eventSourcing.eventStore.streamName'), GatewayHeaderBuilder::create('fromNumber', 'ecotone.eventSourcing.eventStore.fromNumber'), GatewayHeaderBuilder::create('count', 'ecotone.eventSourcing.eventStore.count'), GatewayHeaderBuilder::create('metadataMatcher', 'ecotone.eventSourcing.eventStore.metadataMatcher'), GatewayHeaderBuilder::create('deserialize', 'ecotone.eventSourcing.eventStore.deserialize')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerEventStoreAction(
-            'fetchStreamNames',
-            [HeaderBuilder::createOptional('filter', 'ecotone.eventSourcing.eventStore.filter'), HeaderBuilder::createOptional('metadataMatcher', 'ecotone.eventSourcing.eventStore.metadataMatcher'), HeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), HeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            [GatewayHeaderBuilder::create('filter', 'ecotone.eventSourcing.eventStore.filter'), GatewayHeaderBuilder::create('metadataMatcher', 'ecotone.eventSourcing.eventStore.metadataMatcher'), GatewayHeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), GatewayHeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerEventStoreAction(
-            'fetchStreamNamesRegex',
-            [HeaderBuilder::createOptional('filter', 'ecotone.eventSourcing.eventStore.filter'), HeaderBuilder::createOptional('metadataMatcher', 'ecotone.eventSourcing.eventStore.metadataMatcher'), HeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), HeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            [GatewayHeaderBuilder::create('filter', 'ecotone.eventSourcing.eventStore.filter'), GatewayHeaderBuilder::create('metadataMatcher', 'ecotone.eventSourcing.eventStore.metadataMatcher'), GatewayHeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), GatewayHeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerEventStoreAction(
-            'fetchCategoryNames',
-            [HeaderBuilder::createOptional('filter', 'ecotone.eventSourcing.eventStore.filter'), HeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), HeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            [GatewayHeaderBuilder::create('filter', 'ecotone.eventSourcing.eventStore.filter'), GatewayHeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), GatewayHeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerEventStoreAction(
-            'fetchCategoryNamesRegex',
-            [HeaderBuilder::createOptional('filter', 'ecotone.eventSourcing.eventStore.filter'), HeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), HeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            [GatewayHeaderBuilder::create('filter', 'ecotone.eventSourcing.eventStore.filter'), GatewayHeaderBuilder::create('limit', 'ecotone.eventSourcing.eventStore.limit'), GatewayHeaderBuilder::create('offset', 'ecotone.eventSourcing.eventStore.offset')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
         foreach ($this->projectionStateGateways as $projectionStateGateway) {
             $configuration->registerGatewayBuilder($projectionStateGateway);
         }
@@ -456,28 +402,10 @@ class EventSourcingModule extends NoExternalConfigurationModule
 
     private function registerProjectionManager(Configuration $configuration, EventSourcingConfiguration $eventSourcingConfiguration): void
     {
-        $this->registerProjectionManagerAction('createQuery', [], [], $eventSourcingConfiguration, $configuration);
-
-        $this->registerProjectionManagerAction(
-            'createProjection',
-            [HeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name'), HeaderBuilder::create('options', 'ecotone.eventSourcing.manager.options')],
-            [GatewayHeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name'), GatewayHeaderBuilder::create('options', 'ecotone.eventSourcing.manager.options')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerProjectionManagerAction(
-            'createReadModelProjection',
-            [HeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name'), PayloadBuilder::create('readModel'), HeaderBuilder::create('options', 'ecotone.eventSourcing.manager.options')],
-            [GatewayHeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name'), GatewayPayloadBuilder::create('readModel'), GatewayHeaderBuilder::create('options', 'ecotone.eventSourcing.manager.options')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
         $this->registerProjectionManagerAction(
             'deleteProjection',
             [HeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name'), HeaderBuilder::create('deleteEmittedEvents', 'ecotone.eventSourcing.manager.deleteEmittedEvents')],
-            [GatewayHeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name'), GatewayHeaderBuilder::create('deleteEmittedEvents', 'ecotone.eventSourcing.manager.deleteEmittedEvents')],
+            [GatewayHeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name')],
             $eventSourcingConfiguration,
             $configuration,
             self::ECOTONE_ES_DELETE_PROJECTION,
@@ -515,23 +443,7 @@ class EventSourcingModule extends NoExternalConfigurationModule
         );
 
         $this->registerProjectionManagerAction(
-            'fetchProjectionNames',
-            [HeaderBuilder::createOptional('filter', 'ecotone.eventSourcing.manager.filter'), HeaderBuilder::create('limit', 'ecotone.eventSourcing.manager.limit'), HeaderBuilder::create('offset', 'ecotone.eventSourcing.manager.offset')],
-            [GatewayHeaderBuilder::create('filter', 'ecotone.eventSourcing.manager.filter'), GatewayHeaderBuilder::create('limit', 'ecotone.eventSourcing.manager.limit'), GatewayHeaderBuilder::create('offset', 'ecotone.eventSourcing.manager.offset')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerProjectionManagerAction(
-            'fetchProjectionNamesRegex',
-            [HeaderBuilder::create('regex', 'ecotone.eventSourcing.manager.regex'), HeaderBuilder::create('limit', 'ecotone.eventSourcing.manager.limit'), HeaderBuilder::create('offset', 'ecotone.eventSourcing.manager.offset')],
-            [GatewayHeaderBuilder::create('regex', 'ecotone.eventSourcing.manager.regex'), GatewayHeaderBuilder::create('limit', 'ecotone.eventSourcing.manager.limit'), GatewayHeaderBuilder::create('offset', 'ecotone.eventSourcing.manager.offset')],
-            $eventSourcingConfiguration,
-            $configuration
-        );
-
-        $this->registerProjectionManagerAction(
-            'fetchProjectionStatus',
+            'hasInitializedProjectionWithName',
             [HeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name')],
             [GatewayHeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name')],
             $eventSourcingConfiguration,
@@ -539,7 +451,7 @@ class EventSourcingModule extends NoExternalConfigurationModule
         );
 
         $this->registerProjectionManagerAction(
-            'fetchProjectionStreamPositions',
+            'getProjectionStatus',
             [HeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name')],
             [GatewayHeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name')],
             $eventSourcingConfiguration,
@@ -547,7 +459,7 @@ class EventSourcingModule extends NoExternalConfigurationModule
         );
 
         $this->registerProjectionManagerAction(
-            'fetchProjectionState',
+            'getProjectionState',
             [HeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name')],
             [GatewayHeaderBuilder::create('name', 'ecotone.eventSourcing.manager.name')],
             $eventSourcingConfiguration,
@@ -604,7 +516,7 @@ class EventSourcingModule extends NoExternalConfigurationModule
         $routerHandler =
             ChainMessageHandlerBuilder::create()
                 ->withInputChannelName(Uuid::uuid4()->toString())
-                ->chain(MessageFilterBuilder::createBoolHeaderFilter(ProjectionExecutor::PROJECTION_IS_RESETTING))
+                ->chain(MessageFilterBuilder::createBoolHeaderFilter(ProjectionEventHandler::PROJECTION_IS_REBUILDING))
                 ->withOutputMessageHandler(RouterBuilder::createRecipientListRouter([
                     $eventStoreHandler->getInputMessageChannelName(),
                     $eventBusChannelName,

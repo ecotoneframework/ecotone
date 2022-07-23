@@ -43,7 +43,7 @@ class ProjectionLifeCycleConfiguration
         return $this->initializationRequestChannel;
     }
 
-    public function getResetRequestChannel(): ?string
+    public function getRebuildRequestChannel(): ?string
     {
         return $this->resetRequestChannel;
     }

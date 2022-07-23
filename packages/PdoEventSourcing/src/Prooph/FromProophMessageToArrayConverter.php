@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\EventSourcing;
+namespace Ecotone\EventSourcing\Prooph;
 
 use Prooph\Common\Messaging\Message;
 use Prooph\Common\Messaging\MessageConverter;

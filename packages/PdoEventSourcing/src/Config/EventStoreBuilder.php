@@ -2,10 +2,10 @@
 
 namespace Ecotone\EventSourcing\Config;
 
-use Ecotone\EventSourcing\EcotoneEventStoreProophWrapper;
 use Ecotone\EventSourcing\EventMapper;
 use Ecotone\EventSourcing\EventSourcingConfiguration;
-use Ecotone\EventSourcing\LazyProophEventStore;
+use Ecotone\EventSourcing\Prooph\EcotoneEventStoreProophWrapper;
+use Ecotone\EventSourcing\Prooph\LazyProophEventStore;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;

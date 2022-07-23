@@ -2,6 +2,7 @@
 
 namespace Ecotone\EventSourcing;
 
+use Ecotone\EventSourcing\Prooph\ProophMessage;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Event;
 use Prooph\Common\Messaging\Message;

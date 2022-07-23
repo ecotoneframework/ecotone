@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\EventSourcing\PersistenceStrategy;
+namespace Ecotone\EventSourcing\Prooph\PersistenceStrategy;
 
 use Iterator;
 use Prooph\Common\Messaging\MessageConverter;

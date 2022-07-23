@@ -1,11 +1,13 @@
 <?php
 
-namespace Ecotone\EventSourcing;
+namespace Ecotone\EventSourcing\Prooph;
 
 use Doctrine\DBAL\Driver\PDOConnection;
 use Ecotone\Dbal\DbalReconnectableConnectionFactory;
-use Ecotone\EventSourcing\PersistenceStrategy\InterlopMariaDbSimpleStreamStrategy;
-use Ecotone\EventSourcing\PersistenceStrategy\InterlopMysqlSimpleStreamStrategy;
+use Ecotone\EventSourcing\EventMapper;
+use Ecotone\EventSourcing\EventSourcingConfiguration;
+use Ecotone\EventSourcing\Prooph\PersistenceStrategy\InterlopMariaDbSimpleStreamStrategy;
+use Ecotone\EventSourcing\Prooph\PersistenceStrategy\InterlopMysqlSimpleStreamStrategy;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Iterator;
@@ -24,6 +26,8 @@ use Prooph\EventStore\Pdo\WriteLockStrategy\NoLockStrategy;
 use Prooph\EventStore\Pdo\WriteLockStrategy\PostgresAdvisoryLockStrategy;
 use Prooph\EventStore\Stream;
 use Prooph\EventStore\StreamName;
+
+use function str_contains;
 
 class LazyProophEventStore implements EventStore
 {

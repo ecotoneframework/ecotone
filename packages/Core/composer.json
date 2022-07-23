@@ -25,9 +25,9 @@
     }
   },
   "require": {
-    "php": "^8.1",
+    "php": "^8.0",
     "psr/log": "^2.0|^3.0",
-    "ramsey/uuid": "^4.0",
+    "ramsey/uuid": "^3.0|^4.0",
     "friendsofphp/proxy-manager-lts": "^1.0.12"
   },
   "require-dev": {

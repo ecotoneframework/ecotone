@@ -3,11 +3,13 @@
 namespace Test\Ecotone\EventSourcing\Fixture\TicketEmittingProjection;
 
 use Ecotone\EventSourcing\EventStore;
-use Ecotone\EventSourcing\LazyProophProjectionManager;
+use Ecotone\EventSourcing\Prooph\LazyProophProjectionManager;
 use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\Event;
+
+use function end;
 
 final class NotificationService
 {
@@ -17,14 +19,14 @@ final class NotificationService
     public function getNotifications(#[Reference] EventStore $eventStore): ?string
     {
         $projectionStreamName = LazyProophProjectionManager::getProjectionStreamName(InProgressTicketList::NAME);
-        if (! $eventStore->fetchStreamNames($projectionStreamName, null)) {
+        if (! $eventStore->hasStream($projectionStreamName)) {
             return null;
         }
 
         /** @var Event[] $events */
-        $events = $eventStore->loadReverse($projectionStreamName, count: 1);
+        $events = $eventStore->load($projectionStreamName);
 
-        return $events[0]->getPayload()->ticketId;
+        return end($events)->getPayload()->ticketId;
     }
 
     #[EventHandler]

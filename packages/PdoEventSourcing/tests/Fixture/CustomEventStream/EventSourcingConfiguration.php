@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\EventSourcing\Fixture\CustomEventStream;
 
-use Ecotone\EventSourcing\FromProophMessageToArrayConverter;
+use Ecotone\EventSourcing\Prooph\FromProophMessageToArrayConverter;
 use Ecotone\Messaging\Attribute\Parameter\ConfigurationVariable;
 use Ecotone\Messaging\Attribute\ServiceContext;
 use Prooph\EventStore\Pdo\PersistenceStrategy\MySqlSingleStreamStrategy;

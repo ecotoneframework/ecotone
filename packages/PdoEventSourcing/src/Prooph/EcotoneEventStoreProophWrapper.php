@@ -1,10 +1,12 @@
 <?php
 
-namespace Ecotone\EventSourcing;
+namespace Ecotone\EventSourcing\Prooph;
 
 use ArrayIterator;
 use DateTimeImmutable;
 use DateTimeZone;
+use Ecotone\EventSourcing\EventMapper;
+use Ecotone\EventSourcing\EventStore;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\InMemoryConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
@@ -44,15 +46,7 @@ class EcotoneEventStoreProophWrapper implements EventStore
     /**
      * @inheritDoc
      */
-    public function updateStreamMetadata(string $streamName, array $newMetadata): void
-    {
-        $this->eventStore->updateStreamMetadata(new StreamName($streamName), $newMetadata);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function create(string $streamName, array $streamEvents, array $streamMetadata): void
+    public function create(string $streamName, array $streamEvents = [], array $streamMetadata = []): void
     {
         $this->eventStore->create(new Stream(new StreamName($streamName), $this->convertProophEvents($streamEvents), $streamMetadata));
     }
@@ -111,11 +105,6 @@ class EcotoneEventStoreProophWrapper implements EventStore
         $this->eventStore->delete(new StreamName($streamName));
     }
 
-    public function fetchStreamMetadata(string $streamName): array
-    {
-        return $this->eventStore->fetchStreamMetadata(new StreamName($streamName));
-    }
-
     public function hasStream(string $streamName): bool
     {
         return $this->eventStore->hasStream(new StreamName($streamName));
@@ -155,38 +144,5 @@ class EcotoneEventStoreProophWrapper implements EventStore
         }
 
         return $events;
-    }
-
-    public function loadReverse(string $streamName, int $fromNumber = null, int $count = null, MetadataMatcher $metadataMatcher = null, bool $deserialize = true): array
-    {
-        $streamEvents = $this->eventStore->loadReverse(new StreamName($streamName), $fromNumber, $count, $metadataMatcher);
-        if (! $streamEvents->valid()) {
-            $streamEvents = new ArrayIterator([]);
-        }
-
-        return $this->convertToEcotoneEvents(
-            $streamEvents,
-            $deserialize
-        );
-    }
-
-    public function fetchStreamNames(?string $filter, ?MetadataMatcher $metadataMatcher, int $limit = 20, int $offset = 0): array
-    {
-        return $this->eventStore->fetchStreamNames($filter, $metadataMatcher, $limit, $offset);
-    }
-
-    public function fetchStreamNamesRegex(string $filter, ?MetadataMatcher $metadataMatcher, int $limit = 20, int $offset = 0): array
-    {
-        return $this->eventStore->fetchStreamNamesRegex($filter, $metadataMatcher, $limit, $offset);
-    }
-
-    public function fetchCategoryNames(?string $filter, int $limit = 20, int $offset = 0): array
-    {
-        return $this->eventStore->fetchCategoryNames($filter, $limit, $offset);
-    }
-
-    public function fetchCategoryNamesRegex(string $filter, int $limit = 20, int $offset = 0): array
-    {
-        return $this->fetchCategoryNamesRegex($filter, $limit, $offset);
     }
 }

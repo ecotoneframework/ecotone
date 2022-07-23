@@ -2,8 +2,8 @@
 
 namespace Ecotone\EventSourcing\Config;
 
-use Ecotone\EventSourcing\Config\InboundChannelAdapter\ProjectionExecutor;
-use Ecotone\EventSourcing\LazyProophProjectionManager;
+use Ecotone\EventSourcing\Config\InboundChannelAdapter\ProjectionEventHandler;
+use Ecotone\EventSourcing\Prooph\LazyProophProjectionManager;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -13,7 +13,7 @@ final class StreamNameMapper
     {
         return MessageBuilder::fromMessage($message)
                 ->setHeader('ecotone.eventSourcing.eventStore.streamName', LazyProophProjectionManager::getProjectionStreamName(
-                    $message->getHeaders()->get(ProjectionExecutor::PROJECTION_NAME)
+                    $message->getHeaders()->get(ProjectionEventHandler::PROJECTION_NAME)
                 ))->build();
     }
 }

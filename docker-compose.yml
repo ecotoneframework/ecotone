@@ -18,23 +18,6 @@ services:
       COMPOSER_ROOT_VERSION: 'dev-main'
       RABBIT_HOST: "rabbitmq"
       DATABASE_DSN: pgsql://ecotone:secret@database:5432/ecotone
-  app_8_0:
-    image: simplycodedsoftware/php:8.0
-    volumes:
-      - "$PWD:/data/app"
-    working_dir: "/data/app"
-    command: sleep 99999
-    networks:
-      - default
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
-    # 172.17.0.1
-    environment:
-      COMPOSER_HOME: /data/app
-      COMPOSE_HTTP_TIMEOUT: 9999
-      COMPOSER_ROOT_VERSION: 'dev-main'
-      RABBIT_HOST: "rabbitmq"
-      DATABASE_DSN: pgsql://ecotone:secret@database:5432/ecotone
   database:
     image: postgres:12.1
     networks:

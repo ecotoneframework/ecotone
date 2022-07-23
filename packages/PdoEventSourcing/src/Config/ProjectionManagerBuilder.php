@@ -3,8 +3,8 @@
 namespace Ecotone\EventSourcing\Config;
 
 use Ecotone\EventSourcing\EventSourcingConfiguration;
-use Ecotone\EventSourcing\LazyProophProjectionManager;
 use Ecotone\EventSourcing\ProjectionSetupConfiguration;
+use Ecotone\EventSourcing\Prooph\LazyProophProjectionManager;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;

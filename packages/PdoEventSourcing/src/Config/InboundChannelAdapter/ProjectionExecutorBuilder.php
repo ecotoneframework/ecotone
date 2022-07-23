@@ -3,9 +3,9 @@
 namespace Ecotone\EventSourcing\Config\InboundChannelAdapter;
 
 use Ecotone\EventSourcing\EventSourcingConfiguration;
-use Ecotone\EventSourcing\LazyProophProjectionManager;
 use Ecotone\EventSourcing\ProjectionRunningConfiguration;
 use Ecotone\EventSourcing\ProjectionSetupConfiguration;
+use Ecotone\EventSourcing\Prooph\LazyProophProjectionManager;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
 use Ecotone\Messaging\Handler\ChannelResolver;
@@ -31,13 +31,13 @@ class ProjectionExecutorBuilder extends InputOutputMessageHandlerBuilder impleme
 
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return $interfaceToCallRegistry->getFor(ProjectionExecutor::class, $this->methodName);
+        return $interfaceToCallRegistry->getFor(ProjectionEventHandler::class, $this->methodName);
     }
 
     public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
     {
         return ServiceActivatorBuilder::createWithDirectReference(
-            new ProjectionExecutor(
+            new ProjectionEventHandler(
                 new LazyProophProjectionManager($this->eventSourcingConfiguration, $this->projectSetupConfigurations, $referenceSearchService),
                 $this->projectionSetupConfiguration,
                 $this->projectionRunningConfiguration,
@@ -53,7 +53,7 @@ class ProjectionExecutorBuilder extends InputOutputMessageHandlerBuilder impleme
     public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         return [
-            $interfaceToCallRegistry->getFor(ProjectionExecutor::class, $this->methodName),
+            $interfaceToCallRegistry->getFor(ProjectionEventHandler::class, $this->methodName),
         ];
     }
 

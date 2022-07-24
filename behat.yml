@@ -1,0 +1,9 @@
+default:
+    translation:
+        locale: en
+    formatters:
+        pretty: true
+    suites:
+      default:
+          paths:    [ tests/Messaging/Behat/features, tests/Modelling/Behat/features ]
+          contexts: [ Test\Ecotone\Messaging\Behat\Bootstrap\DomainContext, Test\Ecotone\Modelling\Behat\Bootstrap\DomainContext, Test\Ecotone\Messaging\Behat\Bootstrap\AnnotationBasedMessagingContext ]

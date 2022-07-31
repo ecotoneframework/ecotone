@@ -12,7 +12,7 @@
         }
     ],
     "keywords": ["ddd", "cqrs", "EventSourcing", "ecotone", "service-bus"],
-    "description": "Core modules for running Ecotone Framework",
+    "description": "Supporting you in building DDD, CQRS, Event Sourcing applications with ease.",
     "autoload": {
         "psr-4": {
             "Ecotone\\": "src"

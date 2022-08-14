@@ -7,6 +7,8 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\MessagingException;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class MessageBuilder
@@ -15,19 +17,10 @@ use Ecotone\Messaging\MessageHeaders;
  */
 final class MessageBuilder
 {
-    /**
-     * @var  mixed
-     */
-    private $payload;
-    private \Ecotone\Messaging\Support\HeaderAccessor $headerAccessor;
+    private mixed $payload;
+    private HeaderAccessor $headerAccessor;
 
-    /**
-     * MessageBuilder constructor.
-     * @param $payload
-     * @param HeaderAccessor $headerAccessor
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    private function __construct($payload, HeaderAccessor $headerAccessor)
+    private function __construct(mixed $payload, HeaderAccessor $headerAccessor)
     {
         Assert::notNull($payload, 'Trying to configure message with null payload');
         if ($payload instanceof Message) {
@@ -37,6 +30,70 @@ final class MessageBuilder
         $this->headerAccessor = $headerAccessor;
 
         $this->initialize($payload);
+    }
+
+    /**
+     * @param $payload
+     * @throws MessagingException
+     */
+    private function initialize($payload): void
+    {
+        Assert::notNull($payload, "Message payload can't be empty");
+    }
+
+    /**
+     * @param mixed $payload
+     * @return MessageBuilder
+     */
+    public static function withPayload($payload): self
+    {
+        return new self($payload, HeaderAccessor::create());
+    }
+
+    public static function fromMessage(Message $message): self
+    {
+        return new self($message->getPayload(), HeaderAccessor::createFrom($message->getHeaders()));
+    }
+
+    public static function fromMessageWithNewMessageId(Message $message): self
+    {
+        return (new self($message->getPayload(), HeaderAccessor::createFrom($message->getHeaders())))
+            ->setHeader(MessageHeaders::MESSAGE_ID, Uuid::uuid4()->toString());
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getPayload()
+    {
+        return $this->payload;
+    }
+
+    /**
+     * @param $payload
+     * @return MessageBuilder
+     */
+    public function setPayload($payload): self
+    {
+        Assert::notNull($payload, 'Trying to configure message with null payload');
+        if ($payload instanceof Message) {
+            throw InvalidArgumentException::create("Payload for building message can not be another message for {$payload}");
+        }
+
+        $this->payload = $payload;
+
+        return $this;
+    }
+
+    /**
+     * @param MediaType $mediaType
+     * @return MessageBuilder
+     */
+    public function setContentType(MediaType $mediaType): self
+    {
+        $this->setHeader(MessageHeaders::CONTENT_TYPE, $mediaType->toString());
+
+        return $this;
     }
 
     /**
@@ -55,20 +112,21 @@ final class MessageBuilder
      * @param MediaType $mediaType
      * @return MessageBuilder
      */
-    public function setContentType(MediaType $mediaType): self
+    public function setContentTypeIfAbsent(MediaType $mediaType): self
     {
-        $this->setHeader(MessageHeaders::CONTENT_TYPE, $mediaType->toString());
+        $this->setHeaderIfAbsent(MessageHeaders::CONTENT_TYPE, $mediaType->toString());
 
         return $this;
     }
 
     /**
-     * @param MediaType $mediaType
+     * @param string $headerName
+     * @param $headerValue
      * @return MessageBuilder
      */
-    public function setContentTypeIfAbsent(MediaType $mediaType): self
+    public function setHeaderIfAbsent(string $headerName, $headerValue): self
     {
-        $this->setHeaderIfAbsent(MessageHeaders::CONTENT_TYPE, $mediaType->toString());
+        $this->headerAccessor->setHeaderIfAbsent($headerName, $headerValue);
 
         return $this;
     }
@@ -86,17 +144,6 @@ final class MessageBuilder
         return $this;
     }
 
-    /**
-     * @param string $headerName
-     * @return MessageBuilder
-     */
-    public function removeHeader(string $headerName): self
-    {
-        $this->headerAccessor->removeHeader($headerName);
-
-        return $this;
-    }
-
     public function removeHeaders(array $headerNames): self
     {
         foreach ($headerNames as $headerName) {
@@ -108,12 +155,11 @@ final class MessageBuilder
 
     /**
      * @param string $headerName
-     * @param $headerValue
      * @return MessageBuilder
      */
-    public function setHeaderIfAbsent(string $headerName, $headerValue): self
+    public function removeHeader(string $headerName): self
     {
-        $this->headerAccessor->setHeaderIfAbsent($headerName, $headerValue);
+        $this->headerAccessor->removeHeader($headerName);
 
         return $this;
     }
@@ -140,28 +186,9 @@ final class MessageBuilder
         return $this;
     }
 
-    /**
-     * @param $payload
-     * @return MessageBuilder
-     */
-    public function setPayload($payload): self
+    public function containsKey(string $headerName): bool
     {
-        Assert::notNull($payload, 'Trying to configure message with null payload');
-        if ($payload instanceof Message) {
-            throw InvalidArgumentException::create("Payload for building message can not be another message for {$payload}");
-        }
-
-        $this->payload = $payload;
-
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getPayload()
-    {
-        return $this->payload;
+        return array_key_exists($headerName, $this->getCurrentHeaders());
     }
 
     /**
@@ -172,15 +199,10 @@ final class MessageBuilder
         return $this->headerAccessor->headers();
     }
 
-    public function containsKey(string $headerName): bool
-    {
-        return array_key_exists($headerName, $this->getCurrentHeaders());
-    }
-
     /**
      * @param string $name
      * @return mixed
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function getHeaderWithName(string $name)
     {
@@ -193,46 +215,11 @@ final class MessageBuilder
 
     public function build(): GenericMessage
     {
-        $messageHeaders = MessageHeaders::create(
-            $this->headerAccessor->headers()
-        );
-
         return GenericMessage::create(
             $this->payload,
-            $messageHeaders
+            MessageHeaders::create(
+                $this->headerAccessor->headers()
+            )
         );
-    }
-
-    /**
-     * @param mixed $payload
-     * @return MessageBuilder
-     */
-    public static function withPayload($payload): self
-    {
-        return new self($payload, HeaderAccessor::create());
-    }
-
-    public static function fromMessage(Message $message): self
-    {
-        return new self(
-            $message->getPayload(),
-            HeaderAccessor::createFrom($message->getHeaders())
-        );
-    }
-
-    public static function fromMessageWithPreservedMessageId(Message $message): self
-    {
-        return self::fromMessage($message)
-                        ->setHeader(MessageHeaders::MESSAGE_ID, $message->getHeaders()->getMessageId())
-                        ->setHeader(MessageHeaders::TIMESTAMP, $message->getHeaders()->getTimestamp());
-    }
-
-    /**
-     * @param $payload
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    private function initialize($payload): void
-    {
-        Assert::notNull($payload, "Message payload can't be empty");
     }
 }

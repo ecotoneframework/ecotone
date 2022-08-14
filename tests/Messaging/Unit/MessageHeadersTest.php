@@ -120,12 +120,12 @@ class MessageHeadersTest extends TestCase
 
         $this->assertEquals(
             json_encode([
-                'id' => $messageHeaders->get(MessageHeaders::MESSAGE_ID),
-                'timestamp' => $messageHeaders->get(MessageHeaders::TIMESTAMP),
                 'token' => '123',
                 'metadata' => [
                     'x' => 1,
                 ],
+                'id' => $messageHeaders->get(MessageHeaders::MESSAGE_ID),
+                'timestamp' => $messageHeaders->get(MessageHeaders::TIMESTAMP),
             ]),
             (string)$messageHeaders
         );

@@ -123,11 +123,11 @@ class MessageBuilderTest extends MessagingTest
             $messageToCompare
         );
 
-        $this->assertNotEquals(
+        $this->assertEquals(
             $message->getHeaders()->get(MessageHeaders::MESSAGE_ID),
             $messageToCompare->getHeaders()->get(MessageHeaders::MESSAGE_ID)
         );
-        $this->assertNotEquals(
+        $this->assertEquals(
             $message->getHeaders()->get(MessageHeaders::TIMESTAMP),
             $messageToCompare->getHeaders()->get(MessageHeaders::TIMESTAMP)
         );

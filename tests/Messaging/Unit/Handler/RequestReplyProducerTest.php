@@ -233,6 +233,7 @@ class RequestReplyProducerTest extends MessagingTest
             ->build();
         $requestReplyProducer->handleWithReply($requestMessage);
 
+        /** @var Message[] $splittedMessages */
         $splittedMessages = [];
         while ($splittedMessage = $outputChannel->receive()) {
             $splittedMessages[] = $splittedMessage;
@@ -253,6 +254,8 @@ class RequestReplyProducerTest extends MessagingTest
             ],
             $splittedMessages
         );
+
+        $this->assertNotSame($splittedMessages[0]->getHeaders()->getMessageId(), $splittedMessages[1]->getHeaders()->getMessageId());
     }
 
     public function test_throwing_exception_if_result_of_service_call_is_not_array()
@@ -307,8 +310,11 @@ class RequestReplyProducerTest extends MessagingTest
     {
         $correlationHeader = null;
         $sequenceSize = count($replyData);
+
+        $messageIds = [];
         for ($sequenceNumber = $sequenceSize - 1; $sequenceNumber >= 0; $sequenceNumber--) {
             $splittedMessage = $outputChannel->receive();
+            $messageIds[] = $splittedMessage->getHeaders()->getMessageId();
 
             $this->assertNotInstanceOf(Message::class, $splittedMessage->getPayload(), 'Message is inside message.');
             if (! $correlationHeader) {
@@ -326,5 +332,7 @@ class RequestReplyProducerTest extends MessagingTest
                 $splittedMessage
             );
         }
+
+        $this->assertCount(4, array_unique($messageIds));
     }
 }

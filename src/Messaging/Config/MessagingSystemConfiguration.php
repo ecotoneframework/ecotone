@@ -451,11 +451,17 @@ final class MessagingSystemConfiguration implements Configuration
             $asynchronousChannels[] = $asynchronousMessageChannel;
             foreach ($this->messageHandlerBuilders as $key => $messageHandlerBuilder) {
                 if ($messageHandlerBuilder->getEndpointId() === $targetEndpointId) {
-                    $originalInputChannelName = $messageHandlerBuilder->getInputMessageChannelName();
-                    $targetChannelName        = AsynchronousModule::getSynchronousChannelName($originalInputChannelName);
-                    $this->messageHandlerBuilders[$key] = $messageHandlerBuilder->withInputChannelName($targetChannelName);
+                    $busRoutingChannel = $messageHandlerBuilder->getInputMessageChannelName();
+                    $synchronousChannelName        = AsynchronousModule::getSynchronousChannelName($busRoutingChannel);
+                    $this->messageHandlerBuilders[$key] = $messageHandlerBuilder->withInputChannelName($synchronousChannelName);
 
-                    $this->messageHandlerBuilders[$targetChannelName] = (
+                    /**
+                     * This provides endpoint that is called by gateway (bus).
+                     * Then it outputs message to asynchronous message channel.
+                     * Then when message is consumed it's routed by routing slip
+                     * to target handler
+                     */
+                    $this->messageHandlerBuilders[$synchronousChannelName] = (
                         TransformerBuilder::createHeaderEnricher(
                             [
                                 BusModule::COMMAND_CHANNEL_NAME_BY_NAME => null,
@@ -463,16 +469,16 @@ final class MessagingSystemConfiguration implements Configuration
                                 BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => null,
                                 BusModule::EVENT_CHANNEL_NAME_BY_NAME => null,
                                 MessageHeaders::REPLY_CHANNEL => null,
-                                MessageHeaders::ROUTING_SLIP => $targetChannelName,
+                                MessageHeaders::ROUTING_SLIP => $synchronousChannelName,
                             ]
                         )
-                            ->withEndpointId($targetChannelName)
-                            ->withInputChannelName($originalInputChannelName)
+                            ->withEndpointId($synchronousChannelName)
+                            ->withInputChannelName($busRoutingChannel)
                             ->withOutputMessageChannel($asynchronousMessageChannel)
                     );
 
                     if (array_key_exists($messageHandlerBuilder->getEndpointId(), $this->pollingMetadata)) {
-                        $this->pollingMetadata[$targetChannelName] = $this->pollingMetadata[$messageHandlerBuilder->getEndpointId()];
+                        $this->pollingMetadata[$synchronousChannelName] = $this->pollingMetadata[$messageHandlerBuilder->getEndpointId()];
                         unset($this->pollingMetadata[$messageHandlerBuilder->getEndpointId()]);
                     }
                     $foundEndpoint = true;

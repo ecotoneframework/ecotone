@@ -41,12 +41,12 @@ class SimpleMessageChannelBuilder implements MessageChannelBuilder
 
     public static function createDirectMessageChannel(string $messageChannelName): self
     {
-        return self::create($messageChannelName, DirectChannel::create());
+        return self::create($messageChannelName, DirectChannel::create($messageChannelName));
     }
 
     public static function createPublishSubscribeChannel(string $messageChannelName): self
     {
-        return self::create($messageChannelName, PublishSubscribeChannel::create());
+        return self::create($messageChannelName, PublishSubscribeChannel::create($messageChannelName));
     }
 
     public static function createQueueChannel(string $messageChannelName): self

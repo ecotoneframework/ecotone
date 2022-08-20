@@ -127,9 +127,9 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
 
         $baseKey = Uuid::uuid4()->toString();
         for ($key = 1; $key < count($messageHandlersToChain); $key++) {
-            $bridgeChannels[$baseKey . $key] = DirectChannel::create();
+            $bridgeChannels[$baseKey . $key] = DirectChannel::create($this->inputMessageChannelName . "_chain." . $baseKey . $key);
         }
-        $requestChannel = DirectChannel::create();
+        $requestChannel = DirectChannel::create($this->inputMessageChannelName . "_chain." . $baseKey);
         $bridgeChannels[$baseKey] = $requestChannel;
 
         $customChannelResolver = InMemoryChannelResolver::createWithChannelResolver($channelResolver, $bridgeChannels);

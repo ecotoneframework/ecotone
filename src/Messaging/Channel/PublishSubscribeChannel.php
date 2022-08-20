@@ -18,16 +18,13 @@ class PublishSubscribeChannel implements SubscribableChannel
      */
     private array $messageHandlers = [];
 
-    private function __construct()
+    private function __construct(private string $messageChannelName)
     {
     }
 
-    /**
-     * @return PublishSubscribeChannel
-     */
-    public static function create(): self
+    public static function create(string $messageChannelName = ""): self
     {
-        return new self();
+        return new self($messageChannelName);
     }
 
     /**
@@ -67,6 +64,6 @@ class PublishSubscribeChannel implements SubscribableChannel
 
     public function __toString()
     {
-        return 'publish subscribe channel';
+        return 'publish subscribe channel ' . $this->messageChannelName;
     }
 }

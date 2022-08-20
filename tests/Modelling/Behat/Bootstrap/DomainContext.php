@@ -2,6 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Behat\Bootstrap;
 
+use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\TableNode;
 use Ecotone\Messaging\Conversion\MediaType;
@@ -621,5 +622,16 @@ class DomainContext extends TestCase implements Context
         $result = AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting('user.create', new \Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod\CreateUser('Johny'));
 
         Assert::assertNotNull($result);
+    }
+
+    /**
+     * @Then there should be notification not having metadata :headerName :headerValue
+     */
+    public function thereShouldBeNotificationNotHavingMetadata(string $headerName, string $value)
+    {
+        $this->assertNotEquals(
+            $value,
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting('getNotificationHeaders', [])[$headerName]
+        );
     }
 }

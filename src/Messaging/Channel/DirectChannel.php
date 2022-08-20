@@ -11,23 +11,17 @@ use Ecotone\Messaging\SubscribableChannel;
  * @package Ecotone\Messaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class DirectChannel implements SubscribableChannel
+final class DirectChannel implements SubscribableChannel
 {
     private ?MessageHandler $messageHandler = null;
 
-    /**
-     * DirectChannel constructor.
-     */
-    private function __construct()
+    private function __construct(private string $messageChannelName)
     {
     }
 
-    /**
-     * @return DirectChannel
-     */
-    public static function create(): self
+    public static function create(string $messageChannelName = ""): self
     {
-        return new self();
+        return new self($messageChannelName);
     }
 
     /**
@@ -48,7 +42,7 @@ class DirectChannel implements SubscribableChannel
     public function subscribe(MessageHandler $messageHandler): void
     {
         if ($this->messageHandler) {
-            throw WrongHandlerAmountException::create("{$messageHandler} can't be registered as second handler for unicasting dispatcher. The first is {$this->messageHandler}");
+            throw WrongHandlerAmountException::create("Direct channel {$this->messageChannelName} have registered more than one handler. {$messageHandler} can't be registered as second handler for unicasting dispatcher. The first is {$this->messageHandler}");
         }
 
         $this->messageHandler = $messageHandler;
@@ -64,6 +58,6 @@ class DirectChannel implements SubscribableChannel
 
     public function __toString()
     {
-        return 'direct channel';
+        return 'direct channel ' . $this->messageChannelName;
     }
 }

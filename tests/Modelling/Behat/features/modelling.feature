@@ -93,6 +93,11 @@ Feature: activating as aggregate order entity
     When I place order with metadata "token" 123
     Then there should be notification with metadata "token" 123
 
+  Scenario: Message Id should not be propagated
+    Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\MetadataPropagating"
+    When I place order with metadata "id" "c7330d16-0e67-4dac-a14e-a70ffabfeb06"
+    Then there should be notification not having metadata "id" "c7330d16-0e67-4dac-a14e-a70ffabfeb06"
+
   Scenario: Placing order and notifying. Verify correctness overriding propagated headers
     Given I active messaging for namespace "Test\Ecotone\Modelling\Fixture\MetadataPropagating"
     And I override header "token" with 1234

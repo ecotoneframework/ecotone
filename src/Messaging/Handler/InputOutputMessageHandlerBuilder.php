@@ -15,7 +15,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
 {
     protected string $inputMessageChannelName = '';
     protected string $outputMessageChannelName = '';
-    private ?string $name = '';
+    private ?string $endpointId = '';
     /**
      * @var string[]
      */
@@ -123,7 +123,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      */
     public function getEndpointId(): ?string
     {
-        return $this->name;
+        return $this->endpointId;
     }
 
     /**
@@ -131,7 +131,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      */
     public function withEndpointId(string $endpointId): self
     {
-        $this->name = $endpointId;
+        $this->endpointId = $endpointId;
 
         return $this;
     }

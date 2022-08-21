@@ -167,11 +167,11 @@ final class TypeDescriptor implements Type
             return true;
         }
 
-        if ($this->isScalar() && !$toCompare->isScalar()) {
+        if ($this->isScalar() && ! $toCompare->isScalar()) {
             return false;
         }
 
-        if (!$this->isScalar() && $toCompare->isScalar()) {
+        if (! $this->isScalar() && $toCompare->isScalar()) {
             if ($this->isClassOrInterface()) {
                 if ($this->equals(TypeDescriptor::create(TypeDescriptor::OBJECT))) {
                     return false;
@@ -187,7 +187,7 @@ final class TypeDescriptor implements Type
             return false;
         }
 
-        if (($this->isClassOrInterface() && !$toCompare->isClassOrInterface()) || ($toCompare->isClassOrInterface() && !$this->isClassOrInterface())) {
+        if (($this->isClassOrInterface() && ! $toCompare->isClassOrInterface()) || ($toCompare->isClassOrInterface() && ! $this->isClassOrInterface())) {
             return false;
         }
 
@@ -200,7 +200,7 @@ final class TypeDescriptor implements Type
             }
 
             for ($index = 0; $index < count($thisGenericTypes); $index++) {
-                if (!$thisGenericTypes[$index]->equals($comparedGenericTypes[$index])) {
+                if (! $thisGenericTypes[$index]->equals($comparedGenericTypes[$index])) {
                     return false;
                 }
             }
@@ -209,21 +209,21 @@ final class TypeDescriptor implements Type
         }
 
         if ($this->isClassOrInterface() && $toCompare->isClassOrInterface()) {
-            if (!$this->equals($toCompare)) {
-                if (!$this->isCompoundObjectType() && $toCompare->isCompoundObjectType()) {
+            if (! $this->equals($toCompare)) {
+                if (! $this->isCompoundObjectType() && $toCompare->isCompoundObjectType()) {
                     return true;
                 }
-                if ($this->isCompoundObjectType() && !$toCompare->isCompoundObjectType()) {
+                if ($this->isCompoundObjectType() && ! $toCompare->isCompoundObjectType()) {
                     return false;
                 }
 
                 $thisClass = new ReflectionClass($this->getTypeHint());
                 $toCompareClass = new ReflectionClass($toCompare->getTypeHint());
 
-                if ($thisClass->isInterface() && !$toCompareClass->isInterface()) {
+                if ($thisClass->isInterface() && ! $toCompareClass->isInterface()) {
                     return $toCompareClass->implementsInterface($this->getTypeHint());
                 }
-                if ($toCompareClass->isInterface() && !$thisClass->isInterface()) {
+                if ($toCompareClass->isInterface() && ! $thisClass->isInterface()) {
                     return $thisClass->implementsInterface($toCompare->getTypeHint());
                 }
 
@@ -258,11 +258,11 @@ final class TypeDescriptor implements Type
     {
         $resolvedType = [];
         foreach (self::resolveType($typeHint)->getUnionTypes() as $declarationType) {
-            if ($declarationType->isIterable() && !$declarationType->isCollection() && $docBlockTypeDescription) {
+            if ($declarationType->isIterable() && ! $declarationType->isCollection() && $docBlockTypeDescription) {
                 try {
                     $docblockType = self::resolveType($docBlockTypeDescription);
 
-                    if (!$docblockType->isCollection()) {
+                    if (! $docblockType->isCollection()) {
                         $resolvedType[] = $declarationType;
                         continue;
                     }
@@ -291,7 +291,7 @@ final class TypeDescriptor implements Type
      */
     public static function isInternalClassOrInterface(string $typeHint): bool
     {
-        if (!self::isItTypeOfExistingClassOrInterface($typeHint)) {
+        if (! self::isItTypeOfExistingClassOrInterface($typeHint)) {
             return false;
         }
 
@@ -348,12 +348,12 @@ final class TypeDescriptor implements Type
             }
 
             $collectionType = TypeDescriptor::createFromVariable(reset($variable));
-            if (!$collectionType->isClassNotInterface()) {
+            if (! $collectionType->isClassNotInterface()) {
                 return new self(self::ARRAY);
             }
 
             foreach ($variable as $type) {
-                if (!$collectionType->equals(TypeDescriptor::createFromVariable($type))) {
+                if (! $collectionType->equals(TypeDescriptor::createFromVariable($type))) {
                     return new self(self::ARRAY);
                 }
             }
@@ -385,7 +385,7 @@ final class TypeDescriptor implements Type
      */
     public function resolveGenericTypes(): array
     {
-        if (!$this->isCollection()) {
+        if (! $this->isCollection()) {
             throw InvalidArgumentException::create("Can't resolve collection type on non collection");
         }
 
@@ -623,7 +623,7 @@ final class TypeDescriptor implements Type
 
     public function isAbstractClass(): bool
     {
-        if (!$this->isClassOrInterface()) {
+        if (! $this->isClassOrInterface()) {
             return false;
         }
 
@@ -704,7 +704,7 @@ final class TypeDescriptor implements Type
                 $finalTypes[] = new self(self::ANYTHING);
                 continue;
             }
-            if (!self::isResolvableType($type)) {
+            if (! self::isResolvableType($type)) {
                 throw TypeDefinitionException::create("Passed type hint `{$type}` is not resolvable");
             }
 
@@ -716,7 +716,7 @@ final class TypeDescriptor implements Type
                     $type = self::ARRAY;
                 } else {
                     foreach ($collectionTypes as $collectionType) {
-                        if (!self::isResolvableType($collectionType)) {
+                        if (! self::isResolvableType($collectionType)) {
                             throw TypeDefinitionException::create("Unknown collection type in {$type}. Passed type in collection is not resolvable: {$collectionType}.");
                         }
                     }

@@ -19,7 +19,7 @@ final class DirectChannel implements SubscribableChannel
     {
     }
 
-    public static function create(string $messageChannelName = ""): self
+    public static function create(string $messageChannelName = ''): self
     {
         return new self($messageChannelName);
     }

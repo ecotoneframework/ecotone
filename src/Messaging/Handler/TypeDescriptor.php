@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler;
 
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use ReflectionClass;
 use ReflectionException;
@@ -19,29 +20,30 @@ final class TypeDescriptor implements Type
     public const COLLECTION_TYPE_REGEX = "/[a-zA-Z0-9]*<([\\a-zA-Z0-9,\s]*)>/";
 
     //    scalar types
-    public const         INTEGER           = 'int';
+    public const         INTEGER = 'int';
     private const INTEGER_LONG_NAME = 'integer';
-    public const         FLOAT             = 'float';
-    private const DOUBLE            = 'double';
-    public const         BOOL              = 'bool';
-    private const BOOL_LONG_NAME    = 'boolean';
-    private const BOOL_FALSE_NAME   = 'false';
-    public const         STRING            = 'string';
+    public const         FLOAT = 'float';
+    private const DOUBLE = 'double';
+    public const         BOOL = 'bool';
+    private const BOOL_LONG_NAME = 'boolean';
+    private const BOOL_FALSE_NAME = 'false';
+    public const         STRING = 'string';
 
 //    compound types
-    public const ARRAY                     = 'array';
-    public const         ITERABLE          = 'iterable';
-    public const CLOSURE                  = 'Closure';
-    public const         OBJECT            = 'object';
+    public const ARRAY = 'array';
+    public const         ITERABLE = 'iterable';
+    public const CLOSURE = 'Closure';
+    public const CALLABLE = 'callable';
+    public const         OBJECT = 'object';
 
 //    resource
     public const RESOURCE = 'resource';
 
     public const ANYTHING = 'anything';
-    public const VOID     = 'void';
+    public const VOID = 'void';
 
     public const MIXED = 'mixed';
-    public const NULL  = 'null';
+    public const NULL = 'null';
 
     private string $type;
 
@@ -146,7 +148,7 @@ final class TypeDescriptor implements Type
      *
      * @return bool
      * @throws InvalidArgumentException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      * @throws ReflectionException
      */
     public function isCompatibleWith(Type $toCompare): bool
@@ -165,11 +167,11 @@ final class TypeDescriptor implements Type
             return true;
         }
 
-        if ($this->isScalar() && ! $toCompare->isScalar()) {
+        if ($this->isScalar() && !$toCompare->isScalar()) {
             return false;
         }
 
-        if (! $this->isScalar() && $toCompare->isScalar()) {
+        if (!$this->isScalar() && $toCompare->isScalar()) {
             if ($this->isClassOrInterface()) {
                 if ($this->equals(TypeDescriptor::create(TypeDescriptor::OBJECT))) {
                     return false;
@@ -185,12 +187,12 @@ final class TypeDescriptor implements Type
             return false;
         }
 
-        if (($this->isClassOrInterface() && ! $toCompare->isClassOrInterface()) || ($toCompare->isClassOrInterface() && ! $this->isClassOrInterface())) {
+        if (($this->isClassOrInterface() && !$toCompare->isClassOrInterface()) || ($toCompare->isClassOrInterface() && !$this->isClassOrInterface())) {
             return false;
         }
 
         if ($this->isCollection() && $toCompare->isCollection()) {
-            $thisGenericTypes     = $this->resolveGenericTypes();
+            $thisGenericTypes = $this->resolveGenericTypes();
             $comparedGenericTypes = $toCompare->resolveGenericTypes();
 
             if (count($thisGenericTypes) !== count($comparedGenericTypes)) {
@@ -198,7 +200,7 @@ final class TypeDescriptor implements Type
             }
 
             for ($index = 0; $index < count($thisGenericTypes); $index++) {
-                if (! $thisGenericTypes[$index]->equals($comparedGenericTypes[$index])) {
+                if (!$thisGenericTypes[$index]->equals($comparedGenericTypes[$index])) {
                     return false;
                 }
             }
@@ -207,21 +209,21 @@ final class TypeDescriptor implements Type
         }
 
         if ($this->isClassOrInterface() && $toCompare->isClassOrInterface()) {
-            if (! $this->equals($toCompare)) {
-                if (! $this->isCompoundObjectType() && $toCompare->isCompoundObjectType()) {
+            if (!$this->equals($toCompare)) {
+                if (!$this->isCompoundObjectType() && $toCompare->isCompoundObjectType()) {
                     return true;
                 }
-                if ($this->isCompoundObjectType() && ! $toCompare->isCompoundObjectType()) {
+                if ($this->isCompoundObjectType() && !$toCompare->isCompoundObjectType()) {
                     return false;
                 }
 
-                $thisClass      = new ReflectionClass($this->getTypeHint());
+                $thisClass = new ReflectionClass($this->getTypeHint());
                 $toCompareClass = new ReflectionClass($toCompare->getTypeHint());
 
-                if ($thisClass->isInterface() && ! $toCompareClass->isInterface()) {
+                if ($thisClass->isInterface() && !$toCompareClass->isInterface()) {
                     return $toCompareClass->implementsInterface($this->getTypeHint());
                 }
-                if ($toCompareClass->isInterface() && ! $thisClass->isInterface()) {
+                if ($toCompareClass->isInterface() && !$thisClass->isInterface()) {
                     return $thisClass->implementsInterface($toCompare->getTypeHint());
                 }
 
@@ -256,11 +258,11 @@ final class TypeDescriptor implements Type
     {
         $resolvedType = [];
         foreach (self::resolveType($typeHint)->getUnionTypes() as $declarationType) {
-            if ($declarationType->isIterable() && ! $declarationType->isCollection() && $docBlockTypeDescription) {
+            if ($declarationType->isIterable() && !$declarationType->isCollection() && $docBlockTypeDescription) {
                 try {
                     $docblockType = self::resolveType($docBlockTypeDescription);
 
-                    if (! $docblockType->isCollection()) {
+                    if (!$docblockType->isCollection()) {
                         $resolvedType[] = $declarationType;
                         continue;
                     }
@@ -289,11 +291,16 @@ final class TypeDescriptor implements Type
      */
     public static function isInternalClassOrInterface(string $typeHint): bool
     {
-        if (! self::isItTypeOfExistingClassOrInterface($typeHint)) {
+        if (!self::isItTypeOfExistingClassOrInterface($typeHint)) {
             return false;
         }
 
         return (new ReflectionClass($typeHint))->isInternal();
+    }
+
+    public static function isClosure(string $typeHint): bool
+    {
+        return in_array($typeHint, [self::CLOSURE, self::CALLABLE]);
     }
 
     /**
@@ -311,7 +318,7 @@ final class TypeDescriptor implements Type
      *
      * @param string $type
      *
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     private function __construct(string $type)
     {
@@ -323,7 +330,7 @@ final class TypeDescriptor implements Type
      *
      * @return TypeDescriptor
      * @throws TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public static function createFromVariable($variable): self
     {
@@ -341,12 +348,12 @@ final class TypeDescriptor implements Type
             }
 
             $collectionType = TypeDescriptor::createFromVariable(reset($variable));
-            if (! $collectionType->isClassNotInterface()) {
+            if (!$collectionType->isClassNotInterface()) {
                 return new self(self::ARRAY);
             }
 
             foreach ($variable as $type) {
-                if (! $collectionType->equals(TypeDescriptor::createFromVariable($type))) {
+                if (!$collectionType->equals(TypeDescriptor::createFromVariable($type))) {
                     return new self(self::ARRAY);
                 }
             }
@@ -374,11 +381,11 @@ final class TypeDescriptor implements Type
      *
      * @return TypeDescriptor[]
      * @throws InvalidArgumentException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function resolveGenericTypes(): array
     {
-        if (! $this->isCollection()) {
+        if (!$this->isCollection()) {
             throw InvalidArgumentException::create("Can't resolve collection type on non collection");
         }
 
@@ -401,7 +408,7 @@ final class TypeDescriptor implements Type
      * @param string $className
      *
      * @throws TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public static function createCollection(string $className): TypeDescriptor
     {
@@ -413,7 +420,7 @@ final class TypeDescriptor implements Type
      *
      * @return Type
      * @throws TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public static function create(?string $type): Type
     {
@@ -422,7 +429,7 @@ final class TypeDescriptor implements Type
 
     /**
      * @throws TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public static function createAnythingType(): TypeDescriptor
     {
@@ -431,7 +438,7 @@ final class TypeDescriptor implements Type
 
     /**
      * @throws TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public static function createBooleanType(): TypeDescriptor
     {
@@ -440,7 +447,7 @@ final class TypeDescriptor implements Type
 
     /**
      * @throws TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public static function createIntegerType(): TypeDescriptor
     {
@@ -449,7 +456,7 @@ final class TypeDescriptor implements Type
 
     /**
      * @throws TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public static function createArrayType(): TypeDescriptor
     {
@@ -460,7 +467,7 @@ final class TypeDescriptor implements Type
      * Should be used instead of array, if array is not composed of scalar types or composition of types is unknown
      *
      * @throws TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public static function createIterable(): TypeDescriptor
     {
@@ -469,7 +476,7 @@ final class TypeDescriptor implements Type
 
     /**
      * @throws TypeDefinitionException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public static function createStringType(): TypeDescriptor
     {
@@ -616,7 +623,7 @@ final class TypeDescriptor implements Type
 
     public function isAbstractClass(): bool
     {
-        if (! $this->isClassOrInterface()) {
+        if (!$this->isClassOrInterface()) {
             return false;
         }
 
@@ -649,7 +656,7 @@ final class TypeDescriptor implements Type
     /**
      * @param string|null $typeHint
      * @return Type
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     private static function resolveType(?string $typeHint): Type
     {
@@ -680,6 +687,10 @@ final class TypeDescriptor implements Type
                 $finalTypes[] = new self(self::BOOL);
                 continue;
             }
+            if ($typeHint === self::CALLABLE) {
+                $finalTypes[] = new self(self::CLOSURE);
+                continue;
+            }
 
             if (strpos($type, '[]') !== false) {
                 $type = 'array<' . str_replace('[]', '', $type) . '>';
@@ -693,7 +704,7 @@ final class TypeDescriptor implements Type
                 $finalTypes[] = new self(self::ANYTHING);
                 continue;
             }
-            if (! self::isResolvableType($type)) {
+            if (!self::isResolvableType($type)) {
                 throw TypeDefinitionException::create("Passed type hint `{$type}` is not resolvable");
             }
 
@@ -705,7 +716,7 @@ final class TypeDescriptor implements Type
                     $type = self::ARRAY;
                 } else {
                     foreach ($collectionTypes as $collectionType) {
-                        if (! self::isResolvableType($collectionType)) {
+                        if (!self::isResolvableType($collectionType)) {
                             throw TypeDefinitionException::create("Unknown collection type in {$type}. Passed type in collection is not resolvable: {$collectionType}.");
                         }
                     }

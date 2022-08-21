@@ -29,6 +29,7 @@ use Test\Ecotone\Messaging\Fixture\Conversion\Password;
 use Test\Ecotone\Messaging\Fixture\Conversion\SuperAdmin;
 use Test\Ecotone\Messaging\Fixture\Conversion\TwoStepPassword;
 use Test\Ecotone\Messaging\Fixture\Conversion\User;
+use Test\Ecotone\Messaging\Fixture\Dto\MethodWithCallable;
 
 /**
  * Class InterfaceToCallTest
@@ -390,6 +391,23 @@ class InterfaceToCallTest extends TestCase
         );
         $this->assertEquals(
             TypeDescriptor::create(Favourite::class),
+            $interfaceToCall->getReturnType()
+        );
+    }
+
+    public function test_resolving_callable_type_hint()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            MethodWithCallable::class,
+            'execute'
+        );
+
+        $this->assertEquals(
+            InterfaceParameter::createNotNullable('closure', TypeDescriptor::create(TypeDescriptor::CLOSURE)),
+            $interfaceToCall->getParameterWithName('closure')
+        );
+        $this->assertEquals(
+            TypeDescriptor::create(TypeDescriptor::CLOSURE),
             $interfaceToCall->getReturnType()
         );
     }

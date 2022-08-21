@@ -2,7 +2,6 @@
 
 namespace Test\Ecotone\Modelling\Behat\Bootstrap;
 
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\TableNode;
 use Ecotone\Messaging\Conversion\MediaType;

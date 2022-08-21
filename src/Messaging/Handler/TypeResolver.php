@@ -268,6 +268,10 @@ class TypeResolver
             return true;
         }
 
+        if (TypeDescriptor::isClosure($className)) {
+            return true;
+        }
+
         if (preg_match(self::COLLECTION_TYPE_REGEX, $className, $matches)) {
             return TypeDescriptor::isItTypeOfPrimitive($matches[1]) || TypeDescriptor::isInternalClassOrInterface($matches[1]) || TypeDescriptor::isMixedType($matches[1]);
         }

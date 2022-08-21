@@ -45,11 +45,9 @@ use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Config\BusModule;
 use Exception;
 use Ramsey\Uuid\Uuid;
-use ReflectionException;
 
 /**
  * Class Configuration

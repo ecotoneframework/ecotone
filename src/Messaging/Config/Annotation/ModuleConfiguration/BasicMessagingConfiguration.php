@@ -3,6 +3,7 @@
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
@@ -35,13 +36,17 @@ use Ecotone\Messaging\Handler\Chain\ChainForwardPublisher;
 use Ecotone\Messaging\Handler\Enricher\EnrichGateway;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\Interceptor\ConsumerNameInterceptor;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\NullableMessageChannel;
+use Ecotone\Messaging\Precedence;
 
 #[ModuleAnnotation]
 class BasicMessagingConfiguration extends NoExternalConfigurationModule implements AnnotationModule
@@ -112,6 +117,13 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
                 RouterBuilder::createHeaderRouter(MessagingEntrypoint::ENTRYPOINT)
                     ->withInputChannelName(MessagingEntrypoint::ENTRYPOINT)
             );
+        $configuration->registerBeforeMethodInterceptor(MethodInterceptor::create(
+            ConsumerNameInterceptor::class,
+            $interfaceToCallRegistry->getFor(ConsumerNameInterceptor::class, "intercept"),
+            ServiceActivatorBuilder::createWithDirectReference(new ConsumerNameInterceptor(), "intercept"),
+            Precedence::DATABASE_TRANSACTION_PRECEDENCE - 1000000,
+            AsynchronousRunningEndpoint::class
+        ));
     }
 
     /**

@@ -42,7 +42,6 @@ class PollerTaskExecutor implements TaskExecutor
 
         if ($message) {
             $message = MessageBuilder::fromMessage($message)
-                ->setHeader(MessageHeaders::CONSUMER_ENDPOINT_ID, $this->endpointId)
                 ->setHeader(MessageHeaders::POLLED_CHANNEL_NAME, $this->pollableChannelName)
                 ->build();
 

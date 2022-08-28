@@ -269,9 +269,8 @@ final class MessagingSystemConfiguration implements Configuration
 
     private function prepareAndOptimizeConfiguration(InterfaceToCallRegistry $interfaceToCallRegistry, ServiceConfiguration $applicationConfiguration): void
     {
-        $pollableEndpointAnnotations = [new AsynchronousRunningEndpoint()];
         foreach ($this->channelAdapters as $channelAdapter) {
-            $channelAdapter->withEndpointAnnotations(array_merge($channelAdapter->getEndpointAnnotations(), $pollableEndpointAnnotations));
+            $channelAdapter->withEndpointAnnotations(array_merge($channelAdapter->getEndpointAnnotations(), [new AsynchronousRunningEndpoint($channelAdapter->getEndpointId())]));
         }
 
         /** @var BeforeSendChannelInterceptorBuilder[] $beforeSendInterceptors */
@@ -461,10 +460,9 @@ final class MessagingSystemConfiguration implements Configuration
                 ->chain(ServiceActivatorBuilder::createWithDirectReference(new Bridge(), 'handle'));
         }
 
-        $pollableEndpointAnnotations = [new AsynchronousRunningEndpoint()];
         foreach ($this->messageHandlerBuilders as $key => $messageHandlerBuilder) {
             if ($this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()]->isPollable() && ($messageHandlerBuilder instanceof InterceptedEndpoint)) {
-                $this->messageHandlerBuilders[$key] = $messageHandlerBuilder->withEndpointAnnotations(array_merge($messageHandlerBuilder->getEndpointAnnotations(), $pollableEndpointAnnotations));
+                $this->messageHandlerBuilders[$key] = $messageHandlerBuilder->withEndpointAnnotations(array_merge($messageHandlerBuilder->getEndpointAnnotations(), [new AsynchronousRunningEndpoint($messageHandlerBuilder->getEndpointId())]));
             }
         }
         $this->asynchronousEndpoints = [];

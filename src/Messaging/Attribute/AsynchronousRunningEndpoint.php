@@ -11,7 +11,6 @@ class AsynchronousRunningEndpoint
 {
     public function __construct(private string $endpointId)
     {
-
     }
 
     public function getEndpointId(): string

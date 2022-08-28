@@ -119,8 +119,8 @@ class BasicMessagingConfiguration extends NoExternalConfigurationModule implemen
             );
         $configuration->registerBeforeMethodInterceptor(MethodInterceptor::create(
             ConsumerNameInterceptor::class,
-            $interfaceToCallRegistry->getFor(ConsumerNameInterceptor::class, "intercept"),
-            ServiceActivatorBuilder::createWithDirectReference(new ConsumerNameInterceptor(), "intercept"),
+            $interfaceToCallRegistry->getFor(ConsumerNameInterceptor::class, 'intercept'),
+            ServiceActivatorBuilder::createWithDirectReference(new ConsumerNameInterceptor(), 'intercept'),
             Precedence::DATABASE_TRANSACTION_PRECEDENCE - 1000000,
             AsynchronousRunningEndpoint::class
         ));

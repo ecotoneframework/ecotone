@@ -202,7 +202,7 @@ class PointcutTest extends TestCase
         $this->assertTrue(
             Pointcut::createWith(AsynchronousRunningEndpoint::class)->doesItCut(
                 InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
-                [new AsynchronousRunningEndpoint("some")]
+                [new AsynchronousRunningEndpoint('some')]
             )
         );
     }

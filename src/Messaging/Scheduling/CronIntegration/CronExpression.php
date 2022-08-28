@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling\CronIntegration;
 
-use Ecotone\Messaging\Support\Assert;
 use function count;
 
 use DateTime;
+
 use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;
+use Ecotone\Messaging\Support\Assert;
 use Exception;
 use InvalidArgumentException;
 
@@ -122,7 +123,7 @@ class CronExpression
     public function setExpression(string $value): CronExpression
     {
         $split = preg_split('/\s/', $value, -1, PREG_SPLIT_NO_EMPTY);
-        Assert::isTrue(is_array($split), "Expression value is incorrect: " . $value);
+        Assert::isTrue(is_array($split), 'Expression value is incorrect: ' . $value);
 
         $this->cronParts = $split;
         if (count($this->cronParts) < 5) {
@@ -355,7 +356,7 @@ class CronExpression
         } else {
             $currentDate = new DateTime('now');
         }
-        
+
         $currentDate->setTimezone(new DateTimeZone($timeZone));
         $currentDate->setTime((int) $currentDate->format('H'), (int) $currentDate->format('i'), 0);
 

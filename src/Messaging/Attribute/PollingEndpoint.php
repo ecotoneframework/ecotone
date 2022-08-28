@@ -7,5 +7,4 @@ use Attribute;
 #[Attribute]
 final class PollingEndpoint
 {
-
 }

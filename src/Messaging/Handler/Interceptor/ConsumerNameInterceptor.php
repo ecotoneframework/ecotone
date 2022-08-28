@@ -3,8 +3,8 @@
 namespace Ecotone\Messaging\Handler\Interceptor;
 
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 final class ConsumerNameInterceptor

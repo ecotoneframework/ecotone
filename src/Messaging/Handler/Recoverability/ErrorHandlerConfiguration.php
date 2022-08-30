@@ -22,9 +22,19 @@ class ErrorHandlerConfiguration
         return new self($errorChannelName, $delayedRetryTemplate->build(), null);
     }
 
-    public static function createWithDeadLetterChannel(string $errorChannelName, RetryTemplateBuilder $delayedRetryTemplate, string $deadLetterChannel): ErrorHandlerConfiguration
+    public static function createWithDeadLetterChannel(string $errorChannelName, RetryTemplateBuilder $delayedRetryTemplate, string $deadLetterChannel): self
     {
         return new self($errorChannelName, $delayedRetryTemplate->build(), $deadLetterChannel);
+    }
+
+    public static function createDefault(): self
+    {
+        return ErrorHandlerConfiguration::createWithDeadLetterChannel(
+            "errorChannel",
+            RetryTemplateBuilder::exponentialBackoff(1000, 10)
+                ->maxRetryAttempts(3),
+            "dbal_dead_letter"
+        );
     }
 
     /**

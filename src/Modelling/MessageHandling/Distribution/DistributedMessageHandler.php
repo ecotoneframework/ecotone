@@ -3,6 +3,7 @@
 namespace Ecotone\Modelling\MessageHandling\Distribution;
 
 use Ecotone\Messaging\Attribute\Parameter\Header;
+use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\CommandBus;
@@ -28,7 +29,8 @@ class DistributedMessageHandler
         #[Header(DistributionEntrypoint::DISTRIBUTED_ROUTING_KEY)] string $routingKey,
         #[Header(MessageHeaders::CONTENT_TYPE)] string $contentType,
         CommandBus $commandBus,
-        EventBus $eventBus
+        EventBus $eventBus,
+        MessagingEntrypoint $messagingEntrypoint
     ) {
         if ($payloadType === 'event') {
             if ($this->hasAnyListingHandlers($routingKey)) {
@@ -40,7 +42,9 @@ class DistributedMessageHandler
             }
 
             $commandBus->sendWithRouting($routingKey, $payload, $contentType, $metadata);
-        } else {
+        } elseif ($payloadType === 'message') {
+            $messagingEntrypoint->sendWithHeaders($payload, $metadata, $routingKey);
+        }else {
             throw InvalidArgumentException::create("Trying to call distributed command handler for payload type {$payloadType} and allowed are event/command");
         }
     }

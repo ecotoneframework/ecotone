@@ -9,6 +9,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\CoreModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
@@ -85,6 +86,7 @@ class DistributedGatewayModule extends NoExternalConfigurationModule implements 
                     HeaderBuilder::create('contentType', MessageHeaders::CONTENT_TYPE),
                     ReferenceBuilder::create('commandBus', CommandBus::class),
                     ReferenceBuilder::create('eventBus', EventBus::class),
+                    ReferenceBuilder::create('messagingEntrypoint', MessagingEntrypoint::class),
                 ])
         );
     }

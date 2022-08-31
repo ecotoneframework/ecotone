@@ -3,6 +3,7 @@
 namespace Test\Ecotone\Modelling\Unit\MessageHandling;
 
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Gateway\StorageMessagingEntrypoint;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributedMessageHandler;
 use Ecotone\Modelling\MessageHandling\Distribution\RoutingKeyIsNotDistributed;
 use Ecotone\Modelling\StorageCommandBus;
@@ -18,6 +19,7 @@ class DistributedMessageHandlerTest extends TestCase
     {
         $eventBus                  = StorageEventBus::create();
         $commandBus                = StorageCommandBus::create();
+        $messagingEntrypoint = StorageMessagingEntrypoint::create();
         $distributedMessageHandler = new DistributedMessageHandler(['order.was_placed'], []);
 
         $distributedMessageHandler->handle(
@@ -27,7 +29,8 @@ class DistributedMessageHandlerTest extends TestCase
             'order.was_placed',
             MediaType::TEXT_PLAIN,
             $commandBus,
-            $eventBus
+            $eventBus,
+            $messagingEntrypoint
         );
 
         $this->assertEquals(
@@ -42,6 +45,7 @@ class DistributedMessageHandlerTest extends TestCase
     {
         $eventBus                  = StorageEventBus::create();
         $commandBus                = StorageCommandBus::create();
+        $messagingEntrypoint = StorageMessagingEntrypoint::create();
         $distributedMessageHandler = new DistributedMessageHandler([], []);
 
         $distributedMessageHandler->handle(
@@ -51,7 +55,8 @@ class DistributedMessageHandlerTest extends TestCase
             'order.was_placed',
             MediaType::TEXT_PLAIN,
             $commandBus,
-            $eventBus
+            $eventBus,
+            $messagingEntrypoint
         );
 
         $this->assertEquals(
@@ -64,6 +69,7 @@ class DistributedMessageHandlerTest extends TestCase
     {
         $eventBus                  = StorageEventBus::create();
         $commandBus                = StorageCommandBus::create();
+        $messagingEntrypoint = StorageMessagingEntrypoint::create();
         $distributedMessageHandler = new DistributedMessageHandler([], ['order.place_order']);
 
         $distributedMessageHandler->handle(
@@ -73,7 +79,8 @@ class DistributedMessageHandlerTest extends TestCase
             'order.place_order',
             MediaType::TEXT_PLAIN,
             $commandBus,
-            $eventBus
+            $eventBus,
+            $messagingEntrypoint
         );
 
         $this->assertEquals(
@@ -90,6 +97,7 @@ class DistributedMessageHandlerTest extends TestCase
 
         $eventBus                  = StorageEventBus::create();
         $commandBus                = StorageCommandBus::create();
+        $messagingEntrypoint = StorageMessagingEntrypoint::create();
         $distributedMessageHandler = new DistributedMessageHandler([], []);
 
         $distributedMessageHandler->handle(
@@ -99,7 +107,8 @@ class DistributedMessageHandlerTest extends TestCase
             'order.place_order',
             MediaType::TEXT_PLAIN,
             $commandBus,
-            $eventBus
+            $eventBus,
+            $messagingEntrypoint
         );
     }
 }

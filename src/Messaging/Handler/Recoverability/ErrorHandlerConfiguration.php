@@ -30,10 +30,10 @@ class ErrorHandlerConfiguration
     public static function createDefault(): self
     {
         return ErrorHandlerConfiguration::createWithDeadLetterChannel(
-            "errorChannel",
+            'errorChannel',
             RetryTemplateBuilder::exponentialBackoff(1000, 10)
                 ->maxRetryAttempts(3),
-            "dbal_dead_letter"
+            'dbal_dead_letter'
         );
     }
 

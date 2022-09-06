@@ -44,7 +44,7 @@ class DistributedMessageHandler
             $commandBus->sendWithRouting($routingKey, $payload, $contentType, $metadata);
         } elseif ($payloadType === 'message') {
             $messagingEntrypoint->sendWithHeaders($payload, $metadata, $routingKey);
-        }else {
+        } else {
             throw InvalidArgumentException::create("Trying to call distributed command handler for payload type {$payloadType} and allowed are event/command");
         }
     }

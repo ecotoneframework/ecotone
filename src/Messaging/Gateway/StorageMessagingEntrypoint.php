@@ -11,7 +11,6 @@ class StorageMessagingEntrypoint implements MessagingEntrypoint
 {
     private function __construct()
     {
-
     }
 
     public static function create(): self

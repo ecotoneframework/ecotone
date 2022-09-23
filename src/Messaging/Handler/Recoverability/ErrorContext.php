@@ -11,6 +11,7 @@ class ErrorContext
     public const EXCEPTION_LINE = 'exception-line';
     public const EXCEPTION_CODE = 'exception-code';
     public const EXCEPTION_MESSAGE = 'exception-message';
+    public const DLQ_MESSAGE_REPLIED = 'ecotone.dlq.message_replied';
 
     private string $messageId;
     private int $failedTimestamp;

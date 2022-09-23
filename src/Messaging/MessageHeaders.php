@@ -156,6 +156,13 @@ final class MessageHeaders
         ];
     }
 
+    public static function unsetAsyncKeys(array $metadata): array
+    {
+        unset($metadata[self::TYPE_ID]);
+
+        return $metadata;
+    }
+
     /**
      * @param string $headerRegex e.g. ecotone-domain-*
      *

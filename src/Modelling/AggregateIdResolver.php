@@ -2,7 +2,7 @@
 
 namespace Ecotone\Modelling;
 
-class AggregateId
+class AggregateIdResolver
 {
     public static function resolve(string $aggregateClass, $id)
     {

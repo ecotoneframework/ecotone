@@ -40,7 +40,7 @@ class AggregateIdentifierRetrevingService
             $aggregateIds = is_array($aggregateIds) ? $aggregateIds : [array_key_first($this->payloadIdentifierMapping) => $aggregateIds];
 
             return MessageBuilder::fromMessage($message)
-                ->setHeader(AggregateMessage::AGGREGATE_ID, AggregateId::resolveArrayOfIdentifiers($this->aggregateClassName, $aggregateIds))
+                ->setHeader(AggregateMessage::AGGREGATE_ID, AggregateIdResolver::resolveArrayOfIdentifiers($this->aggregateClassName, $aggregateIds))
                 ->build();
         }
 
@@ -84,7 +84,7 @@ class AggregateIdentifierRetrevingService
         }
 
         return MessageBuilder::fromMessage($message)
-            ->setHeader(AggregateMessage::AGGREGATE_ID, AggregateId::resolveArrayOfIdentifiers($this->aggregateClassName, $aggregateIdentifiers))
+            ->setHeader(AggregateMessage::AGGREGATE_ID, AggregateIdResolver::resolveArrayOfIdentifiers($this->aggregateClassName, $aggregateIdentifiers))
             ->build();
     }
 }

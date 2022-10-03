@@ -224,6 +224,6 @@ class SaveAggregateService
             $aggregateIds[$aggregateIdName] = $id;
         }
 
-        return AggregateId::resolveArrayOfIdentifiers(get_class($aggregate), $aggregateIds);
+        return AggregateIdResolver::resolveArrayOfIdentifiers(get_class($aggregate), $aggregateIds);
     }
 }

@@ -6,7 +6,9 @@ use Ecotone\Messaging\Support\Assert;
 
 final class ExtensionObjectResolver
 {
-    private function __construct(){}
+    private function __construct()
+    {
+    }
 
     /**
      * @template T
@@ -19,7 +21,7 @@ final class ExtensionObjectResolver
         $resolvedObject = null;
         foreach ($extensionObjects as $extensionObject) {
             if ($extensionObject instanceof $className) {
-                Assert::null($resolvedObject, sprintf("Extension object: `%s` needs to be unique, however was registered twice.", $className));
+                Assert::null($resolvedObject, sprintf('Extension object: `%s` needs to be unique, however was registered twice.', $className));
                 $resolvedObject = $extensionObject;
             }
         }

@@ -87,7 +87,7 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
                 new AutoloadFileNamespaceParser(),
                 self::ROOT_DIR,
                 [],
-                "prod",
+                'prod',
                 '',
                 [GatewayWithReplyChannelExample::class]
             ))->findCombined(MessageEndpoint::class, SomeGatewayExample::class)

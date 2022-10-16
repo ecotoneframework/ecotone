@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\PollableChannel;
@@ -32,10 +33,12 @@ class PollerTaskExecutor implements TaskExecutor
         $this->pollableChannelName = $pollableChannelName;
     }
 
-    public function execute(): void
+    public function execute(PollingMetadata $pollingMetadata): void
     {
         try {
-            $message = $this->pollableChannel->receive();
+            $message = $pollingMetadata->getExecutionTimeLimitInMilliseconds()
+                ? $this->pollableChannel->receiveWithTimeout($pollingMetadata->getExecutionTimeLimitInMilliseconds())
+                : $this->pollableChannel->receive();
         } catch (Throwable $exception) {
             throw new ConnectionException("Can't pool message from {$this->pollableChannelName} error happened.", 0, $exception);
         }

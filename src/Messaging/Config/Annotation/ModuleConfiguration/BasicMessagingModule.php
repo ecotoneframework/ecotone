@@ -49,7 +49,7 @@ use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Precedence;
 
 #[ModuleAnnotation]
-class BasicMessagingConfiguration extends NoExternalConfigurationModule implements AnnotationModule
+class BasicMessagingModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
      * @inheritDoc

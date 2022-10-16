@@ -243,7 +243,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
 
         return new InboundChannelAdapter(
             $this->endpointId,
-            SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock()),
+            SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock(), $pollingMetadata),
             $pollingMetadata->getCron()
                 ? CronTrigger::createWith($pollingMetadata->getCron())
                 : PeriodicTrigger::create($pollingMetadata->getFixedRateInMilliseconds(), $pollingMetadata->getInitialDelayInMilliseconds()),

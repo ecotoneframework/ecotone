@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
 
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Scheduling\TaskExecutor;
 
@@ -26,7 +27,7 @@ class InboundChannelTaskExecutor implements TaskExecutor
         $this->inboundChannelGateway = $inboundChannelGateway;
     }
 
-    public function execute(): void
+    public function execute(PollingMetadata $pollingMetadata): void
     {
         $result = call_user_func_array([$this->serviceToCall, $this->method], []);
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Scheduling;
 
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Scheduling\TaskExecutor;
 
 /**
@@ -31,7 +32,7 @@ class StubTaskExecutor implements TaskExecutor
         return new self();
     }
 
-    public function execute(): void
+    public function execute(PollingMetadata $pollingMetadata): void
     {
         $this->wasCalled = true;
         $this->calledTimes++;

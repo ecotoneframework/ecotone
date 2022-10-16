@@ -2,3 +2,7 @@ parameters:
 	level: 1
 	paths:
 		- src
+	ignoreErrors:
+		-
+			message: '#^Class .* not found.$#'
+			path: src/Messaging/Config/ModuleList.php

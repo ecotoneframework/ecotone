@@ -20,7 +20,7 @@ use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Precedence;
 
 #[ModuleAnnotation]
-class EndpointHeadersInterceptorConfiguration extends NoExternalConfigurationModule implements AnnotationModule
+class EndpointHeadersInterceptorModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
      * @inheritDoc

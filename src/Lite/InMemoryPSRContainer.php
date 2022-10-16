@@ -70,6 +70,11 @@ class InMemoryPSRContainer implements GatewayAwareContainer
         return $this->objects[$id];
     }
 
+    public function set(string $id, object $object): void
+    {
+        $this->objects[$id] = $object;
+    }
+
     /**
      * @inheritDoc
      */

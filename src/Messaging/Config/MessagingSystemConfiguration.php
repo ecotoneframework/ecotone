@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config;
 
+use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationFinderFactory;
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\WithRequiredReferenceNameList;
@@ -709,6 +710,22 @@ final class MessagingSystemConfiguration implements Configuration
 
     public static function prepare(string $rootPathToSearchConfigurationFor, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $applicationConfiguration, bool $useCachedVersion): Configuration
     {
+        return self::prepareWithAnnotationFinder(
+            AnnotationFinderFactory::createForAttributes(
+                realpath($rootPathToSearchConfigurationFor),
+                $applicationConfiguration->getNamespaces(),
+                $applicationConfiguration->getEnvironment(),
+                $applicationConfiguration->getLoadedCatalog() ?? ''
+            ),
+            $referenceTypeFromNameResolver,
+            $configurationVariableService,
+            $applicationConfiguration,
+            $useCachedVersion
+        );
+    }
+
+    public static function prepareWithAnnotationFinder(AnnotationFinder $annotationFinder, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $applicationConfiguration, bool $useCachedVersion): Configuration
+    {
         if ($useCachedVersion) {
             Assert::isTrue((bool)$applicationConfiguration->getCacheDirectoryPath(), "Can't make use of cached version of messaging if no cache path is defined");
             $cachedVersion = self::getCachedVersion($applicationConfiguration);
@@ -716,13 +733,6 @@ final class MessagingSystemConfiguration implements Configuration
                 return $cachedVersion;
             }
         }
-
-        $annotationFinder = AnnotationFinderFactory::createForAttributes(
-            realpath($rootPathToSearchConfigurationFor),
-            $applicationConfiguration->getNamespaces(),
-            $applicationConfiguration->getEnvironment(),
-            $applicationConfiguration->getLoadedCatalog() ?? ''
-        );
 
         $preparationInterfaceRegistry = InterfaceToCallRegistry::createWith($referenceTypeFromNameResolver, $annotationFinder);
         return self::prepareWithModuleRetrievingService(
@@ -737,7 +747,7 @@ final class MessagingSystemConfiguration implements Configuration
         );
     }
 
-    private static function getCachedVersion(ServiceConfiguration $applicationConfiguration): ?MessagingSystemConfiguration
+    public static function getCachedVersion(ServiceConfiguration $applicationConfiguration): ?MessagingSystemConfiguration
     {
         if (! $applicationConfiguration->getCacheDirectoryPath()) {
             return null;

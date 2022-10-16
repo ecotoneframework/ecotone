@@ -229,7 +229,7 @@ final class PollingMetadata
     }
 
     /**
-     * @return int
+     * @return int return 0, if no timeout given
      */
     public function getExecutionTimeLimitInMilliseconds(): int
     {

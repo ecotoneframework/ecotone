@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Scheduling;
 
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Scheduling\PeriodicTrigger;
 use Ecotone\Messaging\Scheduling\StubUTCClock;
 use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
@@ -22,7 +23,7 @@ class SyncTaskSchedulerTest extends TestCase
     public function test_when_first_time_called_then_it_should_trigger_immediately()
     {
         $clock = StubUTCClock::createWithCurrentTime('2016-01-01 12:00:00');
-        $syncTaskExecutor = SyncTaskScheduler::createWithEmptyTriggerContext($clock);
+        $syncTaskExecutor = SyncTaskScheduler::createWithEmptyTriggerContext($clock, PollingMetadata::create("test"));
         $taskExecutor = StubTaskExecutor::create();
 
         $syncTaskExecutor->schedule($taskExecutor, PeriodicTrigger::create(1, 0));
@@ -33,7 +34,7 @@ class SyncTaskSchedulerTest extends TestCase
     public function test_when_calling_second_time_it_should_wait_fixed_rate()
     {
         $clock = StubUTCClock::createWithCurrentTime('2016-01-01 12:00:00');
-        $syncTaskExecutor = SyncTaskScheduler::createWithEmptyTriggerContext($clock);
+        $syncTaskExecutor = SyncTaskScheduler::createWithEmptyTriggerContext($clock, PollingMetadata::create("test"));
         $taskExecutor = StubTaskExecutor::create();
 
         $trigger = PeriodicTrigger::create(1000, 0);

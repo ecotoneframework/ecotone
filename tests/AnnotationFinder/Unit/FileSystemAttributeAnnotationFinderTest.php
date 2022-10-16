@@ -67,6 +67,33 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
         );
     }
 
+    public function test_registering_class_name_directly()
+    {
+        $gatewayAnnotation = new SomeGatewayExample();
+        $messageEndpoint   = new MessageEndpoint();
+        $this->assertEquals(
+            [
+                AnnotatedDefinition::create(
+                    $messageEndpoint,
+                    $gatewayAnnotation,
+                    GatewayWithReplyChannelExample::class,
+                    'buy',
+                    [$messageEndpoint],
+                    [$gatewayAnnotation]
+                ),
+            ],
+            (new FileSystemAnnotationFinder(
+                $this->getAnnotationResolver(),
+                new AutoloadFileNamespaceParser(),
+                self::ROOT_DIR,
+                [],
+                "prod",
+                '',
+                [GatewayWithReplyChannelExample::class]
+            ))->findCombined(MessageEndpoint::class, SomeGatewayExample::class)
+        );
+    }
+
     public function test_moving_back_in_catalog_in_case_autoload_was_not_found()
     {
         $gatewayAnnotation = new SomeGatewayExample();

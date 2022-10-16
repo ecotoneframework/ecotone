@@ -35,7 +35,7 @@ class SyncTaskScheduler implements TaskScheduler
         $nextExecution = $trigger->nextExecutionTime($this->clock, $this->triggerContext);
         $this->triggerContext = $this->triggerContext->withLastScheduledExecutionTime($nextExecution);
 
-        if (!$this->isScheduleAndNextEqual() && $this->isItTimeForNextExecution()) {
+        if (! $this->isScheduleAndNextEqual() && $this->isItTimeForNextExecution()) {
             $this->triggerContext = $this->triggerContext->withLastActualExecutionTime($this->triggerContext->lastScheduledTime());
             $taskExecutor->execute($this->pollingMetadata);
         } else {
@@ -48,7 +48,7 @@ class SyncTaskScheduler implements TaskScheduler
      */
     private function isScheduleAndNextEqual(): bool
     {
-        if (!$this->triggerContext->lastScheduledTime() || !$this->triggerContext->lastActualExecutionTime()) {
+        if (! $this->triggerContext->lastScheduledTime() || ! $this->triggerContext->lastActualExecutionTime()) {
             return false;
         }
 

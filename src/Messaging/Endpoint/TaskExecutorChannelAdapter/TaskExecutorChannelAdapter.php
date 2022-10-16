@@ -55,7 +55,7 @@ class TaskExecutorChannelAdapter implements ConsumerLifecycle
         return
             new self(
                 $endpointId,
-                SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock(), PollingMetadata::create("test")),
+                SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock(), PollingMetadata::create('test')),
                 $pollingMetadata->getCron()
                     ? CronTrigger::createWith($pollingMetadata->getCron())
                     : PeriodicTrigger::create($pollingMetadata->getFixedRateInMilliseconds(), $pollingMetadata->getInitialDelayInMilliseconds()),

@@ -68,7 +68,7 @@ class ModuleList
         AmqpTransactionModule::class,
         AmqpPublisherModule::class,
         AmqpModule::class,
-        AmqpConsumerModule::class
+        AmqpConsumerModule::class,
     ];
 
     public const DBAL_MODULES = [

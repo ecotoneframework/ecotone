@@ -8,7 +8,7 @@ use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
 
 class AnnotationFinderFactory
 {
-    public static function createForAttributes(string $rootProjectPath, array $namespaceToSearchIn, string $environmentName = 'prod', string $directoryToDiscoverNamespaces = ''): AnnotationFinder
+    public static function createForAttributes(string $rootProjectPath, array $namespaceToSearchIn, string $environmentName = 'prod', string $directoryToDiscoverNamespaces = '', array $classesToRegister = []): AnnotationFinder
     {
         return new FileSystemAnnotationFinder(
             new AttributeResolver(),
@@ -16,7 +16,8 @@ class AnnotationFinderFactory
             $rootProjectPath,
             $namespaceToSearchIn,
             $environmentName,
-            $directoryToDiscoverNamespaces
+            $directoryToDiscoverNamespaces,
+            $classesToRegister
         );
     }
 }

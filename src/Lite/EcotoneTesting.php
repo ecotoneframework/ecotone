@@ -14,7 +14,7 @@ use Ecotone\Messaging\InMemoryConfigurationVariableService;
 
 final class EcotoneTesting
 {
-    const CONFIGURED_MESSAGING_SYSTEM = ConfiguredMessagingSystem::class;
+    public const CONFIGURED_MESSAGING_SYSTEM = ConfiguredMessagingSystem::class;
 
     /**
      * @param string[] $classesToResolve
@@ -26,9 +26,8 @@ final class EcotoneTesting
         GatewayAwareContainer|array $containerOrAvailableServices = [],
         ?ServiceConfiguration       $configuration = null,
         array                       $configurationVariables = [],
-    ): ConfiguredMessagingSystem
-    {
-        if (!$configuration) {
+    ): ConfiguredMessagingSystem {
+        if (! $configuration) {
             $configuration = ServiceConfiguration::createWithDefaults();
         }
 
@@ -46,9 +45,8 @@ final class EcotoneTesting
         ?ServiceConfiguration       $configuration = null,
         array                       $configurationVariables = [],
         array                       $enableModules = []
-    ): ConfiguredMessagingSystem
-    {
-        if (!$configuration) {
+    ): ConfiguredMessagingSystem {
+        if (! $configuration) {
             $configuration = ServiceConfiguration::createWithDefaults();
         }
 
@@ -86,7 +84,7 @@ final class EcotoneTesting
         }
 
         $messagingSystem = $messagingConfiguration->buildMessagingSystemFromConfiguration(
-            new PsrContainerReferenceSearchService($container, ["logger" => new EchoLogger(), ConfiguredMessagingSystem::class => new StubConfiguredMessagingSystem()])
+            new PsrContainerReferenceSearchService($container, ['logger' => new EchoLogger(), ConfiguredMessagingSystem::class => new StubConfiguredMessagingSystem()])
         );
 
         $container->set(self::CONFIGURED_MESSAGING_SYSTEM, $messagingSystem);

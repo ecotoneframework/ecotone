@@ -46,10 +46,14 @@ class FileSystemAnnotationFinder implements AnnotationFinder
     private array $cachedClassAnnotations = [];
     private AnnotationResolver $annotationResolver;
 
-    public function __construct(AnnotationResolver $annotationResolver, AutoloadNamespaceParser $autoloadNamespaceParser, string $rootProjectDir, array $namespaces, string $environmentName, string $catalogToLoad)
+    public function __construct(
+        AnnotationResolver $annotationResolver, AutoloadNamespaceParser $autoloadNamespaceParser, string $rootProjectDir, array $namespaces, string $environmentName, string $catalogToLoad,
+        array $classesToRegister = []
+    )
     {
         $this->annotationResolver = $annotationResolver;
         $this->init($rootProjectDir, array_unique($namespaces), $catalogToLoad, $autoloadNamespaceParser);
+        $this->registeredClasses = array_merge($this->registeredClasses, $classesToRegister);
 
         $classNamesWithEnvironment = $this->findAnnotatedClasses(Environment::class);
         foreach ($classNamesWithEnvironment as $classNameWithEnvironment) {

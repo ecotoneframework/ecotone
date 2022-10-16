@@ -14,9 +14,10 @@ use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Psr\Container\ContainerInterface;
 
 /**
- * Class EcotoneLite
- * @package Ecotone\Lite
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @TODO Ecotone 2.0 drop this class completely and make use of
+ * EcotoneLiteApplication
+ * Symfony
+ * Laravel
  */
 class EcotoneLiteConfiguration
 {
@@ -27,11 +28,6 @@ class EcotoneLiteConfiguration
 
     public static function createWithConfiguration(string $rootProjectDirectoryPath, ContainerInterface|GatewayAwareContainer $container, ServiceConfiguration $serviceConfiguration, array $configurationVariables, bool $useCachedVersion): ConfiguredMessagingSystem
     {
-        $serviceConfiguration = $serviceConfiguration->withNamespaces(array_merge(
-            $serviceConfiguration->getNamespaces(),
-            [FileSystemAnnotationFinder::FRAMEWORK_NAMESPACE]
-        ));
-
         $configuredMessagingSystem = MessagingSystemConfiguration::prepare(
             realpath($rootProjectDirectoryPath),
             new TypeResolver($container),

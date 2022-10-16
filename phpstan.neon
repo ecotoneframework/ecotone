@@ -5,4 +5,4 @@ parameters:
 	ignoreErrors:
 		-
 			message: '#^Class .* not found.$#'
-			path: src/Messaging/Config/ModuleList.php
+			path: src/Messaging/Config/ModuleClassList.php

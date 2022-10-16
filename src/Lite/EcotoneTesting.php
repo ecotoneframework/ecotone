@@ -6,7 +6,7 @@ use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
-use Ecotone\Messaging\Config\ModuleList;
+use Ecotone\Messaging\Config\ModuleClassList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Config\StubConfiguredMessagingSystem;
 use Ecotone\Messaging\Handler\Logger\EchoLogger;
@@ -31,7 +31,7 @@ final class EcotoneTesting
             $configuration = ServiceConfiguration::createWithDefaults();
         }
 
-        return self::prepareConfiguration(ModuleList::allModules(), $containerOrAvailableServices, $configuration, $classesToResolve, $configurationVariables);
+        return self::prepareConfiguration(ModuleClassList::allModules(), $containerOrAvailableServices, $configuration, $classesToResolve, $configurationVariables);
     }
 
     /**
@@ -50,7 +50,7 @@ final class EcotoneTesting
             $configuration = ServiceConfiguration::createWithDefaults();
         }
 
-        return self::prepareConfiguration(array_merge(ModuleList::CORE_MODULES, $enableModules), $containerOrAvailableServices, $configuration, $classesToResolve, $configurationVariables);
+        return self::prepareConfiguration(array_merge(ModuleClassList::CORE_MODULES, $enableModules), $containerOrAvailableServices, $configuration, $classesToResolve, $configurationVariables);
     }
 
     /**
@@ -64,7 +64,7 @@ final class EcotoneTesting
         $container = $containerOrAvailableServices instanceof GatewayAwareContainer ? $containerOrAvailableServices : InMemoryPSRContainer::createFromAssociativeArray($containerOrAvailableServices);
 
         $modulesToEnable = array_unique($modulesToEnable);
-        $configuration = $configuration->withSkippedModulePackageNames(array_diff(ModuleList::allModules(), $modulesToEnable));
+        $configuration = $configuration->withSkippedModulePackageNames(array_diff(ModuleClassList::allModules(), $modulesToEnable));
 
         $messagingConfiguration = MessagingSystemConfiguration::prepareWithAnnotationFinder(
             InMemoryAnnotationFinder::createFrom(array_merge($classesToResolve, $modulesToEnable)),

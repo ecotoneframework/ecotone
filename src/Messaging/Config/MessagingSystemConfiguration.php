@@ -715,7 +715,8 @@ final class MessagingSystemConfiguration implements Configuration
                 realpath($rootPathToSearchConfigurationFor),
                 $applicationConfiguration->getNamespaces(),
                 $applicationConfiguration->getEnvironment(),
-                $applicationConfiguration->getLoadedCatalog() ?? ''
+                $applicationConfiguration->getLoadedCatalog() ?? '',
+                array_filter(ModuleClassList::allModules(), fn(string $moduleClassName): bool => class_exists($moduleClassName))
             ),
             $referenceTypeFromNameResolver,
             $configurationVariableService,
@@ -724,11 +725,19 @@ final class MessagingSystemConfiguration implements Configuration
         );
     }
 
-    public static function prepareWithAnnotationFinder(AnnotationFinder $annotationFinder, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $applicationConfiguration, bool $useCachedVersion): Configuration
+    public static function loadFromCache(string $cachePath): Configuration
+    {
+        $cachedVersion = self::getCachedVersion($cachePath);
+        Assert::notNull($cachedVersion, sprintf("Cache for Ecotone Configuration is missing in %s", $cachePath));
+
+        return $cachedVersion;
+    }
+
+    public static function prepareWithAnnotationFinder(AnnotationFinder $annotationFinder, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $serviceConfiguration, bool $useCachedVersion): Configuration
     {
         if ($useCachedVersion) {
-            Assert::isTrue((bool)$applicationConfiguration->getCacheDirectoryPath(), "Can't make use of cached version of messaging if no cache path is defined");
-            $cachedVersion = self::getCachedVersion($applicationConfiguration);
+            Assert::isTrue((bool)$serviceConfiguration->getCacheDirectoryPath(), "Can't make use of cached version of messaging if no cache path is defined");
+            $cachedVersion = self::getCachedVersion($serviceConfiguration->getCacheDirectoryPath());
             if ($cachedVersion) {
                 return $cachedVersion;
             }
@@ -743,17 +752,17 @@ final class MessagingSystemConfiguration implements Configuration
             ),
             $referenceTypeFromNameResolver,
             $preparationInterfaceRegistry,
-            $applicationConfiguration
+            $serviceConfiguration
         );
     }
 
-    public static function getCachedVersion(ServiceConfiguration $applicationConfiguration): ?MessagingSystemConfiguration
+    public static function getCachedVersion(?string $cacheDirectoryPath): ?MessagingSystemConfiguration
     {
-        if (! $applicationConfiguration->getCacheDirectoryPath()) {
+        if (!$cacheDirectoryPath) {
             return null;
         }
 
-        $messagingSystemCachePath = $applicationConfiguration->getCacheDirectoryPath() . DIRECTORY_SEPARATOR . 'messaging_system';
+        $messagingSystemCachePath = $cacheDirectoryPath . DIRECTORY_SEPARATOR . 'messaging_system';
         if (file_exists($messagingSystemCachePath)) {
             return unserialize(file_get_contents($messagingSystemCachePath));
         }

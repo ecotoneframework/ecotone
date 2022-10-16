@@ -9,6 +9,7 @@ use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingCommands\MessagingCommandsModule;
 use Ecotone\Messaging\Config\BeforeSend\BeforeSendGateway;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -31,11 +32,17 @@ use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\TimeLimitInterceptor;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Gateway\ConsoleCommandRunner;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
 use Ecotone\Messaging\Handler\Chain\ChainForwardPublisher;
 use Ecotone\Messaging\Handler\Enricher\EnrichGateway;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\Interceptor\ConsumerNameInterceptor;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
@@ -124,6 +131,82 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
             Precedence::DATABASE_TRANSACTION_PRECEDENCE - 1000000,
             AsynchronousRunningEndpoint::class
         ));
+
+        $configuration->registerGatewayBuilder(
+            GatewayProxyBuilder::create(
+                MessagingEntrypoint::class,
+                MessagingEntrypoint::class,
+                "send",
+                MessagingEntrypoint::ENTRYPOINT
+            )->withParameterConverters([
+                GatewayPayloadBuilder::create("payload"),
+                GatewayHeaderBuilder::create("targetChannel", MessagingEntrypoint::ENTRYPOINT)
+            ])
+        );
+        $configuration->registerGatewayBuilder(
+            GatewayProxyBuilder::create(
+                MessagingEntrypoint::class,
+                MessagingEntrypoint::class,
+                "sendWithHeaders",
+                MessagingEntrypoint::ENTRYPOINT
+            )->withParameterConverters([
+                GatewayPayloadBuilder::create("payload"),
+                GatewayHeadersBuilder::create("headers"),
+                GatewayHeaderBuilder::create("targetChannel", MessagingEntrypoint::ENTRYPOINT)
+            ])
+        );
+        $configuration->registerGatewayBuilder(
+            GatewayProxyBuilder::create(
+                MessagingEntrypoint::class,
+                MessagingEntrypoint::class,
+                "sendMessage",
+                MessagingEntrypoint::ENTRYPOINT
+            )
+        );
+
+        $configuration->registerGatewayBuilder(
+            GatewayProxyBuilder::create(
+                MessagingEntrypointWithHeadersPropagation::class,
+                MessagingEntrypointWithHeadersPropagation::class,
+                "send",
+                MessagingEntrypoint::ENTRYPOINT
+            )->withParameterConverters([
+                GatewayPayloadBuilder::create("payload"),
+                GatewayHeaderBuilder::create("targetChannel", MessagingEntrypoint::ENTRYPOINT)
+            ])
+        );
+        $configuration->registerGatewayBuilder(
+            GatewayProxyBuilder::create(
+                MessagingEntrypointWithHeadersPropagation::class,
+                MessagingEntrypointWithHeadersPropagation::class,
+                "sendWithHeaders",
+                MessagingEntrypoint::ENTRYPOINT
+            )->withParameterConverters([
+                GatewayPayloadBuilder::create("payload"),
+                GatewayHeadersBuilder::create("headers"),
+                GatewayHeaderBuilder::create("targetChannel", MessagingEntrypoint::ENTRYPOINT)
+            ])
+        );
+        $configuration->registerGatewayBuilder(
+            GatewayProxyBuilder::create(
+                MessagingEntrypointWithHeadersPropagation::class,
+                MessagingEntrypointWithHeadersPropagation::class,
+                "sendMessage",
+                MessagingEntrypoint::ENTRYPOINT
+            )
+        );
+
+        $configuration->registerGatewayBuilder(
+            GatewayProxyBuilder::create(
+                ConsoleCommandRunner::class,
+                ConsoleCommandRunner::class,
+                "execute",
+                MessagingCommandsModule::ECOTONE_EXECUTE_CONSOLE_COMMAND_EXECUTOR
+            )->withParameterConverters([
+                GatewayHeaderBuilder::create("commandName", MessagingEntrypoint::ENTRYPOINT),
+                GatewayPayloadBuilder::create("parameters")
+            ])
+        );
     }
 
     /**

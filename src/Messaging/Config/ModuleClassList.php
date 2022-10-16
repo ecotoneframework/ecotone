@@ -37,7 +37,7 @@ use Ecotone\Modelling\Config\BusRoutingModule;
 use Ecotone\Modelling\Config\DistributedGatewayModule;
 use Ecotone\Modelling\Config\ModellingHandlerModule;
 
-class ModuleList
+class ModuleClassList
 {
     public const CORE_MODULES = [
         DistributedGatewayModule::class,

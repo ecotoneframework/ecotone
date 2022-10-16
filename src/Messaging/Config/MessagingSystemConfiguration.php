@@ -716,7 +716,7 @@ final class MessagingSystemConfiguration implements Configuration
                 $applicationConfiguration->getNamespaces(),
                 $applicationConfiguration->getEnvironment(),
                 $applicationConfiguration->getLoadedCatalog() ?? '',
-                array_filter(ModuleClassList::allModules(), fn(string $moduleClassName): bool => class_exists($moduleClassName))
+                array_filter(ModuleClassList::allModules(), fn (string $moduleClassName): bool => class_exists($moduleClassName))
             ),
             $referenceTypeFromNameResolver,
             $configurationVariableService,
@@ -728,7 +728,7 @@ final class MessagingSystemConfiguration implements Configuration
     public static function loadFromCache(string $cachePath): Configuration
     {
         $cachedVersion = self::getCachedVersion($cachePath);
-        Assert::notNull($cachedVersion, sprintf("Cache for Ecotone Configuration is missing in %s", $cachePath));
+        Assert::notNull($cachedVersion, sprintf('Cache for Ecotone Configuration is missing in %s', $cachePath));
 
         return $cachedVersion;
     }
@@ -758,7 +758,7 @@ final class MessagingSystemConfiguration implements Configuration
 
     public static function getCachedVersion(?string $cacheDirectoryPath): ?MessagingSystemConfiguration
     {
-        if (!$cacheDirectoryPath) {
+        if (! $cacheDirectoryPath) {
             return null;
         }
 

@@ -136,30 +136,30 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
             GatewayProxyBuilder::create(
                 MessagingEntrypoint::class,
                 MessagingEntrypoint::class,
-                "send",
+                'send',
                 MessagingEntrypoint::ENTRYPOINT
             )->withParameterConverters([
-                GatewayPayloadBuilder::create("payload"),
-                GatewayHeaderBuilder::create("targetChannel", MessagingEntrypoint::ENTRYPOINT)
+                GatewayPayloadBuilder::create('payload'),
+                GatewayHeaderBuilder::create('targetChannel', MessagingEntrypoint::ENTRYPOINT),
             ])
         );
         $configuration->registerGatewayBuilder(
             GatewayProxyBuilder::create(
                 MessagingEntrypoint::class,
                 MessagingEntrypoint::class,
-                "sendWithHeaders",
+                'sendWithHeaders',
                 MessagingEntrypoint::ENTRYPOINT
             )->withParameterConverters([
-                GatewayPayloadBuilder::create("payload"),
-                GatewayHeadersBuilder::create("headers"),
-                GatewayHeaderBuilder::create("targetChannel", MessagingEntrypoint::ENTRYPOINT)
+                GatewayPayloadBuilder::create('payload'),
+                GatewayHeadersBuilder::create('headers'),
+                GatewayHeaderBuilder::create('targetChannel', MessagingEntrypoint::ENTRYPOINT),
             ])
         );
         $configuration->registerGatewayBuilder(
             GatewayProxyBuilder::create(
                 MessagingEntrypoint::class,
                 MessagingEntrypoint::class,
-                "sendMessage",
+                'sendMessage',
                 MessagingEntrypoint::ENTRYPOINT
             )
         );
@@ -168,30 +168,30 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
             GatewayProxyBuilder::create(
                 MessagingEntrypointWithHeadersPropagation::class,
                 MessagingEntrypointWithHeadersPropagation::class,
-                "send",
+                'send',
                 MessagingEntrypoint::ENTRYPOINT
             )->withParameterConverters([
-                GatewayPayloadBuilder::create("payload"),
-                GatewayHeaderBuilder::create("targetChannel", MessagingEntrypoint::ENTRYPOINT)
+                GatewayPayloadBuilder::create('payload'),
+                GatewayHeaderBuilder::create('targetChannel', MessagingEntrypoint::ENTRYPOINT),
             ])
         );
         $configuration->registerGatewayBuilder(
             GatewayProxyBuilder::create(
                 MessagingEntrypointWithHeadersPropagation::class,
                 MessagingEntrypointWithHeadersPropagation::class,
-                "sendWithHeaders",
+                'sendWithHeaders',
                 MessagingEntrypoint::ENTRYPOINT
             )->withParameterConverters([
-                GatewayPayloadBuilder::create("payload"),
-                GatewayHeadersBuilder::create("headers"),
-                GatewayHeaderBuilder::create("targetChannel", MessagingEntrypoint::ENTRYPOINT)
+                GatewayPayloadBuilder::create('payload'),
+                GatewayHeadersBuilder::create('headers'),
+                GatewayHeaderBuilder::create('targetChannel', MessagingEntrypoint::ENTRYPOINT),
             ])
         );
         $configuration->registerGatewayBuilder(
             GatewayProxyBuilder::create(
                 MessagingEntrypointWithHeadersPropagation::class,
                 MessagingEntrypointWithHeadersPropagation::class,
-                "sendMessage",
+                'sendMessage',
                 MessagingEntrypoint::ENTRYPOINT
             )
         );
@@ -200,11 +200,11 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
             GatewayProxyBuilder::create(
                 ConsoleCommandRunner::class,
                 ConsoleCommandRunner::class,
-                "execute",
+                'execute',
                 MessagingCommandsModule::ECOTONE_EXECUTE_CONSOLE_COMMAND_EXECUTOR
             )->withParameterConverters([
-                GatewayHeaderBuilder::create("commandName", MessagingEntrypoint::ENTRYPOINT),
-                GatewayPayloadBuilder::create("parameters")
+                GatewayHeaderBuilder::create('commandName', MessagingEntrypoint::ENTRYPOINT),
+                GatewayPayloadBuilder::create('parameters'),
             ])
         );
     }

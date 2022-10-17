@@ -67,7 +67,7 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
         );
     }
 
-    public function test_registering_class_name_directly()
+    public function test_registering_user_land_class_name_directly()
     {
         $gatewayAnnotation = new SomeGatewayExample();
         $messageEndpoint   = new MessageEndpoint();
@@ -89,9 +89,54 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
                 [],
                 'prod',
                 '',
+                [],
                 [GatewayWithReplyChannelExample::class]
             ))->findCombined(MessageEndpoint::class, SomeGatewayExample::class)
         );
+    }
+
+    public function test_registering_system_class_name_directly()
+    {
+        $gatewayAnnotation = new SomeGatewayExample();
+        $messageEndpoint   = new MessageEndpoint();
+        $this->assertEquals(
+            [
+                AnnotatedDefinition::create(
+                    $messageEndpoint,
+                    $gatewayAnnotation,
+                    GatewayWithReplyChannelExample::class,
+                    'buy',
+                    [$messageEndpoint],
+                    [$gatewayAnnotation]
+                ),
+            ],
+            (new FileSystemAnnotationFinder(
+                $this->getAnnotationResolver(),
+                new AutoloadFileNamespaceParser(),
+                self::ROOT_DIR,
+                [],
+                'prod',
+                '',
+                [GatewayWithReplyChannelExample::class],
+                [SystemContextWithMethodEnvironmentExample::class]
+            ))->findCombined(MessageEndpoint::class, SomeGatewayExample::class)
+        );
+    }
+
+    public function test_throwing_exception_if_no_user_land_classes_and_catalog_and_namespaces_given()
+    {
+        $this->expectException(ConfigurationException::class);
+
+        (new FileSystemAnnotationFinder(
+            $this->getAnnotationResolver(),
+            new AutoloadFileNamespaceParser(),
+            self::ROOT_DIR,
+            [],
+            'prod',
+            '',
+            [GatewayWithReplyChannelExample::class],
+            []
+        ));
     }
 
     public function test_moving_back_in_catalog_in_case_autoload_was_not_found()
@@ -378,34 +423,6 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
         );
 
         $this->assertTrue(true);
-    }
-
-    public function test_throwing_exception_if_given_catalog_to_load_and_no_namespaces_to_load()
-    {
-        $this->expectException(ConfigurationException::class);
-
-        new FileSystemAnnotationFinder(
-            $this->getAnnotationResolver(),
-            InMemoryAutoloadNamespaceParser::createEmpty(),
-            self::ROOT_DIR,
-            [],
-            'test',
-            'src'
-        );
-    }
-
-    public function test_throwing_exception_if_given_catalog_to_load_and_only_ecotone_namespace_defined_to_load()
-    {
-        $this->expectException(ConfigurationException::class);
-
-        new FileSystemAnnotationFinder(
-            $this->getAnnotationResolver(),
-            InMemoryAutoloadNamespaceParser::createEmpty(),
-            self::ROOT_DIR,
-            [FileSystemAnnotationFinder::FRAMEWORK_NAMESPACE],
-            'test',
-            'src'
-        );
     }
 
     private function createAnnotationRegistrationService(string $namespace, string $environmentName): AnnotationFinder

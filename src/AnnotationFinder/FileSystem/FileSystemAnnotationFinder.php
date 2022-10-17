@@ -23,7 +23,6 @@ use function json_decode;
  */
 class FileSystemAnnotationFinder implements AnnotationFinder
 {
-    public const         FRAMEWORK_NAMESPACE = 'Ecotone';
     private const FILE_EXTENSION = 'php';
     public const         CLASS_NAMESPACE_REGEX = "#namespace[\s]*([^\n\s\(\)\[\]\{\}\$]*);#";
 
@@ -47,17 +46,17 @@ class FileSystemAnnotationFinder implements AnnotationFinder
     private AnnotationResolver $annotationResolver;
 
     public function __construct(
-        AnnotationResolver $annotationResolver,
+        AnnotationResolver      $annotationResolver,
         AutoloadNamespaceParser $autoloadNamespaceParser,
-        string $rootProjectDir,
-        array $namespaces,
-        string $environmentName,
-        string $catalogToLoad,
-        array $classesToRegister = []
+        string                  $rootProjectDir,
+        array                   $namespaces,
+        string                  $environmentName,
+        string                  $catalogToLoad,
+        array                   $systemClassesToRegister = [],
+        array                   $userClassesToRegister = []
     ) {
         $this->annotationResolver = $annotationResolver;
-        $this->init($rootProjectDir, array_unique($namespaces), $catalogToLoad, $autoloadNamespaceParser);
-        $this->registeredClasses = array_merge($this->registeredClasses, $classesToRegister);
+        $this->init($rootProjectDir, array_unique($namespaces), $catalogToLoad, $autoloadNamespaceParser, $systemClassesToRegister, $userClassesToRegister);
 
         $classNamesWithEnvironment = $this->findAnnotatedClasses(Environment::class);
         foreach ($classNamesWithEnvironment as $classNameWithEnvironment) {
@@ -77,7 +76,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
             foreach (get_class_methods($className) as $method) {
                 $classAnnotations = array_values(
                     array_filter(
-                        $methodAnnotations = array_map(
+                        array_map(
                             function (object $annotation) {
                                 if ($annotation instanceof Environment) {
                                     return $annotation;
@@ -113,66 +112,26 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         }
     }
 
-    private function init(string $rootProjectDir, array $namespacesToUse, string $catalogToLoad, AutoloadNamespaceParser $autoloadNamespaceParser)
+    private function init(string $rootProjectDir, array $namespacesToUse, string $catalogToLoad, AutoloadNamespaceParser $autoloadNamespaceParser, array $systemClassesToRegister, array $userClassesToRegister)
     {
-        $classes = [];
-        $originalRootProjectDir = $rootProjectDir;
-        $rootProjectDir = realpath(rtrim($rootProjectDir, '/'));
-
-        while ($rootProjectDir !== false && ! file_exists($rootProjectDir . DIRECTORY_SEPARATOR . '/vendor/autoload.php')) {
-            if ($rootProjectDir === DIRECTORY_SEPARATOR) {
-                throw \Ecotone\Messaging\Support\InvalidArgumentException::create(sprintf("Can't find autoload file in given path `%s/vendor/autoload.php` and any preceding ones.", $originalRootProjectDir));
-            }
-
-            $rootProjectDir = realpath($rootProjectDir . DIRECTORY_SEPARATOR . '..');
+        if (!$catalogToLoad && $namespacesToUse == [] && $userClassesToRegister == []) {
+            throw ConfigurationException::create("Loading catalog was turned off and no namespaces were provided. Please provide namespaces manually via configuration or turn on catalog loading. Read related Module section at https://docs.ecotone.tech");
         }
 
-        $composerPath = $rootProjectDir . DIRECTORY_SEPARATOR . 'composer.json';
-
-        if ($catalogToLoad && ! file_exists($composerPath)) {
-            throw new InvalidArgumentException("Ecotone requires psr-4 or psr-0 compatible autoload. Can't load src, composer.json not found in {$composerPath}");
-        }
-        $catalogRelatedNamespaces = [];
+        $registeredClasses = array_merge($systemClassesToRegister, $userClassesToRegister);
         if ($catalogToLoad) {
-            $composerJsonDecoded = json_decode(file_get_contents($composerPath), true);
-
-            if (isset($composerJsonDecoded['autoload'])) {
-                $catalogRelatedNamespaces = array_merge($catalogRelatedNamespaces, $autoloadNamespaceParser->getNamespacesForGivenCatalog($composerJsonDecoded['autoload'], $catalogToLoad));
-            }
-            if (isset($composerJsonDecoded['autoload-dev'])) {
-                $catalogRelatedNamespaces = array_merge($catalogRelatedNamespaces, $autoloadNamespaceParser->getNamespacesForGivenCatalog($composerJsonDecoded['autoload-dev'], $catalogToLoad));
-            }
+            $registeredClasses = array_merge(
+                $registeredClasses,
+                $this->getClassesIn([$rootProjectDir . DIRECTORY_SEPARATOR . $catalogToLoad], null)
+            );
         }
 
-        $namespacesToUse = array_map(fn (string $namespace) => trim($namespace, "\t\n\r\\"), $namespacesToUse);
-        $catalogRelatedNamespaces = array_map(fn (string $namespace) => trim($namespace, "\t\n\r\\"), $catalogRelatedNamespaces);
+        $registeredClasses = array_merge(
+            $registeredClasses,
+            $this->getRegisteredClassesForNamespaces($rootProjectDir, $autoloadNamespaceParser, $namespacesToUse)
+        );
 
-        if (! $catalogRelatedNamespaces && $catalogToLoad && ($namespacesToUse == ['Ecotone'] || $namespacesToUse == [])) {
-            throw ConfigurationException::create("Ecotone cannot resolve namespaces in {$rootProjectDir}/$catalogToLoad. Please provide namespaces manually via configuration. If you do not know how to do it, read Modules section related to your framework at https://docs.ecotone.tech");
-        }
-
-        $paths = $this->getPathsToSearchIn($autoloadNamespaceParser, $rootProjectDir, $namespacesToUse);
-        if ($catalogToLoad) {
-            $paths[] = $rootProjectDir . DIRECTORY_SEPARATOR . $catalogToLoad;
-        }
-
-        $namespacesToUse = array_merge($namespacesToUse, $catalogRelatedNamespaces);
-        foreach ($paths as $path) {
-            $files = $this->getDirContents($path);
-
-            foreach ($files as $file) {
-                if (preg_match_all(self::CLASS_NAMESPACE_REGEX, file_get_contents($file), $results)) {
-                    $namespace = isset($results[1][0]) ? trim($results[1][0]) : '';
-                    $namespace = trim($namespace, "\t\n\r\\");
-
-                    if ($this->isInAvailableNamespaces($namespacesToUse, $namespace)) {
-                        $classes[] = $namespace . '\\' . basename($file, '.php');
-                    }
-                }
-            }
-        }
-
-        $this->registeredClasses = array_unique($classes);
+        $this->registeredClasses = array_unique($registeredClasses);
     }
 
     private function getPathsToSearchIn(AutoloadNamespaceParser $autoloadNamespaceParser, string $rootProjectDir, array $namespaces): array
@@ -415,5 +374,54 @@ class FileSystemAnnotationFinder implements AnnotationFinder
     public function getAnnotationsForProperty(string $className, string $propertyName): array
     {
         return $this->annotationResolver->getAnnotationsForProperty($className, $propertyName);
+    }
+
+    /**
+     * @param string[] $paths
+     * @param string[]|null $namespacesToUse
+     * @param string[] $classes
+     */
+    private function getClassesIn(array $paths, ?array $namespacesToUse): array
+    {
+        $classes = [];
+        foreach ($paths as $path) {
+            $files = $this->getDirContents($path);
+
+            foreach ($files as $file) {
+                if (preg_match_all(self::CLASS_NAMESPACE_REGEX, file_get_contents($file), $results)) {
+                    $namespace = isset($results[1][0]) ? trim($results[1][0]) : '';
+                    $namespace = trim($namespace, "\t\n\r\\");
+
+                    if (is_null($namespacesToUse) || $this->isInAvailableNamespaces($namespacesToUse, $namespace)) {
+                        $classes[] = $namespace . '\\' . basename($file, '.php');
+                    }
+                }
+            }
+        }
+        return $classes;
+    }
+
+    private function getRegisteredClassesForNamespaces(string $rootProjectDir, AutoloadNamespaceParser $autoloadNamespaceParser, array $namespacesToUse): array
+    {
+        if ($namespacesToUse === []) {
+            return [];
+        }
+
+        $originalRootProjectDir = $rootProjectDir;
+        $rootProjectDir = realpath(rtrim($rootProjectDir, '/'));
+
+        while ($rootProjectDir !== false && !file_exists($rootProjectDir . DIRECTORY_SEPARATOR . '/vendor/autoload.php')) {
+            if ($rootProjectDir === DIRECTORY_SEPARATOR) {
+                throw \Ecotone\Messaging\Support\InvalidArgumentException::create(sprintf("Can't find autoload file in given path `%s/vendor/autoload.php` and any preceding ones.", $originalRootProjectDir));
+            }
+
+            $rootProjectDir = realpath($rootProjectDir . DIRECTORY_SEPARATOR . '..');
+        }
+
+        $namespacesToUse = array_map(fn(string $namespace) => trim($namespace, "\t\n\r\\"), $namespacesToUse);
+
+        $paths = $this->getPathsToSearchIn($autoloadNamespaceParser, $rootProjectDir, $namespacesToUse);
+
+        return $this->getClassesIn($paths, $namespacesToUse);
     }
 }

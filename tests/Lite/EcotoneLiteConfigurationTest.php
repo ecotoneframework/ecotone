@@ -7,6 +7,7 @@ use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
+use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\Gateway\FileSystem\GatewayWithReplyChannelExample;
 use Test\Ecotone\Messaging\Fixture\Behat\Presend\CoinGateway;
 use Test\Ecotone\Messaging\Fixture\Behat\Presend\MultiplyCoins;
 use Test\Ecotone\Messaging\Fixture\Behat\Presend\Shop;
@@ -25,8 +26,8 @@ class EcotoneLiteConfigurationTest extends TestCase
         $applicationConfiguration = ServiceConfiguration::createWithDefaults()
                                         ->withCacheDirectoryPath('/tmp/' . Uuid::uuid4()->toString())
                                         ->withSkippedModulePackageNames(['amqp', 'dbal', 'jmsConverter', 'eventSourcing']);
-        $configuration1 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . '/../../', InMemoryPSRContainer::createEmpty(), $applicationConfiguration, [], true);
-        $configuration2 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . '/../../', InMemoryPSRContainer::createEmpty(), $applicationConfiguration, [], true);
+        $configuration1 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . '/../../', InMemoryPSRContainer::createEmpty(), $applicationConfiguration, [], false, [GatewayWithReplyChannelExample::class]);
+        $configuration2 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . '/../../', InMemoryPSRContainer::createEmpty(), $applicationConfiguration, [], true, [GatewayWithReplyChannelExample::class]);
 
         $this->assertEquals($configuration1, $configuration2);
     }

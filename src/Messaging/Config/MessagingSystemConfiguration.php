@@ -708,7 +708,7 @@ final class MessagingSystemConfiguration implements Configuration
         return new self($moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), InterfaceToCallRegistry::createEmpty(), $serviceConfiguration ?? ServiceConfiguration::createWithDefaults());
     }
 
-    public static function prepare(string $rootPathToSearchConfigurationFor, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $applicationConfiguration, bool $useCachedVersion): Configuration
+    public static function prepare(string $rootPathToSearchConfigurationFor, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $applicationConfiguration, bool $useCachedVersion, array $userLandClassesToRegister = []): Configuration
     {
         return self::prepareWithAnnotationFinder(
             AnnotationFinderFactory::createForAttributes(
@@ -716,7 +716,8 @@ final class MessagingSystemConfiguration implements Configuration
                 $applicationConfiguration->getNamespaces(),
                 $applicationConfiguration->getEnvironment(),
                 $applicationConfiguration->getLoadedCatalog() ?? '',
-                array_filter(ModuleClassList::allModules(), fn (string $moduleClassName): bool => class_exists($moduleClassName))
+                array_filter(ModuleClassList::allModules(), fn (string $moduleClassName): bool => class_exists($moduleClassName)),
+                $userLandClassesToRegister
             ),
             $referenceTypeFromNameResolver,
             $configurationVariableService,

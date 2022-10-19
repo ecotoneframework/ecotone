@@ -13,7 +13,9 @@ final class ProxyGenerator
     {
         $proxyFactory = ProxyFactory::createWithCache($cacheDirectoryPath);
         $factory = new RemoteObjectFactory(new class ($container, $referenceName) implements AdapterInterface {
-            public function __construct(private ContainerInterface $container, private string $referenceName) {}
+            public function __construct(private ContainerInterface $container, private string $referenceName)
+            {
+            }
 
             /**
              * @inheritDoc

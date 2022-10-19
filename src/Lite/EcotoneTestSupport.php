@@ -7,12 +7,13 @@ use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModuleClassList;
+use Ecotone\Messaging\Config\ProxyGenerator;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Config\StubConfiguredMessagingSystem;
 use Ecotone\Messaging\Handler\Logger\EchoLogger;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 
-final class EcotoneTesting
+final class EcotoneTestSupport
 {
     public const CONFIGURED_MESSAGING_SYSTEM = ConfiguredMessagingSystem::class;
 

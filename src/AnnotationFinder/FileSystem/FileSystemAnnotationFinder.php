@@ -12,9 +12,6 @@ use Ecotone\AnnotationFinder\Attribute\Environment;
 use Ecotone\AnnotationFinder\ConfigurationException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
-use InvalidArgumentException;
-
-use function json_decode;
 
 /**
  * Class FileSystemAnnotationRegistrationService
@@ -114,8 +111,8 @@ class FileSystemAnnotationFinder implements AnnotationFinder
 
     private function init(string $rootProjectDir, array $namespacesToUse, string $catalogToLoad, AutoloadNamespaceParser $autoloadNamespaceParser, array $systemClassesToRegister, array $userClassesToRegister)
     {
-        if (!$catalogToLoad && $namespacesToUse == [] && $userClassesToRegister == []) {
-            throw ConfigurationException::create("Loading catalog was turned off and no namespaces were provided. Please provide namespaces manually via configuration or turn on catalog loading. Read related Module section at https://docs.ecotone.tech");
+        if (! $catalogToLoad && $namespacesToUse == [] && $userClassesToRegister == []) {
+            throw ConfigurationException::create('Loading catalog was turned off and no namespaces were provided. Please provide namespaces manually via configuration or turn on catalog loading. Read related Module section at https://docs.ecotone.tech');
         }
 
         $registeredClasses = array_merge($systemClassesToRegister, $userClassesToRegister);
@@ -410,7 +407,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         $originalRootProjectDir = $rootProjectDir;
         $rootProjectDir = realpath(rtrim($rootProjectDir, '/'));
 
-        while ($rootProjectDir !== false && !file_exists($rootProjectDir . DIRECTORY_SEPARATOR . '/vendor/autoload.php')) {
+        while ($rootProjectDir !== false && ! file_exists($rootProjectDir . DIRECTORY_SEPARATOR . '/vendor/autoload.php')) {
             if ($rootProjectDir === DIRECTORY_SEPARATOR) {
                 throw \Ecotone\Messaging\Support\InvalidArgumentException::create(sprintf("Can't find autoload file in given path `%s/vendor/autoload.php` and any preceding ones.", $originalRootProjectDir));
             }
@@ -418,7 +415,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
             $rootProjectDir = realpath($rootProjectDir . DIRECTORY_SEPARATOR . '..');
         }
 
-        $namespacesToUse = array_map(fn(string $namespace) => trim($namespace, "\t\n\r\\"), $namespacesToUse);
+        $namespacesToUse = array_map(fn (string $namespace) => trim($namespace, "\t\n\r\\"), $namespacesToUse);
 
         $paths = $this->getPathsToSearchIn($autoloadNamespaceParser, $rootProjectDir, $namespacesToUse);
 

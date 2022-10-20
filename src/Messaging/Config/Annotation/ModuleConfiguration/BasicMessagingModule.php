@@ -203,7 +203,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
                 'execute',
                 MessagingCommandsModule::ECOTONE_EXECUTE_CONSOLE_COMMAND_EXECUTOR
             )->withParameterConverters([
-                GatewayHeaderBuilder::create('commandName', MessagingEntrypoint::ENTRYPOINT),
+                GatewayHeaderBuilder::create('commandName', MessagingCommandsModule::ECOTONE_CONSOLE_COMMAND_NAME),
                 GatewayPayloadBuilder::create('parameters'),
             ])
         );

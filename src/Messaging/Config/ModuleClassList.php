@@ -87,7 +87,7 @@ class ModuleClassList
 
     public const JMS_CONVERTER_MODULES = [
         JMSConverterConfigurationModule::class,
-        JMSDefaultSerialization::class
+        JMSDefaultSerialization::class,
     ];
 
     public static function allModules(): array

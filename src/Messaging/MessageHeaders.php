@@ -96,6 +96,10 @@ final class MessageHeaders
      * Expected content type of reply
      */
     public const REPLY_CONTENT_TYPE = 'replyContentType';
+    /**
+     * Revision number
+     */
+    public const REVISION = 'revision';
 
     private ?array $headers;
 

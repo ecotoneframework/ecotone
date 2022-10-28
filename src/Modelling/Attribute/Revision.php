@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\Attribute;
 
-use Ecotone\Messaging\Support\Assert;
+use Attribute;
 
-#[\Attribute]
+#[Attribute]
 class Revision
 {
     private int $revision;

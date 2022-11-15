@@ -10,6 +10,7 @@ use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Messaging\Store\Document\InMemoryDocumentStore;
@@ -269,7 +270,6 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $newVersionOrder = clone $order;
         $newVersionOrder->increaseAggregateVersion();
-        ;
         $newVersionOrder->getRecordedEvents();
 
         $orderRepository->expects($this->once())

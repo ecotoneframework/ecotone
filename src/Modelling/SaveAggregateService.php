@@ -13,11 +13,13 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\Metadata\RevisionMetadataEnricher;
 use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Attribute\NamedEvent;
+use Ecotone\Modelling\Attribute\Revision;
 use Ecotone\Modelling\Config\BusModule;
 
 /**
@@ -169,6 +171,8 @@ class SaveAggregateService
         }
 
         foreach ($events as $event) {
+            // @TODO Ecotone 2.0 make use of Event (with metadata):
+            $metadata = RevisionMetadataEnricher::enrich($metadata, $event);
             $this->objectEventBus->execute([$event, $metadata]);
 
             $eventDefinition = ClassDefinition::createFor(TypeDescriptor::createFromVariable($event));

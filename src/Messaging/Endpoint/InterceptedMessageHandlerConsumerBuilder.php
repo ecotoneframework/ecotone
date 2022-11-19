@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Endpoint;
 
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InterceptedEndpoint;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -28,6 +29,7 @@ abstract class InterceptedMessageHandlerConsumerBuilder implements MessageHandle
         foreach ($interceptors as $interceptor) {
             $this->addAroundInterceptor(
                 AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
+                    $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME),
                     $interceptor,
                     'postSend',
                     Precedence::ASYNCHRONOUS_CONSUMER_INTERCEPTOR_PRECEDENCE,

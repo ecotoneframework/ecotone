@@ -3,7 +3,9 @@
 namespace Ecotone\Messaging\Channel;
 
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class QueueChannel
@@ -13,17 +15,15 @@ use Ecotone\Messaging\PollableChannel;
 class QueueChannel implements PollableChannel
 {
     /**
-     * @var Message[]
+     * @param Message[] $queue
      */
-    private $queue = [];
-
-    private function __construct()
+    private function __construct(private string $name, private array $queue)
     {
     }
 
-    public static function create(): self
+    public static function create(string $name = "unknown"): self
     {
-        return new self();
+        return new self($name, []);
     }
 
     /**
@@ -52,6 +52,6 @@ class QueueChannel implements PollableChannel
 
     public function __toString()
     {
-        return 'queue channel';
+        return 'queue channel: ' . $this->name;
     }
 }

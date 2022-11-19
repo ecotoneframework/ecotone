@@ -61,6 +61,13 @@ class Assert
         }
     }
 
+    public static function assertEmptyArray(array $array, string $exceptionMessage): void
+    {
+        if (!empty($array)) {
+            throw InvalidArgumentException::create($exceptionMessage);
+        }
+    }
+
     /**
      * @param $valueToCheck
      * @param string $exceptionMessage

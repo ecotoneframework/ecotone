@@ -26,7 +26,7 @@ class ChainForwardPublisher
 
     /**
      * Is responsible for forwarding message into the chain and receiving message from it
-     * after that pushes the the message to the output channel, which can be next chain
+     * after that pushes result message to the output channel, which can be next chain
      */
     public function forward(Message $requestMessage): ?Message
     {
@@ -35,7 +35,7 @@ class ChainForwardPublisher
         $replyChannel = null;
         $requestMessageWithNewChainReply = MessageBuilder::fromMessage($requestMessage);
         if ($replyChannelComingFromCurrentMessage || $this->hasOutputChannel) {
-            $replyChannel = QueueChannel::create();
+            $replyChannel = QueueChannel::create(self::class . "-replyChannel");
             $requestMessageWithNewChainReply->setReplyChannel($replyChannel);
         }
         $requestMessageWithNewChainReply = $requestMessageWithNewChainReply->build();

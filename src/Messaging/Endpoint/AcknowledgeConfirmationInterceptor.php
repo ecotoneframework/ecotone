@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
@@ -23,9 +24,9 @@ class AcknowledgeConfirmationInterceptor
     {
     }
 
-    public static function createAroundInterceptor(PollingMetadata $pollingMetadata): AroundInterceptorReference
+    public static function createAroundInterceptor(InterfaceToCallRegistry $interfaceToCallRegistry, PollingMetadata $pollingMetadata): AroundInterceptorReference
     {
-        return AroundInterceptorReference::createWithDirectObjectAndResolveConverters(new self($pollingMetadata->isStoppedOnError()), 'ack', Precedence::MESSAGE_ACKNOWLEDGE_PRECEDENCE, '');
+        return AroundInterceptorReference::createWithDirectObjectAndResolveConverters($interfaceToCallRegistry, new self($pollingMetadata->isStoppedOnError()), 'ack', Precedence::MESSAGE_ACKNOWLEDGE_PRECEDENCE, '');
     }
 
     /**

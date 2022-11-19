@@ -375,6 +375,7 @@ class GatewayProxyBuilder implements GatewayBuilder
         $aroundInterceptors = $this->aroundInterceptors;
         if ($errorChannel) {
             $aroundInterceptors[] = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
+                $interfaceToCallRegistry,
                 new ErrorChannelInterceptor($errorChannel),
                 'handle',
                 Precedence::ERROR_CHANNEL_PRECEDENCE,

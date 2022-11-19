@@ -6,6 +6,7 @@ use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\Filter\MessageFilterBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
 use Ecotone\Messaging\MessagingException;
@@ -316,6 +317,7 @@ class MessageFilterBuilderTest extends MessagingTest
         $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, 'accept')
             ->withOutputMessageChannel($outputChannelName)
             ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
+                InterfaceToCallRegistry::createEmpty(),
                 CallWithEndingChainAndReturningInterceptorExample::createWithReturnType(true),
                 'callWithEndingChainAndReturning',
                 1,

@@ -147,32 +147,33 @@ final class MessagingSystemConfiguration implements Configuration
      * @param object[] $extensionObjects
      * @param string[] $skippedModulesPackages
      */
-    private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, InterfaceToCallRegistry $preparationInterfaceRegistry, ServiceConfiguration $applicationConfiguration)
+    private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, InterfaceToCallRegistry $preparationInterfaceRegistry, ServiceConfiguration $serviceConfiguration)
     {
-        $extensionObjects = array_merge($extensionObjects, $applicationConfiguration->getExtensionObjects());
+        $extensionObjects = array_merge($extensionObjects, $serviceConfiguration->getExtensionObjects());
         $extensionApplicationConfiguration = [];
         foreach ($extensionObjects as $extensionObject) {
             if ($extensionObject instanceof ServiceConfiguration) {
                 $extensionApplicationConfiguration[] = $extensionObject;
             }
         }
-        $applicationConfiguration = $applicationConfiguration->mergeWith($extensionApplicationConfiguration);
-        if (! $applicationConfiguration->getConnectionRetryTemplate()) {
-            if ($applicationConfiguration->isProductionConfiguration()) {
-                $applicationConfiguration->withConnectionRetryTemplate(
+        $serviceConfiguration = $serviceConfiguration->mergeWith($extensionApplicationConfiguration);
+
+        if (! $serviceConfiguration->getConnectionRetryTemplate()) {
+            if ($serviceConfiguration->isProductionConfiguration()) {
+                $serviceConfiguration->withConnectionRetryTemplate(
                     RetryTemplateBuilder::exponentialBackoff(1000, 3)
                         ->maxRetryAttempts(5)
                 );
             } else {
-                $applicationConfiguration->withConnectionRetryTemplate(
+                $serviceConfiguration->withConnectionRetryTemplate(
                     RetryTemplateBuilder::exponentialBackoff(100, 3)
                         ->maxRetryAttempts(3)
                 );
             }
         }
 
-        $this->isLazyConfiguration = ! $applicationConfiguration->isFailingFast();
-        $this->applicationConfiguration = $applicationConfiguration;
+        $this->isLazyConfiguration = ! $serviceConfiguration->isFailingFast();
+        $this->applicationConfiguration = $serviceConfiguration;
 
         $extensionObjects = array_filter(
             $extensionObjects,
@@ -184,8 +185,8 @@ final class MessagingSystemConfiguration implements Configuration
                 return ! ($extensionObject instanceof ServiceConfiguration);
             }
         );
-        $extensionObjects[] = $applicationConfiguration;
-        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver, $applicationConfiguration->getCacheDirectoryPath() ? ProxyFactory::createWithCache($applicationConfiguration->getCacheDirectoryPath()) : ProxyFactory::createNoCache(), $preparationInterfaceRegistry, $applicationConfiguration);
+        $extensionObjects[] = $serviceConfiguration;
+        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $referenceTypeFromNameResolver, $serviceConfiguration->getCacheDirectoryPath() ? ProxyFactory::createWithCache($serviceConfiguration->getCacheDirectoryPath()) : ProxyFactory::createNoCache(), $preparationInterfaceRegistry, $serviceConfiguration);
     }
 
     /**
@@ -222,11 +223,11 @@ final class MessagingSystemConfiguration implements Configuration
                 $preparationInterfaceRegistry
             );
         }
-
         /** This $preparationInterfaceRegistry is only for preparation. We don't want to cache it, as most of the Interface may not be reused anymore. E.g. public method from Eloquent Model */
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWithBackedBy($referenceTypeFromNameResolver, $preparationInterfaceRegistry);
 
         $this->prepareAndOptimizeConfiguration($interfaceToCallRegistry, $applicationConfiguration);
+
         $proxyFactory->warmUpCacheFor($this->gatewayClassesToGenerateProxies);
         $this->gatewayClassesToGenerateProxies = [];
 
@@ -279,7 +280,7 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
             if ($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel) {
                 if ($this->beforeSendInterceptors) {
-                    $interceptorWithPointCuts = $this->getRelatedInterceptors($this->beforeSendInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceToCallRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorNames());
+                    $interceptorWithPointCuts = $this->getRelatedInterceptors($this->beforeSendInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceToCallRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorNames(), $interfaceToCallRegistry);
                     foreach ($interceptorWithPointCuts as $interceptorReference) {
                         $beforeSendInterceptors[] = new BeforeSendChannelInterceptorBuilder($messageHandlerBuilder->getInputMessageChannelName(), $interceptorReference);
                     }
@@ -295,8 +296,8 @@ final class MessagingSystemConfiguration implements Configuration
         $this->configureDefaultMessageChannels();
         $this->configureAsynchronousEndpoints();
         $this->configureRequiredReferencesAndInterfaces($interfaceToCallRegistry);
-
         $this->configureInterceptors($interfaceToCallRegistry);
+
         $this->resolveRequiredReferences($interfaceToCallRegistry, $this->messageHandlerBuilders);
         $this->resolveRequiredReferences($interfaceToCallRegistry, $this->gatewayBuilders);
         $this->resolveRequiredReferences($interfaceToCallRegistry, $this->channelAdapters);
@@ -337,7 +338,7 @@ final class MessagingSystemConfiguration implements Configuration
      * @return InterceptorWithPointCut[]|AroundInterceptorReference[]|MessageHandlerBuilderWithOutputChannel[]
      * @throws MessagingException
      */
-    private function getRelatedInterceptors($interceptors, InterfaceToCall $interceptedInterface, iterable $endpointAnnotations, iterable $requiredInterceptorNames): iterable
+    private function getRelatedInterceptors($interceptors, InterfaceToCall $interceptedInterface, iterable $endpointAnnotations, iterable $requiredInterceptorNames, InterfaceToCallRegistry $interfaceToCallRegistry): iterable
     {
         $relatedInterceptors = [];
         foreach ($requiredInterceptorNames as $requiredInterceptorName) {
@@ -354,7 +355,7 @@ final class MessagingSystemConfiguration implements Configuration
                 }
             }
 
-            if ($interceptor->doesItCutWith($interceptedInterface, $endpointAnnotations)) {
+            if ($interceptor->doesItCutWith($interceptedInterface, $endpointAnnotations, $interfaceToCallRegistry)) {
                 $relatedInterceptors[] = $interceptor->addInterceptedInterfaceToCall($interceptedInterface, $endpointAnnotations);
             }
         }
@@ -568,13 +569,13 @@ final class MessagingSystemConfiguration implements Configuration
                 $afterCallInterceptors = [];
 
                 if ($this->beforeCallMethodInterceptors) {
-                    $beforeCallInterceptors = $this->getRelatedInterceptors($this->beforeCallMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorNames());
+                    $beforeCallInterceptors = $this->getRelatedInterceptors($this->beforeCallMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorNames(), $interfaceRegistry);
                 }
                 if ($this->aroundMethodInterceptors) {
-                    $aroundInterceptors = $this->getRelatedInterceptors($this->aroundMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorNames());
+                    $aroundInterceptors = $this->getRelatedInterceptors($this->aroundMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorNames(), $interfaceRegistry);
                 }
                 if ($this->afterCallMethodInterceptors) {
-                    $afterCallInterceptors = $this->getRelatedInterceptors($this->afterCallMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorNames());
+                    $afterCallInterceptors = $this->getRelatedInterceptors($this->afterCallMethodInterceptors, $messageHandlerBuilder->getInterceptedInterface($interfaceRegistry), $messageHandlerBuilder->getEndpointAnnotations(), $messageHandlerBuilder->getRequiredInterceptorNames(), $interfaceRegistry);
                 }
 
                 foreach ($aroundInterceptors as $aroundInterceptorReference) {
@@ -608,13 +609,13 @@ final class MessagingSystemConfiguration implements Configuration
             $beforeCallInterceptors = [];
             $afterCallInterceptors = [];
             if ($this->beforeCallMethodInterceptors) {
-                $beforeCallInterceptors = $this->getRelatedInterceptors($this->beforeCallMethodInterceptors, $gatewayBuilder->getInterceptedInterface($interfaceRegistry), $gatewayBuilder->getEndpointAnnotations(), $gatewayBuilder->getRequiredInterceptorNames());
+                $beforeCallInterceptors = $this->getRelatedInterceptors($this->beforeCallMethodInterceptors, $gatewayBuilder->getInterceptedInterface($interfaceRegistry), $gatewayBuilder->getEndpointAnnotations(), $gatewayBuilder->getRequiredInterceptorNames(), $interfaceRegistry);
             }
             if ($this->aroundMethodInterceptors) {
-                $aroundInterceptors = $this->getRelatedInterceptors($this->aroundMethodInterceptors, $gatewayBuilder->getInterceptedInterface($interfaceRegistry), $gatewayBuilder->getEndpointAnnotations(), $gatewayBuilder->getRequiredInterceptorNames());
+                $aroundInterceptors = $this->getRelatedInterceptors($this->aroundMethodInterceptors, $gatewayBuilder->getInterceptedInterface($interfaceRegistry), $gatewayBuilder->getEndpointAnnotations(), $gatewayBuilder->getRequiredInterceptorNames(), $interfaceRegistry);
             }
             if ($this->afterCallMethodInterceptors) {
-                $afterCallInterceptors = $this->getRelatedInterceptors($this->afterCallMethodInterceptors, $gatewayBuilder->getInterceptedInterface($interfaceRegistry), $gatewayBuilder->getEndpointAnnotations(), $gatewayBuilder->getRequiredInterceptorNames());
+                $afterCallInterceptors = $this->getRelatedInterceptors($this->afterCallMethodInterceptors, $gatewayBuilder->getInterceptedInterface($interfaceRegistry), $gatewayBuilder->getEndpointAnnotations(), $gatewayBuilder->getRequiredInterceptorNames(), $interfaceRegistry);
             }
 
             foreach ($aroundInterceptors as $aroundInterceptor) {
@@ -633,13 +634,13 @@ final class MessagingSystemConfiguration implements Configuration
             $beforeCallInterceptors = [];
             $afterCallInterceptors = [];
             if ($this->beforeCallMethodInterceptors) {
-                $beforeCallInterceptors = $this->getRelatedInterceptors($this->beforeCallMethodInterceptors, $channelAdapter->getInterceptedInterface($interfaceRegistry), $channelAdapter->getEndpointAnnotations(), $channelAdapter->getRequiredInterceptorNames());
+                $beforeCallInterceptors = $this->getRelatedInterceptors($this->beforeCallMethodInterceptors, $channelAdapter->getInterceptedInterface($interfaceRegistry), $channelAdapter->getEndpointAnnotations(), $channelAdapter->getRequiredInterceptorNames(), $interfaceRegistry);
             }
             if ($this->aroundMethodInterceptors) {
-                $aroundInterceptors = $this->getRelatedInterceptors($this->aroundMethodInterceptors, $channelAdapter->getInterceptedInterface($interfaceRegistry), $channelAdapter->getEndpointAnnotations(), $channelAdapter->getRequiredInterceptorNames());
+                $aroundInterceptors = $this->getRelatedInterceptors($this->aroundMethodInterceptors, $channelAdapter->getInterceptedInterface($interfaceRegistry), $channelAdapter->getEndpointAnnotations(), $channelAdapter->getRequiredInterceptorNames(), $interfaceRegistry);
             }
             if ($this->afterCallMethodInterceptors) {
-                $afterCallInterceptors = $this->getRelatedInterceptors($this->afterCallMethodInterceptors, $channelAdapter->getInterceptedInterface($interfaceRegistry), $channelAdapter->getEndpointAnnotations(), $channelAdapter->getRequiredInterceptorNames());
+                $afterCallInterceptors = $this->getRelatedInterceptors($this->afterCallMethodInterceptors, $channelAdapter->getInterceptedInterface($interfaceRegistry), $channelAdapter->getEndpointAnnotations(), $channelAdapter->getRequiredInterceptorNames(), $interfaceRegistry);
             }
 
             foreach ($aroundInterceptors as $aroundInterceptor) {
@@ -708,20 +709,32 @@ final class MessagingSystemConfiguration implements Configuration
         return new self($moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InMemoryReferenceTypeFromNameResolver::createEmpty(), InterfaceToCallRegistry::createEmpty(), $serviceConfiguration ?? ServiceConfiguration::createWithDefaults());
     }
 
-    public static function prepare(string $rootPathToSearchConfigurationFor, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $applicationConfiguration, bool $useCachedVersion, array $userLandClassesToRegister = []): Configuration
+    public static function prepare(string $rootPathToSearchConfigurationFor, ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $serviceConfiguration, bool $useCachedVersion, array $userLandClassesToRegister = [], bool $enableTestPackage = false): Configuration
     {
+        $requiredModules = [ModulePackageList::CORE_PACKAGE];
+        if ($enableTestPackage) {
+            $requiredModules[] = ModulePackageList::TEST_PACKAGE;
+        }
+
+        $serviceConfiguration = $serviceConfiguration->withSkippedModulePackageNames(array_diff($serviceConfiguration->getSkippedModulesPackages(), $requiredModules));
+
+        $modulesClasses = [];
+        foreach (array_diff(array_merge(ModulePackageList::allPackages(), [ModulePackageList::TEST_PACKAGE]), $serviceConfiguration->getSkippedModulesPackages()) as $availablePackage) {
+            $modulesClasses = array_merge($modulesClasses, ModulePackageList::getModuleClassesForPackage($availablePackage));
+        }
+
         return self::prepareWithAnnotationFinder(
             AnnotationFinderFactory::createForAttributes(
                 realpath($rootPathToSearchConfigurationFor),
-                $applicationConfiguration->getNamespaces(),
-                $applicationConfiguration->getEnvironment(),
-                $applicationConfiguration->getLoadedCatalog() ?? '',
-                array_filter(ModuleClassList::allModules(), fn (string $moduleClassName): bool => class_exists($moduleClassName)),
+                $serviceConfiguration->getNamespaces(),
+                $serviceConfiguration->getEnvironment(),
+                $serviceConfiguration->getLoadedCatalog() ?? '',
+                array_filter($modulesClasses, fn (string $moduleClassName): bool => class_exists($moduleClassName)),
                 $userLandClassesToRegister
             ),
             $referenceTypeFromNameResolver,
             $configurationVariableService,
-            $applicationConfiguration,
+            $serviceConfiguration,
             $useCachedVersion
         );
     }
@@ -745,6 +758,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         $preparationInterfaceRegistry = InterfaceToCallRegistry::createWith($referenceTypeFromNameResolver, $annotationFinder);
+
         return self::prepareWithModuleRetrievingService(
             new AnnotationModuleRetrievingService(
                 $annotationFinder,
@@ -777,7 +791,13 @@ final class MessagingSystemConfiguration implements Configuration
         if ($cacheDirectoryPath) {
             self::prepareCacheDirectory($cacheDirectoryPath);
         }
-        $messagingSystemConfiguration = new self($moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), $referenceTypeFromNameResolver, $preparationInterfaceRegistry, $applicationConfiguration);
+        $messagingSystemConfiguration = new self(
+            $moduleConfigurationRetrievingService,
+            $moduleConfigurationRetrievingService->findAllExtensionObjects(),
+            $referenceTypeFromNameResolver,
+            $preparationInterfaceRegistry,
+            $applicationConfiguration
+        );
 
         if ($cacheDirectoryPath) {
             $serializedMessagingSystemConfiguration = serialize($messagingSystemConfiguration);

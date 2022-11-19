@@ -9,6 +9,7 @@ use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Recoverability\ErrorHandler;
@@ -79,7 +80,7 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
 
     public function getModulePackageName(): string
     {
-        return CoreModule::NAME;
+        return ModulePackageList::CORE_PACKAGE;
     }
 
     private function hasErrorConfiguration(array $extensionObjects): bool

@@ -8,6 +8,7 @@ use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\ClassReference;
 use Ecotone\Messaging\Attribute\Interceptor\Around;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -30,7 +31,7 @@ class PointcutTest extends TestCase
 {
     public function test_if_empty_point_cut_it_should_no_cut()
     {
-        $this->assertFalse(Pointcut::createEmpty()->doesItCut(InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, 'callMultipleUnorderedArgumentsInvocation'), []));
+        $this->assertFalse(Pointcut::createEmpty()->doesItCut(InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, 'callMultipleUnorderedArgumentsInvocation'), [],InterfaceToCallRegistry::createEmpty()));
     }
 
     public function test_pointing_to_exact_class()
@@ -128,7 +129,8 @@ class PointcutTest extends TestCase
         $this->assertTrue(
             Pointcut::createWith(AttributeOne::class . '&&' . AttributeTwo::class)->doesItCut(
                 InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
-                [new AttributeOne(), new AttributeTwo()]
+                [new AttributeOne(), new AttributeTwo()],
+                InterfaceToCallRegistry::createEmpty()
             )
         );
     }
@@ -138,7 +140,8 @@ class PointcutTest extends TestCase
         $this->assertFalse(
             Pointcut::createWith(AttributeOne::class . '&&' . AttributeTwo::class)->doesItCut(
                 InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
-                [new AttributeTwo()]
+                [new AttributeTwo()],
+                InterfaceToCallRegistry::createEmpty()
             )
         );
     }
@@ -148,7 +151,8 @@ class PointcutTest extends TestCase
         $this->assertTrue(
             Pointcut::createWith('(' . AttributeOne::class . ')')->doesItCut(
                 InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
-                [new AttributeOne()]
+                [new AttributeOne()],
+                InterfaceToCallRegistry::createEmpty()
             )
         );
     }
@@ -158,7 +162,8 @@ class PointcutTest extends TestCase
         $this->assertTrue(
             Pointcut::createWith('(' . AttributeOne::class . ')||(' . AttributeTwo::class . ')')->doesItCut(
                 InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
-                [new AttributeTwo()]
+                [new AttributeTwo()],
+                InterfaceToCallRegistry::createEmpty()
             )
         );
     }
@@ -168,7 +173,8 @@ class PointcutTest extends TestCase
         $this->assertFalse(
             Pointcut::createWith('(' . AttributeOne::class . ')&&(' . AttributeTwo::class . ')')->doesItCut(
                 InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
-                [new AttributeTwo()]
+                [new AttributeTwo()],
+                InterfaceToCallRegistry::createEmpty()
             )
         );
     }
@@ -178,7 +184,8 @@ class PointcutTest extends TestCase
         $this->assertTrue(
             Pointcut::createWith('(' . AttributeOne::class . ')&&(' . AttributeTwo::class . ')')->doesItCut(
                 InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
-                [new AttributeOne(), new AttributeTwo()]
+                [new AttributeOne(), new AttributeTwo()],
+                InterfaceToCallRegistry::createEmpty()
             )
         );
     }
@@ -202,7 +209,8 @@ class PointcutTest extends TestCase
         $this->assertTrue(
             Pointcut::createWith(AsynchronousRunningEndpoint::class)->doesItCut(
                 InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
-                [new AsynchronousRunningEndpoint('some')]
+                [new AsynchronousRunningEndpoint('some')],
+                InterfaceToCallRegistry::createEmpty()
             )
         );
     }
@@ -210,11 +218,11 @@ class PointcutTest extends TestCase
 
     private function itShouldCut(string $expression, InterfaceToCall $doesItCut): void
     {
-        $this->assertTrue(Pointcut::createWith($expression)->doesItCut($doesItCut, []));
+        $this->assertTrue(Pointcut::createWith($expression)->doesItCut($doesItCut, [], InterfaceToCallRegistry::createEmpty()));
     }
 
     private function itShouldNotCut(string $expression, InterfaceToCall $doesItCut): void
     {
-        $this->assertFalse(Pointcut::createWith($expression)->doesItCut($doesItCut, []));
+        $this->assertFalse(Pointcut::createWith($expression)->doesItCut($doesItCut, [], InterfaceToCallRegistry::createEmpty()));
     }
 }

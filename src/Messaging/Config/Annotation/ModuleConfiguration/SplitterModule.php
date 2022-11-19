@@ -7,6 +7,7 @@ use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\Splitter;
 use Ecotone\Messaging\Attribute\Transformer;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Splitter\SplitterBuilder;
 
@@ -42,6 +43,6 @@ class SplitterModule extends MessageHandlerRegisterConfiguration
 
     public function getModulePackageName(): string
     {
-        return CoreModule::NAME;
+        return ModulePackageList::CORE_PACKAGE;
     }
 }

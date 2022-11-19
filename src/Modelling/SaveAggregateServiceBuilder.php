@@ -125,23 +125,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $this->aggregateRepositoryReferenceNames
             );
 
-        $objectEventBus = GatewayProxyBuilder::create('', EventBus::class, 'publish', BusModule::EVENT_CHANNEL_NAME_BY_OBJECT)
-            ->withParameterConverters(
-                [
-                    GatewayPayloadBuilder::create('event'),
-                    GatewayHeadersBuilder::create('metadata'),
-                ]
-            )
-            ->buildWithoutProxyObject($referenceSearchService, $channelResolver);
-
-        $namedEventBus = GatewayProxyBuilder::create('', EventBus::class, 'publishWithRouting', BusModule::EVENT_CHANNEL_NAME_BY_NAME)
-            ->withParameterConverters([
-                GatewayPayloadBuilder::create('event'),
-                GatewayHeadersBuilder::create('metadata'),
-                GatewayHeaderBuilder::create('routingKey', BusModule::EVENT_CHANNEL_NAME_BY_NAME),
-                GatewayHeaderBuilder::create('eventMediaType', MessageHeaders::CONTENT_TYPE),
-            ])
-            ->buildWithoutProxyObject($referenceSearchService, $channelResolver);
+        $eventBus = $referenceSearchService->get(EventBus::class);
 
         return ServiceActivatorBuilder::createWithDirectReference(
             new SaveAggregateService(
@@ -151,8 +135,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $aggregateRepository,
                 PropertyEditorAccessor::create($referenceSearchService),
                 $this->getPropertyReaderAccessor(),
-                $objectEventBus,
-                $namedEventBus,
+                $eventBus,
                 $this->aggregateMethodWithEvents,
                 $this->aggregateIdentifierMapping,
                 $this->aggregateIdentifierGetMethods,

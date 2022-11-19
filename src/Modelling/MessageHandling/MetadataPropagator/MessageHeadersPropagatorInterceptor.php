@@ -7,7 +7,7 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Throwable;
 
-class MessageHeadersPropagator
+class MessageHeadersPropagatorInterceptor
 {
     private array $currentlyPropagatedHeaders = [];
 

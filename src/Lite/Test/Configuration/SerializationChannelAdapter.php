@@ -1,0 +1,60 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Ecotone\Lite\Test\Configuration;
+
+use Ecotone\Messaging\Channel\ChannelInterceptor;
+use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
+use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Throwable;
+
+final class SerializationChannelAdapter implements ChannelInterceptor
+{
+    public function __construct(private MediaType $targetMediaType, private ConversionService $conversionService) {}
+
+    public function preSend(Message $message, MessageChannel $messageChannel): ?Message
+    {
+        return MessageBuilder::fromMessage($message)
+                ->setPayload($this->conversionService->convert(
+                    $message->getPayload(),
+                    TypeDescriptor::createFromVariable($message->getPayload()),
+                    $message->getHeaders()->getContentType(),
+                    $this->targetMediaType->hasTypeParameter() ? $this->targetMediaType->getTypeParameter() : TypeDescriptor::createStringType(),
+                    $this->targetMediaType
+                ))
+                ->setContentType($this->targetMediaType)
+                ->build();
+    }
+
+    public function postSend(Message $message, MessageChannel $messageChannel): void
+    {
+
+    }
+
+    public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?Throwable $exception): void
+    {
+
+    }
+
+    public function preReceive(MessageChannel $messageChannel): bool
+    {
+        return true;
+    }
+
+    public function postReceive(Message $message, MessageChannel $messageChannel): ?Message
+    {
+        return $message;
+    }
+
+    public function afterReceiveCompletion(?Message $message, MessageChannel $messageChannel, ?Throwable $exception): void
+    {
+
+    }
+}

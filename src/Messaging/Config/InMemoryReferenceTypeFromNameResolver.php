@@ -75,6 +75,9 @@ class InMemoryReferenceTypeFromNameResolver implements ReferenceTypeFromNameReso
      */
     public function resolve(string $referenceName): Type
     {
+        if (class_exists($referenceName)) {
+            return TypeDescriptor::create($referenceName);
+        }
         if ($this->referenceSearchService) {
             return TypeDescriptor::createFromVariable($this->referenceSearchService->get($referenceName));
         }

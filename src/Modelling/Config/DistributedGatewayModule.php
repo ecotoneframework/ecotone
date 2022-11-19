@@ -8,6 +8,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\CoreModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -98,6 +99,6 @@ class DistributedGatewayModule extends NoExternalConfigurationModule implements 
 
     public function getModulePackageName(): string
     {
-        return CoreModule::NAME;
+        return ModulePackageList::CORE_PACKAGE;
     }
 }

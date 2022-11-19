@@ -12,6 +12,7 @@ use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
@@ -153,7 +154,7 @@ class Gateway implements NonProxyGateway
         $previousReplyChannel = $requestMessage->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaderWithName(MessageHeaders::REPLY_CHANNEL) : null;
         $replyContentType = $requestMessage->containsKey(MessageHeaders::REPLY_CONTENT_TYPE) ? MediaType::parseMediaType($requestMessage->getHeaderWithName(MessageHeaders::REPLY_CONTENT_TYPE)) : null;
         if ($this->interfaceToCall->canReturnValue()) {
-            $internalReplyBridge = QueueChannel::create();
+            $internalReplyBridge = QueueChannel::create($this->interfaceToCall->getInterfaceName() . "::" . $this->interfaceToCall->getMethodName() . "-replyChannel");
             $requestMessage = $requestMessage
                 ->setReplyChannel($internalReplyBridge);
         } else {
@@ -200,6 +201,7 @@ class Gateway implements NonProxyGateway
             ->withEndpointAnnotations($this->endpointAnnotations);
         $aroundInterceptorReferences = $this->aroundInterceptors;
         $aroundInterceptorReferences[] = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
+            $this->referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME),
             new ConversionInterceptor(
                 $this->referenceSearchService->get(ConversionService::REFERENCE_NAME),
                 $this->interfaceToCall,

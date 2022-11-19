@@ -15,6 +15,7 @@ use Ecotone\Dbal\Recoverability\DbalDeadLetterModule;
 use Ecotone\EventSourcing\Config\EventSourcingModule;
 use Ecotone\JMSConverter\Configuration\JMSConverterConfigurationModule;
 use Ecotone\JMSConverter\Configuration\JMSDefaultSerialization;
+use Ecotone\Lite\Test\Configuration\EcotoneTestSupportModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\BasicMessagingModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule;
@@ -48,7 +49,6 @@ class ModuleClassList
         MethodInterceptorModule::class,
         MessagingCommandsModule::class,
         EndpointHeadersInterceptorModule::class,
-        AsynchronousModule::class,
         BasicMessagingModule::class,
         ConsoleCommandModule::class,
         ConverterModule::class,
@@ -63,6 +63,10 @@ class ModuleClassList
         ServiceActivatorModule::class,
         SplitterModule::class,
         TransformerModule::class,
+    ];
+
+    public const ASYNCHRONOUS_MODULE = [
+        AsynchronousModule::class,
     ];
 
     public const AMQP_MODULES = [
@@ -90,10 +94,15 @@ class ModuleClassList
         JMSDefaultSerialization::class,
     ];
 
+    public const TEST_MODULES = [
+        EcotoneTestSupportModule::class
+    ];
+
     public static function allModules(): array
     {
         return array_merge(
             self::CORE_MODULES,
+            self::ASYNCHRONOUS_MODULE,
             self::AMQP_MODULES,
             self::DBAL_MODULES,
             self::EVENT_SOURCING_MODULES,

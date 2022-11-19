@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Handler\UnionTypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
@@ -108,9 +109,9 @@ class Pointcut
         return $this->expression === '' || is_null($this->expression);
     }
 
-    public function doesItCut(InterfaceToCall $interfaceToCall, array $endpointAnnotations): bool
+    public function doesItCut(InterfaceToCall $interfaceToCall, array $endpointAnnotations, InterfaceToCallRegistry $interfaceToCallRegistry): bool
     {
-        return $this->doesItCutWithPossibleBrackets($this->expression, $endpointAnnotations, $interfaceToCall);
+        return $this->doesItCutWithPossibleBrackets($this->expression, $endpointAnnotations, $interfaceToCall, $interfaceToCallRegistry);
     }
 
     private function getInBetweenBracketsExpressions(string $expression): array
@@ -120,7 +121,7 @@ class Pointcut
         return $results[2];
     }
 
-    private function doesItCutWithPossibleBrackets(?string $expression, array $endpointAnnotations, InterfaceToCall $interfaceToCall): bool
+    private function doesItCutWithPossibleBrackets(?string $expression, array $endpointAnnotations, InterfaceToCall $interfaceToCall, InterfaceToCallRegistry $interfaceToCallRegistry): bool
     {
         if (is_null($expression)) {
             return false;
@@ -129,12 +130,12 @@ class Pointcut
         $results = $this->getExpressionsDivinedByBrackets($expression);
 
         if (empty($results)) {
-            return $this->doesItCutWithPossibleORs($expression, $endpointAnnotations, $interfaceToCall);
+            return $this->doesItCutWithPossibleORs($expression, $endpointAnnotations, $interfaceToCall, $interfaceToCallRegistry);
         }
 
         $expressionsEvaluations = [];
         foreach ($results as $expressionToVerify) {
-            $expressionsEvaluations[] = $this->doesItCutWithPossibleORs($expressionToVerify, $endpointAnnotations, $interfaceToCall);
+            $expressionsEvaluations[] = $this->doesItCutWithPossibleORs($expressionToVerify, $endpointAnnotations, $interfaceToCall, $interfaceToCallRegistry);
         }
 
         $inBetweenBracketsExpressions = $this->getInBetweenBracketsExpressions($expression);
@@ -147,15 +148,15 @@ class Pointcut
             $newExpression .= $expressionsEvaluations[$index] ? 'true' : 'false';
         }
 
-        return $this->doesItCutWithPossibleBrackets($newExpression, $endpointAnnotations, $interfaceToCall);
+        return $this->doesItCutWithPossibleBrackets($newExpression, $endpointAnnotations, $interfaceToCall, $interfaceToCallRegistry);
     }
 
-    private function doesItCutWithPossibleORs(string $expressionToVerify, array $endpointAnnotations, InterfaceToCall $interfaceToCall): bool
+    private function doesItCutWithPossibleORs(string $expressionToVerify, array $endpointAnnotations, InterfaceToCall $interfaceToCall, InterfaceToCallRegistry $interfaceToCallRegistry): bool
     {
         $multipleExpression = explode('||', $expressionToVerify);
 
         foreach ($multipleExpression as $possibleEndExpressions) {
-            if ($this->doesItCutPossibleANDs($possibleEndExpressions, $endpointAnnotations, $interfaceToCall)) {
+            if ($this->doesItCutPossibleANDs($possibleEndExpressions, $endpointAnnotations, $interfaceToCall,$interfaceToCallRegistry)) {
                 return true;
             }
         }
@@ -163,11 +164,11 @@ class Pointcut
         return false;
     }
 
-    private function doesItCutPossibleANDs(string $expressionToVerify, array $endpointAnnotations, InterfaceToCall $interfaceToCall): bool
+    private function doesItCutPossibleANDs(string $expressionToVerify, array $endpointAnnotations, InterfaceToCall $interfaceToCall, InterfaceToCallRegistry $interfaceToCallRegistry): bool
     {
         $expressions = explode('&&', $expressionToVerify);
         foreach ($expressions as $expression) {
-            if (! $this->doesItCutThisExpression($expression, $endpointAnnotations, $interfaceToCall)) {
+            if (! $this->doesItCutThisExpression($expression, $endpointAnnotations, $interfaceToCall, $interfaceToCallRegistry)) {
                 return false;
             }
         }
@@ -175,7 +176,7 @@ class Pointcut
         return true;
     }
 
-    private function doesItCutThisExpression(mixed $expression, array $endpointAnnotations, InterfaceToCall $interfaceToCall): bool
+    private function doesItCutThisExpression(mixed $expression, array $endpointAnnotations, InterfaceToCall $interfaceToCall, InterfaceToCallRegistry $interfaceToCallRegistry): bool
     {
         if ($expression === 'true') {
             return true;
@@ -185,7 +186,7 @@ class Pointcut
         }
 
         if (TypeDescriptor::isItTypeOfExistingClassOrInterface($expression)) {
-            $classDefinition = ClassDefinition::createFor(TypeDescriptor::create($expression));
+            $classDefinition = $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($expression));
             if ($classDefinition->isAnnotation()) {
                 $annotationToCheck = $classDefinition->getClassType();
 

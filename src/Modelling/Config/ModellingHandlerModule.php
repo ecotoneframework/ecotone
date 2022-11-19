@@ -19,6 +19,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\CoreModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
@@ -629,6 +630,6 @@ class ModellingHandlerModule implements AnnotationModule
 
     public function getModulePackageName(): string
     {
-        return CoreModule::NAME;
+        return ModulePackageList::CORE_PACKAGE;
     }
 }

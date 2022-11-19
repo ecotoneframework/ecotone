@@ -9,5 +9,4 @@ use Ecotone\Modelling\Attribute\Revision;
 #[Revision(2)]
 final class MessageWithRevision
 {
-
 }

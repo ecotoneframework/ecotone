@@ -12,6 +12,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingCommands\MessagingCommandsModule;
 use Ecotone\Messaging\Config\BeforeSend\BeforeSendGateway;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\RequiredReference;
 use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverterBuilder;
@@ -92,7 +93,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
         } else {
             $configuration->registerConsumerFactory(new EventDrivenConsumerBuilder());
         }
-        $configuration->registerConsumerFactory(new PollingConsumerBuilder());
+        $configuration->registerConsumerFactory(new PollingConsumerBuilder($interfaceToCallRegistry));
 
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
         $configuration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
@@ -241,6 +242,6 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
 
     public function getModulePackageName(): string
     {
-        return CoreModule::NAME;
+        return ModulePackageList::CORE_PACKAGE;
     }
 }

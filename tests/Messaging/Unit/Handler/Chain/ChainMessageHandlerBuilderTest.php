@@ -16,6 +16,7 @@ use Ecotone\Messaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
 use Ecotone\Messaging\Handler\Enricher\EnricherBuilder;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -249,6 +250,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
     public function test_having_chain_in_chain_with_default_around_interceptors_before_calling_any_chained_handler()
     {
         $aroundAddOneAfterCall = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
+            InterfaceToCallRegistry::createEmpty(),
             CalculatingServiceInterceptorExample::create(1),
             'resultAfterCalling',
             1,
@@ -281,6 +283,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
     public function test_having_chain_in_chain_with_around_interceptors()
     {
         $aroundAddOneAfterCall = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
+            InterfaceToCallRegistry::createEmpty(),
             CalculatingServiceInterceptorExample::create(1),
             'sumAfterCalling',
             1,
@@ -317,6 +320,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
         $internalOutputChannel->subscribe(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum')->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty()));
 
         $aroundAddOneAfterCall = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
+            InterfaceToCallRegistry::createEmpty(),
             CalculatingServiceInterceptorExample::create(10),
             'sumAfterCalling',
             1,

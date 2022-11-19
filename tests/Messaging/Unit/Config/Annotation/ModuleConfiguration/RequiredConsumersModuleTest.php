@@ -49,7 +49,7 @@ class RequiredConsumersModuleTest extends AnnotationConfigurationTest
             InterfaceToCallRegistry::createEmpty()
         );
         $configuration = $this->createMessagingSystemConfiguration()
-            ->registerConsumerFactory(new PollingConsumerBuilder())
+            ->registerConsumerFactory(new PollingConsumerBuilder(InterfaceToCallRegistry::createEmpty()))
             ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel('requestChannel'))
             ->registerMessageHandler(
                 DataReturningService::createExceptionalServiceActivatorBuilder()

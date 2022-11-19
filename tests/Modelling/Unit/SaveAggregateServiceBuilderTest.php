@@ -10,24 +10,26 @@ use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Messaging\Store\Document\InMemoryDocumentStore;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\Config\BusModule;
+use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
 use Ecotone\Modelling\SaveAggregateService;
 use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use Ecotone\Modelling\StandardRepository;
+use Ecotone\Modelling\StorageEventBus;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Test\Ecotone\Modelling\Fixture\Blog\Article;
 use Test\Ecotone\Modelling\Fixture\Blog\PublishArticleCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
+use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\Notification;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\Order;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderWithManualVersioning;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory\NoIdDefinedAfterCallingFactoryExample;
@@ -61,15 +63,11 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $inMemoryStandardRepository = InMemoryStandardRepository::createEmpty();
         $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createFromAssociativeArray(
-                [
-                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
-                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
-                ]
-            ),
+            InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith(
                 [
                     'orderRepository' => $inMemoryStandardRepository,
+                    EventBus::class => StorageEventBus::create()
                 ]
             )
         );
@@ -83,6 +81,41 @@ class SaveAggregateServiceBuilderTest extends TestCase
         );
 
         $this->assertEquals($order, $inMemoryStandardRepository->findBy(Order::class, ['orderId' => 1]));
+    }
+
+    public function test_recorded_event_being_published_with_revision()
+    {
+        $order = Order::createWith(CreateOrderCommand::createWith(1, 1, 'Poland'));
+
+        $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
+            ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
+            'changeShippingAddress',
+            InterfaceToCallRegistry::createEmpty(),
+            SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
+            [],
+            DocumentStore::class
+        )
+            ->withAggregateRepositoryFactories(['orderRepository']);
+
+        $eventBus = StorageEventBus::create();
+        $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
+            InMemoryChannelResolver::createEmpty(),
+            InMemoryReferenceSearchService::createWith(
+                [
+                    'orderRepository' => InMemoryStandardRepository::createEmpty(),
+                    EventBus::class => $eventBus
+                ]
+            )
+        );
+
+        $aggregateCommandHandler->handle(
+            MessageBuilder::withPayload(CreateOrderCommand::createWith(1, 1, 'Some'))
+                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, $order)
+                ->build()
+        );
+
+        $this->assertEquals(new Notification(), $eventBus->getCalls()[0][0]);
+        $this->assertEquals(1, $eventBus->getCalls()[0][1]['revision']);
     }
 
     public function test_snapshoting_aggregate_after_single_event()
@@ -99,16 +132,12 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
         $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createFromAssociativeArray(
-                [
-                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
-                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
-                ]
-            ),
+            InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith(
                 [
                     'repository' => InMemoryEventSourcedRepository::createEmpty(),
                     DocumentStore::class => $inMemoryDocumentStore,
+                    EventBus::class => StorageEventBus::create()
                 ]
             )
         );
@@ -144,16 +173,12 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
         $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createFromAssociativeArray(
-                [
-                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
-                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
-                ]
-            ),
+            InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith(
                 [
                     'repository' => InMemoryEventSourcedRepository::createEmpty(),
                     DocumentStore::class => $inMemoryDocumentStore,
+                    EventBus::class => StorageEventBus::create()
                 ]
             )
         );
@@ -186,16 +211,12 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
         $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createFromAssociativeArray(
-                [
-                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
-                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
-                ]
-            ),
+            InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith(
                 [
                     'repository' => InMemoryEventSourcedRepository::createEmpty(),
                     DocumentStore::class => $inMemoryDocumentStore,
+                    EventBus::class => StorageEventBus::create()
                 ]
             )
         );
@@ -230,15 +251,11 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $inMemoryStandardRepository = InMemoryStandardRepository::createEmpty();
         $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createFromAssociativeArray(
-                [
-                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
-                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
-                ]
-            ),
+            InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith(
                 [
                     'repository' => $inMemoryStandardRepository,
+                    EventBus::class => StorageEventBus::create()
                 ]
             )
         );
@@ -297,16 +314,12 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->withInputChannelName('inputChannel');
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createFromAssociativeArray(
-                [
-                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
-                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
-                ]
-            ),
+            InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith(
                 [
                     'orderRepository' => $orderRepository,
                     ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
+                    EventBus::class => StorageEventBus::create()
                 ]
             )
         );
@@ -362,16 +375,12 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->withInputChannelName('inputChannel');
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createFromAssociativeArray(
-                [
-                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
-                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
-                ]
-            ),
+            InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith(
                 [
                     'orderRepository' => $orderRepository,
                     ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
+                    EventBus::class => StorageEventBus::create()
                 ]
             )
         );
@@ -399,16 +408,12 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->withInputChannelName('inputChannel');
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createFromAssociativeArray(
-                [
-                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
-                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
-                ]
-            ),
+            InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith(
                 [
                     'repository' => InMemoryEventSourcedRepository::createEmpty(),
                     ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
+                    EventBus::class => StorageEventBus::create()
                 ]
             )
         );
@@ -439,15 +444,11 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createEmpty();
 
         $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createFromAssociativeArray(
-                [
-                    BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => QueueChannel::create(),
-                    BusModule::EVENT_CHANNEL_NAME_BY_NAME => QueueChannel::create(),
-                ]
-            ),
+            InMemoryChannelResolver::createEmpty(),
             InMemoryReferenceSearchService::createWith(
                 [
                     'repository' => $inMemoryEventSourcedRepository,
+                    EventBus::class => StorageEventBus::create()
                 ]
             )
         );

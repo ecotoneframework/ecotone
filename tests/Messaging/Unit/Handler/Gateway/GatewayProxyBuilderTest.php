@@ -23,6 +23,7 @@ use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayload
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlingException;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
@@ -790,7 +791,7 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', ServiceInterfaceCalculatingService::class, 'calculate', $requestChannelName)
             ->addAroundInterceptor(
-                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(CalculatingServiceInterceptorExample::create(1), 'sum', 1, ServiceInterfaceCalculatingService::class)
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(),CalculatingServiceInterceptorExample::create(1), 'sum', 1, ServiceInterfaceCalculatingService::class)
             );
 
         $gatewayProxy = $gatewayProxyBuilder->build(
@@ -820,7 +821,7 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', TransactionalInterceptorOnGatewayMethodExample::class, 'invoke', $requestChannelName)
             ->addAroundInterceptor(
-                AroundInterceptorReference::createWithDirectObjectAndResolveConverters($transactionInterceptor, 'transactional', 1, Transactional::class)
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(),$transactionInterceptor, 'transactional', 1, Transactional::class)
             );
 
         $gatewayProxy = $gatewayProxyBuilder->build(
@@ -852,7 +853,7 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', TransactionalInterceptorOnGatewayClassExample::class, 'invoke', $requestChannelName)
             ->addAroundInterceptor(
-                AroundInterceptorReference::createWithDirectObjectAndResolveConverters($transactionInterceptor, 'transactional', 1, Transactional::class)
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(),$transactionInterceptor, 'transactional', 1, Transactional::class)
             );
 
         $gatewayProxy = $gatewayProxyBuilder->build(
@@ -884,7 +885,7 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', TransactionalInterceptorOnGatewayClassAndMethodExample::class, 'invoke', $requestChannelName)
             ->addAroundInterceptor(
-                AroundInterceptorReference::createWithDirectObjectAndResolveConverters($transactionInterceptor, 'transactional', 1, Transactional::class)
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(),$transactionInterceptor, 'transactional', 1, Transactional::class)
             );
 
         $gatewayProxy = $gatewayProxyBuilder->build(
@@ -917,7 +918,7 @@ class GatewayProxyBuilderTest extends MessagingTest
         $gatewayProxyBuilder = GatewayProxyBuilder::create('ref-name', TransactionalInterceptorOnGatewayClassAndMethodExample::class, 'invoke', $requestChannelName)
             ->withEndpointAnnotations([Transactional::createWith(['transactionFactory0'])])
             ->addAroundInterceptor(
-                AroundInterceptorReference::createWithDirectObjectAndResolveConverters($transactionInterceptor, 'transactional', 1, Transactional::class)
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(),$transactionInterceptor, 'transactional', 1, Transactional::class)
             );
 
         $gatewayProxy = $gatewayProxyBuilder->build(

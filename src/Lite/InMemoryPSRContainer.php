@@ -13,10 +13,6 @@ class InMemoryPSRContainer implements GatewayAwareContainer
 {
     private array $objects;
 
-    /**
-     * InMemoryPSRContainer constructor.
-     * @param array $objects
-     */
     private function __construct(array $objects)
     {
         $this->objects = $objects;
@@ -28,7 +24,12 @@ class InMemoryPSRContainer implements GatewayAwareContainer
      */
     public static function createFromAssociativeArray(array $objects): self
     {
-        return new self($objects);
+        $objectReferences = [];
+        foreach ($objects as $referenceName => $object) {
+            $objectReferences[is_int($referenceName) ? get_class($object) : $referenceName] = $object;
+        }
+
+        return new self($objectReferences);
     }
 
     /**

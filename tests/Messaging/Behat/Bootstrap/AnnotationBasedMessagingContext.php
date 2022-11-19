@@ -8,6 +8,7 @@ use Ecotone\Lite\EcotoneLiteConfiguration;
 use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
@@ -58,7 +59,9 @@ use Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignation\UserRepository;
 use Test\Ecotone\Modelling\Fixture\MultipleHandlersAtSameMethod\Basket;
 use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestBookRepository;
 use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestViewer;
+use Test\Ecotone\Modelling\Fixture\Order\OrderWasPlacedConverter;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
+use Test\Ecotone\Modelling\Fixture\Order\PlaceOrderConverter;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserIdService;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\LoggingService;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\OrderErrorHandler;
@@ -145,6 +148,8 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 {
                     $objects = [
                         \Test\Ecotone\Modelling\Fixture\Order\OrderService::class => new \Test\Ecotone\Modelling\Fixture\Order\OrderService(),
+                        OrderWasPlacedConverter::class => new OrderWasPlacedConverter(),
+                        PlaceOrderConverter::class => new PlaceOrderConverter()
                     ];
                     break;
                 }
@@ -353,7 +358,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
             ->withCacheDirectoryPath($cacheDirectoryPath)
             ->withFailFast(false)
             ->withNamespaces([$namespace])
-            ->withSkippedModulePackageNames(['jmsConverter', 'dbal', 'amqp', 'eventSourcing']);
+            ->withSkippedModulePackageNames([ModulePackageList::AMQP_PACKAGE, ModulePackageList::DBAL_PACKAGE, ModulePackageList::JMS_CONVERTER_PACKAGE, ModulePackageList::EVENT_SOURCING_PACKAGE]);
 
         MessagingSystemConfiguration::cleanCache($applicationConfiguration->getCacheDirectoryPath());
         self::$messagingSystem = EcotoneLiteConfiguration::createWithConfiguration(

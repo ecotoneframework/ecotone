@@ -4,7 +4,7 @@ namespace Test\Ecotone\Modelling\Unit\MessageHandling;
 
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\StubMethodInvocation;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagator;
+use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -39,8 +39,8 @@ class MessageHeadersPropagatorTest extends TestCase
         );
     }
 
-    private function getMessageHeadersPropagator(): MessageHeadersPropagator
+    private function getMessageHeadersPropagator(): MessageHeadersPropagatorInterceptor
     {
-        return new MessageHeadersPropagator();
+        return new MessageHeadersPropagatorInterceptor();
     }
 }

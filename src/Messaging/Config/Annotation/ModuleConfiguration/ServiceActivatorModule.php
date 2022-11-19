@@ -8,6 +8,7 @@ use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
@@ -40,6 +41,6 @@ class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
 
     public function getModulePackageName(): string
     {
-        return CoreModule::NAME;
+        return ModulePackageList::CORE_PACKAGE;
     }
 }

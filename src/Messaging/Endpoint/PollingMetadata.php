@@ -61,12 +61,23 @@ final class PollingMetadata
         return new self($endpointId);
     }
 
-    public function withTestingSetup(): self
+    /**
+     * @param int $amountOfMessagesToHandle how many messages should this consumer handle before exiting
+     * @param int $maxExecutionTimeInMilliseconds Maximum execution of running consumer. Take under that while debugging with xdebug it should be set to 0 to avoid exiting consumer to early.
+     * @return $this
+     */
+    public function withTestingSetup(int $amountOfMessagesToHandle = 1, int $maxExecutionTimeInMilliseconds = 100): self
     {
-        return $this
-            ->setExecutionAmountLimit(1)
-            ->setExecutionTimeLimitInMilliseconds(1)
+        $pollingMetadata = $this
+            ->setHandledMessageLimit($amountOfMessagesToHandle)
             ->setStopOnError(true);
+
+        if ($maxExecutionTimeInMilliseconds) {
+            $pollingMetadata = $pollingMetadata
+                ->setExecutionTimeLimitInMilliseconds($maxExecutionTimeInMilliseconds);
+        }
+
+        return $pollingMetadata;
     }
 
     /**

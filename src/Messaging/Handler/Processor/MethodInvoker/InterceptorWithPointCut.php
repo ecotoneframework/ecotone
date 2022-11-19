@@ -3,6 +3,7 @@
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 /**
  * Interface Interceptor
@@ -19,12 +20,7 @@ interface InterceptorWithPointCut
      */
     public function hasName(string $name): bool;
 
-    /**
-     * @param InterfaceToCall $interfaceToCall
-     * @param iterable $endpointAnnotations
-     * @return bool
-     */
-    public function doesItCutWith(InterfaceToCall $interfaceToCall, iterable $endpointAnnotations): bool;
+    public function doesItCutWith(InterfaceToCall $interfaceToCall, iterable $endpointAnnotations, InterfaceToCallRegistry $interfaceToCallRegistry): bool;
 
     /**
      * @param InterfaceToCall $interceptedInterface

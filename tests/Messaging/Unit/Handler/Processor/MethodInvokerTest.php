@@ -12,6 +12,7 @@ use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverter;
 use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverter;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
@@ -689,7 +690,7 @@ class MethodInvokerTest extends MessagingTest
             InMemoryReferenceSearchService::createEmpty(),
             InMemoryChannelResolver::createEmpty(),
             [
-                AroundInterceptorReference::createWithDirectObjectAndResolveConverters($interceptingService1, 'callWithProceed', 0, ''),
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(),$interceptingService1, 'callWithProceed', 0, ''),
             ]
         );
 
@@ -1013,7 +1014,7 @@ class MethodInvokerTest extends MessagingTest
             [],
             InMemoryReferenceSearchService::createEmpty(),
             InMemoryChannelResolver::createEmpty(),
-            [AroundInterceptorReference::createWithDirectObjectAndResolveConverters(CallWithStdClassInterceptorExample::create(), 'callWithStdClass', 0, '')],
+            [AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(),CallWithStdClassInterceptorExample::create(), 'callWithStdClass', 0, '')],
             [
                 new stdClass(),
             ]

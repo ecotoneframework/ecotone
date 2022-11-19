@@ -41,7 +41,7 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
     private \Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder $entrypointGateway;
     private string $requestChannelName;
 
-    public function __construct()
+    public function __construct(InterfaceToCallRegistry $interfaceToCallRegistry)
     {
         $this->requestChannelName = Uuid::uuid4()->toString();
         $this->entrypointGateway = GatewayProxyBuilder::create(
@@ -52,6 +52,7 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
         );
 
         $this->entrypointGateway->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
+            $interfaceToCallRegistry,
             new LoggingInterceptor(null),
             'logException',
             Precedence::EXCEPTION_LOGGING_PRECEDENCE,
@@ -144,7 +145,10 @@ class PollingConsumerBuilder extends InterceptedMessageHandlerConsumerBuilder im
         Assert::notNullAndEmpty($messageHandlerBuilder->getEndpointId(), "Message Endpoint name can't be empty for {$messageHandlerBuilder}");
         Assert::notNull($pollingMetadata, "No polling meta data defined for polling endpoint {$messageHandlerBuilder}");
 
-        $this->entrypointGateway->addAroundInterceptor(AcknowledgeConfirmationInterceptor::createAroundInterceptor($pollingMetadata));
+        $this->entrypointGateway->addAroundInterceptor(AcknowledgeConfirmationInterceptor::createAroundInterceptor(
+            $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME),
+            $pollingMetadata
+        ));
 
         $messageHandler = $messageHandlerBuilder->build($channelResolver, $referenceSearchService);
         $connectionChannel = DirectChannel::create();

@@ -19,7 +19,6 @@ use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Attribute\NamedEvent;
-use Ecotone\Modelling\Attribute\Revision;
 use Ecotone\Modelling\Config\BusModule;
 
 /**
@@ -34,14 +33,7 @@ class SaveAggregateService
 
     private StandardRepository|EventSourcedRepository $aggregateRepository;
     private PropertyReaderAccessor $propertyReaderAccessor;
-    /**
-     * @var NonProxyGateway|EventBus
-     */
-    private object $objectEventBus;
-    /**
-     * @var NonProxyGateway|EventBus
-     */
-    private NonProxyGateway $namedEventBus;
+    private EventBus $eventBus;
     private ?string $aggregateMethodWithEvents;
     private PropertyEditorAccessor $propertyEditorAccessor;
     private array $aggregateIdentifierMapping;
@@ -59,8 +51,7 @@ class SaveAggregateService
         StandardRepository|EventSourcedRepository $aggregateRepository,
         PropertyEditorAccessor $propertyEditorAccessor,
         PropertyReaderAccessor                    $propertyReaderAccessor,
-        NonProxyGateway $objectEventBus,
-        NonProxyGateway $namedEventBus,
+        EventBus $eventBus,
         ?string                                   $aggregateMethodWithEvents,
         array $aggregateIdentifierMapping,
         array $aggregateIdentifierGetMethods,
@@ -72,7 +63,7 @@ class SaveAggregateService
     ) {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
-        $this->objectEventBus = $objectEventBus;
+        $this->eventBus = $eventBus;
         $this->propertyEditorAccessor = $propertyEditorAccessor;
         $this->aggregateMethodWithEvents = $aggregateMethodWithEvents;
         $this->aggregateIdentifierMapping = $aggregateIdentifierMapping;
@@ -80,7 +71,6 @@ class SaveAggregateService
         $this->aggregateVersionProperty = $aggregateVersionProperty;
         $this->isAggregateVersionAutomaticallyIncreased = $isAggregateVersionAutomaticallyIncreased;
         $this->isEventSourced = $isEventSourced;
-        $this->namedEventBus = $namedEventBus;
         $this->isFactoryMethod = $isFactoryMethod;
         $this->aggregateIdentifierGetMethods = $aggregateIdentifierGetMethods;
     }
@@ -173,7 +163,7 @@ class SaveAggregateService
         foreach ($events as $event) {
             // @TODO Ecotone 2.0 make use of Event (with metadata):
             $metadata = RevisionMetadataEnricher::enrich($metadata, $event);
-            $this->objectEventBus->execute([$event, $metadata]);
+            $this->eventBus->publish($event, $metadata);
 
             $eventDefinition = ClassDefinition::createFor(TypeDescriptor::createFromVariable($event));
             $namedEvent = TypeDescriptor::create(NamedEvent::class);
@@ -181,7 +171,7 @@ class SaveAggregateService
                 /** @var NamedEvent $namedEvent */
                 $namedEvent = $eventDefinition->getSingleClassAnnotation($namedEvent);
 
-                $this->namedEventBus->execute([$namedEvent->getName(), $event, MediaType::APPLICATION_X_PHP, $metadata]);
+                $this->eventBus->publishWithRouting($namedEvent->getName(), $event, MediaType::APPLICATION_X_PHP, $metadata);
             }
         }
 

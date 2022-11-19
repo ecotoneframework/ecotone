@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
@@ -48,16 +49,11 @@ class MethodInterceptor implements InterceptorWithPointCut
     }
 
     /**
-     * @param InterfaceToCall $interfaceToCall
      * @param object[]        $endpointAnnotations
-     *
-     * @return bool
-     * @throws TypeDefinitionException
-     * @throws MessagingException
      */
-    public function doesItCutWith(InterfaceToCall $interfaceToCall, iterable $endpointAnnotations): bool
+    public function doesItCutWith(InterfaceToCall $interfaceToCall, iterable $endpointAnnotations, InterfaceToCallRegistry $interfaceToCallRegistry): bool
     {
-        return $this->pointcut->doesItCut($interfaceToCall, $endpointAnnotations);
+        return $this->pointcut->doesItCut($interfaceToCall, $endpointAnnotations, $interfaceToCallRegistry);
     }
 
     /**

@@ -6,6 +6,8 @@ namespace Ecotone\Messaging\Metadata;
 
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Modelling\Attribute\Revision;
+use ReflectionAttribute;
+use ReflectionObject;
 
 final class RevisionMetadataEnricher
 {
@@ -13,10 +15,10 @@ final class RevisionMetadataEnricher
     {
         $metadata[MessageHeaders::REVISION] = 1;
 
-        $reflection = new \ReflectionObject($message);
-        $revisionAttributes = $reflection->getAttributes(Revision::class, \ReflectionAttribute::IS_INSTANCEOF);
+        $reflection = new ReflectionObject($message);
+        $revisionAttributes = $reflection->getAttributes(Revision::class, ReflectionAttribute::IS_INSTANCEOF);
 
-        if (!empty($revisionAttributes)) {
+        if (! empty($revisionAttributes)) {
             /** @var Revision $revision */
             $revision = $revisionAttributes[0]->newInstance();
             $metadata[MessageHeaders::REVISION] = $revision->getRevision();

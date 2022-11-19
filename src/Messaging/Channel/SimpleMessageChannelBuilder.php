@@ -51,7 +51,7 @@ class SimpleMessageChannelBuilder implements MessageChannelBuilder
 
     public static function createQueueChannel(string $messageChannelName): self
     {
-        return self::create($messageChannelName, QueueChannel::create());
+        return self::create($messageChannelName, QueueChannel::create($messageChannelName));
     }
 
     public static function createNullableChannel(string $messageChannelName): self

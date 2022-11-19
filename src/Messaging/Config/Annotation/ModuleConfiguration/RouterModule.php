@@ -6,6 +6,7 @@ use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\Router;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 
@@ -38,6 +39,6 @@ class RouterModule extends MessageHandlerRegisterConfiguration
 
     public function getModulePackageName(): string
     {
-        return CoreModule::NAME;
+        return ModulePackageList::CORE_PACKAGE;
     }
 }

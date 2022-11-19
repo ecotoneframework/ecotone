@@ -4,6 +4,7 @@ namespace Test\Ecotone\Lite;
 
 use Ecotone\Lite\EcotoneLiteConfiguration;
 use Ecotone\Lite\InMemoryPSRContainer;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
@@ -25,7 +26,7 @@ class EcotoneLiteConfigurationTest extends TestCase
     {
         $applicationConfiguration = ServiceConfiguration::createWithDefaults()
                                         ->withCacheDirectoryPath('/tmp/' . Uuid::uuid4()->toString())
-                                        ->withSkippedModulePackageNames(['amqp', 'dbal', 'jmsConverter', 'eventSourcing']);
+                                        ->withSkippedModulePackageNames([ModulePackageList::AMQP_PACKAGE, ModulePackageList::DBAL_PACKAGE, ModulePackageList::JMS_CONVERTER_PACKAGE, ModulePackageList::EVENT_SOURCING_PACKAGE]);
         $configuration1 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . '/../../', InMemoryPSRContainer::createEmpty(), $applicationConfiguration, [], false, [GatewayWithReplyChannelExample::class]);
         $configuration2 = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . '/../../', InMemoryPSRContainer::createEmpty(), $applicationConfiguration, [], true, [GatewayWithReplyChannelExample::class]);
 
@@ -39,7 +40,7 @@ class EcotoneLiteConfigurationTest extends TestCase
         ]);
         $serviceConfiguration = ServiceConfiguration::createWithDefaults()
                                 ->withNamespaces(["Test\Ecotone\Messaging\Fixture\Behat\Presend"])
-                                ->withSkippedModulePackageNames(['amqp', 'dbal', 'jmsConverter', 'eventSourcing']);
+                                ->withSkippedModulePackageNames([ModulePackageList::AMQP_PACKAGE, ModulePackageList::DBAL_PACKAGE, ModulePackageList::JMS_CONVERTER_PACKAGE, ModulePackageList::EVENT_SOURCING_PACKAGE]);
 
         $configuration = EcotoneLiteConfiguration::createWithConfiguration(__DIR__ . '/../../', $container, $serviceConfiguration, [], false);
 

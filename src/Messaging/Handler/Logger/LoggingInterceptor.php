@@ -58,19 +58,10 @@ class LoggingInterceptor
         $this->loggingService->log(LoggingLevel::create($log->logLevel, $log->logFullMessage), $message);
     }
 
-    /**
-     * @param MethodInvocation $methodInvocation
-     * @param Message          $message
-     * @param LogError         $log
-     *
-     * @return mixed
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws TypeDefinitionException
-     * @throws Throwable
-     */
-    public function logException(MethodInvocation $methodInvocation, Message $message, LogError $log, ReferenceSearchService $referenceSearchService)
+    public function logException(MethodInvocation $methodInvocation, Message $message, ?LogError $log, ReferenceSearchService $referenceSearchService)
     {
+        $log = $log ?? new LogError();
+
         $loggingService = new LoggingService(
             $referenceSearchService->get(ConversionService::REFERENCE_NAME),
             $referenceSearchService->get(LoggingHandlerBuilder::LOGGER_REFERENCE)

@@ -9,6 +9,7 @@ use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -192,7 +193,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
             'executeReturnWithInterceptor'
         )
             ->withEndpointId('test')
-            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(new TransactionInterceptor(), 'transactional', 1, ''))
+            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(),new TransactionInterceptor(), 'transactional', 1, ''))
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $requestChannelName => $requestChannel,
@@ -230,7 +231,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
             'executeReturn'
         )
             ->withEndpointId('test')
-            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(new TransactionInterceptor(), 'transactional', 1, ''))
+            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(),new TransactionInterceptor(), 'transactional', 1, ''))
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $requestChannelName => $requestChannel,
@@ -268,7 +269,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
             'executeReturnWithInterceptor'
         )
             ->withEndpointId('test')
-            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(new TransactionInterceptor(), 'transactional', 1, ''))
+            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(),new TransactionInterceptor(), 'transactional', 1, ''))
             ->withEndpointAnnotations([Transactional::createWith(['transactionFactory0'])])
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([

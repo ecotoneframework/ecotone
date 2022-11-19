@@ -75,7 +75,7 @@ class ProxyFactory implements Serializable
      */
     public function warmUpCacheFor(array $classes): void
     {
-        if (! $classes) {
+        if (! $classes || !$this->cacheDirectoryPath) {
             return;
         }
 

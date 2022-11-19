@@ -2,6 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Order;
 
+use Ecotone\AnnotationFinder\Attribute\Environment;
 use Ecotone\Messaging\Attribute\ServiceContext;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
@@ -9,6 +10,7 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 class ChannelConfiguration
 {
     #[ServiceContext]
+    #[Environment(["dev", "prod"])]
     public function registerAsyncChannel(): array
     {
         return [

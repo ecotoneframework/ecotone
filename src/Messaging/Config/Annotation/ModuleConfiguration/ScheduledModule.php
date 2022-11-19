@@ -8,6 +8,7 @@ use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\Scheduled;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 
@@ -37,6 +38,6 @@ class ScheduledModule extends ConsumerRegisterConfiguration
 
     public function getModulePackageName(): string
     {
-        return CoreModule::NAME;
+        return ModulePackageList::CORE_PACKAGE;
     }
 }

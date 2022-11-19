@@ -207,6 +207,8 @@ class ServiceConfiguration
     }
 
     /**
+     * List which packages should be skipped. The core package can't be skipped.
+     * @link ModulePackageList list of available packages
      * @param string[] $modulePackageNames
      */
     public function withSkippedModulePackageNames(array $modulePackageNames): self
@@ -239,6 +241,11 @@ class ServiceConfiguration
     public function getSkippedModulesPackages(): array
     {
         return $this->skippedModulesPackages;
+    }
+
+    public function isModulePackageEnabled(string $modulePackageName): bool
+    {
+        return !in_array($modulePackageName, $this->skippedModulesPackages);
     }
 
     /**

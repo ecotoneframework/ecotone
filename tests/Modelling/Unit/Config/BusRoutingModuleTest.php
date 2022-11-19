@@ -23,7 +23,7 @@ use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\BusRouterBuilder;
 use Ecotone\Modelling\Config\BusRoutingModule;
 use Ecotone\Modelling\EventBus;
-use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagator;
+use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Ecotone\Modelling\QueryBus;
 use stdClass;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
@@ -96,14 +96,14 @@ class BusRoutingModuleTest extends MessagingTest
         $annotationRegistrationService = InMemoryAnnotationFinder::createFrom($annotatedClasses);
         $extendedConfiguration = $this->prepareModule($annotationRegistrationService);
 
-        $messagePropagator = new MessageHeadersPropagator();
+        $messagePropagator = new MessageHeadersPropagatorInterceptor();
         $this->assertEquals(
             MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
                 ->registerBeforeMethodInterceptor(
                     MethodInterceptor::create(
-                        MessageHeadersPropagator::class,
-                        InterfaceToCall::create(MessageHeadersPropagator::class, 'propagateHeaders'),
-                        TransformerBuilder::createWithDirectObject(new MessageHeadersPropagator(), 'propagateHeaders')
+                        MessageHeadersPropagatorInterceptor::class,
+                        InterfaceToCall::create(MessageHeadersPropagatorInterceptor::class, 'propagateHeaders'),
+                        TransformerBuilder::createWithDirectObject(new MessageHeadersPropagatorInterceptor(), 'propagateHeaders')
                             ->withMethodParameterConverters([
                                 AllHeadersBuilder::createWith('headers'),
                             ]),
@@ -113,7 +113,8 @@ class BusRoutingModuleTest extends MessagingTest
                 )
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
-                        new MessageHeadersPropagator(),
+                        InterfaceToCallRegistry::createEmpty(),
+                        new MessageHeadersPropagatorInterceptor(),
                         'storeHeaders',
                         Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,
                         CommandBus::class . '||' . EventBus::class . '||' . QueryBus::class . '||' . AsynchronousRunningEndpoint::class . '||' . PropagateHeaders::class . '||' . MessagingEntrypointWithHeadersPropagation::class

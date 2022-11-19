@@ -20,14 +20,15 @@ class OrderService
      */
     private $notifiedOrders = [];
 
-    #[CommandHandler('order.register', 'orderReceiver')]
+    #[CommandHandler(endpointId: "registerOrderByClass")]
+    #[CommandHandler('order.register', 'registerOrderByRouting')]
     public function register(PlaceOrder $placeOrder, EventBus $eventBus): void
     {
         $this->orders[] = $placeOrder;
         $eventBus->publish(new OrderWasPlaced($placeOrder->getOrderId()), []);
     }
 
-    #[EventHandler(endpointId: 'orderPlaced')]
+    #[EventHandler(endpointId: 'notifyOrderWasPlaced')]
     public function notify(OrderWasPlaced $orderWasPlaced): void
     {
         $this->notifiedOrders[] = $orderWasPlaced->getOrderId();

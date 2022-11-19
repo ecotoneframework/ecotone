@@ -8,6 +8,7 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
@@ -55,6 +56,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
         );
         $configuration->registerAroundMethodInterceptor(
             AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
+                $interfaceToCallRegistry,
                 new LoggingInterceptor(null),
                 'logException',
                 Precedence::ERROR_CHANNEL_PRECEDENCE - 1,
@@ -73,6 +75,6 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
 
     public function getModulePackageName(): string
     {
-        return CoreModule::NAME;
+        return ModulePackageList::CORE_PACKAGE;
     }
 }

@@ -10,7 +10,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagator;
+use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Exception;
 
 /**
@@ -28,14 +28,14 @@ class BusRouterBuilder implements MessageHandlerBuilder
      */
     private string $inputChannelName;
     private string $type;
-    private MessageHeadersPropagator $messageHeadersPropagator;
+    private MessageHeadersPropagatorInterceptor $messageHeadersPropagator;
 
     /**
      * @param string[]  $channelNamesRouting
      *
      * @throws Exception
      */
-    private function __construct(MessageHeadersPropagator $messageHeadersPropagator, string $endpointId, string $inputChannelName, array $channelNamesRouting, string $type)
+    private function __construct(MessageHeadersPropagatorInterceptor $messageHeadersPropagator, string $endpointId, string $inputChannelName, array $channelNamesRouting, string $type)
     {
         $this->channelNamesRouting = $channelNamesRouting;
         $this->inputChannelName = $inputChannelName;
@@ -50,7 +50,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws Exception
      */
-    public static function createEventBusByObject(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting): self
+    public static function createEventBusByObject(MessageHeadersPropagatorInterceptor $messageHeadersPropagator, array $channelNamesRouting): self
     {
         return new self(
             $messageHeadersPropagator,
@@ -67,7 +67,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws Exception
      */
-    public static function createEventBusByName(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting): self
+    public static function createEventBusByName(MessageHeadersPropagatorInterceptor $messageHeadersPropagator, array $channelNamesRouting): self
     {
         return new self(
             $messageHeadersPropagator,
@@ -84,7 +84,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws Exception
      */
-    public static function createCommandBusByObject(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting): self
+    public static function createCommandBusByObject(MessageHeadersPropagatorInterceptor $messageHeadersPropagator, array $channelNamesRouting): self
     {
         return new self(
             $messageHeadersPropagator,
@@ -101,7 +101,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws Exception
      */
-    public static function createCommandBusByName(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting): self
+    public static function createCommandBusByName(MessageHeadersPropagatorInterceptor $messageHeadersPropagator, array $channelNamesRouting): self
     {
         return new self(
             $messageHeadersPropagator,
@@ -118,7 +118,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws Exception
      */
-    public static function createQueryBusByObject(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting): self
+    public static function createQueryBusByObject(MessageHeadersPropagatorInterceptor $messageHeadersPropagator, array $channelNamesRouting): self
     {
         return new self(
             $messageHeadersPropagator,
@@ -135,7 +135,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws Exception
      */
-    public static function createQueryBusByName(MessageHeadersPropagator $messageHeadersPropagator, array $channelNamesRouting): self
+    public static function createQueryBusByName(MessageHeadersPropagatorInterceptor $messageHeadersPropagator, array $channelNamesRouting): self
     {
         return new self(
             $messageHeadersPropagator,

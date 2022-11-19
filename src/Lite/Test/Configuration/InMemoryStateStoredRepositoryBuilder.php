@@ -13,7 +13,9 @@ use Ecotone\Modelling\StandardRepository;
 
 final class InMemoryStateStoredRepositoryBuilder implements RepositoryBuilder
 {
-    public function __construct(private InMemoryStandardRepository $inMemoryStandardRepository) {}
+    public function __construct(private InMemoryStandardRepository $inMemoryStandardRepository)
+    {
+    }
 
     public static function createForAllAggregates(): self
     {

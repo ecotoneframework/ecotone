@@ -10,7 +10,7 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 class ChannelConfiguration
 {
     #[ServiceContext]
-    #[Environment(["dev", "prod"])]
+    #[Environment(['dev', 'prod'])]
     public function registerAsyncChannel(): array
     {
         return [

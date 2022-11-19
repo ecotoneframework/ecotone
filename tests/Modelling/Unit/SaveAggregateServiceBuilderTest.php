@@ -15,7 +15,6 @@ use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Messaging\Store\Document\InMemoryDocumentStore;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
-use Ecotone\Modelling\Config\BusModule;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
@@ -67,7 +66,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
             InMemoryReferenceSearchService::createWith(
                 [
                     'orderRepository' => $inMemoryStandardRepository,
-                    EventBus::class => StorageEventBus::create()
+                    EventBus::class => StorageEventBus::create(),
                 ]
             )
         );
@@ -103,7 +102,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
             InMemoryReferenceSearchService::createWith(
                 [
                     'orderRepository' => InMemoryStandardRepository::createEmpty(),
-                    EventBus::class => $eventBus
+                    EventBus::class => $eventBus,
                 ]
             )
         );
@@ -137,7 +136,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
                 [
                     'repository' => InMemoryEventSourcedRepository::createEmpty(),
                     DocumentStore::class => $inMemoryDocumentStore,
-                    EventBus::class => StorageEventBus::create()
+                    EventBus::class => StorageEventBus::create(),
                 ]
             )
         );
@@ -178,7 +177,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
                 [
                     'repository' => InMemoryEventSourcedRepository::createEmpty(),
                     DocumentStore::class => $inMemoryDocumentStore,
-                    EventBus::class => StorageEventBus::create()
+                    EventBus::class => StorageEventBus::create(),
                 ]
             )
         );
@@ -216,7 +215,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
                 [
                     'repository' => InMemoryEventSourcedRepository::createEmpty(),
                     DocumentStore::class => $inMemoryDocumentStore,
-                    EventBus::class => StorageEventBus::create()
+                    EventBus::class => StorageEventBus::create(),
                 ]
             )
         );
@@ -255,7 +254,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
             InMemoryReferenceSearchService::createWith(
                 [
                     'repository' => $inMemoryStandardRepository,
-                    EventBus::class => StorageEventBus::create()
+                    EventBus::class => StorageEventBus::create(),
                 ]
             )
         );
@@ -319,7 +318,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
                 [
                     'orderRepository' => $orderRepository,
                     ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                    EventBus::class => StorageEventBus::create()
+                    EventBus::class => StorageEventBus::create(),
                 ]
             )
         );
@@ -380,7 +379,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
                 [
                     'orderRepository' => $orderRepository,
                     ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                    EventBus::class => StorageEventBus::create()
+                    EventBus::class => StorageEventBus::create(),
                 ]
             )
         );
@@ -413,7 +412,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
                 [
                     'repository' => InMemoryEventSourcedRepository::createEmpty(),
                     ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                    EventBus::class => StorageEventBus::create()
+                    EventBus::class => StorageEventBus::create(),
                 ]
             )
         );
@@ -448,7 +447,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
             InMemoryReferenceSearchService::createWith(
                 [
                     'repository' => $inMemoryEventSourcedRepository,
-                    EventBus::class => StorageEventBus::create()
+                    EventBus::class => StorageEventBus::create(),
                 ]
             )
         );

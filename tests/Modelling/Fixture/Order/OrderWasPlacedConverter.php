@@ -17,6 +17,6 @@ final class OrderWasPlacedConverter
     #[Converter]
     public function fromOrderWasPlaced(OrderWasPlaced $data): array
     {
-        return ["orderId" => $data->getOrderId()];
+        return ['orderId' => $data->getOrderId()];
     }
 }

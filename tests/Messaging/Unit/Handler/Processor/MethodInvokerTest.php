@@ -690,7 +690,7 @@ class MethodInvokerTest extends MessagingTest
             InMemoryReferenceSearchService::createEmpty(),
             InMemoryChannelResolver::createEmpty(),
             [
-                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(),$interceptingService1, 'callWithProceed', 0, ''),
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(), $interceptingService1, 'callWithProceed', 0, ''),
             ]
         );
 
@@ -1014,7 +1014,7 @@ class MethodInvokerTest extends MessagingTest
             [],
             InMemoryReferenceSearchService::createEmpty(),
             InMemoryChannelResolver::createEmpty(),
-            [AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(),CallWithStdClassInterceptorExample::create(), 'callWithStdClass', 0, '')],
+            [AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(), CallWithStdClassInterceptorExample::create(), 'callWithStdClass', 0, '')],
             [
                 new stdClass(),
             ]

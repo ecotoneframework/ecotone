@@ -10,7 +10,6 @@ use Ecotone\Messaging\Attribute\Endpoint\Priority;
 use Ecotone\Messaging\Attribute\Endpoint\RemoveHeader;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\CoreModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModulePackageList;

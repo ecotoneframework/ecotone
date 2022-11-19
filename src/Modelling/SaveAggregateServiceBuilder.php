@@ -6,10 +6,6 @@ use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
-use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
-use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
-use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -20,7 +16,6 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHandler;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Store\Document\InMemoryDocumentStore;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\AggregateEvents;
@@ -28,7 +23,6 @@ use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
 use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
-use Ecotone\Modelling\Config\BusModule;
 
 /**
  * Class AggregateCallingCommandHandlerBuilder

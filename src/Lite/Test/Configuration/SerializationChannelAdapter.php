@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Ecotone\Lite\Test\Configuration;
 
 use Ecotone\Messaging\Channel\ChannelInterceptor;
-use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
-use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -17,7 +15,9 @@ use Throwable;
 
 final class SerializationChannelAdapter implements ChannelInterceptor
 {
-    public function __construct(private MediaType $targetMediaType, private ConversionService $conversionService) {}
+    public function __construct(private MediaType $targetMediaType, private ConversionService $conversionService)
+    {
+    }
 
     public function preSend(Message $message, MessageChannel $messageChannel): ?Message
     {
@@ -35,12 +35,10 @@ final class SerializationChannelAdapter implements ChannelInterceptor
 
     public function postSend(Message $message, MessageChannel $messageChannel): void
     {
-
     }
 
     public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?Throwable $exception): void
     {
-
     }
 
     public function preReceive(MessageChannel $messageChannel): bool
@@ -55,6 +53,5 @@ final class SerializationChannelAdapter implements ChannelInterceptor
 
     public function afterReceiveCompletion(?Message $message, MessageChannel $messageChannel, ?Throwable $exception): void
     {
-
     }
 }

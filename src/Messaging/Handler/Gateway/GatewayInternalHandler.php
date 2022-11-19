@@ -56,7 +56,7 @@ class GatewayInternalHandler
         $previousReplyChannel = $requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaders()->getReplyChannel() : null;
 
         $requestMessage = MessageBuilder::fromMessage($requestMessage);
-        $replyChannel = $this->replyChannel ? $this->replyChannel : ($this->interfaceToCall->canReturnValue() ? QueueChannel::create($this->interfaceToCall->getInterfaceName() . "::" . $this->interfaceToCall->getMethodName() . "-replyChannel") : null);
+        $replyChannel = $this->replyChannel ? $this->replyChannel : ($this->interfaceToCall->canReturnValue() ? QueueChannel::create($this->interfaceToCall->getInterfaceName() . '::' . $this->interfaceToCall->getMethodName() . '-replyChannel') : null);
         if ($replyChannel) {
             $requestMessage = $requestMessage
                 ->setReplyChannel($replyChannel);

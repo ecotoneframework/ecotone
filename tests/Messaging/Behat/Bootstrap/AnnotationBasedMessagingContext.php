@@ -149,7 +149,7 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                     $objects = [
                         \Test\Ecotone\Modelling\Fixture\Order\OrderService::class => new \Test\Ecotone\Modelling\Fixture\Order\OrderService(),
                         OrderWasPlacedConverter::class => new OrderWasPlacedConverter(),
-                        PlaceOrderConverter::class => new PlaceOrderConverter()
+                        PlaceOrderConverter::class => new PlaceOrderConverter(),
                     ];
                     break;
                 }

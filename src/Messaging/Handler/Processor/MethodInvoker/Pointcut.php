@@ -156,7 +156,7 @@ class Pointcut
         $multipleExpression = explode('||', $expressionToVerify);
 
         foreach ($multipleExpression as $possibleEndExpressions) {
-            if ($this->doesItCutPossibleANDs($possibleEndExpressions, $endpointAnnotations, $interfaceToCall,$interfaceToCallRegistry)) {
+            if ($this->doesItCutPossibleANDs($possibleEndExpressions, $endpointAnnotations, $interfaceToCall, $interfaceToCallRegistry)) {
                 return true;
             }
         }

@@ -245,7 +245,7 @@ class ServiceConfiguration
 
     public function isModulePackageEnabled(string $modulePackageName): bool
     {
-        return !in_array($modulePackageName, $this->skippedModulesPackages);
+        return ! in_array($modulePackageName, $this->skippedModulesPackages);
     }
 
     /**

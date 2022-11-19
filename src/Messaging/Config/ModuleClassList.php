@@ -95,7 +95,7 @@ class ModuleClassList
     ];
 
     public const TEST_MODULES = [
-        EcotoneTestSupportModule::class
+        EcotoneTestSupportModule::class,
     ];
 
     public static function allModules(): array

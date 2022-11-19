@@ -15,12 +15,11 @@ final class TestConfiguration
         private ?MediaType $pollableChannelMediaTypeConversion,
         private string $channelToConvertOn
     ) {
-
     }
 
     public static function createWithDefaults(): self
     {
-        return new self(true, true, null, "");
+        return new self(true, true, null, '');
     }
 
     public function withFailOnCommandHandlerNotFound(bool $shouldFail): self
@@ -41,7 +40,7 @@ final class TestConfiguration
 
     public function withMediaTypeConversion(string $channelName, MediaType $mediaType): self
     {
-        Assert::notNullAndEmpty($channelName, "Converted channel can not be empty");
+        Assert::notNullAndEmpty($channelName, 'Converted channel can not be empty');
 
         $self = clone $this;
         $self->pollableChannelMediaTypeConversion = $mediaType;

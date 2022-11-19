@@ -20,7 +20,7 @@ class OrderService
      */
     private $notifiedOrders = [];
 
-    #[CommandHandler(endpointId: "registerOrderByClass")]
+    #[CommandHandler(endpointId: 'registerOrderByClass')]
     #[CommandHandler('order.register', 'registerOrderByRouting')]
     public function register(PlaceOrder $placeOrder, EventBus $eventBus): void
     {

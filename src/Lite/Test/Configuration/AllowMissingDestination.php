@@ -13,8 +13,8 @@ final class AllowMissingDestination
     {
         try {
             return $methodInvocation->proceed();
-        }catch (DestinationResolutionException) {
-            return null;
+        } catch (DestinationResolutionException) {
+            return;
         }
     }
 }

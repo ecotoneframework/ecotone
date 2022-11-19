@@ -8,7 +8,6 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Lite\Test\TestConfiguration;
 use Ecotone\Lite\Test\TestSupportGateway;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
-use Ecotone\Messaging\Channel\SimpleChannelInterceptorBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
@@ -16,7 +15,6 @@ use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
@@ -29,16 +27,16 @@ use Ecotone\Modelling\QueryBus;
 #[ModuleAnnotation]
 final class EcotoneTestSupportModule extends NoExternalConfigurationModule implements AnnotationModule
 {
-    const RECORD_COMMAND = "recordCommand";
-    const RECORD_EVENT = "recordEvent";
-    const RECORD_QUERY = "recordQuery";
-    const GET_PUBLISHED_EVENT_MESSAGES = "getPublishedEventMessages";
-    const GET_PUBLISHED_EVENTS = "getPublishedEvents";
-    const GET_SENT_COMMANDS = "getSentCommands";
-    const GET_SENT_COMMAND_MESSAGES = "getSentCommandMessages";
-    const GET_SENT_QUERIES = "getSentQueries";
-    const GET_SENT_QUERY_MESSAGES = "getSentQueryMessages";
-    const RESET_MESSAGES = "resetMessages";
+    public const RECORD_COMMAND = 'recordCommand';
+    public const RECORD_EVENT = 'recordEvent';
+    public const RECORD_QUERY = 'recordQuery';
+    public const GET_PUBLISHED_EVENT_MESSAGES = 'getPublishedEventMessages';
+    public const GET_PUBLISHED_EVENTS = 'getPublishedEvents';
+    public const GET_SENT_COMMANDS = 'getSentCommands';
+    public const GET_SENT_COMMAND_MESSAGES = 'getSentCommandMessages';
+    public const GET_SENT_QUERIES = 'getSentQueries';
+    public const GET_SENT_QUERY_MESSAGES = 'getSentQueryMessages';
+    public const RESET_MESSAGES = 'resetMessages';
 
     public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
@@ -52,22 +50,22 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
         $this->registerMessageCollector($configuration, $interfaceToCallRegistry);
 
         $allowMissingDestination = new AllowMissingDestination();
-        if (!$testConfiguration->isFailingOnCommandHandlerNotFound()) {
+        if (! $testConfiguration->isFailingOnCommandHandlerNotFound()) {
             $configuration
                 ->registerAroundMethodInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                     $interfaceToCallRegistry,
                     $allowMissingDestination,
-                    "invoke",
+                    'invoke',
                     Precedence::DEFAULT_PRECEDENCE,
                     CommandBus::class
                 ));
         }
-        if (!$testConfiguration->isFailingOnQueryHandlerNotFound()) {
+        if (! $testConfiguration->isFailingOnQueryHandlerNotFound()) {
             $configuration
                 ->registerAroundMethodInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                     $interfaceToCallRegistry,
                     $allowMissingDestination,
-                    "invoke",
+                    'invoke',
                     Precedence::DEFAULT_PRECEDENCE,
                     QueryBus::class
                 ));
@@ -91,7 +89,7 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
 
     private static function inputChannelName(string $methodName): string
     {
-        return "test_support.message_collector." .$methodName;
+        return 'test_support.message_collector.' .$methodName;
     }
 
     private function registerMessageCollector(Configuration $configuration, InterfaceToCallRegistry $interfaceToCallRegistry): void

@@ -6,7 +6,6 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\CoreModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModulePackageList;

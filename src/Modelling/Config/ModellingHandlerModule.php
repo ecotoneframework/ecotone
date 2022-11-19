@@ -15,7 +15,6 @@ use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\CoreModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;

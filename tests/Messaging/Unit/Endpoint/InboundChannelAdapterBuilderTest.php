@@ -193,7 +193,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
             'executeReturnWithInterceptor'
         )
             ->withEndpointId('test')
-            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(),new TransactionInterceptor(), 'transactional', 1, ''))
+            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(), new TransactionInterceptor(), 'transactional', 1, ''))
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $requestChannelName => $requestChannel,
@@ -231,7 +231,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
             'executeReturn'
         )
             ->withEndpointId('test')
-            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(),new TransactionInterceptor(), 'transactional', 1, ''))
+            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(), new TransactionInterceptor(), 'transactional', 1, ''))
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     $requestChannelName => $requestChannel,
@@ -269,7 +269,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
             'executeReturnWithInterceptor'
         )
             ->withEndpointId('test')
-            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(),new TransactionInterceptor(), 'transactional', 1, ''))
+            ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(), new TransactionInterceptor(), 'transactional', 1, ''))
             ->withEndpointAnnotations([Transactional::createWith(['transactionFactory0'])])
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([

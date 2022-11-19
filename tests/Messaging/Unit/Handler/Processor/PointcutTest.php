@@ -31,7 +31,7 @@ class PointcutTest extends TestCase
 {
     public function test_if_empty_point_cut_it_should_no_cut()
     {
-        $this->assertFalse(Pointcut::createEmpty()->doesItCut(InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, 'callMultipleUnorderedArgumentsInvocation'), [],InterfaceToCallRegistry::createEmpty()));
+        $this->assertFalse(Pointcut::createEmpty()->doesItCut(InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, 'callMultipleUnorderedArgumentsInvocation'), [], InterfaceToCallRegistry::createEmpty()));
     }
 
     public function test_pointing_to_exact_class()

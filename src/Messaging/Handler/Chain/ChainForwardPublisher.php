@@ -35,7 +35,7 @@ class ChainForwardPublisher
         $replyChannel = null;
         $requestMessageWithNewChainReply = MessageBuilder::fromMessage($requestMessage);
         if ($replyChannelComingFromCurrentMessage || $this->hasOutputChannel) {
-            $replyChannel = QueueChannel::create(self::class . "-replyChannel");
+            $replyChannel = QueueChannel::create(self::class . '-replyChannel');
             $requestMessageWithNewChainReply->setReplyChannel($replyChannel);
         }
         $requestMessageWithNewChainReply = $requestMessageWithNewChainReply->build();

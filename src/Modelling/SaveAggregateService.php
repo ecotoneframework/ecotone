@@ -8,7 +8,6 @@ use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;

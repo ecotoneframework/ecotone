@@ -17,6 +17,6 @@ final class PlaceOrderConverter
     #[Converter]
     public function fromPlaceOrder(PlaceOrder $data): array
     {
-        return ["orderId" => $data->getOrderId()];
+        return ['orderId' => $data->getOrderId()];
     }
 }

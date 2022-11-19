@@ -13,7 +13,6 @@ use Ecotone\Messaging\Attribute\Interceptor\Presend;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\CoreModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Config\Configuration;

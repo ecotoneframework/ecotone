@@ -8,14 +8,15 @@ use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Precedence;
 
 final class SerializationChannelAdapterBuilder implements ChannelInterceptorBuilder
 {
-    public function __construct(private string $relatedChannel, private MediaType $targetMediaType) {}
+    public function __construct(private string $relatedChannel, private MediaType $targetMediaType)
+    {
+    }
 
     public function relatedChannelName(): string
     {

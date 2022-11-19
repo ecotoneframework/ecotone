@@ -55,7 +55,7 @@ class AutoCollectionConversionService implements ConversionService
 
         $targetPHPType = $this->getTargetType($sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
         $converter = $this->getConverter($sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
-        if (!is_object($converter)) {
+        if (! is_object($converter)) {
             throw ConversionException::create("Converter was not found for {$sourceMediaType}:{$sourcePHPType} to {$targetMediaType}:{$targetPHPType};");
         }
 

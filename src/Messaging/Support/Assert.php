@@ -63,7 +63,7 @@ class Assert
 
     public static function assertEmptyArray(array $array, string $exceptionMessage): void
     {
-        if (!empty($array)) {
+        if (! empty($array)) {
             throw InvalidArgumentException::create($exceptionMessage);
         }
     }

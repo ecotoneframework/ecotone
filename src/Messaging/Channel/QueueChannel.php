@@ -3,9 +3,7 @@
 namespace Ecotone\Messaging\Channel;
 
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\PollableChannel;
-use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class QueueChannel
@@ -21,7 +19,7 @@ class QueueChannel implements PollableChannel
     {
     }
 
-    public static function create(string $name = "unknown"): self
+    public static function create(string $name = 'unknown'): self
     {
         return new self($name, []);
     }

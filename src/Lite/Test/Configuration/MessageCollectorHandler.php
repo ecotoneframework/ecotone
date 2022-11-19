@@ -33,7 +33,7 @@ final class MessageCollectorHandler implements TestSupportGateway
 
     public function getPublishedEvents(): array
     {
-        $events = array_map(fn(Message $message) => $message->getPayload(), $this->publishedEvents);
+        $events = array_map(fn (Message $message) => $message->getPayload(), $this->publishedEvents);
         $this->publishedEvents = [];
 
         return $events;
@@ -49,7 +49,7 @@ final class MessageCollectorHandler implements TestSupportGateway
 
     public function getSentCommands(): array
     {
-        $commands = array_map(fn(Message $message) => $message->getPayload(), $this->sentCommands);
+        $commands = array_map(fn (Message $message) => $message->getPayload(), $this->sentCommands);
         $this->sentCommands = [];
 
         return $commands;
@@ -65,7 +65,7 @@ final class MessageCollectorHandler implements TestSupportGateway
 
     public function getSentQueries(): array
     {
-        $queries = array_map(fn(Message $message) => $message->getPayload(), $this->sentQueries);
+        $queries = array_map(fn (Message $message) => $message->getPayload(), $this->sentQueries);
         $this->sentQueries = [];
 
         return $queries;

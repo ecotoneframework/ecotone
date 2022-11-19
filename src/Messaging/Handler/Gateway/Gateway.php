@@ -154,7 +154,7 @@ class Gateway implements NonProxyGateway
         $previousReplyChannel = $requestMessage->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaderWithName(MessageHeaders::REPLY_CHANNEL) : null;
         $replyContentType = $requestMessage->containsKey(MessageHeaders::REPLY_CONTENT_TYPE) ? MediaType::parseMediaType($requestMessage->getHeaderWithName(MessageHeaders::REPLY_CONTENT_TYPE)) : null;
         if ($this->interfaceToCall->canReturnValue()) {
-            $internalReplyBridge = QueueChannel::create($this->interfaceToCall->getInterfaceName() . "::" . $this->interfaceToCall->getMethodName() . "-replyChannel");
+            $internalReplyBridge = QueueChannel::create($this->interfaceToCall->getInterfaceName() . '::' . $this->interfaceToCall->getMethodName() . '-replyChannel');
             $requestMessage = $requestMessage
                 ->setReplyChannel($internalReplyBridge);
         } else {

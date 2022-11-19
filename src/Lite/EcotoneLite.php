@@ -34,8 +34,7 @@ final class EcotoneLite
         bool $useCachedVersion = false,
         ?string                  $pathToRootCatalog = null,
         bool $allowGatewaysToBeRegisteredInContainer = false
-    ): ConfiguredMessagingSystem
-    {
+    ): ConfiguredMessagingSystem {
         return self::prepareConfiguration($containerOrAvailableServices, $configuration, $classesToResolve, $configurationVariables, $pathToRootCatalog, false, $allowGatewaysToBeRegisteredInContainer, $useCachedVersion);
     }
 
@@ -51,8 +50,7 @@ final class EcotoneLite
         array                    $configurationVariables = [],
         ?string                  $pathToRootCatalog = null,
         bool $allowGatewaysToBeRegisteredInContainer = false
-    ): ConfiguredMessagingSystemWithTestSupport
-    {
+    ): ConfiguredMessagingSystemWithTestSupport {
         return self::prepareConfiguration($containerOrAvailableServices, $configuration, $classesToResolve, $configurationVariables, $pathToRootCatalog, true, $allowGatewaysToBeRegisteredInContainer, false);
     }
 
@@ -83,7 +81,7 @@ final class EcotoneLite
         );
 
         if ($allowGatewaysToBeRegisteredInContainer) {
-            Assert::isTrue(method_exists($container, 'set'), "Gateways registration was enabled however given container has no `set` method. Please add it or turn off the option.");
+            Assert::isTrue(method_exists($container, 'set'), 'Gateways registration was enabled however given container has no `set` method. Please add it or turn off the option.');
 
             foreach ($messagingConfiguration->getRegisteredGateways() as $gatewayProxyBuilder) {
                 $container->set($gatewayProxyBuilder->getReferenceName(), ProxyGenerator::createFor(

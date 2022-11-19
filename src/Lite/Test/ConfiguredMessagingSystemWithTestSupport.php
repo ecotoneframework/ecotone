@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite\Test;
 
-use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
-use Ecotone\Messaging\Config\GatewayReference;
 use Ecotone\Messaging\Config\NonProxyCombinedGateway;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\MessageChannel;
@@ -15,11 +13,12 @@ use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
-use InvalidArgumentException;
 
 final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessagingSystem
 {
-    public function __construct(private ConfiguredMessagingSystem $configuredMessagingSystem) {}
+    public function __construct(private ConfiguredMessagingSystem $configuredMessagingSystem)
+    {
+    }
 
     public function getGatewayByName(string $gatewayReferenceName): object
     {

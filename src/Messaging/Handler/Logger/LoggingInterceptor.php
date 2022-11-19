@@ -60,7 +60,7 @@ class LoggingInterceptor
 
     public function logException(MethodInvocation $methodInvocation, Message $message, ?LogError $log, ReferenceSearchService $referenceSearchService)
     {
-        $log = $log ?? new LogError();
+        $log ??= new LogError();
 
         $loggingService = new LoggingService(
             $referenceSearchService->get(ConversionService::REFERENCE_NAME),

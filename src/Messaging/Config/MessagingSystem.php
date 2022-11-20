@@ -68,7 +68,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
 
     public function replaceWith(ConfiguredMessagingSystem $messagingSystem): void
     {
-        Assert::isTrue($messagingSystem instanceof MessagingSystem, "Can only replace with " . self::class);
+        Assert::isTrue($messagingSystem instanceof MessagingSystem, 'Can only replace with ' . self::class);
 
         $this->eventDrivenConsumers = $messagingSystem->eventDrivenConsumers;
         $this->pollingConsumerBuilders = $messagingSystem->pollingConsumerBuilders;

@@ -51,6 +51,4 @@ class PsrContainerReferenceSearchService implements ReferenceSearchService
 
         return true;
     }
-
-
 }

@@ -3,7 +3,6 @@
 namespace Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas;
 
 use Ecotone\Messaging\Attribute\Asynchronous;
-use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;

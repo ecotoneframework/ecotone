@@ -100,7 +100,7 @@ final class EcotoneLite
 
         if ($allowGatewaysToBeRegisteredInContainer) {
             $container->set(self::CONFIGURED_MESSAGING_SYSTEM, $messagingSystem);
-        }elseif ($container->has(self::CONFIGURED_MESSAGING_SYSTEM)) {
+        } elseif ($container->has(self::CONFIGURED_MESSAGING_SYSTEM)) {
             /** @var MessagingSystem $alreadyConfiguredMessaging */
             $alreadyConfiguredMessaging = $container->get(self::CONFIGURED_MESSAGING_SYSTEM);
 

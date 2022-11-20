@@ -9,5 +9,4 @@ use Attribute;
 #[Attribute(Attribute::TARGET_CLASS)]
 final class EventSourcingSaga extends EventSourcingAggregate
 {
-
 }

@@ -2,7 +2,6 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Saga;
 
-use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\Saga;

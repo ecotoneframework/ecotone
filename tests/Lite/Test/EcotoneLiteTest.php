@@ -7,7 +7,6 @@ use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Lite\Test\Configuration\InMemoryStateStoredRepositoryBuilder;
 use Ecotone\Lite\Test\TestConfiguration;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Conversion\ConversionException;
@@ -359,7 +358,7 @@ final class EcotoneLiteTest extends TestCase
     public function test_fetching_with_possible_suffix_alias()
     {
         $inMemoryPSRContainer = InMemoryPSRContainer::createFromAssociativeArray([
-            OrderService::class . "-proxy" => new OrderService(),
+            OrderService::class . '-proxy' => new OrderService(),
         ]);
         $ecotoneTestSupport = EcotoneLite::bootstrapForTesting(
             [OrderService::class],

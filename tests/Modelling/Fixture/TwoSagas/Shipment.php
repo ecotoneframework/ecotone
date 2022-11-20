@@ -6,9 +6,10 @@ use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Modelling\Attribute\Saga;
 use InvalidArgumentException;
 
-#[Aggregate]
+#[Saga]
 class Shipment
 {
     public const GET_SHIPMENT_STATUS = 'getShipmentStatus';

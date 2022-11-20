@@ -88,6 +88,11 @@ class LazyConfiguredMessagingSystem implements ConfiguredMessagingSystem
         return $this->getConfiguredSystem()->runConsoleCommand($commandName, $parameters);
     }
 
+    public function replaceWith(ConfiguredMessagingSystem $messagingSystem): void
+    {
+        $this->getConfiguredSystem()->replaceWith($messagingSystem);
+    }
+
     private function getConfiguredSystem(): ConfiguredMessagingSystem
     {
         return $this->container->get(LazyConfiguredMessagingSystem::class);

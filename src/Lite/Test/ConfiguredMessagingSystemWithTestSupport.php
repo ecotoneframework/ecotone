@@ -89,4 +89,9 @@ final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessag
     {
         return $this->configuredMessagingSystem->list();
     }
+
+    public function replaceWith(ConfiguredMessagingSystem $messagingSystem): void
+    {
+        $this->configuredMessagingSystem->replaceWith($messagingSystem);
+    }
 }

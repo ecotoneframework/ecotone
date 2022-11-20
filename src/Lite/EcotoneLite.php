@@ -7,6 +7,7 @@ namespace Ecotone\Lite;
 use Ecotone\Lite\Test\ConfiguredMessagingSystemWithTestSupport;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
+use Ecotone\Messaging\Config\MessagingSystem;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ProxyGenerator;
 use Ecotone\Messaging\Config\ServiceConfiguration;
@@ -97,7 +98,14 @@ final class EcotoneLite
             new PsrContainerReferenceSearchService($container, ['logger' => new EchoLogger(), ConfiguredMessagingSystem::class => new StubConfiguredMessagingSystem()])
         );
 
-        $container->set(self::CONFIGURED_MESSAGING_SYSTEM, $messagingSystem);
+        if ($allowGatewaysToBeRegisteredInContainer) {
+            $container->set(self::CONFIGURED_MESSAGING_SYSTEM, $messagingSystem);
+        }elseif ($container->has(self::CONFIGURED_MESSAGING_SYSTEM)) {
+            /** @var MessagingSystem $alreadyConfiguredMessaging */
+            $alreadyConfiguredMessaging = $container->get(self::CONFIGURED_MESSAGING_SYSTEM);
+
+            $alreadyConfiguredMessaging->replaceWith($messagingSystem);
+        }
 
         if ($enableTesting) {
             $messagingSystem = new ConfiguredMessagingSystemWithTestSupport($messagingSystem);

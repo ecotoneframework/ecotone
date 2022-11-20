@@ -7,10 +7,11 @@ use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Modelling\Attribute\Saga;
 use InvalidArgumentException;
 
 #[Asynchronous(MessagingConfiguration::ASYNCHRONOUS_CHANNEL)]
-#[Aggregate]
+#[Saga]
 class Bookkeeping
 {
     public const GET_BOOKING_STATUS = 'getBookingStatus';

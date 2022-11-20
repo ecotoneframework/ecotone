@@ -11,6 +11,9 @@ namespace Ecotone\Messaging\Handler;
  */
 interface ReferenceSearchService
 {
+    /** This is needed for cases where alias must be added for service */
+    public const POSSIBLE_REFERENCE_SUFFIX = '-proxy';
+
     /**
      * Searching for service with passed reference name
      *

@@ -29,6 +29,10 @@ class PsrContainerReferenceSearchService implements ReferenceSearchService
                 return $this->defaults[$reference];
             }
 
+            if ($this->container->has($reference . self::POSSIBLE_REFERENCE_SUFFIX)) {
+                return $this->container->get($reference . self::POSSIBLE_REFERENCE_SUFFIX);
+            }
+
             throw ReferenceNotFoundException::create("Reference {$reference} was not found");
         }
 
@@ -42,9 +46,11 @@ class PsrContainerReferenceSearchService implements ReferenceSearchService
                 return true;
             }
 
-            return false;
+            return $this->container->has($referenceName . self::POSSIBLE_REFERENCE_SUFFIX);
         }
 
         return true;
     }
+
+
 }

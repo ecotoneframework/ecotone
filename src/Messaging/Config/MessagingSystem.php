@@ -66,6 +66,21 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         }
     }
 
+    public function replaceWith(ConfiguredMessagingSystem $messagingSystem): void
+    {
+        Assert::isTrue($messagingSystem instanceof MessagingSystem, "Can only replace with " . self::class);
+
+        $this->eventDrivenConsumers = $messagingSystem->eventDrivenConsumers;
+        $this->pollingConsumerBuilders = $messagingSystem->pollingConsumerBuilders;
+        $this->inboundChannelAdapterBuilders = $messagingSystem->inboundChannelAdapterBuilders;
+        $this->gatewayReferences = $messagingSystem->gatewayReferences;
+        $this->nonProxyCombinedGateways = $messagingSystem->nonProxyCombinedGateways;
+        $this->channelResolver = $messagingSystem->channelResolver;
+        $this->referenceSearchService = $messagingSystem->referenceSearchService;
+        $this->pollingMetadataConfigurations = $messagingSystem->pollingMetadataConfigurations;
+        $this->consoleCommands = $messagingSystem->consoleCommands;
+    }
+
     /**
      * @param ReferenceSearchService $referenceSearchService
      * @param MessageChannelBuilder[] $messageChannelBuilders

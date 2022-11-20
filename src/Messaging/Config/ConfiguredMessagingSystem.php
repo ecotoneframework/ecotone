@@ -65,4 +65,9 @@ interface ConfiguredMessagingSystem
      * @return string[]
      */
     public function list(): array;
+
+    /**
+     * Allows to replace configured messaging system with new one
+     */
+    public function replaceWith(self $messagingSystem): void;
 }

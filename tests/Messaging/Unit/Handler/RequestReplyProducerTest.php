@@ -241,15 +241,15 @@ class RequestReplyProducerTest extends MessagingTest
 
         $this->assertMultipleMessages(
             [
-                MessageBuilder::withPayload('some2')
-                    ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $splittedMessages[0]->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID))
-                    ->setHeader(MessageHeaders::SEQUENCE_SIZE, 2)
-                    ->setHeader(MessageHeaders::SEQUENCE_NUMBER, 2)
-                    ->build(),
                 MessageBuilder::withPayload('some1')
                     ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $splittedMessages[0]->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID))
                     ->setHeader(MessageHeaders::SEQUENCE_SIZE, 2)
                     ->setHeader(MessageHeaders::SEQUENCE_NUMBER, 1)
+                    ->build(),
+                MessageBuilder::withPayload('some2')
+                    ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $splittedMessages[0]->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID))
+                    ->setHeader(MessageHeaders::SEQUENCE_SIZE, 2)
+                    ->setHeader(MessageHeaders::SEQUENCE_NUMBER, 2)
                     ->build(),
             ],
             $splittedMessages
@@ -312,7 +312,7 @@ class RequestReplyProducerTest extends MessagingTest
         $sequenceSize = count($replyData);
 
         $messageIds = [];
-        for ($sequenceNumber = $sequenceSize - 1; $sequenceNumber >= 0; $sequenceNumber--) {
+        for ($sequenceNumber = 0; $sequenceNumber < $sequenceSize; $sequenceNumber++) {
             $splittedMessage = $outputChannel->receive();
             $messageIds[] = $splittedMessage->getHeaders()->getMessageId();
 

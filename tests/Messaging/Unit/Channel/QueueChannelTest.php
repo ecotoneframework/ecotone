@@ -25,15 +25,8 @@ class QueueChannelTest extends TestCase
         $queueChannel->send($firstMessage);
         $queueChannel->send($secondMessage);
 
-        $this->assertEquals(
-            $secondMessage,
-            $queueChannel->receive()
-        );
-
-        $this->assertEquals(
-            $firstMessage,
-            $queueChannel->receive()
-        );
+        $this->assertEquals($firstMessage,$queueChannel->receive());
+        $this->assertEquals($secondMessage,$queueChannel->receive());
     }
 
     public function test_returning_null_when_queue_is_empty()

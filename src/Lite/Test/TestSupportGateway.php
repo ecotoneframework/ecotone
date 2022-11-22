@@ -28,7 +28,7 @@ interface TestSupportGateway
     /**
      *  Allows to assert metadata of the message
      *
-     * @return array<int, mixed>
+     * @return Message[]
      */
     public function getSentCommandMessages(): array;
 
@@ -40,9 +40,11 @@ interface TestSupportGateway
     /**
      *  Allows to assert metadata of the message
      *
-     * @return array<int, mixed>
+     * @return Message[]
      */
     public function getSentQueryMessages(): array;
 
     public function resetMessages(): void;
+
+    public function releaseMessagesAwaitingFor(string $channelName, int $timeInMilliseconds): void;
 }

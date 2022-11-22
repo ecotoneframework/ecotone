@@ -5,11 +5,6 @@ namespace Ecotone\Messaging\Channel;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\PollableChannel;
 
-/**
- * Class QueueChannel
- * @package Ecotone\Messaging\Channel
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
- */
 class QueueChannel implements PollableChannel
 {
     /**
@@ -37,7 +32,7 @@ class QueueChannel implements PollableChannel
      */
     public function receive(): ?Message
     {
-        return array_pop($this->queue);
+        return array_shift($this->queue);
     }
 
     /**

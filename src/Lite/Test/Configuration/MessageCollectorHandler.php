@@ -7,7 +7,7 @@ namespace Ecotone\Lite\Test\Configuration;
 use Ecotone\Lite\Test\TestSupportGateway;
 use Ecotone\Messaging\Message;
 
-final class MessageCollectorHandler implements TestSupportGateway
+final class MessageCollectorHandler
 {
     /** @var Message[] */
     private array $publishedEvents = [];
@@ -81,6 +81,8 @@ final class MessageCollectorHandler implements TestSupportGateway
 
     public function resetMessages(): void
     {
-        // TODO: Implement resetMessages() method.
+        $this->sentQueries = [];
+        $this->sentCommands = [];
+        $this->publishedEvents = [];
     }
 }

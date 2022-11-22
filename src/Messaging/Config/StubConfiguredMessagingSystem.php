@@ -75,7 +75,6 @@ class StubConfiguredMessagingSystem implements ConfiguredMessagingSystem
 
     public function replaceWith(ConfiguredMessagingSystem $messagingSystem): void
     {
-
     }
 
     public function runConsoleCommand(string $commandName, array $parameters): mixed

@@ -19,8 +19,6 @@ use Psr\Container\ContainerInterface;
 
 final class EcotoneLite
 {
-    public const CONFIGURED_MESSAGING_SYSTEM = ConfiguredMessagingSystem::class;
-
     /**
      * @param string[] $classesToResolve
      * @param array<string,string> $configurationVariables
@@ -99,10 +97,10 @@ final class EcotoneLite
         );
 
         if ($allowGatewaysToBeRegisteredInContainer) {
-            $container->set(self::CONFIGURED_MESSAGING_SYSTEM, $messagingSystem);
-        } elseif ($container->has(self::CONFIGURED_MESSAGING_SYSTEM)) {
+            $container->set(ConfiguredMessagingSystem::class, $messagingSystem);
+        } elseif ($container->has(ConfiguredMessagingSystem::class)) {
             /** @var MessagingSystem $alreadyConfiguredMessaging */
-            $alreadyConfiguredMessaging = $container->get(self::CONFIGURED_MESSAGING_SYSTEM);
+            $alreadyConfiguredMessaging = $container->get(ConfiguredMessagingSystem::class);
 
             $alreadyConfiguredMessaging->replaceWith($messagingSystem);
         }

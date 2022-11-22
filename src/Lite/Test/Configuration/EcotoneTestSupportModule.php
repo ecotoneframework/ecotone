@@ -14,9 +14,16 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurat
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Precedence;
@@ -37,6 +44,7 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
     public const GET_SENT_QUERIES = 'getSentQueries';
     public const GET_SENT_QUERY_MESSAGES = 'getSentQueryMessages';
     public const RESET_MESSAGES = 'resetMessages';
+    public const RELEASE_DELAYED_MESSAGES = 'releaseMessagesAwaitingFor';
 
     public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
@@ -48,6 +56,7 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
         $testConfiguration = ExtensionObjectResolver::resolveUnique(TestConfiguration::class, $extensionObjects, TestConfiguration::createWithDefaults());
 
         $this->registerMessageCollector($configuration, $interfaceToCallRegistry);
+        $this->registerMessageReleasingHandler($configuration);
 
         $allowMissingDestination = new AllowMissingDestination();
         if (! $testConfiguration->isFailingOnCommandHandlerNotFound()) {
@@ -90,6 +99,30 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
     private static function inputChannelName(string $methodName): string
     {
         return 'test_support.message_collector.' .$methodName;
+    }
+
+    private function registerMessageReleasingHandler(Configuration $configuration): void
+    {
+        $configuration
+            ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(
+                new DelayedMessageReleaseHandler(),
+                self::RELEASE_DELAYED_MESSAGES
+            )
+                ->withMethodParameterConverters([
+                    HeaderBuilder::create("channelName", "ecotone.test_support_gateway.channel_name"),
+                    PayloadBuilder::create("timeInMilliseconds"),
+                    ReferenceBuilder::create("channelResolver", ChannelResolver::class)
+                ])
+                ->withInputChannelName(self::inputChannelName(self::RELEASE_DELAYED_MESSAGES)))
+            ->registerGatewayBuilder(GatewayProxyBuilder::create(
+                TestSupportGateway::class,
+                TestSupportGateway::class,
+                self::RELEASE_DELAYED_MESSAGES,
+                self::inputChannelName(self::RELEASE_DELAYED_MESSAGES)
+            )->withParameterConverters([
+                GatewayHeaderBuilder::create("channelName", "ecotone.test_support_gateway.channel_name"),
+                GatewayPayloadBuilder::create("timeInMilliseconds")
+            ]));
     }
 
     private function registerMessageCollector(Configuration $configuration, InterfaceToCallRegistry $interfaceToCallRegistry): void

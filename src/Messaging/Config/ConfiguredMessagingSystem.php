@@ -15,11 +15,13 @@ use InvalidArgumentException;
  * Interface ConfiguredMessagingSystem
  * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @template T
  */
 interface ConfiguredMessagingSystem
 {
     /**
-     * @param string $gatewayReferenceName
+     * @param class-string<T> $gatewayReferenceName
+     * @return T
      * @throws InvalidArgumentException if trying to find not existing gateway reference
      */
     public function getGatewayByName(string $gatewayReferenceName): object;

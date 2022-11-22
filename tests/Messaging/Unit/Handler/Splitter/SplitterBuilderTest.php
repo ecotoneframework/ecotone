@@ -47,9 +47,8 @@ class SplitterBuilderTest extends MessagingTest
         $outputChannel = QueueChannel::create();
         $splitter->handle(MessageBuilder::withPayload([1, 2])->setReplyChannel($outputChannel)->build());
 
-        $payload = $outputChannel->receive()->getPayload();
-        $this->assertEquals(2, $payload);
         $this->assertEquals(1, $outputChannel->receive()->getPayload());
+        $this->assertEquals(2, $outputChannel->receive()->getPayload());
     }
 
     /**
@@ -90,9 +89,8 @@ class SplitterBuilderTest extends MessagingTest
         $outputChannel = QueueChannel::create();
         $splitter->handle(MessageBuilder::withPayload([1, 2])->setReplyChannel($outputChannel)->build());
 
-        $payload = $outputChannel->receive()->getPayload();
-        $this->assertEquals(2, $payload);
         $this->assertEquals(1, $outputChannel->receive()->getPayload());
+        $this->assertEquals(2, $outputChannel->receive()->getPayload());
     }
 
     /**

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite\Test\Configuration;
 
-use Ecotone\Lite\Test\TestSupportGateway;
 use Ecotone\Messaging\Message;
 
 final class MessageCollectorHandler

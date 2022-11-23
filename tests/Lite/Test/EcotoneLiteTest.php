@@ -487,17 +487,17 @@ final class EcotoneLiteTest extends TestCase
 
         $orderId = 'someId';
         $ecotoneTestSupport->getCommandBus()->sendWithRouting('order.register', new PlaceOrder($orderId), metadata: [
-            MessageHeaders::DELIVERY_DELAY => 100
+            MessageHeaders::DELIVERY_DELAY => 100,
         ]);
 
         $ecotoneTestSupport->run('orders');
         $this->assertEquals([], $ecotoneTestSupport->getQueryBus()->sendWithRouting('order.getNotifiedOrders'));
 
-        $ecotoneTestSupport->getTestSupportGateway()->releaseMessagesAwaitingFor("orders", 10);
+        $ecotoneTestSupport->getTestSupportGateway()->releaseMessagesAwaitingFor('orders', 10);
         $ecotoneTestSupport->run('orders');
         $this->assertEquals([], $ecotoneTestSupport->getQueryBus()->sendWithRouting('order.getNotifiedOrders'));
 
-        $ecotoneTestSupport->getTestSupportGateway()->releaseMessagesAwaitingFor("orders", 100);
+        $ecotoneTestSupport->getTestSupportGateway()->releaseMessagesAwaitingFor('orders', 100);
         $ecotoneTestSupport->run('orders');
         $this->assertEquals([$orderId], $ecotoneTestSupport->getQueryBus()->sendWithRouting('order.getNotifiedOrders'));
     }

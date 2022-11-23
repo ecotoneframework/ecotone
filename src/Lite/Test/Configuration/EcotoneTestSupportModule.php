@@ -17,7 +17,6 @@ use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
-use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
@@ -109,9 +108,9 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                 self::RELEASE_DELAYED_MESSAGES
             )
                 ->withMethodParameterConverters([
-                    HeaderBuilder::create("channelName", "ecotone.test_support_gateway.channel_name"),
-                    PayloadBuilder::create("timeInMilliseconds"),
-                    ReferenceBuilder::create("channelResolver", ChannelResolver::class)
+                    HeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
+                    PayloadBuilder::create('timeInMilliseconds'),
+                    ReferenceBuilder::create('channelResolver', ChannelResolver::class),
                 ])
                 ->withInputChannelName(self::inputChannelName(self::RELEASE_DELAYED_MESSAGES)))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
@@ -120,8 +119,8 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                 self::RELEASE_DELAYED_MESSAGES,
                 self::inputChannelName(self::RELEASE_DELAYED_MESSAGES)
             )->withParameterConverters([
-                GatewayHeaderBuilder::create("channelName", "ecotone.test_support_gateway.channel_name"),
-                GatewayPayloadBuilder::create("timeInMilliseconds")
+                GatewayHeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
+                GatewayPayloadBuilder::create('timeInMilliseconds'),
             ]));
     }
 

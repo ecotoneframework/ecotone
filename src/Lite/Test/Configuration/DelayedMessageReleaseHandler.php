@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite\Test\Configuration;
 
-use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Channel\DelayableQueueChannel;
 use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
 use Ecotone\Messaging\Handler\ChannelResolver;
@@ -20,7 +19,7 @@ final class DelayedMessageReleaseHandler
             $channel = $channel->getInternalMessageChannel();
         }
 
-        Assert::isTrue($channel instanceof DelayableQueueChannel, sprintf("Used %s channel to release delayed message, use instead of %s.", $channel::class, DelayableQueueChannel::class));
+        Assert::isTrue($channel instanceof DelayableQueueChannel, sprintf('Used %s channel to release delayed message, use instead of %s.', $channel::class, DelayableQueueChannel::class));
 
         $channel->releaseMessagesAwaitingFor($timeInMilliseconds);
     }

@@ -36,12 +36,11 @@ final class PollingMetadata
     private int $executionAmountLimit = self::DEFAULT_EXECUTION_LIMIT;
     private int $maxMessagePerPoll = self::DEFAULT_MAX_MESSAGES_PER_POLL;
     private int $executionTimeLimitInMilliseconds = self::DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS;
-    private ?\Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder $connectionRetryTemplate = null;
+    private ?RetryTemplateBuilder $connectionRetryTemplate = null;
     private bool $withSignalInterceptors = false;
     private string $triggerReferenceName = '';
     private string $taskExecutorName = '';
     private bool $stopOnError = self::DEFAULT_STOP_ON_ERROR;
-
     /**
      * PollingMetadata constructor.
      * @param string $endpointId
@@ -66,11 +65,11 @@ final class PollingMetadata
      * @param int $maxExecutionTimeInMilliseconds Maximum execution of running consumer. Take under that while debugging with xdebug it should be set to 0 to avoid exiting consumer to early.
      * @return $this
      */
-    public function withTestingSetup(int $amountOfMessagesToHandle = 1, int $maxExecutionTimeInMilliseconds = 100): self
+    public function withTestingSetup(int $amountOfMessagesToHandle = 1, int $maxExecutionTimeInMilliseconds = 100, bool $failAtError = true): self
     {
         $pollingMetadata = $this
             ->setHandledMessageLimit($amountOfMessagesToHandle)
-            ->setStopOnError(true);
+            ->setStopOnError($failAtError);
 
         if ($maxExecutionTimeInMilliseconds) {
             $pollingMetadata = $pollingMetadata
@@ -128,25 +127,25 @@ final class PollingMetadata
 
     public function applyExecutionPollingMetadata(?ExecutionPollingMetadata $executionPollingMetadata): self
     {
-        if (! $executionPollingMetadata) {
+        if (!$executionPollingMetadata) {
             return $this;
         }
 
         $copy = $this->createCopy();
 
-        if (! is_null($executionPollingMetadata->getStopOnError())) {
+        if (!is_null($executionPollingMetadata->getStopOnError())) {
             $copy = $copy->setStopOnError($executionPollingMetadata->getStopOnError());
         }
-        if (! is_null($executionPollingMetadata->getHandledMessageLimit())) {
+        if (!is_null($executionPollingMetadata->getHandledMessageLimit())) {
             $copy = $copy->setHandledMessageLimit($executionPollingMetadata->getHandledMessageLimit());
         }
-        if (! is_null($executionPollingMetadata->getExecutionTimeLimitInMilliseconds())) {
+        if (!is_null($executionPollingMetadata->getExecutionTimeLimitInMilliseconds())) {
             $copy = $copy->setExecutionTimeLimitInMilliseconds($executionPollingMetadata->getExecutionTimeLimitInMilliseconds());
         }
-        if (! is_null($executionPollingMetadata->getMemoryLimitInMegabytes())) {
+        if (!is_null($executionPollingMetadata->getMemoryLimitInMegabytes())) {
             $copy = $copy->setMemoryLimitInMegaBytes($executionPollingMetadata->getMemoryLimitInMegabytes());
         }
-        if (! is_null($executionPollingMetadata->getCron())) {
+        if (!is_null($executionPollingMetadata->getCron())) {
             $copy = $copy->setCron($executionPollingMetadata->getCron());
         }
 
@@ -191,7 +190,7 @@ final class PollingMetadata
 
     public function setEnabledErrorChannel(bool $isErrorChannelEnabled): PollingMetadata
     {
-        $copy                        = $this->createCopy();
+        $copy = $this->createCopy();
         $copy->isErrorChannelEnabled = $isErrorChannelEnabled;
 
         return $copy;

@@ -127,25 +127,25 @@ final class PollingMetadata
 
     public function applyExecutionPollingMetadata(?ExecutionPollingMetadata $executionPollingMetadata): self
     {
-        if (!$executionPollingMetadata) {
+        if (! $executionPollingMetadata) {
             return $this;
         }
 
         $copy = $this->createCopy();
 
-        if (!is_null($executionPollingMetadata->getStopOnError())) {
+        if (! is_null($executionPollingMetadata->getStopOnError())) {
             $copy = $copy->setStopOnError($executionPollingMetadata->getStopOnError());
         }
-        if (!is_null($executionPollingMetadata->getHandledMessageLimit())) {
+        if (! is_null($executionPollingMetadata->getHandledMessageLimit())) {
             $copy = $copy->setHandledMessageLimit($executionPollingMetadata->getHandledMessageLimit());
         }
-        if (!is_null($executionPollingMetadata->getExecutionTimeLimitInMilliseconds())) {
+        if (! is_null($executionPollingMetadata->getExecutionTimeLimitInMilliseconds())) {
             $copy = $copy->setExecutionTimeLimitInMilliseconds($executionPollingMetadata->getExecutionTimeLimitInMilliseconds());
         }
-        if (!is_null($executionPollingMetadata->getMemoryLimitInMegabytes())) {
+        if (! is_null($executionPollingMetadata->getMemoryLimitInMegabytes())) {
             $copy = $copy->setMemoryLimitInMegaBytes($executionPollingMetadata->getMemoryLimitInMegabytes());
         }
-        if (!is_null($executionPollingMetadata->getCron())) {
+        if (! is_null($executionPollingMetadata->getCron())) {
             $copy = $copy->setCron($executionPollingMetadata->getCron());
         }
 

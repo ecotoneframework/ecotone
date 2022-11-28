@@ -160,7 +160,7 @@ final class EcotoneLiteTest extends TestCase
         $ecotoneTestSupport->getCommandBus()->sendWithRouting('order.register', new PlaceOrder('someId'));
 
         $this->assertEquals(
-            [["orderId" => "someId"]],
+            [['orderId' => 'someId']],
             $ecotoneTestSupport->getTestSupportGateway()->getSpiedChannelRecordedMessagePayloads('orders')
         );
 
@@ -193,14 +193,14 @@ final class EcotoneLiteTest extends TestCase
         $ecotoneTestSupport->getTestSupportGateway()->discardRecordedMessages();
         $this->assertCount(
             0,
-            $ecotoneTestSupport->getTestSupportGateway()->getSpiedChannelRecordedMessages("orders")
+            $ecotoneTestSupport->getTestSupportGateway()->getSpiedChannelRecordedMessages('orders')
         );
 
         $ecotoneTestSupport->run('orders');
 
         $this->assertEquals(
-            ["orderId" => "someId"],
-            $ecotoneTestSupport->getTestSupportGateway()->getSpiedChannelRecordedMessages("orders")[0]->getPayload()
+            ['orderId' => 'someId'],
+            $ecotoneTestSupport->getTestSupportGateway()->getSpiedChannelRecordedMessages('orders')[0]->getPayload()
         );
 
         $this->assertEquals([$orderId], $ecotoneTestSupport->getQueryBus()->sendWithRouting('order.getNotifiedOrders'));

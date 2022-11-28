@@ -13,13 +13,14 @@ final class TestConfiguration
         private bool $failOnCommandHandlerNotFound,
         private bool $failOnQueryHandlerNotFound,
         private ?MediaType $pollableChannelMediaTypeConversion,
-        private string $channelToConvertOn
+        private string $channelToConvertOn,
+        private array $spiedChannelNames
     ) {
     }
 
     public static function createWithDefaults(): self
     {
-        return new self(true, true, null, '');
+        return new self(true, true, null, '', []);
     }
 
     public function withFailOnCommandHandlerNotFound(bool $shouldFail): self
@@ -46,6 +47,18 @@ final class TestConfiguration
         $self->pollableChannelMediaTypeConversion = $mediaType;
         $self->channelToConvertOn = $channelName;
 
+        return $self->withSpyOnChannel($channelName);
+    }
+
+    public function withSpyOnChannel(string $channelName): self
+    {
+        if (in_array($channelName, $this->spiedChannelNames)) {
+            return $this;
+        }
+
+        $self = clone $this;
+        $self->spiedChannelNames[] = $channelName;
+
         return $self;
     }
 
@@ -67,5 +80,10 @@ final class TestConfiguration
     public function getChannelToConvertOn(): string
     {
         return $this->channelToConvertOn;
+    }
+
+    public function getSpiedChannels(): array
+    {
+        return $this->spiedChannelNames;
     }
 }

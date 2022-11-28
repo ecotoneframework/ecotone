@@ -36,14 +36,16 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
     public const RECORD_COMMAND = 'recordCommand';
     public const RECORD_EVENT = 'recordEvent';
     public const RECORD_QUERY = 'recordQuery';
-    public const GET_PUBLISHED_EVENT_MESSAGES = 'getPublishedEventMessages';
-    public const GET_PUBLISHED_EVENTS = 'getPublishedEvents';
-    public const GET_SENT_COMMANDS = 'getSentCommands';
-    public const GET_SENT_COMMAND_MESSAGES = 'getSentCommandMessages';
-    public const GET_SENT_QUERIES = 'getSentQueries';
-    public const GET_SENT_QUERY_MESSAGES = 'getSentQueryMessages';
-    public const RESET_MESSAGES = 'resetMessages';
+    public const GET_RECORDED_EVENT_MESSAGES = 'getRecordedEventMessages';
+    public const GET_RECORDED_EVENTS = 'getRecordedEvents';
+    public const GET_RECORDED_COMMANDS = 'getRecordedCommands';
+    public const GET_RECORDED_COMMAND_MESSAGES = 'getRecordedCommandMessages';
+    public const GET_RECORDED_QUERIES = 'getRecordedQueries';
+    public const GET_RECORDED_QUERY_MESSAGES = 'getRecordedQueryMessages';
+    public const DISCARD_MESSAGES = 'discardRecordedMessages';
     public const RELEASE_DELAYED_MESSAGES = 'releaseMessagesAwaitingFor';
+    public const GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS = 'getSpiedChannelRecordedMessagePayloads';
+    public const GET_SPIED_CHANNEL_RECORDED_MESSAGES = 'getSpiedChannelRecordedMessages';
 
     public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
@@ -54,7 +56,8 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
     {
         $testConfiguration = ExtensionObjectResolver::resolveUnique(TestConfiguration::class, $extensionObjects, TestConfiguration::createWithDefaults());
 
-        $this->registerMessageCollector($configuration, $interfaceToCallRegistry);
+        $messageCollectorHandler = new MessageCollectorHandler();
+        $this->registerMessageCollector($messageCollectorHandler, $configuration, $interfaceToCallRegistry);
         $this->registerMessageReleasingHandler($configuration);
 
         $allowMissingDestination = new AllowMissingDestination();
@@ -82,6 +85,44 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
         if ($testConfiguration->getPollableChannelMediaTypeConversion()) {
             $configuration
                 ->registerChannelInterceptor(new SerializationChannelAdapterBuilder($testConfiguration->getChannelToConvertOn(), $testConfiguration->getPollableChannelMediaTypeConversion()));
+        }
+        if ($testConfiguration->getSpiedChannels()) {
+            foreach ($testConfiguration->getSpiedChannels() as $spiedChannel) {
+                $configuration
+                    ->registerChannelInterceptor(new SpiedChannelAdapterBuilder($spiedChannel, $messageCollectorHandler))
+                    ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(
+                        $messageCollectorHandler,
+                        self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS
+                    )
+                        ->withMethodParameterConverters([
+                            HeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
+                        ])
+                        ->withInputChannelName(self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS)))
+                    ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(
+                        $messageCollectorHandler,
+                        self::GET_SPIED_CHANNEL_RECORDED_MESSAGES
+                    )
+                        ->withMethodParameterConverters([
+                            HeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
+                        ])
+                        ->withInputChannelName(self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGES)))
+                    ->registerGatewayBuilder(GatewayProxyBuilder::create(
+                        TestSupportGateway::class,
+                        TestSupportGateway::class,
+                        self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS,
+                        self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS)
+                    )->withParameterConverters([
+                        GatewayHeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
+                    ]))
+                    ->registerGatewayBuilder(GatewayProxyBuilder::create(
+                        TestSupportGateway::class,
+                        TestSupportGateway::class,
+                        self::GET_SPIED_CHANNEL_RECORDED_MESSAGES,
+                        self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGES)
+                    )->withParameterConverters([
+                        GatewayHeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
+                    ]));
+            }
         }
     }
 
@@ -124,10 +165,8 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
             ]));
     }
 
-    private function registerMessageCollector(Configuration $configuration, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    private function registerMessageCollector(MessageCollectorHandler $messageCollectorHandler, Configuration $configuration, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        $messageCollectorHandler = new MessageCollectorHandler();
-
         $configuration
             ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(
                 $messageCollectorHandler,
@@ -146,80 +185,80 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                 ->withInputChannelName(self::inputChannelName(self::RECORD_QUERY)))
             ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(
                 $messageCollectorHandler,
-                self::GET_PUBLISHED_EVENTS
+                self::GET_RECORDED_EVENTS
             )
-                ->withInputChannelName(self::inputChannelName(self::GET_PUBLISHED_EVENTS)))
+                ->withInputChannelName(self::inputChannelName(self::GET_RECORDED_EVENTS)))
             ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(
                 $messageCollectorHandler,
-                self::GET_PUBLISHED_EVENT_MESSAGES
+                self::GET_RECORDED_EVENT_MESSAGES
             )
-                ->withInputChannelName(self::inputChannelName(self::GET_PUBLISHED_EVENT_MESSAGES)))
+                ->withInputChannelName(self::inputChannelName(self::GET_RECORDED_EVENT_MESSAGES)))
             ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(
                 $messageCollectorHandler,
-                self::GET_SENT_COMMANDS
+                self::GET_RECORDED_COMMANDS
             )
-                ->withInputChannelName(self::inputChannelName(self::GET_SENT_COMMANDS)))
+                ->withInputChannelName(self::inputChannelName(self::GET_RECORDED_COMMANDS)))
             ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(
                 $messageCollectorHandler,
-                self::GET_SENT_COMMAND_MESSAGES
+                self::GET_RECORDED_COMMAND_MESSAGES
             )
-                ->withInputChannelName(self::inputChannelName(self::GET_SENT_COMMAND_MESSAGES)))
+                ->withInputChannelName(self::inputChannelName(self::GET_RECORDED_COMMAND_MESSAGES)))
             ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(
                 $messageCollectorHandler,
-                self::GET_SENT_QUERIES
+                self::GET_RECORDED_QUERIES
             )
-                ->withInputChannelName(self::inputChannelName(self::GET_SENT_QUERIES)))
+                ->withInputChannelName(self::inputChannelName(self::GET_RECORDED_QUERIES)))
             ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(
                 $messageCollectorHandler,
-                self::GET_SENT_QUERY_MESSAGES
+                self::GET_RECORDED_QUERY_MESSAGES
             )
-                ->withInputChannelName(self::inputChannelName(self::GET_SENT_QUERY_MESSAGES)))
+                ->withInputChannelName(self::inputChannelName(self::GET_RECORDED_QUERY_MESSAGES)))
             ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(
                 $messageCollectorHandler,
-                self::RESET_MESSAGES
+                self::DISCARD_MESSAGES
             )
-                ->withInputChannelName(self::inputChannelName(self::RESET_MESSAGES)))
+                ->withInputChannelName(self::inputChannelName(self::DISCARD_MESSAGES)))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
                 TestSupportGateway::class,
                 TestSupportGateway::class,
-                self::GET_PUBLISHED_EVENTS,
-                self::inputChannelName(self::GET_PUBLISHED_EVENTS)
+                self::GET_RECORDED_EVENTS,
+                self::inputChannelName(self::GET_RECORDED_EVENTS)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
                 TestSupportGateway::class,
                 TestSupportGateway::class,
-                self::GET_PUBLISHED_EVENT_MESSAGES,
-                self::inputChannelName(self::GET_PUBLISHED_EVENT_MESSAGES)
+                self::GET_RECORDED_EVENT_MESSAGES,
+                self::inputChannelName(self::GET_RECORDED_EVENT_MESSAGES)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
                 TestSupportGateway::class,
                 TestSupportGateway::class,
-                self::GET_SENT_COMMANDS,
-                self::inputChannelName(self::GET_SENT_COMMANDS)
+                self::GET_RECORDED_COMMANDS,
+                self::inputChannelName(self::GET_RECORDED_COMMANDS)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
                 TestSupportGateway::class,
                 TestSupportGateway::class,
-                self::GET_SENT_COMMAND_MESSAGES,
-                self::inputChannelName(self::GET_SENT_COMMAND_MESSAGES)
+                self::GET_RECORDED_COMMAND_MESSAGES,
+                self::inputChannelName(self::GET_RECORDED_COMMAND_MESSAGES)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
                 TestSupportGateway::class,
                 TestSupportGateway::class,
-                self::GET_SENT_QUERIES,
-                self::inputChannelName(self::GET_SENT_QUERIES)
+                self::GET_RECORDED_QUERIES,
+                self::inputChannelName(self::GET_RECORDED_QUERIES)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
                 TestSupportGateway::class,
                 TestSupportGateway::class,
-                self::GET_SENT_QUERY_MESSAGES,
-                self::inputChannelName(self::GET_SENT_QUERY_MESSAGES)
+                self::GET_RECORDED_QUERY_MESSAGES,
+                self::inputChannelName(self::GET_RECORDED_QUERY_MESSAGES)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
                 TestSupportGateway::class,
                 TestSupportGateway::class,
-                self::RESET_MESSAGES,
-                self::inputChannelName(self::RESET_MESSAGES)
+                self::DISCARD_MESSAGES,
+                self::inputChannelName(self::DISCARD_MESSAGES)
             ))
             ->registerBeforeMethodInterceptor(MethodInterceptor::create(
                 MessageCollectorHandler::class . self::RECORD_EVENT,

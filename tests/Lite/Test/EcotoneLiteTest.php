@@ -152,11 +152,17 @@ final class EcotoneLiteTest extends TestCase
                     PollingMetadata::create('orders')
                         ->withTestingSetup(1),
                     TestConfiguration::createWithDefaults()
-                        ->withMediaTypeConversion('orders', MediaType::createApplicationXPHPArray()),
+                        ->withMediaTypeConversion('orders', MediaType::createApplicationXPHPArray())
+                        ->withSpyOnChannel('orders'),
                 ]),
         );
 
         $ecotoneTestSupport->getCommandBus()->sendWithRouting('order.register', new PlaceOrder('someId'));
+
+        $this->assertEquals(
+            [["orderId" => "someId"]],
+            $ecotoneTestSupport->getTestSupportGateway()->getSpiedChannelRecordedMessagePayloads('orders')
+        );
 
         /** Failing on event serialization */
         $this->expectException(ConversionException::class);
@@ -176,14 +182,26 @@ final class EcotoneLiteTest extends TestCase
                     PollingMetadata::create('orders')
                         ->withTestingSetup(2),
                     TestConfiguration::createWithDefaults()
-                        ->withMediaTypeConversion('orders', MediaType::createApplicationXPHPArray()),
+                        ->withMediaTypeConversion('orders', MediaType::createApplicationXPHPArray())
+                        ->withSpyOnChannel('orders'),
                 ]),
         );
 
         $orderId = 'someId';
         $ecotoneTestSupport->getCommandBus()->sendWithRouting('order.register', new PlaceOrder($orderId));
 
+        $ecotoneTestSupport->getTestSupportGateway()->discardRecordedMessages();
+        $this->assertCount(
+            0,
+            $ecotoneTestSupport->getTestSupportGateway()->getSpiedChannelRecordedMessages("orders")
+        );
+
         $ecotoneTestSupport->run('orders');
+
+        $this->assertEquals(
+            ["orderId" => "someId"],
+            $ecotoneTestSupport->getTestSupportGateway()->getSpiedChannelRecordedMessages("orders")[0]->getPayload()
+        );
 
         $this->assertEquals([$orderId], $ecotoneTestSupport->getQueryBus()->sendWithRouting('order.getNotifiedOrders'));
     }
@@ -203,8 +221,8 @@ final class EcotoneLiteTest extends TestCase
 
         $testSupportGateway = $ecotoneTestSupport->getTestSupportGateway();
 
-        $this->assertEquals([new OrderWasPlaced($orderId)], $testSupportGateway->getPublishedEvents());
-        $this->assertEmpty($testSupportGateway->getPublishedEvents());
+        $this->assertEquals([new OrderWasPlaced($orderId)], $testSupportGateway->getRecordedEvents());
+        $this->assertEmpty($testSupportGateway->getRecordedEvents());
     }
 
     public function test_collecting_published_event_messages()
@@ -222,8 +240,8 @@ final class EcotoneLiteTest extends TestCase
 
         $testSupportGateway = $ecotoneTestSupport->getTestSupportGateway();
 
-        $this->assertEquals(new OrderWasPlaced($orderId), $testSupportGateway->getPublishedEventMessages()[0]->getPayload());
-        $this->assertEmpty($testSupportGateway->getPublishedEventMessages());
+        $this->assertEquals(new OrderWasPlaced($orderId), $testSupportGateway->getRecordedEventMessages()[0]->getPayload());
+        $this->assertEmpty($testSupportGateway->getRecordedEventMessages());
     }
 
     public function test_resetting_collected_messages()
@@ -240,9 +258,9 @@ final class EcotoneLiteTest extends TestCase
         $ecotoneTestSupport->getCommandBus()->sendWithRouting('order.register', new PlaceOrder($orderId));
 
         $testSupportGateway = $ecotoneTestSupport->getTestSupportGateway();
-        $testSupportGateway->resetMessages();
+        $testSupportGateway->discardRecordedMessages();
 
-        $this->assertEmpty($testSupportGateway->getPublishedEventMessages());
+        $this->assertEmpty($testSupportGateway->getRecordedEventMessages());
     }
 
     public function test_collecting_sent_query_messages()
@@ -260,7 +278,7 @@ final class EcotoneLiteTest extends TestCase
 
         $ecotoneTestSupport->getQueryBus()->sendWithRouting('basket.getItem', new stdClass());
 
-        $this->assertEquals(new stdClass(), $ecotoneTestSupport->getTestSupportGateway()->getSentQueryMessages()[0]->getPayload());
+        $this->assertEquals(new stdClass(), $ecotoneTestSupport->getTestSupportGateway()->getRecordedQueryMessages()[0]->getPayload());
     }
 
     public function test_collecting_sent_commands()
@@ -276,8 +294,8 @@ final class EcotoneLiteTest extends TestCase
 
         $testSupportGateway = $ecotoneTestSupport->getTestSupportGateway();
 
-        $this->assertEquals([[]], $testSupportGateway->getSentCommands());
-        $this->assertEmpty($testSupportGateway->getSentCommands());
+        $this->assertEquals([[]], $testSupportGateway->getRecordedCommands());
+        $this->assertEmpty($testSupportGateway->getRecordedCommands());
     }
 
     public function test_collecting_sent_command_messages()
@@ -293,8 +311,8 @@ final class EcotoneLiteTest extends TestCase
 
         $testSupportGateway = $ecotoneTestSupport->getTestSupportGateway();
 
-        $this->assertEquals([], $testSupportGateway->getSentCommandMessages()[0]->getPayload());
-        $this->assertEmpty($testSupportGateway->getSentCommandMessages());
+        $this->assertEquals([], $testSupportGateway->getRecordedCommandMessages()[0]->getPayload());
+        $this->assertEmpty($testSupportGateway->getRecordedCommandMessages());
     }
 
     public function test_command_bus_not_failing_in_test_mode_when_no_routing_command_found()
@@ -313,7 +331,7 @@ final class EcotoneLiteTest extends TestCase
         $command = new PlaceOrder('someId');
         $ecotoneTestSupport->getCommandBus()->sendWithRouting('basket.addItem', $command);
 
-        $this->assertEquals([$command], $ecotoneTestSupport->getTestSupportGateway()->getSentCommands());
+        $this->assertEquals([$command], $ecotoneTestSupport->getTestSupportGateway()->getRecordedCommands());
     }
 
     public function test_failing_command_bus_in_test_mode_when_no_routing_command_found()
@@ -349,7 +367,7 @@ final class EcotoneLiteTest extends TestCase
 
         $ecotoneTestSupport->getQueryBus()->sendWithRouting('basket.getItem', new stdClass());
 
-        $this->assertEquals([new stdClass()], $ecotoneTestSupport->getTestSupportGateway()->getSentQueries());
+        $this->assertEquals([new stdClass()], $ecotoneTestSupport->getTestSupportGateway()->getRecordedQueries());
     }
 
     public function test_failing_query_bus_in_test_mode_when_no_routing_command_found()
@@ -390,7 +408,7 @@ final class EcotoneLiteTest extends TestCase
             $ecotoneTestSupport->getQueryBus()->send(GetShippingAddressQuery::create(1))
         );
 
-        $this->assertEquals([new Notification()], $ecotoneTestSupport->getTestSupportGateway()->getPublishedEvents());
+        $this->assertEquals([new Notification()], $ecotoneTestSupport->getTestSupportGateway()->getRecordedEvents());
     }
 
     public function test_fetching_with_possible_suffix_alias()
@@ -411,7 +429,7 @@ final class EcotoneLiteTest extends TestCase
 
         $testSupportGateway = $ecotoneTestSupport->getTestSupportGateway();
 
-        $this->assertEquals([new OrderWasPlaced($orderId)], $testSupportGateway->getPublishedEvents());
+        $this->assertEquals([new OrderWasPlaced($orderId)], $testSupportGateway->getRecordedEvents());
     }
 
     public function test_add_gateways_to_container()
@@ -432,8 +450,8 @@ final class EcotoneLiteTest extends TestCase
 
         $testSupportGateway = $ecotoneTestSupport->getTestSupportGateway();
 
-        $this->assertEquals([new OrderWasPlaced($orderId)], $testSupportGateway->getPublishedEvents());
-        $this->assertEmpty($testSupportGateway->getPublishedEvents());
+        $this->assertEquals([new OrderWasPlaced($orderId)], $testSupportGateway->getRecordedEvents());
+        $this->assertEmpty($testSupportGateway->getRecordedEvents());
     }
 
     public function test_making_use_of_cache()

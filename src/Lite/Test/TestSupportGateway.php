@@ -11,40 +11,50 @@ interface TestSupportGateway
     /**
      * @return array<int, mixed>
      */
-    public function getPublishedEvents(): array;
+    public function getRecordedEvents(): array;
 
     /**
      * Allows to assert metadata of the message
      *
      * @return Message[]
      */
-    public function getPublishedEventMessages(): array;
+    public function getRecordedEventMessages(): array;
 
     /**
      * @return array<int, mixed>
      */
-    public function getSentCommands(): array;
+    public function getRecordedCommands(): array;
 
     /**
      *  Allows to assert metadata of the message
      *
      * @return Message[]
      */
-    public function getSentCommandMessages(): array;
+    public function getRecordedCommandMessages(): array;
 
     /**
      * @return array<int, mixed>
      */
-    public function getSentQueries(): array;
+    public function getRecordedQueries(): array;
 
     /**
      *  Allows to assert metadata of the message
      *
      * @return Message[]
      */
-    public function getSentQueryMessages(): array;
+    public function getRecordedQueryMessages(): array;
 
-    public function resetMessages(): void;
+    /**
+     * @return mixed[]
+     */
+    public function getSpiedChannelRecordedMessagePayloads(string $channelName): array;
+
+    /**
+     * @return Message[]
+     */
+    public function getSpiedChannelRecordedMessages(string $channelName): array;
+
+    public function discardRecordedMessages(): void;
 
     public function releaseMessagesAwaitingFor(string $channelName, int $timeInMilliseconds): void;
 }

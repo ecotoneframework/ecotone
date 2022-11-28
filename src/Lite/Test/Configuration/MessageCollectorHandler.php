@@ -14,6 +14,8 @@ final class MessageCollectorHandler
     private array $sentCommands = [];
     /** @var Message[] */
     private array $sentQueries = [];
+    /** @var Message[] */
+    private array $spiedChannelsMessages = [];
 
     public function recordEvent(Message $event): void
     {
@@ -30,15 +32,12 @@ final class MessageCollectorHandler
         $this->sentQueries[] = $event;
     }
 
-    public function getPublishedEvents(): array
+    public function getRecordedEvents(): array
     {
-        $events = array_map(fn (Message $message) => $message->getPayload(), $this->publishedEvents);
-        $this->publishedEvents = [];
-
-        return $events;
+        return array_map(fn(Message $message) => $message->getPayload(), $this->getRecordedEventMessages());
     }
 
-    public function getPublishedEventMessages(): array
+    public function getRecordedEventMessages(): array
     {
         $events = $this->publishedEvents;
         $this->publishedEvents = [];
@@ -46,15 +45,12 @@ final class MessageCollectorHandler
         return $events;
     }
 
-    public function getSentCommands(): array
+    public function getRecordedCommands(): array
     {
-        $commands = array_map(fn (Message $message) => $message->getPayload(), $this->sentCommands);
-        $this->sentCommands = [];
-
-        return $commands;
+        return array_map(fn(Message $message) => $message->getPayload(), $this->getRecordedCommandMessages());
     }
 
-    public function getSentCommandMessages(): array
+    public function getRecordedCommandMessages(): array
     {
         $commands = $this->sentCommands;
         $this->sentCommands = [];
@@ -62,15 +58,12 @@ final class MessageCollectorHandler
         return $commands;
     }
 
-    public function getSentQueries(): array
+    public function getRecordedQueries(): array
     {
-        $queries = array_map(fn (Message $message) => $message->getPayload(), $this->sentQueries);
-        $this->sentQueries = [];
-
-        return $queries;
+        return array_map(fn(Message $message) => $message->getPayload(), $this->getRecordedQueryMessages());
     }
 
-    public function getSentQueryMessages(): array
+    public function getRecordedQueryMessages(): array
     {
         $queries = $this->sentQueries;
         $this->sentQueries = [];
@@ -78,10 +71,39 @@ final class MessageCollectorHandler
         return $queries;
     }
 
-    public function resetMessages(): void
+    public function recordSpiedChannelMessage(string $channelName, Message $message): void
+    {
+        $this->spiedChannelsMessages[$channelName][] = $message;
+    }
+
+    /**
+     * @return mixed[]
+     */
+    public function getSpiedChannelRecordedMessagePayloads(string $channelName): array
+    {
+        return array_map(fn(Message $message) => $message->getPayload(), $this->getSpiedChannelRecordedMessages($channelName));
+    }
+
+    /**
+     * @return Message[]
+     */
+    public function getSpiedChannelRecordedMessages(string $channelName): array
+    {
+        if (!isset($this->spiedChannelsMessages[$channelName])) {
+            return [];
+        }
+
+        $messages = $this->spiedChannelsMessages[$channelName];
+        unset($this->spiedChannelsMessages[$channelName]);
+
+        return $messages;
+    }
+
+    public function discardRecordedMessages(): void
     {
         $this->sentQueries = [];
         $this->sentCommands = [];
         $this->publishedEvents = [];
+        $this->spiedChannelsMessages = [];
     }
 }

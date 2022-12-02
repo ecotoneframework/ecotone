@@ -34,7 +34,7 @@ If you want to talk or ask question about Ecotone
 
 - [**Twitter**](https://twitter.com/EcotonePHP)
 - **ecotoneframework@gmail.com**
-- [**Gitter**](https://gitter.im/EcotonePHP/community)
+- [**Community Channel**](https://discord.gg/CctGMcrYnV)
 
 ## Support Ecotone
 

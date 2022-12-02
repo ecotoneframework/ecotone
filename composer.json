@@ -2,6 +2,7 @@
     "name": "ecotone/ecotone",
     "license": "MIT",
     "homepage": "https://docs.ecotone.tech",
+    "forum": "https://discord.gg/CctGMcrYnV",
     "type": "library",
     "minimum-stability": "dev",
     "prefer-stable": true,

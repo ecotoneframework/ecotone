@@ -8,7 +8,6 @@ final class RegisterLoadAggregateChannel
 {
     public function __construct(private string $className)
     {
-
     }
 
     public function getClassName(): string

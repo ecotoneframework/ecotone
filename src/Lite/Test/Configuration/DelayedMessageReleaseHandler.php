@@ -6,7 +6,6 @@ namespace Ecotone\Lite\Test\Configuration;
 
 use Ecotone\Messaging\Channel\DelayableQueueChannel;
 use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Support\Assert;
 

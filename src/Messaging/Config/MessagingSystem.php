@@ -159,7 +159,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             $interceptorsForChannel = [];
             foreach ($channelInterceptorBuilders as $channelName => $interceptors) {
                 $regexChannel = str_replace('*', '.*', $channelName);
-                $regexChannel = str_replace("\\", "\\\\", $regexChannel);
+                $regexChannel = str_replace('\\', '\\\\', $regexChannel);
                 if (preg_match("#^{$regexChannel}$#", $channelsBuilder->getMessageChannelName())) {
                     $interceptorsForChannel = array_merge($interceptorsForChannel, array_map(function (ChannelInterceptorBuilder $channelInterceptorBuilder) use ($referenceSearchService) {
                         return $channelInterceptorBuilder->build($referenceSearchService);

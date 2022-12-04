@@ -25,8 +25,8 @@ final class FlowTestSupport
         private MessagingTestSupport $testSupportGateway,
         private MessagingEntrypoint $messagingEntrypoint,
         private ConfiguredMessagingSystem $configuredMessagingSystem
-    )
-    {}
+    ) {
+    }
 
     public function sendCommand(object $command, array $metadata = []): self
     {
@@ -101,7 +101,7 @@ final class FlowTestSupport
      */
     public function getRecordedEventHeaders(): array
     {
-        return array_map(fn(Message $message) => $message->getHeaders(), $this->testSupportGateway->getRecordedEventMessages());
+        return array_map(fn (Message $message) => $message->getHeaders(), $this->testSupportGateway->getRecordedEventMessages());
     }
 
     /**
@@ -109,7 +109,7 @@ final class FlowTestSupport
      */
     public function getRecordedEventRouting(): array
     {
-        return array_map(fn(Message $message) => $message->getHeaders()->get('ecotone.modelling.bus.command_by_name'), $this->testSupportGateway->getRecordedEventMessages());
+        return array_map(fn (Message $message) => $message->getHeaders()->get('ecotone.modelling.bus.command_by_name'), $this->testSupportGateway->getRecordedEventMessages());
     }
 
     /**
@@ -125,7 +125,7 @@ final class FlowTestSupport
      */
     public function getRecordedCommandHeaders(): array
     {
-        return array_map(fn(Message $message) => $message->getHeaders(), $this->testSupportGateway->getRecordedCommandMessages());
+        return array_map(fn (Message $message) => $message->getHeaders(), $this->testSupportGateway->getRecordedCommandMessages());
     }
 
     /**
@@ -133,7 +133,7 @@ final class FlowTestSupport
      */
     public function getRecordedCommandRouting(): array
     {
-        return array_map(fn(Message $message) => $message->getHeaders()->get('ecotone.modelling.bus.command_by_name'), $this->testSupportGateway->getRecordedCommandMessages());
+        return array_map(fn (Message $message) => $message->getHeaders()->get('ecotone.modelling.bus.command_by_name'), $this->testSupportGateway->getRecordedCommandMessages());
     }
 
     /**
@@ -147,7 +147,7 @@ final class FlowTestSupport
         return $this->messagingEntrypoint->sendWithHeaders(
             [],
             [
-                AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => $identifiers
+                AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => $identifiers,
             ],
             ModellingHandlerModule::getRegisterAggregateLoadRepositoryInputChannel($className)
         );

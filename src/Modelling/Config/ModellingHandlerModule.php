@@ -641,7 +641,7 @@ class ModellingHandlerModule implements AnnotationModule
 
     public static function getRegisterAggregateLoadRepositoryInputChannel(string $className): string
     {
-        return self::getAggregateRepositoryInputChannel($className, "will_load" . $className, false, false);
+        return self::getAggregateRepositoryInputChannel($className, 'will_load' . $className, false, false);
     }
 
     public static function getAggregateRepositoryInputChannel(string $className, string $methodName1, bool $isSave, bool $canReturnNull): string

@@ -6,7 +6,7 @@ namespace Ecotone\Lite\Test;
 
 use Ecotone\Messaging\Message;
 
-interface TestSupportGateway
+interface MessagingTestSupport
 {
     /**
      * @return array<int, mixed>

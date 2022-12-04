@@ -6,7 +6,7 @@ namespace Ecotone\Lite\Test\Configuration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Lite\Test\TestConfiguration;
-use Ecotone\Lite\Test\TestSupportGateway;
+use Ecotone\Lite\Test\MessagingTestSupport;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
@@ -27,6 +27,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\Config\RegisterLoadAggregateChannel;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
 
@@ -107,16 +108,16 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                         ])
                         ->withInputChannelName(self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGES)))
                     ->registerGatewayBuilder(GatewayProxyBuilder::create(
-                        TestSupportGateway::class,
-                        TestSupportGateway::class,
+                        MessagingTestSupport::class,
+                        MessagingTestSupport::class,
                         self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS,
                         self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS)
                     )->withParameterConverters([
                         GatewayHeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
                     ]))
                     ->registerGatewayBuilder(GatewayProxyBuilder::create(
-                        TestSupportGateway::class,
-                        TestSupportGateway::class,
+                        MessagingTestSupport::class,
+                        MessagingTestSupport::class,
                         self::GET_SPIED_CHANNEL_RECORDED_MESSAGES,
                         self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGES)
                     )->withParameterConverters([
@@ -155,8 +156,8 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                 ])
                 ->withInputChannelName(self::inputChannelName(self::RELEASE_DELAYED_MESSAGES)))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
-                TestSupportGateway::class,
-                TestSupportGateway::class,
+                MessagingTestSupport::class,
+                MessagingTestSupport::class,
                 self::RELEASE_DELAYED_MESSAGES,
                 self::inputChannelName(self::RELEASE_DELAYED_MESSAGES)
             )->withParameterConverters([
@@ -219,44 +220,44 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
             )
                 ->withInputChannelName(self::inputChannelName(self::DISCARD_MESSAGES)))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
-                TestSupportGateway::class,
-                TestSupportGateway::class,
+                MessagingTestSupport::class,
+                MessagingTestSupport::class,
                 self::GET_RECORDED_EVENTS,
                 self::inputChannelName(self::GET_RECORDED_EVENTS)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
-                TestSupportGateway::class,
-                TestSupportGateway::class,
+                MessagingTestSupport::class,
+                MessagingTestSupport::class,
                 self::GET_RECORDED_EVENT_MESSAGES,
                 self::inputChannelName(self::GET_RECORDED_EVENT_MESSAGES)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
-                TestSupportGateway::class,
-                TestSupportGateway::class,
+                MessagingTestSupport::class,
+                MessagingTestSupport::class,
                 self::GET_RECORDED_COMMANDS,
                 self::inputChannelName(self::GET_RECORDED_COMMANDS)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
-                TestSupportGateway::class,
-                TestSupportGateway::class,
+                MessagingTestSupport::class,
+                MessagingTestSupport::class,
                 self::GET_RECORDED_COMMAND_MESSAGES,
                 self::inputChannelName(self::GET_RECORDED_COMMAND_MESSAGES)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
-                TestSupportGateway::class,
-                TestSupportGateway::class,
+                MessagingTestSupport::class,
+                MessagingTestSupport::class,
                 self::GET_RECORDED_QUERIES,
                 self::inputChannelName(self::GET_RECORDED_QUERIES)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
-                TestSupportGateway::class,
-                TestSupportGateway::class,
+                MessagingTestSupport::class,
+                MessagingTestSupport::class,
                 self::GET_RECORDED_QUERY_MESSAGES,
                 self::inputChannelName(self::GET_RECORDED_QUERY_MESSAGES)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
-                TestSupportGateway::class,
-                TestSupportGateway::class,
+                MessagingTestSupport::class,
+                MessagingTestSupport::class,
                 self::DISCARD_MESSAGES,
                 self::inputChannelName(self::DISCARD_MESSAGES)
             ))
@@ -281,5 +282,17 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                 Precedence::DEFAULT_PRECEDENCE,
                 QueryBus::class
             ));
+    }
+
+    public function getModuleExtensions(array $serviceExtensions): array
+    {
+        $testConfiguration = ExtensionObjectResolver::resolveUnique(TestConfiguration::class, $serviceExtensions, TestConfiguration::createWithDefaults());
+
+        $aggregatesToLoad = [];
+        foreach ($testConfiguration->getAggregatesAndSagasUnderTest() as $aggregateOrSaga) {
+            $aggregatesToLoad[] = new RegisterLoadAggregateChannel($aggregateOrSaga);
+        }
+
+        return $aggregatesToLoad;
     }
 }

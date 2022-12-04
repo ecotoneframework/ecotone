@@ -14,13 +14,14 @@ final class TestConfiguration
         private bool $failOnQueryHandlerNotFound,
         private ?MediaType $pollableChannelMediaTypeConversion,
         private string $channelToConvertOn,
-        private array $spiedChannelNames
+        private array $spiedChannelNames,
+        private array $relatedAggregates
     ) {
     }
 
     public static function createWithDefaults(): self
     {
-        return new self(true, true, null, '', []);
+        return new self(true, true, null, '', [], []);
     }
 
     public function withFailOnCommandHandlerNotFound(bool $shouldFail): self
@@ -62,6 +63,18 @@ final class TestConfiguration
         return $self;
     }
 
+    public function addAggregateOrSagaUnderTest(string $aggregateClassName): self
+    {
+        if (in_array($aggregateClassName, $this->relatedAggregates)) {
+            return $this;
+        }
+
+        $self = clone $this;
+        $self->relatedAggregates[] = $aggregateClassName;
+
+        return $self;
+    }
+
     public function isFailingOnCommandHandlerNotFound(): bool
     {
         return $this->failOnCommandHandlerNotFound;
@@ -85,5 +98,10 @@ final class TestConfiguration
     public function getSpiedChannels(): array
     {
         return $this->spiedChannelNames;
+    }
+
+    public function getAggregatesAndSagasUnderTest(): array
+    {
+        return $this->relatedAggregates;
     }
 }

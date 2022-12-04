@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite;
 
+use Ecotone\Lite\Test\Configuration\InMemoryEventSourcedRepositoryBuilder;
 use Ecotone\Lite\Test\ConfiguredMessagingSystemWithTestSupport;
+use Ecotone\Lite\Test\TestConfiguration;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Config\MessagingSystem;
@@ -12,9 +15,12 @@ use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ProxyGenerator;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Config\StubConfiguredMessagingSystem;
+use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Logger\EchoLogger;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Ecotone\Messaging\Support\Assert;
+use Ecotone\Modelling\Attribute\Aggregate;
 use Psr\Container\ContainerInterface;
 
 final class EcotoneLite
@@ -30,10 +36,11 @@ final class EcotoneLite
         ContainerInterface|array $containerOrAvailableServices = [],
         ?ServiceConfiguration    $configuration = null,
         array                    $configurationVariables = [],
-        bool $useCachedVersion = false,
+        bool                     $useCachedVersion = false,
         ?string                  $pathToRootCatalog = null,
-        bool $allowGatewaysToBeRegisteredInContainer = false
-    ): ConfiguredMessagingSystem {
+        bool                     $allowGatewaysToBeRegisteredInContainer = false
+    ): ConfiguredMessagingSystem
+    {
         return self::prepareConfiguration($containerOrAvailableServices, $configuration, $classesToResolve, $configurationVariables, $pathToRootCatalog, false, $allowGatewaysToBeRegisteredInContainer, $useCachedVersion);
     }
 
@@ -48,8 +55,9 @@ final class EcotoneLite
         ?ServiceConfiguration    $configuration = null,
         array                    $configurationVariables = [],
         ?string                  $pathToRootCatalog = null,
-        bool $allowGatewaysToBeRegisteredInContainer = false
-    ): ConfiguredMessagingSystemWithTestSupport {
+        bool                     $allowGatewaysToBeRegisteredInContainer = false
+    ): ConfiguredMessagingSystemWithTestSupport
+    {
         return self::prepareConfiguration($containerOrAvailableServices, $configuration, $classesToResolve, $configurationVariables, $pathToRootCatalog, true, $allowGatewaysToBeRegisteredInContainer, false);
     }
 

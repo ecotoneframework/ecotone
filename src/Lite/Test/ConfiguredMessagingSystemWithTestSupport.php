@@ -7,6 +7,7 @@ namespace Ecotone\Lite\Test;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\NonProxyCombinedGateway;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
+use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessagePublisher;
 use Ecotone\Modelling\CommandBus;
@@ -65,9 +66,21 @@ final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessag
         return $this->configuredMessagingSystem->getMessagePublisher($referenceName);
     }
 
-    public function getTestSupportGateway(): TestSupportGateway
+    public function getMessagingTestSupport(): MessagingTestSupport
     {
-        return $this->getGatewayByName(TestSupportGateway::class);
+        return $this->getGatewayByName(MessagingTestSupport::class);
+    }
+
+    public function getFlowTestSupport(): FlowTestSupport
+    {
+        return new FlowTestSupport(
+            $this->getCommandBus(),
+            $this->getEventBus(),
+            $this->getQueryBus(),
+            $this->getMessagingTestSupport(),
+            $this->getGatewayByName(MessagingEntrypoint::class),
+            $this->configuredMessagingSystem
+        );
     }
 
     public function getServiceFromContainer(string $referenceName): object

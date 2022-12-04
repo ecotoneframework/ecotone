@@ -15,6 +15,7 @@ use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
@@ -22,6 +23,7 @@ use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
+use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
@@ -306,7 +308,9 @@ class ModellingHandlerModule implements AnnotationModule
         return
             $extensionObject instanceof RepositoryBuilder
             ||
-            $extensionObject instanceof BaseEventSourcingConfiguration;
+            $extensionObject instanceof BaseEventSourcingConfiguration
+            ||
+            $extensionObject instanceof RegisterLoadAggregateChannel;
     }
 
     public function getModuleExtensions(array $serviceExtensions): array
@@ -339,7 +343,7 @@ class ModellingHandlerModule implements AnnotationModule
             $interface = $interfaceToCallRegistry->getFor($repositoryGateway->getClassName(), $repositoryGateway->getMethodName());
             Assert::isTrue($interface->getReturnType()->isClassNotInterface() || $interface->getReturnType()->isVoid(), 'Repository should have return type of Aggregate class or void if is save method: ' . $repositoryGateway);
 
-            $inputChannelName = $repositoryGateway->getClassName() . $repositoryGateway->getMethodName() . ($interface->getReturnType()->isVoid() ? '.save' : '.load' . ($interface->canItReturnNull() ? '.nullable' : ''));
+            $inputChannelName = self::getAggregateRepositoryInputChannel($repositoryGateway->getClassName(), $repositoryGateway->getMethodName(), $interface->getReturnType()->isVoid(), $interface->canItReturnNull());
 
             $chainMessageHandlerBuilder = ChainMessageHandlerBuilder::create()
                                             ->withInputChannelName($inputChannelName);
@@ -381,21 +385,12 @@ class ModellingHandlerModule implements AnnotationModule
                 );
             } else {
                 Assert::isTrue($interface->hasFirstParameter(), 'Fetchting repository should have at least one parameter for identifiers: ' . $repositoryGateway);
-                $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor($interface->getReturnType());
-
-                $configuration->registerMessageHandler(
-                    $chainMessageHandlerBuilder
-                    ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], null, $interfaceToCallRegistry))
-                    ->chain(
-                        LoadAggregateServiceBuilder::create($aggregateClassDefinition, $interface->getMethodName(), null, $interface->canItReturnNull() ? LoadAggregateMode::createContinueOnNotFound() : LoadAggregateMode::createThrowOnNotFound(), $interfaceToCallRegistry)
-                            ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
-                    )
-                    ->chain(
-                        ServiceActivatorBuilder::createWithDirectReference(new FetchAggregate(), 'fetch')
-                            ->withMethodParameterConverters([
-                                HeaderBuilder::createOptional('aggregate', AggregateMessage::AGGREGATE_OBJECT),
-                            ])
-                    )
+                $this->registerLoadAggregateChannel(
+                    $interfaceToCallRegistry->getClassDefinitionFor($interface->getReturnType()),
+                    $interface->canItReturnNull(),
+                    $configuration,
+                    $chainMessageHandlerBuilder,
+                    $interfaceToCallRegistry
                 );
 
                 $gatewayParameterConverters = [GatewayHeaderBuilder::create($interface->getFirstParameter()->getName(), AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER)];
@@ -408,6 +403,18 @@ class ModellingHandlerModule implements AnnotationModule
                     $repositoryGateway->getMethodName(),
                     $inputChannelName
                 )->withParameterConverters($gatewayParameterConverters)
+            );
+        }
+
+        /** @var RegisterLoadAggregateChannel $registerLoadAggregateChannel */
+        foreach (ExtensionObjectResolver::resolve(RegisterLoadAggregateChannel::class, $moduleExtensions) as $registerLoadAggregateChannel) {
+            $this->registerLoadAggregateChannel(
+                $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($registerLoadAggregateChannel->getClassName())),
+                false,
+                $configuration,
+                ChainMessageHandlerBuilder::create()
+                    ->withInputChannelName(self::getRegisterAggregateLoadRepositoryInputChannel($registerLoadAggregateChannel->getClassName())),
+                $interfaceToCallRegistry
             );
         }
 
@@ -630,5 +637,36 @@ class ModellingHandlerModule implements AnnotationModule
     public function getModulePackageName(): string
     {
         return ModulePackageList::CORE_PACKAGE;
+    }
+
+    public static function getRegisterAggregateLoadRepositoryInputChannel(string $className): string
+    {
+        return self::getAggregateRepositoryInputChannel($className, "will_load" . $className, false, false);
+    }
+
+    public static function getAggregateRepositoryInputChannel(string $className, string $methodName1, bool $isSave, bool $canReturnNull): string
+    {
+        return $className . $methodName1 . ($isSave ? '.save' : '.load' . ($canReturnNull ? '.nullable' : ''));
+    }
+
+    private function registerLoadAggregateChannel(ClassDefinition $aggregateClassDefinition, bool $canReturnNull, Configuration $configuration, ChainMessageHandlerBuilder $chainMessageHandlerBuilder, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    {
+        /** @TODO do not require method name in save service */
+        $methodName = $aggregateClassDefinition->getPublicMethodNames() ? $aggregateClassDefinition->getPublicMethodNames()[0] : '__construct';
+
+        $configuration->registerMessageHandler(
+            $chainMessageHandlerBuilder
+                ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], null, $interfaceToCallRegistry))
+                ->chain(
+                    LoadAggregateServiceBuilder::create($aggregateClassDefinition, $methodName, null, $canReturnNull ? LoadAggregateMode::createContinueOnNotFound() : LoadAggregateMode::createThrowOnNotFound(), $interfaceToCallRegistry)
+                        ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
+                )
+                ->chain(
+                    ServiceActivatorBuilder::createWithDirectReference(new FetchAggregate(), 'fetch')
+                        ->withMethodParameterConverters([
+                            HeaderBuilder::createOptional('aggregate', AggregateMessage::AGGREGATE_OBJECT),
+                        ])
+                )
+        );
     }
 }

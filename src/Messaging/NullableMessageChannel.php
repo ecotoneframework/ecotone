@@ -7,7 +7,7 @@ namespace Ecotone\Messaging;
  * @package Ecotone\Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-final class NullableMessageChannel implements SubscribableChannel
+final class NullableMessageChannel implements SubscribableChannel, PollableChannel
 {
     public const CHANNEL_NAME = 'nullChannel';
 
@@ -40,6 +40,15 @@ final class NullableMessageChannel implements SubscribableChannel
     {
     }
 
+    public function receive(): ?Message
+    {
+        return null;
+    }
+
+    public function receiveWithTimeout(int $timeoutInMilliseconds): ?Message
+    {
+        return null;
+    }
 
     /**
      * @inheritDoc

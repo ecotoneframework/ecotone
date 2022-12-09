@@ -63,7 +63,7 @@ final class TestConfiguration
         return $self;
     }
 
-    public function addAggregateOrSagaUnderTest(string $aggregateClassName): self
+    public function addAggregateUnderTest(string $aggregateClassName): self
     {
         if (in_array($aggregateClassName, $this->relatedAggregates)) {
             return $this;
@@ -73,6 +73,11 @@ final class TestConfiguration
         $self->relatedAggregates[] = $aggregateClassName;
 
         return $self;
+    }
+
+    public function addSagaUnderTest(string $sagaClassName): self
+    {
+        return $this->addAggregateUnderTest($sagaClassName);
     }
 
     public function isFailingOnCommandHandlerNotFound(): bool

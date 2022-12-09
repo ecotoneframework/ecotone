@@ -10,8 +10,10 @@ use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\MessagingException;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\Config\BusModule;
 use Ecotone\Modelling\Config\ModellingHandlerModule;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
@@ -130,24 +132,39 @@ final class FlowTestSupport
 
     /**
      * @return string[]
+     * @throws MessagingException
      */
-    public function getRecordedCommandRouting(): array
+    public function getRecordedCommandsWithRouting(): array
     {
-        return array_map(fn (Message $message) => $message->getHeaders()->get('ecotone.modelling.bus.command_by_name'), $this->testSupportGateway->getRecordedCommandMessages());
+        $commandWithRouting = [];
+        foreach ($this->getRecordedCommandHeaders() as $commandHeaders) {
+            if ($commandHeaders->containsKey(BusModule::COMMAND_CHANNEL_NAME_BY_NAME)) {
+                $command = [
+                    $commandHeaders->get(BusModule::COMMAND_CHANNEL_NAME_BY_NAME),
+                ];
+
+                if ($commandHeaders->containsKey("aggregate.id")) {
+                    $command[] = $commandHeaders->get("aggregate.id");
+                }
+
+                $commandWithRouting[] = $command;
+            }
+        }
+
+        return $commandWithRouting;
     }
 
     /**
      * @template T
      * @param class-string<T> $className
-     * @param string|array $identifiers
      * @return T
      */
-    public function getAggregate(string $className, string|array $identifiers): object
+    public function getAggregate(string $className, string|array|object $identifiers): object
     {
         return $this->messagingEntrypoint->sendWithHeaders(
             [],
             [
-                AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => $identifiers,
+                AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => is_object($identifiers) ? (string)$identifiers : $identifiers,
             ],
             ModellingHandlerModule::getRegisterAggregateLoadRepositoryInputChannel($className)
         );

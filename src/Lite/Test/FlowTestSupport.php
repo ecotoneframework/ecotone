@@ -143,8 +143,8 @@ final class FlowTestSupport
                     $commandHeaders->get(BusModule::COMMAND_CHANNEL_NAME_BY_NAME),
                 ];
 
-                if ($commandHeaders->containsKey("aggregate.id")) {
-                    $command[] = $commandHeaders->get("aggregate.id");
+                if ($commandHeaders->containsKey('aggregate.id')) {
+                    $command[] = $commandHeaders->get('aggregate.id');
                 }
 
                 $commandWithRouting[] = $command;

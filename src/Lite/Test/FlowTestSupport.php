@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite\Test;
 
+use App\Testing\Domain\ShoppingBasket\Basket;
+use App\Testing\Domain\ShoppingBasket\Event\ProductWasAddedToBasket;
+use Ecotone\EventSourcing\EventStore;
+use Ecotone\EventSourcing\ProjectionManager;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
@@ -15,9 +19,13 @@ use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\BusModule;
 use Ecotone\Modelling\Config\ModellingHandlerModule;
+use Ecotone\Modelling\Event;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
 
+/**
+ * @template T
+ */
 final class FlowTestSupport
 {
     public function __construct(
@@ -63,6 +71,11 @@ final class FlowTestSupport
         return $this->queryBus->send($query, $metadata, $expectedReturnedMediaType);
     }
 
+    public function sendQueryWithRouting(string $routingKey, mixed $query = [], string $queryMediaType = MediaType::APPLICATION_X_PHP, array $metadata = [], ?string $expectedReturnedMediaType = null): mixed
+    {
+        return $this->queryBus->sendWithRouting($routingKey, $query, $queryMediaType, $metadata, $expectedReturnedMediaType);
+    }
+
     public function discardRecordedMessages(): self
     {
         $this->testSupportGateway->discardRecordedMessages();
@@ -85,9 +98,21 @@ final class FlowTestSupport
         return $this;
     }
 
-    public function sendQueryWithRouting(string $routingKey, mixed $query = [], string $queryMediaType = MediaType::APPLICATION_X_PHP, array $metadata = [], ?string $expectedReturnedMediaType = null): mixed
+    /**
+     * @param Event[]|object[]|array[] $streamEvents
+     */
+    public function appendToEventStore(string $streamName, array $events): self
     {
-        return $this->queryBus->sendWithRouting($routingKey, $query, $queryMediaType, $metadata, $expectedReturnedMediaType);
+        $this->getGateway(EventStore::class)->appendTo($streamName, $events);
+
+        return $this;
+    }
+
+    public function triggerProjection(string $projectionName): self
+    {
+        $this->getGateway(ProjectionManager::class)->triggerProjection($projectionName);
+
+        return $this;
     }
 
     /**
@@ -179,5 +204,14 @@ final class FlowTestSupport
     public function getSaga(string $className, string|array $identifiers): object
     {
         return $this->getAggregate($className, $identifiers);
+    }
+
+    /**
+     * @param class-string<T> $referenceName
+     * @return T
+     */
+    public function getGateway(string $referenceName): object
+    {
+        return $this->configuredMessagingSystem->getGatewayByName($referenceName);
     }
 }

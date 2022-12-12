@@ -28,6 +28,7 @@ class ServiceConfiguration
      * @var string[]
      */
     private array $skippedModulesPackages = [];
+    private bool $areSkippedPackagesDefined = false;
     private ?string $defaultSerializationMediaType = null;
     private ?string $defaultErrorChannel = null;
     private ?int $defaultMemoryLimitInMegabytes = PollingMetadata::DEFAULT_MEMORY_LIMIT_MEGABYTES;
@@ -156,6 +157,14 @@ class ServiceConfiguration
         return $clone;
     }
 
+    public function addExtensionObject(object $extensionObject): self
+    {
+        $clone              = clone $this;
+        $clone->extensionObjects[] = $extensionObject;
+
+        return $clone;
+    }
+
     public function doNotLoadCatalog(): self
     {
         $clone              = clone $this;
@@ -214,6 +223,7 @@ class ServiceConfiguration
     public function withSkippedModulePackageNames(array $modulePackageNames): self
     {
         $this->skippedModulesPackages = $modulePackageNames;
+        $this->areSkippedPackagesDefined = true;
 
         return $this;
     }
@@ -243,6 +253,11 @@ class ServiceConfiguration
         return $this->skippedModulesPackages;
     }
 
+    public function areSkippedPackagesDefined(): bool
+    {
+        return $this->areSkippedPackagesDefined;
+    }
+
     public function isModulePackageEnabled(string $modulePackageName): bool
     {
         return ! in_array($modulePackageName, $this->skippedModulesPackages);
@@ -254,6 +269,20 @@ class ServiceConfiguration
     public function getExtensionObjects(): array
     {
         return $this->extensionObjects;
+    }
+
+    /**
+     * @param string<class-string> $className
+     */
+    public function hasExtensionObject(string $className): bool
+    {
+        foreach ($this->extensionObjects as $extensionObject) {
+            if ($extensionObject instanceof $className) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function getDefaultMemoryLimitInMegabytes(): ?int

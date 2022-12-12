@@ -6,3 +6,12 @@ parameters:
 		-
 			message: '#^Class .* not found.$#'
 			path: src/Messaging/Config/ModuleClassList.php
+		-
+			message: '#^Class .* not found.$#'
+			path: src/Lite/Test/FlowTestSupport.php
+		-
+			message: '#^Class .* not found.$#'
+			path: src/Lite/EcotoneLite.php
+		-
+			message: '#^Call to static method#'
+			path: src/Lite/EcotoneLite.php

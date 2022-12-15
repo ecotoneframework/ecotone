@@ -5,11 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Lite\Test;
 
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\ClassDefinition;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Config\RegisterAggregateRepositoryChannels;
 
 final class TestConfiguration

@@ -5,12 +5,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Lite\Test;
 
 use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Config\ModulePackageList;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use PHPUnit\Framework\TestCase;
-use Test\Ecotone\EventSourcing\Fixture\Ticket\Command\ChangeAssignedPerson;
-use Test\Ecotone\EventSourcing\Fixture\Ticket\Event\TicketWasRegistered;
-use Test\Ecotone\EventSourcing\Fixture\Ticket\Ticket;
 use Test\Ecotone\Modelling\Fixture\Order\OrderService;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\Order;
@@ -47,7 +42,7 @@ final class FlowTestSupportFrameworkTest extends TestCase
         $this->assertTrue(
             $ecotoneTestSupport
                 ->withStateFor(Order::register(new PlaceOrder($orderId)))
-                ->sendCommandWithRoutingKey('order.cancel', metadata: ["aggregate.id" => $orderId])
+                ->sendCommandWithRoutingKey('order.cancel', metadata: ['aggregate.id' => $orderId])
                 ->getAggregate(Order::class, $orderId)
                 ->isCancelled()
         );

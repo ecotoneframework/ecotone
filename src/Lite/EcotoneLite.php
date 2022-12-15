@@ -216,7 +216,7 @@ final class EcotoneLite
         $aggregateAnnotation = TypeDescriptor::create(Aggregate::class);
         foreach ($classesToResolve as $class) {
             $aggregateClass = ClassDefinition::createFor(TypeDescriptor::create($class));
-            if (!$aggregateClass->hasClassAnnotation($aggregateAnnotation)) {
+            if (! $aggregateClass->hasClassAnnotation($aggregateAnnotation)) {
                 continue;
             }
 

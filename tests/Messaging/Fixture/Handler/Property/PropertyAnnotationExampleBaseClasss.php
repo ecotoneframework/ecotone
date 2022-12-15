@@ -8,5 +8,4 @@ use Attribute;
 
 #[Attribute] class PropertyAnnotationExampleBaseClasss
 {
-
 }

@@ -411,11 +411,16 @@ class ModellingHandlerModule implements AnnotationModule
                 $interfaceToCallRegistry
             );
 
-            $this->registerSaveAggregate($aggregateClassDefinition, $configuration,
+            $this->registerSaveAggregate(
+                $aggregateClassDefinition,
+                $configuration,
                 ChainMessageHandlerBuilder::create()
                     ->withInputChannelName(self::getRegisterAggregateSaveRepositoryInputChannel($registerAggregateChannel->getClassName()))
                     ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], null, $interfaceToCallRegistry)),
-                $interfaceToCallRegistry, $baseEventSourcingConfiguration, self::getRegisterAggregateSaveRepositoryInputChannel($registerAggregateChannel->getClassName()));
+                $interfaceToCallRegistry,
+                $baseEventSourcingConfiguration,
+                self::getRegisterAggregateSaveRepositoryInputChannel($registerAggregateChannel->getClassName())
+            );
         }
 
         $aggregateCommandOrEventHandlers = [];

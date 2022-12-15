@@ -20,7 +20,6 @@ use Ecotone\Modelling\Config\ModellingHandlerModule;
 use Ecotone\Modelling\Event;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
-use Ramsey\Uuid\UuidInterface;
 
 /**
  * @template T
@@ -117,7 +116,7 @@ final class FlowTestSupport
             [
                 AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => is_object($identifiers) ? (string)$identifiers : $identifiers,
                 AggregateMessage::TARGET_VERSION => $aggregateVersion,
-                AggregateMessage::AGGREGATE_OBJECT => $aggregateClass
+                AggregateMessage::AGGREGATE_OBJECT => $aggregateClass,
             ],
             ModellingHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregateClass)
         );
@@ -133,7 +132,7 @@ final class FlowTestSupport
         $this->messagingEntrypoint->sendWithHeaders(
             $aggregate,
             [
-                AggregateMessage::AGGREGATE_OBJECT => $aggregate
+                AggregateMessage::AGGREGATE_OBJECT => $aggregate,
             ],
             ModellingHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregate::class)
         );

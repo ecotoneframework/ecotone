@@ -27,7 +27,6 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\Config\RegisterAggregateRepositoryChannels;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
 

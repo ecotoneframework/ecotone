@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
-use App\Domain\Ticket;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\ClassPropertyDefinition;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -91,7 +90,7 @@ class ClassDefinitionTest extends TestCase
 
         $this->assertEquals(
             [
-                ClassPropertyDefinition::createProtected('reference', TypeDescriptor::createStringType(), true, true, [new PropertyAnnotationExample()])
+                ClassPropertyDefinition::createProtected('reference', TypeDescriptor::createStringType(), true, true, [new PropertyAnnotationExample()]),
             ],
             $classDefinition->getPropertiesWithAnnotation(TypeDescriptor::create(PropertyAnnotationExample::class))
         );

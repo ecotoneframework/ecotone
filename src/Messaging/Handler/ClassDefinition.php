@@ -156,7 +156,7 @@ class ClassDefinition
     {
         $foundAnnotations = [];
         foreach ($this->classAnnotations as $classAnnotation) {
-            if (TypeDescriptor::createFromVariable($classAnnotation)->equals($annotationType)) {
+            if (TypeDescriptor::createFromVariable($classAnnotation)->isCompatibleWith($annotationType)) {
                 $foundAnnotations[] = $classAnnotation;
             }
         }
@@ -177,6 +177,17 @@ class ClassDefinition
     }
 
     public function hasClassAnnotation(Type $type): bool
+    {
+        foreach ($this->getClassAnnotations() as $classAnnotation) {
+            if (TypeDescriptor::createFromVariable($classAnnotation)->isCompatibleWith($type)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public function hasClassAnnotationOfPreciseType(Type $type): bool
     {
         foreach ($this->getClassAnnotations() as $classAnnotation) {
             if (TypeDescriptor::createFromVariable($classAnnotation)->equals($type)) {

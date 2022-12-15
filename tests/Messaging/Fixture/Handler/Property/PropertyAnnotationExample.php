@@ -5,6 +5,6 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\Property;
 use Attribute;
 
 #[Attribute]
-class PropertyAnnotationExample
+class PropertyAnnotationExample extends PropertyAnnotationExampleBaseClasss
 {
 }

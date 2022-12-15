@@ -27,7 +27,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\Config\RegisterLoadAggregateChannel;
+use Ecotone\Modelling\Config\RegisterAggregateRepositoryChannels;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
 
@@ -282,17 +282,5 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                 Precedence::DEFAULT_PRECEDENCE,
                 QueryBus::class
             ));
-    }
-
-    public function getModuleExtensions(array $serviceExtensions): array
-    {
-        $testConfiguration = ExtensionObjectResolver::resolveUnique(TestConfiguration::class, $serviceExtensions, TestConfiguration::createWithDefaults());
-
-        $aggregatesToLoad = [];
-        foreach ($testConfiguration->getAggregatesAndSagasUnderTest() as $aggregateOrSaga) {
-            $aggregatesToLoad[] = new RegisterLoadAggregateChannel($aggregateOrSaga);
-        }
-
-        return $aggregatesToLoad;
     }
 }

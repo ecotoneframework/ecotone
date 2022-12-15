@@ -4,6 +4,13 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling;
 
+use Ecotone\Messaging\Handler\ClassDefinition;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingSaga;
+use Ecotone\Modelling\Attribute\Saga;
+
 /**
  * Class InMemoryEventSourcedRepository
  * @package Ecotone\Modelling
@@ -40,7 +47,12 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
      */
     public function canHandle(string $aggregateClassName): bool
     {
-        return empty($this->aggregateTypes) ? true : in_array($aggregateClassName, $this->aggregateTypes);
+        if (in_array($aggregateClassName, $this->aggregateTypes)) {
+            return true;
+        }
+
+        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create($aggregateClassName));
+        return $classDefinition->hasClassAnnotationOfPreciseType(TypeDescriptor::create(EventSourcingAggregate::class)) || $classDefinition->hasClassAnnotationOfPreciseType(TypeDescriptor::create(EventSourcingSaga::class));
     }
 
     /**

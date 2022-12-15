@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling;
 
+use Ecotone\Messaging\Handler\ClassDefinition;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\Saga;
+
 class InMemoryStandardRepository implements StandardRepository
 {
     /**
@@ -30,7 +35,12 @@ class InMemoryStandardRepository implements StandardRepository
      */
     public function canHandle(string $aggregateClassName): bool
     {
-        return empty($this->aggregateTypes) ? true : in_array($aggregateClassName, $this->aggregateTypes);
+        if (in_array($aggregateClassName, $this->aggregateTypes)) {
+            return true;
+        }
+
+        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create($aggregateClassName));
+        return $classDefinition->hasClassAnnotationOfPreciseType(TypeDescriptor::create(Aggregate::class)) || $classDefinition->hasClassAnnotationOfPreciseType(TypeDescriptor::create(Saga::class));
     }
 
     /**

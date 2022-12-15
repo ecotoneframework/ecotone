@@ -23,6 +23,8 @@ class Order
 
     private $isNotifiedCount = 0;
 
+    private bool $isCancelled = false;
+
     private function __construct(string $orderId)
     {
         $this->orderId = $orderId;
@@ -33,6 +35,17 @@ class Order
     public static function register(PlaceOrder $placeOrder): self
     {
         return new self($placeOrder->getOrderId());
+    }
+
+    #[CommandHandler('order.cancel', 'orderCancel')]
+    public function cancel(): void
+    {
+        $this->isCancelled = true;
+    }
+
+    public function isCancelled(): bool
+    {
+        return $this->isCancelled;
     }
 
     #[EventHandler(endpointId:'orderPlaced')]

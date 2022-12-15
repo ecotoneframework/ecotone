@@ -25,7 +25,9 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
+use Ecotone\Modelling\Config\RegisterAggregateRepositoryChannels;
 use Psr\Container\ContainerInterface;
 
 final class EcotoneLite
@@ -44,8 +46,7 @@ final class EcotoneLite
         bool                     $useCachedVersion = false,
         ?string                  $pathToRootCatalog = null,
         bool                     $allowGatewaysToBeRegisteredInContainer = false
-    ): ConfiguredMessagingSystem
-    {
+    ): ConfiguredMessagingSystem {
         return self::prepareConfiguration($containerOrAvailableServices, $configuration, $classesToResolve, $configurationVariables, $pathToRootCatalog, false, $allowGatewaysToBeRegisteredInContainer, $useCachedVersion);
     }
 
@@ -61,8 +62,7 @@ final class EcotoneLite
         array                    $configurationVariables = [],
         ?string                  $pathToRootCatalog = null,
         bool                     $allowGatewaysToBeRegisteredInContainer = false
-    ): ConfiguredMessagingSystemWithTestSupport
-    {
+    ): ConfiguredMessagingSystemWithTestSupport {
         return self::prepareConfiguration($containerOrAvailableServices, $configuration, $classesToResolve, $configurationVariables, $pathToRootCatalog, true, $allowGatewaysToBeRegisteredInContainer, false);
     }
 
@@ -83,8 +83,7 @@ final class EcotoneLite
         bool                     $allowGatewaysToBeRegisteredInContainer = false,
         bool                     $addInMemoryStateStoredRepository = true,
         bool                     $addEventSourcedRepository = true,
-    ): FlowTestSupport
-    {
+    ): FlowTestSupport {
         $configuration = self::prepareForFlowTesting($configuration, ModulePackageList::allPackages(), $classesToResolve, $addInMemoryStateStoredRepository);
 
         if ($addEventSourcedRepository) {
@@ -112,18 +111,17 @@ final class EcotoneLite
         ?string                  $pathToRootCatalog = null,
         bool                     $allowGatewaysToBeRegisteredInContainer = false,
         bool                     $addInMemoryStateStoredRepository = true,
-    ): FlowTestSupport
-    {
+    ): FlowTestSupport {
         $configuration = self::prepareForFlowTesting($configuration, ModulePackageList::allPackagesExcept([ModulePackageList::EVENT_SOURCING_PACKAGE, ModulePackageList::DBAL_PACKAGE, ModulePackageList::JMS_CONVERTER_PACKAGE]), $classesToResolve, $addInMemoryStateStoredRepository);
 
-        if (!$configuration->hasExtensionObject(BaseEventSourcingConfiguration::class)) {
-            Assert::isTrue(class_exists(EventSourcingConfiguration::class), "To use Flow Testing with Event Store you need to add event sourcing module.");
+        if (! $configuration->hasExtensionObject(BaseEventSourcingConfiguration::class)) {
+            Assert::isTrue(class_exists(EventSourcingConfiguration::class), 'To use Flow Testing with Event Store you need to add event sourcing module.');
 
             $configuration = $configuration
                 ->addExtensionObject(EventSourcingConfiguration::createInMemory());
         }
 
-        if (!$configuration->hasExtensionObject(DbalConfiguration::class)) {
+        if (! $configuration->hasExtensionObject(DbalConfiguration::class)) {
             $configuration = $configuration
                 ->addExtensionObject(DbalConfiguration::createForTesting());
         }
@@ -210,16 +208,19 @@ final class EcotoneLite
         $configuration = $configuration ?: ServiceConfiguration::createWithDefaults();
         $testConfiguration = ExtensionObjectResolver::resolveUnique(TestConfiguration::class, $configuration->getExtensionObjects(), TestConfiguration::createWithDefaults());
 
-        if (!$configuration->areSkippedPackagesDefined()) {
+        if (! $configuration->areSkippedPackagesDefined()) {
             $configuration = $configuration
                 ->withSkippedModulePackageNames($packagesToSkip);
         }
 
-        $aggregate = TypeDescriptor::create(Aggregate::class);
+        $aggregateAnnotation = TypeDescriptor::create(Aggregate::class);
         foreach ($classesToResolve as $class) {
-            if (ClassDefinition::createFor(TypeDescriptor::create($class))->hasClassAnnotation($aggregate)) {
-                $testConfiguration = $testConfiguration->addAggregateUnderTest($class);
+            $aggregateClass = ClassDefinition::createFor(TypeDescriptor::create($class));
+            if (!$aggregateClass->hasClassAnnotation($aggregateAnnotation)) {
+                continue;
             }
+
+            $configuration = $configuration->addExtensionObject(new RegisterAggregateRepositoryChannels($aggregateClass->getClassType()->toString(), $aggregateClass->getSingleClassAnnotation($aggregateAnnotation) instanceof EventSourcingAggregate));
         }
 
         $configuration = $configuration

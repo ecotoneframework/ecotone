@@ -18,7 +18,7 @@ class OrderPropertyExample
     #[PropertyAnnotationExample]
     protected static ?string $reference;
 
-    #[PropertyAnnotationExample]
+    #[PropertyAnnotationExampleBaseClasss]
     private ?SomeClass $someClass;
 
     public function doSomething(): void

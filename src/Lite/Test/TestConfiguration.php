@@ -5,10 +5,19 @@ declare(strict_types=1);
 namespace Ecotone\Lite\Test;
 
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\ClassDefinition;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
+use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Config\RegisterAggregateRepositoryChannels;
 
 final class TestConfiguration
 {
+    /**
+     * @param string[] $spiedChannelNames
+     * @param RegisterAggregateRepositoryChannels[] $relatedAggregates
+     */
     private function __construct(
         private bool $failOnCommandHandlerNotFound,
         private bool $failOnQueryHandlerNotFound,
@@ -63,23 +72,6 @@ final class TestConfiguration
         return $self;
     }
 
-    public function addAggregateUnderTest(string $aggregateClassName): self
-    {
-        if (in_array($aggregateClassName, $this->relatedAggregates)) {
-            return $this;
-        }
-
-        $self = clone $this;
-        $self->relatedAggregates[] = $aggregateClassName;
-
-        return $self;
-    }
-
-    public function addSagaUnderTest(string $sagaClassName): self
-    {
-        return $this->addAggregateUnderTest($sagaClassName);
-    }
-
     public function isFailingOnCommandHandlerNotFound(): bool
     {
         return $this->failOnCommandHandlerNotFound;
@@ -105,6 +97,9 @@ final class TestConfiguration
         return $this->spiedChannelNames;
     }
 
+    /**
+     * @return RegisterAggregateRepositoryChannels[]
+     */
     public function getAggregatesAndSagasUnderTest(): array
     {
         return $this->relatedAggregates;

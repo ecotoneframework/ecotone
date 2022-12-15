@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
+use App\Domain\Ticket;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\ClassPropertyDefinition;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingSaga;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Test\Ecotone\Messaging\Fixture\Conversion\Grouping\CollectionOfClassesFromDifferentNamespaceUsingGroupAlias;
@@ -26,6 +30,8 @@ use Test\Ecotone\Messaging\Fixture\Handler\Property\Extra\ExtraObject;
 use Test\Ecotone\Messaging\Fixture\Handler\Property\OrderPropertyExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Property\OrderWithTraits;
 use Test\Ecotone\Messaging\Fixture\Handler\Property\PropertyAnnotationExample;
+use Test\Ecotone\Messaging\Fixture\Handler\Property\PropertyAnnotationExampleBaseClasss;
+use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\Logger;
 
 /**
  * Class ClassDefinitionTest
@@ -46,6 +52,15 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
+    public function test_checking_if_has_annotation()
+    {
+        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Logger::class));
+
+        $this->assertTrue($classDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcingAggregate::class)));
+        $this->assertTrue($classDefinition->hasClassAnnotation(TypeDescriptor::create(Aggregate::class)));
+        $this->assertFalse($classDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcingSaga::class)));
+    }
+
     public function test_retrieving_property_annotations()
     {
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderPropertyExample::class));
@@ -56,16 +71,37 @@ class ClassDefinitionTest extends TestCase
         );
     }
 
+    public function test_retrieving_class_annotations()
+    {
+        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Logger::class));
+
+        $this->assertEquals(
+            new EventSourcingAggregate(),
+            $classDefinition->getSingleClassAnnotation(TypeDescriptor::create(EventSourcingAggregate::class))
+        );
+        $this->assertEquals(
+            new EventSourcingAggregate(),
+            $classDefinition->getSingleClassAnnotation(TypeDescriptor::create(Aggregate::class))
+        );
+    }
+
     public function test_retrieving_property_with_annotation()
     {
         $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderPropertyExample::class));
 
         $this->assertEquals(
             [
-                ClassPropertyDefinition::createProtected('reference', TypeDescriptor::createStringType(), true, true, [new PropertyAnnotationExample()]),
-                ClassPropertyDefinition::createPrivate('someClass', TypeDescriptor::create(stdClass::class), true, false, [new PropertyAnnotationExample()]),
+                ClassPropertyDefinition::createProtected('reference', TypeDescriptor::createStringType(), true, true, [new PropertyAnnotationExample()])
             ],
             $classDefinition->getPropertiesWithAnnotation(TypeDescriptor::create(PropertyAnnotationExample::class))
+        );
+
+        $this->assertEquals(
+            [
+                ClassPropertyDefinition::createProtected('reference', TypeDescriptor::createStringType(), true, true, [new PropertyAnnotationExample()]),
+                ClassPropertyDefinition::createPrivate('someClass', TypeDescriptor::create(stdClass::class), true, false, [new PropertyAnnotationExampleBaseClasss()]),
+            ],
+            $classDefinition->getPropertiesWithAnnotation(TypeDescriptor::create(PropertyAnnotationExampleBaseClasss::class))
         );
     }
 
@@ -136,7 +172,7 @@ class ClassDefinitionTest extends TestCase
             $classDefinition->getProperty('reference')
         );
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate('someClass', TypeDescriptor::create(stdClass::class), true, false, [new PropertyAnnotationExample()]),
+            ClassPropertyDefinition::createPrivate('someClass', TypeDescriptor::create(stdClass::class), true, false, [new PropertyAnnotationExampleBaseClasss()]),
             $classDefinition->getProperty('someClass')
         );
     }

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite\Test;
 
-use App\Testing\Domain\ShoppingBasket\Basket;
-use App\Testing\Domain\ShoppingBasket\Event\ProductWasAddedToBasket;
 use Ecotone\EventSourcing\EventStore;
 use Ecotone\EventSourcing\ProjectionManager;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
@@ -22,6 +20,7 @@ use Ecotone\Modelling\Config\ModellingHandlerModule;
 use Ecotone\Modelling\Event;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * @template T
@@ -101,9 +100,43 @@ final class FlowTestSupport
     /**
      * @param Event[]|object[]|array[] $streamEvents
      */
-    public function appendToEventStore(string $streamName, array $events): self
+    public function withEventStream(string $streamName, array $events): self
     {
         $this->getGateway(EventStore::class)->appendTo($streamName, $events);
+
+        return $this;
+    }
+
+    /**
+     * @param Event[]|object[]|array[] $streamEvents
+     */
+    public function withEventsFor(string|object|array $identifiers, string $aggregateClass, array $events, int $aggregateVersion = 0): self
+    {
+        $this->messagingEntrypoint->sendWithHeaders(
+            $events,
+            [
+                AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => is_object($identifiers) ? (string)$identifiers : $identifiers,
+                AggregateMessage::TARGET_VERSION => $aggregateVersion,
+                AggregateMessage::AGGREGATE_OBJECT => $aggregateClass
+            ],
+            ModellingHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregateClass)
+        );
+
+        return $this;
+    }
+
+    /**
+     * @param Event[]|object[]|array[] $streamEvents
+     */
+    public function withStateFor(object $aggregate): self
+    {
+        $this->messagingEntrypoint->sendWithHeaders(
+            $aggregate,
+            [
+                AggregateMessage::AGGREGATE_OBJECT => $aggregate
+            ],
+            ModellingHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregate::class)
+        );
 
         return $this;
     }

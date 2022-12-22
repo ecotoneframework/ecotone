@@ -7,18 +7,22 @@ namespace Test\Ecotone\Messaging\Unit\Endpoint;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Messaging\Transaction\Null\NullTransaction;
 use Ecotone\Messaging\Transaction\Null\NullTransactionFactory;
 use Ecotone\Messaging\Transaction\Transactional;
 use Ecotone\Messaging\Transaction\TransactionInterceptor;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerStoppingService;
+use Test\Ecotone\Messaging\Fixture\Handler\DataReturningService;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingNoArguments;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
@@ -356,6 +360,42 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
             $payload,
             $inputChannel->receive()->getPayload()
         );
+    }
+
+    public function test_acking_message_when_ack_available_in_message_header_in_inbound_channel_adapter()
+    {
+        $acknowledgementCallback = NullAcknowledgementCallback::create();
+        $message = MessageBuilder::withPayload('some')
+            ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, 'amqpAcker')
+            ->setHeader('amqpAcker', $acknowledgementCallback)
+            ->build();
+        $inputChannelName = 'inputChannelName';
+        $inputChannel = QueueChannel::create();
+        $inboundChannelAdapterStoppingService = ConsumerStoppingService::create($message);
+
+        $inboundChannel = InboundChannelAdapterBuilder::create(
+            $inputChannelName,
+            'someRef',
+            'execute'
+        )
+            ->withEndpointId('test')
+            ->build(
+                InMemoryChannelResolver::createFromAssociativeArray([
+                    $inputChannelName => $inputChannel,
+                ]),
+                InMemoryReferenceSearchService::createWith([
+                    'someRef' => $inboundChannelAdapterStoppingService,
+                ]),
+                PollingMetadata::create('test')
+                    ->setFixedRateInMilliseconds(1)
+                    ->setInitialDelayInMilliseconds(0)
+                    ->setHandledMessageLimit(1)
+                    ->setExecutionAmountLimit(1)
+            );
+
+        $inboundChannel->run();
+
+        $this->assertTrue($acknowledgementCallback->isAcked());
     }
 
     /**

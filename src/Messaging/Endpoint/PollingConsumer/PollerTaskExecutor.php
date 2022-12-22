@@ -35,13 +35,9 @@ class PollerTaskExecutor implements TaskExecutor
 
     public function execute(PollingMetadata $pollingMetadata): void
     {
-        try {
-            $message = $pollingMetadata->getExecutionTimeLimitInMilliseconds()
-                ? $this->pollableChannel->receiveWithTimeout($pollingMetadata->getExecutionTimeLimitInMilliseconds())
-                : $this->pollableChannel->receive();
-        } catch (Throwable $exception) {
-            throw new ConnectionException("Can't pool message from {$this->pollableChannelName} error happened.", 0, $exception);
-        }
+        $message = $pollingMetadata->getExecutionTimeLimitInMilliseconds()
+            ? $this->pollableChannel->receiveWithTimeout($pollingMetadata->getExecutionTimeLimitInMilliseconds())
+            : $this->pollableChannel->receive();
 
         if ($message) {
             $message = MessageBuilder::fromMessage($message)

@@ -47,15 +47,18 @@ class ConsumerStoppingService
 
     public function execute()
     {
-        $this->consumerLifecycle->stop();
-
+        if ($this->consumerLifecycle) {
+            $this->consumerLifecycle->stop();
+        }
         return $this->returnValue;
     }
 
     public function executeNoReturn($receivedPayload): void
     {
         $this->receivedPayload = $receivedPayload;
-        $this->consumerLifecycle->stop();
+        if ($this->consumerLifecycle) {
+            $this->consumerLifecycle->stop();
+        }
     }
 
     /**

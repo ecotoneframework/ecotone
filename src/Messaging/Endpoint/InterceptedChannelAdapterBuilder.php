@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
+use Ecotone\Messaging\Endpoint\TaskExecutorChannelAdapter\TaskExecutorChannelAdapter;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Precedence;
+use Ecotone\Messaging\Scheduling\TaskExecutor;
 
 /**
  * Class InterceptedConsumerBuilder
@@ -17,11 +19,14 @@ use Ecotone\Messaging\Precedence;
  */
 abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
 {
+    protected ?string $endpointId = null;
+
     /**
      * @inheritDoc
      */
     final public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): ConsumerLifecycle
     {
+        $pollingMetadata = $this->withContinuesPolling() ? $pollingMetadata->setFixedRateInMilliseconds(1) : $pollingMetadata;
         $interceptors = InterceptedConsumer::createInterceptorsForPollingMetadata($pollingMetadata);
 
         foreach ($interceptors as $interceptor) {
@@ -35,7 +40,12 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
                 )
             );
         }
-        $consumerLifeCycle = $this->buildAdapter($channelResolver, $referenceSearchService, $pollingMetadata);
+
+        $consumerLifeCycle = TaskExecutorChannelAdapter::createFrom(
+            $this->endpointId,
+            $pollingMetadata,
+            $this->createInboundChannelAdapter($channelResolver, $referenceSearchService, $pollingMetadata)
+        );
 
         if (! $interceptors) {
             return $consumerLifeCycle;
@@ -44,11 +54,10 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
         return new InterceptedConsumer($consumerLifeCycle, $interceptors);
     }
 
-    /**
-     * @param ChannelResolver $channelResolver
-     * @param ReferenceSearchService $referenceSearchService
-     * @param PollingMetadata $pollingMetadata
-     * @return ConsumerLifecycle
-     */
-    abstract protected function buildAdapter(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): ConsumerLifecycle;
+    protected function withContinuesPolling(): bool
+    {
+        return true;
+    }
+
+    protected abstract function createInboundChannelAdapter(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): TaskExecutor;
 }

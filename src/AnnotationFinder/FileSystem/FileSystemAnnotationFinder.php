@@ -12,6 +12,7 @@ use Ecotone\AnnotationFinder\Attribute\Environment;
 use Ecotone\AnnotationFinder\ConfigurationException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class FileSystemAnnotationRegistrationService
@@ -50,17 +51,19 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         string                  $environmentName,
         string                  $catalogToLoad,
         array                   $systemClassesToRegister = [],
-        array                   $userClassesToRegister = []
-    ) {
+        array                   $userClassesToRegister = [],
+        bool                    $isRunningForTesting = false
+    )
+    {
         $this->annotationResolver = $annotationResolver;
-        $this->init($rootProjectDir, array_unique($namespaces), $catalogToLoad, $autoloadNamespaceParser, $systemClassesToRegister, $userClassesToRegister);
+        $this->init($rootProjectDir, array_unique($namespaces), $catalogToLoad, $autoloadNamespaceParser, $systemClassesToRegister, $userClassesToRegister, $isRunningForTesting);
 
         $classNamesWithEnvironment = $this->findAnnotatedClasses(Environment::class);
         foreach ($classNamesWithEnvironment as $classNameWithEnvironment) {
             /** @var Environment $environment */
             $environment = $this->getAnnotationForClass($classNameWithEnvironment, Environment::class);
 
-            if (! in_array($environmentName, $environment->getNames())) {
+            if (!in_array($environmentName, $environment->getNames())) {
                 $key = array_search($classNameWithEnvironment, $this->registeredClasses);
                 if ($key !== false) {
                     unset($this->registeredClasses[$key]);
@@ -97,11 +100,11 @@ class FileSystemAnnotationFinder implements AnnotationFinder
                 );
 
                 if ($methodAnnotations) {
-                    if (! in_array($environmentName, $methodAnnotations[0]->getNames())) {
+                    if (!in_array($environmentName, $methodAnnotations[0]->getNames())) {
                         $this->bannedEnvironmentClassMethods[$className][$method] = true;
                     }
                 } elseif ($classAnnotations) {
-                    if (! in_array($environmentName, $classAnnotations[0]->getNames())) {
+                    if (!in_array($environmentName, $classAnnotations[0]->getNames())) {
                         $this->bannedEnvironmentClassMethods[$className][$method] = true;
                     }
                 }
@@ -109,9 +112,9 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         }
     }
 
-    private function init(string $rootProjectDir, array $namespacesToUse, string $catalogToLoad, AutoloadNamespaceParser $autoloadNamespaceParser, array $systemClassesToRegister, array $userClassesToRegister)
+    private function init(string $rootProjectDir, array $namespacesToUse, string $catalogToLoad, AutoloadNamespaceParser $autoloadNamespaceParser, array $systemClassesToRegister, array $userClassesToRegister, bool $isRunningForTesting)
     {
-        if (! $catalogToLoad && $namespacesToUse == [] && $userClassesToRegister == []) {
+        if (!$catalogToLoad && $namespacesToUse == [] && $userClassesToRegister == [] && !$isRunningForTesting) {
             throw ConfigurationException::create('Loading catalog was turned off and no namespaces were provided. Please provide namespaces manually via configuration or turn on catalog loading. Read related Module section at https://docs.ecotone.tech');
         }
 
@@ -145,7 +148,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
 
     private function getDirContents(string $dir, array &$results = []): array
     {
-        if (! is_dir($dir)) {
+        if (!is_dir($dir)) {
             return [];
         }
 
@@ -155,7 +158,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
             $fullPath = realpath($dir . DIRECTORY_SEPARATOR . $value);
             Assert::isTrue($fullPath !== false, "Can't parse contents of " . $dir . DIRECTORY_SEPARATOR . $value);
 
-            if (! is_dir($fullPath)) {
+            if (!is_dir($fullPath)) {
                 if (pathinfo($fullPath, PATHINFO_EXTENSION) === self::FILE_EXTENSION) {
                     $results[] = $fullPath;
                 }
@@ -318,7 +321,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
             }
         }
 
-        throw \Ecotone\Messaging\Support\InvalidArgumentException::create("Can't find attribute {$attributeClassName} for {$className}");
+        throw InvalidArgumentException::create("Can't find attribute {$attributeClassName} for {$className}");
     }
 
     /**
@@ -407,15 +410,15 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         $originalRootProjectDir = $rootProjectDir;
         $rootProjectDir = realpath(rtrim($rootProjectDir, '/'));
 
-        while ($rootProjectDir !== false && ! file_exists($rootProjectDir . DIRECTORY_SEPARATOR . '/vendor/autoload.php')) {
+        while ($rootProjectDir !== false && !file_exists($rootProjectDir . DIRECTORY_SEPARATOR . '/vendor/autoload.php')) {
             if ($rootProjectDir === DIRECTORY_SEPARATOR) {
-                throw \Ecotone\Messaging\Support\InvalidArgumentException::create(sprintf("Can't find autoload file in given path `%s/vendor/autoload.php` and any preceding ones.", $originalRootProjectDir));
+                throw InvalidArgumentException::create(sprintf("Can't find autoload file in given path `%s/vendor/autoload.php` and any preceding ones.", $originalRootProjectDir));
             }
 
             $rootProjectDir = realpath($rootProjectDir . DIRECTORY_SEPARATOR . '..');
         }
 
-        $namespacesToUse = array_map(fn (string $namespace) => trim($namespace, "\t\n\r\\"), $namespacesToUse);
+        $namespacesToUse = array_map(fn(string $namespace) => trim($namespace, "\t\n\r\\"), $namespacesToUse);
 
         $paths = $this->getPathsToSearchIn($autoloadNamespaceParser, $rootProjectDir, $namespacesToUse);
 

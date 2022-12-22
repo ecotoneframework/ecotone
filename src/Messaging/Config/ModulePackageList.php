@@ -10,6 +10,7 @@ final class ModulePackageList
     public const ASYNCHRONOUS_PACKAGE = 'asynchronous';
     public const AMQP_PACKAGE = 'amqp';
     public const DBAL_PACKAGE = 'dbal';
+    public const SQS_PACKAGE = 'sqs';
     public const EVENT_SOURCING_PACKAGE = 'eventSourcing';
     public const JMS_CONVERTER_PACKAGE = 'jmsConverter';
     public const TEST_PACKAGE = 'test';
@@ -21,6 +22,7 @@ final class ModulePackageList
             ModulePackageList::ASYNCHRONOUS_PACKAGE => ModuleClassList::ASYNCHRONOUS_MODULE,
             ModulePackageList::AMQP_PACKAGE => ModuleClassList::AMQP_MODULES,
             ModulePackageList::DBAL_PACKAGE => ModuleClassList::DBAL_MODULES,
+            ModulePackageList::SQS_PACKAGE => ModuleClassList::SQS_MODULES,
             ModulePackageList::EVENT_SOURCING_PACKAGE => ModuleClassList::EVENT_SOURCING_MODULES,
             ModulePackageList::JMS_CONVERTER_PACKAGE => ModuleClassList::JMS_CONVERTER_MODULES,
             ModulePackageList::TEST_PACKAGE => ModuleClassList::TEST_MODULES,
@@ -37,6 +39,7 @@ final class ModulePackageList
             self::CORE_PACKAGE,
             self::ASYNCHRONOUS_PACKAGE,
             self::AMQP_PACKAGE,
+            self::SQS_PACKAGE,
             self::DBAL_PACKAGE,
             self::EVENT_SOURCING_PACKAGE,
             self::JMS_CONVERTER_PACKAGE,

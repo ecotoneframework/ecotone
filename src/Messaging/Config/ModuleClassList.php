@@ -85,6 +85,8 @@ class ModuleClassList
         DbalPublisherModule::class,
     ];
 
+    public const SQS_MODULES = [];
+
     public const EVENT_SOURCING_MODULES = [
         EventSourcingModule::class,
     ];

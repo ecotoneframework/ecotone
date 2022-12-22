@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
 
+use Ecotone\Messaging\Endpoint\PollingConsumer\ConnectionException;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\PollableChannel;
-use RuntimeException;
 
 class ExceptionalQueueChannel implements PollableChannel
 {
@@ -34,7 +34,7 @@ class ExceptionalQueueChannel implements PollableChannel
     public function receive(): ?Message
     {
         $this->exceptionCount++;
-        throw new RuntimeException();
+        throw new ConnectionException();
     }
 
     /**

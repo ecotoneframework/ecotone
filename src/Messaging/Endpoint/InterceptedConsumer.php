@@ -50,7 +50,7 @@ class InterceptedConsumer implements ConsumerLifecycle
                 $runResultedInConnectionException = true;
                 foreach ($this->consumerInterceptors as $consumerInterceptor) {
                     if ($consumerInterceptor->shouldBeThrown($exception)) {
-                        throw $exception->getPrevious();
+                        throw $exception->getPrevious() ?? $exception;
                     }
                 }
             }

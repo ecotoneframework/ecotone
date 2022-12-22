@@ -42,14 +42,6 @@ class TaskExecutorChannelAdapter implements ConsumerLifecycle
         $this->taskExecutor = $taskExecutor;
     }
 
-    /**
-     * @param string $endpointId
-     * @param PollingMetadata $pollingMetadata
-     * @param TaskExecutor $taskExecutor
-     * @return TaskExecutorChannelAdapter
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
-     */
     public static function createFrom(string $endpointId, PollingMetadata $pollingMetadata, TaskExecutor $taskExecutor): self
     {
         return

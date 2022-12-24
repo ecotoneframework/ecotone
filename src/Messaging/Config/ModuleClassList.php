@@ -19,12 +19,12 @@ use Ecotone\Lite\Test\Configuration\EcotoneTestSupportModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\BasicMessagingModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessageConsumerModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConverterModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders\EndpointHeadersInterceptorModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ErrorHandlerModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\GatewayModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\LoggingModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessageConsumerModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingCommands\MessagingCommandsModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor\MethodInterceptorModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\PollerModule;
@@ -66,7 +66,7 @@ class ModuleClassList
         ServiceActivatorModule::class,
         SplitterModule::class,
         TransformerModule::class,
-        MessageConsumerModule::class
+        MessageConsumerModule::class,
     ];
 
     public const ASYNCHRONOUS_MODULE = [
@@ -91,7 +91,7 @@ class ModuleClassList
 
     public const SQS_MODULES = [
         SqsMessageConsumerModule::class,
-        SqsMessagePublisherModule::class
+        SqsMessagePublisherModule::class,
     ];
 
     public const EVENT_SOURCING_MODULES = [

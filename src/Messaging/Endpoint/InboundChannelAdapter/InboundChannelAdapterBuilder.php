@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
 
-use Ecotone\Messaging\Endpoint\AcknowledgeConfirmationInterceptor;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapterEntrypoint;
 use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\InterceptedChannelAdapterBuilder;

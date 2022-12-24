@@ -1113,7 +1113,7 @@ final class MessagingSystemConfiguration implements Configuration
                 $registeredGatewayBuilder->getReferenceName() === $gatewayBuilder->getReferenceName()
                 && $registeredGatewayBuilder->getRelatedMethodName() === $gatewayBuilder->getRelatedMethodName()
             ) {
-                throw ConfigurationException::create(sprintf("Registering Gateway for the same class and method twice: %s::%s", $gatewayBuilder->getReferenceName(), $gatewayBuilder->getRelatedMethodName()));
+                throw ConfigurationException::create(sprintf('Registering Gateway for the same class and method twice: %s::%s', $gatewayBuilder->getReferenceName(), $gatewayBuilder->getRelatedMethodName()));
             }
         }
 

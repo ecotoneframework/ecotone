@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Endpoint\TaskExecutorChannelAdapter;
 
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
-use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapter;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Scheduling\CronTrigger;
 use Ecotone\Messaging\Scheduling\EpochBasedClock;
@@ -22,24 +21,8 @@ use Ecotone\Messaging\Scheduling\Trigger;
  */
 class TaskExecutorChannelAdapter implements ConsumerLifecycle
 {
-    private string $consumerName;
-    private \Ecotone\Messaging\Scheduling\Trigger $trigger;
-    private \Ecotone\Messaging\Scheduling\TaskScheduler $taskScheduler;
-    private \Ecotone\Messaging\Scheduling\TaskExecutor $taskExecutor;
-
-    /**
-     * InboundChannelAdapter constructor.
-     * @param string $consumerName
-     * @param TaskScheduler $taskScheduler
-     * @param Trigger $trigger
-     * @param TaskExecutor $taskExecutor
-     */
-    public function __construct(string $consumerName, TaskScheduler $taskScheduler, Trigger $trigger, TaskExecutor $taskExecutor)
+    public function __construct(private string $consumerName, private TaskScheduler $taskScheduler, private Trigger $trigger, private TaskExecutor $taskExecutor)
     {
-        $this->consumerName = $consumerName;
-        $this->taskScheduler = $taskScheduler;
-        $this->trigger = $trigger;
-        $this->taskExecutor = $taskExecutor;
     }
 
     public static function createFrom(string $endpointId, PollingMetadata $pollingMetadata, TaskExecutor $taskExecutor): self
@@ -47,7 +30,7 @@ class TaskExecutorChannelAdapter implements ConsumerLifecycle
         return
             new self(
                 $endpointId,
-                SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock(), PollingMetadata::create('test')),
+                SyncTaskScheduler::createWithEmptyTriggerContext(new EpochBasedClock(), $pollingMetadata),
                 $pollingMetadata->getCron()
                     ? CronTrigger::createWith($pollingMetadata->getCron())
                     : PeriodicTrigger::create($pollingMetadata->getFixedRateInMilliseconds(), $pollingMetadata->getInitialDelayInMilliseconds()),

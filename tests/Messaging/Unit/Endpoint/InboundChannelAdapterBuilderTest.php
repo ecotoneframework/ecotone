@@ -22,7 +22,6 @@ use Ecotone\Messaging\Transaction\Transactional;
 use Ecotone\Messaging\Transaction\TransactionInterceptor;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerStoppingService;
-use Test\Ecotone\Messaging\Fixture\Handler\DataReturningService;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingNoArguments;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
@@ -364,6 +363,8 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
 
     public function test_acking_message_when_ack_available_in_message_header_in_inbound_channel_adapter()
     {
+        // write for real implementation tests, if is acked correctly
+
         $acknowledgementCallback = NullAcknowledgementCallback::create();
         $message = MessageBuilder::withPayload('some')
             ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, 'amqpAcker')

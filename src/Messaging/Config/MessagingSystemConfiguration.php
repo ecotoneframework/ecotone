@@ -81,6 +81,7 @@ final class MessagingSystemConfiguration implements Configuration
      * @var PollingMetadata[]
      */
     private array $pollingMetadata = [];
+    /** @var GatewayProxyBuilder[] */
     private array $gatewayBuilders = [];
     /**
      * @var MessageHandlerConsumerBuilder[]
@@ -1107,6 +1108,15 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerGatewayBuilder(GatewayBuilder $gatewayBuilder): Configuration
     {
+        foreach ($this->gatewayBuilders as $registeredGatewayBuilder) {
+            if (
+                $registeredGatewayBuilder->getReferenceName() === $gatewayBuilder->getReferenceName()
+                && $registeredGatewayBuilder->getRelatedMethodName() === $gatewayBuilder->getRelatedMethodName()
+            ) {
+                throw ConfigurationException::create(sprintf("Registering Gateway for the same class and method twice: %s::%s", $gatewayBuilder->getReferenceName(), $gatewayBuilder->getRelatedMethodName()));
+            }
+        }
+
         $this->gatewayBuilders[] = $gatewayBuilder;
         $this->requireReferences($gatewayBuilder->getRequiredReferences());
         $this->gatewayClassesToGenerateProxies[] = $gatewayBuilder->getInterfaceName();

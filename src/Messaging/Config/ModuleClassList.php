@@ -2,9 +2,9 @@
 
 namespace Ecotone\Messaging\Config;
 
-use Ecotone\Amqp\Configuration\AmqpConsumerModule;
+use Ecotone\Amqp\Configuration\AmqpMessageConsumerModule;
 use Ecotone\Amqp\Configuration\AmqpModule;
-use Ecotone\Amqp\Publisher\AmqpPublisherModule;
+use Ecotone\Amqp\Publisher\AmqpMessagePublisherModule;
 use Ecotone\Amqp\Transaction\AmqpTransactionModule;
 use Ecotone\Dbal\Configuration\DbalPublisherModule;
 use Ecotone\Dbal\DbalTransaction\DbalTransactionModule;
@@ -19,6 +19,7 @@ use Ecotone\Lite\Test\Configuration\EcotoneTestSupportModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\BasicMessagingModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessageConsumerModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConverterModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders\EndpointHeadersInterceptorModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ErrorHandlerModule;
@@ -38,6 +39,8 @@ use Ecotone\Modelling\Config\BusModule;
 use Ecotone\Modelling\Config\BusRoutingModule;
 use Ecotone\Modelling\Config\DistributedGatewayModule;
 use Ecotone\Modelling\Config\ModellingHandlerModule;
+use Ecotone\Sqs\Configuration\SqsMessageConsumerModule;
+use Ecotone\Sqs\Configuration\SqsMessagePublisherModule;
 
 class ModuleClassList
 {
@@ -63,6 +66,7 @@ class ModuleClassList
         ServiceActivatorModule::class,
         SplitterModule::class,
         TransformerModule::class,
+        MessageConsumerModule::class
     ];
 
     public const ASYNCHRONOUS_MODULE = [
@@ -71,9 +75,9 @@ class ModuleClassList
 
     public const AMQP_MODULES = [
         AmqpTransactionModule::class,
-        AmqpPublisherModule::class,
+        AmqpMessagePublisherModule::class,
         AmqpModule::class,
-        AmqpConsumerModule::class,
+        AmqpMessageConsumerModule::class,
     ];
 
     public const DBAL_MODULES = [
@@ -85,7 +89,10 @@ class ModuleClassList
         DbalPublisherModule::class,
     ];
 
-    public const SQS_MODULES = [];
+    public const SQS_MODULES = [
+        SqsMessageConsumerModule::class,
+        SqsMessagePublisherModule::class
+    ];
 
     public const EVENT_SOURCING_MODULES = [
         EventSourcingModule::class,

@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Endpoint;
 
 use Ecotone\Messaging\Endpoint\TaskExecutorChannelAdapter\TaskExecutorChannelAdapter;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -20,6 +21,7 @@ use Ecotone\Messaging\Scheduling\TaskExecutor;
 abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsumerBuilder
 {
     protected ?string $endpointId = null;
+    protected InboundChannelAdapterEntrypoint|GatewayProxyBuilder $inboundGateway;
 
     /**
      * @inheritDoc
@@ -41,6 +43,11 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
             );
         }
 
+        $this->inboundGateway->addAroundInterceptor(AcknowledgeConfirmationInterceptor::createAroundInterceptor(
+            $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME),
+            $pollingMetadata
+        ));
+
         $consumerLifeCycle = TaskExecutorChannelAdapter::createFrom(
             $this->endpointId,
             $pollingMetadata,
@@ -59,5 +66,5 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
         return true;
     }
 
-    protected abstract function createInboundChannelAdapter(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): TaskExecutor;
+    abstract protected function createInboundChannelAdapter(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): TaskExecutor;
 }

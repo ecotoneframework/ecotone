@@ -10,7 +10,6 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Scheduling\TaskExecutor;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Throwable;
 
 /**
  * Class PollingConsumerTaskExecutor

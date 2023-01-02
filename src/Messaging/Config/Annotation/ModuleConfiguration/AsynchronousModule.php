@@ -22,16 +22,9 @@ use Ecotone\Modelling\Attribute\QueryHandler;
 #[ModuleAnnotation]
 class AsynchronousModule extends NoExternalConfigurationModule implements AnnotationModule
 {
-    private array $asyncEndpoints = [];
-
-    /**
-     * ConverterModule constructor.
-     *
-     * @param array $asyncEndpoints
-     */
-    private function __construct(array $asyncEndpoints)
+    private function __construct(private array $asyncEndpoints)
     {
-        $this->asyncEndpoints = $asyncEndpoints;
+
     }
 
     /**
@@ -48,30 +41,6 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
         );
 
         $registeredAsyncEndpoints = [];
-        foreach ($asynchronousMethods as $asynchronousMethod) {
-            /** @var Asynchronous $asyncAnnotation */
-            $asyncAnnotation = $asynchronousMethod->getAnnotationForMethod();
-            $inputChannel    = $asyncAnnotation->getChannelName();
-            foreach ($endpoints as $key => $endpoint) {
-                if (($endpoint->getClassName() === $asynchronousMethod->getClassName()) && ($endpoint->getMethodName() === $asynchronousMethod->getMethodName())) {
-                    /** @var EndpointAnnotation $annotationForMethod */
-                    $annotationForMethod = $endpoint->getAnnotationForMethod();
-                    if ($annotationForMethod instanceof QueryHandler) {
-                        continue;
-                    }
-                    if (in_array(get_class($annotationForMethod), [CommandHandler::class, EventHandler::class])) {
-                        if ($annotationForMethod->isEndpointIdGenerated()) {
-                            throw ConfigurationException::create("{$endpoint} should have endpointId defined for handling asynchronously");
-                        }
-                    }
-
-                    $registeredAsyncEndpoints[$inputChannel][] = $annotationForMethod->getEndpointId();
-                    unset($endpoints[$key]);
-                }
-            }
-        }
-        $endpoints = array_values($endpoints);
-
         foreach ($asynchronousClasses as $asynchronousClass) {
             /** @var Asynchronous $asyncClass */
             $asyncClass = AnnotatedDefinitionReference::getSingleAnnotationForClass($annotationRegistrationService, $asynchronousClass, Asynchronous::class);
@@ -88,7 +57,28 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
                         }
                     }
 
-                    $registeredAsyncEndpoints[$asyncClass->getChannelName()][] = $annotationForMethod->getEndpointId();
+                    $registeredAsyncEndpoints[$annotationForMethod->getEndpointId()] = $asyncClass->getChannelName();
+                }
+            }
+        }
+
+        foreach ($asynchronousMethods as $asynchronousMethod) {
+            /** @var Asynchronous $asyncAnnotation */
+            $asyncAnnotation = $asynchronousMethod->getAnnotationForMethod();
+            foreach ($endpoints as $key => $endpoint) {
+                if (($endpoint->getClassName() === $asynchronousMethod->getClassName()) && ($endpoint->getMethodName() === $asynchronousMethod->getMethodName())) {
+                    /** @var EndpointAnnotation $annotationForMethod */
+                    $annotationForMethod = $endpoint->getAnnotationForMethod();
+                    if ($annotationForMethod instanceof QueryHandler) {
+                        continue;
+                    }
+                    if (in_array(get_class($annotationForMethod), [CommandHandler::class, EventHandler::class])) {
+                        if ($annotationForMethod->isEndpointIdGenerated()) {
+                            throw ConfigurationException::create("{$endpoint} should have endpointId defined for handling asynchronously");
+                        }
+                    }
+
+                    $registeredAsyncEndpoints[$annotationForMethod->getEndpointId()] = $asyncAnnotation->getChannelName();
                 }
             }
         }
@@ -96,12 +86,10 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
         return new self($registeredAsyncEndpoints);
     }
 
-    public function getSynchronousChannelFor(string $handlerChannelName, string $endpointId): ?string
+    public function getSynchronousChannelFor(string $handlerChannelName, string $endpointIdToLookFor): ?string
     {
-        foreach ($this->asyncEndpoints as $channelName => $endpointNames) {
-            if (in_array($endpointId, $endpointNames)) {
-                return self::getHandlerExecutionChannel($handlerChannelName);
-            }
+        if (array_key_exists($endpointIdToLookFor, $this->asyncEndpoints)) {
+            return self::getHandlerExecutionChannel($handlerChannelName);
         }
 
         return $handlerChannelName;
@@ -125,10 +113,8 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
      */
     public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        foreach ($this->asyncEndpoints as $channelName => $asyncEndpointsForChannel) {
-            foreach ($asyncEndpointsForChannel as $asyncEndpointForChannel) {
-                $configuration->registerAsynchronousEndpoint($channelName, $asyncEndpointForChannel);
-            }
+        foreach ($this->asyncEndpoints as $endpointId => $asyncChannels) {
+            $configuration->registerAsynchronousEndpoint($asyncChannels, $endpointId);
         }
     }
 

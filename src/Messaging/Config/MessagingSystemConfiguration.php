@@ -22,6 +22,7 @@ use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Bridge\Bridge;
+use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -397,15 +398,15 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private function configureAsynchronousEndpoints(): void
     {
-        $asynchronousChannels = [];
-
-        foreach ($this->asynchronousEndpoints as $targetEndpointId => $asynchronousMessageChannel) {
+        $allAsynchronousChannels = [];
+        foreach ($this->asynchronousEndpoints as $targetEndpointId => $asynchronousMessageChannels) {
+            $allAsynchronousChannels = array_merge($allAsynchronousChannels, $asynchronousMessageChannels);
+            $asynchronousMessageChannel = array_shift($asynchronousMessageChannels);
             if (! isset($this->channelBuilders[$asynchronousMessageChannel]) && ! isset($this->defaultChannelBuilders[$asynchronousMessageChannel])) {
                 throw ConfigurationException::create("Registered asynchronous endpoint `{$targetEndpointId}`, however channel configuration for `{$asynchronousMessageChannel}` was not provided.");
             }
 
             $foundEndpoint = false;
-            $asynchronousChannels[] = $asynchronousMessageChannel;
             foreach ($this->messageHandlerBuilders as $key => $messageHandlerBuilder) {
                 if ($messageHandlerBuilder->getEndpointId() === $targetEndpointId) {
                     $busRoutingChannel = $messageHandlerBuilder->getInputMessageChannelName();
@@ -413,6 +414,8 @@ final class MessagingSystemConfiguration implements Configuration
                     $this->messageHandlerBuilders[$key] = $messageHandlerBuilder->withInputChannelName($handlerExecutionChannel);
                     $this->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel($handlerExecutionChannel));
 
+                    $consequentialChannels = $asynchronousMessageChannels;
+                    $consequentialChannels[] = $handlerExecutionChannel;
                     /**
                      * This provides endpoint that is called by gateway (bus).
                      * Then it outputs message to asynchronous message channel.
@@ -427,7 +430,7 @@ final class MessagingSystemConfiguration implements Configuration
                                 BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT => null,
                                 BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => null,
                                 BusModule::EVENT_CHANNEL_NAME_BY_NAME => null,
-                                MessageHeaders::ROUTING_SLIP => $handlerExecutionChannel,
+                                MessageHeaders::ROUTING_SLIP => implode(",", $consequentialChannels),
                             ]
                         )
                             ->withEndpointId($generatedEndpointId)
@@ -449,7 +452,7 @@ final class MessagingSystemConfiguration implements Configuration
             }
         }
 
-        foreach (array_unique($asynchronousChannels) as $asynchronousChannel) {
+        foreach (array_unique($allAsynchronousChannels) as $asynchronousChannel) {
             Assert::isTrue($this->channelBuilders[$asynchronousChannel]->isPollable(), "Asynchronous Message Channel {$asynchronousChannel} must be Pollable");
             //        needed for correct around intercepting, otherwise requestReply is outside of around interceptor scope
             /**
@@ -1000,9 +1003,9 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @inheritDoc
      */
-    public function registerAsynchronousEndpoint(string $asynchronousChannelName, string $targetEndpointId): Configuration
+    public function registerAsynchronousEndpoint(array|string $asynchronousChannelNames, string $targetEndpointId): Configuration
     {
-        $this->asynchronousEndpoints[$targetEndpointId] = $asynchronousChannelName;
+        $this->asynchronousEndpoints[$targetEndpointId] = is_string($asynchronousChannelNames) ? [$asynchronousChannelNames] : $asynchronousChannelNames;
 
         return $this;
     }

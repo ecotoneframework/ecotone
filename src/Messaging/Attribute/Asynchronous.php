@@ -10,16 +10,16 @@ use Ecotone\Messaging\Support\Assert;
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS)]
 class Asynchronous
 {
-    private string $channelName;
+    private string|array $channelName;
 
-    public function __construct(string $channelName)
+    public function __construct(string|array $channelName)
     {
         Assert::notNullAndEmpty($channelName, 'Channel name can not be empty string');
         $this->channelName = $channelName;
     }
 
-    public function getChannelName(): string
+    public function getChannelName(): array
     {
-        return $this->channelName;
+        return is_string($this->channelName) ? [$this->channelName] : $this->channelName;
     }
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config;
 
-use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
@@ -354,7 +353,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         /** @var MessageChannel $channel */
         $channel = $configuredMessagingSystem->getMessageChannelByName($entrypointChannelName);
 
-        $channel->send( MessageBuilder::withPayload(2)->build());
+        $channel->send(MessageBuilder::withPayload(2)->build());
         $this->assertNull($calculatingService->getLastResult());
         $configuredMessagingSystem->run($channelNameOne);
         $this->assertNull($calculatingService->getLastResult());
@@ -389,7 +388,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
         /** @var MessageChannel $channel */
         $channel = $configuredMessagingSystem->getMessageChannelByName($entrypointChannelName);
 
-        $channel->send( MessageBuilder::withPayload(2)->build());
+        $channel->send(MessageBuilder::withPayload(2)->build());
         $this->assertNull($calculatingService->getLastResult());
         $configuredMessagingSystem->run($channelNameOne);
         $this->assertNull($calculatingService->getLastResult());

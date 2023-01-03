@@ -24,7 +24,6 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
 {
     private function __construct(private array $asyncEndpoints)
     {
-
     }
 
     /**

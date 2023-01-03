@@ -22,7 +22,6 @@ use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Bridge\Bridge;
-use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -430,7 +429,7 @@ final class MessagingSystemConfiguration implements Configuration
                                 BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT => null,
                                 BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => null,
                                 BusModule::EVENT_CHANNEL_NAME_BY_NAME => null,
-                                MessageHeaders::ROUTING_SLIP => implode(",", $consequentialChannels),
+                                MessageHeaders::ROUTING_SLIP => implode(',', $consequentialChannels),
                             ]
                         )
                             ->withEndpointId($generatedEndpointId)

@@ -6,5 +6,7 @@ namespace Test\Ecotone\Modelling\Fixture\CommandEventFlow;
 
 final class MerchantCreated
 {
-    public function __construct(public string $merchantId) {}
+    public function __construct(public string $merchantId)
+    {
+    }
 }

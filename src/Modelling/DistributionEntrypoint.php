@@ -9,4 +9,6 @@ interface DistributionEntrypoint
     public const DISTRIBUTED_PAYLOAD_TYPE         = 'ecotone.distributed.payloadType';
 
     public function distribute($payload, array $metadata, string $payloadType, string $routingKey, string $mediaType);
+
+    public function distributeMessage($payload, array $metadata, string $mediaType);
 }

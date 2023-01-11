@@ -24,7 +24,7 @@ final class User
         return $user;
     }
 
-    #[QueryHandler("user.get")]
+    #[QueryHandler('user.get')]
     public function isRegistered(): bool
     {
         return true;

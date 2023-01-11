@@ -75,6 +75,14 @@ class DistributedGatewayModule extends NoExternalConfigurationModule implements 
                     GatewayHeaderBuilder::create('mediaType', MessageHeaders::CONTENT_TYPE),
                 ])
         );
+        $configuration->registerGatewayBuilder(
+            GatewayProxyBuilder::create(DistributionEntrypoint::class, DistributionEntrypoint::class, 'distributeMessage', DistributionEntrypoint::DISTRIBUTED_CHANNEL)
+                ->withParameterConverters([
+                    GatewayPayloadBuilder::create('payload'),
+                    GatewayHeadersBuilder::create('metadata'),
+                    GatewayHeaderBuilder::create('mediaType', MessageHeaders::CONTENT_TYPE),
+                ])
+        );
         $configuration->registerMessageHandler(
             ServiceActivatorBuilder::createWithDirectReference(new DistributedMessageHandler($this->distributedEventHandlerRoutingKeys, $this->distributedCommandHandlerRoutingKeys), 'handle')
                 ->withInputChannelName(DistributionEntrypoint::DISTRIBUTED_CHANNEL)

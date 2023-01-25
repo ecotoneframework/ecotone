@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
+use Ecotone\Messaging\Endpoint\PollingConsumer\RejectMessageException;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
@@ -43,6 +44,7 @@ class AcknowledgeConfirmationInterceptor
         }
 
         $result = null;
+        $exception = null;
         /** @var AcknowledgementCallback $amqpAcknowledgementCallback */
         $amqpAcknowledgementCallback = $message->getHeaders()->get($message->getHeaders()->get(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION));
         try {
@@ -51,14 +53,18 @@ class AcknowledgeConfirmationInterceptor
             if ($amqpAcknowledgementCallback->isAutoAck()) {
                 $amqpAcknowledgementCallback->accept();
             }
-        } catch (Throwable $exception) {
+        } catch (RejectMessageException $exception){
+            if ($amqpAcknowledgementCallback->isAutoAck()) {
+                $amqpAcknowledgementCallback->reject();
+            }
+        }catch (Throwable $exception) {
             if ($amqpAcknowledgementCallback->isAutoAck()) {
                 $amqpAcknowledgementCallback->requeue();
             }
+        }
 
-            if ($this->shouldStopOnError) {
-                throw $exception;
-            }
+        if ($this->shouldStopOnError && $exception !== null) {
+            throw $exception;
         }
 
         return $result;

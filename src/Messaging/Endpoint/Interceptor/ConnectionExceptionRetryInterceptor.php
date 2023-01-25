@@ -13,10 +13,12 @@ class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
 {
     private int $currentNumberOfRetries = 0;
     private ?\Ecotone\Messaging\Handler\Recoverability\RetryTemplate $retryTemplate;
+    private bool $isStoppedOnError;
 
-    public function __construct(?RetryTemplateBuilder $retryTemplate)
+    public function __construct(?RetryTemplateBuilder $retryTemplate, bool $isStoppedOnError)
     {
         $this->retryTemplate = $retryTemplate ? $retryTemplate->build() : null;
+        $this->isStoppedOnError = $isStoppedOnError;
     }
 
     /**
@@ -40,7 +42,7 @@ class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
      */
     public function shouldBeThrown(Throwable $exception): bool
     {
-        if (! ($exception instanceof ConnectionException)) {
+        if (! ($exception instanceof ConnectionException) || $this->isStoppedOnError) {
             return true;
         }
 

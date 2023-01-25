@@ -29,6 +29,7 @@ use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
 use Ecotone\Modelling\Config\RegisterAggregateRepositoryChannels;
 use Psr\Container\ContainerInterface;
+use Psr\Log\NullLogger;
 
 final class EcotoneLite
 {
@@ -170,7 +171,7 @@ final class EcotoneLite
         }
 
         $messagingSystem = $messagingConfiguration->buildMessagingSystemFromConfiguration(
-            new PsrContainerReferenceSearchService($container, ['logger' => new EchoLogger(), ConfiguredMessagingSystem::class => new StubConfiguredMessagingSystem()])
+            new PsrContainerReferenceSearchService($container, ['logger' => new NullLogger(), ConfiguredMessagingSystem::class => new StubConfiguredMessagingSystem()])
         );
 
         if ($allowGatewaysToBeRegisteredInContainer) {

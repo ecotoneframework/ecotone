@@ -36,8 +36,9 @@ use Ecotone\Modelling\QueryBus;
  */
 final class MessagingSystem implements ConfiguredMessagingSystem
 {
-    public const POLLING_CONSUMER_BUILDER = 'builder';
-    public const POLLING_CONSUMER_HANDLER = 'handler';
+    public const CONSUMER_BUILDER = 'builder';
+    public const CONSUMER_HANDLER = 'handler';
+    const EXECUTION = 'built';
 
     /**
      * Application constructor.
@@ -126,8 +127,8 @@ final class MessagingSystem implements ConfiguredMessagingSystem
                 if ($messageHandlerConsumerBuilder->isSupporting($messageHandlerBuilder, $messageChannel)) {
                     if ($messageHandlerConsumerBuilder->isPollingConsumer()) {
                         $pollingConsumerBuilders[$messageHandlerBuilder->getEndpointId()] = [
-                            self::POLLING_CONSUMER_BUILDER => $messageHandlerConsumerBuilder,
-                            self::POLLING_CONSUMER_HANDLER => $messageHandlerBuilder,
+                            self::CONSUMER_BUILDER => $messageHandlerConsumerBuilder,
+                            self::CONSUMER_HANDLER => $messageHandlerBuilder,
                         ];
                     } else {
                         $eventDrivenConsumers[] = $messageHandlerConsumerBuilder->build($channelResolver, $referenceSearchService, $messageHandlerBuilder, self::getPollingMetadata($messageHandlerBuilder->getEndpointId(), $pollingMetadataConfigurations));
@@ -139,7 +140,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         $inboundChannelAdapterBuilders = [];
         foreach ($channelAdapterConsumerBuilders as $channelAdapter) {
             $endpointId = $channelAdapter->getEndpointId();
-            $inboundChannelAdapterBuilders[$endpointId] = $channelAdapter;
+            $inboundChannelAdapterBuilders[$endpointId][self::CONSUMER_BUILDER] = $channelAdapter;
         }
 
         return new self($eventDrivenConsumers, $pollingConsumerBuilders, $inboundChannelAdapterBuilders, $gateways, $nonProxyGateways, $channelResolver, $referenceSearchService, $pollingMetadataConfigurations, $consoleCommands);
@@ -234,21 +235,34 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             ->applyExecutionPollingMetadata($executionPollingMetadata);
 
         if (array_key_exists($name, $this->pollingConsumerBuilders)) {
-            /** @var MessageHandlerConsumerBuilder $consumerBuilder */
-            $consumerBuilder = $this->pollingConsumerBuilders[$name][self::POLLING_CONSUMER_BUILDER];
+            if (!isset($this->pollingConsumerBuilders[$name][self::EXECUTION])) {
+                /** @var MessageHandlerConsumerBuilder $consumerBuilder */
+                $consumerBuilder = $this->pollingConsumerBuilders[$name][self::CONSUMER_BUILDER];
 
-            $consumerBuilder->build(
-                $this->channelResolver,
-                $this->referenceSearchService,
-                $this->pollingConsumerBuilders[$name][self::POLLING_CONSUMER_HANDLER],
-                $pollingMetadata
-            )->run();
+                $consumerLifecycle = $consumerBuilder->build(
+                    $this->channelResolver,
+                    $this->referenceSearchService,
+                    $this->pollingConsumerBuilders[$name][self::CONSUMER_HANDLER],
+                    $pollingMetadata
+                );
+                $this->pollingConsumerBuilders[$name][self::EXECUTION] = $consumerLifecycle;
+            }
+
+            $this->pollingConsumerBuilders[$name][self::EXECUTION]->run();
         } elseif (array_key_exists($name, $this->inboundChannelAdapterBuilders)) {
-            $this->inboundChannelAdapterBuilders[$name]->build(
-                $this->channelResolver,
-                $this->referenceSearchService,
-                $pollingMetadata
-            )->run();
+            if (!isset($this->inboundChannelAdapterBuilders[$name][self::EXECUTION])) {
+                /** @var InboundChannelAdapterBuilder $inboundChannelAdapter */
+                $inboundChannelAdapter = $this->inboundChannelAdapterBuilders[$name][self::CONSUMER_BUILDER];
+
+                $consumerLifecycle = $inboundChannelAdapter->build(
+                    $this->channelResolver,
+                    $this->referenceSearchService,
+                    $pollingMetadata
+                );
+                $this->inboundChannelAdapterBuilders[$name][self::EXECUTION] = $consumerLifecycle;
+            }
+
+            $this->inboundChannelAdapterBuilders[$name][self::EXECUTION]->run();
         } else {
             throw InvalidArgumentException::create("Can't run `{$name}` as it does not exists. Please verify, if the name is correct using `ecotone:list`.");
         }

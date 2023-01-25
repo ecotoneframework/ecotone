@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
+use Ecotone\Messaging\Support\Assert;
+
 /**
  * Class NullAcknowledgementCallback
  * @package Ecotone\Messaging\Endpoint
@@ -14,7 +16,7 @@ class NullAcknowledgementCallback implements AcknowledgementCallback
     private const AWAITING = 0;
     private const ACKED = 1;
     private const REJECT = 2;
-    private const REQUEUED = 2;
+    private const REQUEUED = 3;
 
     private int $status = self::AWAITING;
 
@@ -68,6 +70,7 @@ class NullAcknowledgementCallback implements AcknowledgementCallback
      */
     public function accept(): void
     {
+        Assert::isTrue($this->isAwaiting(), "Acknowledge was already sent");
         $this->status = self::ACKED;
     }
 
@@ -76,6 +79,7 @@ class NullAcknowledgementCallback implements AcknowledgementCallback
      */
     public function reject(): void
     {
+        Assert::isTrue($this->isAwaiting(), "Acknowledge was already sent");
         $this->status = self::REJECT;
     }
 
@@ -84,6 +88,12 @@ class NullAcknowledgementCallback implements AcknowledgementCallback
      */
     public function requeue(): void
     {
+        Assert::isTrue($this->isAwaiting(), "Acknowledge was already sent");
         $this->status = self::REQUEUED;
+    }
+
+    private function isAwaiting(): bool
+    {
+        return $this->status === self::AWAITING;
     }
 }

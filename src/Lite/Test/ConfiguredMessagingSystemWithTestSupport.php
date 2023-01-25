@@ -14,6 +14,7 @@ use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
+use Ecotone\Messaging\Message;
 
 final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessagingSystem
 {
@@ -59,6 +60,14 @@ final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessag
     public function getDistributedBus(): DistributedBus
     {
         return $this->configuredMessagingSystem->getDistributedBus();
+    }
+
+    public function sendMessage(string $targetChannel, mixed $payload = '', array $metadata = []): void
+    {
+        /** @var MessagingEntrypoint $messagingEntrypoint */
+        $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
+
+        $messagingEntrypoint->sendWithHeaders($payload, $metadata, $targetChannel);
     }
 
     public function getMessagePublisher(string $referenceName = MessagePublisher::class): MessagePublisher

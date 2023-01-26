@@ -14,7 +14,6 @@ use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
-use Ecotone\Messaging\Message;
 
 final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessagingSystem
 {

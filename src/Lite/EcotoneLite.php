@@ -20,7 +20,6 @@ use Ecotone\Messaging\Config\ProxyGenerator;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Config\StubConfiguredMessagingSystem;
 use Ecotone\Messaging\Handler\ClassDefinition;
-use Ecotone\Messaging\Handler\Logger\EchoLogger;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Ecotone\Messaging\Support\Assert;

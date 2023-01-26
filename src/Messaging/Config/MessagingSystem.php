@@ -38,7 +38,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
 {
     public const CONSUMER_BUILDER = 'builder';
     public const CONSUMER_HANDLER = 'handler';
-    const EXECUTION = 'built';
+    public const EXECUTION = 'built';
 
     /**
      * Application constructor.
@@ -235,7 +235,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             ->applyExecutionPollingMetadata($executionPollingMetadata);
 
         if (array_key_exists($name, $this->pollingConsumerBuilders)) {
-            if (!isset($this->pollingConsumerBuilders[$name][self::EXECUTION])) {
+            if (! isset($this->pollingConsumerBuilders[$name][self::EXECUTION])) {
                 /** @var MessageHandlerConsumerBuilder $consumerBuilder */
                 $consumerBuilder = $this->pollingConsumerBuilders[$name][self::CONSUMER_BUILDER];
 
@@ -250,7 +250,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
 
             $this->pollingConsumerBuilders[$name][self::EXECUTION]->run();
         } elseif (array_key_exists($name, $this->inboundChannelAdapterBuilders)) {
-            if (!isset($this->inboundChannelAdapterBuilders[$name][self::EXECUTION])) {
+            if (! isset($this->inboundChannelAdapterBuilders[$name][self::EXECUTION])) {
                 /** @var InboundChannelAdapterBuilder $inboundChannelAdapter */
                 $inboundChannelAdapter = $this->inboundChannelAdapterBuilders[$name][self::CONSUMER_BUILDER];
 

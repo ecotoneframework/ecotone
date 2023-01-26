@@ -53,11 +53,11 @@ class AcknowledgeConfirmationInterceptor
             if ($amqpAcknowledgementCallback->isAutoAck()) {
                 $amqpAcknowledgementCallback->accept();
             }
-        } catch (RejectMessageException $exception){
+        } catch (RejectMessageException $exception) {
             if ($amqpAcknowledgementCallback->isAutoAck()) {
                 $amqpAcknowledgementCallback->reject();
             }
-        }catch (Throwable $exception) {
+        } catch (Throwable $exception) {
             if ($amqpAcknowledgementCallback->isAutoAck()) {
                 $amqpAcknowledgementCallback->requeue();
             }

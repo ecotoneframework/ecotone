@@ -10,6 +10,7 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\MessageBuilder;
 use InvalidArgumentException;
+use Throwable;
 
 class DataReturningService
 {
@@ -23,9 +24,9 @@ class DataReturningService
      */
     private $headers;
 
-    private ?\Throwable $exception;
+    private ?Throwable $exception;
 
-    private function __construct($data, bool $asAMessage, array $headers, ?\Throwable $exception)
+    private function __construct($data, bool $asAMessage, array $headers, ?Throwable $exception)
     {
         $this->data = $data;
         $this->asAMessage = $asAMessage;
@@ -65,13 +66,13 @@ class DataReturningService
 
     public static function createServiceActivatorBuilderWithRejectException(): ServiceActivatorBuilder
     {
-        return ServiceActivatorBuilder::createWithDirectReference(new self('', true, [], new RejectMessageException("rejecting message")), 'handle');
+        return ServiceActivatorBuilder::createWithDirectReference(new self('', true, [], new RejectMessageException('rejecting message')), 'handle');
     }
 
     public function handle(Message $message)
     {
         if ($this->exception) {
-            throw new $this->exception;
+            throw new $this->exception();
         }
 
         if ($this->asAMessage) {

@@ -10,11 +10,11 @@ use Ecotone\Messaging\Message;
 
 final class SuccessServiceActivator
 {
-    #[Asynchronous("async_channel")]
-    #[ServiceActivator("handle_channel")]
+    #[Asynchronous('async_channel')]
+    #[ServiceActivator('handle_channel')]
     public function handle(Message $message): void
     {
-        return;
+
     }
 
     public function __toString()

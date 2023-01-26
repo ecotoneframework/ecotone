@@ -70,7 +70,7 @@ class NullAcknowledgementCallback implements AcknowledgementCallback
      */
     public function accept(): void
     {
-        Assert::isTrue($this->isAwaiting(), "Acknowledge was already sent");
+        Assert::isTrue($this->isAwaiting(), 'Acknowledge was already sent');
         $this->status = self::ACKED;
     }
 
@@ -79,7 +79,7 @@ class NullAcknowledgementCallback implements AcknowledgementCallback
      */
     public function reject(): void
     {
-        Assert::isTrue($this->isAwaiting(), "Acknowledge was already sent");
+        Assert::isTrue($this->isAwaiting(), 'Acknowledge was already sent');
         $this->status = self::REJECT;
     }
 
@@ -88,7 +88,7 @@ class NullAcknowledgementCallback implements AcknowledgementCallback
      */
     public function requeue(): void
     {
-        Assert::isTrue($this->isAwaiting(), "Acknowledge was already sent");
+        Assert::isTrue($this->isAwaiting(), 'Acknowledge was already sent');
         $this->status = self::REQUEUED;
     }
 

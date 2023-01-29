@@ -14,7 +14,6 @@ final class SuccessServiceActivator
     #[ServiceActivator('handle_channel')]
     public function handle(Message $message): void
     {
-
     }
 
     public function __toString()

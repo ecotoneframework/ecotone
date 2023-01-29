@@ -39,6 +39,8 @@ use Ecotone\Modelling\Config\BusModule;
 use Ecotone\Modelling\Config\BusRoutingModule;
 use Ecotone\Modelling\Config\DistributedGatewayModule;
 use Ecotone\Modelling\Config\ModellingHandlerModule;
+use Ecotone\Redis\Configuration\RedisMessageConsumerModule;
+use Ecotone\Redis\Configuration\RedisMessagePublisherModule;
 use Ecotone\Sqs\Configuration\SqsMessageConsumerModule;
 use Ecotone\Sqs\Configuration\SqsMessagePublisherModule;
 
@@ -87,6 +89,11 @@ class ModuleClassList
         DeduplicationModule::class,
         DbalTransactionModule::class,
         DbalPublisherModule::class,
+    ];
+
+    public const REDIS_MODULES = [
+        RedisMessageConsumerModule::class,
+        RedisMessagePublisherModule::class,
     ];
 
     public const SQS_MODULES = [

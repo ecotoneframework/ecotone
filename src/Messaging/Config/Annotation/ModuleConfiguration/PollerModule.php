@@ -58,10 +58,10 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
         return new self($multiplePollingMetadata);
     }
 
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($this->pollingMetadata as $metadata) {
-            $configuration->registerPollingMetadata($metadata);
+            $messagingConfiguration->registerPollingMetadata($metadata);
         }
     }
 

@@ -126,13 +126,13 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
         return [$parameterConverters, $parameters];
     }
 
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($this->oneTimeCommandHandlers as $oneTimeCommand) {
-            $configuration->registerMessageHandler($oneTimeCommand);
+            $messagingConfiguration->registerMessageHandler($oneTimeCommand);
         }
         foreach ($this->oneTimeCommandConfigurations as $oneTimeCommandConfiguration) {
-            $configuration->registerConsoleCommand($oneTimeCommandConfiguration);
+            $messagingConfiguration->registerConsoleCommand($oneTimeCommandConfiguration);
         }
     }
 

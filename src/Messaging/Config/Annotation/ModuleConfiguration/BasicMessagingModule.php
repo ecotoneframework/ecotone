@@ -70,39 +70,39 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($extensionObjects as $extensionObject) {
             if ($extensionObject instanceof ChannelInterceptorBuilder) {
-                $configuration->registerChannelInterceptor($extensionObject);
+                $messagingConfiguration->registerChannelInterceptor($extensionObject);
             } elseif ($extensionObject instanceof MessageHandlerBuilder) {
-                $configuration->registerMessageHandler($extensionObject);
+                $messagingConfiguration->registerMessageHandler($extensionObject);
             } elseif ($extensionObject instanceof MessageChannelBuilder) {
-                $configuration->registerMessageChannel($extensionObject);
+                $messagingConfiguration->registerMessageChannel($extensionObject);
             } elseif ($extensionObject instanceof GatewayBuilder) {
-                $configuration->registerGatewayBuilder($extensionObject);
+                $messagingConfiguration->registerGatewayBuilder($extensionObject);
             } elseif ($extensionObject instanceof ChannelAdapterConsumerBuilder) {
-                $configuration->registerConsumer($extensionObject);
+                $messagingConfiguration->registerConsumer($extensionObject);
             } elseif ($extensionObject instanceof PollingMetadata) {
-                $configuration->registerPollingMetadata($extensionObject);
+                $messagingConfiguration->registerPollingMetadata($extensionObject);
             }
         }
 
-        if ($configuration->isLazyLoaded()) {
-            $configuration->registerConsumerFactory(new LazyEventDrivenConsumerBuilder());
+        if ($messagingConfiguration->isLazyLoaded()) {
+            $messagingConfiguration->registerConsumerFactory(new LazyEventDrivenConsumerBuilder());
         } else {
-            $configuration->registerConsumerFactory(new EventDrivenConsumerBuilder());
+            $messagingConfiguration->registerConsumerFactory(new EventDrivenConsumerBuilder());
         }
-        $configuration->registerConsumerFactory(new PollingConsumerBuilder($interfaceToCallRegistry));
+        $messagingConfiguration->registerConsumerFactory(new PollingConsumerBuilder($interfaceToCallRegistry));
 
-        $configuration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
-        $configuration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
-        $configuration->registerConverter(new UuidToStringConverterBuilder());
-        $configuration->registerConverter(new StringToUuidConverterBuilder());
-        $configuration->registerConverter(new SerializingConverterBuilder());
-        $configuration->registerConverter(new DeserializingConverterBuilder());
+        $messagingConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
+        $messagingConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
+        $messagingConfiguration->registerConverter(new UuidToStringConverterBuilder());
+        $messagingConfiguration->registerConverter(new StringToUuidConverterBuilder());
+        $messagingConfiguration->registerConverter(new SerializingConverterBuilder());
+        $messagingConfiguration->registerConverter(new DeserializingConverterBuilder());
 
-        $configuration->registerRelatedInterfaces([
+        $messagingConfiguration->registerRelatedInterfaces([
             $interfaceToCallRegistry->getFor(LimitConsumedMessagesInterceptor::class, 'postSend'),
             $interfaceToCallRegistry->getFor(ConnectionExceptionRetryInterceptor::class, 'postSend'),
             $interfaceToCallRegistry->getFor(LimitExecutionAmountInterceptor::class, 'postSend'),
@@ -116,16 +116,16 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
             $interfaceToCallRegistry->getFor(InboundChannelAdapterEntrypoint::class, 'executeEntrypoint'),
             $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'logException'),
         ]);
-        $configuration
+        $messagingConfiguration
             ->registerInternalGateway(TypeDescriptor::create(InboundGatewayEntrypoint::class))
             ->registerInternalGateway(TypeDescriptor::create(EnrichGateway::class));
 
-        $configuration
+        $messagingConfiguration
             ->registerMessageHandler(
                 RouterBuilder::createHeaderRouter(MessagingEntrypoint::ENTRYPOINT)
                     ->withInputChannelName(MessagingEntrypoint::ENTRYPOINT)
             );
-        $configuration->registerBeforeMethodInterceptor(MethodInterceptor::create(
+        $messagingConfiguration->registerBeforeMethodInterceptor(MethodInterceptor::create(
             ConsumerNameInterceptor::class,
             $interfaceToCallRegistry->getFor(ConsumerNameInterceptor::class, 'intercept'),
             ServiceActivatorBuilder::createWithDirectReference(new ConsumerNameInterceptor(), 'intercept'),
@@ -133,7 +133,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
             AsynchronousRunningEndpoint::class
         ));
 
-        $configuration->registerGatewayBuilder(
+        $messagingConfiguration->registerGatewayBuilder(
             GatewayProxyBuilder::create(
                 MessagingEntrypoint::class,
                 MessagingEntrypoint::class,
@@ -144,7 +144,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
                 GatewayHeaderBuilder::create('targetChannel', MessagingEntrypoint::ENTRYPOINT),
             ])
         );
-        $configuration->registerGatewayBuilder(
+        $messagingConfiguration->registerGatewayBuilder(
             GatewayProxyBuilder::create(
                 MessagingEntrypoint::class,
                 MessagingEntrypoint::class,
@@ -156,7 +156,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
                 GatewayHeaderBuilder::create('targetChannel', MessagingEntrypoint::ENTRYPOINT),
             ])
         );
-        $configuration->registerGatewayBuilder(
+        $messagingConfiguration->registerGatewayBuilder(
             GatewayProxyBuilder::create(
                 MessagingEntrypoint::class,
                 MessagingEntrypoint::class,
@@ -165,7 +165,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
             )
         );
 
-        $configuration->registerGatewayBuilder(
+        $messagingConfiguration->registerGatewayBuilder(
             GatewayProxyBuilder::create(
                 MessagingEntrypointWithHeadersPropagation::class,
                 MessagingEntrypointWithHeadersPropagation::class,
@@ -176,7 +176,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
                 GatewayHeaderBuilder::create('targetChannel', MessagingEntrypoint::ENTRYPOINT),
             ])
         );
-        $configuration->registerGatewayBuilder(
+        $messagingConfiguration->registerGatewayBuilder(
             GatewayProxyBuilder::create(
                 MessagingEntrypointWithHeadersPropagation::class,
                 MessagingEntrypointWithHeadersPropagation::class,
@@ -188,7 +188,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
                 GatewayHeaderBuilder::create('targetChannel', MessagingEntrypoint::ENTRYPOINT),
             ])
         );
-        $configuration->registerGatewayBuilder(
+        $messagingConfiguration->registerGatewayBuilder(
             GatewayProxyBuilder::create(
                 MessagingEntrypointWithHeadersPropagation::class,
                 MessagingEntrypointWithHeadersPropagation::class,
@@ -197,7 +197,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
             )
         );
 
-        $configuration->registerGatewayBuilder(
+        $messagingConfiguration->registerGatewayBuilder(
             GatewayProxyBuilder::create(
                 ConsoleCommandRunner::class,
                 ConsoleCommandRunner::class,

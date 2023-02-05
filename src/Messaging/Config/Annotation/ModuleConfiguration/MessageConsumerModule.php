@@ -47,10 +47,10 @@ final class MessageConsumerModule extends NoExternalConfigurationModule implemen
         return new self($serviceActivators);
     }
 
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($this->serviceActivators as $serviceActivator) {
-            $configuration->registerMessageHandler($serviceActivator);
+            $messagingConfiguration->registerMessageHandler($serviceActivator);
         }
     }
 

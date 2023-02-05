@@ -33,10 +33,10 @@ class EndpointHeadersInterceptorModule extends NoExternalConfigurationModule imp
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         $interfaceToCall = $interfaceToCallRegistry->getFor(EndpointHeadersInterceptor::class, 'addMetadata');
-        $configuration->registerBeforeSendInterceptor(
+        $messagingConfiguration->registerBeforeSendInterceptor(
             MethodInterceptor::create(
                 EndpointHeadersInterceptor::class,
                 $interfaceToCall,
@@ -45,7 +45,7 @@ class EndpointHeadersInterceptorModule extends NoExternalConfigurationModule imp
                 ExpireAfter::class . '||' . Priority::class . '||' . Delayed::class . '||' . AddHeader::class . '||' . RemoveHeader::class
             )
         );
-        $configuration->registerRelatedInterfaces([$interfaceToCall]);
+        $messagingConfiguration->registerRelatedInterfaces([$interfaceToCall]);
     }
 
     /**

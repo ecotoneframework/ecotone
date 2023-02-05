@@ -34,9 +34,9 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        $configuration->registerBeforeMethodInterceptor(
+        $messagingConfiguration->registerBeforeMethodInterceptor(
             MethodInterceptor::create(
                 'beforeLog',
                 $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'logBefore'),
@@ -45,7 +45,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 LogBefore::class
             )
         );
-        $configuration->registerAfterMethodInterceptor(
+        $messagingConfiguration->registerAfterMethodInterceptor(
             MethodInterceptor::create(
                 'afterLog',
                 $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'logAfter'),
@@ -54,7 +54,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 LogAfter::class
             )
         );
-        $configuration->registerAroundMethodInterceptor(
+        $messagingConfiguration->registerAroundMethodInterceptor(
             AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                 $interfaceToCallRegistry,
                 new LoggingInterceptor(null),

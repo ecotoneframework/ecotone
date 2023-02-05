@@ -75,10 +75,10 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($this->converterBuilders as $converterBuilder) {
-            $configuration->registerConverter($converterBuilder);
+            $messagingConfiguration->registerConverter($converterBuilder);
         }
     }
 

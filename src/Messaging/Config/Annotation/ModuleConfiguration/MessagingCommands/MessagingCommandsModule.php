@@ -26,9 +26,9 @@ class MessagingCommandsModule extends NoExternalConfigurationModule implements A
         return new self();
     }
 
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        $configuration->registerMessageHandler(
+        $messagingConfiguration->registerMessageHandler(
             ServiceActivatorBuilder::createWithDirectReference(new MessagingBaseCommand(), 'executeConsoleCommand')
                 ->withMethodParameterConverters([
                     HeaderBuilder::create('commandName', self::ECOTONE_CONSOLE_COMMAND_NAME),
@@ -37,8 +37,8 @@ class MessagingCommandsModule extends NoExternalConfigurationModule implements A
                 ->withInputChannelName(self::ECOTONE_EXECUTE_CONSOLE_COMMAND_EXECUTOR)
         );
 
-        $this->registerConsoleCommand('runAsynchronousEndpointCommand', 'ecotone:run', $configuration, $interfaceToCallRegistry);
-        $this->registerConsoleCommand('listAsynchronousEndpointsCommand', 'ecotone:list', $configuration, $interfaceToCallRegistry);
+        $this->registerConsoleCommand('runAsynchronousEndpointCommand', 'ecotone:run', $messagingConfiguration, $interfaceToCallRegistry);
+        $this->registerConsoleCommand('listAsynchronousEndpointsCommand', 'ecotone:list', $messagingConfiguration, $interfaceToCallRegistry);
     }
 
     public function canHandle($extensionObject): bool

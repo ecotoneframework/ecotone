@@ -36,9 +36,9 @@ class SerializerModule extends NoExternalConfigurationModule implements Annotati
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        $configuration
+        $messagingConfiguration
             ->registerGatewayBuilder(
                 GatewayProxyBuilder::create(
                     Serializer::class,

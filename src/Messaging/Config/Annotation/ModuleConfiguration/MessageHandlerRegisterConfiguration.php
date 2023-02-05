@@ -66,10 +66,10 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
-            $configuration->registerMessageHandler($messageHandlerBuilder);
+            $messagingConfiguration->registerMessageHandler($messageHandlerBuilder);
         }
     }
 

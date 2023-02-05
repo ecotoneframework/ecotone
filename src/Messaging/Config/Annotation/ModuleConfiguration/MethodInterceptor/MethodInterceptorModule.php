@@ -157,20 +157,20 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($this->beforeSendInterceptors as $interceptor) {
-            $configuration->registerBeforeSendInterceptor($interceptor);
+            $messagingConfiguration->registerBeforeSendInterceptor($interceptor);
         }
-        $configuration->registerRelatedInterfaces($this->beforeSendRelatedInterfaces);
+        $messagingConfiguration->registerRelatedInterfaces($this->beforeSendRelatedInterfaces);
         foreach ($this->preCallInterceptors as $preCallInterceptor) {
-            $configuration->registerBeforeMethodInterceptor($preCallInterceptor);
+            $messagingConfiguration->registerBeforeMethodInterceptor($preCallInterceptor);
         }
         foreach ($this->aroundInterceptors as $aroundInterceptorReference) {
-            $configuration->registerAroundMethodInterceptor($aroundInterceptorReference);
+            $messagingConfiguration->registerAroundMethodInterceptor($aroundInterceptorReference);
         }
         foreach ($this->postCallInterceptors as $postCallInterceptor) {
-            $configuration->registerAfterMethodInterceptor($postCallInterceptor);
+            $messagingConfiguration->registerAfterMethodInterceptor($postCallInterceptor);
         }
     }
 

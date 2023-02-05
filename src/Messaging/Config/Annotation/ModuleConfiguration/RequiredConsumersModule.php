@@ -53,10 +53,10 @@ class RequiredConsumersModule extends NoExternalConfigurationModule implements A
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($this->consumerIds as $consumerId) {
-            $configuration->requireConsumer($consumerId);
+            $messagingConfiguration->requireConsumer($consumerId);
         }
     }
 

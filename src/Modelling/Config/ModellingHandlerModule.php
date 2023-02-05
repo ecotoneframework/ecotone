@@ -321,10 +321,10 @@ class ModellingHandlerModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $moduleExtensions, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $moduleExtensions, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
-        $configuration->requireReferences($this->aggregateRepositoryReferenceNames);
+        $messagingConfiguration->requireReferences($this->aggregateRepositoryReferenceNames);
         foreach ($moduleExtensions as $aggregateRepositoryBuilder) {
             if ($aggregateRepositoryBuilder instanceof RepositoryBuilder) {
                 $referenceId = Uuid::uuid4()->toString();
@@ -374,13 +374,13 @@ class ModellingHandlerModule implements AnnotationModule
                     $gatewayParameterConverters = [GatewayHeaderBuilder::create($interface->getFirstParameter()->getName(), AggregateMessage::AGGREGATE_OBJECT)];
                 }
 
-                $this->registerSaveAggregate($aggregateClassDefinition, $configuration, $chainMessageHandlerBuilder, $interfaceToCallRegistry, $baseEventSourcingConfiguration, $inputChannelName);
+                $this->registerSaveAggregate($aggregateClassDefinition, $messagingConfiguration, $chainMessageHandlerBuilder, $interfaceToCallRegistry, $baseEventSourcingConfiguration, $inputChannelName);
             } else {
                 Assert::isTrue($interface->hasFirstParameter(), 'Fetchting repository should have at least one parameter for identifiers: ' . $repositoryGateway);
                 $this->registerLoadAggregate(
                     $interfaceToCallRegistry->getClassDefinitionFor($interface->getReturnType()),
                     $interface->canItReturnNull(),
-                    $configuration,
+                    $messagingConfiguration,
                     $chainMessageHandlerBuilder,
                     $interfaceToCallRegistry
                 );
@@ -388,7 +388,7 @@ class ModellingHandlerModule implements AnnotationModule
                 $gatewayParameterConverters = [GatewayHeaderBuilder::create($interface->getFirstParameter()->getName(), AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER)];
             }
 
-            $configuration->registerGatewayBuilder(
+            $messagingConfiguration->registerGatewayBuilder(
                 GatewayProxyBuilder::create(
                     $repositoryGateway->getClassName(),
                     $repositoryGateway->getClassName(),
@@ -405,7 +405,7 @@ class ModellingHandlerModule implements AnnotationModule
             $this->registerLoadAggregate(
                 $aggregateClassDefinition,
                 false,
-                $configuration,
+                $messagingConfiguration,
                 ChainMessageHandlerBuilder::create()
                     ->withInputChannelName(self::getRegisterAggregateLoadRepositoryInputChannel($registerAggregateChannel->getClassName())),
                 $interfaceToCallRegistry
@@ -413,7 +413,7 @@ class ModellingHandlerModule implements AnnotationModule
 
             $this->registerSaveAggregate(
                 $aggregateClassDefinition,
-                $configuration,
+                $messagingConfiguration,
                 ChainMessageHandlerBuilder::create()
                     ->withInputChannelName(self::getRegisterAggregateSaveRepositoryInputChannel($registerAggregateChannel->getClassName()))
                     ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], null, $interfaceToCallRegistry)),
@@ -426,34 +426,34 @@ class ModellingHandlerModule implements AnnotationModule
         $aggregateCommandOrEventHandlers = [];
         foreach ($this->aggregateCommandHandlers as $registration) {
             $channelName = self::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
-            $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($channelName));
+            $messagingConfiguration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($channelName));
             $aggregateCommandOrEventHandlers[$registration->getClassName()][$channelName][] = $registration;
         }
 
         foreach ($this->aggregateEventHandlers as $registration) {
             $channelName = self::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
-            $configuration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($channelName));
+            $messagingConfiguration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($channelName));
             $aggregateCommandOrEventHandlers[$registration->getClassName()][$channelName][] = $registration;
         }
 
         foreach ($aggregateCommandOrEventHandlers as $channelNameRegistrations) {
             foreach ($channelNameRegistrations as $channelName => $registrations) {
-                $this->registerAggregateCommandHandler($configuration, $interfaceToCallRegistry, $this->aggregateRepositoryReferenceNames, $registrations, $channelName, $baseEventSourcingConfiguration);
+                $this->registerAggregateCommandHandler($messagingConfiguration, $interfaceToCallRegistry, $this->aggregateRepositoryReferenceNames, $registrations, $channelName, $baseEventSourcingConfiguration);
             }
         }
 
         foreach ($this->aggregateQueryHandlers as $registration) {
-            $this->registerAggregateQueryHandler($registration, $interfaceToCallRegistry, $parameterConverterAnnotationFactory, $configuration);
+            $this->registerAggregateQueryHandler($registration, $interfaceToCallRegistry, $parameterConverterAnnotationFactory, $messagingConfiguration);
         }
 
         foreach ($this->serviceCommandHandlers as $registration) {
-            $this->registerServiceHandler(self::getNamedMessageChannelFor($registration, $interfaceToCallRegistry), $configuration, $registration, $interfaceToCallRegistry);
+            $this->registerServiceHandler(self::getNamedMessageChannelFor($registration, $interfaceToCallRegistry), $messagingConfiguration, $registration, $interfaceToCallRegistry);
         }
         foreach ($this->serviceQueryHandlers as $registration) {
-            $this->registerServiceHandler(self::getNamedMessageChannelFor($registration, $interfaceToCallRegistry), $configuration, $registration, $interfaceToCallRegistry);
+            $this->registerServiceHandler(self::getNamedMessageChannelFor($registration, $interfaceToCallRegistry), $messagingConfiguration, $registration, $interfaceToCallRegistry);
         }
         foreach ($this->serviceEventHandlers as $registration) {
-            $this->registerServiceHandler(self::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry), $configuration, $registration, $interfaceToCallRegistry);
+            $this->registerServiceHandler(self::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry), $messagingConfiguration, $registration, $interfaceToCallRegistry);
         }
     }
 

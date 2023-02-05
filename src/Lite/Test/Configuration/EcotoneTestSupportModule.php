@@ -52,17 +52,17 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
         return new self();
     }
 
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         $testConfiguration = ExtensionObjectResolver::resolveUnique(TestConfiguration::class, $extensionObjects, TestConfiguration::createWithDefaults());
 
         $messageCollectorHandler = new MessageCollectorHandler();
-        $this->registerMessageCollector($messageCollectorHandler, $configuration, $interfaceToCallRegistry);
-        $this->registerMessageReleasingHandler($configuration);
+        $this->registerMessageCollector($messageCollectorHandler, $messagingConfiguration, $interfaceToCallRegistry);
+        $this->registerMessageReleasingHandler($messagingConfiguration);
 
         $allowMissingDestination = new AllowMissingDestination();
         if (! $testConfiguration->isFailingOnCommandHandlerNotFound()) {
-            $configuration
+            $messagingConfiguration
                 ->registerAroundMethodInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                     $interfaceToCallRegistry,
                     $allowMissingDestination,
@@ -72,7 +72,7 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                 ));
         }
         if (! $testConfiguration->isFailingOnQueryHandlerNotFound()) {
-            $configuration
+            $messagingConfiguration
                 ->registerAroundMethodInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                     $interfaceToCallRegistry,
                     $allowMissingDestination,
@@ -83,12 +83,12 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
         }
 
         if ($testConfiguration->getPollableChannelMediaTypeConversion()) {
-            $configuration
+            $messagingConfiguration
                 ->registerChannelInterceptor(new SerializationChannelAdapterBuilder($testConfiguration->getChannelToConvertOn(), $testConfiguration->getPollableChannelMediaTypeConversion()));
         }
         if ($testConfiguration->getSpiedChannels()) {
             foreach ($testConfiguration->getSpiedChannels() as $spiedChannel) {
-                $configuration
+                $messagingConfiguration
                     ->registerChannelInterceptor(new SpiedChannelAdapterBuilder($spiedChannel, $messageCollectorHandler))
                     ->registerMessageHandler(ServiceActivatorBuilder::createWithDirectReference(
                         $messageCollectorHandler,

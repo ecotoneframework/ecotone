@@ -36,7 +36,7 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         if (! $this->hasErrorConfiguration($extensionObjects)) {
             $extensionObjects = [ErrorHandlerConfiguration::createDefault()];
@@ -56,10 +56,10 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
                 ->withInputChannelName($extensionObject->getErrorChannelName());
             if ($extensionObject->getDeadLetterQueueChannel()) {
                 $errorHandler = $errorHandler->withOutputMessageChannel($extensionObject->getDeadLetterQueueChannel());
-                $configuration
+                $messagingConfiguration
                     ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($extensionObject->getDeadLetterQueueChannel()));
             }
-            $configuration
+            $messagingConfiguration
                 ->registerMessageHandler($errorHandler)
                 ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($extensionObject->getErrorChannelName()))
                 ->registerMessageHandler(

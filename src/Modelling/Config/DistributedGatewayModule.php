@@ -63,9 +63,9 @@ class DistributedGatewayModule extends NoExternalConfigurationModule implements 
         return array_keys($routingKeys);
     }
 
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        $configuration->registerGatewayBuilder(
+        $messagingConfiguration->registerGatewayBuilder(
             GatewayProxyBuilder::create(DistributionEntrypoint::class, DistributionEntrypoint::class, 'distribute', DistributionEntrypoint::DISTRIBUTED_CHANNEL)
                 ->withParameterConverters([
                     GatewayPayloadBuilder::create('payload'),
@@ -75,7 +75,7 @@ class DistributedGatewayModule extends NoExternalConfigurationModule implements 
                     GatewayHeaderBuilder::create('mediaType', MessageHeaders::CONTENT_TYPE),
                 ])
         );
-        $configuration->registerGatewayBuilder(
+        $messagingConfiguration->registerGatewayBuilder(
             GatewayProxyBuilder::create(DistributionEntrypoint::class, DistributionEntrypoint::class, 'distributeMessage', DistributionEntrypoint::DISTRIBUTED_CHANNEL)
                 ->withParameterConverters([
                     GatewayPayloadBuilder::create('payload'),
@@ -83,7 +83,7 @@ class DistributedGatewayModule extends NoExternalConfigurationModule implements 
                     GatewayHeaderBuilder::create('mediaType', MessageHeaders::CONTENT_TYPE),
                 ])
         );
-        $configuration->registerMessageHandler(
+        $messagingConfiguration->registerMessageHandler(
             ServiceActivatorBuilder::createWithDirectReference(new DistributedMessageHandler($this->distributedEventHandlerRoutingKeys, $this->distributedCommandHandlerRoutingKeys), 'handle')
                 ->withInputChannelName(DistributionEntrypoint::DISTRIBUTED_CHANNEL)
                 ->withMethodParameterConverters([

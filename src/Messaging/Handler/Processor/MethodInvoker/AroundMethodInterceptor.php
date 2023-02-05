@@ -112,6 +112,13 @@ class AroundMethodInterceptor
                         $resolvedArgument = $endpointAnnotation;
                     }
                 }
+                if ($resolvedArgument === null) {
+                    foreach ($methodInvocation->getEndpointAnnotations() as $endpointAnnotation) {
+                        if (TypeDescriptor::createFromVariable($endpointAnnotation)->isCompatibleWith($parameter->getTypeDescriptor())) {
+                            $resolvedArgument = $endpointAnnotation;
+                        }
+                    }
+                }
             }
 
             if (is_null($resolvedArgument)) {

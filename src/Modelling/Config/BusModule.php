@@ -85,10 +85,10 @@ class BusModule extends NoExternalConfigurationModule implements AnnotationModul
         ]);
     }
 
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($this->gateways as $gateway) {
-            $configuration->registerGatewayBuilder($gateway);
+            $messagingConfiguration->registerGatewayBuilder($gateway);
         }
     }
 

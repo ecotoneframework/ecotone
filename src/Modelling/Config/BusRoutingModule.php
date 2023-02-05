@@ -362,9 +362,9 @@ class BusRoutingModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function prepare(Configuration $configuration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        $configuration
+        $messagingConfiguration
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     MessageHeadersPropagatorInterceptor::class,

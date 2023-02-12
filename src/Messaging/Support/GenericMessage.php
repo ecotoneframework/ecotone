@@ -85,7 +85,7 @@ final class GenericMessage implements Message
     /**
      * @inheritDoc
      */
-    public function getPayload()
+    public function getPayload(): mixed
     {
         return $this->payload;
     }

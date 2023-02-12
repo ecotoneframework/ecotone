@@ -6,5 +6,5 @@ interface Message
 {
     public function getHeaders(): MessageHeaders;
 
-    public function getPayload() : mixed;
+    public function getPayload(): mixed;
 }

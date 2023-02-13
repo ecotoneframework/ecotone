@@ -19,17 +19,17 @@ final class MessageCollectorHandler
 
     public function recordEvent(Message $event): void
     {
-        $this->publishedEvents[] = $event;
+        $this->publishedEvents[$event->getHeaders()->getMessageId()] = $event;
     }
 
-    public function recordCommand(Message $event): void
+    public function recordCommand(Message $command): void
     {
-        $this->sentCommands[] = $event;
+        $this->sentCommands[] = $command;
     }
 
-    public function recordQuery(Message $event): void
+    public function recordQuery(Message $query): void
     {
-        $this->sentQueries[] = $event;
+        $this->sentQueries[] = $query;
     }
 
     public function getRecordedEvents(): array
@@ -39,7 +39,7 @@ final class MessageCollectorHandler
 
     public function getRecordedEventMessages(): array
     {
-        $events = $this->publishedEvents;
+        $events = array_values($this->publishedEvents);
         $this->publishedEvents = [];
 
         return $events;
@@ -52,7 +52,7 @@ final class MessageCollectorHandler
 
     public function getRecordedCommandMessages(): array
     {
-        $commands = $this->sentCommands;
+        $commands = array_values($this->sentCommands);
         $this->sentCommands = [];
 
         return $commands;
@@ -93,7 +93,7 @@ final class MessageCollectorHandler
             return [];
         }
 
-        $messages = $this->spiedChannelsMessages[$channelName];
+        $messages = array_values($this->spiedChannelsMessages[$channelName]);
         unset($this->spiedChannelsMessages[$channelName]);
 
         return $messages;

@@ -19,6 +19,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Attribute\NamedEvent;
 use Ecotone\Modelling\Config\BusModule;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class SaveAggregateService
@@ -76,6 +77,19 @@ class SaveAggregateService
 
     public function save(Message $message, array $metadata): Message
     {
+        unset($metadata[AggregateMessage::AGGREGATE_ID]);
+        unset($metadata[AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER]);
+        unset($metadata[AggregateMessage::AGGREGATE_OBJECT]);
+        unset($metadata[AggregateMessage::TARGET_VERSION]);
+        unset($metadata[BusModule::COMMAND_CHANNEL_NAME_BY_NAME]);
+        unset($metadata[BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT]);
+        unset($metadata[BusModule::EVENT_CHANNEL_NAME_BY_NAME]);
+        unset($metadata[BusModule::EVENT_CHANNEL_NAME_BY_OBJECT]);
+        unset($metadata[BusModule::QUERY_CHANNEL_NAME_BY_NAME]);
+        unset($metadata[BusModule::QUERY_CHANNEL_NAME_BY_OBJECT]);
+        unset($metadata[MessageHeaders::REPLY_CHANNEL]);
+        unset($metadata[MessageHeaders::CONTENT_TYPE]);
+
         $aggregate = $message->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT);
         $events = [];
 
@@ -85,12 +99,18 @@ class SaveAggregateService
         } elseif ($this->aggregateMethodWithEvents) {
             $events = call_user_func([$aggregate, $this->aggregateMethodWithEvents]);
         }
-        foreach ($events as $event) {
+
+        $events = array_map(function($event) use ($metadata) : Event {
             if (! is_object($event)) {
                 $typeDescriptor = TypeDescriptor::createFromVariable($event);
                 throw InvalidArgumentException::create("Events return by after calling {$this->aggregateInterface} must all be objects, {$typeDescriptor->toString()} given");
             }
-        }
+
+            $metadata = RevisionMetadataEnricher::enrich($metadata, $event);
+            $metadata[MessageHeaders::MESSAGE_ID] = Uuid::uuid4()->toString();
+
+            return Event::create($event, $metadata);
+        }, $events);
 
         $versionBeforeHandling = $message->getHeaders()->containsKey(AggregateMessage::TARGET_VERSION)
             ? $message->getHeaders()->get(AggregateMessage::TARGET_VERSION)
@@ -110,19 +130,6 @@ class SaveAggregateService
                             ? $message->getHeaders()->get(AggregateMessage::AGGREGATE_ID)
                             : [];
         $aggregateIds = $aggregateIds ?: $this->getAggregateIds($aggregateIds, $aggregate, $this->isEventSourced);
-
-        unset($metadata[AggregateMessage::AGGREGATE_ID]);
-        unset($metadata[AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER]);
-        unset($metadata[AggregateMessage::AGGREGATE_OBJECT]);
-        unset($metadata[AggregateMessage::TARGET_VERSION]);
-        unset($metadata[BusModule::COMMAND_CHANNEL_NAME_BY_NAME]);
-        unset($metadata[BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT]);
-        unset($metadata[BusModule::EVENT_CHANNEL_NAME_BY_NAME]);
-        unset($metadata[BusModule::EVENT_CHANNEL_NAME_BY_OBJECT]);
-        unset($metadata[BusModule::QUERY_CHANNEL_NAME_BY_NAME]);
-        unset($metadata[BusModule::QUERY_CHANNEL_NAME_BY_OBJECT]);
-        unset($metadata[MessageHeaders::REPLY_CHANNEL]);
-        unset($metadata[MessageHeaders::CONTENT_TYPE]);
 
         if ($this->isEventSourced) {
             if ($this->snapshotTriggerThreshold !== self::NO_SNAPSHOT_THRESHOLD && in_array(is_string($aggregate) ? $aggregate : $aggregate::class, $this->aggregateClassesToSnapshot)) {
@@ -160,17 +167,15 @@ class SaveAggregateService
         }
 
         foreach ($events as $event) {
-            // @TODO Ecotone 2.0 make use of Event (with metadata):
-            $metadata = RevisionMetadataEnricher::enrich($metadata, $event);
-            $this->eventBus->publish($event, $metadata);
+            $this->eventBus->publish($event->getPayload(), $event->getMetadata());
 
-            $eventDefinition = ClassDefinition::createFor(TypeDescriptor::createFromVariable($event));
+            $eventDefinition = ClassDefinition::createFor(TypeDescriptor::createFromVariable($event->getPayload()));
             $namedEvent = TypeDescriptor::create(NamedEvent::class);
             if ($eventDefinition->hasClassAnnotation($namedEvent)) {
                 /** @var NamedEvent $namedEvent */
                 $namedEvent = $eventDefinition->getSingleClassAnnotation($namedEvent);
 
-                $this->eventBus->publishWithRouting($namedEvent->getName(), $event, MediaType::APPLICATION_X_PHP, $metadata);
+                $this->eventBus->publishWithRouting($namedEvent->getName(), $event->getPayload(), MediaType::APPLICATION_X_PHP, $event->getMetadata());
             }
         }
 

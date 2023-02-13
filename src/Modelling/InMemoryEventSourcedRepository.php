@@ -35,6 +35,8 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
     {
         $self = static::createEmpty();
 
+        $events = array_map(static fn($event) => Event::create($event), $events);
+
         $self->save($identifiers, $aggregateClassName, $events, [], count($events));
 
         return $self;
@@ -75,6 +77,8 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
     public function save(array $identifiers, string $aggregateClassName, array $events, array $metadata, int $versionBeforeHandling): void
     {
         $key = $this->getKey($identifiers);
+
+        $events = array_map(static fn(Event $event) => $event->getPayload(), $events);
 
         if (! isset($this->eventsPerAggregate[$aggregateClassName][$key])) {
             $this->eventsPerAggregate[$aggregateClassName][$key] = $events;

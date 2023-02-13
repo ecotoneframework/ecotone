@@ -100,7 +100,7 @@ class SaveAggregateService
             $events = call_user_func([$aggregate, $this->aggregateMethodWithEvents]);
         }
 
-        $events = array_map(function($event) use ($metadata) : Event {
+        $events = array_map(function ($event) use ($metadata): Event {
             if (! is_object($event)) {
                 $typeDescriptor = TypeDescriptor::createFromVariable($event);
                 throw InvalidArgumentException::create("Events return by after calling {$this->aggregateInterface} must all be objects, {$typeDescriptor->toString()} given");

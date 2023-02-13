@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging;
 
-use Exception;
-
 /**
  * Interface MessageHandler
  * @package Ecotone\Messaging
@@ -14,10 +12,7 @@ use Exception;
 interface MessageHandler
 {
     /**
-     * Handle given message
-     *
-     * @param Message $message
-     * @throws Exception
+     * Handles given message
      */
     public function handle(Message $message): void;
 }

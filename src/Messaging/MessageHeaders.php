@@ -5,6 +5,9 @@ namespace Ecotone\Messaging;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
+use Ecotone\Modelling\AggregateMessage;
+use Ecotone\Modelling\Config\BusModule;
+use Ecotone\Modelling\DistributionEntrypoint;
 use function json_encode;
 
 use Ramsey\Uuid\Uuid;
@@ -101,8 +104,7 @@ final class MessageHeaders
      */
     public const REVISION = 'revision';
 
-    private ?array $headers;
-
+    private array $headers;
 
     /**
      * MessageHeaders constructor.
@@ -130,7 +132,7 @@ final class MessageHeaders
         return static::createMessageHeadersWith($headers);
     }
 
-    final public function headers(): ?array
+    final public function headers(): array
     {
         return $this->headers;
     }
@@ -163,6 +165,62 @@ final class MessageHeaders
     public static function unsetAsyncKeys(array $metadata): array
     {
         unset($metadata[self::TYPE_ID]);
+
+        return $metadata;
+    }
+
+    public static function unsetEnqueueMetadata(array $metadata): array
+    {
+        if (isset($metadata[self::CONSUMER_ACK_HEADER_LOCATION])) {
+            unset($metadata[$metadata[self::CONSUMER_ACK_HEADER_LOCATION]]);
+        }
+
+        unset(
+            $metadata[self::DELIVERY_DELAY],
+            $metadata[self::TIME_TO_LIVE],
+            $metadata[self::CONTENT_TYPE],
+            $metadata[self::CONSUMER_ACK_HEADER_LOCATION],
+            $metadata[self::CONSUMER_ENDPOINT_ID],
+            $metadata[self::POLLED_CHANNEL_NAME],
+            $metadata[self::REPLY_CHANNEL]
+        );
+
+        return $metadata;
+    }
+
+    public static function unsetDistributionKeys(array $metadata): array
+    {
+        unset(
+            $metadata[DistributionEntrypoint::DISTRIBUTED_CHANNEL],
+            $metadata[DistributionEntrypoint::DISTRIBUTED_PAYLOAD_TYPE],
+            $metadata[DistributionEntrypoint::DISTRIBUTED_ROUTING_KEY]
+        );
+
+        return $metadata;
+    }
+
+    public static function unsetBusKeys(array $metadata): array
+    {
+        unset(
+            $metadata[BusModule::COMMAND_CHANNEL_NAME_BY_NAME],
+            $metadata[BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT],
+            $metadata[BusModule::EVENT_CHANNEL_NAME_BY_NAME],
+            $metadata[BusModule::EVENT_CHANNEL_NAME_BY_OBJECT],
+            $metadata[BusModule::QUERY_CHANNEL_NAME_BY_NAME],
+            $metadata[BusModule::QUERY_CHANNEL_NAME_BY_OBJECT]
+        );
+
+        return $metadata;
+    }
+
+    public static function unsetAggregateKeys(array $metadata): array
+    {
+        unset(
+            $metadata[AggregateMessage::AGGREGATE_ID],
+            $metadata[AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER],
+            $metadata[AggregateMessage::AGGREGATE_OBJECT],
+            $metadata[AggregateMessage::TARGET_VERSION]
+        );
 
         return $metadata;
     }

@@ -19,9 +19,7 @@ class Event
         $this->eventType = $eventType;
         $this->payload = $payload;
 
-        if (! array_key_exists(MessageHeaders::MESSAGE_ID, $metadata)) {
-            $metadata[MessageHeaders::MESSAGE_ID] = Uuid::uuid4()->toString();
-        }
+        $metadata[MessageHeaders::MESSAGE_ID] = Uuid::uuid4()->toString();
         if (! array_key_exists(MessageHeaders::TIMESTAMP, $metadata)) {
             $metadata[MessageHeaders::TIMESTAMP] = (int)round(microtime(true));
         }
@@ -52,5 +50,15 @@ class Event
     public function getMetadata(): array
     {
         return $this->metadata;
+    }
+
+    public function withMetadata(array $metadata): self
+    {
+        return self::create($this->payload, $metadata);
+    }
+
+    public function withAddedMetadata(array $metadata): self
+    {
+        return self::create($this->payload, array_merge($this->metadata, $metadata));
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Ecotone\Modelling;
 
+use Ecotone\Enqueue\OutboundMessageConverter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
@@ -77,18 +78,11 @@ class SaveAggregateService
 
     public function save(Message $message, array $metadata): Message
     {
-        unset($metadata[AggregateMessage::AGGREGATE_ID]);
-        unset($metadata[AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER]);
-        unset($metadata[AggregateMessage::AGGREGATE_OBJECT]);
-        unset($metadata[AggregateMessage::TARGET_VERSION]);
-        unset($metadata[BusModule::COMMAND_CHANNEL_NAME_BY_NAME]);
-        unset($metadata[BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT]);
-        unset($metadata[BusModule::EVENT_CHANNEL_NAME_BY_NAME]);
-        unset($metadata[BusModule::EVENT_CHANNEL_NAME_BY_OBJECT]);
-        unset($metadata[BusModule::QUERY_CHANNEL_NAME_BY_NAME]);
-        unset($metadata[BusModule::QUERY_CHANNEL_NAME_BY_OBJECT]);
-        unset($metadata[MessageHeaders::REPLY_CHANNEL]);
-        unset($metadata[MessageHeaders::CONTENT_TYPE]);
+        $metadata = MessageHeaders::unsetEnqueueMetadata($metadata);
+        $metadata = MessageHeaders::unsetDistributionKeys($metadata);
+        $metadata = MessageHeaders::unsetAsyncKeys($metadata);
+        $metadata = MessageHeaders::unsetBusKeys($metadata);
+        $metadata = MessageHeaders::unsetAggregateKeys($metadata);
 
         $aggregate = $message->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT);
         $events = [];
@@ -107,7 +101,6 @@ class SaveAggregateService
             }
 
             $metadata = RevisionMetadataEnricher::enrich($metadata, $event);
-            $metadata[MessageHeaders::MESSAGE_ID] = Uuid::uuid4()->toString();
 
             return Event::create($event, $metadata);
         }, $events);

@@ -141,7 +141,7 @@ class BusRoutingModule implements AnnotationModule
                 $asynchronous = $registration->getMethodAnnotationsWithType(Asynchronous::class)[0];
                 /** @var CommandHandler $annotationForMethod */
                 $annotationForMethod = $registration->getAnnotationForMethod();
-                Assert::isTrue(!in_array($annotationForMethod->getInputChannelName(), $asynchronous->getChannelName()),"Command Handler routing key can't be equal to asynchronous channel name in {$registration}");
+                Assert::isTrue(! in_array($annotationForMethod->getInputChannelName(), $asynchronous->getChannelName()), "Command Handler routing key can't be equal to asynchronous channel name in {$registration}");
             }
 
             if ($registration->hasClassAnnotation(Aggregate::class)) {
@@ -250,7 +250,7 @@ class BusRoutingModule implements AnnotationModule
                 $asynchronous = $registration->getMethodAnnotationsWithType(Asynchronous::class)[0];
                 /** @var EventHandler $annotationForMethod */
                 $annotationForMethod = $registration->getAnnotationForMethod();
-                Assert::isTrue(!in_array($annotationForMethod->getListenTo(), $asynchronous->getChannelName()),"Event Handler listen to routing can't be equal to asynchronous channel name in {$registration}");
+                Assert::isTrue(! in_array($annotationForMethod->getListenTo(), $asynchronous->getChannelName()), "Event Handler listen to routing can't be equal to asynchronous channel name in {$registration}");
             }
 
             if ($registration->hasClassAnnotation(Aggregate::class)) {

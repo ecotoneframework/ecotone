@@ -9,10 +9,9 @@ use Ecotone\Modelling\Attribute\EventHandler;
 
 final class SomeTestEventHandler
 {
-    #[Asynchronous("input")]
-    #[EventHandler(listenTo: "input", endpointId: "test")]
+    #[Asynchronous('input')]
+    #[EventHandler(listenTo: 'input', endpointId: 'test')]
     public function test2(): void
     {
-
     }
 }

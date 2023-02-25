@@ -26,7 +26,6 @@ use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use Ecotone\Messaging\Endpoint\NoConsumerFactoryForBuilderException;
-use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
@@ -40,7 +39,6 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Precedence;
@@ -61,8 +59,6 @@ use Test\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithAnnotationFromMethodInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\StubCallSavingService;
-use Test\Ecotone\Messaging\Fixture\Handler\SuccessServiceActivator;
-use Test\Ecotone\Messaging\Fixture\SameChannelAndRouting\MessagingConfiguration;
 use Test\Ecotone\Messaging\Fixture\SameChannelAndRouting\SomeTestCommandHandler;
 use Test\Ecotone\Messaging\Fixture\SameChannelAndRouting\SomeTestEventHandler;
 use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
@@ -2163,7 +2159,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ServiceConfiguration::createWithDefaults()
                 ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
                 ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel("input"),
+                    SimpleMessageChannelBuilder::createQueueChannel('input'),
                 ])
         );
     }
@@ -2178,7 +2174,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
             ServiceConfiguration::createWithDefaults()
                 ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
                 ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel("input"),
+                    SimpleMessageChannelBuilder::createQueueChannel('input'),
                 ])
         );
     }

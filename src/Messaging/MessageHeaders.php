@@ -8,6 +8,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\Config\BusModule;
 use Ecotone\Modelling\DistributionEntrypoint;
+
 use function json_encode;
 
 use Ramsey\Uuid\Uuid;

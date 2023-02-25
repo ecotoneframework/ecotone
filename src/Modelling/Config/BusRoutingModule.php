@@ -5,6 +5,7 @@ namespace Ecotone\Modelling\Config;
 use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\PropagateHeaders;
@@ -22,6 +23,7 @@ use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Precedence;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\Distributed;
@@ -134,6 +136,14 @@ class BusRoutingModule implements AnnotationModule
             }
         }
         foreach ($annotationRegistrationService->findAnnotatedMethods(CommandHandler::class) as $registration) {
+            if ($registration->hasMethodAnnotation(Asynchronous::class)) {
+                /** @var Asynchronous $asynchronous */
+                $asynchronous = $registration->getMethodAnnotationsWithType(Asynchronous::class)[0];
+                /** @var CommandHandler $annotationForMethod */
+                $annotationForMethod = $registration->getAnnotationForMethod();
+                Assert::isTrue(!in_array($annotationForMethod->getInputChannelName(), $asynchronous->getChannelName()),"Command Handler routing key can't be equal to asynchronous channel name in {$registration}");
+            }
+
             if ($registration->hasClassAnnotation(Aggregate::class)) {
                 continue;
             }
@@ -235,6 +245,14 @@ class BusRoutingModule implements AnnotationModule
             }
         }
         foreach ($annotationRegistrationService->findAnnotatedMethods(EventHandler::class) as $registration) {
+            if ($registration->hasMethodAnnotation(Asynchronous::class)) {
+                /** @var Asynchronous $asynchronous */
+                $asynchronous = $registration->getMethodAnnotationsWithType(Asynchronous::class)[0];
+                /** @var EventHandler $annotationForMethod */
+                $annotationForMethod = $registration->getAnnotationForMethod();
+                Assert::isTrue(!in_array($annotationForMethod->getListenTo(), $asynchronous->getChannelName()),"Event Handler listen to routing can't be equal to asynchronous channel name in {$registration}");
+            }
+
             if ($registration->hasClassAnnotation(Aggregate::class)) {
                 continue;
             }

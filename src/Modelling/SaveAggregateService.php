@@ -2,7 +2,6 @@
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Enqueue\OutboundMessageConverter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
@@ -19,8 +18,6 @@ use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Attribute\NamedEvent;
-use Ecotone\Modelling\Config\BusModule;
-use Ramsey\Uuid\Uuid;
 
 /**
  * Class SaveAggregateService

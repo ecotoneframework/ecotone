@@ -6,5 +6,4 @@ namespace Test\Ecotone\Modelling\Fixture\HandlerWithAbstractClass;
 
 final class TestHandler extends TestAbstractHandler
 {
-
 }

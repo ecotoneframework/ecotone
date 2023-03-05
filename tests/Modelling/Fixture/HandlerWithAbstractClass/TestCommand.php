@@ -8,6 +8,5 @@ final class TestCommand
 {
     public function __construct(public int $amount)
     {
-
     }
 }

@@ -23,7 +23,7 @@ class AttributeResolver implements AnnotationResolver
             $reflectionMethod = TypeResolver::getMethodOwnerClass($analyzedClass, $methodName)->getMethod($methodName);
 
             return array_reduce($reflectionMethod->getAttributes(), function (array $carry, ReflectionAttribute $attribute) {
-                if (!class_exists($attribute->getName())) {
+                if (! class_exists($attribute->getName())) {
                     return $carry;
                 }
 
@@ -43,7 +43,7 @@ class AttributeResolver implements AnnotationResolver
     {
         $analyzedClass = new ReflectionClass($className);
         $attributes = array_reduce(($analyzedClass)->getAttributes(), function (array $carry, ReflectionAttribute $attribute) {
-            if (!class_exists($attribute->getName())) {
+            if (! class_exists($attribute->getName())) {
                 return $carry;
             }
 
@@ -52,7 +52,7 @@ class AttributeResolver implements AnnotationResolver
             return $carry;
         }, []);
 
-        if ($analyzedClass->isAbstract() && !$analyzedClass->isInterface()) {
+        if ($analyzedClass->isAbstract() && ! $analyzedClass->isInterface()) {
             $attributes[] = new IsAbstract();
         }
 

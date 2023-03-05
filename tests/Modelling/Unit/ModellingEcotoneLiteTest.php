@@ -46,7 +46,7 @@ final class ModellingEcotoneLiteTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapForTesting(
             [TestHandler::class, TestAbstractHandler::class],
             [
-                new TestHandler()
+                new TestHandler(),
             ],
             ServiceConfiguration::createWithDefaults()
                 ->withSkippedModulePackageNames(ModulePackageList::allPackages())

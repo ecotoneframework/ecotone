@@ -10,9 +10,12 @@ use Ecotone\AnnotationFinder\Attribute\Environment;
 use Ecotone\AnnotationFinder\ConfigurationException;
 use Ecotone\AnnotationFinder\FileSystem\AutoloadFileNamespaceParser;
 use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
+use Ecotone\Messaging\Attribute\IsAbstract;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
+use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\AbstractClass\TestAbstractHandler;
+use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\AbstractClass\TestHandler;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\EndpointAnnotationExample;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\Extension;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\MessageEndpoint;
@@ -325,6 +328,46 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
                 ),
             ],
             $fileSystemAnnotationRegistrationService->findAnnotatedMethods(SomeHandlerAnnotation::class)
+        );
+    }
+
+    public function test_ignoring_abstract_class_while_fetching_annotated_classes()
+    {
+        $annotation = new SomeHandlerAnnotation();
+
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . '\\AbstractClass', 'prod');
+
+        $this->assertEquals(
+            [
+                AnnotatedMethod::create(
+                    $annotation,
+                    TestHandler::class,
+                    'execute',
+                    [],
+                    [$annotation]
+                ),
+            ],
+            $fileSystemAnnotationRegistrationService->findAnnotatedMethods(SomeHandlerAnnotation::class)
+        );
+    }
+
+    public function test_interfaces_should_be_found_and_not_treat_as_abstracts()
+    {
+        $annotation = new SomeGatewayExample();
+
+        $fileSystemAnnotationRegistrationService = $this->createAnnotationRegistrationService($this->getAnnotationNamespacePrefix() . '\\MessageEndpoint\\Gateway\\FileSystem', 'prod');
+
+        $this->assertEquals(
+            [
+                AnnotatedMethod::create(
+                    $annotation,
+                    GatewayWithReplyChannelExample::class,
+                    'buy',
+                    [new MessageEndpoint()],
+                    [$annotation]
+                ),
+            ],
+            $fileSystemAnnotationRegistrationService->findAnnotatedMethods(SomeGatewayExample::class)
         );
     }
 

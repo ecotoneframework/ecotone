@@ -10,6 +10,7 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\Attribute\Environment;
 use Ecotone\AnnotationFinder\ConfigurationException;
+use Ecotone\Messaging\Attribute\IsAbstract;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -42,6 +43,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
      */
     private array $cachedClassAnnotations = [];
     private AnnotationResolver $annotationResolver;
+    private IsAbstract $isAbstractAnnotation;
 
     public function __construct(
         AnnotationResolver      $annotationResolver,
@@ -55,6 +57,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         bool                    $isRunningForTesting = false
     ) {
         $this->annotationResolver = $annotationResolver;
+        $this->isAbstractAnnotation = new IsAbstract();
         $this->init($rootProjectDir, array_unique($namespaces), $catalogToLoad, $autoloadNamespaceParser, $systemClassesToRegister, $userClassesToRegister, $isRunningForTesting);
 
         $classNamesWithEnvironment = $this->findAnnotatedClasses(Environment::class);
@@ -285,6 +288,11 @@ class FileSystemAnnotationFinder implements AnnotationFinder
                 if ($this->isMethodBannedFromCurrentEnvironment($className, $method)) {
                     continue;
                 }
+                $classAnnotations = $this->getCachedAnnotationsForClass($className);
+
+                if ($this->isAbstractClass($classAnnotations)) {
+                    continue;
+                }
 
                 $methodAnnotations = $this->getCachedMethodAnnotations($className, $method);
                 foreach ($methodAnnotations as $methodAnnotation) {
@@ -293,7 +301,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
                             $methodAnnotation,
                             $className,
                             $method,
-                            $this->getCachedAnnotationsForClass($className),
+                            $classAnnotations,
                             $methodAnnotations
                         );
 
@@ -422,5 +430,16 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         $paths = $this->getPathsToSearchIn($autoloadNamespaceParser, $rootProjectDir, $namespacesToUse);
 
         return $this->getClassesIn($paths, $namespacesToUse);
+    }
+
+    private function isAbstractClass(array $classAnnotations): bool
+    {
+        foreach ($classAnnotations as $classAnnotation) {
+            if ($classAnnotation == $this->isAbstractAnnotation) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

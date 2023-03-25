@@ -89,6 +89,22 @@ final class FlowTestSupport
         return $this;
     }
 
+    /**
+     * @return mixed[]
+     */
+    public function getSpiedChannelRecordedMessagePayloads(string $channelName): array
+    {
+        return $this->testSupportGateway->getSpiedChannelRecordedMessagePayloads($channelName);
+    }
+
+    /**
+     * @return Message[]
+     */
+    public function getSpiedChannelRecordedMessages(string $channelName): array
+    {
+        return $this->testSupportGateway->getSpiedChannelRecordedMessages($channelName);
+    }
+
     public function run(string $name, ?ExecutionPollingMetadata $executionPollingMetadata = null): self
     {
         $this->configuredMessagingSystem->run($name, $executionPollingMetadata);

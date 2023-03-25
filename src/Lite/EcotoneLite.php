@@ -51,6 +51,11 @@ final class EcotoneLite
     }
 
     /**
+     * This should be used in cases we want to test stateless services.
+     * It will not register any repositories for aggregates.
+     *
+     * In case you want to test flows or stateful classes like Aggregates and Sagas, use "bootstrapFlowTesting" instead
+     *
      * @param string[] $classesToResolve
      * @param array<string,string> $configurationVariables
      * @param ContainerInterface|object[] $containerOrAvailableServices
@@ -63,6 +68,11 @@ final class EcotoneLite
         ?string                  $pathToRootCatalog = null,
         bool                     $allowGatewaysToBeRegisteredInContainer = false
     ): ConfiguredMessagingSystemWithTestSupport {
+        if (! $configuration->areSkippedPackagesDefined()) {
+            $configuration = $configuration
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages());
+        }
+
         return self::prepareConfiguration($containerOrAvailableServices, $configuration, $classesToResolve, $configurationVariables, $pathToRootCatalog, true, $allowGatewaysToBeRegisteredInContainer, false);
     }
 

@@ -26,6 +26,6 @@ class AddCurrentUserId
     public function logAction(?Basket $basket): void
     {
         $logged = true;
-//        do some logging
+        //        do some logging
     }
 }

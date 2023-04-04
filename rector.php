@@ -9,8 +9,8 @@ use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigura
 return static function (ContainerConfigurator $containerConfigurator): void {
     $services = $containerConfigurator->services();
     $services->set(Rector\TypeDeclaration\Rector\FunctionLike\ReturnTypeDeclarationRector::class);
-//    $services->set(Rector\TypeDeclaration\Rector\Property\TypedPropertyRector::class);
-//    $services->set(Rector\Php74\Rector\Property\TypedPropertyRector::class);
+    //    $services->set(Rector\TypeDeclaration\Rector\Property\TypedPropertyRector::class);
+    //    $services->set(Rector\Php74\Rector\Property\TypedPropertyRector::class);
 
     // get parameters
     $parameters = $containerConfigurator->parameters();

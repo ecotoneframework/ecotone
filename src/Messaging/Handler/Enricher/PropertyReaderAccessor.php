@@ -29,7 +29,7 @@ class PropertyReaderAccessor
         try {
             $this->getPropertyValue($propertyPath, $fromData);
         } catch (ReflectionException | InvalidArgumentException $e) {
-//            Handle it without exceptions
+            //            Handle it without exceptions
             return false;
         }
 

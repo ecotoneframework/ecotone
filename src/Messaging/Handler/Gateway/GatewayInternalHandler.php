@@ -52,7 +52,7 @@ class GatewayInternalHandler
      */
     public function handle(Message $requestMessage)
     {
-//      Gateway can be called inside service activator. So it means, we need to preserve reply channel in order to reply with it
+        //      Gateway can be called inside service activator. So it means, we need to preserve reply channel in order to reply with it
         $previousReplyChannel = $requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaders()->getReplyChannel() : null;
 
         $requestMessage = MessageBuilder::fromMessage($requestMessage);

@@ -29,14 +29,14 @@ final class TypeDescriptor implements Type
     private const BOOL_FALSE_NAME = 'false';
     public const         STRING = 'string';
 
-//    compound types
+    //    compound types
     public const ARRAY = 'array';
     public const         ITERABLE = 'iterable';
     public const CLOSURE = 'Closure';
     public const CALLABLE = 'callable';
     public const         OBJECT = 'object';
 
-//    resource
+    //    resource
     public const RESOURCE = 'resource';
 
     public const ANYTHING = 'anything';

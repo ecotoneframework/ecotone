@@ -66,9 +66,9 @@ class HeaderConverter implements ParameterConverter
                 $headerValue = $this->doConversion($headerValue, MediaType::APPLICATION_X_PHP, $relatedParameter);
             }
 
-//            @TODO
-//            $fromType = TypeDescriptor::createFromVariable($headerValue);
-//            throw ConversionException::create("Lack of converter available for {$interfaceToCall} with parameter name `{$relatedParameter}` to convert it from {$fromType} to {$relatedParameter->getTypeDescriptor()}");
+            //            @TODO
+            //            $fromType = TypeDescriptor::createFromVariable($headerValue);
+            //            throw ConversionException::create("Lack of converter available for {$interfaceToCall} with parameter name `{$relatedParameter}` to convert it from {$fromType} to {$relatedParameter->getTypeDescriptor()}");
         }
 
         return $headerValue;

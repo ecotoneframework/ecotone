@@ -461,7 +461,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
             OrderService::class => new OrderService(),
         ]);
 
-//        cache
+        //        cache
         EcotoneLite::bootstrap(
             [OrderService::class],
             $inMemoryPSRContainer,
@@ -471,7 +471,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
             useCachedVersion: true
         );
 
-//        resolve cache
+        //        resolve cache
         $ecotoneLite = EcotoneLite::bootstrap(
             [OrderService::class],
             $inMemoryPSRContainer,

@@ -45,4 +45,6 @@ interface ConsumerInterceptor
      * @return mixed result of method invocation
      */
     public function postSend(MethodInvocation $methodInvocation): mixed;
+
+    public function isInterestedInPostSend(): bool;
 }

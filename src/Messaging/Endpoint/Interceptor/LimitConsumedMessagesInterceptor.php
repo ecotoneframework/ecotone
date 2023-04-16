@@ -79,4 +79,9 @@ class LimitConsumedMessagesInterceptor implements ConsumerInterceptor
 
         return $methodInvocation->proceed();
     }
+
+    public function isInterestedInPostSend(): bool
+    {
+        return true;
+    }
 }

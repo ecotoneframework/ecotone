@@ -73,7 +73,7 @@ class InterceptedConsumer implements ConsumerLifecycle
     /**
      * @param PollingMetadata $pollingMetadata
      * @param array $interceptor
-     * @return array
+     * @return ConsumerInterceptor[]
      * @throws \Ecotone\Messaging\MessagingException
      */
     public static function createInterceptorsForPollingMetadata(PollingMetadata $pollingMetadata): array

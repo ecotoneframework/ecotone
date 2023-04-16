@@ -82,4 +82,9 @@ class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
     {
         return $methodInvocation->proceed();
     }
+
+    public function isInterestedInPostSend(): bool
+    {
+        return false;
+    }
 }

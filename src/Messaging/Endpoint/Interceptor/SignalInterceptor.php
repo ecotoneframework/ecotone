@@ -72,14 +72,6 @@ class SignalInterceptor implements ConsumerInterceptor
     }
 
     /**
-     * @inheritDoc
-     */
-    public function postSend(MethodInvocation $methodInvocation): mixed
-    {
-        return $methodInvocation->proceed();
-    }
-
-    /**
      * @param int $signal
      */
     public function stopConsumer(int $signal): void
@@ -87,5 +79,18 @@ class SignalInterceptor implements ConsumerInterceptor
         if (in_array($signal, [self::SIGNAL_INTERRUPT, self::SIGNAL_QUIT, self::SIGNAL_TERMINATE])) {
             $this->shouldBeStopped = true;
         }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function postSend(MethodInvocation $methodInvocation): mixed
+    {
+        return $methodInvocation->proceed();
+    }
+
+    public function isInterestedInPostSend(): bool
+    {
+        return false;
     }
 }

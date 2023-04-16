@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Endpoint\Interceptor;
 
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Throwable;
 
 /**
@@ -73,7 +74,8 @@ class LimitExecutionAmountInterceptor implements ConsumerInterceptor
     /**
      * @inheritDoc
      */
-    public function postSend(): void
+    public function postSend(MethodInvocation $methodInvocation): mixed
     {
+        return $methodInvocation->proceed();
     }
 }

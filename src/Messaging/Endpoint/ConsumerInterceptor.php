@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Throwable;
 
 /**
@@ -40,6 +41,8 @@ interface ConsumerInterceptor
 
     /**
      * Called after each sending message to request channel
+     *
+     * @return mixed result of method invocation
      */
-    public function postSend(): void;
+    public function postSend(MethodInvocation $methodInvocation): mixed;
 }

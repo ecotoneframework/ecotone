@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Endpoint\Interceptor;
 
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
 use Ecotone\Messaging\Endpoint\PollingConsumer\ConnectionException;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Throwable;
 
@@ -77,7 +78,8 @@ class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
     /**
      * @inheritDoc
      */
-    public function postSend(): void
+    public function postSend(MethodInvocation $methodInvocation): mixed
     {
+        return $methodInvocation->proceed();
     }
 }

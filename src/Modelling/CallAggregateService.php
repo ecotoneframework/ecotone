@@ -11,9 +11,8 @@ use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInvoker;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\RequestReplyProducer;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -119,7 +118,7 @@ class CallAggregateService
             $methodInvokerChainProcessor = new AroundMethodInvoker(
                 $methodInvoker,
                 $methodInvoker->getMethodCall($noReplyMessage),
-                array_map(fn(AroundInterceptorReference $interceptorReference) => $interceptorReference->buildAroundInterceptor($this->referenceSearchService), $this->aroundMethodInterceptors),
+                array_map(fn (AroundInterceptorReference $interceptorReference) => $interceptorReference->buildAroundInterceptor($this->referenceSearchService), $this->aroundMethodInterceptors),
                 $noReplyMessage,
                 RequestReplyProducer::createRequestAndReply(
                     $outputChannel,
@@ -131,8 +130,8 @@ class CallAggregateService
 
             $methodInvokerChainProcessor->proceed();
             $result = $outputChannel->receive();
-            $result = !is_null($result) ? $result->getPayload() : null;
-        }else {
+            $result = ! is_null($result) ? $result->getPayload() : null;
+        } else {
             $result = $methodInvoker->executeEndpoint($message);
         }
 

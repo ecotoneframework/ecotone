@@ -7,7 +7,6 @@ namespace Ecotone\Messaging\Handler\Processor;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageProcessor;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodCall;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDescriptor;

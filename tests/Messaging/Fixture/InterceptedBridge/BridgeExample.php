@@ -10,19 +10,19 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 final class BridgeExample
 {
-    #[ServiceActivator("bridgeExample", outputChannelName: "bridgeSum")]
+    #[ServiceActivator('bridgeExample', outputChannelName: 'bridgeSum')]
     public function result(int $result): int
     {
         return $result;
     }
 
-    #[ServiceActivator("bridgeSum")]
+    #[ServiceActivator('bridgeSum')]
     public function sum(int $amount): int
     {
         return $amount + 1;
     }
 
-    #[Around(precedence: 0, pointcut: BridgeExample::class . "::result")]
+    #[Around(precedence: 0, pointcut: BridgeExample::class . '::result')]
     public function multiply(MethodInvocation $methodInvocation): int
     {
         return $methodInvocation->proceed()->getPayload() * 3;

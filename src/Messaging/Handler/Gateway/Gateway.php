@@ -199,7 +199,7 @@ class Gateway implements NonProxyGateway
             ->withWrappingResultInMessage(false)
             ->withEndpointAnnotations($this->endpointAnnotations);
         $aroundInterceptorReferences = $this->aroundInterceptors;
-        if ($replyContentType !== null || !($this->interfaceToCall->getReturnType()->isAnything() || $this->interfaceToCall->getReturnType()->isMessage())) {
+        if ($replyContentType !== null || ! ($this->interfaceToCall->getReturnType()->isAnything() || $this->interfaceToCall->getReturnType()->isMessage())) {
             $aroundInterceptorReferences[] = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                 $this->referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME),
                 new ConversionInterceptor(

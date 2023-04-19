@@ -71,7 +71,7 @@ final class EcotoneLite
         if (! $configuration) {
             $configuration = ServiceConfiguration::createWithDefaults();
         }
-        
+
         if (! $configuration->areSkippedPackagesDefined()) {
             $configuration = $configuration
                 ->withSkippedModulePackageNames(ModulePackageList::allPackages());

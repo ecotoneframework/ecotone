@@ -5,22 +5,23 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Handler\Bridge;
 
 use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\InterceptedBridge\AsynchronousBridgeExample;
 use Test\Ecotone\Messaging\Fixture\InterceptedBridge\BridgeExample;
 
+/**
+ * @internal
+ */
 final class BridgeTest extends TestCase
 {
     public function test_intercepting_message_handler_should_happen_only_for_given_endpoint()
     {
         $ecotoneLite = EcotoneLite::bootstrapForTesting(
             [BridgeExample::class],
-            [new BridgeExample]
+            [new BridgeExample()]
         );
 
         $this->assertEquals(

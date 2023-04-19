@@ -5,17 +5,12 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler;
 
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodCall;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInvoker;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageDeliveryException;
 use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Exception;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -35,10 +30,12 @@ class RequestReplyProducer
     private int $method;
 
     private function __construct(
-        ?MessageChannel $outputChannel, MessageProcessor $messageProcessor,
-        ChannelResolver $channelResolver, bool $isReplyRequired, int $method,
-    )
-    {
+        ?MessageChannel $outputChannel,
+        MessageProcessor $messageProcessor,
+        ChannelResolver $channelResolver,
+        bool $isReplyRequired,
+        int $method,
+    ) {
         $this->outputChannel = $outputChannel;
         $this->isReplyRequired = $isReplyRequired;
         $this->channelResolver = $channelResolver;
@@ -79,7 +76,7 @@ class RequestReplyProducer
 
         /** Execute endpoint with around and sends reply. Important as endpoint replay channel is replaced in AroundMethodInvoker */
         $result = $aroundMethodInvoker->proceed();
-        if ($message->getHeaders()->hasReplyChannel() && !is_null($result)) {
+        if ($message->getHeaders()->hasReplyChannel() && ! is_null($result)) {
             $result = $result instanceof Message ? $result : MessageBuilder::fromMessage($message)->setPayload($result)->build();
             $message->getHeaders()->getReplyChannel()->send($result);
         }
@@ -110,14 +107,14 @@ class RequestReplyProducer
         } else {
             if ($routingSlip) {
                 $replyChannel = $this->channelResolver->resolve(array_shift($routingSlipChannels));
-            }elseif ($requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
+            } elseif ($requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
                 $replyChannel = $this->channelResolver->resolve($requestMessage->getHeaders()->getReplyChannel());
             }
         }
         $routingSlip = implode(',', $routingSlipChannels);
 
-        if (!$replyChannel) {
-            if (!$this->isReplyRequired()) {
+        if (! $replyChannel) {
+            if (! $this->isReplyRequired()) {
                 return;
             }
 
@@ -132,7 +129,7 @@ class RequestReplyProducer
                     ->setPayload($replyData);
             }
 
-            if (!$routingSlip) {
+            if (! $routingSlip) {
                 $messageBuilder = $messageBuilder
                     ->removeHeader(MessageHeaders::ROUTING_SLIP);
             } else {
@@ -141,7 +138,7 @@ class RequestReplyProducer
             }
             $replyChannel->send($messageBuilder->build());
         } else {
-            if (!is_iterable($replyData)) {
+            if (! is_iterable($replyData)) {
                 throw MessageDeliveryException::createWithFailedMessage("Can't split message {$message}, payload to split is not iterable in {$this->messageProcessor}", $message);
             }
 

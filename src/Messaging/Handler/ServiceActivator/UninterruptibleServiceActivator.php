@@ -14,7 +14,9 @@ use Ecotone\Messaging\MessageHandler;
 
 final class UninterruptibleServiceActivator implements MessageHandlerBuilderWithParameterConverters
 {
-    private function __construct(private ServiceActivatorBuilder $serviceActivatorBuilder) {}
+    private function __construct(private ServiceActivatorBuilder $serviceActivatorBuilder)
+    {
+    }
 
     public static function create(object $objectToInvokeOnReferenceName, string $methodName): self
     {

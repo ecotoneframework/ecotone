@@ -4,7 +4,6 @@ namespace Ecotone\Messaging\Handler\Gateway;
 
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;

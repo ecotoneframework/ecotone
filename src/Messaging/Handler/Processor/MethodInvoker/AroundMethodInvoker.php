@@ -5,14 +5,11 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use ArrayIterator;
-use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\RequestReplyProducer;
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -31,10 +28,11 @@ class AroundMethodInvoker implements MethodInvocation
 
     public function __construct(
         private MessageProcessor $messageProcessor,
-        private MethodCall $methodCall, array $aroundMethodInterceptors,
-        private Message $requestMessage, private RequestReplyProducer $requestReplyProducer
-    )
-    {
+        private MethodCall $methodCall,
+        array $aroundMethodInterceptors,
+        private Message $requestMessage,
+        private RequestReplyProducer $requestReplyProducer
+    ) {
         $this->aroundMethodInterceptors = new ArrayIterator($aroundMethodInterceptors);
     }
 

@@ -17,13 +17,13 @@ final class AsynchronousBridgeExample
     public int $result = 0;
 
     #[Asynchronous('async')]
-    #[ServiceActivator("bridgeExample", outputChannelName: "bridgeSum")]
+    #[ServiceActivator('bridgeExample', outputChannelName: 'bridgeSum')]
     public function result(int $result): int
     {
         return $result;
     }
 
-    #[ServiceActivator("bridgeSum")]
+    #[ServiceActivator('bridgeSum')]
     public function sum(int $amount): int
     {
         return $amount + 1;

@@ -58,7 +58,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
      * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function test_replacing_with_result_message_no_containing_reply_channel()
+    public function test_handler_returns_message_with_no_reply_channel_and_making_use_of_requested_reply_channel()
     {
         $objectToInvokeOnReference = 'service-a';
         $replyChannel = QueueChannel::create();
@@ -76,7 +76,7 @@ class ServiceActivatorBuilderTest extends MessagingTest
 
         $serviceActivator->handle(MessageBuilder::withPayload('someOther')->setReplyChannel($replyChannel)->build());
 
-        $this->assertNull($replyChannel->receive());
+        $this->assertNotNull($replyChannel->receive());
     }
 
     /**

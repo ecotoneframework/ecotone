@@ -338,6 +338,11 @@ final class MessageHeaders
         return $this->containsKey(self::CONTENT_TYPE);
     }
 
+    public function hasReplyChannel(): bool
+    {
+        return $this->containsKey(self::REPLY_CHANNEL);
+    }
+
     /**
      * @return string
      * @throws MessagingException

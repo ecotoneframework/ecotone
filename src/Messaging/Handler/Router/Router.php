@@ -62,7 +62,7 @@ final class Router implements MessageHandler
      */
     public function handle(Message $message): void
     {
-        $resolutionChannels = $this->methodInvoker->processMessage($message);
+        $resolutionChannels = $this->methodInvoker->executeEndpoint($message);
 
         if (is_null($resolutionChannels)) {
             $resolutionChannels = [];

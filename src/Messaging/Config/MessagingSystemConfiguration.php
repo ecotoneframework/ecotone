@@ -41,6 +41,8 @@ use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\UninterruptibleServiceActivator;
+use Ecotone\Messaging\Handler\Transformer\HeaderEnricher;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\MessageHeaders;
@@ -423,14 +425,15 @@ final class MessagingSystemConfiguration implements Configuration
                      */
                     $generatedEndpointId = Uuid::uuid4()->toString();
                     $this->registerMessageHandler(
-                        TransformerBuilder::createHeaderEnricher(
-                            [
+                        UninterruptibleServiceActivator::create(
+                            HeaderEnricher::create([
                                 BusModule::COMMAND_CHANNEL_NAME_BY_NAME => null,
                                 BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT => null,
                                 BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => null,
                                 BusModule::EVENT_CHANNEL_NAME_BY_NAME => null,
                                 MessageHeaders::ROUTING_SLIP => implode(',', $consequentialChannels),
-                            ]
+                            ]),
+                            'transform',
                         )
                             ->withEndpointId($generatedEndpointId)
                             ->withInputChannelName($busRoutingChannel)
@@ -456,13 +459,11 @@ final class MessagingSystemConfiguration implements Configuration
             //        needed for correct around intercepting, otherwise requestReply is outside of around interceptor scope
             /**
              * This is Bridge that will fetch the message and make use of routing_slip to target it
-             * message handler
+             * message handler.
              */
-            $this->messageHandlerBuilders[$asynchronousChannel] = ChainMessageHandlerBuilder::create()
+            $this->messageHandlerBuilders[$asynchronousChannel] = ServiceActivatorBuilder::createWithDirectReference(new Bridge(), 'handle')
                 ->withInputChannelName($asynchronousChannel)
-                ->withEndpointId($asynchronousChannel)
-                ->chain(ServiceActivatorBuilder::createWithDirectReference(new Bridge(), 'handle'))
-                ->chain(ServiceActivatorBuilder::createWithDirectReference(new Bridge(), 'handle'));
+                ->withEndpointId($asynchronousChannel);
         }
 
         foreach ($this->messageHandlerBuilders as $key => $messageHandlerBuilder) {

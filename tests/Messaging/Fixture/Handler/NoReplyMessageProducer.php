@@ -2,7 +2,9 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageProcessor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodCall;
 use Ecotone\Messaging\Message;
 
 /**
@@ -22,7 +24,7 @@ class NoReplyMessageProducer implements MessageProcessor
     /**
      * @inheritDoc
      */
-    public function processMessage(Message $message)
+    public function executeEndpoint(Message $message)
     {
         $this->wasCalled = true;
     }
@@ -30,6 +32,31 @@ class NoReplyMessageProducer implements MessageProcessor
     public function wasCalled(): bool
     {
         return $this->wasCalled;
+    }
+
+    public function getMethodCall(Message $message): MethodCall
+    {
+        return MethodCall::createWith([], false);
+    }
+
+    public function getAroundMethodInterceptors(): array
+    {
+        return [];
+    }
+
+    public function getObjectToInvokeOn(): string|object
+    {
+        return self::class;
+    }
+
+    public function getInterceptedInterface(): InterfaceToCall
+    {
+        return InterfaceToCall::create(self::class, 'executeEndpoint');
+    }
+
+    public function getEndpointAnnotations(): array
+    {
+        return [];
     }
 
     public function __toString()

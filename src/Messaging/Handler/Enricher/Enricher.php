@@ -31,7 +31,7 @@ class Enricher implements MessageHandler
      */
     public function handle(Message $message): void
     {
-        $this->replyProducer->handleWithReply($message);
+        $this->replyProducer->handleWithPossibleAroundInterceptors($message);
     }
 
     public function __toString()

@@ -68,6 +68,10 @@ final class EcotoneLite
         ?string                  $pathToRootCatalog = null,
         bool                     $allowGatewaysToBeRegisteredInContainer = false
     ): ConfiguredMessagingSystemWithTestSupport {
+        if (! $configuration) {
+            $configuration = ServiceConfiguration::createWithDefaults();
+        }
+        
         if (! $configuration->areSkippedPackagesDefined()) {
             $configuration = $configuration
                 ->withSkippedModulePackageNames(ModulePackageList::allPackages());

@@ -32,7 +32,7 @@ class PassThroughService
      */
     public function invoke(Message $message): Message
     {
-        $this->methodInvoker->processMessage($message);
+        $this->methodInvoker->executeEndpoint($message);
 
         return $message;
     }

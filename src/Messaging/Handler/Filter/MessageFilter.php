@@ -40,7 +40,7 @@ class MessageFilter
      */
     public function handle(Message $message): ?Message
     {
-        if (! $this->messageSelector->processMessage($message)) {
+        if (! $this->messageSelector->executeEndpoint($message)) {
             return $message;
         }
 

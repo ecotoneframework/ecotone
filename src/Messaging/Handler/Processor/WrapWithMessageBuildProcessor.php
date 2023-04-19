@@ -7,6 +7,8 @@ namespace Ecotone\Messaging\Handler\Processor;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageProcessor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodCall;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Handler\UnionTypeDescriptor;
@@ -42,9 +44,9 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
     /**
      * @inheritDoc
      */
-    public function processMessage(Message $message): ?Message
+    public function executeEndpoint(Message $message): ?Message
     {
-        $result = $this->messageProcessor->processMessage($message);
+        $result = $this->messageProcessor->executeEndpoint($message);
 
         if (is_null($result)) {
             return null;
@@ -90,6 +92,31 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
             ->setContentType(MediaType::createApplicationXPHPWithTypeParameter($returnType->toString()))
             ->setPayload($result)
             ->build();
+    }
+
+    public function getMethodCall(Message $message): MethodCall
+    {
+        return $this->messageProcessor->getMethodCall($message);
+    }
+
+    public function getAroundMethodInterceptors(): array
+    {
+        return $this->messageProcessor->getAroundMethodInterceptors();
+    }
+
+    public function getObjectToInvokeOn(): string|object
+    {
+        return $this->messageProcessor->getObjectToInvokeOn();
+    }
+
+    public function getInterceptedInterface(): InterfaceToCall
+    {
+        return $this->messageProcessor->getInterceptedInterface();
+    }
+
+    public function getEndpointAnnotations(): array
+    {
+        return $this->messageProcessor->getEndpointAnnotations();
     }
 
     /**

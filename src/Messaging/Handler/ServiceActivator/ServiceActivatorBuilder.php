@@ -37,7 +37,6 @@ final class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder imp
     private array $requiredReferenceNames = [];
     private ?object $directObjectReference = null;
     private bool $shouldPassThroughMessage = false;
-    private bool $canAroundInterceptorsReplaceArguments = true;
     private bool $shouldWrapResultInMessage = true;
 
     /**
@@ -85,17 +84,6 @@ final class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder imp
     public function withWrappingResultInMessage(bool $shouldWrapInMessage): self
     {
         $this->shouldWrapResultInMessage = $shouldWrapInMessage;
-
-        return $this;
-    }
-
-    /**
-     * @param bool $canAroundInterceptorReplaceArgument
-     * @return ServiceActivatorBuilder
-     */
-    public function withPossibilityToReplaceArgumentsInAroundInterceptors(bool $canAroundInterceptorReplaceArgument): self
-    {
-        $this->canAroundInterceptorsReplaceArguments = $canAroundInterceptorReplaceArgument;
 
         return $this;
     }

@@ -197,21 +197,22 @@ class Gateway implements NonProxyGateway
 
         $gatewayInternalHandler = ServiceActivatorBuilder::createWithDirectReference($gatewayInternalHandler, 'handle')
             ->withWrappingResultInMessage(false)
-            ->withPossibilityToReplaceArgumentsInAroundInterceptors(false)
             ->withEndpointAnnotations($this->endpointAnnotations);
         $aroundInterceptorReferences = $this->aroundInterceptors;
-        $aroundInterceptorReferences[] = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
-            $this->referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME),
-            new ConversionInterceptor(
-                $this->referenceSearchService->get(ConversionService::REFERENCE_NAME),
-                $this->interfaceToCall,
-                $replyContentType,
-                $this->messageConverters,
-            ),
-            'convert',
-            Precedence::GATEWAY_REPLY_CONVERSION_PRECEDENCE,
-            $this->interfaceToCall->getInterfaceName()
-        );
+        if ($replyContentType !== null || !($this->interfaceToCall->getReturnType()->isAnything() || $this->interfaceToCall->getReturnType()->isMessage())) {
+            $aroundInterceptorReferences[] = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
+                $this->referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME),
+                new ConversionInterceptor(
+                    $this->referenceSearchService->get(ConversionService::REFERENCE_NAME),
+                    $this->interfaceToCall,
+                    $replyContentType,
+                    $this->messageConverters,
+                ),
+                'convert',
+                Precedence::GATEWAY_REPLY_CONVERSION_PRECEDENCE,
+                $this->interfaceToCall->getInterfaceName()
+            );
+        }
         foreach ($aroundInterceptorReferences as $aroundInterceptorReference) {
             $gatewayInternalHandler = $gatewayInternalHandler->addAroundInterceptor($aroundInterceptorReference);
         }

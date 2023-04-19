@@ -314,7 +314,7 @@ class MessageFilterBuilderTest extends MessagingTest
         $outputChannelName = 'outputChannel';
         $outputChannel = QueueChannel::create();
 
-        $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, 'accept')
+        $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, 'refuse')
             ->withOutputMessageChannel($outputChannelName)
             ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                 InterfaceToCallRegistry::createEmpty(),

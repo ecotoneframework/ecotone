@@ -29,7 +29,7 @@ class Transformer implements MessageHandler
      */
     public function handle(Message $message): void
     {
-        $this->requestReplyProducer->handleWithReply($message);
+        $this->requestReplyProducer->handleWithPossibleAroundInterceptors($message);
     }
 
     public function __toString()

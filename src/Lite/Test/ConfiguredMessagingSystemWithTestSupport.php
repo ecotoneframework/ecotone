@@ -61,12 +61,12 @@ final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessag
         return $this->configuredMessagingSystem->getDistributedBus();
     }
 
-    public function sendMessage(string $targetChannel, mixed $payload = '', array $metadata = []): void
+    public function sendMessage(string $targetChannel, mixed $payload = '', array $metadata = []): mixed
     {
         /** @var MessagingEntrypoint $messagingEntrypoint */
         $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
 
-        $messagingEntrypoint->sendWithHeaders($payload, $metadata, $targetChannel);
+        return $messagingEntrypoint->sendWithHeaders($payload, $metadata, $targetChannel);
     }
 
     public function getMessagePublisher(string $referenceName = MessagePublisher::class): MessagePublisher

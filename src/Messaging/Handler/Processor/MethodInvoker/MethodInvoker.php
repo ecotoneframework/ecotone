@@ -36,10 +36,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 final class MethodInvoker implements MessageProcessor
 {
-    /**
-     * @var object|string
-     */
-    private $objectToInvokeOn;
+    private string|object $objectToInvokeOn;
     private string $objectMethodName;
     /**
      * @var ParameterConverter[]
@@ -218,34 +215,12 @@ final class MethodInvoker implements MessageProcessor
     /**
      * @inheritDoc
      */
-    public function processMessage(Message $message)
+    public function executeEndpoint(Message $message)
     {
-        $methodCall = $this->getMethodCall($message);
-
-        if (! $this->aroundMethodInterceptors) {
-            return call_user_func_array([$this->objectToInvokeOn, $this->objectMethodName], $methodCall->getMethodArgumentValues());
-        }
-
-        $methodInvokerProcessor = new MethodInvokerChainProcessor(
-            $methodCall,
-            $this,
-            $this->aroundMethodInterceptors,
-            $this->objectToInvokeOn,
-            $this->interfaceToCall,
-            $message,
-            $this->endpointAnnotations
-        );
-
-        return $methodInvokerProcessor->proceed();
+        return call_user_func_array([$this->objectToInvokeOn, $this->objectMethodName], $this->getMethodCall($message)->getMethodArgumentValues());
     }
 
-    /**
-     * @param Message $message
-     * @return MethodCall
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     */
-    private function getMethodCall(Message $message): MethodCall
+    public function getMethodCall(Message $message): MethodCall
     {
         $sourceMediaType = $message->getHeaders()->containsKey(MessageHeaders::CONTENT_TYPE)
             ? MediaType::parseMediaType($message->getHeaders()->get(MessageHeaders::CONTENT_TYPE))
@@ -402,5 +377,31 @@ final class MethodInvoker implements MessageProcessor
         $this->objectToInvokeOn = $objectToInvokeOn;
         $this->objectMethodName = $objectMethodName;
         $this->orderedMethodArguments = $orderedMethodArguments;
+    }
+
+    /**
+     * @return AroundMethodInterceptor[]
+     */
+    public function getAroundMethodInterceptors(): array
+    {
+        return $this->aroundMethodInterceptors;
+    }
+
+    public function getObjectToInvokeOn(): string|object
+    {
+        return $this->objectToInvokeOn;
+    }
+
+    public function getInterceptedInterface(): InterfaceToCall
+    {
+        return $this->interfaceToCall;
+    }
+
+    /**
+     * @return object[]
+     */
+    public function getEndpointAnnotations(): array
+    {
+        return $this->endpointAnnotations;
     }
 }

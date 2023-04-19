@@ -2,6 +2,7 @@
 
 namespace Ecotone\Modelling;
 
+use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
@@ -12,9 +13,12 @@ use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInvoker;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\RequestReplyProducer;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -32,7 +36,7 @@ class CallAggregateService
     private ChannelResolver $channelResolver;
     private ReferenceSearchService $referenceSearchService;
     /**
-     * @var AroundMethodInterceptor[]
+     * @var AroundInterceptorReference[]
      */
     private array $aroundMethodInterceptors;
     private bool $isCommandHandler;
@@ -103,11 +107,35 @@ class CallAggregateService
             $this->parameterConverterBuilders,
             $this->referenceSearchService,
             $this->channelResolver,
-            $this->aroundMethodInterceptors,
+            [],
             []
         );
 
-        $result = $methodInvoker->processMessage($message);
+        if ($this->aroundMethodInterceptors) {
+            $outputChannel = QueueChannel::create((string)$this->aggregateInterface);
+            $noReplyMessage = MessageBuilder::fromMessage($message)
+                                ->removeHeaders([MessageHeaders::REPLY_CHANNEL, MessageHeaders::ROUTING_SLIP])
+                                ->build();
+            $methodInvokerChainProcessor = new AroundMethodInvoker(
+                $methodInvoker,
+                $methodInvoker->getMethodCall($noReplyMessage),
+                array_map(fn(AroundInterceptorReference $interceptorReference) => $interceptorReference->buildAroundInterceptor($this->referenceSearchService), $this->aroundMethodInterceptors),
+                $noReplyMessage,
+                RequestReplyProducer::createRequestAndReply(
+                    $outputChannel,
+                    $methodInvoker,
+                    $this->channelResolver,
+                    false
+                )
+            );
+
+            $methodInvokerChainProcessor->proceed();
+            $result = $outputChannel->receive();
+            $result = !is_null($result) ? $result->getPayload() : null;
+        }else {
+            $result = $methodInvoker->executeEndpoint($message);
+        }
+
         $resultType = TypeDescriptor::createFromVariable($result);
         if ($resultType->isIterable() && $this->aggregateInterface->getReturnType()->isCollection()) {
             $interfaceReturnType = $this->aggregateInterface->getReturnType();

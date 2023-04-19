@@ -10,6 +10,6 @@ class CallWithEndingChainAndReturningInterceptorExample extends BaseInterceptorE
     #[Around]
     public function callWithEndingChainAndReturning(MethodInvocation $methodInvocation)
     {
-        return $this->valueToReturn;
+        return $methodInvocation->proceed();
     }
 }

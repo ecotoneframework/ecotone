@@ -50,6 +50,11 @@ class ServiceConfiguration
         return new self();
     }
 
+    public static function createWithAsynchronicityOnly(): self
+    {
+        return self::createWithDefaults()->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]));
+    }
+
     /**
      * @param self[] $applicationConfigurations
      *

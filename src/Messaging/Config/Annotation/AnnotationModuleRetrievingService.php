@@ -79,7 +79,7 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
                 $parameters[] = ConfigurationVariableBuilder::createFrom($variableName, $interfaceParameter);
             }
             $methodInvoker = MethodInvoker::createWith($interfaceToCall, $newInstance, $parameters, InMemoryReferenceSearchService::createWith([ConfigurationVariableService::REFERENCE_NAME => $this->variableConfigurationService]));
-            $extensionObjectToResolve = $methodInvoker->processMessage(MessageBuilder::withPayload('stub')->build());
+            $extensionObjectToResolve = $methodInvoker->executeEndpoint(MessageBuilder::withPayload('stub')->build());
 
             if (! is_array($extensionObjectToResolve)) {
                 Assert::isObject($extensionObjectToResolve, "Incorrect configuration given in {$annotationRegistration->getClassName()}:{$annotationRegistration->getMethodName()}. Configuration returned by ServiceContext must be object or array of objects.");

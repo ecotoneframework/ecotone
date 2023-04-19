@@ -3,7 +3,9 @@
 namespace Ecotone\Messaging\Handler\Transformer;
 
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageProcessor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -39,9 +41,9 @@ class TransformerMessageProcessor implements MessageProcessor
     /**
      * @inheritDoc
      */
-    public function processMessage(Message $message): ?Message
+    public function executeEndpoint(Message $message): ?Message
     {
-        $reply = $this->methodInvoker->processMessage($message);
+        $reply = $this->methodInvoker->executeEndpoint($message);
         $replyBuilder = MessageBuilder::fromMessage($message);
 
         if (is_null($reply)) {
@@ -60,6 +62,31 @@ class TransformerMessageProcessor implements MessageProcessor
         }
 
         return $reply;
+    }
+
+    public function getMethodCall(Message $message): MethodCall
+    {
+        return $this->methodInvoker->getMethodCall($message);
+    }
+
+    public function getAroundMethodInterceptors(): array
+    {
+        return $this->methodInvoker->getAroundMethodInterceptors();
+    }
+
+    public function getObjectToInvokeOn(): string|object
+    {
+        return $this->methodInvoker->getObjectToInvokeOn();
+    }
+
+    public function getInterceptedInterface(): InterfaceToCall
+    {
+        return $this->methodInvoker->getInterceptedInterface();
+    }
+
+    public function getEndpointAnnotations(): array
+    {
+        return $this->methodInvoker->getEndpointAnnotations();
     }
 
     /**

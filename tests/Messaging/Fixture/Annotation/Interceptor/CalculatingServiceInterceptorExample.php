@@ -7,6 +7,7 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\Interceptor;
 use Ecotone\Messaging\Attribute\ClassReference;
 use Ecotone\Messaging\Attribute\Interceptor\Around;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Messaging\Message;
 
 #[ClassReference('calculatingService')]
 class CalculatingServiceInterceptorExample
@@ -45,10 +46,8 @@ class CalculatingServiceInterceptorExample
     #[Around(2, CalculatingServiceInterceptorExample::class)]
     public function sum(MethodInvocation $methodInvocation, int $amount)
     {
-        $result = $amount + $this->secondValueForMathOperations;
-
-        $methodInvocation->replaceArgument('amount', $result);
-        return $methodInvocation->proceed();
+        $result = $this->getResult($methodInvocation);
+        return $result + $this->secondValueForMathOperations;
     }
 
     /**
@@ -57,7 +56,7 @@ class CalculatingServiceInterceptorExample
      */
     public function sumAfterCalling(MethodInvocation $methodInvocation): int
     {
-        $result = $methodInvocation->proceed();
+        $result = $this->getResult($methodInvocation);
 
         return $this->secondValueForMathOperations + $result;
     }
@@ -70,19 +69,15 @@ class CalculatingServiceInterceptorExample
     #[Around]
     public function subtract(MethodInvocation $methodInvocation, int $amount): int
     {
-        $result = $amount - $this->secondValueForMathOperations;
-
-        $methodInvocation->replaceArgument('amount', $result);
-        return $methodInvocation->proceed();
+        $result = $this->getResult($methodInvocation);
+        return $result - $this->secondValueForMathOperations;
     }
 
     #[Around(2, CalculatingServiceInterceptorExample::class)]
     public function multiply(MethodInvocation $methodInvocation, int $amount): int
     {
-        $result = $amount * $this->secondValueForMathOperations;
-
-        $methodInvocation->replaceArgument('amount', $result);
-        return $methodInvocation->proceed();
+        $result = $this->getResult($methodInvocation);
+        return $result * $this->secondValueForMathOperations;
     }
 
     /**
@@ -91,5 +86,12 @@ class CalculatingServiceInterceptorExample
     public function isWasCalled(): bool
     {
         return $this->wasCalled;
+    }
+
+    private function getResult(MethodInvocation $methodInvocation): mixed
+    {
+        $result = $methodInvocation->proceed();
+
+        return $result instanceof Message ? $result->getPayload() : $result;
     }
 }

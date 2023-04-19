@@ -2,7 +2,10 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Processor;
 
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageProcessor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodCall;
 use Ecotone\Messaging\Message;
 use Throwable;
 
@@ -31,9 +34,34 @@ class ThrowExceptionMessageProcessor implements MessageProcessor
     /**
      * @inheritDoc
      */
-    public function processMessage(Message $message)
+    public function executeEndpoint(Message $message)
     {
         throw $this->exception;
+    }
+
+    public function getMethodCall(Message $message): MethodCall
+    {
+        return MethodCall::createWith([], false);
+    }
+
+    public function getAroundMethodInterceptors(): array
+    {
+        return [];
+    }
+
+    public function getObjectToInvokeOn(): string|object
+    {
+        return self::class;
+    }
+
+    public function getInterceptedInterface(): InterfaceToCall
+    {
+        return InterfaceToCall::create(self::class, 'executeEndpoint');
+    }
+
+    public function getEndpointAnnotations(): array
+    {
+        return [];
     }
 
     /**

@@ -410,7 +410,7 @@ class TransformerBuilderTest extends MessagingTest
         $serviceActivator->handle(MessageBuilder::withPayload(2)->setReplyChannel($replyChannel)->build());
 
         $this->assertEquals(
-            12,
+            24,
             $replyChannel->receive()->getPayload()
         );
     }

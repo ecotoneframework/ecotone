@@ -8,6 +8,7 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Attribute\EndpointAnnotation;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Messaging\Channel\CombinedMessageChannel;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
@@ -104,7 +105,7 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
      */
     public function canHandle($extensionObject): bool
     {
-        return false;
+        return $extensionObject instanceof CombinedMessageChannel;
     }
 
     /**
@@ -112,8 +113,23 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
      */
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
+        $combinedMessageChannels = [];
+        /** @var CombinedMessageChannel $combinedMessageChannel */
+        foreach (ExtensionObjectResolver::resolve(CombinedMessageChannel::class, $extensionObjects) as $combinedMessageChannel) {
+            $combinedMessageChannels[$combinedMessageChannel->getReferenceName()] = $combinedMessageChannel->getCombinedChannels();
+        }
+
         foreach ($this->asyncEndpoints as $endpointId => $asyncChannels) {
-            $messagingConfiguration->registerAsynchronousEndpoint($asyncChannels, $endpointId);
+            $asyncChannels         = is_array($asyncChannels) ? $asyncChannels : [$asyncChannels];
+            $asyncChannelsResolved = [];
+            foreach ($asyncChannels as $asyncChannel) {
+                if (array_key_exists($asyncChannel, $combinedMessageChannels)) {
+                    $asyncChannelsResolved = array_merge($asyncChannelsResolved, $combinedMessageChannels[$asyncChannel]);
+                } else {
+                    $asyncChannelsResolved[] = $asyncChannel;
+                }
+            }
+            $messagingConfiguration->registerAsynchronousEndpoint($asyncChannelsResolved, $endpointId);
         }
     }
 

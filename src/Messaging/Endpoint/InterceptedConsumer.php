@@ -96,7 +96,7 @@ class InterceptedConsumer implements ConsumerLifecycle
         if ($pollingMetadata->getExecutionTimeLimitInMilliseconds() > 0) {
             $interceptors[] = new TimeLimitInterceptor($pollingMetadata->getExecutionTimeLimitInMilliseconds());
         }
-        $interceptors[] = new ConnectionExceptionRetryInterceptor($referenceSearchService->get(LoggingHandlerBuilder::LOGGER_REFERENCE),$pollingMetadata->getConnectionRetryTemplate(), $pollingMetadata->isStoppedOnError());
+        $interceptors[] = new ConnectionExceptionRetryInterceptor($referenceSearchService->get(LoggingHandlerBuilder::LOGGER_REFERENCE), $pollingMetadata->getConnectionRetryTemplate(), $pollingMetadata->isStoppedOnError());
 
         return $interceptors;
     }

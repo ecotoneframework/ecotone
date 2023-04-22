@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
@@ -42,7 +43,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'logBefore'),
                 LoggingHandlerBuilder::createForBefore(),
                 Precedence::ERROR_CHANNEL_PRECEDENCE - 1,
-                LogBefore::class
+                LogBefore::class . '||' . AsynchronousRunningEndpoint::class
             )
         );
         $messagingConfiguration->registerAfterMethodInterceptor(
@@ -60,7 +61,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 new LoggingInterceptor(null),
                 'logException',
                 Precedence::ERROR_CHANNEL_PRECEDENCE - 1,
-                LogError::class
+                LogError::class . '||' . AsynchronousRunningEndpoint::class
             )
         );
     }

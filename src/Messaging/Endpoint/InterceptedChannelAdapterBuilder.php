@@ -29,7 +29,7 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
     final public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): ConsumerLifecycle
     {
         $pollingMetadata = $this->withContinuesPolling() ? $pollingMetadata->setFixedRateInMilliseconds(1) : $pollingMetadata;
-        $interceptors = InterceptedConsumer::createInterceptorsForPollingMetadata($pollingMetadata);
+        $interceptors = InterceptedConsumer::createInterceptorsForPollingMetadata($pollingMetadata, $referenceSearchService);
 
         foreach ($interceptors as $interceptor) {
             if ($interceptor->isInterestedInPostSend()) {

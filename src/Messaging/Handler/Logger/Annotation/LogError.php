@@ -12,4 +12,10 @@ use Ecotone\Messaging\Handler\Logger\LoggingLevel;
 class LogError extends Logger
 {
     public string $logLevel = LoggingLevel::CRITICAL;
+
+    public function __construct(string $logLevel = LoggingLevel::CRITICAL, bool $logFullMessage = false)
+    {
+        $this->logLevel       = $logLevel;
+        $this->logFullMessage = $logFullMessage;
+    }
 }

@@ -41,8 +41,10 @@ class LoggingInterceptor
      * @throws MessagingException
      * @throws TypeDefinitionException
      */
-    public function logBefore(Message $message, LogBefore $log): void
+    public function logBefore(Message $message, ?LogBefore $log): void
     {
+        $log ??= new LogBefore();
+
         $this->loggingService->log(LoggingLevel::create($log->logLevel, $log->logFullMessage), $message);
     }
 
@@ -53,8 +55,10 @@ class LoggingInterceptor
      * @throws MessagingException
      * @throws TypeDefinitionException
      */
-    public function logAfter(Message $message, LogAfter $log): void
+    public function logAfter(Message $message, ?LogAfter $log): void
     {
+        $log ??= new LogAfter();
+
         $this->loggingService->log(LoggingLevel::create($log->logLevel, $log->logFullMessage), $message);
     }
 

@@ -9,6 +9,8 @@ use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\TimeLimitInterceptor;
 use Ecotone\Messaging\Endpoint\PollingConsumer\ConnectionException;
+use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class ContinuouslyRunningConsumer
@@ -76,7 +78,7 @@ class InterceptedConsumer implements ConsumerLifecycle
      * @return ConsumerInterceptor[]
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createInterceptorsForPollingMetadata(PollingMetadata $pollingMetadata): array
+    public static function createInterceptorsForPollingMetadata(PollingMetadata $pollingMetadata, ReferenceSearchService $referenceSearchService): array
     {
         $interceptors = [];
         if ($pollingMetadata->getHandledMessageLimit() > 0) {
@@ -94,7 +96,7 @@ class InterceptedConsumer implements ConsumerLifecycle
         if ($pollingMetadata->getExecutionTimeLimitInMilliseconds() > 0) {
             $interceptors[] = new TimeLimitInterceptor($pollingMetadata->getExecutionTimeLimitInMilliseconds());
         }
-        $interceptors[] = new ConnectionExceptionRetryInterceptor($pollingMetadata->getConnectionRetryTemplate(), $pollingMetadata->isStoppedOnError());
+        $interceptors[] = new ConnectionExceptionRetryInterceptor($referenceSearchService->get(LoggingHandlerBuilder::LOGGER_REFERENCE),$pollingMetadata->getConnectionRetryTemplate(), $pollingMetadata->isStoppedOnError());
 
         return $interceptors;
     }

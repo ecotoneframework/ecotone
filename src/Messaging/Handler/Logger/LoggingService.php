@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types=0);
 
 namespace Ecotone\Messaging\Handler\Logger;
 
@@ -75,12 +75,11 @@ class LoggingService
 
     /**
      * @param Message $message
-     * @return mixed|string
      * @throws InvalidArgumentException
      * @throws TypeDefinitionException
      * @throws MessagingException
      */
-    private function convertPayloadToScalarType(Message $message)
+    private function convertPayloadToScalarType(Message $message): string
     {
         $data = $message->getPayload();
         $sourceMediaType = $message->getHeaders()->hasContentType() ? $message->getHeaders()->getContentType() : MediaType::createApplicationXPHP();

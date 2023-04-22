@@ -14,7 +14,5 @@ use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
  */
 interface InboundGatewayEntrypoint
 {
-    #[LogBefore]
-    #[LogError]
     public function executeEntrypoint($data);
 }

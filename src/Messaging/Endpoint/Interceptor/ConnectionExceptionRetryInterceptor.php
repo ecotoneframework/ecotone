@@ -9,17 +9,16 @@ use Ecotone\Messaging\Endpoint\PollingConsumer\ConnectionException;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Throwable;
+use \Psr\Log\LoggerInterface;
 
 class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
 {
     private int $currentNumberOfRetries = 0;
     private ?\Ecotone\Messaging\Handler\Recoverability\RetryTemplate $retryTemplate;
-    private bool $isStoppedOnError;
 
-    public function __construct(?RetryTemplateBuilder $retryTemplate, bool $isStoppedOnError)
+    public function __construct(private LoggerInterface $logger, ?RetryTemplateBuilder $retryTemplate, private bool $isStoppedOnError)
     {
         $this->retryTemplate = $retryTemplate ? $retryTemplate->build() : null;
-        $this->isStoppedOnError = $isStoppedOnError;
     }
 
     /**
@@ -52,6 +51,8 @@ class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
             return true;
         }
 
+        $retryConnectionIn = $this->retryTemplate->calculateNextDelay($this->currentNumberOfRetries);
+        $this->logger->info("Retrying to connect to the Message Channel. Current number of retries: {$this->currentNumberOfRetries}, Message Consumer will try to reconnect in {$retryConnectionIn}ms. Exception: {$exception->getMessage()}");
         return false;
     }
 

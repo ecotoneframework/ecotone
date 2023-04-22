@@ -41,9 +41,9 @@ final class OutboxWithMultipleChannels
     {
         /** faking asynchronous message channels */
         return [
-            SimpleMessageChannelBuilder::createQueueChannel("outbox"),
+            SimpleMessageChannelBuilder::createQueueChannel('outbox'),
             PollingMetadata::create('outbox')->withTestingSetup(),
-            SimpleMessageChannelBuilder::createQueueChannel("rabbitMQ"),
+            SimpleMessageChannelBuilder::createQueueChannel('rabbitMQ'),
             PollingMetadata::create('rabbitMQ')->withTestingSetup(),
         ];
     }

@@ -96,7 +96,7 @@ class MessageHeadersTest extends TestCase
         $messageHeaders = MessageHeaders::create([
             'ecotone.domain.aggregate' => 'name',
             'ecotone.domain.method' => 'bla',
-            'ecotone.messaging',
+            'ecotone.messaging' => 'test',
         ]);
 
         $this->assertEquals(

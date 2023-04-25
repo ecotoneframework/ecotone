@@ -39,7 +39,7 @@ class ServiceExpectingOneArgument
 
     public function withArrayReturnValue(string $name): array
     {
-        return [$name];
+        return ['some' => $name];
     }
 
     public function withArrayTypeHintAndArrayReturnValue(array $values): array

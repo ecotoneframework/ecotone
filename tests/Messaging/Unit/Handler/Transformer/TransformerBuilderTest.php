@@ -176,7 +176,7 @@ class TransformerBuilderTest extends MessagingTest
 
         $this->assertMessages(
             MessageBuilder::withPayload($payload)
-                ->setHeader('0', $payload)
+                ->setHeader('some', $payload)
                 ->setContentType(MediaType::createApplicationXPHP())
                 ->build(),
             $outputChannel->receive()
@@ -189,7 +189,7 @@ class TransformerBuilderTest extends MessagingTest
      */
     public function test_transforming_headers_if_array_returned_and_message_payload_is_also_array()
     {
-        $payload = ['some payload'];
+        $payload = ['some' => 'some payload'];
         $outputChannel = QueueChannel::create();
         $outputChannelName = 'output';
         $objectToInvokeReference = 'service-a';
@@ -208,7 +208,7 @@ class TransformerBuilderTest extends MessagingTest
 
         $this->assertMessages(
             MessageBuilder::withPayload($payload)
-                ->setHeader('0', 'some payload')
+                ->setHeader('some', 'some payload')
                 ->build(),
             $outputChannel->receive()
         );

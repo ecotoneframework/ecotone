@@ -48,11 +48,15 @@ class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
 
         $this->currentNumberOfRetries++;
         if (! $this->retryTemplate || ! $this->retryTemplate->canBeCalledNextTime($this->currentNumberOfRetries)) {
+            $this->logger->critical("Connection retry to Message Channel was exceed.", ['exception' => $exception]);
             return true;
         }
 
         $retryConnectionIn = $this->retryTemplate->calculateNextDelay($this->currentNumberOfRetries);
-        $this->logger->info("Retrying to connect to the Message Channel. Current number of retries: {$this->currentNumberOfRetries}, Message Consumer will try to reconnect in {$retryConnectionIn}ms. Exception: {$exception->getMessage()}");
+        $this->logger->info(
+            ConnectionException::connectionRetryMessage($this->currentNumberOfRetries, $retryConnectionIn),
+            ['exception' => $exception]
+        );
         return false;
     }
 

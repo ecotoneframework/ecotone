@@ -381,7 +381,7 @@ final class MessageHeaders
             if (is_null($headerName) || $headerName === '') {
                 throw InvalidMessageHeaderException::create('Passed empty header name');
             }
-            if (!is_string($headerName)) {
+            if (! is_string($headerName)) {
                 throw InvalidMessageHeaderException::create(sprintf('Passed header name must be string `%s` given, with value `%s`', $headerName, $headerValue));
             }
         }

@@ -6,4 +6,8 @@ use RuntimeException;
 
 class ConnectionException extends RuntimeException
 {
+    public static function connectionRetryMessage(int $retryCount, int $delayTimeMs): self
+    {
+        return new self("Retrying to connect to the Message Channel. Current number of retries: {$retryCount}, Message Consumer will try to reconnect in {$delayTimeMs}ms.",);
+    }
 }

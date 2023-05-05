@@ -48,12 +48,12 @@ class OrderDispatch
     public function whenOrderStarted(OrderDispatchWasBegun $event): void
     {
         $this->orderId = $event->getOrderId();
-        $this->status = "new";
+        $this->status = 'new';
     }
 
     #[EventSourcingHandler]
     public function whenPaymentDone(OrderDispatchWasFinished $event): void
     {
-        $this->status = "closed";
+        $this->status = 'closed';
     }
 }

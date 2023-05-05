@@ -20,6 +20,7 @@ use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\AggregateEvents;
 use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingSaga;
 
 class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
 {
@@ -72,7 +73,8 @@ class CallAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         $this->aggregateMethodWithEvents = $aggregateMethodWithEvents;
 
         $eventSourcedAggregateAnnotation = TypeDescriptor::create(EventSourcingAggregate::class);
-        if ($interfaceToCall->hasClassAnnotation($eventSourcedAggregateAnnotation)) {
+        $eventSourcedSagaAnnotation = TypeDescriptor::create(EventSourcingSaga::class);
+        if ($interfaceToCall->hasClassAnnotation($eventSourcedAggregateAnnotation) || $interfaceToCall->hasClassAnnotation($eventSourcedSagaAnnotation)) {
             $this->isEventSourced = true;
         }
 

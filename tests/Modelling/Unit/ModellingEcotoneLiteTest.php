@@ -12,6 +12,10 @@ use Test\Ecotone\Modelling\Fixture\CommandEventFlow\CreateMerchant;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\Merchant;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\MerchantSubscriber;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\User;
+use Test\Ecotone\Modelling\Fixture\EventSourcedSaga\OrderDispatch;
+use Test\Ecotone\Modelling\Fixture\EventSourcedSaga\OrderDispatchRepository;
+use Test\Ecotone\Modelling\Fixture\EventSourcedSaga\OrderWasCreated;
+use Test\Ecotone\Modelling\Fixture\EventSourcedSaga\PaymentWasDoneEvent;
 use Test\Ecotone\Modelling\Fixture\HandlerWithAbstractClass\TestAbstractHandler;
 use Test\Ecotone\Modelling\Fixture\HandlerWithAbstractClass\TestCommand;
 use Test\Ecotone\Modelling\Fixture\HandlerWithAbstractClass\TestHandler;
@@ -114,6 +118,27 @@ final class ModellingEcotoneLiteTest extends TestCase
         $this->assertEquals(
             1,
             $ecotoneLite->sendQueryWithRouting('getResult')
+        );
+    }
+
+    public function test_event_flow_with_event_sourcing_aggregate()
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [OrderDispatch::class],
+            [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+        );
+
+        $this->assertEquals(
+            "new",
+            $ecotoneLite->publishEvent(new OrderWasCreated("1"))
+                ->sendQueryWithRouting('order_dispatch.getStatus', metadata: ['aggregate.id' => "1"])
+        );
+        $this->assertEquals(
+            "closed",
+            $ecotoneLite->publishEvent(new PaymentWasDoneEvent("1"))
+                ->sendQueryWithRouting('order_dispatch.getStatus', metadata: ['aggregate.id' => "1"])
         );
     }
 }

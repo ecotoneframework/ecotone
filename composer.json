@@ -66,6 +66,11 @@
         },
         "ecotone": {
             "repository": "ecotone"
+        },
+        "merge-plugin": {
+            "include": [
+                "../local_packages.json"
+            ]
         }
     },
     "config": {

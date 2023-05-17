@@ -98,6 +98,7 @@ class SaveAggregateService
             }
 
             $metadata = RevisionMetadataEnricher::enrich($metadata, $event);
+            $metadata = MessageHeaders::unsetTransportMessageKeys($metadata);
 
             return Event::create($event, $metadata);
         }, $events);

@@ -163,6 +163,13 @@ final class MessageHeaders
         ];
     }
 
+    public static function unsetTransportMessageKeys(array $metadata): array
+    {
+        unset($metadata[self::MESSAGE_ID]);
+
+        return $metadata;
+    }
+
     public static function unsetAsyncKeys(array $metadata): array
     {
         unset($metadata[self::TYPE_ID]);

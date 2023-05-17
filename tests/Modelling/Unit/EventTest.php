@@ -6,8 +6,11 @@ namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Modelling\Event;
-use PHPUnit\Framework\TestCase;
+
 use function PHPUnit\Framework\assertEquals;
+
+use PHPUnit\Framework\TestCase;
+use stdClass;
 
 /**
  * @internal
@@ -22,6 +25,6 @@ final class EventTest extends TestCase
         ];
 
         assertEquals($metadata, (Event::createWithType('type', [], $metadata))->getMetadata());
-        assertEquals($metadata, (Event::create(new \stdClass(), $metadata))->getMetadata());
+        assertEquals($metadata, (Event::create(new stdClass(), $metadata))->getMetadata());
     }
 }

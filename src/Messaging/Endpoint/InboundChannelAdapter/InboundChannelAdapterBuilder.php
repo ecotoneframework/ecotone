@@ -20,7 +20,6 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Exception;
 
 /**
  * Class InboundChannelAdapterBuilder

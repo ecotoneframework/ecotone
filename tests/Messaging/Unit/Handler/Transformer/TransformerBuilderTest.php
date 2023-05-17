@@ -19,7 +19,6 @@ use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Exception;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingMessageAndReturningMessage;
@@ -355,8 +354,8 @@ class TransformerBuilderTest extends MessagingTest
         $serviceActivator = TransformerBuilder::createWithDirectObject($objectToInvoke, 'result')
             ->withInputChannelName('someName')
             ->withEndpointId('someEndpoint')
-            ->addAroundInterceptor(AroundInterceptorReference::create( CalculatingServiceInterceptorExample::class, InterfaceToCall::create(CalculatingServiceInterceptorExample::class,'sum'), 2, '', []))
-            ->addAroundInterceptor(AroundInterceptorReference::create( CalculatingServiceInterceptorExample::class, InterfaceToCall::create(CalculatingServiceInterceptorExample::class,'multiply'), 1, '', []))
+            ->addAroundInterceptor(AroundInterceptorReference::create(CalculatingServiceInterceptorExample::class, InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'sum'), 2, '', []))
+            ->addAroundInterceptor(AroundInterceptorReference::create(CalculatingServiceInterceptorExample::class, InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'multiply'), 1, '', []))
             ->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createWith([
                 CalculatingServiceInterceptorExample::class => CalculatingServiceInterceptorExample::create(4),
             ]));

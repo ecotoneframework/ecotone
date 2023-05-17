@@ -6,9 +6,6 @@ namespace Ecotone\Messaging\Handler;
 
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
-use Ecotone\Messaging\Config\ReferenceTypeFromNameResolver;
-use InvalidArgumentException;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -51,7 +48,7 @@ class InterfaceToCallRegistry
 
     public static function createWithBackedBy(self $interfaceToCallRegistry): self
     {
-        $self = new self( null, false);
+        $self = new self(null, false);
         $self->preparedInterfaceToCallRegistry = $interfaceToCallRegistry;
 
         return $self;
@@ -65,7 +62,7 @@ class InterfaceToCallRegistry
      */
     public static function createWithInterfaces(iterable $interfacesToCall, bool $isLocked, ReferenceSearchService $referenceSearchService): self
     {
-        $self = new self( null, $isLocked);
+        $self = new self(null, $isLocked);
         foreach ($interfacesToCall as $interfaceToCall) {
             $self->interfacesToCall[self::getName($interfaceToCall->getInterfaceName(), $interfaceToCall->getMethodName())] = $interfaceToCall;
         }

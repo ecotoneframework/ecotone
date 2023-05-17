@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
-use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -15,8 +13,6 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Precedence;
-use Ecotone\Messaging\Support\InvalidArgumentException;
-use ReflectionException;
 
 final class AroundInterceptorReference implements InterceptorWithPointCut
 {

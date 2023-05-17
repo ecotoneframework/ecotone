@@ -7,7 +7,6 @@ namespace Test\Ecotone\Messaging\Unit\Handler\ServiceActivator;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
-use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -180,9 +179,9 @@ class ServiceActivatorBuilderTest extends MessagingTest
     {
         $objectToInvoke = CalculatingService::create(0);
 
-        $firstInterceptor = AroundInterceptorReference::create( 'calculator', InterfaceToCall::create(CalculatingServiceInterceptorExample::class,'sum'), 1, '', []);
-        $secondInterceptor = AroundInterceptorReference::create( 'calculator', InterfaceToCall::create(CalculatingServiceInterceptorExample::class,'multiply'), 2, '', []);
-        $thirdInterceptor = AroundInterceptorReference::create( 'calculator', InterfaceToCall::create(CalculatingServiceInterceptorExample::class,'sum'), 3, '', []);
+        $firstInterceptor = AroundInterceptorReference::create('calculator', InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'sum'), 1, '', []);
+        $secondInterceptor = AroundInterceptorReference::create('calculator', InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'multiply'), 2, '', []);
+        $thirdInterceptor = AroundInterceptorReference::create('calculator', InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'sum'), 3, '', []);
         $replyChannel = QueueChannel::create();
 
         $serviceActivator = ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'result')

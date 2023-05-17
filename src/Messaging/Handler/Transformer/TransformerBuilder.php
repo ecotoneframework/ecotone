@@ -60,7 +60,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
         return [
             $this->methodNameOrInterface instanceof InterfaceToCall
                 ? $this->methodNameOrInterface
-                : $interfaceToCallRegistry->getFor($this->directObject, $this->getMethodName())
+                : $interfaceToCallRegistry->getFor($this->directObject, $this->getMethodName()),
         ];
     }
 

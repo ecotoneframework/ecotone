@@ -33,7 +33,7 @@ class ScheduledModuleTest extends AnnotationConfigurationTest
             $configuration,
             $this->createMessagingSystemConfiguration()
                 ->registerConsumer(
-                    InboundChannelAdapterBuilder::create('requestChannel', SchedulerExample::class, InterfaceToCall::create(SchedulerExample::class , 'doRun'))
+                    InboundChannelAdapterBuilder::create('requestChannel', SchedulerExample::class, InterfaceToCall::create(SchedulerExample::class, 'doRun'))
                         ->withEndpointId('run')
                         ->withRequiredInterceptorNames(['some'])
                 )

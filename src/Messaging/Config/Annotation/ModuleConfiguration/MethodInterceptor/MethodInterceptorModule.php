@@ -145,9 +145,9 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
         $methodParameterConverterBuilders = $parameterConverterFactory->createParameterWithDefaults($interfaceToCall, (bool)$interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(IgnorePayload::class)));
         if ($isTransformer) {
             return TransformerBuilder::create(
-                    AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),
-                    $interfaceToCallRegistry->getFor($methodInterceptor->getClassName(), $methodInterceptor->getMethodName())
-                )
+                AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),
+                $interfaceToCallRegistry->getFor($methodInterceptor->getClassName(), $methodInterceptor->getMethodName())
+            )
                 ->withMethodParameterConverters($methodParameterConverterBuilders);
         }
 

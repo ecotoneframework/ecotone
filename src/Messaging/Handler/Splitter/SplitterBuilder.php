@@ -55,7 +55,7 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
         return [
             $this->methodNameOrInterface instanceof InterfaceToCall
                 ? $this->methodNameOrInterface
-                : $interfaceToCallRegistry->getFor($this->directObject, $this->methodNameOrInterface)
+                : $interfaceToCallRegistry->getFor($this->directObject, $this->methodNameOrInterface),
         ];
     }
 

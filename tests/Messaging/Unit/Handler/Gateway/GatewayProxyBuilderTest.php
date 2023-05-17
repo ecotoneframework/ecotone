@@ -1012,7 +1012,7 @@ class GatewayProxyBuilderTest extends MessagingTest
                 Transactional::createWith(['transactionFactory']),
             ])
             ->addAroundInterceptor(
-                AroundInterceptorReference::create( 'transactionInterceptor', InterfaceToCall::create(TransactionInterceptor::class, 'transactional'), 1, Transactional::class, [])
+                AroundInterceptorReference::create('transactionInterceptor', InterfaceToCall::create(TransactionInterceptor::class, 'transactional'), 1, Transactional::class, [])
             );
 
         $gatewayProxy = $gatewayProxyBuilder->build(

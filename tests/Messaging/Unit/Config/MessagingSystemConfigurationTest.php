@@ -16,7 +16,6 @@ use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ConsoleCommandConfiguration;
 use Ecotone\Messaging\Config\ConsoleCommandParameter;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
-use Ecotone\Messaging\Config\InMemoryReferenceTypeFromNameResolver;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\OptionalReference;
@@ -805,7 +804,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
     {
         $this->assertEquals(
             MessagingSystemConfiguration::prepareWithModuleRetrievingService(InMemoryModuleMessaging::createWith([], [ServiceConfiguration::createWithDefaults()]), InterfaceToCallRegistry::createEmpty(), ServiceConfiguration::createWithDefaults()->withDefaultSerializationMediaType(MediaType::APPLICATION_JSON)),
-            MessagingSystemConfiguration::prepareWithModuleRetrievingService(InMemoryModuleMessaging::createWith([], [ServiceConfiguration::createWithDefaults()->withDefaultSerializationMediaType(MediaType::APPLICATION_XML)]),InterfaceToCallRegistry::createEmpty(), ServiceConfiguration::createWithDefaults()->withDefaultSerializationMediaType(MediaType::APPLICATION_JSON))
+            MessagingSystemConfiguration::prepareWithModuleRetrievingService(InMemoryModuleMessaging::createWith([], [ServiceConfiguration::createWithDefaults()->withDefaultSerializationMediaType(MediaType::APPLICATION_XML)]), InterfaceToCallRegistry::createEmpty(), ServiceConfiguration::createWithDefaults()->withDefaultSerializationMediaType(MediaType::APPLICATION_JSON))
         );
     }
 
@@ -1617,7 +1616,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::create(
                         $calculatorWithOne,
-                        InterfaceToCall::create(CalculatingService::class,'sum'),
+                        InterfaceToCall::create(CalculatingService::class, 'sum'),
                         1,
                         '',
                         []
@@ -1626,7 +1625,7 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 ->registerAroundMethodInterceptor(
                     AroundInterceptorReference::create(
                         $calculatorWithTwoAround,
-                        InterfaceToCall::create(CalculatingServiceInterceptorExample::class,'sum'),
+                        InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'sum'),
                         1,
                         '',
                         []

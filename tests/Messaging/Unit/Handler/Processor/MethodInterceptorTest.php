@@ -28,7 +28,13 @@ class MethodInterceptorTest extends TestCase
 {
     public function test_adding_parameters_when_type_hinting_for_annotation_class()
     {
-        $methodInterceptor = MethodInterceptor::create(CalculatorInterceptor::class, InterfaceToCall::create(CalculatorInterceptor::class, 'multiplyBefore'), ServiceActivatorBuilder::create(CalculatorInterceptor::class, 'multiplyBefore'), 1, '');
+        $methodInterceptor = MethodInterceptor::create(
+            CalculatorInterceptor::class,
+            InterfaceToCall::create(CalculatorInterceptor::class, 'multiplyBefore'),
+            ServiceActivatorBuilder::create(CalculatorInterceptor::class, InterfaceToCall::create(CalculatorInterceptor::class, 'multiplyBefore')),
+            1,
+            ''
+        );
 
         $this->assertEquals(
             [
@@ -44,7 +50,13 @@ class MethodInterceptorTest extends TestCase
 
     public function test_adding_reference_parameter_converters()
     {
-        $methodInterceptor = MethodInterceptor::create(ServiceActivatorInterceptorWithServicesExample::class, InterfaceToCall::create(ServiceActivatorInterceptorWithServicesExample::class, 'doSomethingBefore'), ServiceActivatorBuilder::create(ServiceActivatorInterceptorWithServicesExample::class, 'doSomethingBefore'), 1, '');
+        $methodInterceptor = MethodInterceptor::create(
+            ServiceActivatorInterceptorWithServicesExample::class,
+            InterfaceToCall::create(ServiceActivatorInterceptorWithServicesExample::class, 'doSomethingBefore'),
+            ServiceActivatorBuilder::create(ServiceActivatorInterceptorWithServicesExample::class, InterfaceToCall::create(ServiceActivatorInterceptorWithServicesExample::class, 'doSomethingBefore')),
+            1,
+            ''
+        );
 
         $this->assertEquals(
             [
@@ -64,14 +76,14 @@ class MethodInterceptorTest extends TestCase
             MethodInterceptor::create(
                 AroundInterceptorExample::class,
                 InterfaceToCall::create(AroundInterceptorExample::class, 'withNonAnnotationClass'),
-                ServiceActivatorBuilder::create(AroundInterceptorExample::class, 'withNonAnnotationClass'),
+                ServiceActivatorBuilder::create(AroundInterceptorExample::class, InterfaceToCall::create(AroundInterceptorExample::class, 'withNonAnnotationClass')),
                 1,
                 '(' . AttributeOne::class . ')'
             ),
             MethodInterceptor::create(
                 AroundInterceptorExample::class,
                 InterfaceToCall::create(AroundInterceptorExample::class, 'withNonAnnotationClass'),
-                ServiceActivatorBuilder::create(AroundInterceptorExample::class, 'withNonAnnotationClass'),
+                ServiceActivatorBuilder::create(AroundInterceptorExample::class, InterfaceToCall::create(AroundInterceptorExample::class, 'withNonAnnotationClass')),
                 1,
                 ''
             )

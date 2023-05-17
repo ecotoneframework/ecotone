@@ -30,47 +30,24 @@ use Exception;
 class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
 {
     private string $referenceName;
-    private string $methodName;
     private string $requestChannelName;
     private ?object $directObject = null;
 
-    /**
-     * InboundChannelAdapterBuilder constructor.
-     * @param string $requestChannelName
-     * @param string $referenceName
-     * @param string $methodName
-     * @throws Exception
-     */
-    private function __construct(string $requestChannelName, string $referenceName, string $methodName)
+    private function __construct(string $requestChannelName, string $referenceName, private InterfaceToCall $interfaceToCall)
     {
         $this->inboundGateway = GatewayProxyBuilder::create($referenceName, InboundGatewayEntrypoint::class, 'executeEntrypoint', $requestChannelName);
         $this->referenceName = $referenceName;
-        $this->methodName = $methodName;
         $this->requestChannelName = $requestChannelName;
     }
 
-    /**
-     * @param string $requestChannelName
-     * @param string $referenceName
-     * @param string $methodName
-     * @return InboundChannelAdapterBuilder
-     * @throws Exception
-     */
-    public static function create(string $requestChannelName, string $referenceName, string $methodName): self
+    public static function create(string $requestChannelName, string $referenceName, InterfaceToCall $interfaceToCall): self
     {
-        return new self($requestChannelName, $referenceName, $methodName);
+        return new self($requestChannelName, $referenceName, $interfaceToCall);
     }
 
-    /**
-     * @param string $requestChannelName
-     * @param $objectToInvoke
-     * @param string $methodName
-     * @return InboundChannelAdapterBuilder
-     * @throws Exception
-     */
-    public static function createWithDirectObject(string $requestChannelName, $objectToInvoke, string $methodName): self
+    public static function createWithDirectObject(string $requestChannelName, $objectToInvoke, InterfaceToCall $interfaceToCall): self
     {
-        $self = new self($requestChannelName, '', $methodName);
+        $self = new self($requestChannelName, '', $interfaceToCall);
         $self->directObject = $objectToInvoke;
 
         return $self;
@@ -146,9 +123,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return $this->directObject
-                ? $interfaceToCallRegistry->getFor($this->directObject, $this->methodName)
-                : $interfaceToCallRegistry->getForReferenceName($this->referenceName, $this->methodName);
+        return $this->interfaceToCall;
     }
 
     /**
@@ -200,30 +175,28 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
         Assert::notNullAndEmpty($this->endpointId, "Endpoint Id for inbound channel adapter can't be empty");
 
         $referenceService = $this->directObject ?: $referenceSearchService->get($this->referenceName);
-        /** @var InterfaceToCall $interfaceToCall */
-        $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($referenceService, $this->methodName);
 
         $registeredAnnotations = $this->getEndpointAnnotations();
-        foreach ($interfaceToCall->getMethodAnnotations() as $annotation) {
+        foreach ($this->interfaceToCall->getMethodAnnotations() as $annotation) {
             if ($this->canBeAddedToRegisteredAnnotations($registeredAnnotations, $annotation)) {
                 $registeredAnnotations[] = $annotation;
             }
         }
-        foreach ($interfaceToCall->getClassAnnotations() as $annotation) {
+        foreach ($this->interfaceToCall->getClassAnnotations() as $annotation) {
             if ($this->canBeAddedToRegisteredAnnotations($registeredAnnotations, $annotation)) {
                 $registeredAnnotations[] = $annotation;
             }
         }
         $this->inboundGateway->withEndpointAnnotations($registeredAnnotations);
 
-        if (! $interfaceToCall->hasNoParameters()) {
-            throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not have any parameters");
+        if (! $this->interfaceToCall->hasNoParameters()) {
+            throw InvalidArgumentException::create("{$this->interfaceToCall} for InboundChannelAdapter should not have any parameters");
         }
 
-        $methodName = $this->methodName;
-        if ($interfaceToCall->hasReturnTypeVoid()) {
+        $methodName = $this->interfaceToCall->getMethodName();
+        if ($this->interfaceToCall->hasReturnTypeVoid()) {
             if ($this->requestChannelName !== NullableMessageChannel::CHANNEL_NAME) {
-                throw InvalidArgumentException::create("{$interfaceToCall} for InboundChannelAdapter should not be void, if channel name is not nullChannel");
+                throw InvalidArgumentException::create("{$this->interfaceToCall} for InboundChannelAdapter should not be void, if channel name is not nullChannel");
             }
 
             $referenceService = new PassThroughService($referenceService, $methodName);

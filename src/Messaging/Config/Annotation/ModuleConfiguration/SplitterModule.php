@@ -8,6 +8,7 @@ use Ecotone\Messaging\Attribute\Splitter;
 use Ecotone\Messaging\Attribute\Transformer;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\ModulePackageList;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Splitter\SplitterBuilder;
 
@@ -17,7 +18,7 @@ class SplitterModule extends MessageHandlerRegisterConfiguration
     /**
      * @inheritDoc
      */
-    public static function createMessageHandlerFrom(AnnotatedFinding $annotationRegistration): MessageHandlerBuilderWithParameterConverters
+    public static function createMessageHandlerFrom(AnnotatedFinding $annotationRegistration, InterfaceToCallRegistry $interfaceToCallRegistry): MessageHandlerBuilderWithParameterConverters
     {
         /** @var Transformer $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
@@ -25,7 +26,7 @@ class SplitterModule extends MessageHandlerRegisterConfiguration
         return
             SplitterBuilder::create(
                 AnnotatedDefinitionReference::getReferenceFor($annotationRegistration),
-                $annotationRegistration->getMethodName()
+                $interfaceToCallRegistry->getFor($annotationRegistration->getClassName(), $annotationRegistration->getMethodName())
             )
                 ->withEndpointId($annotation->getEndpointId())
                 ->withInputChannelName($annotation->getInputChannelName())

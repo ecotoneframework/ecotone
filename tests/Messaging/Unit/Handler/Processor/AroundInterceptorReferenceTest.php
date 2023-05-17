@@ -2,6 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
@@ -25,8 +26,8 @@ class AroundInterceptorReferenceTest extends TestCase
         $expectedPointcut = '';
 
         $this->assertEquals(
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, $expectedPointcut, []),
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, '', [])
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, $expectedPointcut, []),
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, '', [])
         );
     }
 
@@ -37,8 +38,8 @@ class AroundInterceptorReferenceTest extends TestCase
         $expectedPointcut = '(' . AttributeOne::class . ')';
 
         $this->assertEquals(
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, $expectedPointcut, []),
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, '', [])
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, $expectedPointcut, []),
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, '', [])
         );
     }
 
@@ -49,8 +50,8 @@ class AroundInterceptorReferenceTest extends TestCase
         $expectedPointcut = '(' . AttributeOne::class  . '||' . AttributeTwo::class . ')';
 
         $this->assertEquals(
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, $expectedPointcut, []),
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, '', [])
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, $expectedPointcut, []),
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, '', [])
         );
     }
 
@@ -61,8 +62,8 @@ class AroundInterceptorReferenceTest extends TestCase
         $expectedPointcut = '(' . AttributeOne::class  . '||' . AttributeTwo::class . ')';
 
         $this->assertEquals(
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, $expectedPointcut, []),
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, '', [])
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, $expectedPointcut, []),
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, '', [])
         );
     }
 
@@ -73,8 +74,8 @@ class AroundInterceptorReferenceTest extends TestCase
         $expectedPointcut = '(' . AttributeOne::class  . ')&&(' . AttributeTwo::class . ')';
 
         $this->assertEquals(
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, $expectedPointcut, []),
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, '', [])
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, $expectedPointcut, []),
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, '', [])
         );
     }
 
@@ -85,8 +86,8 @@ class AroundInterceptorReferenceTest extends TestCase
         $expectedPointcut = '(' . AttributeOne::class  . '||' . AttributeTwo::class . ')&&(' . AttributeThree::class . ')';
 
         $this->assertEquals(
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, $expectedPointcut, []),
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, '', [])
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, $expectedPointcut, []),
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, '', [])
         );
     }
 
@@ -97,8 +98,8 @@ class AroundInterceptorReferenceTest extends TestCase
         $expectedPointcut = '(' . AttributeOne::class  . '||' . AttributeThree::class . ')&&(' . AttributeTwo::class . ')';
 
         $this->assertEquals(
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, $expectedPointcut, []),
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, '', [])
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass, $methodName), 0, $expectedPointcut, []),
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass, $methodName), 0, '', [])
         );
     }
 
@@ -109,7 +110,7 @@ class AroundInterceptorReferenceTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, '', []);
+        AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, '', []);
     }
 
     public function test_throwing_exception_if_attribute_joined_with_non_attribute()
@@ -119,7 +120,7 @@ class AroundInterceptorReferenceTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, '', []);
+        AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, '', []);
     }
 
     public function test_ignoring_non_class_parameters()
@@ -129,8 +130,8 @@ class AroundInterceptorReferenceTest extends TestCase
         $expectedPointcut = '(' . AttributeOne::class . ')';
 
         $this->assertEquals(
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, $expectedPointcut, []),
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, '', [])
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, $expectedPointcut, []),
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, '', [])
         );
     }
 
@@ -141,8 +142,8 @@ class AroundInterceptorReferenceTest extends TestCase
         $expectedPointcut = '(' . AttributeOne::class . ')';
 
         $this->assertEquals(
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, $expectedPointcut, []),
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, '', [])
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, $expectedPointcut, []),
+            AroundInterceptorReference::create(AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, '', [])
         );
     }
 
@@ -153,12 +154,12 @@ class AroundInterceptorReferenceTest extends TestCase
         $expectedPointcut = '(' . AttributeOne::class . ')';
 
         $this->assertEquals(
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, $expectedPointcut, [
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, $expectedPointcut, [
                 PayloadConverter::create('payload'),
                 HeaderBuilder::create('class', 'token'),
                 AllHeadersBuilder::createWith('headers'),
             ]),
-            AroundInterceptorReference::create($interceptorClass, AroundInterceptorExample::class, $methodName, 0, '', [
+            AroundInterceptorReference::create( AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass,$methodName), 0, '', [
                 PayloadConverter::create('payload'),
                 HeaderBuilder::create('class', 'token'),
                 AllHeadersBuilder::createWith('headers'),

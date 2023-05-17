@@ -87,9 +87,8 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                 /** @var Around $aroundInterceptor */
                 $aroundInterceptor    = $interceptorInterface->getMethodAnnotation($aroundAnnotation);
                 $aroundInterceptors[] = AroundInterceptorReference::create(
-                    $methodInterceptor->getClassName(),
                     AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),
-                    $methodInterceptor->getMethodName(),
+                    $interceptorInterface,
                     $aroundInterceptor->precedence,
                     $aroundInterceptor->pointcut,
                     $parameterConverterFactory->createParameterConverters($interceptorInterface)
@@ -102,7 +101,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                 $beforeSendInterceptors[] = \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),
                     $interceptorInterface,
-                    self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interceptorInterface),
+                    self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interceptorInterface, $interfaceToCallRegistry),
                     $beforeSendInterceptor->precedence,
                     $beforeSendInterceptor->pointcut
                 );
@@ -115,7 +114,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                 $preCallInterceptors[] = \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),
                     $interceptorInterface,
-                    self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interceptorInterface),
+                    self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interceptorInterface, $interfaceToCallRegistry),
                     $beforeInterceptor->precedence,
                     $beforeInterceptor->pointcut
                 );
@@ -127,7 +126,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
                 $postCallInterceptors[] = \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor::create(
                     AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),
                     $interceptorInterface,
-                    self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interceptorInterface),
+                    self::createMessageHandler($methodInterceptor, $parameterConverterFactory, $interceptorInterface, $interfaceToCallRegistry),
                     $afterInterceptor->precedence,
                     $afterInterceptor->pointcut
                 );
@@ -137,7 +136,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
         return new self($beforeSendInterceptors, $preCallInterceptors, $aroundInterceptors, $postCallInterceptors, $relatedInterfaces);
     }
 
-    private static function createMessageHandler(AnnotatedFinding $methodInterceptor, ParameterConverterAnnotationFactory $parameterConverterFactory, InterfaceToCall $interfaceToCall): MessageHandlerBuilderWithOutputChannel
+    private static function createMessageHandler(AnnotatedFinding $methodInterceptor, ParameterConverterAnnotationFactory $parameterConverterFactory, InterfaceToCall $interfaceToCall, InterfaceToCallRegistry $interfaceToCallRegistry): MessageHandlerBuilderWithOutputChannel
     {
         /** @var After|Before $annotationForMethod */
         $annotationForMethod = $methodInterceptor->getAnnotationForMethod();
@@ -145,11 +144,14 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
 
         $methodParameterConverterBuilders = $parameterConverterFactory->createParameterWithDefaults($interfaceToCall, (bool)$interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(IgnorePayload::class)));
         if ($isTransformer) {
-            return TransformerBuilder::create(AnnotatedDefinitionReference::getReferenceFor($methodInterceptor), $methodInterceptor->getMethodName())
+            return TransformerBuilder::create(
+                    AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),
+                    $interfaceToCallRegistry->getFor($methodInterceptor->getClassName(), $methodInterceptor->getMethodName())
+                )
                 ->withMethodParameterConverters($methodParameterConverterBuilders);
         }
 
-        return ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($methodInterceptor), $methodInterceptor->getMethodName())
+        return ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($methodInterceptor), $interfaceToCallRegistry->getFor($methodInterceptor->getClassName(), $methodInterceptor->getMethodName()))
             ->withPassThroughMessageOnVoidInterface(true)
             ->withMethodParameterConverters($methodParameterConverterBuilders);
     }

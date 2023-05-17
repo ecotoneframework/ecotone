@@ -40,7 +40,7 @@ abstract class ConsumerRegisterConfiguration extends NoExternalConfigurationModu
     {
         $consumerBuilders = [];
         foreach ($annotationRegistrationService->findAnnotatedMethods(static::getConsumerAnnotation()) as $annotationRegistration) {
-            $consumerBuilders[] = static::createConsumerFrom($annotationRegistration);
+            $consumerBuilders[] = static::createConsumerFrom($annotationRegistration, $interfaceToCallRegistry);
         }
 
         /** @phpstan-ignore-next-line */
@@ -52,7 +52,7 @@ abstract class ConsumerRegisterConfiguration extends NoExternalConfigurationModu
      */
     abstract public static function getConsumerAnnotation(): string;
 
-    abstract public static function createConsumerFrom(AnnotatedFinding $annotationRegistration): ConsumerLifecycleBuilder;
+    abstract public static function createConsumerFrom(AnnotatedFinding $annotationRegistration, InterfaceToCallRegistry $interfaceToCallRegistry): ConsumerLifecycleBuilder;
 
     /**
      * @inheritDoc

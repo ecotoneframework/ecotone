@@ -7,6 +7,7 @@ use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\Router;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\ModulePackageList;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 
@@ -18,12 +19,15 @@ class RouterModule extends MessageHandlerRegisterConfiguration
     /**
      * @inheritDoc
      */
-    public static function createMessageHandlerFrom(AnnotatedFinding $annotationRegistration): MessageHandlerBuilderWithParameterConverters
+    public static function createMessageHandlerFrom(AnnotatedFinding $annotationRegistration, InterfaceToCallRegistry $interfaceToCallRegistry): MessageHandlerBuilderWithParameterConverters
     {
         /** @var Router $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
-        return RouterBuilder::create(AnnotatedDefinitionReference::getReferenceFor($annotationRegistration), $annotationRegistration->getMethodName())
+        return RouterBuilder::create(
+                AnnotatedDefinitionReference::getReferenceFor($annotationRegistration),
+                $interfaceToCallRegistry->getFor($annotationRegistration->getClassName(), $annotationRegistration->getMethodName())
+            )
             ->withEndpointId($annotation->getEndpointId())
             ->withInputChannelName($annotation->getInputChannelName())
             ->setResolutionRequired($annotation->isResolutionRequired());

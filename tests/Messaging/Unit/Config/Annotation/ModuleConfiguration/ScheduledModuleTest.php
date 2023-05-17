@@ -8,6 +8,7 @@ use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ScheduledModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter\SchedulerExample;
 
@@ -32,7 +33,7 @@ class ScheduledModuleTest extends AnnotationConfigurationTest
             $configuration,
             $this->createMessagingSystemConfiguration()
                 ->registerConsumer(
-                    InboundChannelAdapterBuilder::create('requestChannel', SchedulerExample::class, 'doRun')
+                    InboundChannelAdapterBuilder::create('requestChannel', SchedulerExample::class, InterfaceToCall::create(SchedulerExample::class , 'doRun'))
                         ->withEndpointId('run')
                         ->withRequiredInterceptorNames(['some'])
                 )

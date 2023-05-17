@@ -32,21 +32,21 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
      */
     private array $requiredReferences = [];
     private string|object $referenceNameOrObject;
-    private string $methodName;
+    private string|InterfaceToCall $methodNameOrInterface;
     private ?string $discardChannelName = null;
     private bool $throwExceptionOnDiscard = false;
 
-    private function __construct(string|object $referenceName, string $methodName)
+    private function __construct(string|object $referenceName, string|InterfaceToCall $methodName)
     {
         $this->referenceNameOrObject     = $referenceName;
-        $this->methodName        = $methodName;
+        $this->methodNameOrInterface        = $methodName;
 
         $this->initialize();
     }
 
-    public static function createWithReferenceName(string $referenceName, string $methodName): self
+    public static function createWithReferenceName(string $referenceName, InterfaceToCall $interfaceToCall): self
     {
-        return new self($referenceName, $methodName);
+        return new self($referenceName, $interfaceToCall);
     }
 
     public static function createWithDirectObject(object $referenceObject, string $methodName): self
@@ -69,9 +69,9 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
     {
         $messageFilter = $interfaceToCallRegistry->getFor(MessageFilter::class, 'handle');
 
-        return is_string($this->referenceNameOrObject)
-                    ? [$interfaceToCallRegistry->getForReferenceName($this->referenceNameOrObject, $this->methodName), $messageFilter]
-                    : [$interfaceToCallRegistry->getFor($this->referenceNameOrObject, $this->methodName), $messageFilter];
+        return $this->methodNameOrInterface instanceof InterfaceToCall
+                    ? [$this->methodNameOrInterface, $messageFilter]
+                    : [$interfaceToCallRegistry->getFor($this->referenceNameOrObject, $this->getMethodName()), $messageFilter];
     }
 
     /**
@@ -79,9 +79,9 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
-        return is_string($this->referenceNameOrObject)
-            ? $interfaceToCallRegistry->getForReferenceName($this->referenceNameOrObject, $this->methodName)
-            : $interfaceToCallRegistry->getFor($this->referenceNameOrObject, $this->methodName);
+        return $this->methodNameOrInterface instanceof InterfaceToCall
+            ? $this->methodNameOrInterface
+            : $interfaceToCallRegistry->getFor($this->referenceNameOrObject, $this->getMethodName());
     }
 
     /**
@@ -142,10 +142,10 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
         $messageSelector = is_object($this->referenceNameOrObject) ? $this->referenceNameOrObject : $referenceSearchService->get($this->referenceNameOrObject);
 
         /** @var InterfaceToCall $interfaceToCall */
-        $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($messageSelector, $this->methodName);
+        $interfaceToCall = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME)->getFor($messageSelector, $this->getMethodName());
         if (! $interfaceToCall->hasReturnValueBoolean()) {
             $class = get_class($messageSelector);
-            throw InvalidArgumentException::create("Object with reference {$class} should return bool for method {$this->methodName} while using Message Filter");
+            throw InvalidArgumentException::create("Object with reference {$class} should return bool for method {$this->getMethodName()} while using Message Filter");
         }
 
         $discardChannel = $this->discardChannelName ? $channelResolver->resolve($this->discardChannelName) : null;
@@ -155,7 +155,7 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
         $serviceActivatorBuilder = ServiceActivatorBuilder::createWithDirectReference(
             new MessageFilter(
                 MethodInvoker::createWith(
-                    $interfaceToCallRegistry->getFor($messageSelector, $this->methodName),
+                    $interfaceToCallRegistry->getFor($messageSelector, $this->getMethodName()),
                     $messageSelector,
                     $this->parameterConverters,
                     $referenceSearchService,
@@ -187,6 +187,13 @@ class MessageFilterBuilder extends InputOutputMessageHandlerBuilder implements M
      */
     public function __toString()
     {
-        return sprintf('Message filter - %s:%s with name `%s` for input channel `%s`', $this->referenceNameOrObject, $this->methodName, $this->getEndpointId(), $this->inputMessageChannelName);
+        return sprintf('Message filter - %s:%s with name `%s` for input channel `%s`', $this->referenceNameOrObject, $this->getMethodName(), $this->getEndpointId(), $this->inputMessageChannelName);
+    }
+
+    private function getMethodName(): string|InterfaceToCall
+    {
+        return $this->methodNameOrInterface instanceof InterfaceToCall
+            ? $this->methodNameOrInterface->getMethodName()
+            : $this->methodNameOrInterface;
     }
 }

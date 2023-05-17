@@ -74,7 +74,7 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
 
         $inputChannel                = 'ecotone.channel.' . $commandName;
 
-        $messageHandlerBuilder       = ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($annotatedMethod), $methodName)
+        $messageHandlerBuilder       = ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($annotatedMethod), $interfaceToCallRegistry->getFor($annotatedMethod->getClassName(), $methodName))
             ->withEndpointId('ecotone.endpoint.' . $commandName)
             ->withEndpointAnnotations([$annotatedMethod->getAnnotationForMethod()])
             ->withInputChannelName($inputChannel)

@@ -5,6 +5,7 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\RouterModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
@@ -38,7 +39,7 @@ class RouterModuleTest extends AnnotationConfigurationTest
         $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
 
-        $router = RouterBuilder::create(RouterWithNoResolutionRequiredExample::class, 'route')
+        $router = RouterBuilder::create(RouterWithNoResolutionRequiredExample::class, InterfaceToCall::create(RouterWithNoResolutionRequiredExample::class, 'route'))
             ->withEndpointId('some-id')
             ->withInputChannelName('inputChannel')
             ->setResolutionRequired(false);

@@ -28,6 +28,7 @@ use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
@@ -625,8 +626,8 @@ class ModellingHandlerModule implements AnnotationModule
         );
 
         $handler = $registration->hasMethodAnnotation(ChangingHeaders::class)
-            ? TransformerBuilder::create(AnnotatedDefinitionReference::getReferenceFor($registration), $registration->getMethodName())
-            : ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($registration), $registration->getMethodName());
+            ? TransformerBuilder::create(AnnotatedDefinitionReference::getReferenceFor($registration), $interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName()))
+            : ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($registration), $interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName()));
 
         $configuration->registerMessageHandler(
             $handler

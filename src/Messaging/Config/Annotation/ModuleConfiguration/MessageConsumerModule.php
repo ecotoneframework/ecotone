@@ -35,7 +35,7 @@ final class MessageConsumerModule extends NoExternalConfigurationModule implemen
             $amqpConsumerAnnotation = $amqpConsumer->getAnnotationForMethod();
 
             $endpointId = $amqpConsumerAnnotation->getEndpointId();
-            $serviceActivators[] = ServiceActivatorBuilder::create($reference, $amqpConsumer->getMethodName())
+            $serviceActivators[] = ServiceActivatorBuilder::create($reference, $interfaceToCallRegistry->getFor($amqpConsumer->getClassName(), $amqpConsumer->getMethodName()))
                 ->withEndpointId($endpointId . '.target')
                 ->withInputChannelName($endpointId)
                 ->withMethodParameterConverters($annotationParameterBuilder->createParameterWithDefaults(

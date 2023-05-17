@@ -6,6 +6,7 @@ use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\Filter\MessageFilterBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
@@ -36,7 +37,7 @@ class MessageFilterBuilderTest extends MessagingTest
         $outputChannelName = 'outputChannel';
         $outputChannel = QueueChannel::create();
 
-        $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, 'accept')
+        $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCall::create(MessageSelectorExample::class, 'accept'))
                             ->withOutputMessageChannel($outputChannelName)
                             ->build(
                                 InMemoryChannelResolver::createFromAssociativeArray([
@@ -67,7 +68,7 @@ class MessageFilterBuilderTest extends MessagingTest
         $outputChannelName = 'outputChannel';
         $outputChannel = QueueChannel::create();
 
-        $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, 'refuse')
+        $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCall::create(MessageSelectorExample::class, 'refuse'))
             ->withOutputMessageChannel($outputChannelName)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
@@ -221,7 +222,7 @@ class MessageFilterBuilderTest extends MessagingTest
 
         $this->expectException(InvalidArgumentException::class);
 
-        MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, 'wrongReturnType')
+        MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCall::create(MessageSelectorExample::class, 'wrongReturnType'))
             ->withOutputMessageChannel($outputChannelName)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
@@ -243,7 +244,7 @@ class MessageFilterBuilderTest extends MessagingTest
         $discardChannelName = 'discardChannel';
         $discardChannel = QueueChannel::create();
 
-        $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, 'refuse')
+        $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCall::create(MessageSelectorExample::class, 'refuse'))
             ->withOutputMessageChannel($outputChannelName)
             ->withDiscardChannelName($discardChannelName)
             ->build(
@@ -272,7 +273,7 @@ class MessageFilterBuilderTest extends MessagingTest
         $outputChannelName = 'outputChannel';
         $outputChannel = QueueChannel::create();
 
-        $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, 'refuse')
+        $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCall::create(MessageSelectorExample::class, 'refuse'))
             ->withOutputMessageChannel($outputChannelName)
             ->withThrowingExceptionOnDiscard(true)
             ->build(
@@ -297,10 +298,10 @@ class MessageFilterBuilderTest extends MessagingTest
         $endpointName = 'someName';
 
         $this->assertEquals(
-            MessageFilterBuilder::createWithReferenceName('ref-name', 'method-name')
+            MessageFilterBuilder::createWithReferenceName('ref-name', InterfaceToCall::create(MessageSelectorExample::class, 'refuse'))
                 ->withInputChannelName($inputChannelName)
                 ->withEndpointId($endpointName),
-            sprintf('Message filter - %s:%s with name `%s` for input channel `%s`', 'ref-name', 'method-name', $endpointName, $inputChannelName)
+            sprintf('Message filter - %s:%s with name `%s` for input channel `%s`', 'ref-name', 'refuse', $endpointName, $inputChannelName)
         );
     }
 
@@ -314,7 +315,7 @@ class MessageFilterBuilderTest extends MessagingTest
         $outputChannelName = 'outputChannel';
         $outputChannel = QueueChannel::create();
 
-        $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, 'refuse')
+        $messageFilter = MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCall::create(MessageSelectorExample::class, 'refuse'))
             ->withOutputMessageChannel($outputChannelName)
             ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                 InterfaceToCallRegistry::createEmpty(),

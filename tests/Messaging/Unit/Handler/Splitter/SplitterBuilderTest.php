@@ -26,22 +26,13 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  */
 class SplitterBuilderTest extends MessagingTest
 {
-    /**
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws Exception
-     */
     public function test_splitting_incoming_message_where_service_returns_payloads()
     {
-        $referenceName = 'ref-a';
-        $splitter = SplitterBuilder::create($referenceName, 'splitToPayload');
+        $splitter = SplitterBuilder::createWithDirectObject(new ServiceSplittingArrayPayload(), 'splitToPayload');
 
-        $service = new ServiceSplittingArrayPayload();
         $splitter = $splitter->build(
             InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith([
-                $referenceName => $service,
-            ])
+            InMemoryReferenceSearchService::createEmpty()
         );
 
         $outputChannel = QueueChannel::create();
@@ -57,18 +48,13 @@ class SplitterBuilderTest extends MessagingTest
      */
     public function test_throwing_exception_if_splitter_does_not_return_array()
     {
-        $referenceName = 'ref-a';
-        $splitter = SplitterBuilder::create($referenceName, 'splittingWithReturnString');
-
-        $service = new WrongSplittingService();
+        $splitter = SplitterBuilder::createWithDirectObject(new WrongSplittingService(), 'splittingWithReturnString');
 
         $this->expectException(InvalidArgumentException::class);
 
         $splitter->build(
             InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith([
-                $referenceName => $service,
-            ])
+            InMemoryReferenceSearchService::createEmpty()
         );
     }
 
@@ -137,14 +123,10 @@ class SplitterBuilderTest extends MessagingTest
 
     public function test_converting_to_string()
     {
-        $inputChannelName = 'inputChannel';
-        $endpointName = 'someName';
-
-        $this->assertEquals(
-            SplitterBuilder::create('ref-name', 'method-name')
-                ->withInputChannelName($inputChannelName)
-                ->withEndpointId($endpointName),
-            sprintf('Splitter - %s:%s with name `%s` for input channel `%s`', 'ref-name', 'method-name', $endpointName, $inputChannelName)
+        $this->assertIsString(
+            (string)SplitterBuilder::createMessagePayloadSplitter()
+                ->withInputChannelName('inputChannel')
+                ->withEndpointId('someName')
         );
     }
 }

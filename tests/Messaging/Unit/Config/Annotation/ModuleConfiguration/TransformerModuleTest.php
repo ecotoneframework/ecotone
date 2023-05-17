@@ -7,6 +7,7 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\TransformerModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
@@ -38,7 +39,7 @@ class TransformerModuleTest extends AnnotationConfigurationTest
 
         $messageHandlerBuilder = TransformerBuilder::create(
             TransformerWithMethodParameterExample::class,
-            'send'
+            InterfaceToCall::create(TransformerWithMethodParameterExample::class, 'send')
         )
             ->withEndpointId('some-id')
             ->withInputChannelName('inputChannel')

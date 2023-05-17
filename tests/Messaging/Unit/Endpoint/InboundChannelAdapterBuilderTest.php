@@ -10,6 +10,7 @@ use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilde
 use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\MessageHeaders;
@@ -45,7 +46,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         InboundChannelAdapterBuilder::create(
             'channelName',
             'someRef',
-            'withReturnValue'
+            InterfaceToCall::create(ServiceExpectingOneArgument::class, 'withReturnValue')
         )
             ->withEndpointId('test')
             ->build(
@@ -68,7 +69,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         InboundChannelAdapterBuilder::create(
             'channelName',
             'someRef',
-            'withoutReturnValue'
+            InterfaceToCall::create(ServiceExpectingNoArguments::class, 'withoutReturnValue')
         )
             ->withEndpointId('test')
             ->build(
@@ -88,7 +89,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         $inboundChannel = InboundChannelAdapterBuilder::create(
             $inputChannelName,
             'someRef',
-            'withoutReturnValue'
+            InterfaceToCall::create($service::class, 'withoutReturnValue')
         )
             ->withEndpointId('test')
             ->build(
@@ -120,7 +121,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         $inboundChannel = InboundChannelAdapterBuilder::create(
             $inputChannelName,
             'someRef',
-            'execute'
+            InterfaceToCall::create($inboundChannelAdapterStoppingService::class, 'execute')
         )
             ->withEndpointId('test')
             ->build(
@@ -156,7 +157,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         $inboundChannel = InboundChannelAdapterBuilder::create(
             $requestChannelName,
             'someRef',
-            'executeReturn'
+            InterfaceToCall::create($inboundChannelAdapterStoppingService::class, 'executeReturn')
         )
             ->withEndpointId('test')
             ->build(
@@ -193,7 +194,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         $inboundChannel = InboundChannelAdapterBuilder::create(
             $requestChannelName,
             'someRef',
-            'executeReturnWithInterceptor'
+            InterfaceToCall::create($inboundChannelAdapterStoppingService::class, 'executeReturnWithInterceptor')
         )
             ->withEndpointId('test')
             ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(), new TransactionInterceptor(), 'transactional', 1, ''))
@@ -231,7 +232,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         $inboundChannel = InboundChannelAdapterBuilder::create(
             $requestChannelName,
             'someRef',
-            'executeReturn'
+            InterfaceToCall::create($inboundChannelAdapterStoppingService::class, 'executeReturn')
         )
             ->withEndpointId('test')
             ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(), new TransactionInterceptor(), 'transactional', 1, ''))
@@ -269,7 +270,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         $inboundChannel = InboundChannelAdapterBuilder::create(
             $requestChannelName,
             'someRef',
-            'executeReturnWithInterceptor'
+            InterfaceToCall::create($inboundChannelAdapterStoppingService::class, 'executeReturnWithInterceptor')
         )
             ->withEndpointId('test')
             ->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(), new TransactionInterceptor(), 'transactional', 1, ''))
@@ -305,7 +306,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         $inboundChannel = InboundChannelAdapterBuilder::create(
             $requestChannelName,
             'someRef',
-            'executeReturn'
+            InterfaceToCall::create($inboundChannelAdapterStoppingService::class, 'executeReturn')
         )
             ->withEndpointId('test')
             ->build(
@@ -337,7 +338,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         $inboundChannel = InboundChannelAdapterBuilder::create(
             $inputChannelName,
             'someRef',
-            'execute'
+            InterfaceToCall::create($inboundChannelAdapterStoppingService::class, 'execute')
         )
             ->withEndpointId('test')
             ->build(
@@ -377,7 +378,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         $inboundChannel = InboundChannelAdapterBuilder::create(
             $inputChannelName,
             'someRef',
-            'execute'
+            InterfaceToCall::create($inboundChannelAdapterStoppingService::class, 'execute')
         )
             ->withEndpointId('test')
             ->build(
@@ -415,7 +416,7 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
         InboundChannelAdapterBuilder::create(
             $inputChannelName,
             'someRef',
-            'notExistingMethod'
+            InterfaceToCall::create($inboundChannelAdapterStoppingService::class, 'notExistingMethod')
         )
             ->withEndpointId('test')
             ->build(

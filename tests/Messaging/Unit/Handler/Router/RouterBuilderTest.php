@@ -9,6 +9,7 @@ use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\DestinationResolutionException;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -39,7 +40,7 @@ class RouterBuilderTest extends MessagingTest
         $targetChannel = QueueChannel::create();
         $objectToInvokeReference = 'service-a';
 
-        $router = RouterBuilder::create($objectToInvokeReference, 'pick')
+        $router = RouterBuilder::create($objectToInvokeReference, InterfaceToCall::create(SingleChannelRouter::class, 'pick'))
                     ->build(
                         InMemoryChannelResolver::createFromAssociativeArray([
                             $chanelName => $targetChannel,
@@ -67,7 +68,7 @@ class RouterBuilderTest extends MessagingTest
         $targetChannel2 = QueueChannel::create();
 
         $objectToInvokeReference = 'service-a';
-        $router = RouterBuilder::create($objectToInvokeReference, 'pick')
+        $router = RouterBuilder::create($objectToInvokeReference, InterfaceToCall::create(MultipleChannelRouter::class, 'pick'))
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([
                     'channel1' => $targetChannel1,
@@ -97,7 +98,7 @@ class RouterBuilderTest extends MessagingTest
     public function test_throwing_exception_if_resolution_is_required()
     {
         $objectToInvokeReference = 'service-a';
-        $router = RouterBuilder::create($objectToInvokeReference, 'pick')
+        $router = RouterBuilder::create($objectToInvokeReference, InterfaceToCall::create(MultipleChannelRouter::class, 'pick'))
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([]),
                 InMemoryReferenceSearchService::createWith([
@@ -120,7 +121,7 @@ class RouterBuilderTest extends MessagingTest
     public function test_if_no_resolution_required_not_throwing_exception_when_no_resolution()
     {
         $objectToInvokeReference = 'service-a';
-        $router = RouterBuilder::create($objectToInvokeReference, 'pick')
+        $router = RouterBuilder::create($objectToInvokeReference, InterfaceToCall::create(MultipleChannelRouter::class, 'pick'))
             ->setResolutionRequired(false)
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([]),
@@ -336,7 +337,7 @@ class RouterBuilderTest extends MessagingTest
         $endpointName = 'someName';
 
         $this->assertEquals(
-            RouterBuilder::create('ref-name', 'method-name')
+            RouterBuilder::create('ref-name', InterfaceToCall::create(MultipleChannelRouter::class, 'pick'))
                 ->withInputChannelName($inputChannelName)
                 ->withEndpointId($endpointName),
             sprintf('Router for input channel `%s` with name `%s`', $inputChannelName, $endpointName)

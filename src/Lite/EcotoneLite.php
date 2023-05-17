@@ -162,7 +162,6 @@ final class EcotoneLite
 
         $messagingConfiguration = MessagingSystemConfiguration::prepare(
             $pathToRootCatalog,
-            InMemoryReferenceTypeFromNameResolver::createFromReferenceSearchService(new PsrContainerReferenceSearchService($container)),
             InMemoryConfigurationVariableService::create($configurationVariables),
             $serviceConfiguration,
             $useCachedVersion,

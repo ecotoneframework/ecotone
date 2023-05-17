@@ -44,9 +44,8 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
         $messageHandlerBuilders    = [];
         $parameterConverterFactory = ParameterConverterAnnotationFactory::create();
         foreach ($annotationRegistrationService->findAnnotatedMethods(static::getMessageHandlerAnnotation()) as $annotationRegistration) {
-            $annotation               = $annotationRegistration->getAnnotationForMethod();
             $relatedInterface = $interfaceToCallRegistry->getFor($annotationRegistration->getClassName(), $annotationRegistration->getMethodName());
-            $messageHandlerBuilders[] = static::createMessageHandlerFrom($annotationRegistration)
+            $messageHandlerBuilders[] = static::createMessageHandlerFrom($annotationRegistration, $interfaceToCallRegistry)
                 ->withMethodParameterConverters(
                     $parameterConverterFactory->createParameterWithDefaults($interfaceToCallRegistry->getFor($annotationRegistration->getClassName(), $annotationRegistration->getMethodName()), (bool)$relatedInterface->hasMethodAnnotation(TypeDescriptor::create(IgnorePayload::class)))
                 );
@@ -61,7 +60,7 @@ abstract class MessageHandlerRegisterConfiguration extends NoExternalConfigurati
      */
     abstract public static function getMessageHandlerAnnotation(): string;
 
-    abstract public static function createMessageHandlerFrom(AnnotatedFinding $annotationRegistration): MessageHandlerBuilderWithParameterConverters;
+    abstract public static function createMessageHandlerFrom(AnnotatedFinding $annotationRegistration, InterfaceToCallRegistry $interfaceToCallRegistry): MessageHandlerBuilderWithParameterConverters;
 
     /**
      * @inheritDoc

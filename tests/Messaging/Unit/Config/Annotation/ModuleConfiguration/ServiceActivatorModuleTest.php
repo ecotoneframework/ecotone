@@ -5,6 +5,7 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ConfigurationVariableBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
@@ -41,7 +42,7 @@ class ServiceActivatorModuleTest extends AnnotationConfigurationTest
             $configuration,
             $this->createMessagingSystemConfiguration()
                 ->registerMessageHandler(
-                    ServiceActivatorBuilder::create(ServiceActivatorWithAllConfigurationDefined::class, 'sendMessage')
+                    ServiceActivatorBuilder::create(ServiceActivatorWithAllConfigurationDefined::class, InterfaceToCall::create(ServiceActivatorWithAllConfigurationDefined::class, 'sendMessage'))
                         ->withEndpointId('test-name')
                         ->withInputChannelName('inputChannel')
                         ->withOutputMessageChannel('outputChannel')

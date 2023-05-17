@@ -5,6 +5,7 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\SplitterModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Splitter\SplitterBuilder;
@@ -40,7 +41,7 @@ class SplitterModuleTest extends AnnotationConfigurationTest
 
         $messageHandlerBuilder = SplitterBuilder::create(
             SplitterExample::class,
-            'split'
+            InterfaceToCall::create(SplitterExample::class, 'split')
         )
             ->withEndpointId('testId')
             ->withInputChannelName('inputChannel')

@@ -29,31 +29,29 @@ class InterfaceToCallRegistry
      * @var ClassDefinition[]
      */
     private array $classDefinitions = [];
-    private \Ecotone\Messaging\Config\ReferenceTypeFromNameResolver $referenceTypeFromNameResolver;
     private ?AnnotationResolver $annotationResolver;
     private ?self $preparedInterfaceToCallRegistry = null;
     private bool $isLocked;
 
-    private function __construct(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, ?AnnotationResolver $annotationResolver, bool $isLocked)
+    private function __construct(?AnnotationResolver $annotationResolver, bool $isLocked)
     {
-        $this->referenceTypeFromNameResolver = $referenceTypeFromNameResolver;
         $this->annotationResolver = $annotationResolver;
         $this->isLocked = $isLocked;
     }
 
     public static function createEmpty(): self
     {
-        return new self(InMemoryReferenceTypeFromNameResolver::createEmpty(), null, false);
+        return new self(null, false);
     }
 
-    public static function createWith(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, AnnotationResolver $annotationResolver): self
+    public static function createWith(AnnotationResolver $annotationResolver): self
     {
-        return new self($referenceTypeFromNameResolver, $annotationResolver, false);
+        return new self($annotationResolver, false);
     }
 
-    public static function createWithBackedBy(ReferenceTypeFromNameResolver $referenceTypeFromNameResolver, self $interfaceToCallRegistry): self
+    public static function createWithBackedBy(self $interfaceToCallRegistry): self
     {
-        $self = new self($referenceTypeFromNameResolver, null, false);
+        $self = new self( null, false);
         $self->preparedInterfaceToCallRegistry = $interfaceToCallRegistry;
 
         return $self;
@@ -67,7 +65,7 @@ class InterfaceToCallRegistry
      */
     public static function createWithInterfaces(iterable $interfacesToCall, bool $isLocked, ReferenceSearchService $referenceSearchService): self
     {
-        $self = new self(InMemoryReferenceTypeFromNameResolver::createFromReferenceSearchService($referenceSearchService), null, $isLocked);
+        $self = new self( null, $isLocked);
         foreach ($interfacesToCall as $interfaceToCall) {
             $self->interfacesToCall[self::getName($interfaceToCall->getInterfaceName(), $interfaceToCall->getMethodName())] = $interfaceToCall;
         }
@@ -135,20 +133,5 @@ class InterfaceToCallRegistry
         }
 
         return $interfaces;
-    }
-
-    public function getForReferenceName(string $referenceName, string $methodName): InterfaceToCall
-    {
-        try {
-            $objectClassType = $this->referenceTypeFromNameResolver->resolve($referenceName);
-        } catch (ReferenceNotFoundException $exception) {
-            throw ConfigurationException::create("Cannot find reference with name `$referenceName` for method {$methodName}. " . $exception->getMessage());
-        }
-
-        if (! $objectClassType->isClassOrInterface()) {
-            throw new InvalidArgumentException("Reference {$referenceName} is not an object");
-        }
-
-        return $this->getFor($objectClassType->toString(), $methodName);
     }
 }

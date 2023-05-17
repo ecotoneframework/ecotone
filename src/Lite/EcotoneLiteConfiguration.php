@@ -29,7 +29,6 @@ class EcotoneLiteConfiguration
     {
         $configuredMessagingSystem = MessagingSystemConfiguration::prepare(
             realpath($rootProjectDirectoryPath),
-            new TypeResolver($container),
             InMemoryConfigurationVariableService::create($configurationVariables),
             $serviceConfiguration,
             $useCachedVersion,

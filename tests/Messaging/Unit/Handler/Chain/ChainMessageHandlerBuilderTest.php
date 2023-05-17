@@ -16,6 +16,7 @@ use Ecotone\Messaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
 use Ecotone\Messaging\Handler\Enricher\EnricherBuilder;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
@@ -30,6 +31,7 @@ use Exception;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Transformer\TransformerWithMethodParameterExample;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
 use Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion\Order;
 use Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion\OrderConverter;
@@ -475,7 +477,7 @@ class ChainMessageHandlerBuilderTest extends TestCase
     public function test_passing_references_objects_to_top_handler()
     {
         $chainBuilder = ChainMessageHandlerBuilder::create()
-                        ->chain(TransformerBuilder::create('some', 'method'));
+                        ->chain(TransformerBuilder::create('some', InterfaceToCall::create(TransformerWithMethodParameterExample::class, 'send')));
 
         $this->assertEquals(['some'], $chainBuilder->getRequiredReferenceNames());
     }

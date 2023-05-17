@@ -11,6 +11,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 #[ModuleAnnotation]
 class ScheduledModule extends ConsumerRegisterConfiguration
@@ -26,12 +27,16 @@ class ScheduledModule extends ConsumerRegisterConfiguration
     /**
      * @inheritDoc
      */
-    public static function createConsumerFrom(AnnotatedFinding $annotationRegistration): ConsumerLifecycleBuilder
+    public static function createConsumerFrom(AnnotatedFinding $annotationRegistration, InterfaceToCallRegistry $interfaceToCallRegistry): ConsumerLifecycleBuilder
     {
         /** @var Scheduled $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
-        return InboundChannelAdapterBuilder::create($annotation->getRequestChannelName(), AnnotatedDefinitionReference::getReferenceFor($annotationRegistration), $annotationRegistration->getMethodName())
+        return InboundChannelAdapterBuilder::create(
+                $annotation->getRequestChannelName(),
+                AnnotatedDefinitionReference::getReferenceFor($annotationRegistration),
+                $interfaceToCallRegistry->getFor($annotationRegistration->getClassName(), $annotationRegistration->getMethodName())
+            )
             ->withEndpointId($annotation->getEndpointId())
             ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames());
     }

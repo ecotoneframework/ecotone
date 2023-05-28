@@ -714,6 +714,14 @@ final class MessagingSystemConfiguration implements Configuration
 
     public static function prepare(string $rootPathToSearchConfigurationFor, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $serviceConfiguration, bool $useCachedVersion, array $userLandClassesToRegister = [], bool $enableTestPackage = false): Configuration
     {
+        if ($useCachedVersion) {
+            Assert::isTrue((bool)$serviceConfiguration->getCacheDirectoryPath(), "Can't make use of cached version of messaging if no cache path is defined");
+            $cachedVersion = self::getCachedVersion($serviceConfiguration->getCacheDirectoryPath());
+            if ($cachedVersion) {
+                return $cachedVersion;
+            }
+        }
+
         $requiredModules = [ModulePackageList::CORE_PACKAGE];
         if ($enableTestPackage) {
             $requiredModules[] = ModulePackageList::TEST_PACKAGE;
@@ -737,8 +745,7 @@ final class MessagingSystemConfiguration implements Configuration
                 $enableTestPackage
             ),
             $configurationVariableService,
-            $serviceConfiguration,
-            $useCachedVersion
+            $serviceConfiguration
         );
     }
 
@@ -750,16 +757,8 @@ final class MessagingSystemConfiguration implements Configuration
         return $cachedVersion;
     }
 
-    public static function prepareWithAnnotationFinder(AnnotationFinder $annotationFinder, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $serviceConfiguration, bool $useCachedVersion): Configuration
+    public static function prepareWithAnnotationFinder(AnnotationFinder $annotationFinder, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $serviceConfiguration): Configuration
     {
-        if ($useCachedVersion) {
-            Assert::isTrue((bool)$serviceConfiguration->getCacheDirectoryPath(), "Can't make use of cached version of messaging if no cache path is defined");
-            $cachedVersion = self::getCachedVersion($serviceConfiguration->getCacheDirectoryPath());
-            if ($cachedVersion) {
-                return $cachedVersion;
-            }
-        }
-
         $preparationInterfaceRegistry = InterfaceToCallRegistry::createWith($annotationFinder);
 
         return self::prepareWithModuleRetrievingService(

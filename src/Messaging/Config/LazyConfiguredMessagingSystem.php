@@ -5,12 +5,11 @@ namespace Ecotone\Messaging\Config;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessagePublisher;
-use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
-use Psr\Container\ContainerInterface;
+use InvalidArgumentException;
 
 /**
  * configured messaging system is set up on boot, so in case of fetching it during initialization we need to provide lazy config
@@ -95,8 +94,8 @@ class LazyConfiguredMessagingSystem implements ConfiguredMessagingSystem
 
     private function getConfiguredSystem(): ConfiguredMessagingSystem
     {
-        if (!$this->configuredMessagingSystem) {
-            throw new \InvalidArgumentException("Configured messaging system was not set");
+        if (! $this->configuredMessagingSystem) {
+            throw new InvalidArgumentException('Configured messaging system was not set');
         }
         return $this->configuredMessagingSystem;
     }

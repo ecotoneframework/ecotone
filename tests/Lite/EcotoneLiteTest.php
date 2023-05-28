@@ -9,6 +9,9 @@ use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Order\ChannelConfiguration;
 use Test\Ecotone\Modelling\Fixture\Order\OrderService;
 
+/**
+ * @internal
+ */
 class EcotoneLiteTest extends TestCase
 {
     public function test_it_can_run_console_command(): void
@@ -18,10 +21,10 @@ class EcotoneLiteTest extends TestCase
             [new OrderService()],
             ServiceConfiguration::createWithDefaults()
                 ->withSkippedModulePackageNames(ModulePackageList::allPackages())
-                ->withEnvironment("test")
+                ->withEnvironment('test')
         );
 
-        $ecotone->runConsoleCommand("ecotone:list", []);
+        $ecotone->runConsoleCommand('ecotone:list', []);
         $this->expectNotToPerformAssertions();
     }
 }

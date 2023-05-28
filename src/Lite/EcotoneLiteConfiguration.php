@@ -7,7 +7,6 @@ namespace Ecotone\Lite;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Config\StubConfiguredMessagingSystem;
 use Ecotone\Messaging\Handler\Logger\EchoLogger;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Psr\Container\ContainerInterface;
@@ -27,13 +26,16 @@ class EcotoneLiteConfiguration
 
     public static function createWithConfiguration(string $rootProjectDirectoryPath, ContainerInterface|GatewayAwareContainer $container, ServiceConfiguration $serviceConfiguration, array $configurationVariables, bool $useCachedVersion, array $classesToRegister = []): ConfiguredMessagingSystem
     {
+        $referenceSearchService = new PsrContainerReferenceSearchService($container, ['logger' => new EchoLogger()]);
         $configuredMessagingSystem = MessagingSystemConfiguration::prepare(
             realpath($rootProjectDirectoryPath),
             InMemoryConfigurationVariableService::create($configurationVariables),
             $serviceConfiguration,
             $useCachedVersion,
             $classesToRegister
-        )->buildMessagingSystemFromConfiguration(new PsrContainerReferenceSearchService($container, ['logger' => new EchoLogger(), ConfiguredMessagingSystem::class => new StubConfiguredMessagingSystem()]));
+        )->buildMessagingSystemFromConfiguration($referenceSearchService);
+
+        $referenceSearchService->setConfiguredMessagingSystem($configuredMessagingSystem);
 
         if ($container instanceof GatewayAwareContainer) {
             foreach ($configuredMessagingSystem->getGatewayList() as $gatewayReference) {

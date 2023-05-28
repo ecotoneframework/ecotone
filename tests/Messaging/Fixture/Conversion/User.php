@@ -107,9 +107,9 @@ interface User
     public function interfaceFromGlobalNamespace(DateTimeInterface $dateTime): DateTimeInterface;
 
     /**
-     * @param (\stdClass|string)[] $data
+     * @param (stdClass|string)[] $data
      *
-     * @return (\stdClass|string)[]
+     * @return (stdClass|string)[]
      */
     #[IgnoreDocblockTypeHint]
     public function ignoreDocblockTypeHint(array $data): array;

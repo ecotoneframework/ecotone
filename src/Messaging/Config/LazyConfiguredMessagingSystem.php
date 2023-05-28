@@ -17,7 +17,9 @@ use Psr\Container\ContainerInterface;
  */
 class LazyConfiguredMessagingSystem implements ConfiguredMessagingSystem
 {
-    public function __construct(private ContainerInterface $container)
+    private ?ConfiguredMessagingSystem $configuredMessagingSystem = null;
+
+    public function __construct()
     {
     }
 
@@ -48,9 +50,7 @@ class LazyConfiguredMessagingSystem implements ConfiguredMessagingSystem
 
     public function getServiceFromContainer(string $referenceName): object
     {
-        Assert::isTrue($this->container->has($referenceName), "Service with reference {$referenceName} does not exists");
-
-        return $this->container->get($referenceName);
+        return $this->getConfiguredSystem()->getServiceFromContainer($referenceName);
     }
 
     public function getCommandBus(): CommandBus
@@ -90,11 +90,14 @@ class LazyConfiguredMessagingSystem implements ConfiguredMessagingSystem
 
     public function replaceWith(ConfiguredMessagingSystem $messagingSystem): void
     {
-        $this->getConfiguredSystem()->replaceWith($messagingSystem);
+        $this->configuredMessagingSystem = $messagingSystem;
     }
 
     private function getConfiguredSystem(): ConfiguredMessagingSystem
     {
-        return $this->container->get(LazyConfiguredMessagingSystem::class);
+        if (!$this->configuredMessagingSystem) {
+            throw new \InvalidArgumentException("Configured messaging system was not set");
+        }
+        return $this->configuredMessagingSystem;
     }
 }

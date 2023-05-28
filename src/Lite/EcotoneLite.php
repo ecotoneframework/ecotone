@@ -17,7 +17,6 @@ use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ProxyGenerator;
 use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Config\StubConfiguredMessagingSystem;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
@@ -181,9 +180,11 @@ final class EcotoneLite
             }
         }
 
-        $messagingSystem = $messagingConfiguration->buildMessagingSystemFromConfiguration(
-            new PsrContainerReferenceSearchService($container, ['logger' => new NullLogger(), ConfiguredMessagingSystem::class => new StubConfiguredMessagingSystem()])
-        );
+        $referenceSearchService = new PsrContainerReferenceSearchService($container, ['logger' => new NullLogger()]);
+
+        $messagingSystem = $messagingConfiguration->buildMessagingSystemFromConfiguration($referenceSearchService);
+
+        $referenceSearchService->setConfiguredMessagingSystem($messagingSystem);
 
         if ($allowGatewaysToBeRegisteredInContainer) {
             $container->set(ConfiguredMessagingSystem::class, $messagingSystem);

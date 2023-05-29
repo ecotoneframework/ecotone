@@ -29,12 +29,12 @@ class PsrContainerReferenceSearchService implements ReferenceSearchService
      */
     public function get(string $reference): object
     {
+        if ($reference === ConfiguredMessagingSystem::class) {
+            return $this->lazyConfiguredMessagingSystem;
+        }
         if (! $this->container->has($reference)) {
             if (array_key_exists($reference, $this->defaults)) {
                 return $this->defaults[$reference];
-            }
-            if ($reference === ConfiguredMessagingSystem::class) {
-                return $this->lazyConfiguredMessagingSystem;
             }
 
             if ($this->container->has($reference . self::POSSIBLE_REFERENCE_SUFFIX)) {

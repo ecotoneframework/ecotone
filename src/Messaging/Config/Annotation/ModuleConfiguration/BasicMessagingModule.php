@@ -38,7 +38,6 @@ use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
 use Ecotone\Messaging\Handler\Chain\ChainForwardPublisher;
 use Ecotone\Messaging\Handler\Enricher\EnrichGateway;
-use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
@@ -235,7 +234,6 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
     public function getRelatedReferences(): array
     {
         return [
-            RequiredReference::create(ExpressionEvaluationService::REFERENCE),
             RequiredReference::create(InterfaceToCallRegistry::REFERENCE_NAME),
         ];
     }

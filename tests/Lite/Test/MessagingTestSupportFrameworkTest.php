@@ -294,7 +294,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
 
         $testSupportGateway = $ecotoneTestSupport->getMessagingTestSupport();
 
-        $this->assertEquals([[]], $testSupportGateway->getRecordedCommands());
+        $this->assertEquals([[], []], $testSupportGateway->getRecordedCommands());
         $this->assertEmpty($testSupportGateway->getRecordedCommands());
     }
 

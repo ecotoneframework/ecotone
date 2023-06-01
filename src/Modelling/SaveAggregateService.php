@@ -75,11 +75,7 @@ class SaveAggregateService
 
     public function save(Message $message, array $metadata): Message
     {
-        $metadata = MessageHeaders::unsetEnqueueMetadata($metadata);
-        $metadata = MessageHeaders::unsetDistributionKeys($metadata);
-        $metadata = MessageHeaders::unsetAsyncKeys($metadata);
-        $metadata = MessageHeaders::unsetBusKeys($metadata);
-        $metadata = MessageHeaders::unsetAggregateKeys($metadata);
+        $metadata = MessageHeaders::unsetNonUserKeys($metadata);
 
         $aggregate = $message->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT);
         $events = [];

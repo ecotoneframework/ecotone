@@ -3,6 +3,7 @@
 namespace Ecotone\Messaging;
 
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
 use Ecotone\Modelling\AggregateMessage;
@@ -105,6 +106,8 @@ final class MessageHeaders
      */
     public const REVISION = 'revision';
 
+    public const STREAM_BASED_SOURCED = 'streamBasedSourced';
+
     private array $headers;
 
     /**
@@ -160,7 +163,18 @@ final class MessageHeaders
             self::POLLED_CHANNEL_NAME,
             self::REPLY_CONTENT_TYPE,
             self::CONSUMER_ENDPOINT_ID,
+            self::STREAM_BASED_SOURCED,
+            MessagingEntrypoint::ENTRYPOINT,
         ];
+    }
+
+    public static function unsetFrameworkKeys(array $metadata): array
+    {
+        foreach (self::getFrameworksHeaderNames() as $frameworksHeaderName) {
+            unset($metadata[$frameworksHeaderName]);
+        }
+
+        return $metadata;
     }
 
     public static function unsetTransportMessageKeys(array $metadata): array
@@ -231,6 +245,16 @@ final class MessageHeaders
         );
 
         return $metadata;
+    }
+
+    public static function unsetNonUserKeys(array $metadata): array
+    {
+        $metadata = self::unsetEnqueueMetadata($metadata);
+        $metadata = self::unsetDistributionKeys($metadata);
+        $metadata = self::unsetAsyncKeys($metadata);
+        $metadata = self::unsetBusKeys($metadata);
+
+        return self::unsetAggregateKeys($metadata);
     }
 
     /**

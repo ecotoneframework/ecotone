@@ -23,7 +23,6 @@ use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Bridge\Bridge;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
-use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
@@ -1100,11 +1099,11 @@ final class MessagingSystemConfiguration implements Configuration
     }
 
     /**
-     * @param GatewayBuilder $gatewayBuilder
+     * @param GatewayProxyBuilder $gatewayBuilder
      *
      * @return Configuration
      */
-    public function registerGatewayBuilder(GatewayBuilder $gatewayBuilder): Configuration
+    public function registerGatewayBuilder(GatewayProxyBuilder $gatewayBuilder): Configuration
     {
         foreach ($this->gatewayBuilders as $registeredGatewayBuilder) {
             if (
@@ -1226,7 +1225,7 @@ final class MessagingSystemConfiguration implements Configuration
             }
         }
 
-        /** @var GatewayBuilder[][] $preparedGateways */
+        /** @var GatewayProxyBuilder[][] $preparedGateways */
         $preparedGateways = [];
         foreach ($this->gatewayBuilders as $gatewayBuilder) {
             $preparedGateways[$gatewayBuilder->getReferenceName()][] = $gatewayBuilder->withMessageConverters($this->messageConverterReferenceNames);
@@ -1241,7 +1240,6 @@ final class MessagingSystemConfiguration implements Configuration
             $this->pollingMetadata,
             $this->messageHandlerBuilders,
             $this->channelAdapters,
-            $this->isLazyConfiguration,
             $this->consoleCommands
         );
     }

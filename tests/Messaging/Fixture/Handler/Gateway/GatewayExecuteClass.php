@@ -2,25 +2,18 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Gateway;
 
-use Closure;
+use Ecotone\Messaging\Handler\NonProxyGateway;
 
-class GatewayExecuteClass
+class GatewayExecuteClass implements NonProxyGateway
 {
     private $returnData;
 
-    private function __construct($returnData)
+    public function __construct($returnData)
     {
         $this->returnData = $returnData;
     }
 
-    public static function createBuildClosure($returnData): Closure
-    {
-        return function () use ($returnData) {
-            return new self($returnData);
-        };
-    }
-
-    public function execute()
+    public function execute(array $methodArgumentValues)
     {
         return $this->returnData;
     }

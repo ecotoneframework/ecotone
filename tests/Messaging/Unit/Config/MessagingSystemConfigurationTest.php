@@ -51,7 +51,6 @@ use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\SingleMeth
 use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
 use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter\OrderService;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
-use Test\Ecotone\Messaging\Fixture\Handler\DumbGatewayBuilder;
 use Test\Ecotone\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
 use Test\Ecotone\Messaging\Fixture\Handler\ExceptionMessageHandler;
 use Test\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
@@ -230,7 +229,6 @@ class MessagingSystemConfigurationTest extends MessagingTest
     {
         $config = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createWith([], []))
             ->registerMessageHandler(DumbMessageHandlerBuilder::create(NoReturnMessageHandler::create(), 'queue'))
-            ->registerGatewayBuilder(DumbGatewayBuilder::create()->withRequiredReference('some'))
             ->registerMessageChannel(SimpleMessageChannelBuilder::create('queue', QueueChannel::create()))
             ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
             ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create('queue', 'interceptor'));

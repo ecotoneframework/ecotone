@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use Closure;
 use ProxyManager\Configuration;
 use ProxyManager\Factory\LazyLoadingValueHolderFactory;
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
@@ -104,36 +103,9 @@ class ProxyFactory implements Serializable
         }
     }
 
-    /**
-     * @param string $interfaceName
-     * @param Closure $buildCallback
-     */
-    public function createProxyClass(string $interfaceName, Closure $buildCallback): \ProxyManager\Proxy\RemoteObjectInterface
+    public function createProxyClassWithAdapter(string $interfaceName, AdapterInterface $adapter): \ProxyManager\Proxy\RemoteObjectInterface
     {
-        $factory = new RemoteObjectFactory(new class ($buildCallback) implements AdapterInterface {
-            private Closure $buildCallback;
-
-            /**
-             *  constructor.
-             *
-             * @param Closure $buildCallback
-             */
-            public function __construct(Closure $buildCallback)
-            {
-                $this->buildCallback = $buildCallback;
-            }
-
-            /**
-             * @inheritDoc
-             */
-            public function call(string $wrappedClass, string $method, array $params = [])
-            {
-                $buildCallback = $this->buildCallback;
-                $gateway = $buildCallback();
-
-                return $gateway->execute($params);
-            }
-        }, $this->getConfiguration());
+        $factory = new RemoteObjectFactory($adapter, $this->getConfiguration());
 
         return $factory->createProxy($interfaceName);
     }

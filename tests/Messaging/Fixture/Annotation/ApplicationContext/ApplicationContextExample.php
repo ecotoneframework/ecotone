@@ -8,7 +8,6 @@ use Ecotone\Messaging\Attribute\ServiceContext;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
@@ -20,7 +19,7 @@ class ApplicationContextExample
     public const HTTP_OUTPUT_CHANNEL = 'httpOutput';
 
     #[ServiceContext]
-    public function gateway(): GatewayBuilder
+    public function gateway(): GatewayProxyBuilder
     {
         return GatewayProxyBuilder::create('some-ref', GatewayExample::class, 'doSomething', self::HTTP_INPUT_CHANNEL);
     }

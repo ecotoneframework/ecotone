@@ -10,7 +10,6 @@ use Ecotone\Messaging\Conversion\ConverterBuilder;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Handler\Gateway\GatewayBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
@@ -110,10 +109,10 @@ interface Configuration
     public function registerConsumerFactory(MessageHandlerConsumerBuilder $consumerFactory): Configuration;
 
     /**
-     * @param GatewayBuilder $gatewayBuilder
+     * @param GatewayProxyBuilder $gatewayBuilder
      * @return Configuration
      */
-    public function registerGatewayBuilder(GatewayBuilder $gatewayBuilder): Configuration;
+    public function registerGatewayBuilder(GatewayProxyBuilder $gatewayBuilder): Configuration;
 
     /**
      * @return string[]

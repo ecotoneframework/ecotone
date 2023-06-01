@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Gateway;
 
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
@@ -229,7 +228,7 @@ class Gateway implements NonProxyGateway
 
         return $chainHandler
             ->build(
-                InMemoryChannelResolver::createWithChannelResolver($this->channelResolver, []),
+                $this->channelResolver,
                 $this->referenceSearchService
             );
     }

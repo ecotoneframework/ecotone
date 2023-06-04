@@ -420,14 +420,14 @@ class BusRoutingModuleTest extends MessagingTest
             ServiceEventHandlerWithClass::class,
         ];
 
-        $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class]], [stdClass::class => [stdClass::class]]);
+        $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class]], []);
     }
 
     public function test_union_registering_service_event_handler()
     {
         $annotatedClasses = [EventHandlerForUnionType::class];
 
-        $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class . '|' . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class], \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class => [stdClass::class . '|' . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class]], [stdClass::class => [stdClass::class . '|' . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class], \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class => [stdClass::class . '|' . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class]]);
+        $this->assertRouting($annotatedClasses, [], [], [], [], [stdClass::class => [stdClass::class . '|' . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class], \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class => [stdClass::class . '|' . \Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced::class]], []);
     }
 
     public function test_registering_aggregate_event_handler()

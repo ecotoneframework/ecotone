@@ -236,10 +236,10 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $classChannels           = ModellingHandlerModule::getEventPayloadClasses($registration, $interfaceToCallRegistry);
+            $unionEventClasses           = ModellingHandlerModule::getEventPayloadClasses($registration, $interfaceToCallRegistry);
             $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
 
-            foreach ($classChannels as $classChannel) {
+            foreach ($unionEventClasses as $classChannel) {
                 $objectEventHandlers[$classChannel][] = $namedMessageChannelFor;
                 $objectEventHandlers[$classChannel]   = array_unique($objectEventHandlers[$classChannel]);
             }
@@ -264,9 +264,9 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $classChannels           = ModellingHandlerModule::getEventPayloadClasses($registration, $interfaceToCallRegistry);
+            $unionEventClasses           = ModellingHandlerModule::getEventPayloadClasses($registration, $interfaceToCallRegistry);
             $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
-            foreach ($classChannels as $classChannel) {
+            foreach ($unionEventClasses as $classChannel) {
                 if (! EventBusRouter::isRegexBasedRoute($namedMessageChannelFor)) {
                     $objectEventHandlers[$classChannel][] = $namedMessageChannelFor;
                     $objectEventHandlers[$classChannel]   = array_unique($objectEventHandlers[$classChannel]);
@@ -290,22 +290,10 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $chanelName = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
-
             if ($annotation->getListenTo()) {
+                $chanelName = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
                 $namedEventHandlers[$chanelName][] = $chanelName;
                 $namedEventHandlers[$chanelName]   = array_unique($namedEventHandlers[$chanelName]);
-            } else {
-                $type = TypeDescriptor::create($chanelName);
-                if ($type->isUnionType()) {
-                    foreach ($type->getUnionTypes() as $type) {
-                        $namedEventHandlers[$type->toString()][] = $chanelName;
-                        $namedEventHandlers[$type->toString()]   = array_unique($namedEventHandlers[$type->toString()]);
-                    }
-                } else {
-                    $namedEventHandlers[$chanelName][] = $chanelName;
-                    $namedEventHandlers[$chanelName]   = array_unique($namedEventHandlers[$chanelName]);
-                }
             }
         }
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, EventHandler::class) as $registration) {
@@ -382,6 +370,7 @@ class BusRoutingModule implements AnnotationModule
      */
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
+        $pointcut = CommandBus::class . '||' . EventBus::class . '||' . QueryBus::class . '||' . AsynchronousRunningEndpoint::class . '||' . PropagateHeaders::class . '||' . MessagingEntrypointWithHeadersPropagation::class;
         $messagingConfiguration
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
@@ -394,7 +383,7 @@ class BusRoutingModule implements AnnotationModule
                             ]
                         ),
                     Precedence::ENDPOINT_HEADERS_PRECEDENCE - 2,
-                    CommandBus::class . '||' . EventBus::class . '||' . QueryBus::class . '||' . AsynchronousRunningEndpoint::class . '||' . PropagateHeaders::class . '||' . MessagingEntrypointWithHeadersPropagation::class
+                    $pointcut
                 )
             )
             ->registerAroundMethodInterceptor(
@@ -403,7 +392,7 @@ class BusRoutingModule implements AnnotationModule
                     $this->messageHeadersPropagator,
                     'storeHeaders',
                     Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,
-                    CommandBus::class . '||' . EventBus::class . '||' . QueryBus::class . '||' . AsynchronousRunningEndpoint::class . '||' . PropagateHeaders::class . '||' . MessagingEntrypointWithHeadersPropagation::class
+                    $pointcut
                 )
             )
             ->registerMessageHandler($this->commandBusByObject)

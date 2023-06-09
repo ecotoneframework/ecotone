@@ -44,8 +44,7 @@
         "phpunit/phpunit": "^9.5",
         "behat/behat": "^3.10",
         "phpstan/phpstan": "^1.8",
-        "symfony/expression-language": "^6.0",
-        "phpbench/phpbench": "^1.2"
+        "symfony/expression-language": "^6.0"
     },
     "scripts": {
         "tests:phpstan": "vendor/bin/phpstan",
@@ -55,9 +54,6 @@
         "tests:behat": [
             "vendor/bin/behat -vvv"
         ],
-        "tests:phpbench": [
-            "vendor/bin/phpbench run tests/Benchmark --bootstrap=./vendor/autoload.php"
-        ],
         "tests:ci": [
             "@tests:phpstan",
             "@tests:phpunit",
@@ -66,7 +62,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "1.87.1-dev"
+            "dev-main": "1.88.0-dev"
         },
         "ecotone": {
             "repository": "ecotone"

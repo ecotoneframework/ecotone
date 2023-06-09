@@ -36,6 +36,8 @@ final class MediaType
 
     private const TYPE_PARAMETER = 'type';
 
+    private static array $parsedMediaTypes = [];
+
     private string $type;
     private string $subtype;
     /**
@@ -184,6 +186,9 @@ final class MediaType
      */
     public static function parseMediaType(string $mediaType): self
     {
+        if (isset(self::$parsedMediaTypes[$mediaType])) {
+            return self::$parsedMediaTypes[$mediaType];
+        }
         $parsedMediaType = explode('/', $mediaType);
 
         Assert::keyExists($parsedMediaType, 0, "Passed media type {$mediaType} has no type");
@@ -196,7 +201,7 @@ final class MediaType
             $parameters[$parameter[0]] = $parameter[1];
         }
 
-        return self::createWithParameters($parsedMediaType[0], $subtype, $parameters);
+        return self::$parsedMediaTypes[$mediaType] = self::createWithParameters($parsedMediaType[0], $subtype, $parameters);
     }
 
     /**

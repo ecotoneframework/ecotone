@@ -256,7 +256,7 @@ final class MethodInvoker implements MessageProcessor
                 )) {
                     $convertedData = $this->doConversion($this->interfaceToCall, $interfaceParameter, $data, $sourceTypeDescriptor, $currentParameterMediaType, $parameterType, $parameterMediaType);
                 } elseif ($message->getHeaders()->containsKey(MessageHeaders::TYPE_ID)) {
-                    $resolvedTargetParameterType = $message->getHeaders()->containsKey(MessageHeaders::TYPE_ID) ? TypeDescriptor::create($message->getHeaders()->get(MessageHeaders::TYPE_ID)) : $parameterType;
+                    $resolvedTargetParameterType = TypeDescriptor::create($message->getHeaders()->get(MessageHeaders::TYPE_ID));
                     if ($this->canConvertParameter(
                         $sourceTypeDescriptor,
                         $currentParameterMediaType,

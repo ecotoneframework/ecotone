@@ -4,7 +4,7 @@ namespace TestingNamespace\Correct;
 
 use Ecotone\Messaging\Attribute\ServiceContext;
 
-class CorrectClass
+class CorrectMessagingClass
 {
     #[ServiceContext]
     public function someExtension(): array

@@ -18,6 +18,7 @@ use Test\Ecotone\Modelling\Fixture\EventSourcedSaga\PaymentWasDoneEvent;
 use Test\Ecotone\Modelling\Fixture\HandlerWithAbstractClass\TestAbstractHandler;
 use Test\Ecotone\Modelling\Fixture\HandlerWithAbstractClass\TestCommand;
 use Test\Ecotone\Modelling\Fixture\HandlerWithAbstractClass\TestHandler;
+use Test\Ecotone\Modelling\Fixture\NoEventsReturnedFromFactoryMethod\Aggregate;
 use Test\Ecotone\Modelling\Fixture\Outbox\OutboxWithMultipleChannels;
 
 /**
@@ -138,6 +139,22 @@ final class ModellingEcotoneLiteTest extends TestCase
             'closed',
             $ecotoneLite->publishEvent(new PaymentWasDoneEvent('1'))
                 ->sendQueryWithRouting('order_dispatch.getStatus', metadata: ['aggregate.id' => '1'])
+        );
+    }
+
+    public function test_factory_method_of_event_sourced_aggregate_can_return_no_events(): void
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            classesToResolve: [Aggregate::class],
+            configuration: ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+        );
+
+        self::assertEquals(
+            [],
+            $ecotoneLite
+                ->sendCommandWithRoutingKey('aggregate.create')
+                ->getRecordedEvents()
         );
     }
 }

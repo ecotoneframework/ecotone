@@ -50,9 +50,9 @@ final class FlowTestSupport
         return $this;
     }
 
-    public function publishEvent(object $event): self
+    public function publishEvent(object $event, array $metadata = []): self
     {
-        $this->eventBus->publish($event);
+        $this->eventBus->publish($event, $metadata);
 
         return $this;
     }

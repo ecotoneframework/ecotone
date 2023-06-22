@@ -31,7 +31,7 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepo
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\Notification;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\Order;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderWithManualVersioning;
-use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory\NoIdDefinedAfterCallingFactoryExample;
+use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory\NoIdDefinedAfterRecordingEvents;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifierGetMethodForEventSourcedAggregate;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifierGetMethodWithParameters;
 use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
@@ -396,7 +396,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
     public function test_throwing_exception_if_aggregate_before_saving_has_no_nullable_identifier()
     {
         $aggregateCallingCommandHandler = SaveAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(NoIdDefinedAfterCallingFactoryExample::class)),
+            ClassDefinition::createFor(TypeDescriptor::create(NoIdDefinedAfterRecordingEvents::class)),
             'create',
             InterfaceToCallRegistry::createEmpty(),
             SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
@@ -421,7 +421,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $aggregateCommandHandler->handle(
             MessageBuilder::withPayload([])
-                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, new NoIdDefinedAfterCallingFactoryExample())
+                ->setHeader(AggregateMessage::AGGREGATE_OBJECT, new NoIdDefinedAfterRecordingEvents())
                 ->setReplyChannel(NullableMessageChannel::create())
                 ->build()
         );

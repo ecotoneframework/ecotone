@@ -2,14 +2,14 @@
 
 namespace Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory;
 
-use Ecotone\Modelling\Attribute\AggregateFactory;
+use Ecotone\Modelling\Attribute\AggregateEvents;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use stdClass;
 
 #[EventSourcingAggregate]
-class NoIdDefinedAfterCallingFactoryExample
+class NoIdDefinedAfterRecordingEvents
 {
     #[AggregateIdentifier]
     private $id;
@@ -17,12 +17,12 @@ class NoIdDefinedAfterCallingFactoryExample
     #[CommandHandler]
     public static function create(CreateNoIdDefinedAggregate $command): array
     {
-        return [new stdClass()];
+        return [];
     }
 
-    #[AggregateFactory]
-    public static function factory(array $events): self
+    #[AggregateEvents]
+    public function recordedEvents(): array
     {
-        return new self();
+        return [new stdClass()];
     }
 }

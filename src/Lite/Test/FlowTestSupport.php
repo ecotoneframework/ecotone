@@ -149,7 +149,7 @@ final class FlowTestSupport
             ModellingHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregateClass)
         );
 
-        return $this;
+        return $this->discardRecordedMessages();
     }
 
     /**

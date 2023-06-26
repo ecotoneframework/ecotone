@@ -11,6 +11,7 @@ use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Conversion\ConversionException;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\DestinationResolutionException;
 use Ecotone\Messaging\MessageHeaders;
@@ -142,32 +143,31 @@ final class MessagingTestSupportFrameworkTest extends TestCase
 
     public function test_failing_serializing_event_message_due_to_lack_of_converter()
     {
-        $ecotoneTestSupport = EcotoneLite::bootstrapForTesting(
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, PlaceOrderConverter::class],
             [new OrderService(), new PlaceOrderConverter(), 'logger' => new NullLogger()],
             ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
                 ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('orders'),
-                    PollingMetadata::create('orders')
-                        ->withTestingSetup(1),
                     TestConfiguration::createWithDefaults()
                         ->withMediaTypeConversion('orders', MediaType::createApplicationXPHPArray())
                         ->withSpyOnChannel('orders'),
                 ]),
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('orders'),
+            ],
         );
 
-        $ecotoneTestSupport->getCommandBus()->sendWithRouting('order.register', new PlaceOrder('someId'));
+        $ecotoneTestSupport->sendCommandWithRoutingKey('order.register', new PlaceOrder('someId'));
 
         $this->assertEquals(
             [['orderId' => 'someId']],
-            $ecotoneTestSupport->getMessagingTestSupport()->getSpiedChannelRecordedMessagePayloads('orders')
+            $ecotoneTestSupport->getSpiedChannelRecordedMessagePayloads('orders')
         );
 
         /** Failing on event serialization */
         $this->expectException(ConversionException::class);
 
-        $ecotoneTestSupport->run('orders');
+        $ecotoneTestSupport->run('orders', ExecutionPollingMetadata::createWithTestingSetup());
     }
 
     public function test_serializing_command_and_event_before_sending_to_asynchronous_channel()

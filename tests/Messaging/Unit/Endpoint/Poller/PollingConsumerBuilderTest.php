@@ -9,8 +9,6 @@ use Ecotone\Messaging\Channel\ExceptionalQueueChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
-use Ecotone\Messaging\Config\ModulePackageList;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
@@ -264,14 +262,12 @@ class PollingConsumerBuilderTest extends MessagingTest
     public function test_acking_message_with_fully_running_ecotone()
     {
         $messageChannelName = 'async_channel';
-        $ecotoneTestSupport = EcotoneLite::bootstrapForTesting(
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [SuccessServiceActivator::class],
             [new SuccessServiceActivator()],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel($messageChannelName),
-                ])
-                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel($messageChannelName),
+            ]
         );
 
         $acknowledgeCallback = NullAcknowledgementCallback::create();

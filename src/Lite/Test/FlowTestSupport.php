@@ -296,6 +296,14 @@ final class FlowTestSupport
         return $this->getAggregate($className, $identifiers);
     }
 
+    public function sendMessage(string $targetChannel, mixed $payload = '', array $metadata = []): mixed
+    {
+        /** @var MessagingEntrypoint $messagingEntrypoint */
+        $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
+
+        return $messagingEntrypoint->sendWithHeaders($payload, $metadata, $targetChannel);
+    }
+
     /**
      * @param class-string<T> $referenceName
      * @return T

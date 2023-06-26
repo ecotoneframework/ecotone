@@ -468,11 +468,11 @@ class ModellingHandlerModule implements AnnotationModule
         $registration = reset($registrations);
 
         $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($registration->getClassName()));
-        if (count($registrations) > 2) {
-            throw new InvalidArgumentException("Can't handle");
+        if (count($registrations) > 2 && $registration->getAnnotationForMethod() instanceof CommandHandler) {
+            throw new InvalidArgumentException("Command Handler registers multiple times on {$registration->getClassName()}::{$registration->getMethodName()} method. You may register same Command Handler for action and factory method method maximum.");
         }
 
-        $actionChannel                    = null;
+        $actionChannels                    = [];
         $factoryChannel                   = null;
         $factoryHandledPayloadType        = null;
         $factoryIdentifierMetadataMapping = [];
@@ -485,13 +485,18 @@ class ModellingHandlerModule implements AnnotationModule
                 $factoryHandledPayloadType        = $factoryHandledPayloadType ? $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($factoryHandledPayloadType)) : null;
                 $factoryIdentifierMetadataMapping = $registration->getAnnotationForMethod()->identifierMetadataMapping;
             } else {
-                Assert::null($actionChannel, "Trying to register action method for {$aggregateClassDefinition->getClassType()->toString()} twice under same channel {$messageChannelName}");
-                $actionChannel = $channel;
+                if ($actionChannels !== [] && $registration->getAnnotationForMethod() instanceof CommandHandler) {
+                    throw \Ecotone\Messaging\Support\InvalidArgumentException::create("Trying to register action method for {$aggregateClassDefinition->getClassType()->toString()} twice under same channel {$messageChannelName}");
+                }
+
+                $actionChannels[] = $channel;
             }
         }
 
-        $hasFactoryAndActionRedirect = count($registrations) === 2;
+        $hasFactoryAndActionRedirect = $actionChannels !== [] && $factoryChannel !== null;
         if ($hasFactoryAndActionRedirect) {
+            Assert::isTrue(count($actionChannels) <= 1, "Message Handlers on Aggregate and Saga can be used either for single factory method and single action method together, or for multiple actions methods in {$aggregateClassDefinition->getClassType()->toString()}");
+
             $messageChannelNameRouter = Uuid::uuid4()->toString();
             $configuration->registerMessageHandler(
                 ChainMessageHandlerBuilder::create()
@@ -505,7 +510,7 @@ class ModellingHandlerModule implements AnnotationModule
             );
 
             $configuration->registerMessageHandler(
-                RouterBuilder::createHeaderMappingRouter(AggregateMessage::AGGREGATE_OBJECT_EXISTS, [true => $actionChannel, false => $factoryChannel])
+                RouterBuilder::createHeaderMappingRouter(AggregateMessage::AGGREGATE_OBJECT_EXISTS, [true => $actionChannels[0], false => $factoryChannel])
                     ->withInputChannelName($messageChannelNameRouter)
             );
         }
@@ -521,7 +526,7 @@ class ModellingHandlerModule implements AnnotationModule
             $isFactoryMethod       = $relatedClassInterface->isStaticallyCalled();
             $parameterConverters   = $parameterConverterAnnotationFactory->createParameterWithDefaults($relatedClassInterface, (bool)$relatedClassInterface->hasMethodAnnotation(TypeDescriptor::create(IgnorePayload::class)));
             $connectionChannel     = $hasFactoryAndActionRedirect
-                ? ($isFactoryMethod ? $factoryChannel : $actionChannel)
+                ? ($isFactoryMethod ? $factoryChannel : $actionChannels[0])
                 : self::getHandlerChannel($registration);
             if (! $hasFactoryAndActionRedirect) {
                 $configuration->registerMessageHandler(

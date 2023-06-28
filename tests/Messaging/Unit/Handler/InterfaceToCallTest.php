@@ -30,6 +30,7 @@ use Test\Ecotone\Messaging\Fixture\Conversion\SuperAdmin;
 use Test\Ecotone\Messaging\Fixture\Conversion\TwoStepPassword;
 use Test\Ecotone\Messaging\Fixture\Conversion\User;
 use Test\Ecotone\Messaging\Fixture\Dto\MethodWithCallable;
+use Test\Ecotone\Messaging\Fixture\Handler\ObjectWithConstructorProperties;
 
 /**
  * Class InterfaceToCallTest
@@ -612,5 +613,12 @@ class InterfaceToCallTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         $interfaceToCall->getClassAnnotation(TypeDescriptor::create(Asynchronous::class));
+    }
+
+    public function test_not_throwing_exception_when_retrieving_constructor_parameter_attributes()
+    {
+        $interfaceToCall = InterfaceToCall::create(ObjectWithConstructorProperties::class, '__construct');
+
+        $this->assertCount(1, $interfaceToCall->getFirstParameter()->getAnnotations());
     }
 }

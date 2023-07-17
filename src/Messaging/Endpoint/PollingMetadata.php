@@ -18,6 +18,7 @@ final class PollingMetadata
     public const DEFAULT_EXECUTION_LIMIT = 0;
     public const DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS = 0;
     public const DEFAULT_STOP_ON_ERROR = false;
+    public const DEFAULT_FINISH_WHEN_NO_MESSAGES = false;
 
     private string $endpointId;
     private string $cron = '';
@@ -41,6 +42,8 @@ final class PollingMetadata
     private string $triggerReferenceName = '';
     private string $taskExecutorName = '';
     private bool $stopOnError = self::DEFAULT_STOP_ON_ERROR;
+    private bool $finishWhenNoMessages = self::DEFAULT_FINISH_WHEN_NO_MESSAGES;
+
     /**
      * PollingMetadata constructor.
      * @param string $endpointId
@@ -147,6 +150,9 @@ final class PollingMetadata
         }
         if (! is_null($executionPollingMetadata->getCron())) {
             $copy = $copy->setCron($executionPollingMetadata->getCron());
+        }
+        if (! is_null($executionPollingMetadata->getFinishWhenNoMessages())) {
+            $copy = $copy->setFinishWhenNoMessages($executionPollingMetadata->getFinishWhenNoMessages());
         }
 
         return $copy;
@@ -295,6 +301,9 @@ final class PollingMetadata
     }
 
     /**
+     * How many times Consumer should be executed before it will be stopped.
+     * It takes under consideration polling when no messages are received.
+     *
      * @param int $executionAmountLimit
      * @return PollingMetadata
      */
@@ -302,6 +311,14 @@ final class PollingMetadata
     {
         $copy = $this->createCopy();
         $copy->executionAmountLimit = $executionAmountLimit;
+
+        return $copy;
+    }
+
+    public function setFinishWhenNoMessages(bool $finishWhenNoMessages): PollingMetadata
+    {
+        $copy = $this->createCopy();
+        $copy->finishWhenNoMessages = $finishWhenNoMessages;
 
         return $copy;
     }
@@ -400,6 +417,11 @@ final class PollingMetadata
     public function getHandledMessageLimit(): int
     {
         return $this->handledMessageLimit;
+    }
+
+    public function finishWhenNoMessages(): bool
+    {
+        return $this->finishWhenNoMessages;
     }
 
     /**

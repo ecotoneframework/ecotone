@@ -108,6 +108,8 @@ final class MessageHeaders
 
     public const STREAM_BASED_SOURCED = 'streamBasedSourced';
 
+    public const CHANNEL_SEND_RETRY_NUMBER = 'channelSendRetryNumber';
+
     private array $headers;
 
     /**
@@ -165,6 +167,7 @@ final class MessageHeaders
             self::CONSUMER_ENDPOINT_ID,
             self::STREAM_BASED_SOURCED,
             MessagingEntrypoint::ENTRYPOINT,
+            self::CHANNEL_SEND_RETRY_NUMBER,
         ];
     }
 

@@ -82,9 +82,41 @@ class ChannelInterceptorTest extends TestCase
         $channelInterceptor
             ->expects($this->once())
             ->method('afterSendCompletion')
-            ->with($requestMessage, $queueChannel, new InvalidArgumentException(''));
+            ->with($requestMessage, $queueChannel, new InvalidArgumentException(''))
+            ->willReturn(false);
 
         $this->expectException(InvalidArgumentException::class);
+
+        $pollableChannel = new PollableChannelInterceptorAdapter(
+            $queueChannel,
+            [$channelInterceptor]
+        );
+        $pollableChannel->send($requestMessage);
+    }
+
+    public function test_intercepting_send_completion_if_exception_occurred_and_was_handled()
+    {
+        $requestMessage = MessageBuilder::withPayload('some1')->build();
+        $queueChannel = $this->createMock(QueueChannel::class);
+        $queueChannel
+            ->method('send')
+            ->willThrowException(new InvalidArgumentException())
+            ->with($requestMessage);
+
+        $channelInterceptor = $this->createMock(ChannelInterceptor::class);
+        $channelInterceptor
+            ->method('preSend')
+            ->willReturn($requestMessage);
+        $channelInterceptor
+            ->expects($this->once())
+            ->method('afterSendCompletion')
+            ->with($requestMessage, $queueChannel, new InvalidArgumentException(''))
+            ->willReturn(true);
+
+        $channelInterceptor
+            ->expects($this->once())
+            ->method('postSend')
+            ->with($requestMessage, $queueChannel);
 
         $pollableChannel = new PollableChannelInterceptorAdapter(
             $queueChannel,

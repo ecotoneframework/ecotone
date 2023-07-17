@@ -17,6 +17,7 @@ use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -143,7 +144,7 @@ class PollingConsumerBuilderTest extends MessagingTest
     {
         $pollingConsumerBuilder = new PollingConsumerBuilder(InterfaceToCallRegistry::createEmpty());
         $inputChannelName = 'inputChannelName';
-        $inputChannel = ExceptionalQueueChannel::create();
+        $inputChannel = ExceptionalQueueChannel::createWithExceptionOnReceive();
 
         $serviceHandler = DataReturningService::createServiceActivatorBuilder('some')
             ->withEndpointId('test')
@@ -271,7 +272,7 @@ class PollingConsumerBuilderTest extends MessagingTest
         );
 
         $acknowledgeCallback = NullAcknowledgementCallback::create();
-        $ecotoneTestSupport->sendMessage('handle_channel', metadata: [
+        $ecotoneTestSupport->sendDirectToChannel('handle_channel', metadata: [
             MessageHeaders::CONSUMER_ACK_HEADER_LOCATION => 'ack',
             'ack' => $acknowledgeCallback,
         ]);
@@ -281,7 +282,7 @@ class PollingConsumerBuilderTest extends MessagingTest
         $this->assertTrue($acknowledgeCallback->isAcked());
 
         $acknowledgeCallback = NullAcknowledgementCallback::create();
-        $ecotoneTestSupport->sendMessage('handle_channel', metadata: [
+        $ecotoneTestSupport->sendDirectToChannel('handle_channel', metadata: [
             MessageHeaders::CONSUMER_ACK_HEADER_LOCATION => 'ack',
             'ack' => $acknowledgeCallback,
         ]);
@@ -391,6 +392,38 @@ class PollingConsumerBuilderTest extends MessagingTest
 
         $this->assertTrue($acknowledgementCallback->isRequeued());
         $this->assertNull($errorChannel->receive());
+    }
+
+    public function test_finish_when_no_messages(): void
+    {
+        $inputChannelName = 'inputChannel';
+        $inputChannel = QueueChannel::create();
+        $objectToInvokeOn = new class () {
+            public array $receivedMessages = [];
+            public function handle(Message $message): void
+            {
+                $this->receivedMessages[] = $message;
+            }
+        };
+        $messageHandlerBuilder = ServiceActivatorBuilder::createWithDirectReference($objectToInvokeOn, 'handle')
+            ->withEndpointId('some-id')
+            ->withInputChannelName($inputChannelName);
+
+        $pollingConsumer = $this->createPollingConsumerWithCustomConfiguration(
+            [
+                $inputChannelName => $inputChannel,
+            ],
+            $messageHandlerBuilder,
+            PollingMetadata::create('some')
+                ->setFinishWhenNoMessages(true)
+        );
+
+        $inputChannel->send(MessageBuilder::withPayload('some')->build());
+        $inputChannel->send(MessageBuilder::withPayload('some')->build());
+        $pollingConsumer->run();
+
+        $this->assertNull($inputChannel->receive());
+        $this->assertCount(2, $objectToInvokeOn->receivedMessages);
     }
 
     private function createPollingConsumer(string $inputChannelName, QueueChannel $inputChannel, $messageHandler): \Ecotone\Messaging\Endpoint\ConsumerLifecycle

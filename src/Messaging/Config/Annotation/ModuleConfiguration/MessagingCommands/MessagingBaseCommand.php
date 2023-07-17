@@ -14,7 +14,7 @@ class MessagingBaseCommand
         return $configuredMessagingSystem->runConsoleCommand($commandName, $parameters);
     }
 
-    public function runAsynchronousEndpointCommand(string $consumerName, ConfiguredMessagingSystem $configuredMessagingSystem, #[ConsoleParameterOption] ?string $handledMessageLimit = null, #[ConsoleParameterOption] ?int $executionTimeLimit = null, #[ConsoleParameterOption] ?int $memoryLimit = null, #[ConsoleParameterOption] ?string $cron = null, #[ConsoleParameterOption] bool $stopOnFailure = false): void
+    public function runAsynchronousEndpointCommand(string $consumerName, ConfiguredMessagingSystem $configuredMessagingSystem, #[ConsoleParameterOption] ?string $handledMessageLimit = null, #[ConsoleParameterOption] ?int $executionTimeLimit = null, #[ConsoleParameterOption] ?int $memoryLimit = null, #[ConsoleParameterOption] ?string $cron = null, #[ConsoleParameterOption] bool $stopOnFailure = false, #[ConsoleParameterOption] bool $finishWhenNoMessages = false): void
     {
         $pollingMetadata = ExecutionPollingMetadata::createWithDefaults();
         if ($stopOnFailure) {
@@ -31,6 +31,9 @@ class MessagingBaseCommand
         }
         if ($cron) {
             $pollingMetadata = $pollingMetadata->withCron($cron);
+        }
+        if ($finishWhenNoMessages) {
+            $pollingMetadata = $pollingMetadata->withFinishWhenNoMessages(true);
         }
 
 

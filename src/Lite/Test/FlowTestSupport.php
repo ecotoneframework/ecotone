@@ -11,8 +11,11 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\BusModule;
@@ -103,6 +106,11 @@ final class FlowTestSupport
     public function getSpiedChannelRecordedMessages(string $channelName): array
     {
         return $this->testSupportGateway->getSpiedChannelRecordedMessages($channelName);
+    }
+
+    public function getMessageChannel(string $channelName): MessageChannel|PollableChannel
+    {
+        return $this->configuredMessagingSystem->getMessageChannelByName($channelName);
     }
 
     public function run(string $name, ?ExecutionPollingMetadata $executionPollingMetadata = null): self
@@ -296,12 +304,21 @@ final class FlowTestSupport
         return $this->getAggregate($className, $identifiers);
     }
 
-    public function sendMessage(string $targetChannel, mixed $payload = '', array $metadata = []): mixed
+    public function sendDirectToChannel(string $targetChannel, mixed $payload = '', array $metadata = []): mixed
     {
         /** @var MessagingEntrypoint $messagingEntrypoint */
         $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
 
         return $messagingEntrypoint->sendWithHeaders($payload, $metadata, $targetChannel);
+    }
+
+    public function sendMessageDirectToChannel(Message $message): mixed
+    {
+        Assert::isTrue($message->getHeaders()->containsKey(MessagingEntrypoint::ENTRYPOINT), "Message must be sent directly to channel, so it must contains `ecotone.messaging.entrypoint` header. Use `sendDirectToChannel` method instead, if you don't want to add it manually.");
+        /** @var MessagingEntrypoint $messagingEntrypoint */
+        $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
+
+        return $messagingEntrypoint->sendMessage($message);
     }
 
     /**

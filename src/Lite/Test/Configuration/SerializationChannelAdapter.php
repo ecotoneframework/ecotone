@@ -37,8 +37,9 @@ final class SerializationChannelAdapter implements ChannelInterceptor
     {
     }
 
-    public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?Throwable $exception): void
+    public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?Throwable $exception): bool
     {
+        return false;
     }
 
     public function preReceive(MessageChannel $messageChannel): bool

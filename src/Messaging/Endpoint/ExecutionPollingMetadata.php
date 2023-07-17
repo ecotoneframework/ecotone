@@ -9,6 +9,7 @@ final class ExecutionPollingMetadata
     private ?int $memoryLimitInMegabytes = null;
     private ?string $cron = null;
     private ?bool $stopOnError = null;
+    private ?bool $finishWhenNoMessages = null;
 
     private function __construct()
     {
@@ -82,6 +83,14 @@ final class ExecutionPollingMetadata
         return $self;
     }
 
+    public function withFinishWhenNoMessages(bool $finishWhenNoMessages): ExecutionPollingMetadata
+    {
+        $self = clone $this;
+        $self->finishWhenNoMessages = $finishWhenNoMessages;
+
+        return $self;
+    }
+
     public function getCron(): ?string
     {
         return $this->cron;
@@ -105,5 +114,10 @@ final class ExecutionPollingMetadata
     public function getStopOnError(): ?bool
     {
         return $this->stopOnError;
+    }
+
+    public function getFinishWhenNoMessages(): ?bool
+    {
+        return $this->finishWhenNoMessages;
     }
 }

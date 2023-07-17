@@ -33,8 +33,9 @@ abstract class AbstractChannelInterceptor implements ChannelInterceptor
     /**
      * @inheritDoc
      */
-    public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?Throwable $exception): void
+    public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?Throwable $exception): bool
     {
+        return false;
     }
 
     /**

@@ -7,6 +7,7 @@ namespace Ecotone\Messaging\Config;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
+use Ecotone\Messaging\Support\Assert;
 
 class ServiceConfiguration
 {
@@ -156,6 +157,9 @@ class ServiceConfiguration
 
     public function withExtensionObjects(array $extensionObjects): self
     {
+        foreach ($extensionObjects as $extensionObject) {
+            Assert::isObject($extensionObject, 'Extension object must be an object, given: ' . gettype($extensionObject));
+        }
         $clone              = clone $this;
         $clone->extensionObjects = $extensionObjects;
 

@@ -124,7 +124,7 @@ class LoggerExample implements LoggerInterface
      */
     public function critical(string|Stringable $message, array $context = []): void
     {
-        $this->critical[] = $message;
+        $this->critical[] = ['message' => $message, 'context' => $context];
     }
 
     /**

@@ -250,6 +250,7 @@ final class EcotoneLite
 
         $aggregateAnnotation = TypeDescriptor::create(Aggregate::class);
         foreach ($classesToResolve as $class) {
+            Assert::isTrue(is_string($class), 'Classes to resolve must be strings, instead given: ' . TypeDescriptor::createFromVariable($class)->toString());
             $aggregateClass = ClassDefinition::createFor(TypeDescriptor::create($class));
             if (! $aggregateClass->hasClassAnnotation($aggregateAnnotation)) {
                 continue;
@@ -266,6 +267,7 @@ final class EcotoneLite
             $configuration = $configuration
                 ->addExtensionObject(InMemoryRepositoryBuilder::createForAllStateStoredAggregates());
         }
+
         return $configuration;
     }
 }

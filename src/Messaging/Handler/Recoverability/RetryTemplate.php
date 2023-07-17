@@ -28,6 +28,11 @@ final class RetryTemplate
         $this->maxAttempts = $maxAttempts;
     }
 
+    public static function createNeverRetry(): self
+    {
+        return new self(0, 0, null, 0);
+    }
+
     /**
      * @return int delay in milliseconds
      */
@@ -60,5 +65,10 @@ final class RetryTemplate
         }
 
         return $this->delayForRetryNumber($retryNumber - 1) * $this->multiplier;
+    }
+
+    public function getMaxAttempts(): int
+    {
+        return $this->maxAttempts;
     }
 }

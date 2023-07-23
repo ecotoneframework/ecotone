@@ -14,7 +14,7 @@ use Ecotone\Messaging\Channel\PollableChannel\PollableChannelConfiguration;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\MessageHeaders;
 use PHPUnit\Framework\TestCase;
 
@@ -91,27 +91,29 @@ final class CollectorModuleTest extends TestCase
         $this->assertNull($ecotoneLite->getMessageChannel('bets')->receive(), 'No message should not be sent due to exception');
     }
 
-    public function test_collected_message_is_delayed_so_messages_are_not_sent_on_handler_exception_when_async_scenario()
+    public function test_collected_message_are_not_sent_when_handler_exception_happens_in_async_scenario()
     {
         $ecotoneLite = $this->bootstrapEcotone(
             [BetService::class],
             [new BetService()],
             [
                 SimpleMessageChannelBuilder::createQueueChannel('bets'),
+                SimpleMessageChannelBuilder::createQueueChannel('customErrorChannel'),
             ],
-            [PollableChannelConfiguration::neverRetry('bets')->withCollector(true)]
+            [
+                PollableChannelConfiguration::neverRetry('bets')->withCollector(true),
+                PollingMetadata::create('bets')->withTestingSetup(failAtError: false)->setErrorChannelName('customErrorChannel'),
+            ]
         );
 
         $ecotoneLite->sendCommandWithRoutingKey('asyncMakeBet', true);
-        try {
-            $ecotoneLite->run('bets', ExecutionPollingMetadata::createWithTestingSetup());
-        } catch (\RuntimeException) {
-        }
+        $ecotoneLite->run('bets');
+        $this->assertNotNull($ecotoneLite->getMessageChannel('customErrorChannel')->receive(), 'Message should be sent due to error channel');
         $this->assertNull($ecotoneLite->getMessageChannel('bets')->receive(), 'No message should not be sent due to exception');
 
         /** Previous messages should be cleared and not resent */
         $ecotoneLite->sendCommandWithRoutingKey('asyncMakeBet', false);
-        $ecotoneLite->run('bets', ExecutionPollingMetadata::createWithTestingSetup());
+        $ecotoneLite->run('bets');
         $this->assertNotNull($ecotoneLite->getMessageChannel('bets')->receive(), 'Message was not collected');
         $this->assertNull($ecotoneLite->getMessageChannel('bets')->receive(), 'No more messages should be collected');
     }

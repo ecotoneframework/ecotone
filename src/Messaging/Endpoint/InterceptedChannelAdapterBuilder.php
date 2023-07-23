@@ -31,6 +31,7 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
         $pollingMetadata = $this->withContinuesPolling() ? $pollingMetadata->setFixedRateInMilliseconds(1) : $pollingMetadata;
         $interceptors = InterceptedConsumer::createInterceptorsForPollingMetadata($pollingMetadata, $referenceSearchService);
 
+        $results = [];
         foreach ($interceptors as $interceptor) {
             if ($interceptor->isInterestedInPostSend()) {
                 $this->addAroundInterceptor(

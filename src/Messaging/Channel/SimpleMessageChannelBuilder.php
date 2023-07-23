@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
 
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\MessageChannel;
@@ -15,7 +16,7 @@ use Ecotone\Messaging\PollableChannel;
  * @package Ecotone\Messaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class SimpleMessageChannelBuilder implements MessageChannelBuilder
+class SimpleMessageChannelBuilder implements PollableMessageChannelBuilder
 {
     private string $messageChannelName;
     private MessageChannel $messageChannel;
@@ -85,6 +86,11 @@ class SimpleMessageChannelBuilder implements MessageChannelBuilder
     public function getMessageChannelName(): string
     {
         return $this->messageChannelName;
+    }
+
+    public function getDefaultConversionMediaType(): ?MediaType
+    {
+        return MediaType::createApplicationXPHP();
     }
 
     /**

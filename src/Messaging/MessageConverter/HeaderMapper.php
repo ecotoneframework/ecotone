@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\MessageConverter;
 
+use Ecotone\Messaging\Conversion\ConversionService;
+
 /**
  * Interface HeaderMapper
  * @package Ecotone\Messaging\Handler
@@ -15,11 +17,11 @@ interface HeaderMapper
      * @param array $headersToBeMapped
      * @return array
      */
-    public function mapToMessageHeaders(array $headersToBeMapped): array;
+    public function mapToMessageHeaders(array $headersToBeMapped, ConversionService $conversionService): array;
 
     /**
      * @param array $headersToBeMapped
      * @return array
      */
-    public function mapFromMessageHeaders(array $headersToBeMapped): array;
+    public function mapFromMessageHeaders(array $headersToBeMapped, ConversionService $conversionService): array;
 }

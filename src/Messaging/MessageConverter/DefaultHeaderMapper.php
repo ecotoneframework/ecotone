@@ -28,70 +28,59 @@ class DefaultHeaderMapper implements HeaderMapper
     private array $toMessageHeadersMapping = [];
     private bool $headerNamesToLower;
 
-    private ConversionService $conversionService;
+    /**
+     * @param string[] $toMessageHeadersMapping
+     * @param string[] $fromMessageHeadersMapping
+     */
+    private function __construct(array $toMessageHeadersMapping, array $fromMessageHeadersMapping, bool $headerNamesToLower)
+    {
+        $this->fromMessageHeadersMapping = $this->prepareRegex($fromMessageHeadersMapping, $headerNamesToLower);
+        $this->toMessageHeadersMapping = $this->prepareRegex($toMessageHeadersMapping, $headerNamesToLower);
+        $this->headerNamesToLower = $headerNamesToLower;
+    }
 
     /**
      * @param string[] $toMessageHeadersMapping
      * @param string[] $fromMessageHeadersMapping
      */
-    private function __construct(array $toMessageHeadersMapping, array $fromMessageHeadersMapping, bool $headerNamesToLower, ConversionService $conversionService)
+    public static function createWith(array $toMessageHeadersMapping, array $fromMessageHeadersMapping): self
     {
-        $this->fromMessageHeadersMapping = $this->prepareRegex($fromMessageHeadersMapping, $headerNamesToLower);
-        $this->toMessageHeadersMapping = $this->prepareRegex($toMessageHeadersMapping, $headerNamesToLower);
-        $this->headerNamesToLower = $headerNamesToLower;
-        $this->conversionService = $conversionService;
+        return new self($toMessageHeadersMapping, $fromMessageHeadersMapping, false);
     }
 
     /**
-     * @param array $toMessageHeadersMapping
-     * @param array $fromMessageHeadersMapping
-     * @return DefaultHeaderMapper
+     * @param string[] $toMessageHeadersMapping
+     * @param string[] $fromMessageHeadersMapping
      */
-    public static function createWith(array $toMessageHeadersMapping, array $fromMessageHeadersMapping, ConversionService $conversionService): self
+    public static function createCaseInsensitiveHeadersWith(array $toMessageHeadersMapping, array $fromMessageHeadersMapping): self
     {
-        return new self($toMessageHeadersMapping, $fromMessageHeadersMapping, false, $conversionService);
+        return new self($toMessageHeadersMapping, $fromMessageHeadersMapping, true);
     }
 
-    /**
-     * @param array $toMessageHeadersMapping
-     * @param array $fromMessageHeadersMapping
-     * @return DefaultHeaderMapper
-     */
-    public static function createCaseInsensitiveHeadersWith(array $toMessageHeadersMapping, array $fromMessageHeadersMapping, ConversionService $conversionService): self
+    public static function createAllHeadersMapping(): self
     {
-        return new self($toMessageHeadersMapping, $fromMessageHeadersMapping, true, $conversionService);
+        return new self(['*'], ['*'], false);
     }
 
-    /**
-     * @return DefaultHeaderMapper
-     */
-    public static function createAllHeadersMapping(ConversionService $conversionService): self
+    public static function createNoMapping(): self
     {
-        return new self(['*'], ['*'], false, $conversionService);
-    }
-
-    /**
-     * @return DefaultHeaderMapper
-     */
-    public static function createNoMapping(ConversionService $conversionService): self
-    {
-        return new self([], [], false, $conversionService);
+        return new self([], [], false);
     }
 
     /**
      * @inheritDoc
      */
-    public function mapToMessageHeaders(array $headersToBeMapped): array
+    public function mapToMessageHeaders(array $headersToBeMapped, ConversionService $conversionService): array
     {
-        return $this->mapHeaders($this->toMessageHeadersMapping, $headersToBeMapped);
+        return $this->mapHeaders($this->toMessageHeadersMapping, $headersToBeMapped, $conversionService);
     }
 
     /**
      * @inheritDoc
      */
-    public function mapFromMessageHeaders(array $headersToBeMapped): array
+    public function mapFromMessageHeaders(array $headersToBeMapped, ConversionService $conversionService): array
     {
-        return $this->mapHeaders($this->fromMessageHeadersMapping, $headersToBeMapped);
+        return $this->mapHeaders($this->fromMessageHeadersMapping, $headersToBeMapped, $conversionService);
     }
 
     /**
@@ -101,7 +90,7 @@ class DefaultHeaderMapper implements HeaderMapper
      * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function mapHeaders(array $mappingHeaders, array $sourceHeaders): array
+    private function mapHeaders(array $mappingHeaders, array $sourceHeaders, ConversionService $conversionService): array
     {
         $targetHeaders = [];
         $convertedSourceHeaders = [];
@@ -111,19 +100,19 @@ class DefaultHeaderMapper implements HeaderMapper
 
         foreach ($mappingHeaders as $mappedHeader) {
             if (is_array($mappedHeader)) {
-                $targetHeaders = array_merge($this->mapHeaders($mappedHeader, $sourceHeaders));
+                $targetHeaders = array_merge($this->mapHeaders($mappedHeader, $sourceHeaders, $conversionService));
                 continue;
             }
 
             if (array_key_exists($mappedHeader, $convertedSourceHeaders)) {
-                $targetHeaders = $this->convertToStoreableFormat($mappedHeader, $convertedSourceHeaders[$mappedHeader], $targetHeaders);
+                $targetHeaders = $this->convertToStoreableFormat($mappedHeader, $convertedSourceHeaders[$mappedHeader], $targetHeaders, $conversionService);
 
                 continue;
             }
 
             foreach ($convertedSourceHeaders as $sourceHeaderName => $value) {
                 if (preg_match("#{$mappedHeader}#", $sourceHeaderName)) {
-                    $targetHeaders = $this->convertToStoreableFormat($sourceHeaderName, $value, $targetHeaders);
+                    $targetHeaders = $this->convertToStoreableFormat($sourceHeaderName, $value, $targetHeaders, $conversionService);
                 }
             }
         }
@@ -165,19 +154,19 @@ class DefaultHeaderMapper implements HeaderMapper
         return $finalMappingHeaders;
     }
 
-    private function convertToStoreableFormat(string $mappedHeader, mixed $value, array $convertedHeaders): array
+    private function convertToStoreableFormat(string $mappedHeader, mixed $value, array $convertedHeaders, ConversionService $conversionService): array
     {
         if ($this->isScalarType($value)) {
             $convertedHeaders[$mappedHeader] = $value;
         } elseif (
-            $this->conversionService->canConvert(
+            $conversionService->canConvert(
                 TypeDescriptor::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
                 TypeDescriptor::createStringType(),
                 MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
             )
         ) {
-            $convertedHeaders[$mappedHeader] =  $this->conversionService->convert(
+            $convertedHeaders[$mappedHeader] =  $conversionService->convert(
                 $value,
                 TypeDescriptor::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
@@ -185,14 +174,14 @@ class DefaultHeaderMapper implements HeaderMapper
                 MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
             );
         } elseif (
-            $this->conversionService->canConvert(
+            $conversionService->canConvert(
                 TypeDescriptor::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
                 TypeDescriptor::createStringType(),
                 MediaType::createApplicationXPHP()
             )
         ) {
-            $convertedHeaders[$mappedHeader] =  $this->conversionService->convert(
+            $convertedHeaders[$mappedHeader] =  $conversionService->convert(
                 $value,
                 TypeDescriptor::createFromVariable($value),
                 MediaType::createApplicationXPHP(),

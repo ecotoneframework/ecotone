@@ -17,6 +17,7 @@ use Ecotone\JMSConverter\Configuration\JMSConverterConfigurationModule;
 use Ecotone\JMSConverter\Configuration\JMSDefaultSerialization;
 use Ecotone\Lite\Test\Configuration\EcotoneTestSupportModule;
 use Ecotone\Messaging\Channel\Collector\Config\CollectorModule;
+use Ecotone\Messaging\Channel\PollableChannel\InMemory\InMemoryQueueAcknowledgeModule;
 use Ecotone\Messaging\Channel\PollableChannel\SendRetries\PollableChannelSendRetriesModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\BasicMessagingModule;
@@ -75,6 +76,7 @@ class ModuleClassList
         MessageConsumerModule::class,
         InstantRetryModule::class,
         PollableChannelSendRetriesModule::class,
+        InMemoryQueueAcknowledgeModule::class,
     ];
 
     public const ASYNCHRONOUS_MODULE = [

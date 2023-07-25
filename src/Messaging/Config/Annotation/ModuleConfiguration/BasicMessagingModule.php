@@ -26,6 +26,7 @@ use Ecotone\Messaging\Endpoint\EventDriven\LazyEventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapterEntrypoint;
 use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\Interceptor\ConnectionExceptionRetryInterceptor;
+use Ecotone\Messaging\Endpoint\Interceptor\FinishWhenNoMessagesInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitExecutionAmountInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
@@ -101,6 +102,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
         $messagingConfiguration->registerConverter(new DeserializingConverterBuilder());
 
         $messagingConfiguration->registerRelatedInterfaces([
+            $interfaceToCallRegistry->getFor(FinishWhenNoMessagesInterceptor::class, 'postSend'),
             $interfaceToCallRegistry->getFor(LimitConsumedMessagesInterceptor::class, 'postSend'),
             $interfaceToCallRegistry->getFor(ConnectionExceptionRetryInterceptor::class, 'postSend'),
             $interfaceToCallRegistry->getFor(LimitExecutionAmountInterceptor::class, 'postSend'),

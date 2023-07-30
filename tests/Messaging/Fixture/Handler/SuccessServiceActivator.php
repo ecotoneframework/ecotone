@@ -12,11 +12,13 @@ use Ecotone\Modelling\Attribute\QueryHandler;
 final class SuccessServiceActivator
 {
     private int $calls = 0;
+    private Message $lastCalledMessage;
 
     #[Asynchronous('async_channel')]
     #[ServiceActivator('handle_channel')]
     public function handle(Message $message): void
     {
+        $this->lastCalledMessage = $message;
         $this->calls++;
     }
 
@@ -24,6 +26,12 @@ final class SuccessServiceActivator
     public function getNumberOfCalls(): int
     {
         return $this->calls;
+    }
+
+    #[QueryHandler('get_last_message_headers')]
+    public function getLastCalledMessage(): array
+    {
+        return $this->lastCalledMessage->getHeaders()->headers();
     }
 
     public function __toString()

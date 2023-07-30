@@ -165,6 +165,10 @@ final class TypeDescriptor implements Type
             return false;
         }
 
+        if ($this->isNullType() && $toCompare->isNullType()) {
+            return true;
+        }
+
         if (is_a($this->type, $toCompare->getTypeHint(), true)) {
             return true;
         }
@@ -772,6 +776,11 @@ final class TypeDescriptor implements Type
     public function isUnionType(): bool
     {
         return false;
+    }
+
+    public function isNullType(): bool
+    {
+        return $this->type === self::NULL;
     }
 
     /**

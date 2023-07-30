@@ -198,13 +198,10 @@ class ServiceConfiguration
         return $clone;
     }
 
-    /**
-     * @param string $defaultSerializationMediaType
-     */
-    public function withDefaultSerializationMediaType(string $defaultSerializationMediaType): self
+    public function withDefaultSerializationMediaType(string|MediaType $defaultSerializationMediaType): self
     {
         $clone                                = clone $this;
-        $clone->defaultSerializationMediaType = $defaultSerializationMediaType;
+        $clone->defaultSerializationMediaType = is_string($defaultSerializationMediaType) ? $defaultSerializationMediaType : $defaultSerializationMediaType->toString();
 
         return $clone;
     }

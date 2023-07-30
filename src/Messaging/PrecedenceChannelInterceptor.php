@@ -10,5 +10,5 @@ interface PrecedenceChannelInterceptor
 
     public const MESSAGE_SERIALIZATION = 2000;
 
-    public const COLLECTOR_PRECEDENCE = self::MESSAGE_SERIALIZATION + 1;
+    public const COLLECTOR_PRECEDENCE = self::MESSAGE_SERIALIZATION - 1;
 }

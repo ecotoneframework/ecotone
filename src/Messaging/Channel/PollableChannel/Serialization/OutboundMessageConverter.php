@@ -2,31 +2,25 @@
 
 namespace Ecotone\Messaging\Channel\PollableChannel\Serialization;
 
+use Ecotone\Messaging\Conversion\ConversionException;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 
 class OutboundMessageConverter
 {
-    private HeaderMapper $headerMapper;
-    private ?MediaType $defaultConversionMediaType;
-    private ?int $defaultDeliveryDelay;
-    private ?int $defaultTimeToLive;
-    private ?int $defaultPriority;
-    private array $staticHeadersToAdd;
-
-    public function __construct(HeaderMapper $headerMapper, ?MediaType $defaultConversionMediaType, ?int $defaultDeliveryDelay, ?int $defaultTimeToLive, ?int $defaultPriority, array $staticHeadersToAdd)
-    {
-        $this->headerMapper               = $headerMapper;
-        $this->defaultConversionMediaType = $defaultConversionMediaType;
-        $this->defaultDeliveryDelay       = $defaultDeliveryDelay;
-        $this->defaultTimeToLive          = $defaultTimeToLive;
-        $this->defaultPriority            = $defaultPriority;
-        $this->staticHeadersToAdd = $staticHeadersToAdd;
+    public function __construct(
+        private HeaderMapper $headerMapper,
+        private ?MediaType $defaultConversionMediaType,
+        private ?int $defaultDeliveryDelay = null,
+        private ?int $defaultTimeToLive = null,
+        private ?int $defaultPriority = null,
+        private array $staticHeadersToAdd = []
+    ) {
     }
 
     public function prepare(Message $messageToConvert, ConversionService $conversionService): OutboundMessage
@@ -40,56 +34,75 @@ class OutboundMessageConverter
         $applicationHeaders[MessageHeaders::MESSAGE_ID] = $messageToConvert->getHeaders()->getMessageId();
         $applicationHeaders[MessageHeaders::TIMESTAMP]  = $messageToConvert->getHeaders()->getTimestamp();
 
-        $mediaType             = $messageToConvert->getHeaders()->hasContentType() ? $messageToConvert->getHeaders()->getContentType() : null;
+        $sourceMediaType             = $messageToConvert->getHeaders()->hasContentType() ? $messageToConvert->getHeaders()->getContentType() : null;
         if (! is_string($messagePayload)) {
-            if (! $messageToConvert->getHeaders()->hasContentType()) {
-                throw new InvalidArgumentException("Can't send outside of application. Payload has incorrect type, that can't be converted: " . TypeDescriptor::createFromVariable($messagePayload)->toString());
+            if (TypeDescriptor::createFromVariable($messagePayload)->isScalar()) {
+                $sourceMediaType = MediaType::createApplicationXPHP();
+            }
+            if (! $sourceMediaType) {
+                throw new ConversionException("Can't send outside of application. Payload has incorrect type, that can't be converted: " . TypeDescriptor::createFromVariable($messagePayload)->toString());
             }
 
-            $sourceType      = $messageToConvert->getHeaders()->getContentType()->hasTypeParameter() ? $messageToConvert->getHeaders()->getContentType()->getTypeParameter() : TypeDescriptor::createFromVariable($messagePayload);
-            $sourceMediaType = $messageToConvert->getHeaders()->getContentType();
-            $targetType      = TypeDescriptor::createStringType();
+            $sourceType      = $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : TypeDescriptor::createFromVariable($messagePayload);
+            $targetConversionMediaType = $this->defaultConversionMediaType ?: MediaType::createApplicationXPHPSerialized();
+            $targetType = TypeDescriptor::createStringType();
+            if ($targetConversionMediaType->hasTypeParameter()) {
+                $targetType = $targetConversionMediaType->getTypeParameter();
+            } elseif ($targetConversionMediaType->isCompatibleWith(MediaType::createApplicationXPHP())) {
+                $targetType = TypeDescriptor::createAnythingType();
+            }
 
-            $defaultConversionMediaType = $this->defaultConversionMediaType ?: MediaType::createApplicationXPHPSerialized();
-            if ($conversionService->canConvert(
-                $sourceType,
-                $sourceMediaType,
-                $targetType,
-                $defaultConversionMediaType
-            )) {
-                $applicationHeaders[MessageHeaders::TYPE_ID] = TypeDescriptor::createFromVariable($messagePayload)->toString();
-
-                $mediaType             = $defaultConversionMediaType;
-                $messagePayload = $conversionService->convert(
-                    $messagePayload,
+            if ($this->doesRequireConversion($sourceMediaType, $sourceType, $targetConversionMediaType, $targetType)) {
+                if ($conversionService->canConvert(
                     $sourceType,
-                    $messageToConvert->getHeaders()->getContentType(),
+                    $sourceMediaType,
                     $targetType,
-                    $mediaType
-                );
-            } elseif ($sourceType->isString()) {
-                if (is_null($mediaType)) {
-                    $mediaType = MediaType::createTextPlain();
+                    $targetConversionMediaType
+                )) {
+                    $applicationHeaders[MessageHeaders::TYPE_ID] = TypeDescriptor::createFromVariable($messagePayload)->toString();
+                    $messagePayload = $conversionService->convert(
+                        $messagePayload,
+                        $sourceType,
+                        $sourceMediaType,
+                        $targetType,
+                        $targetConversionMediaType
+                    );
+
+                    $sourceMediaType = $targetConversionMediaType;
+                } elseif ($sourceType->isString()) {
+                    if (is_null($sourceMediaType)) {
+                        $sourceMediaType = MediaType::createTextPlain();
+                    }
+                } else {
+                    throw new ConversionException(
+                        "Can't send message to external channel. Payload has incorrect non-convertable type or converter is missing for:
+                 From {$sourceMediaType}:{$sourceType} to {$targetConversionMediaType}:{$targetType}"
+                    );
                 }
-            } else {
-                throw new InvalidArgumentException(
-                    "Can't send message to external channel. Payload has incorrect non-convertable type or converter is missing for:
-                 From {$sourceMediaType}:{$sourceType} to {$defaultConversionMediaType}:{$targetType}"
-                );
             }
         }
 
         if ($messageToConvert->getHeaders()->containsKey(MessageHeaders::ROUTING_SLIP)) {
             $applicationHeaders[MessageHeaders::ROUTING_SLIP] = $messageToConvert->getHeaders()->get(MessageHeaders::ROUTING_SLIP);
         }
+        $applicationHeaders[MessageHeaders::CONTENT_TYPE] = $sourceMediaType?->toString();
 
         return new OutboundMessage(
             $messagePayload,
             array_merge($applicationHeaders, $this->staticHeadersToAdd),
-            $mediaType ? $mediaType->toString() : null,
+            $applicationHeaders[MessageHeaders::CONTENT_TYPE],
             $messageToConvert->getHeaders()->containsKey(MessageHeaders::DELIVERY_DELAY) ? $messageToConvert->getHeaders()->get(MessageHeaders::DELIVERY_DELAY) : $this->defaultDeliveryDelay,
             $messageToConvert->getHeaders()->containsKey(MessageHeaders::TIME_TO_LIVE) ? $messageToConvert->getHeaders()->get(MessageHeaders::TIME_TO_LIVE) : $this->defaultTimeToLive,
             $messageToConvert->getHeaders()->containsKey(MessageHeaders::PRIORITY) ? $messageToConvert->getHeaders()->get(MessageHeaders::PRIORITY) : $this->defaultPriority,
         );
+    }
+
+    private function doesRequireConversion(
+        MediaType $sourceMediaType,
+        Type $sourceType,
+        MediaType $targetConversionMediaType,
+        Type $targetType
+    ): bool {
+        return ! ($sourceMediaType->isCompatibleWith($targetConversionMediaType) && $sourceType->isCompatibleWith($targetType));
     }
 }

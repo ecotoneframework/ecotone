@@ -35,7 +35,7 @@ final class RetriesChannelInterceptorBuilder implements ChannelInterceptorBuilde
 
     public function getPrecedence(): int
     {
-        return PrecedenceChannelInterceptor::COLLECTOR_PRECEDENCE;
+        return PrecedenceChannelInterceptor::DEFAULT_PRECEDENCE;
     }
 
     public function build(ReferenceSearchService $referenceSearchService): ChannelInterceptor

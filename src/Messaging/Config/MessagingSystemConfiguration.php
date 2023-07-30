@@ -388,6 +388,7 @@ final class MessagingSystemConfiguration implements Configuration
     {
         $this->channelInterceptorBuilders[$channelInterceptorBuilder->getPrecedence()][] = $channelInterceptorBuilder;
         $this->requireReferences($channelInterceptorBuilder->getRequiredReferenceNames());
+        krsort($this->channelInterceptorBuilders);
 
         return $this;
     }
@@ -1216,7 +1217,6 @@ final class MessagingSystemConfiguration implements Configuration
         spl_autoload_register($proxyFactory->getConfiguration()->getProxyAutoloader());
 
         $channelInterceptorsByImportance = $this->channelInterceptorBuilders;
-        arsort($channelInterceptorsByImportance);
         $channelInterceptorsByChannelName = [];
         foreach ($channelInterceptorsByImportance as $channelInterceptors) {
             /** @var ChannelInterceptorBuilder $channelInterceptor */

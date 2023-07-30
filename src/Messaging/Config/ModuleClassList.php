@@ -19,6 +19,7 @@ use Ecotone\Lite\Test\Configuration\EcotoneTestSupportModule;
 use Ecotone\Messaging\Channel\Collector\Config\CollectorModule;
 use Ecotone\Messaging\Channel\PollableChannel\InMemory\InMemoryQueueAcknowledgeModule;
 use Ecotone\Messaging\Channel\PollableChannel\SendRetries\PollableChannelSendRetriesModule;
+use Ecotone\Messaging\Channel\PollableChannel\Serialization\PollableChannelSerializationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\BasicMessagingModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule;
@@ -75,12 +76,13 @@ class ModuleClassList
         TransformerModule::class,
         MessageConsumerModule::class,
         InstantRetryModule::class,
-        PollableChannelSendRetriesModule::class,
-        InMemoryQueueAcknowledgeModule::class,
     ];
 
     public const ASYNCHRONOUS_MODULE = [
         AsynchronousModule::class,
+        PollableChannelSerializationModule::class,
+        PollableChannelSendRetriesModule::class,
+        InMemoryQueueAcknowledgeModule::class,
     ];
 
     public const AMQP_MODULES = [

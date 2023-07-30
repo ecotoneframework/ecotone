@@ -6,6 +6,7 @@ namespace Test\Ecotone\Messaging\Unit\Endpoint\Poller;
 
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Channel\ExceptionalQueueChannel;
+use Ecotone\Messaging\Channel\PollableChannel\InMemory\InMemoryAcknowledgeCallback;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
@@ -270,25 +271,15 @@ class PollingConsumerBuilderTest extends MessagingTest
             ]
         );
 
-        $acknowledgeCallback = NullAcknowledgementCallback::create();
-        $ecotoneTestSupport->sendDirectToChannel('handle_channel', metadata: [
-            MessageHeaders::CONSUMER_ACK_HEADER_LOCATION => 'ack',
-            'ack' => $acknowledgeCallback,
-        ]);
-
-        $this->assertFalse($acknowledgeCallback->isAcked());
+        $ecotoneTestSupport->sendDirectToChannel('handle_channel');
         $ecotoneTestSupport->run($messageChannelName, ExecutionPollingMetadata::createWithDefaults()->withTestingSetup());
-        $this->assertTrue($acknowledgeCallback->isAcked());
 
-        $acknowledgeCallback = NullAcknowledgementCallback::create();
-        $ecotoneTestSupport->sendDirectToChannel('handle_channel', metadata: [
-            MessageHeaders::CONSUMER_ACK_HEADER_LOCATION => 'ack',
-            'ack' => $acknowledgeCallback,
-        ]);
+        $headers = $ecotoneTestSupport->sendQueryWithRouting('get_last_message_headers');
 
-        $this->assertFalse($acknowledgeCallback->isAcked());
-        $ecotoneTestSupport->run($messageChannelName, ExecutionPollingMetadata::createWithDefaults()->withTestingSetup());
-        $this->assertTrue($acknowledgeCallback->isAcked());
+        /** @var InMemoryAcknowledgeCallback $acknowledge */
+        $acknowledge = $headers[$headers[MessageHeaders::CONSUMER_ACK_HEADER_LOCATION]];
+        $this->assertInstanceOf(InMemoryAcknowledgeCallback::class, $acknowledge);
+        $this->assertNull($ecotoneTestSupport->getMessageChannel($messageChannelName)->receive());
     }
 
     public function test_acking_on_gateway_failure_when_error_channel_defined()

@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Ecotone\Messaging\Channel\PollableChannel\SendRetries;
+namespace Ecotone\Messaging\Channel\PollableChannel\Serialization;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
-use Ecotone\Messaging\Channel\MessageChannelBuilder;
-use Ecotone\Messaging\Channel\PollableChannel\PollableChannelConfiguration;
+use Ecotone\Messaging\Channel\MessageChannelWithSerializationBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
@@ -17,7 +16,7 @@ use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 #[ModuleAnnotation]
-final class PollableChannelSendRetriesModule extends NoExternalConfigurationModule implements AnnotationModule
+final class PollableChannelSerializationModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
@@ -26,22 +25,14 @@ final class PollableChannelSendRetriesModule extends NoExternalConfigurationModu
 
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        $pollableMessageChannels = ExtensionObjectResolver::resolve(MessageChannelBuilder::class, $extensionObjects);
-        $pollableChannelConfigurations = ExtensionObjectResolver::resolve(PollableChannelConfiguration::class, $extensionObjects);
+        $pollableMessageChannels = ExtensionObjectResolver::resolve(MessageChannelWithSerializationBuilder::class, $extensionObjects);
 
         foreach ($pollableMessageChannels as $pollableMessageChannel) {
-            $channelConfiguration = PollableChannelConfiguration::createWithDefaults($pollableMessageChannel->getMessageChannelName());
-
-            foreach ($pollableChannelConfigurations as $pollableChannelConfiguration) {
-                if ($pollableChannelConfiguration->getChannelName() === $pollableMessageChannel->getMessageChannelName()) {
-                    $channelConfiguration = $pollableChannelConfiguration;
-                }
-            }
-
             $messagingConfiguration->registerChannelInterceptor(
-                new RetriesChannelInterceptorBuilder(
+                new OutboundSerializationChannelBuilder(
                     $pollableMessageChannel->getMessageChannelName(),
-                    $channelConfiguration->getRetryTemplate()
+                    $pollableMessageChannel->getHeaderMapper(),
+                    $pollableMessageChannel->getConversionMediaType()
                 )
             );
         }
@@ -49,8 +40,7 @@ final class PollableChannelSendRetriesModule extends NoExternalConfigurationModu
 
     public function canHandle($extensionObject): bool
     {
-        return $extensionObject instanceof PollableChannelConfiguration
-            || ($extensionObject instanceof MessageChannelBuilder && $extensionObject->isPollable());
+        return $extensionObject instanceof MessageChannelWithSerializationBuilder && $extensionObject->isPollable();
     }
 
     public function getModulePackageName(): string

@@ -127,11 +127,9 @@ final class MessagingTestSupportFrameworkTest extends TestCase
             ServiceConfiguration::createWithDefaults()
                 ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
                 ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('orders'),
+                    SimpleMessageChannelBuilder::createQueueChannel('orders', conversionMediaType: MediaType::createApplicationXPHPArray()),
                     PollingMetadata::create('orders')
                         ->withTestingSetup(2),
-                    TestConfiguration::createWithDefaults()
-                        ->withMediaTypeConversion('orders', MediaType::createApplicationXPHPArray()),
                 ]),
         );
 
@@ -149,11 +147,10 @@ final class MessagingTestSupportFrameworkTest extends TestCase
             ServiceConfiguration::createWithDefaults()
                 ->withExtensionObjects([
                     TestConfiguration::createWithDefaults()
-                        ->withMediaTypeConversion('orders', MediaType::createApplicationXPHPArray())
                         ->withSpyOnChannel('orders'),
                 ]),
             enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('orders'),
+                SimpleMessageChannelBuilder::createQueueChannel('orders', conversionMediaType: MediaType::createApplicationXPHPArray()),
             ],
         );
 
@@ -178,11 +175,10 @@ final class MessagingTestSupportFrameworkTest extends TestCase
             ServiceConfiguration::createWithDefaults()
                 ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
                 ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('orders'),
+                    SimpleMessageChannelBuilder::createQueueChannel('orders', conversionMediaType: MediaType::createApplicationXPHPArray()),
                     PollingMetadata::create('orders')
                         ->withTestingSetup(2),
                     TestConfiguration::createWithDefaults()
-                        ->withMediaTypeConversion('orders', MediaType::createApplicationXPHPArray())
                         ->withSpyOnChannel('orders'),
                 ]),
         );
@@ -495,11 +491,9 @@ final class MessagingTestSupportFrameworkTest extends TestCase
             ServiceConfiguration::createWithDefaults()
                 ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
                 ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('orders', true),
+                    SimpleMessageChannelBuilder::createQueueChannel('orders', true, MediaType::createApplicationXPHPArray()),
                     PollingMetadata::create('orders')
                         ->withTestingSetup(2),
-                    TestConfiguration::createWithDefaults()
-                        ->withMediaTypeConversion('orders', MediaType::createApplicationXPHPArray()),
                 ]),
         );
 

@@ -116,6 +116,8 @@ interface Type
      */
     public function isUnionType(): bool;
 
+    public function isNullType(): bool;
+
     /**
      * @return string
      */

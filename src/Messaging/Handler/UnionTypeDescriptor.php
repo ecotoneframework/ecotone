@@ -142,6 +142,17 @@ class UnionTypeDescriptor implements Type
         return false;
     }
 
+    public function isNullType(): bool
+    {
+        foreach ($this->typeDescriptors as $ownedTypeDescriptor) {
+            if ($ownedTypeDescriptor->isNullType()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public function isMessage(): bool
     {
         foreach ($this->typeDescriptors as $ownedTypeDescriptor) {

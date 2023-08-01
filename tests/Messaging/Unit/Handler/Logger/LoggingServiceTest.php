@@ -67,7 +67,7 @@ class LoggingServiceTest extends TestCase
         $logger
             ->expects($this->once())
             ->method('debug')
-            ->with(serialize($payload));
+            ->with(addslashes(serialize($payload)));
 
         $loggingService = new LoggingService(AutoCollectionConversionService::createWith([
             new SerializingConverter(),

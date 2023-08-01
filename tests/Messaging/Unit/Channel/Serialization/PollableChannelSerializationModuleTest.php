@@ -35,7 +35,7 @@ final class PollableChannelSerializationModuleTest extends TestCase
         $ecotoneLite->sendCommand(new PlaceOrder('1'));
 
         $this->assertSame(
-            serialize(new PlaceOrder('1')),
+            addslashes(serialize(new PlaceOrder('1'))),
             $ecotoneLite->getMessageChannel('orders')->receive()->getPayload()
         );
     }

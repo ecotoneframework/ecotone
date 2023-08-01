@@ -236,7 +236,7 @@ class MethodInvokerTest extends MessagingTest
             );
 
         $replyMessage = $methodInvocation->executeEndpoint(
-            MessageBuilder::withPayload(serialize(Order::create('1', 'correct')))
+            MessageBuilder::withPayload(addslashes(serialize(Order::create('1', 'correct'))))
                 ->setContentType(MediaType::createApplicationXPHPSerialized())
                 ->build()
         );

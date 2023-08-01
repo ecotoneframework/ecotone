@@ -10,6 +10,7 @@ use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Channel\Collector\CollectorSenderInterceptor;
 use Ecotone\Messaging\Channel\Collector\CollectorStorage;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Channel\PollableChannel\GlobalPollableChannelConfiguration;
 use Ecotone\Messaging\Channel\PollableChannel\PollableChannelConfiguration;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
@@ -30,6 +31,7 @@ final class CollectorModule extends NoExternalConfigurationModule implements Ann
 
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
+        $globalPollableChannelConfiguration = ExtensionObjectResolver::resolveUnique(GlobalPollableChannelConfiguration::class, $extensionObjects, GlobalPollableChannelConfiguration::createWithDefaults());
         $pollableMessageChannels = ExtensionObjectResolver::resolve(MessageChannelBuilder::class, $extensionObjects);
         $pollableChannelConfigurations = ExtensionObjectResolver::resolve(PollableChannelConfiguration::class, $extensionObjects);
 
@@ -44,7 +46,7 @@ final class CollectorModule extends NoExternalConfigurationModule implements Ann
 
 
         foreach ($pollableMessageChannels as $pollableMessageChannel) {
-            $channelConfiguration = PollableChannelConfiguration::createWithDefaults($pollableMessageChannel->getMessageChannelName());
+            $channelConfiguration = $globalPollableChannelConfiguration;
 
             foreach ($pollableChannelConfigurations as $pollableChannelConfiguration) {
                 if ($pollableChannelConfiguration->getChannelName() === $pollableMessageChannel->getMessageChannelName()) {
@@ -58,13 +60,13 @@ final class CollectorModule extends NoExternalConfigurationModule implements Ann
 
             $collector = new CollectorStorage();
             $messagingConfiguration->registerChannelInterceptor(
-                new CollectorChannelInterceptorBuilder($channelConfiguration->getChannelName(), $collector),
+                new CollectorChannelInterceptorBuilder($pollableMessageChannel->getMessageChannelName(), $collector),
             );
 
             $messagingConfiguration->registerAroundMethodInterceptor(
                 AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                     $interfaceToCallRegistry,
-                    new CollectorSenderInterceptor($collector, $channelConfiguration->getChannelName()),
+                    new CollectorSenderInterceptor($collector, $pollableMessageChannel->getMessageChannelName()),
                     'send',
                     Precedence::COLLECTOR_SENDER_PRECEDENCE,
                     CommandBus::class . '||' . AsynchronousRunningEndpoint::class
@@ -82,8 +84,8 @@ final class CollectorModule extends NoExternalConfigurationModule implements Ann
     {
         return
             $extensionObject instanceof PollableChannelConfiguration
-            ||
-            ($extensionObject instanceof MessageChannelBuilder && $extensionObject->isPollable());
+            || $extensionObject instanceof GlobalPollableChannelConfiguration
+            || ($extensionObject instanceof MessageChannelBuilder && $extensionObject->isPollable());
     }
 
     public function getModulePackageName(): string

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging;
 
+use Ecotone\Messaging\Handler\MessageHandlingException;
 use Exception;
 use Throwable;
 
@@ -66,6 +67,20 @@ abstract class MessagingException extends Exception
     {
         /** @phpstan-ignore-next-line */
         return new static($message, static::errorCode(), $throwable);
+    }
+
+    /**
+     * @param Throwable $cause
+     * @param Message $originalMessage
+     * @return MessageHandlingException|static
+     */
+    public static function fromOtherException(Throwable $cause, Message $originalMessage): MessagingException
+    {
+        $messageHandlingException = self::createWithFailedMessage($cause->getMessage(), $originalMessage);
+
+        $messageHandlingException->setCausationException($cause);
+
+        return $messageHandlingException;
     }
 
     /**

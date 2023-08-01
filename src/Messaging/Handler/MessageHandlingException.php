@@ -2,9 +2,7 @@
 
 namespace Ecotone\Messaging\Handler;
 
-use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
-use Throwable;
 
 /**
  * Class MessageHandlingException
@@ -13,20 +11,6 @@ use Throwable;
  */
 final class MessageHandlingException extends MessagingException
 {
-    /**
-     * @param Throwable $cause
-     * @param Message $originalMessage
-     * @return MessageHandlingException|static
-     */
-    public static function fromOtherException(Throwable $cause, Message $originalMessage): MessagingException
-    {
-        $messageHandlingException = self::createWithFailedMessage($cause->getMessage(), $originalMessage);
-
-        $messageHandlingException->setCausationException($cause);
-
-        return $messageHandlingException;
-    }
-
     /**
      * @inheritDoc
      */

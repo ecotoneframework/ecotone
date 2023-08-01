@@ -7,32 +7,28 @@ namespace Ecotone\Messaging\Channel\PollableChannel;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplate;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
-class PollableChannelConfiguration
+final class GlobalPollableChannelConfiguration
 {
     private function __construct(
-        private string        $channelName,
         private RetryTemplate $retryTemplate,
         private bool          $collectorEnabled = true,
-        private ?string       $errorChannelName = null
+        private ?string $errorChannelName = null
     ) {
     }
 
-    public static function createWithDefaults(string $channelName): self
+    public static function createWithDefaults(): self
     {
-        return new self(
-            $channelName,
-            self::defaultRetry(),
-        );
+        return new self(self::defaultRetry());
     }
 
-    public static function create(string $channelName, RetryTemplate $retryTemplate): self
+    public static function create(RetryTemplate $retryTemplate): self
     {
-        return new self($channelName, $retryTemplate);
+        return new self($retryTemplate);
     }
 
-    public static function neverRetry(string $channelName): self
+    public static function neverRetry(): self
     {
-        return new self($channelName, RetryTemplate::createNeverRetry());
+        return new self(RetryTemplate::createNeverRetry());
     }
 
     public function withCollector(bool $collectorEnabled): self
@@ -56,11 +52,6 @@ class PollableChannelConfiguration
         return RetryTemplateBuilder::exponentialBackoff(1, 20)
             ->maxRetryAttempts(2)
             ->build();
-    }
-
-    public function getChannelName(): string
-    {
-        return $this->channelName;
     }
 
     public function getRetryTemplate(): RetryTemplate

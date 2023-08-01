@@ -20,7 +20,7 @@ class DeserializingConverter implements Converter
      */
     public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
     {
-        return unserialize($source);
+        return unserialize(stripslashes($source));
     }
 
     /**

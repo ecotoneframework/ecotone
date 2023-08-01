@@ -8,7 +8,9 @@ use Ecotone\Lite\EcotoneLite;
 use Ecotone\Lite\Test\FlowTestSupport;
 use Ecotone\Messaging\Channel\ExceptionalQueueChannel;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Channel\PollableChannel\GlobalPollableChannelConfiguration;
 use Ecotone\Messaging\Channel\PollableChannel\PollableChannelConfiguration;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Exception;
@@ -42,7 +44,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
         $this->assertCount(1, $loggerExample->getInfo());
     }
 
-    public function test_retrying_two_time_on_failure_with_success()
+    public function test_retrying_two_time_on_failure_and_recovering()
     {
         $loggerExample = LoggerExample::create();
         $ecotoneLite = $this->bootstrapEcotone(
@@ -135,6 +137,80 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
         $this->assertNull($message);
         $this->assertCount(1, $loggerExample->getError());
     }
+
+    public function test_sending_to_dead_letter_on_failure()
+    {
+        $loggerExample = LoggerExample::create();
+
+        $ecotoneLite = $this->bootstrapEcotone(
+            [OrderService::class],
+            [new OrderService(), 'logger' => $loggerExample],
+            [
+                ExceptionalQueueChannel::createWithExceptionOnSend('orders', 1),
+                SimpleMessageChannelBuilder::createQueueChannel('deadLetter'),
+            ],
+            [
+                PollableChannelConfiguration::neverRetry('orders')
+                    ->withErrorChannel('deadLetter'),
+            ]
+        );
+
+        $ecotoneLite->sendCommand(new PlaceOrder('1'));
+
+        $this->assertNull($ecotoneLite->getMessageChannel('orders')->receive());
+        $this->assertNotNull($ecotoneLite->getMessageChannel('deadLetter')->receive());
+    }
+
+    public function test_sending_to_dead_letter_on_failure_using_global_configuration()
+    {
+        $loggerExample = LoggerExample::create();
+
+        $ecotoneLite = $this->bootstrapEcotone(
+            [OrderService::class],
+            [new OrderService(), 'logger' => $loggerExample],
+            [
+                ExceptionalQueueChannel::createWithExceptionOnSend('orders', 1),
+                SimpleMessageChannelBuilder::createQueueChannel('deadLetter'),
+            ],
+            [
+                GlobalPollableChannelConfiguration::neverRetry('orders')
+                    ->withErrorChannel('deadLetter'),
+            ]
+        );
+
+        $ecotoneLite->sendCommand(new PlaceOrder('1'));
+
+        $this->assertNull($ecotoneLite->getMessageChannel('orders')->receive());
+        $this->assertNotNull($ecotoneLite->getMessageChannel('deadLetter')->receive());
+    }
+
+    public function test_on_success_recover_message_is_not_sent_to_dlq()
+    {
+        $loggerExample = LoggerExample::create();
+        $ecotoneLite = $this->bootstrapEcotone(
+            [OrderService::class],
+            [new OrderService(), 'logger' => $loggerExample],
+            [
+                ExceptionalQueueChannel::createWithExceptionOnSend('orders', 2),
+                SimpleMessageChannelBuilder::createQueueChannel('deadLetter'),
+            ],
+            [
+                PollableChannelConfiguration::create(
+                    'orders',
+                    RetryTemplateBuilder::fixedBackOff(1)
+                        ->maxRetryAttempts(2)
+                        ->build()
+                )
+                    ->withErrorChannel('deadLetter'),
+            ]
+        );
+
+        $ecotoneLite->sendCommand(new PlaceOrder('1'));
+
+        $this->assertNotNull($ecotoneLite->getMessageChannel('orders')->receive());
+        $this->assertNull($ecotoneLite->getMessageChannel('deadLetter')->receive());
+    }
+
 
     /**
      * @param string[] $classesToResolve

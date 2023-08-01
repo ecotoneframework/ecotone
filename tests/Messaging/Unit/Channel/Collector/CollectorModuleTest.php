@@ -10,6 +10,7 @@ use Ecotone\Messaging\Channel\Collector\CollectedMessage;
 use Ecotone\Messaging\Channel\Collector\Config\CollectorConfiguration;
 use Ecotone\Messaging\Channel\ExceptionalQueueChannel;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Channel\PollableChannel\GlobalPollableChannelConfiguration;
 use Ecotone\Messaging\Channel\PollableChannel\PollableChannelConfiguration;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
@@ -34,7 +35,7 @@ use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
  */
 final class CollectorModuleTest extends TestCase
 {
-    public function test_receiving_collected_message_from_command_handler()
+    public function test_receiving_collected_message_from_command_handler_without_exception()
     {
         $ecotoneLite = $this->bootstrapEcotone(
             [OrderService::class],
@@ -146,6 +147,30 @@ final class CollectorModuleTest extends TestCase
         $this->assertNull($ecotoneLite->getMessageChannel('bets')->receive(), 'No more messages should be collected');
     }
 
+    public function test_not_collected_message_will_be_sent_to_channel_before_exception_with_global_configuration()
+    {
+        $ecotoneLite = $this->bootstrapEcotone(
+            [BetService::class],
+            [new BetService()],
+            [
+                SimpleMessageChannelBuilder::createQueueChannel('bets'),
+            ],
+            [GlobalPollableChannelConfiguration::neverRetry()->withCollector(false)]
+        );
+
+        try {
+            $ecotoneLite->sendCommandWithRoutingKey('makeBet', true);
+        } catch (\RuntimeException) {
+        }
+
+        $this->assertNotNull($ecotoneLite->getMessageChannel('bets')->receive(), 'Message was not collected');
+
+        /** Previous messages should be cleared and not resent */
+        $ecotoneLite->sendCommandWithRoutingKey('makeBet', false);
+        $this->assertNotNull($ecotoneLite->getMessageChannel('bets')->receive(), 'Message was not collected');
+        $this->assertNull($ecotoneLite->getMessageChannel('bets')->receive(), 'No more messages should be collected');
+    }
+
     public function test_collecting_messages_from_different_channels()
     {
         $ecotoneLite = $this->bootstrapEcotone(
@@ -193,7 +218,7 @@ final class CollectorModuleTest extends TestCase
         $this->assertNull($ecotoneLite->getMessageChannel('bets')->receive(), 'No more messages should be collected');
     }
 
-    public function test_throwing_exception_if_multiple_collector_registered_for_same_channel()
+    public function test_throwing_exception_if_multiple_collectors_registered_for_same_channel()
     {
         $this->expectException(ConfigurationException::class);
 

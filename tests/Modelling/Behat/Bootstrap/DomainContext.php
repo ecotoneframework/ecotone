@@ -86,7 +86,7 @@ class DomainContext extends TestCase implements Context
      */
     public function thereShouldBeProductsForOrderWithIdRetrievedFrom(int $productsAmount, int $orderId, string $channelName)
     {
-        $executeWithContentType = AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting($channelName, serialize(GetOrderAmountQuery::createWith($orderId)), MediaType::APPLICATION_X_PHP_SERIALIZED);
+        $executeWithContentType = AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting($channelName, addslashes(serialize(GetOrderAmountQuery::createWith($orderId))), MediaType::APPLICATION_X_PHP_SERIALIZED);
         $this->assertEquals(
             $productsAmount,
             $executeWithContentType

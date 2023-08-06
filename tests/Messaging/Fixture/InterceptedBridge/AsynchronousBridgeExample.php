@@ -14,26 +14,31 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 final class AsynchronousBridgeExample
 {
-    public int $result = 0;
+    public int $result = 2;
 
     #[Asynchronous('async')]
     #[ServiceActivator('bridgeExample', outputChannelName: 'bridgeSum')]
     public function result(int $result): int
     {
-        return $result;
+        $this->result += $result;
+
+        return $this->result;
     }
 
     #[ServiceActivator('bridgeSum')]
     public function sum(int $amount): int
     {
-        return $amount + 1;
+        $this->result += $amount;
+
+        return $this->result;
     }
 
     #[Around(precedence: 0, pointcut: AsynchronousRunningEndpoint::class)]
     public function multiply(MethodInvocation $methodInvocation)
     {
+        $this->result *= 2;
         $result = $methodInvocation->proceed();
-        $this->result = $result->getPayload() * 3;
+        $this->result *= 3;
 
         return $result;
     }

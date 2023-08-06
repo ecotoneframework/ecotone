@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
+namespace Ecotone\Messaging\Handler\Logger\Config;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -42,8 +43,8 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 'beforeLog',
                 $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'logBefore'),
                 LoggingHandlerBuilder::createForBefore(),
-                Precedence::ERROR_CHANNEL_PRECEDENCE - 1,
-                LogBefore::class . '||' . AsynchronousRunningEndpoint::class
+                Precedence::EXCEPTION_LOGGING_PRECEDENCE,
+                LogBefore::class
             )
         );
         $messagingConfiguration->registerAfterMethodInterceptor(
@@ -51,7 +52,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 'afterLog',
                 $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'logAfter'),
                 LoggingHandlerBuilder::createForAfter(),
-                Precedence::ERROR_CHANNEL_PRECEDENCE - 1,
+                Precedence::EXCEPTION_LOGGING_PRECEDENCE,
                 LogAfter::class
             )
         );
@@ -60,7 +61,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
                 $interfaceToCallRegistry,
                 new LoggingInterceptor(null),
                 'logException',
-                Precedence::ERROR_CHANNEL_PRECEDENCE - 1,
+                Precedence::EXCEPTION_LOGGING_PRECEDENCE,
                 LogError::class . '||' . AsynchronousRunningEndpoint::class
             )
         );

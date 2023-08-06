@@ -15,7 +15,6 @@ use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\MessageHeaders;
@@ -43,7 +42,7 @@ class PollingConsumerBuilderTest extends MessagingTest
      */
     public function test_creating_consumer_with_default_period_trigger()
     {
-        $pollingConsumerBuilder = new PollingConsumerBuilder(InterfaceToCallRegistry::createEmpty());
+        $pollingConsumerBuilder = new PollingConsumerBuilder();
         $inputChannelName = 'inputChannelName';
         $inputChannel = QueueChannel::create();
 
@@ -75,7 +74,7 @@ class PollingConsumerBuilderTest extends MessagingTest
      */
     public function test_passing_message_to_error_channel_on_failure()
     {
-        $pollingConsumerBuilder = new PollingConsumerBuilder(InterfaceToCallRegistry::createEmpty());
+        $pollingConsumerBuilder = new PollingConsumerBuilder();
         $inputChannelName = 'inputChannelName';
         $errorChannelName = 'errorChannel';
         $inputChannel = QueueChannel::create();
@@ -107,7 +106,7 @@ class PollingConsumerBuilderTest extends MessagingTest
 
     public function test_retrying_template_should_not_handle_exception_thrown_during_handling_of_message()
     {
-        $pollingConsumerBuilder = new PollingConsumerBuilder(InterfaceToCallRegistry::createEmpty());
+        $pollingConsumerBuilder = new PollingConsumerBuilder();
         $inputChannelName = 'inputChannelName';
         $inputChannel = QueueChannel::create();
 
@@ -142,7 +141,7 @@ class PollingConsumerBuilderTest extends MessagingTest
 
     public function test_retrying_template_should_handle_exceptions_thrown_before_handling_of_message()
     {
-        $pollingConsumerBuilder = new PollingConsumerBuilder(InterfaceToCallRegistry::createEmpty());
+        $pollingConsumerBuilder = new PollingConsumerBuilder();
         $inputChannelName = 'inputChannelName';
         $inputChannel = ExceptionalQueueChannel::createWithExceptionOnReceive();
 
@@ -410,7 +409,7 @@ class PollingConsumerBuilderTest extends MessagingTest
 
     private function createPollingConsumer(string $inputChannelName, QueueChannel $inputChannel, $messageHandler): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
     {
-        return (new PollingConsumerBuilder(InterfaceToCallRegistry::createEmpty()))->build(
+        return (new PollingConsumerBuilder())->build(
             InMemoryChannelResolver::createFromAssociativeArray([
                 $inputChannelName => $inputChannel,
             ]),
@@ -423,7 +422,7 @@ class PollingConsumerBuilderTest extends MessagingTest
 
     private function createPollingConsumerWithCustomConfiguration(array $channels, $messageHandler, PollingMetadata  $pollingMetadata): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
     {
-        return (new PollingConsumerBuilder(InterfaceToCallRegistry::createEmpty()))->build(
+        return (new PollingConsumerBuilder())->build(
             InMemoryChannelResolver::createFromAssociativeArray($channels),
             InMemoryReferenceSearchService::createEmpty(),
             $messageHandler,

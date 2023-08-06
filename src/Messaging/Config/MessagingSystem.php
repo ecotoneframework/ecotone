@@ -2,6 +2,7 @@
 
 namespace Ecotone\Messaging\Config;
 
+use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\EventDrivenChannelInterceptorAdapter;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
@@ -17,6 +18,7 @@ use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyAdapter;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
+use Ecotone\Messaging\Handler\InterceptedEndpoint;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\MessageChannel;
@@ -125,8 +127,14 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             foreach ($messageHandlerConsumerFactories as $messageHandlerConsumerBuilder) {
                 if ($messageHandlerConsumerBuilder->isSupporting($messageHandlerBuilder, $messageChannel)) {
                     if ($messageHandlerConsumerBuilder->isPollingConsumer()) {
+                        $consumerBuilderForGivenHandler = $messageHandlerConsumerBuilder;
+                        if ($messageHandlerConsumerBuilder instanceof InterceptedEndpoint) {
+                            $consumerBuilderForGivenHandler = clone $messageHandlerConsumerBuilder;
+                            $consumerBuilderForGivenHandler->withEndpointAnnotations([new AsynchronousRunningEndpoint($messageHandlerBuilder->getEndpointId())]);
+                        }
+
                         $pollingConsumerBuilders[$messageHandlerBuilder->getEndpointId()] = [
-                            self::CONSUMER_BUILDER => $messageHandlerConsumerBuilder,
+                            self::CONSUMER_BUILDER => $consumerBuilderForGivenHandler,
                             self::CONSUMER_HANDLER => $messageHandlerBuilder,
                         ];
                     } else {

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging;
 
+/**
+ * The lower value, the quicker interceptor will be run
+ */
 interface Precedence
 {
     /**

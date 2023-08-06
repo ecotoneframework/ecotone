@@ -16,15 +16,9 @@ use Ecotone\Messaging\MessageHandler;
  */
 final class ServiceActivatingHandler implements MessageHandler
 {
-    private \Ecotone\Messaging\Handler\RequestReplyProducer $requestReplyProducer;
-
-    /**
-     * ServiceActivatingHandler constructor.
-     * @param RequestReplyProducer $requestReplyProducer
-     */
-    public function __construct(RequestReplyProducer $requestReplyProducer)
-    {
-        $this->requestReplyProducer = $requestReplyProducer;
+    public function __construct(
+        private RequestReplyProducer $requestReplyProducer,
+    ) {
     }
 
     /**

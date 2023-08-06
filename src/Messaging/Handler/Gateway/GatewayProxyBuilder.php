@@ -220,9 +220,8 @@ class GatewayProxyBuilder implements InterceptedEndpoint
      */
     public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference): self
     {
-        $this->aroundInterceptors[] = $aroundInterceptorReference;
         $this->requiredReferenceNames = array_merge($this->requiredReferenceNames, $aroundInterceptorReference->getRequiredReferenceNames());
-
+        $this->aroundInterceptors[] = $aroundInterceptorReference;
         return $this;
     }
 
@@ -353,15 +352,14 @@ class GatewayProxyBuilder implements InterceptedEndpoint
             Assert::isSubclassOf($replyChannel, PollableChannel::class, 'Reply channel must be pollable');
         }
         $errorChannel = $this->errorChannelName ? $channelResolver->resolve($this->errorChannelName) : null;
-        $aroundInterceptors = $this->aroundInterceptors;
         if ($errorChannel) {
-            $aroundInterceptors[] = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
+            $this->addAroundInterceptor(AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
                 $interfaceToCallRegistry,
                 new ErrorChannelInterceptor($errorChannel),
                 'handle',
                 Precedence::ERROR_CHANNEL_PRECEDENCE,
                 $this->interfaceName
-            );
+            ));
         }
 
         if (! $interfaceToCall->canReturnValue() && $this->replyChannelName) {
@@ -416,11 +414,26 @@ class GatewayProxyBuilder implements InterceptedEndpoint
             $this->replyMilliSecondsTimeout,
             $referenceSearchService,
             $channelResolver,
-            $aroundInterceptors,
+            $this->getSortedAroundInterceptors($this->aroundInterceptors),
             $this->getSortedInterceptors($beforeInterceptors),
             $this->getSortedInterceptors($this->afterInterceptors),
             $registeredAnnotations
         );
+    }
+
+    /**
+     * @return AroundInterceptorReference[]
+     */
+    private function getSortedAroundInterceptors(array $aroundInterceptors): array
+    {
+        usort(
+            $aroundInterceptors,
+            function (AroundInterceptorReference $a, AroundInterceptorReference $b) {
+                return $a->getPrecedence() <=> $b->getPrecedence();
+            }
+        );
+
+        return $aroundInterceptors;
     }
 
     private function validateInterceptorsCorrectness(ReferenceSearchService $referenceSearchService): void

@@ -18,7 +18,7 @@ class RentCalendar
     }
 
     #[QueryHandler('doesCalendarContainAppointments')]
-    public function getCalendarEvents(string $appointmentIdToCheck): bool
+    public function getCalendarEvents($appointmentIdToCheck): bool
     {
         foreach ($this->calendarEvents as $appointmentId => $calendarEvent) {
             if ($appointmentId == $appointmentIdToCheck) {

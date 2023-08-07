@@ -5,18 +5,14 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Gateway;
 
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageConverter\MessageConverter;
@@ -24,7 +20,6 @@ use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
-use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Throwable;
@@ -43,22 +38,6 @@ class Gateway implements NonProxyGateway
      */
     private array $messageConverters;
     private InterfaceToCall $interfaceToCall;
-    private ?PollableChannel $replyChannel;
-    private ?MessageChannel $errorChannel;
-    private int $replyMilliSecondsTimeout;
-    private MessageChannel $gatewayRequestChannel;
-    private ReferenceSearchService $referenceSearchService;
-    private iterable $aroundInterceptors;
-    /**
-     * @var InputOutputMessageHandlerBuilder[]
-     */
-    private iterable $sortedBeforeInterceptors = [];
-    /**
-     * @var InputOutputMessageHandlerBuilder[]
-     */
-    private iterable $sortedAfterInterceptors = [];
-    private iterable $endpointAnnotations;
-    private ChannelResolver $channelResolver;
 
     /**
      * GatewayProxy constructor.
@@ -80,30 +59,12 @@ class Gateway implements NonProxyGateway
         InterfaceToCall $interfaceToCall,
         MethodCallToMessageConverter $methodCallToMessageConverter,
         array $messageConverters,
-        MessageChannel $requestChannel,
-        ?PollableChannel $replyChannel,
-        ?MessageChannel $errorChannel,
-        int $replyMilliSecondsTimeout,
-        ReferenceSearchService $referenceSearchService,
-        ChannelResolver $channelResolver,
-        iterable $aroundInterceptors,
-        iterable $sortedBeforeInterceptors,
-        iterable $sortedAfterInterceptors,
-        iterable $endpointAnnotations
+        private GatewayReplyConverter $gatewayReplyConverter,
+        private MessageHandler $gatewayInternalHandler
     ) {
         $this->methodCallToMessageConverter = $methodCallToMessageConverter;
         $this->messageConverters = $messageConverters;
         $this->interfaceToCall = $interfaceToCall;
-        $this->replyChannel = $replyChannel;
-        $this->errorChannel = $errorChannel;
-        $this->replyMilliSecondsTimeout = $replyMilliSecondsTimeout;
-        $this->gatewayRequestChannel = $requestChannel;
-        $this->referenceSearchService = $referenceSearchService;
-        $this->aroundInterceptors = $aroundInterceptors;
-        $this->endpointAnnotations = $endpointAnnotations;
-        $this->sortedBeforeInterceptors = $sortedBeforeInterceptors;
-        $this->sortedAfterInterceptors = $sortedAfterInterceptors;
-        $this->channelResolver = $channelResolver;
     }
 
     /**
@@ -163,74 +124,34 @@ class Gateway implements NonProxyGateway
         $requestMessage = $requestMessage
             ->removeHeader(MessageHeaders::REPLY_CONTENT_TYPE)
             ->build();
-        $messageHandler = $this->buildHandler($replyContentType);
 
-        $messageHandler->handle($requestMessage);
-        $reply = $internalReplyBridge ? $internalReplyBridge->receive() : null;
+        $this->gatewayInternalHandler->handle($requestMessage);
+        $replyMessage = $internalReplyBridge ? $internalReplyBridge->receive() : null;
+        if (! is_null($replyMessage) && $this->interfaceToCall->canReturnValue()) {
+            if ($replyContentType !== null || ! ($this->interfaceToCall->getReturnType()->isAnything() || $this->interfaceToCall->getReturnType()->isMessage())) {
+                $reply = $this->gatewayReplyConverter->convert($replyMessage, $replyContentType);
+                if (! ($reply instanceof Message)) {
+                    $replyMessage = MessageBuilder::fromMessage($replyMessage)
+                                        ->setPayload($reply)
+                                        ->build();
+                } else {
+                    $replyMessage = $reply;
+                }
+            }
+        }
 
-        if ($reply) {
+        if ($replyMessage) {
             if ($this->interfaceToCall->getReturnType()->isClassOfType(Message::class)) {
                 if ($previousReplyChannel) {
-                    return MessageBuilder::fromMessage($reply)
+                    return MessageBuilder::fromMessage($replyMessage)
                         ->setReplyChannel($previousReplyChannel)
                         ->build();
                 }
 
-                return $reply;
+                return $replyMessage;
             }
 
-            return $reply->getPayload();
+            return $replyMessage->getPayload();
         }
-    }
-
-
-    private function buildHandler(?MediaType $replyContentType): MessageHandler
-    {
-        $gatewayInternalHandler = new GatewayInternalHandler(
-            $this->interfaceToCall,
-            $this->gatewayRequestChannel,
-            $this->errorChannel,
-            $this->replyChannel,
-            $this->replyMilliSecondsTimeout
-        );
-
-        $gatewayInternalHandler = ServiceActivatorBuilder::createWithDirectReference($gatewayInternalHandler, 'handle')
-            ->withWrappingResultInMessage(false)
-            ->withEndpointAnnotations($this->endpointAnnotations);
-        $aroundInterceptorReferences = $this->aroundInterceptors;
-        if ($replyContentType !== null || ! ($this->interfaceToCall->getReturnType()->isAnything() || $this->interfaceToCall->getReturnType()->isMessage())) {
-            /** @TODO That probably should be added quicker */
-            $aroundInterceptorReferences[] = AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
-                $this->referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME),
-                new ConversionInterceptor(
-                    $this->referenceSearchService->get(ConversionService::REFERENCE_NAME),
-                    $this->interfaceToCall,
-                    $replyContentType,
-                    $this->messageConverters,
-                ),
-                'convert',
-                Precedence::GATEWAY_REPLY_CONVERSION_PRECEDENCE,
-                $this->interfaceToCall->getInterfaceName()
-            );
-        }
-        foreach ($aroundInterceptorReferences as $aroundInterceptorReference) {
-            $gatewayInternalHandler = $gatewayInternalHandler->addAroundInterceptor($aroundInterceptorReference);
-        }
-
-
-        $chainHandler = ChainMessageHandlerBuilder::create();
-        foreach ($this->sortedBeforeInterceptors as $beforeInterceptor) {
-            $chainHandler = $chainHandler->chain($beforeInterceptor);
-        }
-        $chainHandler = $chainHandler->chain($gatewayInternalHandler);
-        foreach ($this->sortedAfterInterceptors as $afterInterceptor) {
-            $chainHandler = $chainHandler->chain($afterInterceptor);
-        }
-
-        return $chainHandler
-            ->build(
-                $this->channelResolver,
-                $this->referenceSearchService
-            );
     }
 }

@@ -19,7 +19,11 @@ class CalculatorInterceptor
     public function sumAround(MethodInvocation $methodInvocation, AroundSumCalculation $aroundResultCalculation): int
     {
         $proceed = $methodInvocation->proceed();
-        return $proceed + $aroundResultCalculation->amount;
+        if (! $proceed) {
+            return $aroundResultCalculation->amount;
+        }
+
+        return $proceed->getPayload() + $aroundResultCalculation->amount;
     }
 
     #[After(pointcut: AfterMultiplyCalculation::class)]

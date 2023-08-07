@@ -21,7 +21,7 @@ class InterceptorExample
     public function sum(MethodInvocation $methodInvocation): int
     {
         $proceed = $methodInvocation->proceed();
-        return $proceed + 1;
+        return $proceed->getPayload() + 1;
     }
 
     #[After(pointcut: CalculateGatewayExample::class)]

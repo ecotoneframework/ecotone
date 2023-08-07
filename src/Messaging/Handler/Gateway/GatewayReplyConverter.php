@@ -8,14 +8,13 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Future;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\MessageConverter;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 
-class ConversionInterceptor
+class GatewayReplyConverter
 {
     /**
      * @param MessageConverter[] $messageConverters
@@ -23,20 +22,12 @@ class ConversionInterceptor
     public function __construct(
         private ConversionService $conversionService,
         private InterfaceToCall $interfaceToCall,
-        private ?MediaType $replyContentType,
         private array $messageConverters
     ) {
     }
 
-    public function convert(MethodInvocation $methodInvocation)
+    public function convert(mixed $result, ?MediaType $replyContentType)
     {
-        /** @var Message $result */
-        $result = $methodInvocation->proceed();
-
-        if (is_null($result) || ! $this->interfaceToCall->canReturnValue()) {
-            return;
-        }
-
         foreach ($this->messageConverters as $messageConverter) {
             $reply = $messageConverter->fromMessage(
                 $result,
@@ -63,7 +54,7 @@ class ConversionInterceptor
             }
         }
 
-        if (! $this->replyContentType) {
+        if (! $replyContentType) {
             if (! $this->interfaceToCall->getReturnType()->isMessage() && ! $sourceType->isCompatibleWith($this->interfaceToCall->getReturnType())) {
                 if ($this->conversionService->canConvert($sourceType, $sourceMediaType, $this->interfaceToCall->getReturnType(), MediaType::createApplicationXPHP())) {
                     return $this->conversionService->convert($data, $sourceType, $sourceMediaType, $this->interfaceToCall->getReturnType(), MediaType::createApplicationXPHP());
@@ -81,15 +72,15 @@ class ConversionInterceptor
             return $result->getPayload();
         }
 
-        if (! $sourceMediaType->isCompatibleWith($this->replyContentType) || ($this->replyContentType->hasTypeParameter() && $this->replyContentType->getTypeParameter()->isIterable())) {
-            $targetType = $this->replyContentType->hasTypeParameter() ? $this->replyContentType->getTypeParameter() : TypeDescriptor::createAnythingType();
+        if (! $sourceMediaType->isCompatibleWith($replyContentType) || ($replyContentType->hasTypeParameter() && $replyContentType->getTypeParameter()->isIterable())) {
+            $targetType = $replyContentType->hasTypeParameter() ? $replyContentType->getTypeParameter() : TypeDescriptor::createAnythingType();
             if (! $this->conversionService->canConvert(
                 $sourceType,
                 $sourceMediaType,
                 $targetType,
-                $this->replyContentType
+                $replyContentType
             )) {
-                throw InvalidArgumentException::create("Lack of converter for {$this->interfaceToCall} can't convert reply {$sourceMediaType}:{$sourceType} to {$this->replyContentType}:{$targetType}");
+                throw InvalidArgumentException::create("Lack of converter for {$this->interfaceToCall} can't convert reply {$sourceMediaType}:{$sourceType} to {$replyContentType}:{$targetType}");
             }
 
             $data = $this->conversionService->convert(
@@ -97,13 +88,13 @@ class ConversionInterceptor
                 $sourceType,
                 $sourceMediaType,
                 $targetType,
-                $this->replyContentType
+                $replyContentType
             );
         }
 
         if ($this->interfaceToCall->doesItReturnMessage()) {
             return MessageBuilder::fromMessage($result)
-                        ->setContentType($this->replyContentType)
+                        ->setContentType($replyContentType)
                         ->setPayload($data)
                         ->build();
         }

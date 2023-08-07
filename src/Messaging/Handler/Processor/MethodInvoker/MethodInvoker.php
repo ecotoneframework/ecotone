@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Ecotone\Messaging\Conversion\ConversionException;
@@ -217,7 +215,26 @@ final class MethodInvoker implements MessageProcessor
      */
     public function executeEndpoint(Message $message)
     {
-        return call_user_func_array([$this->objectToInvokeOn, $this->objectMethodName], $this->getMethodCall($message)->getMethodArgumentValues());
+        $params = $this->getMethodCall($message)->getMethodArgumentValues();
+
+        /** Used to make the stacktrace shorter and more readable, as call_user_func_array add additional stacktrace level */
+        if (is_string($this->objectToInvokeOn)) {
+            return match (count($params)) {
+                0 => $this->objectToInvokeOn::{$this->objectMethodName}(),
+                1 => $this->objectToInvokeOn::{$this->objectMethodName}($params[0]),
+                2 => $this->objectToInvokeOn::{$this->objectMethodName}($params[0], $params[1]),
+                3 => $this->objectToInvokeOn::{$this->objectMethodName}($params[0], $params[1], $params[2]),
+                default => call_user_func_array([$this->objectToInvokeOn, $this->objectMethodName], $params),
+            };
+        }
+
+        return match (count($params)) {
+            0 => $this->objectToInvokeOn->{$this->objectMethodName}(),
+            1 => $this->objectToInvokeOn->{$this->objectMethodName}($params[0]),
+            2 => $this->objectToInvokeOn->{$this->objectMethodName}($params[0], $params[1]),
+            3 => $this->objectToInvokeOn->{$this->objectMethodName}($params[0], $params[1], $params[2]),
+            default => call_user_func_array([$this->objectToInvokeOn, $this->objectMethodName], $params),
+        };
     }
 
     public function getMethodCall(Message $message): MethodCall

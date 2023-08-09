@@ -182,7 +182,8 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
                 if (is_null($handledMessageClassNameDefinition) && is_null($mappingKey)) {
                     $aggregatePayloadIdentifiersMapping[$aggregateIdentifierName] = $aggregateIdentifierName;
                 } elseif (is_null($mappingKey) && ! $this->hasIdentifierMappingInMetadata($metadataIdentifierMapping, $aggregateIdentifierName)) {
-                    throw new InvalidArgumentException("Can't find aggregate identifier mapping `{$aggregateIdentifierName}` in {$handledMessageClassNameDefinition} for {$aggregateClassDefinition}. Have you forgot to mark #[TargetAggregateIdentifier]?");
+                    /** NO mapping available, identifier should come from message headers under "aggregate.id" */
+                    $aggregatePayloadIdentifiersMapping = [];
                 } else {
                     $aggregatePayloadIdentifiersMapping[$aggregateIdentifierName] = $mappingKey;
                 }

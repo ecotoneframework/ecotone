@@ -144,14 +144,7 @@ class AroundMethodInterceptor
             $argumentsToCall[] = $resolvedArgument;
         }
 
-        /** Used to make the stacktrace shorter and more readable, as call_user_func_array add additional stacktrace level */
-        $returnValue = match (count($argumentsToCall)) {
-            0 => $this->referenceToCall->{$this->interceptorInterfaceToCall->getMethodName()}(),
-            1 => $this->referenceToCall->{$this->interceptorInterfaceToCall->getMethodName()}($argumentsToCall[0]),
-            2 => $this->referenceToCall->{$this->interceptorInterfaceToCall->getMethodName()}($argumentsToCall[0], $argumentsToCall[1]),
-            3 => $this->referenceToCall->{$this->interceptorInterfaceToCall->getMethodName()}($argumentsToCall[0], $argumentsToCall[1], $argumentsToCall[2]),
-            default => call_user_func_array([$this->referenceToCall, $this->interceptorInterfaceToCall->getMethodName()], $argumentsToCall),
-        };
+        $returnValue = $this->referenceToCall->{$this->interceptorInterfaceToCall->getMethodName()}(...$argumentsToCall);
 
         if (! $hasMethodInvocation) {
             return $methodInvocation->proceed();

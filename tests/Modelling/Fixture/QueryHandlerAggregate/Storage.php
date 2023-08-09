@@ -3,7 +3,7 @@
 namespace Test\Ecotone\Modelling\Fixture\QueryHandlerAggregate;
 
 use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\AggregateIdentifier;
+use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
 #[Aggregate]
@@ -13,7 +13,7 @@ class Storage
      * @param SmallBox[] $smallBoxes
      * @param BigBox[] $bigBoxes
      */
-    private function __construct(#[AggregateIdentifier] private string $storageId, private array $smallBoxes, private array $bigBoxes)
+    private function __construct(#[Identifier] private string $storageId, private array $smallBoxes, private array $bigBoxes)
     {
     }
 

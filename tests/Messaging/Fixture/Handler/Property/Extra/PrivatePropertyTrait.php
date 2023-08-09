@@ -2,10 +2,10 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Property\Extra;
 
-use Ecotone\Modelling\Attribute\AggregateIdentifier;
+use Ecotone\Modelling\Attribute\Identifier;
 
 trait PrivatePropertyTrait
 {
-    #[AggregateIdentifier]
+    #[Identifier]
     private ?ExtraObject $property;
 }

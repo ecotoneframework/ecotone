@@ -2,15 +2,15 @@
 
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 
-use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\AggregateVersion;
+use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\WithAggregateEvents;
 
 class OrderWithManualVersioning implements VersionAggregate
 {
     use WithAggregateEvents;
 
-    #[AggregateIdentifier]
+    #[Identifier]
     private string $orderId;
     /**
      * @var int

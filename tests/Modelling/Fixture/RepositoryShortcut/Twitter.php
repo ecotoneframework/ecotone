@@ -3,14 +3,14 @@
 namespace Test\Ecotone\Modelling\Fixture\RepositoryShortcut;
 
 use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
 #[Aggregate]
 class Twitter
 {
-    #[AggregateIdentifier]
+    #[Identifier]
     private string $twitId;
     private string $content;
 

@@ -9,13 +9,13 @@
 namespace Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler;
 
 use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\AggregateIdentifier;
+use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
 #[Aggregate]
 class AggregateQueryHandlerExample
 {
-    #[AggregateIdentifier]
+    #[Identifier]
     private string $id;
 
     #[QueryHandler(endpointId: 'some-id')]

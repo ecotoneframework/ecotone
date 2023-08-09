@@ -32,6 +32,6 @@ class GatewayProxyAdapter implements AdapterInterface
             throw new InvalidArgumentException("{$wrappedClass}:{$method} has not registered gateway");
         }
 
-        return call_user_func_array([$this->gateways[$method], 'execute'], [$params]);
+        return $this->gateways[$method]->execute($params);
     }
 }

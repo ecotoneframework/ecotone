@@ -3,8 +3,8 @@
 namespace Test\Ecotone\Modelling\Fixture\NamedEvent;
 
 use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\WithAggregateEvents;
 
 #[Aggregate]
@@ -12,7 +12,7 @@ class GuestBook
 {
     use WithAggregateEvents;
 
-    private function __construct(#[AggregateIdentifier] private string $bookId, private array $guests)
+    private function __construct(#[Identifier] private string $bookId, private array $guests)
     {
     }
 

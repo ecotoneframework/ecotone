@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Test\Ecotone\Modelling\Fixture\SagaWithMultipleActions;
 
 use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\Attribute\Saga;
-use Ecotone\Modelling\Attribute\SagaIdentifier;
 
 #[Saga]
 final class SagaWithMultipleEventHandlersAndFactoryMethod
 {
     public function __construct(
-        #[SagaIdentifier] private string $orderId,
+        #[Identifier] private string $orderId,
         private int $actionOneCalled = 0,
         private int $actionTwoCalled = 0
     ) {

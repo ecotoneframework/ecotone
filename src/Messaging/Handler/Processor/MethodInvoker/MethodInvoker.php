@@ -217,24 +217,12 @@ final class MethodInvoker implements MessageProcessor
     {
         $params = $this->getMethodCall($message)->getMethodArgumentValues();
 
-        /** Used to make the stacktrace shorter and more readable, as call_user_func_array add additional stacktrace level */
+        /** Used direct calls instead of call_user_func to make the stacktrace shorter and more readable, as call_user_func_array add additional stacktrace level */
         if (is_string($this->objectToInvokeOn)) {
-            return match (count($params)) {
-                0 => $this->objectToInvokeOn::{$this->objectMethodName}(),
-                1 => $this->objectToInvokeOn::{$this->objectMethodName}($params[0]),
-                2 => $this->objectToInvokeOn::{$this->objectMethodName}($params[0], $params[1]),
-                3 => $this->objectToInvokeOn::{$this->objectMethodName}($params[0], $params[1], $params[2]),
-                default => call_user_func_array([$this->objectToInvokeOn, $this->objectMethodName], $params),
-            };
+            return $this->objectToInvokeOn::{$this->objectMethodName}(...$params);
         }
 
-        return match (count($params)) {
-            0 => $this->objectToInvokeOn->{$this->objectMethodName}(),
-            1 => $this->objectToInvokeOn->{$this->objectMethodName}($params[0]),
-            2 => $this->objectToInvokeOn->{$this->objectMethodName}($params[0], $params[1]),
-            3 => $this->objectToInvokeOn->{$this->objectMethodName}($params[0], $params[1], $params[2]),
-            default => call_user_func_array([$this->objectToInvokeOn, $this->objectMethodName], $params),
-        };
+        return $this->objectToInvokeOn->{$this->objectMethodName}(...$params);
     }
 
     public function getMethodCall(Message $message): MethodCall

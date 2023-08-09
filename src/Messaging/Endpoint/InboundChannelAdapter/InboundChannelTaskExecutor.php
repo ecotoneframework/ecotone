@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
 
 use Ecotone\Messaging\Endpoint\PollingMetadata;
@@ -29,7 +27,7 @@ class InboundChannelTaskExecutor implements TaskExecutor
 
     public function execute(PollingMetadata $pollingMetadata): void
     {
-        $result = call_user_func_array([$this->serviceToCall, $this->method], []);
+        $result = $this->serviceToCall->{$this->method}();
 
         if (! is_null($result)) {
             $this->inboundChannelGateway->execute([$result]);

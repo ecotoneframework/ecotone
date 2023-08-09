@@ -17,7 +17,6 @@ use Ecotone\Modelling\AggregateMessage;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Blog\Article;
 use Test\Ecotone\Modelling\Fixture\Blog\ChangeArticleContentCommand;
-use Test\Ecotone\Modelling\Fixture\Blog\RepublishArticleCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifierGetMethodForEventSourcedAggregate;
 use Test\Ecotone\Modelling\Fixture\InterceptingAggregate\Basket;
@@ -168,18 +167,6 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(OrderFulfilment::class)),
             ['some' => 'paymentId', 'orderId' => 'x'],
             ClassDefinition::createFor(TypeDescriptor::create(PaymentWasDoneEvent::class)),
-            InterfaceToCallRegistry::createEmpty()
-        );
-    }
-
-    public function test_throwing_exception_if_no_aggregate_identifier_definition_found()
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        AggregateIdentifierRetrevingServiceBuilder::createWith(
-            ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
-            [],
-            ClassDefinition::createFor(TypeDescriptor::create(RepublishArticleCommand::class)),
             InterfaceToCallRegistry::createEmpty()
         );
     }

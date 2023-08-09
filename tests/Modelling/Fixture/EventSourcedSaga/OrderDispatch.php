@@ -5,8 +5,8 @@ namespace Test\Ecotone\Modelling\Fixture\EventSourcedSaga;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
 use Ecotone\Modelling\Attribute\EventSourcingSaga;
+use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\Attribute\QueryHandler;
-use Ecotone\Modelling\Attribute\SagaIdentifier;
 use Ecotone\Modelling\WithAggregateVersioning;
 
 #[EventSourcingSaga]
@@ -14,7 +14,7 @@ class OrderDispatch
 {
     use WithAggregateVersioning;
 
-    #[SagaIdentifier]
+    #[Identifier]
     private $orderId;
     /**
      * @var string

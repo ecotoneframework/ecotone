@@ -17,7 +17,7 @@ class PassThroughService
 
     public function execute(): DateTimeImmutable
     {
-        call_user_func_array([$this->serviceToCall, $this->method], []);
+        $this->serviceToCall->{$this->method}();
 
         return new DateTimeImmutable();
     }

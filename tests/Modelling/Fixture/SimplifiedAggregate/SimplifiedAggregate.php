@@ -4,14 +4,14 @@ namespace Test\Ecotone\Modelling\Fixture\SimplifiedAggregate;
 
 use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
 #[Aggregate]
 class SimplifiedAggregate
 {
-    public function __construct(#[AggregateIdentifier] private string $id, private bool $isEnabled = false)
+    public function __construct(#[Identifier] private string $id, private bool $isEnabled = false)
     {
     }
 

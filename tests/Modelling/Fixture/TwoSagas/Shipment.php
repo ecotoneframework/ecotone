@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Modelling\Fixture\TwoSagas;
 
-use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\Attribute\Saga;
 use InvalidArgumentException;
@@ -12,7 +12,7 @@ use InvalidArgumentException;
 class Shipment
 {
     public const GET_SHIPMENT_STATUS = 'getShipmentStatus';
-    #[AggregateIdentifier]
+    #[Identifier]
     private string $orderId;
     private string $status;
 

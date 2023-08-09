@@ -85,6 +85,10 @@ class LoadAggregateService
         }
 
         if (! $aggregateOrEventStream && $this->loadAggregateMode->isThrowingOnNotFound()) {
+            if ($aggregateIdentifiers === []) {
+                throw AggregateNotFoundException::create("Aggregate {$this->aggregateClassName} for calling {$this->aggregateMethod} was not as no identifiers were provided. Have you forgot to add use #[TargetIdentifier] in your Command or `aggregate.id` in metadata or provide #[Identifier] to MessageGateway?");
+            }
+
             throw AggregateNotFoundException::create("Aggregate {$this->aggregateClassName} for calling {$this->aggregateMethod} was not found using identifiers " . json_encode($aggregateIdentifiers));
         }
 

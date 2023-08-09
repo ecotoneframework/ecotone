@@ -58,6 +58,7 @@ final class EcotoneLite
      * @param string[] $classesToResolve
      * @param array<string,string> $configurationVariables
      * @param ContainerInterface|object[] $containerOrAvailableServices
+     * @deprecated Ecotone 2.0 will drop this method, use "bootstrapFlowTesting" instead
      */
     public static function bootstrapForTesting(
         array                    $classesToResolve = [],

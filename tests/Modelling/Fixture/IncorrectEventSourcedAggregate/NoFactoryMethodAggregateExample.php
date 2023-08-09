@@ -2,14 +2,14 @@
 
 namespace Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate;
 
-use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Attribute\Identifier;
 
 #[EventSourcingAggregate]
 class NoFactoryMethodAggregateExample
 {
-    #[AggregateIdentifier]
+    #[Identifier]
     private string $id;
 
     #[CommandHandler]

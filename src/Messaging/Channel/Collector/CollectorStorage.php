@@ -50,7 +50,9 @@ final class CollectorStorage
      */
     public function releaseMessages(LoggerInterface $logger): array
     {
-        $logger->info(sprintf('Releasing collected %s message(s) to send them to Message Channels', count($this->collectedMessages)));
+        if (count($this->collectedMessages) > 0) {
+            $logger->info(sprintf('Releasing collected %s message(s) to send them to Message Channels', count($this->collectedMessages)));
+        }
         $collectedMessages = $this->collectedMessages;
         $this->disable();
 

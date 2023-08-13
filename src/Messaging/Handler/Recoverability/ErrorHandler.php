@@ -62,9 +62,10 @@ class ErrorHandler
             if (! $this->hasDeadLetterOutput) {
                 $logger->critical(
                     sprintf(
-                        'Discarding message %s as no dead letter channel was defined. Retried maximum number of `%s` times',
+                        'Discarding message %s as no dead letter channel was defined. Retried maximum number of `%s` times. Due to: %s',
                         $failedMessage->getHeaders()->getMessageId(),
-                        $retryNumber
+                        $retryNumber,
+                        $cause->getMessage()
                     ),
                     ['exception' => $cause]
                 );
@@ -74,9 +75,10 @@ class ErrorHandler
 
             $logger->critical(
                 sprintf(
-                    'Sending message `%s` to dead letter channel, as retried maximum number of `%s` times',
+                    'Sending message `%s` to dead letter channel, as retried maximum number of `%s` times. Due to: %s',
                     $failedMessage->getHeaders()->getMessageId(),
-                    $retryNumber
+                    $retryNumber,
+                    $cause->getMessage()
                 ),
                 ['exception' => $cause]
             );

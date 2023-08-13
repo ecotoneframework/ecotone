@@ -71,7 +71,14 @@ class AcknowledgeConfirmationInterceptor
         } catch (Throwable $exception) {
             if ($amqpAcknowledgementCallback->isAutoAck()) {
                 $amqpAcknowledgementCallback->requeue();
-                $logger->info(sprintf('Message with id `%s` requeued in Message Channel', $message->getHeaders()->getMessageId()));
+                $logger->info(
+                    sprintf(
+                        'Message with id `%s` requeued in Message Channel. Due to %s',
+                        $message->getHeaders()->getMessageId(),
+                        $exception->getMessage()
+                    ),
+                    ['exception' => $exception]
+                );
             }
         }
 

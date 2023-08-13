@@ -43,10 +43,9 @@ class AcknowledgeConfirmationInterceptor
     {
         $logger->info(
             sprintf(
-                'Message with id `%s` received at %d from Message Channel `%s`',
+                'Message with id `%s` received from Message Channel `%s`',
                 $message->getHeaders()->getMessageId(),
-                $message->getHeaders()->getTimestamp(),
-                $message->getHeaders()->containsKey(MessageHeaders::POLLED_CHANNEL_NAME)
+                $message->getHeaders()->containsKey(MessageHeaders::POLLED_CHANNEL_NAME) ? $message->getHeaders()->get(MessageHeaders::POLLED_CHANNEL_NAME) : 'unknown'
             )
         );
         if (! $message->getHeaders()->containsKey(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION)) {

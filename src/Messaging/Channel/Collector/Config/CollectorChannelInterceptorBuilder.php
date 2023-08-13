@@ -9,6 +9,7 @@ use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\Collector\CollectorStorage;
 use Ecotone\Messaging\Channel\Collector\MessageCollectorChannelInterceptor;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\PrecedenceChannelInterceptor;
 
@@ -40,6 +41,9 @@ final class CollectorChannelInterceptorBuilder implements ChannelInterceptorBuil
 
     public function build(ReferenceSearchService $referenceSearchService): ChannelInterceptor
     {
-        return new MessageCollectorChannelInterceptor($this->collector);
+        return new MessageCollectorChannelInterceptor(
+            $this->collector,
+            $referenceSearchService->get(LoggingHandlerBuilder::LOGGER_REFERENCE)
+        );
     }
 }

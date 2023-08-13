@@ -3,6 +3,7 @@
 namespace Ecotone\Messaging\Handler\Logger;
 
 use Psr\Log\AbstractLogger;
+use Psr\Log\LogLevel;
 
 /**
  * Class EchoLogger
@@ -16,6 +17,11 @@ class EchoLogger extends AbstractLogger
      */
     public function log($level, $message, array $context = []): void
     {
-        echo "{$level}: {$message}\n";
+        $color = "\033[32m";
+        if (in_array($level, [LogLevel::ALERT, LogLevel::EMERGENCY, LogLevel::CRITICAL, LogLevel::ERROR])) {
+            $color = "\033[31m";
+        }
+
+        echo "{$color}{$level}:\033[0m {$message}\n";
     }
 }

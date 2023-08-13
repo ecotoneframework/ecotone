@@ -26,8 +26,7 @@ final class CollectorSenderInterceptor
         $this->collectorStorage->enable();
         try {
             $result = $methodInvocation->proceed();
-            $collectedMessages = $this->collectorStorage->getCollectedMessages();
-            $this->collectorStorage->disable();
+            $collectedMessages = $this->collectorStorage->releaseMessages($logger);
             if ($collectedMessages !== []) {
                 $messageChannel = $this->getTargetChannel($configuredMessagingSystem);
 

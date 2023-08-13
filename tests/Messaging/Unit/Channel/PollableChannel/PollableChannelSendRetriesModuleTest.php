@@ -41,7 +41,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
         $message = $ecotoneLite->getMessageChannel('orders')->receive();
 
         $this->assertNotNull($message);
-        $this->assertCount(1, $loggerExample->getInfo());
+        $this->assertCount(3, $loggerExample->getInfo());
     }
 
     public function test_retrying_two_time_on_failure_and_recovering()
@@ -60,7 +60,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
         $message = $ecotoneLite->getMessageChannel('orders')->receive();
 
         $this->assertNotNull($message);
-        $this->assertCount(2, $loggerExample->getInfo());
+        $this->assertCount(4, $loggerExample->getInfo());
     }
 
     public function test_retrying_exceeded_and_fails()
@@ -86,7 +86,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
 
         $this->assertTrue($exception);
         $this->assertNull($message);
-        $this->assertCount(2, $loggerExample->getInfo());
+        $this->assertCount(4, $loggerExample->getInfo());
         $this->assertCount(1, $loggerExample->getError());
     }
 

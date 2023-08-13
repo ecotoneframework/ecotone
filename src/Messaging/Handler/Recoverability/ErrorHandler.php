@@ -62,7 +62,7 @@ class ErrorHandler
             if (! $this->hasDeadLetterOutput) {
                 $logger->critical(
                     sprintf(
-                        'Discarding message %s because no dead letter channel was defined. Retried maximum number of %s times',
+                        'Discarding message %s as no dead letter channel was defined. Retried maximum number of `%s` times',
                         $failedMessage->getHeaders()->getMessageId(),
                         $retryNumber
                     ),
@@ -74,7 +74,7 @@ class ErrorHandler
 
             $logger->critical(
                 sprintf(
-                    'Sending message %s to dead letter channel, as retried maximum number of %s times',
+                    'Sending message `%s` to dead letter channel, as retried maximum number of `%s` times',
                     $failedMessage->getHeaders()->getMessageId(),
                     $retryNumber
                 ),
@@ -91,17 +91,21 @@ class ErrorHandler
                     ->build();
         }
 
+        $delayMs = $this->delayedRetryTemplate->calculateNextDelay($retryNumber);
         $logger->info(
             sprintf(
-                'Retrying message %s with %s number of retry',
+                'Retrying message with id `%s` with delay of `%d` ms. %s',
                 $failedMessage->getHeaders()->getMessageId(),
-                $retryNumber
+                $delayMs,
+                $this->delayedRetryTemplate->getMaxAttempts()
+                    ? sprintf('Try %d out of %s', $retryNumber, $this->delayedRetryTemplate->getMaxAttempts())
+                    : ''
             ),
             ['exception' => $cause]
         );
         $messageChannel->send(
             $messageBuilder
-                ->setHeader(MessageHeaders::DELIVERY_DELAY, $this->delayedRetryTemplate->calculateNextDelay($retryNumber))
+                ->setHeader(MessageHeaders::DELIVERY_DELAY, $delayMs)
                 ->setHeader(self::ECOTONE_RETRY_HEADER, $retryNumber)
                 ->build()
         );

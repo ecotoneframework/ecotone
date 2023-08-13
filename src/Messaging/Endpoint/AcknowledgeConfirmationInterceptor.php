@@ -41,6 +41,14 @@ class AcknowledgeConfirmationInterceptor
      */
     public function ack(MethodInvocation $methodInvocation, Message $message, #[Reference('logger')] LoggerInterface $logger)
     {
+        $logger->info(
+            sprintf(
+                'Message with id `%s` received at %d from Message Channel `%s`',
+                $message->getHeaders()->getMessageId(),
+                $message->getHeaders()->getTimestamp(),
+                $message->getHeaders()->containsKey(MessageHeaders::POLLED_CHANNEL_NAME)
+            )
+        );
         if (! $message->getHeaders()->containsKey(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION)) {
             return $methodInvocation->proceed();
         }
@@ -54,17 +62,17 @@ class AcknowledgeConfirmationInterceptor
 
             if ($amqpAcknowledgementCallback->isAutoAck()) {
                 $amqpAcknowledgementCallback->accept();
-                $logger->info(sprintf('Message with id %s acknowledged in Message Broker', $message->getHeaders()->getMessageId()));
+                $logger->info(sprintf('Message with id `%s` acknowledged in Message Channel', $message->getHeaders()->getMessageId()));
             }
         } catch (RejectMessageException $exception) {
             if ($amqpAcknowledgementCallback->isAutoAck()) {
                 $amqpAcknowledgementCallback->reject();
-                $logger->info(sprintf('Message with id %s rejected in Message Broker', $message->getHeaders()->getMessageId()));
+                $logger->info(sprintf('Message with id `%s` rejected in Message Channel', $message->getHeaders()->getMessageId()));
             }
         } catch (Throwable $exception) {
             if ($amqpAcknowledgementCallback->isAutoAck()) {
                 $amqpAcknowledgementCallback->requeue();
-                $logger->info(sprintf('Message with id %s requeued in Message Broker', $message->getHeaders()->getMessageId()));
+                $logger->info(sprintf('Message with id `%s` requeued in Message Channel', $message->getHeaders()->getMessageId()));
             }
         }
 

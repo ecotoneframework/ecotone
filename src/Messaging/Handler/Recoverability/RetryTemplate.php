@@ -67,7 +67,7 @@ final class RetryTemplate
         return $this->delayForRetryNumber($retryNumber - 1) * $this->multiplier;
     }
 
-    public function getMaxAttempts(): int
+    public function getMaxAttempts(): ?int
     {
         return $this->maxAttempts;
     }

@@ -6,19 +6,30 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Lite\Test\FlowTestSupport;
+use Ecotone\Messaging\Channel\Collector\Config\CollectorConfiguration;
+use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\MessagingException;
 use ReflectionException;
+use RuntimeException;
 use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncClassExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncCommandHandlerWithoutIdExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncEventHandlerExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncEventHandlerWithoutIdExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncMethodExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncQueryHandlerExample;
+use Test\Ecotone\Modelling\Fixture\Order\OrderService;
+use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
+use Test\Ecotone\Modelling\Fixture\Retry\RetriedCommandHandler;
 
 /**
  * Class ConverterModuleTest
@@ -134,6 +145,62 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
             InMemoryAnnotationFinder::createEmpty()
                 ->registerClassWithAnnotations(AsyncCommandHandlerWithoutIdExample::class),
             InterfaceToCallRegistry::createEmpty()
+        );
+    }
+
+    public function test_messaging_provide_default_ending_polling_metadata()
+    {
+        $ecotoneLite = $this->bootstrapEcotone(
+            [OrderService::class],
+            [new OrderService()],
+            [
+                SimpleMessageChannelBuilder::createQueueChannel('orders', conversionMediaType: MediaType::createApplicationXPHP()),
+            ],
+            []
+        );
+
+        $command = new PlaceOrder('1');
+        foreach (range(1, 100) as $i) {
+            $ecotoneLite->sendCommand($command);
+        }
+
+        $ecotoneLite->run('orders');
+
+        $this->assertCount(100, $ecotoneLite->sendQueryWithRouting('order.getOrders'));
+    }
+
+    public function test_messaging_provide_default_ending_on_failure_polling_metadata()
+    {
+        $ecotoneLite = $this->bootstrapEcotone(
+            [RetriedCommandHandler::class],
+            [new RetriedCommandHandler()],
+            [
+                SimpleMessageChannelBuilder::createQueueChannel('async', conversionMediaType: MediaType::createApplicationXPHP()),
+            ],
+            []
+        );
+
+        $ecotoneLite->sendCommandWithRoutingKey('retried.asynchronous', 2);
+
+        $this->expectException(RuntimeException::class);
+
+        $ecotoneLite->run('async');
+    }
+
+    /**
+     * @param string[] $classesToResolve
+     * @param object[] $services
+     * @param MessageChannelBuilder[] $channelBuilders
+     * @param CollectorConfiguration[] $collectorConfigurations
+     */
+    private function bootstrapEcotone(array $classesToResolve, array $services, array $channelBuilders, array $collectorConfigurations): FlowTestSupport
+    {
+        return EcotoneLite::bootstrapFlowTesting(
+            $classesToResolve,
+            $services,
+            ServiceConfiguration::createWithDefaults()
+                ->withExtensionObjects($collectorConfigurations),
+            enableAsynchronousProcessing: $channelBuilders
         );
     }
 }

@@ -28,7 +28,7 @@ class ServiceConfiguration
     /**
      * @var string[]
      */
-    private array $skippedModulesPackages = [];
+    private array $skippedModulesPackages = [ModulePackageList::TEST_PACKAGE];
     private bool $areSkippedPackagesDefined = false;
     private ?string $defaultSerializationMediaType = null;
     private ?string $defaultErrorChannel = null;
@@ -48,7 +48,7 @@ class ServiceConfiguration
 
     public static function createWithDefaults(): self
     {
-        return new self();
+        return (new self());
     }
 
     public static function createWithAsynchronicityOnly(): self

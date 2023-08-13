@@ -152,7 +152,8 @@ final class PollingMetadata
             $copy = $copy->setCron($executionPollingMetadata->getCron());
         }
         if (! is_null($executionPollingMetadata->getFinishWhenNoMessages())) {
-            $copy = $copy->setFinishWhenNoMessages($executionPollingMetadata->getFinishWhenNoMessages());
+            $copy = $copy
+                        ->setFinishWhenNoMessages($executionPollingMetadata->getFinishWhenNoMessages());
         }
 
         return $copy;
@@ -319,6 +320,9 @@ final class PollingMetadata
     {
         $copy = $this->createCopy();
         $copy->finishWhenNoMessages = $finishWhenNoMessages;
+        $copy->handledMessageLimit = 0;
+        $copy->executionAmountLimit = 0;
+        $copy->executionTimeLimitInMilliseconds = 0;
 
         return $copy;
     }

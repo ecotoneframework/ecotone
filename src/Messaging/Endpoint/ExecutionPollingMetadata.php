@@ -38,7 +38,9 @@ final class ExecutionPollingMetadata
     {
         return self::createWithDefaults()
             ->withFinishWhenNoMessages(true)
-            ->withStopOnError($failAtError);
+            ->withStopOnError($failAtError)
+            ->withExecutionTimeLimitInMilliseconds(0)
+            ->withHandledMessageLimit(0);
     }
 
     public function withCron(string $cron): ExecutionPollingMetadata

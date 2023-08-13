@@ -407,6 +407,32 @@ class PollingConsumerBuilderTest extends MessagingTest
         );
     }
 
+    public function test_finish_when_no_messages_with_more_messages(): void
+    {
+        $inputChannelName = 'async_channel';
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [SuccessServiceActivator::class],
+            [new SuccessServiceActivator()],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel($inputChannelName),
+            ]
+        );
+
+        $ecotoneTestSupport->sendDirectToChannel('handle_channel');
+        $ecotoneTestSupport->sendDirectToChannel('handle_channel');
+        $ecotoneTestSupport->sendDirectToChannel('handle_channel');
+
+        $ecotoneTestSupport->run($inputChannelName, ExecutionPollingMetadata::createWithFinishWhenNoMessages());
+
+        $this->assertSame(
+            3,
+            $ecotoneTestSupport->sendQueryWithRouting('get_number_of_calls')
+        );
+        $this->assertNull(
+            $ecotoneTestSupport->getMessageChannel($inputChannelName)->receive()
+        );
+    }
+
     private function createPollingConsumer(string $inputChannelName, QueueChannel $inputChannel, $messageHandler): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
     {
         return (new PollingConsumerBuilder())->build(

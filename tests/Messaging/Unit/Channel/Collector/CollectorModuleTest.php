@@ -21,10 +21,11 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\MessageHeaders;
 use PHPUnit\Framework\TestCase;
 
+use RuntimeException;
+
 use function str_contains;
 
 use Test\Ecotone\Modelling\Fixture\Collector\BetNotificator;
-
 use Test\Ecotone\Modelling\Fixture\Collector\BetService;
 use Test\Ecotone\Modelling\Fixture\Collector\BetStatistics;
 use Test\Ecotone\Modelling\Fixture\Order\OrderService;
@@ -66,7 +67,7 @@ final class CollectorModuleTest extends TestCase
 
         try {
             $ecotoneLite->sendCommandWithRoutingKey('makeBet', true);
-        } catch (\RuntimeException) {
+        } catch (RuntimeException) {
         }
 
         $this->assertNull($ecotoneLite->getMessageChannel('bets')->receive(), 'No message should not be sent due to exception');
@@ -90,7 +91,7 @@ final class CollectorModuleTest extends TestCase
 
         try {
             $ecotoneLite->sendCommandWithRoutingKey('makeBet', true);
-        } catch (\RuntimeException) {
+        } catch (RuntimeException) {
         }
 
         $this->assertNull($ecotoneLite->getMessageChannel('bets')->receive(), 'No message should not be sent due to exception');
@@ -136,7 +137,7 @@ final class CollectorModuleTest extends TestCase
 
         try {
             $ecotoneLite->sendCommandWithRoutingKey('makeBet', true);
-        } catch (\RuntimeException) {
+        } catch (RuntimeException) {
         }
 
         $this->assertNotNull($ecotoneLite->getMessageChannel('bets')->receive(), 'Message was not collected');
@@ -160,7 +161,7 @@ final class CollectorModuleTest extends TestCase
 
         try {
             $ecotoneLite->sendCommandWithRoutingKey('makeBet', true);
-        } catch (\RuntimeException) {
+        } catch (RuntimeException) {
         }
 
         $this->assertNotNull($ecotoneLite->getMessageChannel('bets')->receive(), 'Message was not collected');
@@ -207,7 +208,7 @@ final class CollectorModuleTest extends TestCase
 
         try {
             $ecotoneLite->sendCommandWithRoutingKey('makeBlindBet', true);
-        } catch (\RuntimeException) {
+        } catch (RuntimeException) {
         }
 
         $this->assertNull($ecotoneLite->getMessageChannel('bets')->receive(), 'Message was collected');

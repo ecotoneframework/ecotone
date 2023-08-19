@@ -4,6 +4,8 @@ namespace Ecotone\Messaging\Store\Document;
 
 use function json_decode;
 
+use JsonException;
+
 final class InMemoryDocumentStore implements DocumentStore
 {
     /**
@@ -33,7 +35,7 @@ final class InMemoryDocumentStore implements DocumentStore
         if (is_string($document)) {
             try {
                 json_decode($document, flags: JSON_THROW_ON_ERROR);
-            } catch (\JsonException) {
+            } catch (JsonException) {
                 throw DocumentException::create(sprintf('Trying to store document in %s collection with incorrect JSON: %s', $documentId, $collectionName));
             }
         }

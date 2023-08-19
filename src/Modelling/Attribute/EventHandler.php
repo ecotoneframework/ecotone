@@ -5,7 +5,7 @@ namespace Ecotone\Modelling\Attribute;
 use Attribute;
 use Ecotone\Messaging\Attribute\IdentifiedAnnotation;
 
-#[Attribute(Attribute::TARGET_METHOD|Attribute::IS_REPEATABLE)]
+#[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
 class EventHandler extends IdentifiedAnnotation
 {
     public string $listenTo;

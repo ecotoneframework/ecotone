@@ -124,7 +124,7 @@ class InMemoryChannelResolver implements ChannelResolver
         Assert::allInstanceOfType($namedMessageChannels, NamedMessageChannel::class);
 
         /** @var NamedMessageChannel[] $namedMessageChannels */
-        $namedMessageChannels= array_merge($namedMessageChannels, [NamedMessageChannel::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create())]);
+        $namedMessageChannels = array_merge($namedMessageChannels, [NamedMessageChannel::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create())]);
 
         foreach ($namedMessageChannels as $namedMessageChannel) {
             $this->resolvableChannels[$namedMessageChannel->getName()] = $namedMessageChannel->getMessageChannel();

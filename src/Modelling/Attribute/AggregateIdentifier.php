@@ -9,7 +9,7 @@ use Ecotone\Modelling\AggregateMessage;
 /**
  * @deprecated Ecotone 2.0 will drop this attribute. Use #[Identifier] instead
  */
-#[Attribute(Attribute::TARGET_PROPERTY|Attribute::TARGET_PARAMETER)]
+#[Attribute(Attribute::TARGET_PROPERTY | Attribute::TARGET_PARAMETER)]
 class AggregateIdentifier extends Header
 {
     public function __construct()

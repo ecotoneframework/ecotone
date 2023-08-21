@@ -159,14 +159,12 @@ class AsynchronousModuleTest extends AnnotationConfigurationTest
             []
         );
 
-        $command = new PlaceOrder('1');
-        foreach (range(1, 100) as $i) {
-            $ecotoneLite->sendCommand($command);
-        }
+        $ecotoneLite->sendCommand(new PlaceOrder('1'));
 
+        /** This otherwise would not finish */
         $ecotoneLite->run('orders');
 
-        $this->assertCount(100, $ecotoneLite->sendQueryWithRouting('order.getOrders'));
+        $this->assertCount(1, $ecotoneLite->sendQueryWithRouting('order.getOrders'));
     }
 
     public function test_messaging_provide_default_ending_on_failure_polling_metadata()

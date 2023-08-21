@@ -148,7 +148,7 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
                     if (! $this->hasPollingMetadata($pollingMetadata, $asyncEndpointChannel)) {
                         $messagingConfiguration->registerPollingMetadata(
                             PollingMetadata::create($asyncEndpointChannel)
-                                ->withTestingSetup(100, 1000, true)
+                                ->withTestingSetup(100, 100, true)
                         );
                     }
                 }

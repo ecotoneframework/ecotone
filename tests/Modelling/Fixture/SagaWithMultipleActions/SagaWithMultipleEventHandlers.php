@@ -15,7 +15,8 @@ final class SagaWithMultipleEventHandlers
     use WithEvents;
 
     public function __construct(
-        #[Identifier] private string $orderId,
+        #[Identifier]
+        private string $orderId,
         public int $actionOneCalled = 0,
         public int $actionTwoCalled = 0
     ) {

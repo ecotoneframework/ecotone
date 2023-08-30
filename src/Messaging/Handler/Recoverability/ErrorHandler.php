@@ -33,7 +33,8 @@ class ErrorHandler
     public function handle(
         ErrorMessage $errorMessage,
         ChannelResolver $channelResolver,
-        #[Reference(LoggingHandlerBuilder::LOGGER_REFERENCE)] LoggerInterface $logger
+        #[Reference(LoggingHandlerBuilder::LOGGER_REFERENCE)]
+        LoggerInterface $logger
     ): ?Message {
         /** @var MessagingException $messagingException */
         $messagingException = $errorMessage->getPayload();

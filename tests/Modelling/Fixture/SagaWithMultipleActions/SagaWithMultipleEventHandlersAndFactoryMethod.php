@@ -12,7 +12,8 @@ use Ecotone\Modelling\Attribute\Saga;
 final class SagaWithMultipleEventHandlersAndFactoryMethod
 {
     public function __construct(
-        #[Identifier] private string $orderId,
+        #[Identifier]
+        private string $orderId,
         private int $actionOneCalled = 0,
         private int $actionTwoCalled = 0
     ) {

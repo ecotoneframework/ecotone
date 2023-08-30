@@ -9,7 +9,8 @@ class ObjectWithConstructorProperties
 {
     public function __construct(
         #[ExampleAttribute,
-            Identifier] public string $id
+            Identifier]
+        public string $id
     ) {
     }
 }

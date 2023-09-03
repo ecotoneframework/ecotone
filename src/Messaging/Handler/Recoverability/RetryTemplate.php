@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Recoverability;
 
+use Closure;
 use Ecotone\Messaging\Support\Assert;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 /**
  * @internal
@@ -41,6 +44,29 @@ final class RetryTemplate
         Assert::isTrue($this->canBeCalledNextTime($retryNumber), "Retry template exceed number of possible tries {$retryNumber} of {$this->maxAttempts}. Should not be called anymore.");
 
         return $this->delayForRetryNumber($retryNumber);
+    }
+
+    public function runCallbackWithRetries(Closure $closure, string $exceptionClass, LoggerInterface $logger, string $retryMessage): void
+    {
+        $retryNumber = 0;
+        do {
+            try {
+                $closure();
+                break;
+            } catch (Throwable $exception) {
+                if (! $exception instanceof $exceptionClass) {
+                    throw $exception;
+                }
+
+                if (! $this->canBeCalledNextTime($retryNumber)) {
+                    throw $exception;
+                }
+
+                $logger->info($retryMessage, ['exception' => $exception]);
+                $retryNumber++;
+                usleep($this->calculateNextDelay($retryNumber) * 1000);
+            }
+        } while (true);
     }
 
     public function canBeCalledNextTime(int $retryNumber): bool

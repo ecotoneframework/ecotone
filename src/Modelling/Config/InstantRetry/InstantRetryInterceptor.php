@@ -33,7 +33,7 @@ class InstantRetryInterceptor
                 }
 
                 $retries++;
-                $logger->info(sprintf('Exception happened. Doing instant try %d out of %d.', $retries, $this->maxRetryAttempts), [
+                $logger->info(sprintf('Exception happened. Trying to self-heal by doing instant try %d out of %d.', $retries, $this->maxRetryAttempts), [
                     'exception' => $exception->getMessage(),
                 ]);
             }

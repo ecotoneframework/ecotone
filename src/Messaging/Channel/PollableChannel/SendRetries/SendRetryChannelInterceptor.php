@@ -38,7 +38,7 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
         if ($exception !== null) {
             $attempt = 1;
             while ($this->retryTemplate->canBeCalledNextTime($attempt)) {
-                $this->logger->info("Message was not sent to {$this->relatedChannel} due to exception. Will retry to send attempt: {$attempt}", [
+                $this->logger->info("Message was not sent to {$this->relatedChannel} due to exception. Trying to self-heal by doing retry attempt: {$attempt}/{$this->retryTemplate->getMaxAttempts()}", [
                     'exception' => $exception->getMessage(),
                     'relatedChannel' => $this->relatedChannel,
                 ]);

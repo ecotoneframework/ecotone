@@ -2,10 +2,12 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
+use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
@@ -57,9 +59,6 @@ class AroundMethodInterceptor
 
         $hasMethodInvocation                  = false;
         $argumentsToCall           = [];
-        $interceptedInstanceType              = $methodInvocation->getInterceptedInterface()->getInterfaceType();
-        $referenceSearchServiceTypeDescriptor = TypeDescriptor::create(ReferenceSearchService::class);
-        $messageType                          = TypeDescriptor::create(Message::class);
         $messagePayloadType                   = $requestMessage->getHeaders()->hasContentType() && $requestMessage->getHeaders()->getContentType()->hasTypeParameter()
             ? $requestMessage->getHeaders()->getContentType()->getTypeParameter()
             : TypeDescriptor::createFromVariable($requestMessage->getPayload());
@@ -71,77 +70,7 @@ class AroundMethodInterceptor
         }
 
         foreach ($this->interceptorInterfaceToCall->getInterfaceParameters() as $parameter) {
-            $resolvedArgument = null;
-            $hasArgumentBeenResolved = false;
-            foreach ($this->parameterConverters as $parameterConverter) {
-                if ($parameterConverter->isHandling($parameter)) {
-                    $resolvedArgument = $parameterConverter->getArgumentFrom($this->interceptorInterfaceToCall, $parameter, $requestMessage, []);
-                    $hasArgumentBeenResolved = true;
-                }
-            }
-            if ($hasArgumentBeenResolved) {
-                $argumentsToCall[] = $resolvedArgument;
-                continue;
-            }
-
-            if (is_null($resolvedArgument) && $parameter->canBePassedIn($messagePayloadType)) {
-                $resolvedArgument = $requestMessage->getPayload();
-            }
-
-            if (is_null($resolvedArgument) && $parameter->canBePassedIn($methodInvocationType)) {
-                $resolvedArgument    = $methodInvocation;
-            }
-
-            if (is_null($resolvedArgument) && $parameter->canBePassedIn($interceptedInstanceType)) {
-                $resolvedArgument = is_string($methodInvocation->getObjectToInvokeOn()) ? null : $methodInvocation->getObjectToInvokeOn();
-            }
-
-            if (is_null($resolvedArgument) && $parameter->canBePassedIn($messageType)) {
-                $resolvedArgument = $requestMessage;
-            }
-
-            if (is_null($resolvedArgument)) {
-                if ($methodInvocation->getInterceptedInterface()->hasClassAnnotation($parameter->getTypeDescriptor())) {
-                    $resolvedArgument = $methodInvocation->getInterceptedInterface()->getClassAnnotation($parameter->getTypeDescriptor());
-                }
-                if ($methodInvocation->getInterceptedInterface()->hasMethodAnnotation($parameter->getTypeDescriptor())) {
-                    $resolvedArgument = $methodInvocation->getInterceptedInterface()->getMethodAnnotation($parameter->getTypeDescriptor());
-                }
-                foreach ($methodInvocation->getEndpointAnnotations() as $endpointAnnotation) {
-                    if (TypeDescriptor::createFromVariable($endpointAnnotation)->equals($parameter->getTypeDescriptor())) {
-                        $resolvedArgument = $endpointAnnotation;
-                    }
-                }
-                if ($resolvedArgument === null) {
-                    foreach ($methodInvocation->getEndpointAnnotations() as $endpointAnnotation) {
-                        if (TypeDescriptor::createFromVariable($endpointAnnotation)->isCompatibleWith($parameter->getTypeDescriptor())) {
-                            $resolvedArgument = $endpointAnnotation;
-                        }
-                    }
-                }
-            }
-
-            if (is_null($resolvedArgument)) {
-                if ($parameter->canBePassedIn($referenceSearchServiceTypeDescriptor)) {
-                    $resolvedArgument = $this->referenceSearchService;
-                }
-            }
-
-            foreach ($methodCall->getMethodArguments() as $methodArgument) {
-                if ($methodArgument->hasEqualTypeAs($parameter)) {
-                    $resolvedArgument = $methodArgument->value();
-                }
-            }
-
-            if (is_null($resolvedArgument) && $parameter->getTypeDescriptor()->isNonCollectionArray()) {
-                $resolvedArgument = $requestMessage->getHeaders()->headers();
-            }
-
-            if (is_null($resolvedArgument) && ! $parameter->doesAllowNulls()) {
-                throw MethodInvocationException::create("{$this->interceptorInterfaceToCall} can't resolve argument for parameter with name `{$parameter->getName()}`. It can be that the value is null in this scenario (for example type hinting for Aggregate, when calling Aggregate Factory Method), however the interface does not allow for nulls.");
-            }
-
-            $argumentsToCall[] = $resolvedArgument;
+            $argumentsToCall[] = $this->resolveArgument($parameter, $methodInvocation, $methodCall, $requestMessage, $messagePayloadType);
         }
 
         $returnValue = $this->referenceToCall->{$this->interceptorInterfaceToCall->getMethodName()}(...$argumentsToCall);
@@ -151,6 +80,74 @@ class AroundMethodInterceptor
         }
 
         return $returnValue;
+    }
+
+    private function resolveArgument(
+        InterfaceParameter $parameter,
+        MethodInvocation $methodInvocation,
+        MethodCall $methodCall,
+        Message $requestMessage,
+        Type $messagePayloadType
+    ): mixed {
+        foreach ($this->parameterConverters as $parameterConverter) {
+            if ($parameterConverter->isHandling($parameter)) {
+                return $parameterConverter->getArgumentFrom($this->interceptorInterfaceToCall, $parameter, $requestMessage, []);
+            }
+        }
+
+        if ($parameter->canBePassedIn($messagePayloadType)) {
+            return $requestMessage->getPayload();
+        }
+
+        if ($parameter->canBePassedIn(TypeDescriptor::create(MethodInvocation::class))) {
+            return $methodInvocation;
+        }
+
+        if (
+            $parameter->canBePassedIn($methodInvocation->getInterceptedInterface()->getInterfaceType())
+            && ! is_string($methodInvocation->getObjectToInvokeOn())) {
+            return $methodInvocation->getObjectToInvokeOn();
+        }
+
+        if ($parameter->canBePassedIn(TypeDescriptor::create(Message::class))) {
+            return $requestMessage;
+        }
+
+        if ($methodInvocation->getInterceptedInterface()->hasClassAnnotation($parameter->getTypeDescriptor())) {
+            return $methodInvocation->getInterceptedInterface()->getClassAnnotation($parameter->getTypeDescriptor());
+        }
+        if ($methodInvocation->getInterceptedInterface()->hasMethodAnnotation($parameter->getTypeDescriptor())) {
+            return $methodInvocation->getInterceptedInterface()->getMethodAnnotation($parameter->getTypeDescriptor());
+        }
+        foreach ($methodInvocation->getEndpointAnnotations() as $endpointAnnotation) {
+            if (TypeDescriptor::createFromVariable($endpointAnnotation)->equals($parameter->getTypeDescriptor())) {
+                return $endpointAnnotation;
+            }
+        }
+        foreach ($methodInvocation->getEndpointAnnotations() as $endpointAnnotation) {
+            if (TypeDescriptor::createFromVariable($endpointAnnotation)->isCompatibleWith($parameter->getTypeDescriptor())) {
+                return $endpointAnnotation;
+            }
+        }
+
+        if ($parameter->canBePassedIn(TypeDescriptor::create(ReferenceSearchService::class))) {
+            return $this->referenceSearchService;
+        }
+
+        foreach ($methodCall->getMethodArguments() as $methodArgument) {
+            if ($methodArgument->hasEqualTypeAs($parameter)) {
+                return $methodArgument->value();
+            }
+        }
+
+        if ($parameter->getTypeDescriptor()->isNonCollectionArray()) {
+            return $requestMessage->getHeaders()->headers();
+        }
+
+        if ($parameter->doesAllowNulls()) {
+            return null;
+        }
+        throw MethodInvocationException::create("{$this->interceptorInterfaceToCall} can't resolve argument for parameter with name `{$parameter->getName()}`. It can be that the value is null in this scenario (for example type hinting for Aggregate, when calling Aggregate Factory Method), however the interface does not allow for nulls.");
     }
 
     /**

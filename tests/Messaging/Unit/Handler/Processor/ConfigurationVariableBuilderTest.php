@@ -34,7 +34,6 @@ class ConfigurationVariableBuilderTest extends TestCase
                 InterfaceToCall::create(CallableService::class, 'wasCalled'),
                 $interfaceParameter,
                 MessageBuilder::withPayload('some')->build(),
-                []
             )
         );
     }
@@ -54,7 +53,6 @@ class ConfigurationVariableBuilderTest extends TestCase
                 InterfaceToCall::create(CallableService::class, 'wasCalled'),
                 $interfaceParameter,
                 MessageBuilder::withPayload('some')->build(),
-                []
             )
         );
     }
@@ -71,7 +69,6 @@ class ConfigurationVariableBuilderTest extends TestCase
                 InterfaceToCall::create(CallableService::class, 'wasCalled'),
                 $interfaceParameter,
                 MessageBuilder::withPayload('some')->build(),
-                []
             )
         );
     }
@@ -90,7 +87,6 @@ class ConfigurationVariableBuilderTest extends TestCase
                 InterfaceToCall::create(CallableService::class, 'wasCalled'),
                 $interfaceParameter,
                 MessageBuilder::withPayload('some')->build(),
-                []
             )
         );
     }

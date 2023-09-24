@@ -38,9 +38,9 @@ class MethodInterceptorTest extends TestCase
 
         $this->assertEquals(
             [
-                InterceptorConverterBuilder::create('beforeMultiplyCalculation', InterfaceToCall::create(Calculator::class, 'calculate'), []),
                 PayloadBuilder::create('amount'),
                 AllHeadersBuilder::createWith('metadata'),
+                InterceptorConverterBuilder::create('beforeMultiplyCalculation', InterfaceToCall::create(Calculator::class, 'calculate'), []),
             ],
             $methodInterceptor->addInterceptedInterfaceToCall(InterfaceToCall::create(Calculator::class, 'calculate'), [])
                 ->getInterceptingObject()

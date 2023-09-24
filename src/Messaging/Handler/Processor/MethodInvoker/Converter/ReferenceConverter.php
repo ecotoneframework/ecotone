@@ -57,9 +57,9 @@ class ReferenceConverter implements ParameterConverter
     /**
      * @inheritDoc
      */
-    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message, array $endpointAnnotations): object
+    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message): object
     {
-        return $this->referenceService ? $this->referenceService : $this->referenceSearchService->get($relatedParameter->getTypeHint());
+        return $this->referenceService ?: $this->referenceSearchService->get($relatedParameter->getTypeHint());
     }
 
     /**

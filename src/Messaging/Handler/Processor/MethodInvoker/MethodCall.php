@@ -82,19 +82,4 @@ class MethodCall
             return $argument->value();
         }, $this->methodArguments);
     }
-
-    /**
-     * @param string $parameterName
-     * @return bool
-     */
-    public function hasMethodArgumentWithName(string $parameterName): bool
-    {
-        foreach ($this->methodArguments as $methodArgument) {
-            if ($methodArgument->getParameterName() === $parameterName) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 }

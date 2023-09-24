@@ -102,7 +102,7 @@ class AutoCollectionConversionService implements ConversionService
             }
 
             foreach ($targetTypesToCheck as $targetTypeToCheck) {
-                if ($targetTypeToCheck->equals(TypeDescriptor::create(TypeDescriptor::NULL))) {
+                if ($targetTypeToCheck->isNullType()) {
                     continue;
                 }
 

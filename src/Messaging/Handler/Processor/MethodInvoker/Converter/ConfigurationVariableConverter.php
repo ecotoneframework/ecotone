@@ -18,7 +18,7 @@ class ConfigurationVariableConverter implements ParameterConverter
         $this->variableValue = $variableValue;
     }
 
-    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message, array $endpointAnnotations)
+    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message)
     {
         return $this->variableValue;
     }

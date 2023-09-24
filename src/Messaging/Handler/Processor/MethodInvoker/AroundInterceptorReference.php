@@ -5,12 +5,18 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
-use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverter;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MethodInvocationConverter;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MethodInvocationObjectConverter;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueConverter;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Precedence;
 
@@ -83,9 +89,8 @@ final class AroundInterceptorReference implements InterceptorWithPointCut
      *
      * @return AroundMethodInterceptor[]
      */
-    public static function createAroundInterceptorsWithChannel(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $interceptorsReferences): array
+    public static function createAroundInterceptorsWithChannel(ReferenceSearchService $referenceSearchService, array $interceptorsReferences, array $endpointAnnotations, InterfaceToCall $interceptedInterface): array
     {
-        $aroundMethodInterceptors = [];
         usort(
             $interceptorsReferences,
             function (AroundInterceptorReference $element, AroundInterceptorReference $elementToCompare) {
@@ -96,18 +101,15 @@ final class AroundInterceptorReference implements InterceptorWithPointCut
                 return $element->getPrecedence() > $elementToCompare->getPrecedence() ? 1 : -1;
             }
         );
-        if ($interceptorsReferences) {
-            foreach ($interceptorsReferences as $interceptorsReferenceName) {
-                $interceptingService = $interceptorsReferenceName->buildAroundInterceptor($referenceSearchService);
-
-                $aroundMethodInterceptors[] = $interceptingService;
-            }
+        $aroundMethodInterceptors = [];
+        foreach ($interceptorsReferences as $interceptorsReferenceName) {
+            $aroundMethodInterceptors[] = $interceptorsReferenceName->buildAroundInterceptor($referenceSearchService, [...$interceptedInterface->getClassAnnotations(), ...$interceptedInterface->getMethodAnnotations(), ...$endpointAnnotations], $interceptedInterface->getInterfaceType());
         }
 
         return $aroundMethodInterceptors;
     }
 
-    public function getInterceptingInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
+    public function getInterceptingInterface(): InterfaceToCall
     {
         return $this->interfaceToCall;
     }
@@ -120,13 +122,47 @@ final class AroundInterceptorReference implements InterceptorWithPointCut
         return $this->precedence;
     }
 
-    public function buildAroundInterceptor(ReferenceSearchService $referenceSearchService): AroundMethodInterceptor
+    public function buildAroundInterceptor(ReferenceSearchService $referenceSearchService, array $endpointAnnotations = [], ?Type $interceptedInterfaceType = null): AroundMethodInterceptor
     {
         $referenceToCall = $this->directObject ?: $referenceSearchService->get($this->referenceName);
 
         $builtConverters = [];
-        foreach ($this->parameterConverters as $parameterConverter) {
-            $builtConverters[] = $parameterConverter->build($referenceSearchService);
+        foreach ($this->getInterceptingInterface()->getInterfaceParameters() as $parameter) {
+            foreach ($this->parameterConverters as $parameterConverter) {
+                if ($parameterConverter->isHandling($parameter)) {
+                    $builtConverters[] = $parameterConverter->build($referenceSearchService);
+                    continue 2;
+                }
+            }
+            if ($parameter->canBePassedIn(TypeDescriptor::create(MethodInvocation::class))) {
+                $builtConverters[] = new MethodInvocationConverter($parameter->getName());
+                continue;
+            }
+            if ($interceptedInterfaceType && $parameter->canBePassedIn($interceptedInterfaceType)) {
+                $builtConverters[] = new MethodInvocationObjectConverter($parameter->getName());
+                continue;
+            }
+            foreach ($endpointAnnotations as $endpointAnnotation) {
+                if (TypeDescriptor::createFromVariable($endpointAnnotation)->equals($parameter->getTypeDescriptor())) {
+                    $builtConverters[] = ValueConverter::createWith($parameter->getName(), $endpointAnnotation);
+                    continue 2;
+                }
+            }
+            foreach ($endpointAnnotations as $endpointAnnotation) {
+                if (TypeDescriptor::createFromVariable($endpointAnnotation)->isCompatibleWith($parameter->getTypeDescriptor())) {
+                    $builtConverters[] = ValueConverter::createWith($parameter->getName(), $endpointAnnotation);
+                    continue 2;
+                }
+            }
+            if ($parameter->canBePassedIn(TypeDescriptor::create(Message::class))) {
+                $builtConverters[] = MessageConverter::create($parameter->getName());
+                continue;
+            }
+
+            if ($parameter->canBePassedIn(TypeDescriptor::create(ReferenceSearchService::class))) {
+                $builtConverters[] = ValueConverter::createWith($parameter->getName(), $referenceSearchService);
+                continue;
+            }
         }
 
         return AroundMethodInterceptor::createWith(
@@ -135,14 +171,6 @@ final class AroundInterceptorReference implements InterceptorWithPointCut
             $referenceSearchService,
             $builtConverters
         );
-    }
-
-    /**
-     * @return string
-     */
-    public function getInterceptorName(): string
-    {
-        return $this->interceptorName;
     }
 
     /**

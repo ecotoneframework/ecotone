@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
+use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
@@ -41,7 +42,9 @@ class PayloadBuilder implements ParameterConverterBuilder
      */
     public function build(ReferenceSearchService $referenceSearchService): ParameterConverter
     {
-        return PayloadConverter::create($this->parameterName);
+        /** @var ConversionService $conversionService */
+        $conversionService = $referenceSearchService->get(ConversionService::REFERENCE_NAME);
+        return PayloadConverter::create($conversionService, $this->parameterName);
     }
 
     /**

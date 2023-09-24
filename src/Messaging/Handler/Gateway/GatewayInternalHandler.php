@@ -21,7 +21,6 @@ use Ecotone\Messaging\Support\MessageBuilder;
 class GatewayInternalHandler
 {
     private \Ecotone\Messaging\MessageChannel $requestChannel;
-    private ?\Ecotone\Messaging\MessageChannel $errorChannel;
     private ?\Ecotone\Messaging\PollableChannel $replyChannel;
     private \Ecotone\Messaging\Handler\InterfaceToCall $interfaceToCall;
     private int $replyMilliSecondsTimeout;
@@ -30,15 +29,13 @@ class GatewayInternalHandler
      * GatewayInternalHandler constructor.
      * @param InterfaceToCall $interfaceToCall
      * @param MessageChannel $requestChannel
-     * @param MessageChannel|null $errorChannel
      * @param PollableChannel|null $replyChannel
      * @param int $replyMilliSecondsTimeout
      */
-    public function __construct(InterfaceToCall $interfaceToCall, MessageChannel $requestChannel, ?MessageChannel $errorChannel, ?PollableChannel $replyChannel, int $replyMilliSecondsTimeout)
+    public function __construct(InterfaceToCall $interfaceToCall, MessageChannel $requestChannel, ?PollableChannel $replyChannel, int $replyMilliSecondsTimeout)
     {
         $this->interfaceToCall = $interfaceToCall;
         $this->requestChannel = $requestChannel;
-        $this->errorChannel = $errorChannel;
         $this->replyChannel = $replyChannel;
         $this->replyMilliSecondsTimeout = $replyMilliSecondsTimeout;
     }
@@ -100,7 +97,7 @@ class GatewayInternalHandler
                 throw InvalidArgumentException::create("{$this->interfaceToCall} expects value, but null was returned. Have you consider changing return value to nullable?");
             }
             if ($replyMessage instanceof ErrorMessage) {
-                throw ($replyMessage->getPayload()->getCause() ? $replyMessage->getPayload()->getCause() : $replyMessage->getPayload());
+                throw ($replyMessage->getPayload()->getCause() ?: $replyMessage->getPayload());
             }
 
             return $replyMessage;

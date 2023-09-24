@@ -21,7 +21,7 @@ final class EventSourcingHandlerExecutor
 
     public function fill(array $events, ?object $existingAggregate): object
     {
-        $aggregate = $existingAggregate ?? (new ReflectionClass($this->aggregateClassName))->newInstance();
+        $aggregate = $existingAggregate ?? (new $this->aggregateClassName());
         foreach ($events as $event) {
             if ($event instanceof Event) {
                 $event = $event->getPayload();
@@ -35,7 +35,7 @@ final class EventSourcingHandlerExecutor
             $eventType = TypeDescriptor::createFromVariable($event);
             foreach ($this->eventSourcingHandlerMethods as $methodInterface) {
                 if ($methodInterface->getFirstParameter()->canBePassedIn($eventType)) {
-                    call_user_func([$aggregate, $methodInterface->getMethodName()], $event);
+                    $aggregate->{$methodInterface->getMethodName()}($event);
                 }
             }
         }

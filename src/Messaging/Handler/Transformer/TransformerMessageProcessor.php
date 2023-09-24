@@ -3,7 +3,6 @@
 namespace Ecotone\Messaging\Handler\Transformer;
 
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
@@ -69,24 +68,9 @@ class TransformerMessageProcessor implements MessageProcessor
         return $this->methodInvoker->getMethodCall($message);
     }
 
-    public function getAroundMethodInterceptors(): array
-    {
-        return $this->methodInvoker->getAroundMethodInterceptors();
-    }
-
     public function getObjectToInvokeOn(): string|object
     {
         return $this->methodInvoker->getObjectToInvokeOn();
-    }
-
-    public function getInterceptedInterface(): InterfaceToCall
-    {
-        return $this->methodInvoker->getInterceptedInterface();
-    }
-
-    public function getEndpointAnnotations(): array
-    {
-        return $this->methodInvoker->getEndpointAnnotations();
     }
 
     /**

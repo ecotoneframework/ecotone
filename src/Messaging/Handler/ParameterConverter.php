@@ -20,7 +20,7 @@ interface ParameterConverter
      * @param object[] $endpointAnnotations
      * @return mixed
      */
-    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message, array $endpointAnnotations);
+    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message);
 
     /**
      * @param InterfaceParameter $parameter

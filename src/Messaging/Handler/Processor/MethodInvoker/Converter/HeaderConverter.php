@@ -43,7 +43,7 @@ class HeaderConverter implements ParameterConverter
     /**
      * @inheritDoc
      */
-    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message, array $endpointAnnotations)
+    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message)
     {
         $isRequired = $this->isRequired;
         if (! $message->getHeaders()->containsKey($this->headerName)) {

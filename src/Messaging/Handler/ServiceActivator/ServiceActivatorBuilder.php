@@ -11,6 +11,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\Processor\WrapWithMessageBuildProcessor;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -37,6 +38,8 @@ final class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder imp
     private ?object $directObjectReference = null;
     private bool $shouldPassThroughMessage = false;
     private bool $shouldWrapResultInMessage = true;
+
+    private bool $isCompiled = false;
 
     private function __construct(string $objectToInvokeOnReferenceName, private string|InterfaceToCall $methodNameOrInterfaceToCall)
     {
@@ -132,7 +135,6 @@ final class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder imp
             $this->methodNameOrInterfaceToCall instanceof InterfaceToCall
                 ? $this->methodNameOrInterfaceToCall
                 : $interfaceToCallRegistry->getFor($this->directObjectReference, $this->getMethodName()),
-            $interfaceToCallRegistry->getFor(PassThroughService::class, 'invoke'),
         ];
     }
 
@@ -165,35 +167,22 @@ final class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder imp
             $objectToInvoke,
             $this->methodParameterConverterBuilders,
             $referenceSearchService,
-            $channelResolver,
-            $this->orderedAroundInterceptors,
             $this->getEndpointAnnotations()
         );
         if ($this->shouldWrapResultInMessage) {
             $messageProcessor = WrapWithMessageBuildProcessor::createWith(
                 $interfaceToCall,
                 $messageProcessor,
-                $referenceSearchService
-            );
-        }
-        if ($this->shouldPassThroughMessage && $interfaceToCall->hasReturnTypeVoid()) {
-            $passThroughService = new PassThroughService($messageProcessor);
-            $messageProcessor   = MethodInvoker::createWith(
-                $interfaceToCallRegistry->getFor($passThroughService, 'invoke'),
-                $passThroughService,
-                [],
-                $referenceSearchService
             );
         }
 
-        return new ServiceActivatingHandler(
-            RequestReplyProducer::createRequestAndReply(
-                $this->outputMessageChannelName,
-                $messageProcessor,
-                $channelResolver,
-                $this->isReplyRequired,
-            ),
-            count($this->orderedAroundInterceptors) > 0,
+        return RequestReplyProducer::createRequestAndReply(
+            $this->outputMessageChannelName,
+            $messageProcessor,
+            $channelResolver,
+            $this->isReplyRequired,
+            $this->shouldPassThroughMessage && $interfaceToCall->hasReturnTypeVoid(),
+            aroundInterceptors: AroundInterceptorReference::createAroundInterceptorsWithChannel($referenceSearchService, $this->orderedAroundInterceptors, $this->getEndpointAnnotations(), $interfaceToCall),
         );
     }
 

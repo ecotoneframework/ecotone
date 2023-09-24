@@ -44,7 +44,6 @@ class HeaderBuilderTest extends TestCase
                 InterfaceToCall::create(CallableService::class, 'wasCalled'),
                 InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
                 MessageBuilder::withPayload('a')->setHeader('token', 123)->build(),
-                []
             )
         );
     }
@@ -60,7 +59,6 @@ class HeaderBuilderTest extends TestCase
                 InterfaceToCall::create(CallableService::class, 'wasCalled'),
                 InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
                 MessageBuilder::withPayload('a')->build(),
-                []
             )
         );
     }
@@ -86,7 +84,6 @@ class HeaderBuilderTest extends TestCase
             MessageBuilder::withPayload('a')
                 ->setHeader('personId', $personId)
                 ->build(),
-            []
         );
 
         $this->assertInstanceOf(UuidInterface::class, $headerResult);
@@ -123,7 +120,6 @@ class HeaderBuilderTest extends TestCase
             MessageBuilder::withPayload('a')
                 ->setHeader('personIds', $data)
                 ->build(),
-            []
         );
 
         $this->assertEquals(new stdClass(), $headerResult);
@@ -150,7 +146,6 @@ class HeaderBuilderTest extends TestCase
             MessageBuilder::withPayload('a')
                 ->setHeader('personId', $personId)
                 ->build(),
-            []
         );
 
         $this->assertInstanceOf(UuidInterface::class, $headerResult);
@@ -168,7 +163,6 @@ class HeaderBuilderTest extends TestCase
                 InterfaceToCall::create(ServiceWithDefaultArgument::class, 'execute'),
                 InterfaceParameter::create('name', TypeDescriptor::createWithDocBlock('string', ''), false, true, '', false, []),
                 MessageBuilder::withPayload('a')->build(),
-                []
             )
         );
     }

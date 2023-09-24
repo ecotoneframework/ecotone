@@ -8,7 +8,6 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodCall;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Handler\UnionTypeDescriptor;
 use Ecotone\Messaging\Message;
@@ -35,7 +34,7 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
         $this->messageProcessor = $messageProcessor;
     }
 
-    public static function createWith(InterfaceToCall $interfaceToCall, MessageProcessor $messageProcessor, ReferenceSearchService $referenceSearchService)
+    public static function createWith(InterfaceToCall $interfaceToCall, MessageProcessor $messageProcessor)
     {
         return new self($interfaceToCall, $messageProcessor);
     }
@@ -98,24 +97,9 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
         return $this->messageProcessor->getMethodCall($message);
     }
 
-    public function getAroundMethodInterceptors(): array
-    {
-        return $this->messageProcessor->getAroundMethodInterceptors();
-    }
-
     public function getObjectToInvokeOn(): string|object
     {
         return $this->messageProcessor->getObjectToInvokeOn();
-    }
-
-    public function getInterceptedInterface(): InterfaceToCall
-    {
-        return $this->messageProcessor->getInterceptedInterface();
-    }
-
-    public function getEndpointAnnotations(): array
-    {
-        return $this->messageProcessor->getEndpointAnnotations();
     }
 
     /**

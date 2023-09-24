@@ -2,7 +2,6 @@
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
@@ -10,14 +9,12 @@ use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInvoker;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInvocation;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\Handler\RequestReplyProducer;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -35,7 +32,7 @@ class CallAggregateService
     private ChannelResolver $channelResolver;
     private ReferenceSearchService $referenceSearchService;
     /**
-     * @var AroundInterceptorReference[]
+     * @var AroundMethodInterceptor[]
      */
     private array $aroundMethodInterceptors;
     private bool $isCommandHandler;
@@ -57,7 +54,7 @@ class CallAggregateService
     public function __construct(InterfaceToCall $interfaceToCall, bool $isEventSourced, ChannelResolver $channelResolver, array $parameterConverterBuilders, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService, PropertyReaderAccessor $propertyReaderAccessor, PropertyEditorAccessor $propertyEditorAccessor, bool $isCommand, bool $isFactoryMethod, private EventSourcingHandlerExecutor $eventSourcingHandlerExecutor, ?string $aggregateVersionProperty, bool $isAggregateVersionAutomaticallyIncreased, ?string $aggregateMethodWithEvents)
     {
         Assert::allInstanceOfType($parameterConverterBuilders, ParameterConverterBuilder::class);
-        Assert::allInstanceOfType($aroundMethodInterceptors, AroundInterceptorReference::class);
+        Assert::allInstanceOfType($aroundMethodInterceptors, AroundMethodInterceptor::class);
 
         $this->parameterConverterBuilders = $parameterConverterBuilders;
         $this->channelResolver = $channelResolver;
@@ -105,32 +102,15 @@ class CallAggregateService
             $aggregate ? $aggregate : $this->aggregateInterface->getInterfaceType()->toString(),
             $this->parameterConverterBuilders,
             $this->referenceSearchService,
-            $this->channelResolver,
-            [],
-            []
         );
 
         if ($this->aroundMethodInterceptors) {
-            $outputChannel = QueueChannel::create((string)$this->aggregateInterface);
-            $noReplyMessage = MessageBuilder::fromMessage($message)
-                                ->removeHeaders([MessageHeaders::REPLY_CHANNEL, MessageHeaders::ROUTING_SLIP])
-                                ->build();
-            $methodInvokerChainProcessor = new AroundMethodInvoker(
+            $methodInvokerChainProcessor = new AroundMethodInvocation(
+                $message,
+                $this->aroundMethodInterceptors,
                 $methodInvoker,
-                $methodInvoker->getMethodCall($noReplyMessage),
-                array_map(fn (AroundInterceptorReference $interceptorReference) => $interceptorReference->buildAroundInterceptor($this->referenceSearchService), $this->aroundMethodInterceptors),
-                $noReplyMessage,
-                RequestReplyProducer::createRequestAndReply(
-                    $outputChannel,
-                    $methodInvoker,
-                    $this->channelResolver,
-                    false
-                )
             );
-
-            $methodInvokerChainProcessor->proceed();
-            $result = $outputChannel->receive();
-            $result = ! is_null($result) ? $result->getPayload() : null;
+            $result = $methodInvokerChainProcessor->proceed();
         } else {
             $result = $methodInvoker->executeEndpoint($message);
         }

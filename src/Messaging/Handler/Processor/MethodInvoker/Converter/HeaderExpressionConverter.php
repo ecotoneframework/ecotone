@@ -60,7 +60,7 @@ class HeaderExpressionConverter implements ParameterConverter
     /**
      * @inheritDoc
      */
-    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message, array $endpointAnnotations)
+    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message)
     {
         if ($this->isRequired && ! $message->getHeaders()->containsKey($this->headerName)) {
             throw InvalidArgumentException::create("Header with key {$this->headerName} does not exists for Header Parameter Converter");

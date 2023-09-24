@@ -54,7 +54,7 @@ class RequestReplyProducerTest extends MessagingTest
      */
     private function handleReplyWithMessage(Message $message, RequestReplyProducer $requestReplyProducer): void
     {
-        $requestReplyProducer->handleWithPossibleAroundInterceptors($message);
+        $requestReplyProducer->handle($message);
     }
 
     public function test_processing_message_with_reply()
@@ -216,7 +216,7 @@ class RequestReplyProducerTest extends MessagingTest
             ->setHeader('token', 'abcd')
             ->setReplyChannel($outputChannel)
             ->build();
-        $requestReplyProducer->handleWithPossibleAroundInterceptors($requestMessage);
+        $requestReplyProducer->handle($requestMessage);
 
         $this->compareToSplittedMessages($replyData, $outputChannel, $requestMessage);
     }
@@ -231,7 +231,7 @@ class RequestReplyProducerTest extends MessagingTest
             ->setHeader('token', 'abcd')
             ->setReplyChannel($outputChannel)
             ->build();
-        $requestReplyProducer->handleWithPossibleAroundInterceptors($requestMessage);
+        $requestReplyProducer->handle($requestMessage);
 
         /** @var Message[] $splittedMessages */
         $splittedMessages = [];
@@ -265,7 +265,7 @@ class RequestReplyProducerTest extends MessagingTest
 
         $this->expectException(MessageDeliveryException::class);
 
-        $requestReplyProducer->handleWithPossibleAroundInterceptors(
+        $requestReplyProducer->handle(
             MessageBuilder::withPayload('some')
                 ->setReplyChannel(QueueChannel::create())
                 ->build()

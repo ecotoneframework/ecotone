@@ -56,7 +56,6 @@ class InterceptorConverterBuilderTest extends TestCase
                 InterfaceToCall::create(CallableService::class, 'wasCalled'),
                 $parameter,
                 MessageBuilder::withPayload('a')->setHeader('token', 123)->build(),
-                []
             )
         );
     }
@@ -84,7 +83,6 @@ class InterceptorConverterBuilderTest extends TestCase
                 InterfaceToCall::create(CallableService::class, 'wasCalled'),
                 $parameter,
                 MessageBuilder::withPayload('a')->setHeader('token', 123)->build(),
-                []
             )
         );
     }
@@ -115,7 +113,6 @@ class InterceptorConverterBuilderTest extends TestCase
                 InterfaceToCall::create(CallableService::class, 'wasCalled'),
                 $parameter,
                 MessageBuilder::withPayload('a')->setHeader('token', 123)->build(),
-                []
             )
         );
     }
@@ -137,7 +134,6 @@ class InterceptorConverterBuilderTest extends TestCase
                 InterfaceToCall::create(ServiceWithoutReturnValue::class, 'callWithNullableAnnotation'),
                 InterfaceParameter::createNullable('transactional', TypeDescriptor::createWithDocBlock(Transactional::class, '')),
                 MessageBuilder::withPayload('a')->setHeader('token', 123)->build(),
-                []
             )
         );
     }
@@ -153,7 +149,6 @@ class InterceptorConverterBuilderTest extends TestCase
             InterfaceToCall::create(ServiceWithoutReturnValue::class, 'callWithAnnotation'),
             InterfaceParameter::createNotNullable('transactional', TypeDescriptor::createWithDocBlock(Transactional::class, '')),
             MessageBuilder::withPayload('a')->setHeader('token', 123)->build(),
-            []
         );
     }
 }

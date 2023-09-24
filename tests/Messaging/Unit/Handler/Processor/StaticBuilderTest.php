@@ -40,7 +40,6 @@ class StaticBuilderTest extends TestCase
                 InterfaceToCall::create(CallableService::class, 'wasCalled'),
                 InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', null)),
                 MessageBuilder::withPayload('a')->build(),
-                []
             )
         );
     }

@@ -3,7 +3,6 @@
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Closure;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use stdClass;
 
 class StubMethodInvocation implements MethodInvocation
@@ -41,21 +40,6 @@ class StubMethodInvocation implements MethodInvocation
     public function getObjectToInvokeOn()
     {
         return new stdClass();
-    }
-
-    public function getInterceptedClassName(): string
-    {
-        return self::class;
-    }
-
-    public function getInterceptedMethodName(): string
-    {
-        return 'getInterceptedInterface';
-    }
-
-    public function getInterceptedInterface(): InterfaceToCall
-    {
-        return InterfaceToCall::create(self::class, 'getInterceptedInterface');
     }
 
     public function getEndpointAnnotations(): iterable

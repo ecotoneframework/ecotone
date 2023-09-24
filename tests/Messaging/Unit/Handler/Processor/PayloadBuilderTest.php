@@ -39,7 +39,6 @@ class PayloadBuilderTest extends MessagingTest
                 InterfaceToCall::create(CallableService::class, 'wasCalled'),
                 InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
                 MessageBuilder::withPayload($payload)->build(),
-                []
             )
         );
     }

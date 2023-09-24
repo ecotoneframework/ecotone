@@ -29,7 +29,6 @@ class AllHeadersBuilderTest extends TestCase
             MessageBuilder::withPayload('some')
                 ->setHeader('someId', 123)
                 ->build(),
-            []
         );
         unset($result[MessageHeaders::MESSAGE_ID]);
         unset($result[MessageHeaders::TIMESTAMP]);

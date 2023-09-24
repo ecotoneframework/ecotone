@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use Ecotone\Messaging\Handler\InterfaceToCall;
-
 /**
  * Interface MethodInvocation
  * @package Ecotone\Messaging\MethodInterceptor
@@ -24,26 +22,6 @@ interface MethodInvocation
      * @var string|object
      */
     public function getObjectToInvokeOn();
-
-    /**
-     * @return string
-     */
-    public function getInterceptedClassName(): string;
-
-    /**
-     * @return string
-     */
-    public function getInterceptedMethodName(): string;
-
-    /**
-     * @return InterfaceToCall
-     */
-    public function getInterceptedInterface(): InterfaceToCall;
-
-    /**
-     * @return object[]
-     */
-    public function getEndpointAnnotations(): iterable;
 
     /**
      * @return array

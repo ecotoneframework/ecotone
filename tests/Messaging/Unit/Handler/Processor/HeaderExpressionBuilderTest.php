@@ -49,7 +49,6 @@ class HeaderExpressionBuilderTest extends TestCase
                 MessageBuilder::withPayload('some')
                     ->setHeader('token', '100')
                     ->build(),
-                []
             )
         );
     }
@@ -75,7 +74,6 @@ class HeaderExpressionBuilderTest extends TestCase
                 MessageBuilder::withPayload('x')
                     ->setHeader('number', 100)
                     ->build(),
-                []
             )
         );
     }
@@ -93,7 +91,6 @@ class HeaderExpressionBuilderTest extends TestCase
             InterfaceToCall::create(CallableService::class, 'wasCalled'),
             InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
             MessageBuilder::withPayload('some')->build(),
-            []
         );
     }
 
@@ -110,7 +107,6 @@ class HeaderExpressionBuilderTest extends TestCase
                 InterfaceToCall::create(CallableService::class, 'wasCalled'),
                 InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
                 MessageBuilder::withPayload('some')->build(),
-                []
             )
         );
     }

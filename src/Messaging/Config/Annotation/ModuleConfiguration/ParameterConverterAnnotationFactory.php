@@ -20,7 +20,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverter
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressionBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodArgumentsFactory;
 
 /**
  * Class ParameterConverterAnnotationFactory
@@ -44,7 +44,7 @@ class ParameterConverterAnnotationFactory
     public function createParameterWithDefaults(InterfaceToCall $relatedClassInterface, bool $ignorePayload): array
     {
         return
-            MethodInvoker::createDefaultMethodParameters(
+            MethodArgumentsFactory::createDefaultMethodParameters(
                 $relatedClassInterface,
                 $this->createParameterConverters($relatedClassInterface),
                 [],

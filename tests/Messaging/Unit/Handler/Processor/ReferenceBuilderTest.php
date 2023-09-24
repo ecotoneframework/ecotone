@@ -43,7 +43,6 @@ class ReferenceBuilderTest extends TestCase
                 InterfaceToCall::create(CallableService::class, 'wasCalled'),
                 InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock(stdClass::class, '')),
                 MessageBuilder::withPayload('paramName')->build(),
-                []
             )
         );
     }
@@ -66,7 +65,6 @@ class ReferenceBuilderTest extends TestCase
                 InterfaceToCall::create(CallableService::class, 'wasCalled'),
                 InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock(stdClass::class, '')),
                 MessageBuilder::withPayload('paramName')->build(),
-                []
             )
         );
     }

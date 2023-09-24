@@ -6,7 +6,7 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadConverter;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AroundInterceptorExample;
@@ -155,12 +155,12 @@ class AroundInterceptorReferenceTest extends TestCase
 
         $this->assertEquals(
             AroundInterceptorReference::create(AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass, $methodName), 0, $expectedPointcut, [
-                PayloadConverter::create('payload'),
+                PayloadBuilder::create('payload'),
                 HeaderBuilder::create('class', 'token'),
                 AllHeadersBuilder::createWith('headers'),
             ]),
             AroundInterceptorReference::create(AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass, $methodName), 0, '', [
-                PayloadConverter::create('payload'),
+                PayloadBuilder::create('payload'),
                 HeaderBuilder::create('class', 'token'),
                 AllHeadersBuilder::createWith('headers'),
             ])

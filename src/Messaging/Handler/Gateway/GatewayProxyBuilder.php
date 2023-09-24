@@ -272,7 +272,7 @@ class GatewayProxyBuilder implements InterceptedEndpoint
         ];
 
         foreach ($this->aroundInterceptors as $aroundInterceptor) {
-            $resolvedInterfaces[] = $aroundInterceptor->getInterceptingInterface($interfaceToCallRegistry);
+            $resolvedInterfaces[] = $aroundInterceptor->getInterceptingInterface();
         }
 
         return $resolvedInterfaces;
@@ -428,7 +428,6 @@ class GatewayProxyBuilder implements InterceptedEndpoint
         $gatewayInternalHandler = new GatewayInternalHandler(
             $interfaceToCall,
             $channelResolver->resolve($this->requestChannelName),
-            $this->errorChannelName ? $channelResolver->resolve($this->errorChannelName) : null,
             $this->replyChannelName ? $channelResolver->resolve($this->replyChannelName) : null,
             $this->replyMilliSecondsTimeout
         );

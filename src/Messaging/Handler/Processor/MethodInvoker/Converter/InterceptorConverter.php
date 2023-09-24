@@ -40,7 +40,7 @@ class InterceptorConverter implements ParameterConverter
     /**
      * @inheritDoc
      */
-    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message, array $endpointAnnotations)
+    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message)
     {
         if ($relatedParameter->canBePassedIn(TypeDescriptor::create(InterfaceToCall::class))) {
             return $this->interceptedInterface;

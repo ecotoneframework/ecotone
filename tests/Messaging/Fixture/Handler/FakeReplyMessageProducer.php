@@ -2,7 +2,6 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodCall;
 use Ecotone\Messaging\Message;
 
@@ -50,11 +49,6 @@ class FakeReplyMessageProducer implements \Ecotone\Messaging\Handler\MessageProc
     public function getObjectToInvokeOn(): string|object
     {
         return self::class;
-    }
-
-    public function getInterceptedInterface(): InterfaceToCall
-    {
-        return InterfaceToCall::create(self::class, 'processMessage');
     }
 
     public function getEndpointAnnotations(): array

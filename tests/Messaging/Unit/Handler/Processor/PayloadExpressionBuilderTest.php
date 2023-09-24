@@ -47,7 +47,6 @@ class PayloadExpressionBuilderTest extends TestCase
                 InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
                 MessageBuilder::withPayload('100')
                     ->build(),
-                []
             )
         );
     }
@@ -72,7 +71,6 @@ class PayloadExpressionBuilderTest extends TestCase
                 InterfaceParameter::createNullable('x', TypeDescriptor::create('string')),
                 MessageBuilder::withPayload(100)
                     ->build(),
-                []
             )
         );
     }

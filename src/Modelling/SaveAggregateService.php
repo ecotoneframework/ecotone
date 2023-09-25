@@ -11,7 +11,6 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Metadata\RevisionMetadataEnricher;
 use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Messaging\Support\Assert;
@@ -104,11 +103,11 @@ class SaveAggregateService
         $aggregateIds = $aggregateIds ?: $this->getAggregateIds($aggregateIds, $aggregate, $this->isEventSourced);
 
         if ($this->isEventSourced) {
-            if ($this->snapshotTriggerThreshold !== self::NO_SNAPSHOT_THRESHOLD && in_array(is_string($aggregate) ? $aggregate : $aggregate::class, $this->aggregateClassesToSnapshot)) {
-                if (! is_object($aggregate)) {
-                    throw MessagingException::create(sprintf("Can't use repository shortcuts together with snapshots for %s", $aggregate));
-                }
-
+            if (
+                $this->snapshotTriggerThreshold !== self::NO_SNAPSHOT_THRESHOLD
+                && is_object($aggregate)
+                && in_array($aggregate::class, $this->aggregateClassesToSnapshot)
+            ) {
                 $version = $versionBeforeHandling;
                 foreach ($events as $event) {
                     $version += 1;

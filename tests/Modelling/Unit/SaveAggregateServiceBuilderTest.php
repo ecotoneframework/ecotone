@@ -54,8 +54,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
             'changeShippingAddress',
             InterfaceToCallRegistry::createEmpty(),
+            false,
             SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
-            [],
             DocumentStore::class
         )
             ->withAggregateRepositoryFactories(['orderRepository']);
@@ -90,8 +90,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
             'changeShippingAddress',
             InterfaceToCallRegistry::createEmpty(),
+            false,
             SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
-            [],
             DocumentStore::class
         )
             ->withAggregateRepositoryFactories(['orderRepository']);
@@ -123,8 +123,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
             'start',
             InterfaceToCallRegistry::createEmpty(),
+            true,
             1,
-            [Ticket::class],
             DocumentStore::class
         )
             ->withAggregateRepositoryFactories(['repository']);
@@ -164,8 +164,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
             'start',
             InterfaceToCallRegistry::createEmpty(),
+            false,
             1,
-            [Order::class],
             DocumentStore::class
         )
             ->withAggregateRepositoryFactories(['repository']);
@@ -202,8 +202,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
             'start',
             InterfaceToCallRegistry::createEmpty(),
+            true,
             2,
-            [Ticket::class],
             DocumentStore::class
         )
             ->withAggregateRepositoryFactories(['repository']);
@@ -242,8 +242,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
             'createWith',
             InterfaceToCallRegistry::createEmpty(),
+            false,
             SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
-            [],
             DocumentStore::class
         )
             ->withAggregateRepositoryFactories(['repository']);
@@ -305,8 +305,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
             'multiplyOrder',
             InterfaceToCallRegistry::createEmpty(),
+            false,
             SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
-            [],
             DocumentStore::class
         )
             ->withAggregateRepositoryFactories(['orderRepository'])
@@ -366,8 +366,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(OrderWithManualVersioning::class)),
             'multiplyOrder',
             InterfaceToCallRegistry::createEmpty(),
+            false,
             SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
-            [],
             DocumentStore::class
         )
             ->withAggregateRepositoryFactories(['orderRepository'])
@@ -399,8 +399,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(NoIdDefinedAfterRecordingEvents::class)),
             'create',
             InterfaceToCallRegistry::createEmpty(),
+            false,
             SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
-            [],
             DocumentStore::class
         )
             ->withAggregateRepositoryFactories(['repository'])
@@ -433,8 +433,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodForEventSourcedAggregate::class)),
             'create',
             InterfaceToCallRegistry::createEmpty(),
+            false,
             SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
-            [],
             DocumentStore::class
         )
             ->withAggregateRepositoryFactories(['repository'])
@@ -477,8 +477,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodWithParameters::class)),
             'create',
             InterfaceToCallRegistry::createEmpty(),
+            false,
             SaveAggregateService::NO_SNAPSHOT_THRESHOLD,
-            [],
             DocumentStore::class
         )
             ->withAggregateRepositoryFactories(['repository'])

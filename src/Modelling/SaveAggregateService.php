@@ -54,8 +54,8 @@ class SaveAggregateService
         array $aggregateIdentifierGetMethods,
         ?string $aggregateVersionProperty,
         bool $isAggregateVersionAutomaticallyIncreased,
-        private int                               $snapshotTriggerThreshold,
-        private array $aggregateClassesToSnapshot,
+        private bool $useSnapshot,
+        private int $snapshotTriggerThreshold,
         private DocumentStore $documentStore
     ) {
         $this->aggregateRepository = $aggregateRepository;
@@ -103,11 +103,7 @@ class SaveAggregateService
         $aggregateIds = $aggregateIds ?: $this->getAggregateIds($aggregateIds, $aggregate, $this->isEventSourced);
 
         if ($this->isEventSourced) {
-            if (
-                $this->snapshotTriggerThreshold !== self::NO_SNAPSHOT_THRESHOLD
-                && is_object($aggregate)
-                && in_array($aggregate::class, $this->aggregateClassesToSnapshot)
-            ) {
+            if ($this->useSnapshot && is_object($aggregate)) {
                 $version = $versionBeforeHandling;
                 foreach ($events as $event) {
                     $version += 1;

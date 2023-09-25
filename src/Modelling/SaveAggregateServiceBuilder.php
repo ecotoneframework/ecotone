@@ -16,6 +16,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Messaging\Store\Document\InMemoryDocumentStore;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\AggregateEvents;
@@ -51,14 +52,26 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     private ?string $aggregateMethodWithEvents;
     private bool $isEventSourced = false;
 
-    private function __construct(ClassDefinition $aggregateClassDefinition, string $methodName, InterfaceToCallRegistry $interfaceToCallRegistry, private int $snapshotTriggerThreshold, private array $aggregateClassesToSnapshot, private string $documentStoreReference)
-    {
+    private function __construct(
+        ClassDefinition $aggregateClassDefinition,
+        string $methodName,
+        InterfaceToCallRegistry $interfaceToCallRegistry,
+        private bool $useSnapshot = false,
+        private int $snapshotTriggerThreshold = BaseEventSourcingConfiguration::DEFAULT_SNAPSHOT_TRIGGER_THRESHOLD,
+        private string $documentStoreReference = DocumentStore::class
+    ) {
         $this->initialize($aggregateClassDefinition, $methodName, $interfaceToCallRegistry);
     }
 
-    public static function create(ClassDefinition $aggregateClassDefinition, string $methodName, InterfaceToCallRegistry $interfaceToCallRegistry, int $snapshotTriggerThreshold, array $aggregateClassesToSnapshot, string $documentStoreReference): self
-    {
-        return new self($aggregateClassDefinition, $methodName, $interfaceToCallRegistry, $snapshotTriggerThreshold, $aggregateClassesToSnapshot, $documentStoreReference);
+    public static function create(
+        ClassDefinition $aggregateClassDefinition,
+        string $methodName,
+        InterfaceToCallRegistry $interfaceToCallRegistry,
+        bool $useSnapshot,
+        int $snapshotTriggerThreshold,
+        string $documentStoreReference
+    ): self {
+        return new self($aggregateClassDefinition, $methodName, $interfaceToCallRegistry, $useSnapshot, $snapshotTriggerThreshold, $documentStoreReference);
     }
 
     /**
@@ -135,9 +148,9 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $this->aggregateIdentifierGetMethods,
                 $this->aggregateVersionProperty,
                 $this->isAggregateVersionAutomaticallyIncreased,
+                $this->useSnapshot,
                 $this->snapshotTriggerThreshold,
-                $this->aggregateClassesToSnapshot,
-                $this->aggregateClassesToSnapshot == [] ? InMemoryDocumentStore::createEmpty() : $referenceSearchService->get($this->documentStoreReference)
+                $this->useSnapshot ? $referenceSearchService->get($this->documentStoreReference) : InMemoryDocumentStore::createEmpty()
             ),
             'save'
         )

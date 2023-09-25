@@ -564,10 +564,17 @@ class ModellingHandlerModule implements AnnotationModule
 
             $configuration->registerMessageHandler($chainHandler);
             $configuration->registerMessageHandler(
-                SaveAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $interfaceToCallRegistry, $baseEventSourcingConfiguration->getSnapshotTriggerThreshold(), $baseEventSourcingConfiguration->getSnapshotsAggregateClasses(), $baseEventSourcingConfiguration->getDocumentStoreReference())
-                    ->withInputChannelName($saveChannel)
-                    ->withOutputMessageChannel($annotation->getOutputChannelName())
-                    ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
+                SaveAggregateServiceBuilder::create(
+                    $aggregateClassDefinition,
+                    $registration->getMethodName(),
+                    $interfaceToCallRegistry,
+                    $baseEventSourcingConfiguration->useSnapshotFor($aggregateClassDefinition->getClassType()->toString()),
+                    $baseEventSourcingConfiguration->getSnapshotTriggerThresholdFor($aggregateClassDefinition->getClassType()->toString()),
+                    $baseEventSourcingConfiguration->getDocumentStoreReferenceFor($aggregateClassDefinition->getClassType()->toString())
+                )
+                ->withInputChannelName($saveChannel)
+                ->withOutputMessageChannel($annotation->getOutputChannelName())
+                ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
             );
         }
     }
@@ -696,11 +703,20 @@ class ModellingHandlerModule implements AnnotationModule
     {
         /** @TODO do not require method name in save service */
         $methodName = $aggregateClassDefinition->getPublicMethodNames() ? $aggregateClassDefinition->getPublicMethodNames()[0] : '__construct';
+
+
         $configuration->registerMessageHandler(
             $chainMessageHandlerBuilder
                 ->chain(
-                    SaveAggregateServiceBuilder::create($aggregateClassDefinition, $methodName, $interfaceToCallRegistry, $baseEventSourcingConfiguration->getSnapshotTriggerThreshold(), $baseEventSourcingConfiguration->getSnapshotsAggregateClasses(), $baseEventSourcingConfiguration->getDocumentStoreReference())
-                        ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
+                    SaveAggregateServiceBuilder::create(
+                        $aggregateClassDefinition,
+                        $methodName,
+                        $interfaceToCallRegistry,
+                        $baseEventSourcingConfiguration->useSnapshotFor($aggregateClassDefinition->getClassType()->toString()),
+                        $baseEventSourcingConfiguration->getSnapshotTriggerThresholdFor($aggregateClassDefinition->getClassType()->toString()),
+                        $baseEventSourcingConfiguration->getDocumentStoreReferenceFor($aggregateClassDefinition->getClassType()->toString())
+                    )
+                    ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
                 )
         );
     }

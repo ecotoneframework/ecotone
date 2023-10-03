@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
-use Ecotone\Messaging\Handler\InterfaceParameter;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Message;
 
@@ -17,39 +15,16 @@ use Ecotone\Messaging\Message;
  */
 class MessageConverter implements ParameterConverter
 {
-    private string $parameterName;
-
-    /**
-     * MessageArgument constructor.
-     * @param string $parameterName
-     */
-    private function __construct(string $parameterName)
+    public static function create(): self
     {
-        $this->parameterName = $parameterName;
-    }
-
-    /**
-     * @param string $parameterName
-     * @return MessageConverter
-     */
-    public static function create(string $parameterName): self
-    {
-        return new self($parameterName);
+        return new self();
     }
 
     /**
      * @inheritDoc
      */
-    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message): Message
+    public function getArgumentFrom(Message $message): Message
     {
         return $message;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function isHandling(InterfaceParameter $parameter): bool
-    {
-        return $parameter->getName() == $this->parameterName;
     }
 }

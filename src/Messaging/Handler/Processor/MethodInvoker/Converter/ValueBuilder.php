@@ -5,44 +5,18 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
- * Class StaticValueBuilder
- * @package Ecotone\Messaging\Handler\Processor\MethodInvoker
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 class ValueBuilder implements ParameterConverterBuilder
 {
-    private string $parameterName;
-    /**
-     * @var mixed
-     */
-    private $staticValue;
-
-    /**
-     * HeaderArgument constructor.
-     *
-     * @param string $parameterName
-     * @param mixed $staticValue
-     */
-    private function __construct(string $parameterName, $staticValue)
+    public function __construct(private string $parameterName, private mixed $staticValue)
     {
-        $this->parameterName = $parameterName;
-        $this->staticValue   = $staticValue;
-    }
-
-    /**
-     * @param string $parameterName
-     * @param mixed  $staticValue
-     *
-     * @return self
-     */
-    public static function create(string $parameterName, $staticValue): self
-    {
-        return new self($parameterName, $staticValue);
     }
 
     /**
@@ -64,8 +38,8 @@ class ValueBuilder implements ParameterConverterBuilder
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): ParameterConverter
+    public function build(ReferenceSearchService $referenceSearchService, InterfaceToCall $interfaceToCall, InterfaceParameter $interfaceParameter): ParameterConverter
     {
-        return ValueConverter::createWith($this->parameterName, $this->staticValue);
+        return ValueConverter::createWith($this->staticValue);
     }
 }

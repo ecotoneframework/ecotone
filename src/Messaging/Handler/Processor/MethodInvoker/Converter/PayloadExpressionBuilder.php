@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -53,7 +54,7 @@ class PayloadExpressionBuilder implements ParameterConverterBuilder
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): ParameterConverter
+    public function build(ReferenceSearchService $referenceSearchService, InterfaceToCall $interfaceToCall, InterfaceParameter $interfaceParameter): ParameterConverter
     {
         /** @var ExpressionEvaluationService $expressionService */
         $expressionService = $referenceSearchService->get(ExpressionEvaluationService::REFERENCE);
@@ -63,7 +64,6 @@ class PayloadExpressionBuilder implements ParameterConverterBuilder
         return new PayloadExpressionConverter(
             $referenceSearchService,
             $expressionService,
-            $this->parameterName,
             $this->expression
         );
     }

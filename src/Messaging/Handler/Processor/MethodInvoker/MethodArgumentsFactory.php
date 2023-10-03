@@ -2,20 +2,27 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
+use function array_merge;
+
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
 class MethodArgumentsFactory
 {
+    /**
+     * @param ParameterConverterBuilder[] $passedMethodParameterConverters
+     * @param object[] $endpointAnnotations
+     * @return ParameterConverterBuilder[]
+     */
     public static function createDefaultMethodParameters(InterfaceToCall $interfaceToCall, array $passedMethodParameterConverters, array $endpointAnnotations, ?InterfaceToCall $interceptedInterface, bool $ignorePayload): array
     {
         $passedArgumentsCount = count($passedMethodParameterConverters);
@@ -23,10 +30,10 @@ class MethodArgumentsFactory
         $missingParametersAmount = $requiredArgumentsCount - $passedArgumentsCount;
 
         if ($missingParametersAmount > 0) {
-            foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
-                if (! self::hasParameterConverter($passedMethodParameterConverters, $interfaceParameter) && $interfaceParameter->getTypeDescriptor()->isClassOrInterface()) {
-                    if ($interceptedInterface && ($interfaceParameter->isAnnotation() || $interceptedInterface->getInterfaceType()->equals($interfaceParameter->getTypeDescriptor()))) {
-                        $passedMethodParameterConverters[] = InterceptorConverterBuilder::create($interfaceParameter->getName(), $interceptedInterface, $endpointAnnotations);
+            if ($interceptedInterface) {
+                foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
+                    if (! self::hasParameterConverter($passedMethodParameterConverters, $interfaceParameter) && $interfaceParameter->isAnnotation()) {
+                        $passedMethodParameterConverters[] = self::getAnnotationValueConverter($interfaceParameter, $interceptedInterface, $endpointAnnotations) ?? new ValueBuilder($interfaceParameter->getName(), null);
                         $missingParametersAmount--;
                     }
                 }
@@ -63,8 +70,24 @@ class MethodArgumentsFactory
         return $orderedMethodArguments;
     }
 
+    public static function getAnnotationValueConverter(InterfaceParameter $interfaceParameter, InterfaceToCall $interceptedInterface, array $endpointAnnotations): ?ValueBuilder
+    {
+        $allAnnotations = array_merge($interceptedInterface->getClassAnnotations(), $interceptedInterface->getMethodAnnotations(), $endpointAnnotations);
+        foreach ($allAnnotations as $endpointAnnotation) {
+            if (TypeDescriptor::createFromVariable($endpointAnnotation)->equals($interfaceParameter->getTypeDescriptor())) {
+                return new ValueBuilder($interfaceParameter->getName(), $endpointAnnotation);
+            }
+        }
+        foreach ($allAnnotations as $endpointAnnotation) {
+            if (TypeDescriptor::createFromVariable($endpointAnnotation)->isCompatibleWith($interfaceParameter->getTypeDescriptor())) {
+                return new ValueBuilder($interfaceParameter->getName(), $endpointAnnotation);
+            }
+        }
+        return null;
+    }
+
     /**
-     * @param array $passedMethodParameterConverters
+     * @param ParameterConverterBuilder[] $passedMethodParameterConverters
      * @return bool
      */
     private static function hasPayloadConverter(array $passedMethodParameterConverters): bool
@@ -84,7 +107,7 @@ class MethodArgumentsFactory
     }
 
     /**
-     * @param array|ParameterConverter[] $methodParameterConverters
+     * @param ParameterConverterBuilder[] $methodParameterConverters
      * @throws MessagingException
      */
     private static function getMethodArgumentFor(InterfaceParameter $invokeParameter, array $methodParameterConverters, InterfaceToCall $interfaceToCall): ParameterConverterBuilder

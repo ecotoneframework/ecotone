@@ -37,15 +37,17 @@ class HeaderExpressionBuilderTest extends TestCase
     public function test_creating_payload_expression()
     {
         $converter = HeaderExpressionBuilder::create('x', 'token', 'value ~ 1', true);
-        $converter = $converter->build(InMemoryReferenceSearchService::createWith([
-            ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-        ]));
+        $converter = $converter->build(
+            InMemoryReferenceSearchService::createWith([
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
+            ]),
+            InterfaceToCall::create(CallableService::class, 'wasCalled'),
+            InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
+        );
 
         $this->assertEquals(
             '1001',
             $converter->getArgumentFrom(
-                InterfaceToCall::create(CallableService::class, 'wasCalled'),
-                InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
                 MessageBuilder::withPayload('some')
                     ->setHeader('token', '100')
                     ->build(),
@@ -61,16 +63,18 @@ class HeaderExpressionBuilderTest extends TestCase
     {
         $converter = HeaderExpressionBuilder::create('x', 'number', "reference('calculatingService').sum(value)", true);
 
-        $converter = $converter->build(InMemoryReferenceSearchService::createWith([
-            ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-            'calculatingService' => CalculatingService::create(1),
-        ]));
+        $converter = $converter->build(
+            InMemoryReferenceSearchService::createWith([
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
+                'calculatingService' => CalculatingService::create(1),
+            ]),
+            InterfaceToCall::create(CallableService::class, 'wasCalled'),
+            InterfaceParameter::createNullable('x', TypeDescriptor::create('string')),
+        );
 
         $this->assertEquals(
             101,
             $converter->getArgumentFrom(
-                InterfaceToCall::create(CallableService::class, 'wasCalled'),
-                InterfaceParameter::createNullable('x', TypeDescriptor::create('string')),
                 MessageBuilder::withPayload('x')
                     ->setHeader('number', 100)
                     ->build(),
@@ -81,15 +85,17 @@ class HeaderExpressionBuilderTest extends TestCase
     public function test_throwing_exception_if_header_does_not_exists()
     {
         $converter = HeaderExpressionBuilder::create('x', 'token', 'value ~ 1', true);
-        $converter = $converter->build(InMemoryReferenceSearchService::createWith([
-            ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-        ]));
+        $converter = $converter->build(
+            InMemoryReferenceSearchService::createWith([
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
+            ]),
+            InterfaceToCall::create(CallableService::class, 'wasCalled'),
+            InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
+        );
 
         $this->expectException(InvalidArgumentException::class);
 
         $converter->getArgumentFrom(
-            InterfaceToCall::create(CallableService::class, 'wasCalled'),
-            InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
             MessageBuilder::withPayload('some')->build(),
         );
     }
@@ -97,15 +103,17 @@ class HeaderExpressionBuilderTest extends TestCase
     public function test_not_throwing_exception_if_header_does_not_exists_and_is_no_required()
     {
         $converter = HeaderExpressionBuilder::create('x', 'token', 'value ~ 1', false);
-        $converter = $converter->build(InMemoryReferenceSearchService::createWith([
-            ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-        ]));
+        $converter = $converter->build(
+            InMemoryReferenceSearchService::createWith([
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
+            ]),
+            InterfaceToCall::create(CallableService::class, 'wasCalled'),
+            InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
+        );
 
         $this->assertEquals(
             '1',
             $converter->getArgumentFrom(
-                InterfaceToCall::create(CallableService::class, 'wasCalled'),
-                InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
                 MessageBuilder::withPayload('some')->build(),
             )
         );

@@ -50,34 +50,12 @@ class ReferenceBuilder implements ParameterConverterBuilder
     }
 
     /**
-     * @param string $parameterName
-     * @return ReferenceBuilder
-     */
-    public static function createWithDynamicResolve(string $parameterName): self
-    {
-        return new self($parameterName, '');
-    }
-
-    /**
-     * @param string $parameterName
-     * @param InterfaceToCall $referenceClass
-     * @return ReferenceBuilder
-     * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
-     */
-    public static function createFromParameterTypeHint(string $parameterName, InterfaceToCall $referenceClass): self
-    {
-        return new self($parameterName, $referenceClass->getParameterWithName($parameterName)->getTypeHint());
-    }
-
-    /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): ParameterConverter
+    public function build(ReferenceSearchService $referenceSearchService, InterfaceToCall $interfaceToCall, InterfaceParameter $interfaceParameter): ParameterConverter
     {
-        return ReferenceConverter::create(
+        return new ReferenceConverter(
             $referenceSearchService,
-            $this->parameterName,
             $this->referenceServiceName
         );
     }

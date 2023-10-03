@@ -26,5 +26,5 @@ interface ParameterConverterBuilder
      * @param ReferenceSearchService $referenceSearchService
      * @return ParameterConverter
      */
-    public function build(ReferenceSearchService $referenceSearchService): ParameterConverter;
+    public function build(ReferenceSearchService $referenceSearchService, InterfaceToCall $interfaceToCall, InterfaceParameter $interfaceParameter): ParameterConverter;
 }

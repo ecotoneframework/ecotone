@@ -23,9 +23,11 @@ class AllHeadersBuilderTest extends TestCase
 {
     public function test_retrieving_all_headers()
     {
-        $result = AllHeadersBuilder::createWith('some')->build(InMemoryReferenceSearchService::createEmpty())->getArgumentFrom(
+        $result = AllHeadersBuilder::createWith('some')->build(
+            InMemoryReferenceSearchService::createEmpty(),
             InterfaceToCall::create(CallableService::class, 'wasCalled'),
             InterfaceParameter::createNullable('some', TypeDescriptor::createStringType()),
+        )->getArgumentFrom(
             MessageBuilder::withPayload('some')
                 ->setHeader('someId', 123)
                 ->build(),

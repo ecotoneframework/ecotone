@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -61,17 +62,15 @@ class HeaderExpressionBuilder implements ParameterConverterBuilder
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): ParameterConverter
+    public function build(ReferenceSearchService $referenceSearchService, InterfaceToCall $interfaceToCall, InterfaceParameter $interfaceParameter): ParameterConverter
     {
         /** @var ExpressionEvaluationService $expressionService */
         $expressionService = $referenceSearchService->get(ExpressionEvaluationService::REFERENCE);
         Assert::isSubclassOf($expressionService, ExpressionEvaluationService::class, "You're using expression converter parameter, so you must define reference service " . ExpressionEvaluationService::REFERENCE . ' in your registry container, which is subclass of ' . ExpressionEvaluationService::class);
 
-
         return new HeaderExpressionConverter(
             $referenceSearchService,
             $expressionService,
-            $this->parameterName,
             $this->headerName,
             $this->expression,
             $this->isRequired

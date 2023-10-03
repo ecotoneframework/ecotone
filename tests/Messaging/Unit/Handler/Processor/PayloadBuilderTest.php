@@ -30,14 +30,16 @@ class PayloadBuilderTest extends MessagingTest
     public function test_creating_payload_converter()
     {
         $converter = PayloadBuilder::create('some');
-        $converter = $converter->build(InMemoryReferenceSearchService::createEmpty());
+        $converter = $converter->build(
+            InMemoryReferenceSearchService::createEmpty(),
+            InterfaceToCall::create(CallableService::class, 'wasCalled'),
+            InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
+        );
 
         $payload = 'rabbit';
         $this->assertEquals(
             $payload,
             $converter->getArgumentFrom(
-                InterfaceToCall::create(CallableService::class, 'wasCalled'),
-                InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
                 MessageBuilder::withPayload($payload)->build(),
             )
         );

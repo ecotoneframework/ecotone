@@ -36,15 +36,17 @@ class PayloadExpressionBuilderTest extends TestCase
     public function test_creating_payload_expression()
     {
         $converter = PayloadExpressionBuilder::create('x', 'value ~ 1');
-        $converter = $converter->build(InMemoryReferenceSearchService::createWith([
-            ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-        ]));
+        $converter = $converter->build(
+            InMemoryReferenceSearchService::createWith([
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
+            ]),
+            InterfaceToCall::create(CallableService::class, 'wasCalled'),
+            InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
+        );
 
         $this->assertEquals(
             '1001',
             $converter->getArgumentFrom(
-                InterfaceToCall::create(CallableService::class, 'wasCalled'),
-                InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
                 MessageBuilder::withPayload('100')
                     ->build(),
             )
@@ -59,16 +61,18 @@ class PayloadExpressionBuilderTest extends TestCase
     {
         $converter = PayloadExpressionBuilder::create('x', "reference('calculatingService').sum(value)");
 
-        $converter = $converter->build(InMemoryReferenceSearchService::createWith([
-            ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-            'calculatingService' => CalculatingService::create(1),
-        ]));
+        $converter = $converter->build(
+            InMemoryReferenceSearchService::createWith([
+                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
+                'calculatingService' => CalculatingService::create(1),
+            ]),
+            InterfaceToCall::create(CallableService::class, 'wasCalled'),
+            InterfaceParameter::createNullable('x', TypeDescriptor::create('string')),
+        );
 
         $this->assertEquals(
             101,
             $converter->getArgumentFrom(
-                InterfaceToCall::create(CallableService::class, 'wasCalled'),
-                InterfaceParameter::createNullable('x', TypeDescriptor::create('string')),
                 MessageBuilder::withPayload(100)
                     ->build(),
             )

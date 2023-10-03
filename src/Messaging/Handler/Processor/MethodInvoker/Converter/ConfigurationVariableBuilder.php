@@ -4,6 +4,7 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
@@ -35,7 +36,7 @@ class ConfigurationVariableBuilder implements ParameterConverterBuilder
         return $this->parameterName === $parameter->getName();
     }
 
-    public function build(ReferenceSearchService $referenceSearchService): ParameterConverter
+    public function build(ReferenceSearchService $referenceSearchService, InterfaceToCall $interfaceToCall, InterfaceParameter $interfaceParameter): ParameterConverter
     {
         /** @var ConfigurationVariableService $configurationVariableService */
         $configurationVariableService = $referenceSearchService->get(ConfigurationVariableService::REFERENCE_NAME);
@@ -49,6 +50,6 @@ class ConfigurationVariableBuilder implements ParameterConverterBuilder
             throw InvalidArgumentException::create('Trying to access configuration variable `' . $this->variableName . "` however it's missing");
         }
 
-        return new ConfigurationVariableConverter($this->parameterName, $variableValue);
+        return new ValueConverter($variableValue);
     }
 }

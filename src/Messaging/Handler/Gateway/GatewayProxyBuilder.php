@@ -333,7 +333,6 @@ class GatewayProxyBuilder implements InterceptedEndpoint
 
     public function buildWithoutProxyObject(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver): NonProxyGateway
     {
-        $this->validateInterceptorsCorrectness($referenceSearchService);
         Assert::isInterface($this->interfaceName, "Gateway should point to interface instead of got {$this->interfaceName} which is not correct interface");
 
         /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
@@ -408,11 +407,8 @@ class GatewayProxyBuilder implements InterceptedEndpoint
         );
     }
 
-    private function buildGatewayInternalHandler(
-        InterfaceToCall $interfaceToCall,
-        ReferenceSearchService $referenceSearchService,
-        ChannelResolver $channelResolver
-    ): MessageHandler {
+    private function getRegisteredAnnotations(InterfaceToCall $interfaceToCall): array
+    {
         $registeredAnnotations = $this->endpointAnnotations;
         foreach ($interfaceToCall->getMethodAnnotations() as $annotation) {
             if ($this->canBeAddedToRegisteredAnnotations($registeredAnnotations, $annotation)) {
@@ -424,6 +420,16 @@ class GatewayProxyBuilder implements InterceptedEndpoint
                 $registeredAnnotations[] = $annotation;
             }
         }
+
+        return $registeredAnnotations;
+    }
+
+    private function buildGatewayInternalHandler(
+        InterfaceToCall $interfaceToCall,
+        ReferenceSearchService $referenceSearchService,
+        ChannelResolver $channelResolver
+    ): MessageHandler {
+        $registeredAnnotations = $this->getRegisteredAnnotations($interfaceToCall);
 
         $gatewayInternalHandler = new GatewayInternalHandler(
             $interfaceToCall,
@@ -469,13 +475,6 @@ class GatewayProxyBuilder implements InterceptedEndpoint
         );
 
         return $aroundInterceptors;
-    }
-
-    private function validateInterceptorsCorrectness(ReferenceSearchService $referenceSearchService): void
-    {
-        foreach ($this->aroundInterceptors as $aroundInterceptorReference) {
-            $aroundInterceptorReference->buildAroundInterceptor($referenceSearchService);
-        }
     }
 
     /**

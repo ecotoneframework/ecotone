@@ -7,24 +7,12 @@ namespace Ecotone\Messaging\Handler;
 use Ecotone\Messaging\Message;
 
 /**
- * Class MethodArgument
- * @package Ecotone\Messaging\Handler\ServiceActivator
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
 interface ParameterConverter
 {
     /**
-     * @param InterfaceToCall $interfaceToCall
-     * @param InterfaceParameter $relatedParameter
-     * @param Message $message
-     * @param object[] $endpointAnnotations
      * @return mixed
      */
-    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message);
-
-    /**
-     * @param InterfaceParameter $parameter
-     * @return bool
-     */
-    public function isHandling(InterfaceParameter $parameter): bool;
+    public function getArgumentFrom(Message $message);
 }

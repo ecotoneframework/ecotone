@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
-use Ecotone\Messaging\Conversion\ConversionException;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceParameter;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverter;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
@@ -22,83 +21,62 @@ use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
  */
 class HeaderConverter implements ParameterConverter
 {
-    private string $headerName;
-    private string $parameterName;
-    private bool $isRequired;
-    private ConversionService $conversionService;
-
-    private function __construct(string $parameterName, string $headerName, bool $isRequired, ConversionService $conversionService)
+    public function __construct(private InterfaceParameter $parameter, private string $headerName, private bool $isRequired, private ConversionService $conversionService)
     {
-        $this->parameterName = $parameterName;
-        $this->headerName = $headerName;
-        $this->isRequired = $isRequired;
-        $this->conversionService = $conversionService;
-    }
-
-    public static function create(string $parameterName, string $headerName, bool $isRequired, ConversionService $conversionService): self
-    {
-        return new self($parameterName, $headerName, $isRequired, $conversionService);
     }
 
     /**
      * @inheritDoc
      */
-    public function getArgumentFrom(InterfaceToCall $interfaceToCall, InterfaceParameter $relatedParameter, Message $message)
+    public function getArgumentFrom(Message $message)
     {
-        $isRequired = $this->isRequired;
         if (! $message->getHeaders()->containsKey($this->headerName)) {
-            if ($relatedParameter->hasDefaultValue()) {
-                return $relatedParameter->getDefaultValue();
+            if ($this->parameter->hasDefaultValue()) {
+                return $this->parameter->getDefaultValue();
             }
 
-            if (! $isRequired) {
+            if (! $this->isRequired) {
                 return;
             }
         }
 
         $headerValue = $message->getHeaders()->get($this->headerName);
 
+        $targetType = $this->parameter->getTypeDescriptor();
+
         $sourceValueType = TypeDescriptor::createFromVariable($headerValue);
-        if (! $sourceValueType->isCompatibleWith($relatedParameter->getTypeDescriptor())) {
-            if ($sourceValueType->isScalar() && $this->canConvertTo($headerValue, DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE, $relatedParameter)) {
-                $headerValue = $this->doConversion($headerValue, DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE, $relatedParameter);
-            } elseif ($this->canConvertTo($headerValue, MediaType::APPLICATION_X_PHP, $relatedParameter)) {
-                $headerValue = $this->doConversion($headerValue, MediaType::APPLICATION_X_PHP, $relatedParameter);
+        if (! $sourceValueType->isCompatibleWith($targetType)) {
+            if ($sourceValueType->isScalar() && $this->canConvertTo($headerValue, DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE, $targetType)) {
+                $headerValue = $this->doConversion($headerValue, DefaultHeaderMapper::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE, $targetType);
+            } elseif ($this->canConvertTo($headerValue, MediaType::APPLICATION_X_PHP, $targetType)) {
+                $headerValue = $this->doConversion($headerValue, MediaType::APPLICATION_X_PHP, $targetType);
             }
 
             //            @TODO
             //            $fromType = TypeDescriptor::createFromVariable($headerValue);
-            //            throw ConversionException::create("Lack of converter available for {$interfaceToCall} with parameter name `{$relatedParameter}` to convert it from {$fromType} to {$relatedParameter->getTypeDescriptor()}");
+            //            throw ConversionException::create("Lack of converter available for {$interfaceToCall} with parameter name `{$this->parameter}` to convert it from {$fromType} to {$relatedParameter->getTypeDescriptor()}");
         }
 
         return $headerValue;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function isHandling(InterfaceParameter $parameter): bool
-    {
-        return $parameter->getName() == $this->parameterName;
-    }
-
-    private function canConvertTo(mixed $headerValue, string $sourceMediaType, InterfaceParameter $relatedParameter): bool
+    private function canConvertTo(mixed $headerValue, string $sourceMediaType, Type $targetType): bool
     {
         return $this->conversionService->canConvert(
             TypeDescriptor::createFromVariable($headerValue),
             MediaType::parseMediaType($sourceMediaType),
-            $relatedParameter->getTypeDescriptor(),
+            $targetType,
             MediaType::createApplicationXPHP()
         );
     }
 
-    private function doConversion(mixed $headerValue, string $sourceMediaType, InterfaceParameter $relatedParameter)
+    private function doConversion(mixed $headerValue, string $sourceMediaType, Type $targetType)
     {
         $headerValue = $this->conversionService->convert(
             $headerValue,
             TypeDescriptor::createFromVariable($headerValue),
             MediaType::parseMediaType($sourceMediaType),
-            $relatedParameter->getTypeDescriptor(),
+            $targetType,
             MediaType::createApplicationXPHP()
         );
 

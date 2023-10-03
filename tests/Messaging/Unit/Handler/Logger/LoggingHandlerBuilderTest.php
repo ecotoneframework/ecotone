@@ -11,8 +11,9 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\InterceptorConverterBuilder;
+use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodArgumentsFactory;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 use function json_encode;
@@ -32,13 +33,14 @@ class LoggingHandlerBuilderTest extends MessagingTest
 {
     public function test_logger_passing_messaging_through()
     {
+        $logParameter = InterfaceToCall::create(LoggingInterceptor::class, 'logAfter')->getParameterWithName('log');
         $logger = LoggerExample::create();
         $queueChannel = QueueChannel::create();
         $loggingHandler = LoggingHandlerBuilder::createForAfter()
                             ->withOutputMessageChannel('outputChannel')
                             ->withMethodParameterConverters([
                                 MessageConverterBuilder::create('message'),
-                                InterceptorConverterBuilder::create('log', InterfaceToCall::create(ServiceActivatorWithLoggerExample::class, 'sendMessage'), []),
+                                MethodArgumentsFactory::getAnnotationValueConverter($logParameter, InterfaceToCall::create(ServiceActivatorWithLoggerExample::class, 'sendMessage'), []),
                             ])
                             ->build(
                                 InMemoryChannelResolver::createFromAssociativeArray([
@@ -61,6 +63,7 @@ class LoggingHandlerBuilderTest extends MessagingTest
 
     public function test_given_payload_is_string_when_logging_without_debug_level_then_default_debug_level_should_be_used()
     {
+        $logParameter = InterfaceToCall::create(LoggingInterceptor::class, 'logBefore')->getParameterWithName('log');
         $logger = $this
             ->getMockBuilder(LoggerInterface::class)
             ->getMock();
@@ -70,7 +73,7 @@ class LoggingHandlerBuilderTest extends MessagingTest
             ->withOutputMessageChannel('outputChannel')
             ->withMethodParameterConverters([
                 MessageConverterBuilder::create('message'),
-                InterceptorConverterBuilder::create('log', InterfaceToCall::create(ServiceActivatorWithLoggerExample::class, 'sendMessage'), []),
+                MethodArgumentsFactory::getAnnotationValueConverter($logParameter, InterfaceToCall::create(ServiceActivatorWithLoggerExample::class, 'sendMessage'), []),
             ])
             ->build(
                 InMemoryChannelResolver::createFromAssociativeArray([

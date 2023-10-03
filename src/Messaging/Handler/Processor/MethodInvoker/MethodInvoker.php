@@ -57,8 +57,8 @@ final class MethodInvoker implements MessageProcessor
     {
         $methodParametersConverterBuilders = MethodArgumentsFactory::createDefaultMethodParameters($interfaceToCall, $methodParametersConverterBuilders, $endpointAnnotations, null, false);
         $methodParameterConverters         = [];
-        foreach ($methodParametersConverterBuilders as $methodParameter) {
-            $methodParameterConverters[] = $methodParameter->build($referenceSearchService);
+        foreach ($methodParametersConverterBuilders as $index => $methodParameter) {
+            $methodParameterConverters[] = $methodParameter->build($referenceSearchService, $interfaceToCall, $interfaceToCall->getParameterAtIndex($index));
         }
 
         return new self($objectToInvokeOn, $interfaceToCall->getMethodName(), $methodParameterConverters, $interfaceToCall, true);
@@ -86,11 +86,7 @@ final class MethodInvoker implements MessageProcessor
 
         for ($index = 0; $index < $count; $index++) {
             $interfaceParameter = $this->interfaceToCall->getParameterAtIndex($index);
-            $data = $this->orderedMethodArguments[$index]->getArgumentFrom(
-                $this->interfaceToCall,
-                $interfaceParameter,
-                $message,
-            );
+            $data = $this->orderedMethodArguments[$index]->getArgumentFrom($message);
 
             $methodArguments[] = MethodArgument::createWith($interfaceParameter, $data);
         }

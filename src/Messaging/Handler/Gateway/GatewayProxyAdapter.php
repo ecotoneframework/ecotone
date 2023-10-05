@@ -2,25 +2,14 @@
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use Ecotone\Messaging\Handler\NonProxyGateway;
-use InvalidArgumentException;
+use Ecotone\Messaging\Config\NonProxyCombinedGateway;
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
 
 class GatewayProxyAdapter implements AdapterInterface
 {
-    /**
-     * @var NonProxyGateway[]
-     */
-    private array $gateways;
-
-    /**
-     *  constructor.
-     *
-     * @param array<string, NonProxyGateway> $gateways
-     */
-    public function __construct(array $gateways)
+    public function __construct(private NonProxyCombinedGateway $nonProxyCombinedGateway)
     {
-        $this->gateways = $gateways;
+
     }
 
     /**
@@ -28,10 +17,6 @@ class GatewayProxyAdapter implements AdapterInterface
      */
     public function call(string $wrappedClass, string $method, array $params = [])
     {
-        if (! isset($this->gateways[$method])) {
-            throw new InvalidArgumentException("{$wrappedClass}:{$method} has not registered gateway");
-        }
-
-        return $this->gateways[$method]->execute($params);
+        return $this->nonProxyCombinedGateway->executeMethod($method, $params);
     }
 }

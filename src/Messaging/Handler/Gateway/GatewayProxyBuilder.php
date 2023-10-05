@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Gateway;
 
 use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Config\NonProxyCombinedGateway;
+use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
@@ -98,7 +100,7 @@ class GatewayProxyBuilder implements InterceptedEndpoint
         $this->interfaceName = $interfaceName;
         $this->methodName = $methodName;
         $this->requestChannelName = $requestChannelName;
-        $this->requiredReferenceNames[] = ProxyFactory::REFERENCE_NAME;
+        $this->requiredReferenceNames[] = ServiceCacheConfiguration::REFERENCE_NAME;
     }
 
     /**
@@ -318,19 +320,31 @@ class GatewayProxyBuilder implements InterceptedEndpoint
     }
 
     /**
-     * @inheritdoc
+     * This will be with proxy class, so the resulting object will be implementing interface
      */
     public function build(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver): object
     {
-        /** @var ProxyFactory $proxyFactory */
-        $proxyFactory = $referenceSearchService->get(ProxyFactory::REFERENCE_NAME);
+        /** @var ServiceCacheConfiguration $serviceCacheConfiguration */
+        $serviceCacheConfiguration = $referenceSearchService->get(ServiceCacheConfiguration::REFERENCE_NAME);
+        $proxyFactory = ProxyFactory::createWithCache($serviceCacheConfiguration);
 
-        $gateway = $this->buildWithoutProxyObject($referenceSearchService, $channelResolver);
-        $adapter = new GatewayProxyAdapter([$this->getRelatedMethodName() => $gateway]);
+        $adapter = new GatewayProxyAdapter(
+            NonProxyCombinedGateway::createWith(
+                $this->referenceName,
+                $this->interfaceName,
+                [$this->getRelatedMethodName() => $this->buildWithoutProxyObject(
+                    $referenceSearchService,
+                    $channelResolver
+                )]
+            )
+        );
 
         return $proxyFactory->createProxyClassWithAdapter($this->interfaceName, $adapter);
     }
 
+    /**
+     * This is used for Framework cases, where framework build their own proxy classes
+     */
     public function buildWithoutProxyObject(ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver): NonProxyGateway
     {
         Assert::isInterface($this->interfaceName, "Gateway should point to interface instead of got {$this->interfaceName} which is not correct interface");

@@ -12,25 +12,27 @@ class NonProxyCombinedGateway
      * @var NonProxyGateway[]
      */
     private array $methodGateways;
+    private string $interfaceName;
 
     /**
-     * GatewayReference constructor.
-     *
-     * @param string   $referenceName
      * @param NonProxyGateway[] $methodGateways
      */
-    private function __construct(string $referenceName, array $methodGateways)
-    {
+    private function __construct(
+        string $referenceName,
+        string $interfaceName,
+        array $methodGateways
+    ) {
         $this->referenceName  = $referenceName;
         $this->methodGateways = $methodGateways;
+        $this->interfaceName = $interfaceName;
     }
 
     /**
      * @param NonProxyGateway[] $methodGateways
      */
-    public static function createWith(string $referenceName, array $methodGateways): self
+    public static function createWith(string $referenceName, string $interfaceName, array $methodGateways): self
     {
-        return new self($referenceName, $methodGateways);
+        return new self($referenceName, $interfaceName, $methodGateways);
     }
 
     /**
@@ -39,6 +41,11 @@ class NonProxyCombinedGateway
     public function getReferenceName(): string
     {
         return $this->referenceName;
+    }
+
+    public function getInterfaceName(): string
+    {
+        return $this->interfaceName;
     }
 
     /**

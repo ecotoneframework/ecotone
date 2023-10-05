@@ -36,11 +36,6 @@ final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessag
         return $this->configuredMessagingSystem->runConsoleCommand($commandName, $parameters);
     }
 
-    public function getGatewayList(): iterable
-    {
-        return $this->configuredMessagingSystem->getGatewayList();
-    }
-
     public function getCommandBus(): CommandBus
     {
         return $this->configuredMessagingSystem->getCommandBus();

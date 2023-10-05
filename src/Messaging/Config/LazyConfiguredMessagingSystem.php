@@ -32,11 +32,6 @@ class LazyConfiguredMessagingSystem implements ConfiguredMessagingSystem
         return $this->getConfiguredSystem()->getNonProxyGatewayByName($gatewayReferenceName);
     }
 
-    public function getGatewayList(): iterable
-    {
-        return $this->getConfiguredSystem()->getGatewayList();
-    }
-
     public function getMessageChannelByName(string $channelName): MessageChannel
     {
         return $this->getConfiguredSystem()->getMessageChannelByName($channelName);

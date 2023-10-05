@@ -110,12 +110,20 @@ final class MessagingSystem implements ConfiguredMessagingSystem
     ): MessagingSystem {
         $channelResolver = self::createChannelResolver($messageChannelInterceptors, $messageChannelBuilders, $referenceSearchService);
 
-        [$gateways, $nonProxyGateways] = self::configureGateways($gatewayBuilders, $referenceSearchService, $channelResolver);
-
-        $gatewayReferences = [];
-        foreach ($gateways as $gateway) {
-            $gatewayReferences[$gateway->getReferenceName()] = $gateway->getGateway();
-            $referenceSearchService->registerReferencedObject($gateway->getReferenceName(), $gatewayReferences[$gateway->getReferenceName()]);
+        $nonProxyGateways = self::configureGateways($gatewayBuilders, $referenceSearchService, $channelResolver);
+        foreach ($nonProxyGateways as $gateway) {
+            /** A case when Symfony or Laravel are used, they provide own Proxy implementations */
+            if ($referenceSearchService->has($gateway->getReferenceName())) {
+                continue;
+            }
+            $referenceSearchService->registerReferencedObject(
+                $gateway->getReferenceName(),
+                fn ($referenceName) => self::createGatewayByName(
+                    $referenceName,
+                    $nonProxyGateways,
+                    $referenceSearchService->get(ServiceCacheConfiguration::REFERENCE_NAME)
+                )
+            );
         }
         $referenceSearchService->registerReferencedObject(ChannelResolver::class, $channelResolver);
 
@@ -150,7 +158,7 @@ final class MessagingSystem implements ConfiguredMessagingSystem
             $inboundChannelAdapterBuilders[$endpointId][self::CONSUMER_BUILDER] = $channelAdapter;
         }
 
-        return new self($eventDrivenConsumers, $pollingConsumerBuilders, $inboundChannelAdapterBuilders, $gateways, $nonProxyGateways, $channelResolver, $referenceSearchService, $pollingMetadataConfigurations, $consoleCommands);
+        return new self($eventDrivenConsumers, $pollingConsumerBuilders, $inboundChannelAdapterBuilders, [], $nonProxyGateways, $channelResolver, $referenceSearchService, $pollingMetadataConfigurations, $consoleCommands);
     }
 
     /**
@@ -191,34 +199,29 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      * @param GatewayProxyBuilder[][] $preparedGateways
      * @param ReferenceSearchService $referenceSearchService
      * @param ChannelResolver $channelResolver
-     * @return GatewayReference[]
+     * @return NonProxyCombinedGateway[]
      * @throws MessagingException
      */
     private static function configureGateways(array $preparedGateways, ReferenceSearchService $referenceSearchService, ChannelResolver $channelResolver): array
     {
-        $gateways = [];
         $nonProxyCombinedGateways = [];
-        /** @var ProxyFactory $proxyFactory */
-        $proxyFactory = $referenceSearchService->get(ProxyFactory::REFERENCE_NAME);
 
         foreach ($preparedGateways as $referenceName => $preparedGatewaysForReference) {
             $referenceName = $preparedGatewaysForReference[0]->getReferenceName();
             $nonProxyCombinedGatewaysMethods = [];
+            /** @TODO build gateway when requested and cache it internally. No need to build everything at boot time */
             foreach ($preparedGatewaysForReference as $proxyBuilder) {
                 $nonProxyCombinedGatewaysMethods[$proxyBuilder->getRelatedMethodName()] =
                     $proxyBuilder->buildWithoutProxyObject($referenceSearchService, $channelResolver);
             }
 
-            $nonProxyCombinedGateways[$referenceName] = NonProxyCombinedGateway::createWith($referenceName, $nonProxyCombinedGatewaysMethods);
-            $interfaceName = $preparedGatewaysForReference[0]->getInterfaceName();
-            $proxyAdapter = new GatewayProxyAdapter($nonProxyCombinedGatewaysMethods);
-            $gateways[$referenceName] =
-                GatewayReference::createWith(
-                    $referenceName,
-                    $proxyFactory->createProxyClassWithAdapter($interfaceName, $proxyAdapter)
-                );
+            $nonProxyCombinedGateways[$referenceName] = NonProxyCombinedGateway::createWith(
+                $referenceName,
+                $preparedGatewaysForReference[0]->getInterfaceName(),
+                $nonProxyCombinedGatewaysMethods
+            );
         }
-        return [$gateways, $nonProxyCombinedGateways];
+        return $nonProxyCombinedGateways;
     }
 
     private static function getPollingMetadata(string $endpointId, array $pollingMetadataConfigurations): PollingMetadata
@@ -277,13 +280,32 @@ final class MessagingSystem implements ConfiguredMessagingSystem
      */
     public function getGatewayByName(string $gatewayReferenceName): object
     {
-        foreach ($this->gatewayReferences as $gatewayReference) {
-            if ($gatewayReference->hasReferenceName($gatewayReferenceName)) {
-                return $gatewayReference->getGateway();
-            }
+        if (isset($this->gatewayReferences[$gatewayReferenceName])) {
+            return $this->gatewayReferences[$gatewayReferenceName];
         }
 
-        throw InvalidArgumentException::create("Gateway with reference {$gatewayReferenceName} does not exists");
+        $this->gatewayReferences[$gatewayReferenceName] = self::createGatewayByName(
+            $gatewayReferenceName,
+            $this->nonProxyCombinedGateways,
+            $this->referenceSearchService->get(ServiceCacheConfiguration::REFERENCE_NAME)
+        );
+
+        return $this->gatewayReferences[$gatewayReferenceName];
+    }
+
+    public static function createGatewayByName(
+        string $gatewayReferenceName,
+        array $nonProxyGateways,
+        ServiceCacheConfiguration $serviceCacheConfiguration
+    ): object {
+        $proxyFactory = ProxyFactory::createWithCache($serviceCacheConfiguration);
+
+        $nonProxyCombinedGateway = $nonProxyGateways[$gatewayReferenceName];
+
+        return $proxyFactory->createProxyClassWithAdapter(
+            $nonProxyCombinedGateway->getInterfaceName(),
+            new GatewayProxyAdapter($nonProxyCombinedGateway)
+        );
     }
 
     public function getNonProxyGatewayByName(string $gatewayReferenceName): NonProxyCombinedGateway
@@ -325,14 +347,6 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         }
 
         return $gateway->sendWithHeaders([], $arguments, $consoleCommandConfiguration->getChannelName());
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getGatewayList(): iterable
-    {
-        return $this->gatewayReferences;
     }
 
     public function getCommandBus(): CommandBus

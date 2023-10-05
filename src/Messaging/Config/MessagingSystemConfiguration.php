@@ -194,16 +194,15 @@ final class MessagingSystemConfiguration implements Configuration
             }
         );
         $extensionObjects[] = $serviceConfiguration;
-        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $serviceConfiguration->getCacheDirectoryPath() ? ProxyFactory::createWithCache($serviceConfiguration->getCacheDirectoryPath()) : ProxyFactory::createNoCache(), $preparationInterfaceRegistry, $serviceConfiguration);
+        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $preparationInterfaceRegistry, $serviceConfiguration);
     }
 
     /**
      * @param string[] $skippedModulesPackages
      */
-    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $serviceExtensions, ProxyFactory $proxyFactory, InterfaceToCallRegistry $preparationInterfaceRegistry, ServiceConfiguration $applicationConfiguration): void
+    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $serviceExtensions, InterfaceToCallRegistry $preparationInterfaceRegistry, ServiceConfiguration $applicationConfiguration): void
     {
         $moduleReferenceSearchService = ModuleReferenceSearchService::createEmpty();
-        $moduleReferenceSearchService->store(ProxyFactory::REFERENCE_NAME, $proxyFactory);
 
         $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations($applicationConfiguration->getSkippedModulesPackages());
         $moduleExtensions = [];
@@ -235,8 +234,6 @@ final class MessagingSystemConfiguration implements Configuration
         $interfaceToCallRegistry = InterfaceToCallRegistry::createWithBackedBy($preparationInterfaceRegistry);
 
         $this->prepareAndOptimizeConfiguration($interfaceToCallRegistry, $applicationConfiguration);
-
-        $proxyFactory->warmUpCacheFor($this->gatewayClassesToGenerateProxies);
         $this->gatewayClassesToGenerateProxies = [];
 
         $this->interfacesToCall = array_unique($this->interfacesToCall);
@@ -259,7 +256,7 @@ final class MessagingSystemConfiguration implements Configuration
                 $referenceName = $referenceName->getReferenceName();
             }
 
-            if (in_array($referenceName, [InterfaceToCallRegistry::REFERENCE_NAME, ConversionService::REFERENCE_NAME, ProxyFactory::REFERENCE_NAME])) {
+            if (in_array($referenceName, [InterfaceToCallRegistry::REFERENCE_NAME, ConversionService::REFERENCE_NAME])) {
                 continue;
             }
 
@@ -749,14 +746,17 @@ final class MessagingSystemConfiguration implements Configuration
         return new self($moduleConfigurationRetrievingService, $moduleConfigurationRetrievingService->findAllExtensionObjects(), InterfaceToCallRegistry::createEmpty(), $serviceConfiguration ?? ServiceConfiguration::createWithDefaults());
     }
 
-    public static function prepare(string $rootPathToSearchConfigurationFor, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $serviceConfiguration, bool $useCachedVersion, array $userLandClassesToRegister = [], bool $enableTestPackage = false): Configuration
-    {
-        if ($useCachedVersion) {
-            Assert::isTrue((bool)$serviceConfiguration->getCacheDirectoryPath(), "Can't make use of cached version of messaging if no cache path is defined");
-            $cachedVersion = self::getCachedVersion($serviceConfiguration->getCacheDirectoryPath());
-            if ($cachedVersion) {
-                return $cachedVersion;
-            }
+    public static function prepare(
+        string $rootPathToSearchConfigurationFor,
+        ConfigurationVariableService $configurationVariableService,
+        ServiceConfiguration $serviceConfiguration,
+        ServiceCacheConfiguration $serviceCacheConfiguration,
+        array $userLandClassesToRegister = [],
+        bool $enableTestPackage = false
+    ): Configuration {
+        $cachedVersion = self::getCachedVersion($serviceCacheConfiguration);
+        if ($cachedVersion) {
+            return $cachedVersion;
         }
 
         $requiredModules = [ModulePackageList::CORE_PACKAGE];
@@ -782,20 +782,17 @@ final class MessagingSystemConfiguration implements Configuration
                 $enableTestPackage
             ),
             $configurationVariableService,
-            $serviceConfiguration
+            $serviceConfiguration,
+            $serviceCacheConfiguration
         );
     }
 
-    public static function loadFromCache(string $cachePath): Configuration
-    {
-        $cachedVersion = self::getCachedVersion($cachePath);
-        Assert::notNull($cachedVersion, sprintf('Cache for Ecotone Configuration is missing in %s', $cachePath));
-
-        return $cachedVersion;
-    }
-
-    public static function prepareWithAnnotationFinder(AnnotationFinder $annotationFinder, ConfigurationVariableService $configurationVariableService, ServiceConfiguration $serviceConfiguration): Configuration
-    {
+    private static function prepareWithAnnotationFinder(
+        AnnotationFinder $annotationFinder,
+        ConfigurationVariableService $configurationVariableService,
+        ServiceConfiguration $serviceConfiguration,
+        ServiceCacheConfiguration $serviceCacheConfiguration
+    ): Configuration {
         $preparationInterfaceRegistry = InterfaceToCallRegistry::createWith($annotationFinder);
 
         return self::prepareWithModuleRetrievingService(
@@ -805,17 +802,18 @@ final class MessagingSystemConfiguration implements Configuration
                 $configurationVariableService
             ),
             $preparationInterfaceRegistry,
-            $serviceConfiguration
+            $serviceConfiguration,
+            $serviceCacheConfiguration
         );
     }
 
-    public static function getCachedVersion(?string $cacheDirectoryPath): ?MessagingSystemConfiguration
+    public static function getCachedVersion(ServiceCacheConfiguration $serviceCacheConfiguration): ?MessagingSystemConfiguration
     {
-        if (! $cacheDirectoryPath) {
+        if (! $serviceCacheConfiguration->shouldUseCache()) {
             return null;
         }
 
-        $messagingSystemCachePath = $cacheDirectoryPath . DIRECTORY_SEPARATOR . 'messaging_system';
+        $messagingSystemCachePath = self::getMessagingSystemCachedFile($serviceCacheConfiguration);
         if (file_exists($messagingSystemCachePath)) {
             return unserialize(file_get_contents($messagingSystemCachePath));
         }
@@ -823,12 +821,16 @@ final class MessagingSystemConfiguration implements Configuration
         return null;
     }
 
-    public static function prepareWithModuleRetrievingService(ModuleRetrievingService $moduleConfigurationRetrievingService, InterfaceToCallRegistry $preparationInterfaceRegistry, ServiceConfiguration $applicationConfiguration): MessagingSystemConfiguration
-    {
-        $cacheDirectoryPath = $applicationConfiguration->getCacheDirectoryPath();
-        if ($cacheDirectoryPath) {
-            self::prepareCacheDirectory($cacheDirectoryPath);
-        }
+    /**
+     * @TODO that method should stay private, require refactoring tests
+     */
+    public static function prepareWithModuleRetrievingService(
+        ModuleRetrievingService $moduleConfigurationRetrievingService,
+        InterfaceToCallRegistry $preparationInterfaceRegistry,
+        ServiceConfiguration $applicationConfiguration,
+        ServiceCacheConfiguration $serviceCacheConfiguration
+    ): MessagingSystemConfiguration {
+        self::prepareCacheDirectory($serviceCacheConfiguration);
         $messagingSystemConfiguration = new self(
             $moduleConfigurationRetrievingService,
             $moduleConfigurationRetrievingService->findAllExtensionObjects(),
@@ -836,16 +838,23 @@ final class MessagingSystemConfiguration implements Configuration
             $applicationConfiguration
         );
 
-        if ($cacheDirectoryPath) {
+        if ($serviceCacheConfiguration->shouldUseCache()) {
             $serializedMessagingSystemConfiguration = serialize($messagingSystemConfiguration);
-            file_put_contents($cacheDirectoryPath . DIRECTORY_SEPARATOR . 'messaging_system', $serializedMessagingSystemConfiguration);
+            file_put_contents(self::getMessagingSystemCachedFile($serviceCacheConfiguration), $serializedMessagingSystemConfiguration);
         }
 
         return $messagingSystemConfiguration;
     }
 
-    private static function prepareCacheDirectory(string $cacheDirectoryPath): void
+    public static function prepareCacheDirectory(ServiceCacheConfiguration $serviceCacheConfiguration): void
     {
+        if (! $serviceCacheConfiguration->shouldUseCache()) {
+            /** We need to clean, in case stale cache exists. So enabling cache will generate fresh one */
+            self::cleanCache($serviceCacheConfiguration);
+            return;
+        }
+
+        $cacheDirectoryPath = $serviceCacheConfiguration->getPath();
         if (! is_dir($cacheDirectoryPath)) {
             @mkdir($cacheDirectoryPath, 0775, true);
         }
@@ -854,12 +863,9 @@ final class MessagingSystemConfiguration implements Configuration
         Assert::isFalse(is_file($cacheDirectoryPath), 'Cache directory is file, should be directory');
     }
 
-    public static function cleanCache(string $cacheDirectoryPath): void
+    public static function cleanCache(ServiceCacheConfiguration $serviceCacheConfiguration): void
     {
-        if ($cacheDirectoryPath) {
-            self::prepareCacheDirectory($cacheDirectoryPath);
-            self::deleteFiles($cacheDirectoryPath . DIRECTORY_SEPARATOR, false);
-        }
+        self::deleteFiles($serviceCacheConfiguration->getPath(), false);
     }
 
     private static function deleteFiles(string $target, bool $deleteDirectory): void
@@ -877,6 +883,11 @@ final class MessagingSystemConfiguration implements Configuration
         } elseif (is_file($target)) {
             unlink($target);
         }
+    }
+
+    private static function getMessagingSystemCachedFile(ServiceCacheConfiguration $serviceCacheConfiguration): string
+    {
+        return $serviceCacheConfiguration->getPath() . DIRECTORY_SEPARATOR . 'messaging_system';
     }
 
     public function requireConsumer(string $endpointId): Configuration
@@ -1248,9 +1259,10 @@ final class MessagingSystemConfiguration implements Configuration
             $converters[] = $converterBuilder->build($referenceSearchService);
         }
         $referenceSearchService = $this->prepareReferenceSearchServiceWithInternalReferences($referenceSearchService, $converters, $interfaceToCallRegistry);
+        /** @var ServiceCacheConfiguration $serviceCacheConfiguration */
+        $serviceCacheConfiguration = $referenceSearchService->get(ServiceCacheConfiguration::class);
         /** @var ProxyFactory $proxyFactory */
-        $proxyFactory = $referenceSearchService->get(ProxyFactory::REFERENCE_NAME);
-        $proxyFactory->warmUpCacheFor($this->gatewayClassesToGenerateProxies);
+        $proxyFactory = ProxyFactory::createWithCache($serviceCacheConfiguration);
         $this->registerAutoloader($proxyFactory->getConfiguration()->getProxyAutoloader());
 
         $channelInterceptorsByImportance = $this->channelInterceptorBuilders;
@@ -1301,7 +1313,8 @@ final class MessagingSystemConfiguration implements Configuration
                     InterfaceToCallRegistry::REFERENCE_NAME => $interfaceToCallRegistry,
                     ServiceConfiguration::class => $this->applicationConfiguration,
                 ]
-            )
+            ),
+            $this->applicationConfiguration
         );
     }
 

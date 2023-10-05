@@ -16,9 +16,10 @@ use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\MessagingSystem;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModulePackageList;
-use Ecotone\Messaging\Config\ProxyGenerator;
+use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\ClassDefinition;
+use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Ecotone\Messaging\Support\Assert;
@@ -164,29 +165,35 @@ final class EcotoneLite
 
         $container = $containerOrAvailableServices instanceof ContainerInterface ? $containerOrAvailableServices : InMemoryPSRContainer::createFromAssociativeArray($containerOrAvailableServices);
 
+        $serviceCacheConfiguration = new ServiceCacheConfiguration(
+            $serviceConfiguration->getCacheDirectoryPath(),
+            $useCachedVersion
+        );
         $messagingConfiguration = MessagingSystemConfiguration::prepare(
             $pathToRootCatalog,
             InMemoryConfigurationVariableService::create($configurationVariables),
             $serviceConfiguration,
-            $useCachedVersion,
+            $serviceCacheConfiguration,
             $classesToResolve,
             $enableTesting
         );
 
         if ($allowGatewaysToBeRegisteredInContainer) {
             Assert::isTrue(method_exists($container, 'set'), 'Gateways registration was enabled however given container has no `set` method. Please add it or turn off the option.');
-
             foreach ($messagingConfiguration->getRegisteredGateways() as $gatewayProxyBuilder) {
-                $container->set($gatewayProxyBuilder->getReferenceName(), ProxyGenerator::createFor(
+                $container->set($gatewayProxyBuilder->getReferenceName(), ProxyFactory::createFor(
                     $gatewayProxyBuilder->getReferenceName(),
                     $container,
                     $gatewayProxyBuilder->getInterfaceName(),
-                    $serviceConfiguration->getCacheDirectoryPath() ?: sys_get_temp_dir()
+                    $serviceCacheConfiguration
                 ));
             }
         }
 
-        $referenceSearchService = new PsrContainerReferenceSearchService($container, ['logger' => new NullLogger()]);
+        $referenceSearchService = new PsrContainerReferenceSearchService($container, [
+            'logger' => new NullLogger(),
+            ServiceCacheConfiguration::REFERENCE_NAME => $serviceCacheConfiguration,
+        ]);
 
         $messagingSystem = $messagingConfiguration->buildMessagingSystemFromConfiguration($referenceSearchService);
 

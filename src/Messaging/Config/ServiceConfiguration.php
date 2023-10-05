@@ -18,7 +18,7 @@ class ServiceConfiguration
 
     private string $serviceName = self::DEFAULT_SERVICE_NAME;
     private bool $failFast = self::DEFAULT_FAIL_FAST;
-    private ?string $cacheDirectoryPath = null;
+    private string $cacheDirectoryPath;
     private string $environment = self::DEFAULT_ENVIRONMENT;
     private ?string $loadCatalog = '';
     /**
@@ -44,6 +44,7 @@ class ServiceConfiguration
 
     private function __construct()
     {
+        $this->cacheDirectoryPath = sys_get_temp_dir();
     }
 
     public static function createWithDefaults(): self
@@ -122,10 +123,7 @@ class ServiceConfiguration
         return $clone;
     }
 
-    /**
-     * @param string|null $cacheDirectoryPath
-     */
-    public function withCacheDirectoryPath(?string $cacheDirectoryPath): self
+    public function withCacheDirectoryPath(string $cacheDirectoryPath): self
     {
         $clone                     = clone $this;
         $clone->cacheDirectoryPath = rtrim($cacheDirectoryPath, '/');
@@ -326,9 +324,10 @@ class ServiceConfiguration
     }
 
     /**
-     * @return string|null
+     * @TODO Ecotone 2.0 Rethink if it should still be here, if ServiceCacheDirectory can be used instead
+     * @deprecated use ServiceCacheDirectory
      */
-    public function getCacheDirectoryPath(): ?string
+    public function getCacheDirectoryPath(): string
     {
         return $this->cacheDirectoryPath;
     }

@@ -3,13 +3,14 @@
 namespace Ecotone\Lite;
 
 use Ecotone\Messaging\Handler\ReferenceNotFoundException;
+use Psr\Container\ContainerInterface;
 
 /**
  * Class InMemoryPSRContainer
  * @package Ecotone\Lite
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class InMemoryPSRContainer implements GatewayAwareContainer
+class InMemoryPSRContainer implements ContainerInterface
 {
     private array $objects;
 

@@ -34,11 +34,6 @@ interface ConfiguredMessagingSystem
 
     public function runConsoleCommand(string $commandName, array $parameters): mixed;
 
-    /**
-     * @return GatewayReference[]
-     */
-    public function getGatewayList(): iterable;
-
     public function getCommandBus(): CommandBus;
 
     public function getQueryBus(): QueryBus;

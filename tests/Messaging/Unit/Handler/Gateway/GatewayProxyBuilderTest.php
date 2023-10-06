@@ -119,7 +119,7 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $this->expectException(InvalidArgumentException::class);
 
-        $gatewayProxyBuilder->build(
+        $gatewayProxyBuilder->buildWithoutProxyObject(
             InMemoryReferenceSearchService::createEmpty(),
             InMemoryChannelResolver::create(
                 [
@@ -323,7 +323,7 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         $this->expectException(InvalidArgumentException::class);
 
-        $gatewayProxyBuilder->build(
+        $gatewayProxyBuilder->buildWithoutProxyObject(
             InMemoryReferenceSearchService::createEmpty(),
             InMemoryChannelResolver::createFromAssociativeArray(
                 [
@@ -1093,7 +1093,7 @@ class GatewayProxyBuilderTest extends MessagingTest
 
         GatewayProxyBuilder::create('some', ServiceInterfaceReceiveOnly::class, 'sendMail', 'requestChannel')
             ->withErrorChannel('errorChannel')
-            ->build(
+            ->buildWithoutProxyObject(
                 InMemoryReferenceSearchService::createEmpty(),
                 InMemoryChannelResolver::createFromAssociativeArray([
                     'requestChannel' => DirectChannel::create(),

@@ -2,37 +2,37 @@
 
 namespace Ecotone\Messaging\Config;
 
+use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\NonProxyGateway;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Support\Assert;
 
 class NonProxyCombinedGateway
 {
-    private string $referenceName;
     /**
-     * @var NonProxyGateway[]
-     */
-    private array $methodGateways;
-    private string $interfaceName;
-
-    /**
-     * @param NonProxyGateway[] $methodGateways
+     * @param array<string, GatewayProxyBuilder|NonProxyGateway> $methodGateways
      */
     private function __construct(
-        string $referenceName,
-        string $interfaceName,
-        array $methodGateways
+        private string $referenceName,
+        private string $interfaceName,
+        private array $methodGateways,
+        private ReferenceSearchService $referenceSearchService,
+        private ChannelResolver $channelResolver
     ) {
-        $this->referenceName  = $referenceName;
-        $this->methodGateways = $methodGateways;
-        $this->interfaceName = $interfaceName;
     }
 
     /**
-     * @param NonProxyGateway[] $methodGateways
+     * @param array<string, GatewayProxyBuilder> $methodGateways
      */
-    public static function createWith(string $referenceName, string $interfaceName, array $methodGateways): self
-    {
-        return new self($referenceName, $interfaceName, $methodGateways);
+    public static function createWith(
+        string $referenceName,
+        string $interfaceName,
+        array $methodGateways,
+        ReferenceSearchService $referenceSearchService,
+        ChannelResolver $channelResolver
+    ): self {
+        return new self($referenceName, $interfaceName, $methodGateways, $referenceSearchService, $channelResolver);
     }
 
     /**
@@ -60,6 +60,10 @@ class NonProxyCombinedGateway
     public function executeMethod(string $methodName, array $params)
     {
         Assert::keyExists($this->methodGateways, $methodName, "Can't call gateway {$this->referenceName} with method {$methodName}. The method does not exists");
+
+        if ($this->methodGateways[$methodName] instanceof GatewayProxyBuilder) {
+            $this->methodGateways[$methodName] = $this->methodGateways[$methodName]->buildWithoutProxyObject($this->referenceSearchService, $this->channelResolver);
+        }
 
         return $this->methodGateways[$methodName]->execute($params);
     }

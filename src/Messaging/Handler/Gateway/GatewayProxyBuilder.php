@@ -332,10 +332,9 @@ class GatewayProxyBuilder implements InterceptedEndpoint
             NonProxyCombinedGateway::createWith(
                 $this->referenceName,
                 $this->interfaceName,
-                [$this->getRelatedMethodName() => $this->buildWithoutProxyObject(
-                    $referenceSearchService,
-                    $channelResolver
-                )]
+                [$this->getRelatedMethodName() => $this],
+                $referenceSearchService,
+                $channelResolver
             )
         );
 

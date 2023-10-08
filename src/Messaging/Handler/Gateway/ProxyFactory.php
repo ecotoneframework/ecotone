@@ -69,4 +69,12 @@ class ProxyFactory
             new EcotoneRemoteAdapter($container, $referenceName)
         );
     }
+
+    public function createWithCurrentConfiguration(string $referenceName, ContainerInterface $container, string $interface): object
+    {
+        return $this->createProxyClassWithAdapter(
+            $interface,
+            new EcotoneRemoteAdapter($container, $referenceName)
+        );
+    }
 }

@@ -27,6 +27,11 @@ interface ConfiguredMessagingSystem
     public function getGatewayByName(string $gatewayReferenceName): object;
 
     /**
+     * @return GatewayReference[]
+     */
+    public function getGatewayList(): array;
+
+    /**
      * @param string $gatewayReferenceName
      * @throws InvalidArgumentException if trying to find not existing gateway reference
      */

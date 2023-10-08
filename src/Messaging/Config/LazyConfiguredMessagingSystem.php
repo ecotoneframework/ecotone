@@ -77,6 +77,11 @@ class LazyConfiguredMessagingSystem implements ConfiguredMessagingSystem
         return $this->getConfiguredSystem()->list();
     }
 
+    public function getGatewayList(): array
+    {
+        return $this->getConfiguredSystem()->getGatewayList();
+    }
+
     public function runConsoleCommand(string $commandName, array $parameters): mixed
     {
         return $this->getConfiguredSystem()->runConsoleCommand($commandName, $parameters);

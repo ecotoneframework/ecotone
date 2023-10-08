@@ -106,6 +106,11 @@ final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessag
         return $this->configuredMessagingSystem->list();
     }
 
+    public function getGatewayList(): array
+    {
+        return $this->configuredMessagingSystem->getGatewayList();
+    }
+
     public function replaceWith(ConfiguredMessagingSystem $messagingSystem): void
     {
         $this->configuredMessagingSystem->replaceWith($messagingSystem);

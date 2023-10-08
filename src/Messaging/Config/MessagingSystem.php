@@ -170,6 +170,11 @@ final class MessagingSystem implements ConfiguredMessagingSystem
         return new self($eventDrivenConsumers, $pollingConsumerBuilders, $inboundChannelAdapterBuilders, [], $nonProxyGateways, $channelResolver, $referenceSearchService, $pollingMetadataConfigurations, $consoleCommands);
     }
 
+    public function getGatewayList(): array
+    {
+        return array_values(array_map(fn (NonProxyCombinedGateway $gateway) => new GatewayReference($gateway->getReferenceName(), $gateway->getInterfaceName()), $this->nonProxyCombinedGateways));
+    }
+
     /**
      * @param ChannelInterceptorBuilder[] $channelInterceptorBuilders
      * @param MessageChannelBuilder[] $channelBuilders

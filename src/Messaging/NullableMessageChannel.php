@@ -55,6 +55,6 @@ final class NullableMessageChannel implements SubscribableChannel, PollableChann
      */
     public function __toString()
     {
-        return 'nullable channel';
+        return 'null';
     }
 }

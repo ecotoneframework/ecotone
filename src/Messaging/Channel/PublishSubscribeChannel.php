@@ -64,6 +64,6 @@ class PublishSubscribeChannel implements SubscribableChannel
 
     public function __toString()
     {
-        return 'publish subscribe channel ' . $this->messageChannelName;
+        return 'publish subscribe: ' . $this->messageChannelName;
     }
 }

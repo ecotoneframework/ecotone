@@ -10,6 +10,7 @@ use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -386,7 +387,10 @@ class DomainContext implements Context
     public function iConfigureMessagingSystem()
     {
         $this->inMemoryReferenceSearchService = InMemoryReferenceSearchService::createEmpty();
-        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
+        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaults(
+            InMemoryModuleMessaging::createEmpty(),
+            ServiceConfiguration::createWithAsynchronicityOnly()
+        );
     }
 
     /**

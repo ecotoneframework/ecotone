@@ -94,6 +94,7 @@ class LoggingHandlerBuilderTest extends MessagingTest
                 'headers' => json_encode([
                     'id' => $message->getHeaders()->getMessageId(),
                     'timestamp' => $message->getHeaders()->getTimestamp(),
+                    'correlationId' => $message->getHeaders()->getCorrelationId(),
                 ]),
             ]);
 

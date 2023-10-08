@@ -7,7 +7,6 @@ use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
@@ -353,12 +352,11 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
         $objects['logger'] = new NullLogger();
         $cacheDirectoryPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString() . 'ecotone_testing_behat_cache';
 
-        $applicationConfiguration = ServiceConfiguration::createWithDefaults()
+        $applicationConfiguration = ServiceConfiguration::createWithAsynchronicityOnly()
             ->withEnvironment('prod')
             ->withCacheDirectoryPath($cacheDirectoryPath)
             ->withFailFast(false)
-            ->withNamespaces([$namespace])
-            ->withSkippedModulePackageNames([ModulePackageList::AMQP_PACKAGE, ModulePackageList::DBAL_PACKAGE, ModulePackageList::JMS_CONVERTER_PACKAGE, ModulePackageList::EVENT_SOURCING_PACKAGE]);
+            ->withNamespaces([$namespace]);
 
         $ecotoneLite = EcotoneLite::bootstrap(
             [],

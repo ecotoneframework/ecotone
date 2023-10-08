@@ -23,4 +23,8 @@ interface MessageProcessor
     public function getMethodCall(Message $message): MethodCall;
 
     public function getObjectToInvokeOn(): string|object;
+
+    public function getMethodName(): string;
+
+    public function getInterfaceToCall(): InterfaceToCall;
 }

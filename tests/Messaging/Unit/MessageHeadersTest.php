@@ -25,7 +25,7 @@ class MessageHeadersTest extends TestCase
     {
         $headers = MessageHeaders::createEmpty();
 
-        $this->assertEquals(2, $headers->size());
+        $this->assertEquals(3, $headers->size());
         $this->assertTrue(Uuid::isValid($headers->get(MessageHeaders::MESSAGE_ID)));
 
         $this->assertFalse($headers->hasMessageId('2db4db21-e3f1-492a-af98-a61468bb03e9'));
@@ -39,7 +39,7 @@ class MessageHeadersTest extends TestCase
         ];
         $messageHeaders = MessageHeaders::create($headers);
 
-        $this->assertEquals(3, $messageHeaders->size());
+        $this->assertEquals(4, $messageHeaders->size());
     }
 
     public function test_throwing_exception_when_asking_for_not_existing_header()
@@ -126,6 +126,7 @@ class MessageHeadersTest extends TestCase
                 ],
                 'id' => $messageHeaders->get(MessageHeaders::MESSAGE_ID),
                 'timestamp' => $messageHeaders->get(MessageHeaders::TIMESTAMP),
+                MessageHeaders::MESSAGE_CORRELATION_ID => $messageHeaders->getCorrelationId(),
             ]),
             (string)$messageHeaders
         );

@@ -12,11 +12,11 @@ class MessageHeadersPropagatorInterceptor
 
     public function storeHeaders(MethodInvocation $methodInvocation, Message $message)
     {
-        $headers = $message->getHeaders()->headers();
-        $headers = MessageHeaders::unsetFrameworkKeys($headers);
-        $headers = MessageHeaders::unsetNonUserKeys($headers);
+        $userlandHeaders = MessageHeaders::unsetAllFrameworkHeaders($message->getHeaders()->headers());
+        $userlandHeaders[MessageHeaders::MESSAGE_ID] = $message->getHeaders()->getMessageId();
+        $userlandHeaders[MessageHeaders::MESSAGE_CORRELATION_ID] = $message->getHeaders()->getCorrelationId();
 
-        $this->currentlyPropagatedHeaders[] = $headers;
+        $this->currentlyPropagatedHeaders[] = $userlandHeaders;
 
         try {
             $reply = $methodInvocation->proceed();
@@ -33,7 +33,7 @@ class MessageHeadersPropagatorInterceptor
             return $headers;
         }
 
-        return array_merge($this->getLastHeaders(), $headers);
+        return MessageHeaders::propagateContextHeaders($this->getLastHeaders(), $headers);
     }
 
     public function getLastHeaders(): array

@@ -58,6 +58,6 @@ final class DirectChannel implements SubscribableChannel
 
     public function __toString()
     {
-        return 'direct channel ' . $this->messageChannelName;
+        return 'direct: ' . $this->messageChannelName;
     }
 }

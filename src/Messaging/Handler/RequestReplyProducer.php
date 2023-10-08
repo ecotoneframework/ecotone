@@ -12,7 +12,6 @@ use Ecotone\Messaging\MessageDeliveryException;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ramsey\Uuid\Uuid;
 
 /**
  * Class RequestReplyProducer
@@ -122,23 +121,22 @@ class RequestReplyProducer implements MessageHandler
             }
 
             $sequenceSize = count($replyData);
-            $correlationId = Uuid::uuid4()->toString();
             for ($sequenceNumber = 0; $sequenceNumber < $sequenceSize; $sequenceNumber++) {
                 $payload = $replyData[$sequenceNumber];
                 if ($payload instanceof Message) {
                     $replyChannel->send(
                         MessageBuilder::fromMessage($payload)
-                            ->setHeaderIfAbsent(MessageHeaders::MESSAGE_CORRELATION_ID, $correlationId)
+                            ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $message->getHeaders()->getCorrelationId())
                             ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber + 1)
                             ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
                             ->build()
                     );
                 } else {
                     $replyChannel->send(
-                        MessageBuilder::fromMessageWithNewMessageId($message)
+                        MessageBuilder::fromParentMessage($message)
                             ->setPayload($payload)
                             ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::createFromVariable($payload)->toString()))
-                            ->setHeaderIfAbsent(MessageHeaders::MESSAGE_CORRELATION_ID, $correlationId)
+                            ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $message->getHeaders()->getCorrelationId())
                             ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber + 1)
                             ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
                             ->build()

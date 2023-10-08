@@ -14,6 +14,7 @@ final class ModulePackageList
     public const SQS_PACKAGE = 'sqs';
     public const EVENT_SOURCING_PACKAGE = 'eventSourcing';
     public const JMS_CONVERTER_PACKAGE = 'jmsConverter';
+    public const TRACING_PACKAGE = 'tracing';
     public const TEST_PACKAGE = 'test';
 
     public static function getModuleClassesForPackage(string $packageName): array
@@ -27,6 +28,7 @@ final class ModulePackageList
             ModulePackageList::SQS_PACKAGE => ModuleClassList::SQS_MODULES,
             ModulePackageList::EVENT_SOURCING_PACKAGE => ModuleClassList::EVENT_SOURCING_MODULES,
             ModulePackageList::JMS_CONVERTER_PACKAGE => ModuleClassList::JMS_CONVERTER_MODULES,
+            ModulePackageList::TRACING_PACKAGE => ModuleClassList::TRACING_MODULES,
             ModulePackageList::TEST_PACKAGE => ModuleClassList::TEST_MODULES,
             default => throw ConfigurationException::create(sprintf('Given unknown package name %s. Available packages name are: %s', $packageName, implode(',', self::allPackages())))
         };
@@ -46,6 +48,7 @@ final class ModulePackageList
             self::DBAL_PACKAGE,
             self::EVENT_SOURCING_PACKAGE,
             self::JMS_CONVERTER_PACKAGE,
+            self::TRACING_PACKAGE,
         ];
     }
 

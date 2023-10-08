@@ -92,10 +92,12 @@ class MethodInvokerTest extends MessagingTest
             MessageConverterBuilder::create('message'),
         ], InMemoryReferenceSearchService::createEmpty());
 
-        $this->assertMessages(
-            MessageBuilder::withPayload('test')
+        $message = MessageBuilder::withPayload('some')->build();
+        $this->assertEquals(
+            MessageBuilder::fromMessage($message)
+                ->setPayload('test')
                 ->build(),
-            $methodInvocation->executeEndpoint(MessageBuilder::withPayload('some')->build())
+            $methodInvocation->executeEndpoint($message)
         );
     }
 
@@ -232,17 +234,17 @@ class MethodInvokerTest extends MessagingTest
                 ], $referenceSearchService),
             );
 
-        $replyMessage = $methodInvocation->executeEndpoint(
+        $message =
             MessageBuilder::withPayload(addslashes(serialize(Order::create('1', 'correct'))))
                 ->setContentType(MediaType::createApplicationXPHPSerialized())
-                ->build()
-        );
+                ->build();
 
-        $this->assertMessages(
-            MessageBuilder::withPayload(OrderConfirmation::fromOrder(Order::create('1', 'correct')))
+        $this->assertEquals(
+            MessageBuilder::fromMessage($message)
+                ->setPayload(OrderConfirmation::fromOrder(Order::create('1', 'correct')))
                 ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(OrderConfirmation::class))
                 ->build(),
-            $replyMessage
+            $methodInvocation->executeEndpoint($message)
         );
     }
 

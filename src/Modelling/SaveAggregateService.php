@@ -17,6 +17,7 @@ use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Attribute\NamedEvent;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class SaveAggregateService
@@ -208,14 +209,24 @@ class SaveAggregateService
             $events = call_user_func([$aggregate, $this->aggregateMethodWithEvents]);
         }
 
-        return array_map(function ($event) use ($metadata): Event {
+        return array_map(function ($event) use ($message, $metadata): Event {
             if (! is_object($event)) {
                 $typeDescriptor = TypeDescriptor::createFromVariable($event);
                 throw InvalidArgumentException::create("Events return by after calling {$this->aggregateInterface} must all be objects, {$typeDescriptor->toString()} given");
             }
+            if ($event instanceof Event) {
+                $metadata = $event->getMetadata();
+                $event = $event->getPayload();
+            }
 
+            $metadata = MessageHeaders::unsetAllFrameworkHeaders($metadata);
             $metadata = RevisionMetadataEnricher::enrich($metadata, $event);
-            $metadata = MessageHeaders::unsetTransportMessageKeys($metadata);
+            $metadata[MessageHeaders::MESSAGE_ID] ??= Uuid::uuid4()->toString();
+            $metadata[MessageHeaders::TIMESTAMP] ??= (int)round(microtime(true));
+            $metadata = MessageHeaders::propagateContextHeaders([
+                MessageHeaders::MESSAGE_ID => $message->getHeaders()->getMessageId(),
+                MessageHeaders::MESSAGE_CORRELATION_ID => $message->getHeaders()->getCorrelationId(),
+            ], $metadata);
 
             return Event::create($event, $metadata);
         }, $events);

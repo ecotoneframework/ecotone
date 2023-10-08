@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use ArrayIterator;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Message;
 
@@ -24,6 +25,9 @@ class AroundMethodInvocation implements MethodInvocation
 
     private MethodCall $methodCall;
 
+    /**
+     * @param AroundMethodInterceptor[] $aroundMethodInterceptors
+     */
     public function __construct(
         private Message          $requestMessage,
         array                    $aroundMethodInterceptors,
@@ -36,7 +40,7 @@ class AroundMethodInvocation implements MethodInvocation
     /**
      * @inheritDoc
      */
-    public function proceed()
+    public function proceed(): mixed
     {
         /** @var AroundMethodInterceptor $aroundMethodInterceptor */
         $aroundMethodInterceptor = $this->aroundMethodInterceptors->current();
@@ -53,19 +57,26 @@ class AroundMethodInvocation implements MethodInvocation
     }
 
     /**
-     * @return array
+     * @return mixed[]
      */
     public function getArguments(): array
     {
         return $this->methodCall->getMethodArgumentValues();
     }
 
-    /**
-     * @var string|object
-     */
-    public function getObjectToInvokeOn()
+    public function getObjectToInvokeOn(): string|object
     {
         return $this->interceptedMessageProcessor->getObjectToInvokeOn();
+    }
+
+    public function getMethodName(): string
+    {
+        return $this->interceptedMessageProcessor->getMethodName();
+    }
+
+    public function getInterfaceToCall(): InterfaceToCall
+    {
+        return $this->interceptedMessageProcessor->getInterfaceToCall();
     }
 
     /**

@@ -62,7 +62,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "1.107.1-dev"
+            "dev-main": "1.108.0-dev"
         },
         "ecotone": {
             "repository": "ecotone"

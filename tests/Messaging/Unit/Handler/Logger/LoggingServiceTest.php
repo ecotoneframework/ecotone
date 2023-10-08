@@ -131,6 +131,7 @@ class LoggingServiceTest extends TestCase
                 'headers' => json_encode([
                     'id' => $message->getHeaders()->get(MessageHeaders::MESSAGE_ID),
                     'timestamp' => $message->getHeaders()->get(MessageHeaders::TIMESTAMP),
+                    'correlationId' => $message->getHeaders()->getCorrelationId(),
                 ]),
             ]);
 

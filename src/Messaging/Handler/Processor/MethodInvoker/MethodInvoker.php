@@ -107,6 +107,11 @@ final class MethodInvoker implements MessageProcessor
         return $this->objectToInvokeOn;
     }
 
+    public function getMethodName(): string
+    {
+        return $this->objectMethodName;
+    }
+
     public function getInterfaceToCall(): InterfaceToCall
     {
         return $this->interfaceToCall;

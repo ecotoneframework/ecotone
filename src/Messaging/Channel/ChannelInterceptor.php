@@ -58,15 +58,6 @@ interface ChannelInterceptor
     public function preReceive(MessageChannel $messageChannel): bool;
 
     /**
-     * Invoked immediately after a Message has been retrieved but before it is returned to the caller.
-     *
-     * @param Message $message message that was received
-     * @param MessageChannel $messageChannel message channel that message was received from
-     * @return Message|null
-     */
-    public function postReceive(Message $message, MessageChannel $messageChannel): ?Message;
-
-    /**
      * Invoked after the completion of a receive regardless of any exception that have been raised thus allowing for proper resource cleanup.
      * This will only called when preReceive return true
      * @param Message|null $message
@@ -75,4 +66,13 @@ interface ChannelInterceptor
      * @return void
      */
     public function afterReceiveCompletion(?Message $message, MessageChannel $messageChannel, ?Throwable $exception): void;
+
+    /**
+     * Invoked immediately after a Message has been retrieved but before it is returned to the caller.
+     *
+     * @param Message $message message that was received
+     * @param MessageChannel $messageChannel message channel that message was received from
+     * @return Message|null
+     */
+    public function postReceive(Message $message, MessageChannel $messageChannel): ?Message;
 }

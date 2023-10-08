@@ -153,19 +153,55 @@ class MessageBuilderTest extends MessagingTest
         );
     }
 
-    public function test_allow_to_manually_set_message_header_id_and_timestamp()
+    public function test_allow_to_manually_message_header_id_and_timestamp()
     {
         $this->assertEquals(
             MessageBuilder::withPayload('some')
                 ->setHeader(MessageHeaders::MESSAGE_ID, 123)
                 ->setHeader(MessageHeaders::TIMESTAMP, 1587658787863)
+                ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, 1234)
                 ->build(),
             MessageBuilder::withPayload('some')
                 ->setMultipleHeaders([
                     MessageHeaders::MESSAGE_ID => 123,
                     MessageHeaders::TIMESTAMP => 1587658787863,
+                    MessageHeaders::MESSAGE_CORRELATION_ID => 1234,
                 ])
                 ->build()
         );
+    }
+
+    public function test_correlation_id_is_preserved()
+    {
+        $correlationId = 1587658787863;
+        $message = MessageBuilder::withPayload('some')
+            ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $correlationId)
+            ->build();
+
+        $this->assertEquals(
+            $correlationId,
+            MessageBuilder::fromMessage($message)->build()->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID)
+        );
+    }
+
+    public function test_correlation_id_is_preserved_when_id_is_generated()
+    {
+        $correlationId = 1587658787863;
+        $message = MessageBuilder::withPayload('some')
+            ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $correlationId)
+            ->build();
+
+        $this->assertEquals(
+            $correlationId,
+            MessageBuilder::fromParentMessage($message)->build()->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID)
+        );
+    }
+
+    public function test_correlation_auto_generated_if_missing()
+    {
+        $message = MessageBuilder::withPayload('some')
+            ->build();
+
+        $this->assertNotNull($message->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID));
     }
 }

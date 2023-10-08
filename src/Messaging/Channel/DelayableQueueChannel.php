@@ -73,6 +73,6 @@ final class DelayableQueueChannel implements PollableChannel
 
     public function __toString()
     {
-        return 'delayable queue channel: ' . $this->name;
+        return 'in memory delayable: ' . $this->name;
     }
 }

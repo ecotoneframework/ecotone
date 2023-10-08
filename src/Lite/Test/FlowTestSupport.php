@@ -143,6 +143,14 @@ final class FlowTestSupport
     }
 
     /**
+     * @return Event[]
+     */
+    public function getEventStreamEvents(string $streamName): array
+    {
+        return $this->getGateway(EventStore::class)->load($streamName);
+    }
+
+    /**
      * @param Event[]|object[]|array[] $streamEvents
      */
     public function withEventsFor(string|object|array $identifiers, string $aggregateClass, array $events, int $aggregateVersion = 0): self

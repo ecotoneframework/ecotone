@@ -33,6 +33,7 @@ class AllHeadersBuilderTest extends TestCase
                 ->build(),
         );
         unset($result[MessageHeaders::MESSAGE_ID]);
+        unset($result[MessageHeaders::MESSAGE_CORRELATION_ID]);
         unset($result[MessageHeaders::TIMESTAMP]);
 
         $this->assertEquals(

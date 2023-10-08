@@ -3,6 +3,7 @@
 namespace Ecotone\Messaging\Handler\Processor;
 
 use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodCall;
 use Ecotone\Messaging\Handler\RequestReplyProducer;
@@ -36,5 +37,15 @@ class HandlerReplyProcessor implements MessageProcessor
     public function getObjectToInvokeOn(): string|object
     {
         return $this->requestReplyProducer->getMessageProcessor()->getObjectToInvokeOn();
+    }
+
+    public function getMethodName(): string
+    {
+        return $this->requestReplyProducer->getMessageProcessor()->getMethodName();
+    }
+
+    public function getInterfaceToCall(): InterfaceToCall
+    {
+        return $this->requestReplyProducer->getMessageProcessor()->getInterfaceToCall();
     }
 }

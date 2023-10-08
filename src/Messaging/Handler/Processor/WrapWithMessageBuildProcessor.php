@@ -102,6 +102,16 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
         return $this->messageProcessor->getObjectToInvokeOn();
     }
 
+    public function getMethodName(): string
+    {
+        return $this->messageProcessor->getMethodName();
+    }
+
+    public function getInterfaceToCall(): InterfaceToCall
+    {
+        return $this->messageProcessor->getInterfaceToCall();
+    }
+
     /**
      * @return string
      */

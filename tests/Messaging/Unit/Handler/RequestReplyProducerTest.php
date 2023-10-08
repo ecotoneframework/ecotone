@@ -65,7 +65,7 @@ class RequestReplyProducerTest extends MessagingTest
 
         $this->handleReplyWith($requestReplyProducer);
 
-        $this->assertMessages(MessageBuilder::withPayload($replyData)->build(), $outputChannel->receive());
+        $this->assertSame($replyData, $outputChannel->receive()->getPayload());
     }
 
     public function test_throwing_exception_if_required_reply_and_got_none()
@@ -118,8 +118,10 @@ class RequestReplyProducerTest extends MessagingTest
 
         $this->handleReplyWithMessage($message, $requestReplyProducer);
 
-        $this->assertMessages(
-            MessageBuilder::withPayload($replyData)
+        $this->assertEquals(
+            MessageBuilder::fromMessage($message)
+                ->setPayload($replyData)
+                ->removeHeader(MessageHeaders::ROUTING_SLIP)
                 ->build(),
             $replyChannel->receive()
         );
@@ -189,16 +191,16 @@ class RequestReplyProducerTest extends MessagingTest
         $requestReplyProducer = $this->createRequestReplyProducer(FakeReplyMessageProducer::create($replyData), $outputChannel);
 
         $replyChannelFromMessage = QueueChannel::create();
-        $this->handleReplyWithMessage(
-            MessageBuilder::withPayload('some')
-                ->setHeader('token', 'abcd')
-                ->setReplyChannel($replyChannelFromMessage)
-                ->build(),
-            $requestReplyProducer
-        );
+        $requestMessage = MessageBuilder::withPayload('some')
+            ->setHeader('token', 'abcd')
+            ->setReplyChannel($replyChannelFromMessage)
+            ->build();
 
-        $this->assertMessages(
-            MessageBuilder::withPayload($replyData)
+        $this->handleReplyWithMessage($requestMessage, $requestReplyProducer);
+
+        $this->assertEquals(
+            MessageBuilder::fromMessage($requestMessage)
+                ->setPayload($replyData)
                 ->setHeader('token', 'abcd')
                 ->setReplyChannel($replyChannelFromMessage)
                 ->build(),
@@ -242,12 +244,12 @@ class RequestReplyProducerTest extends MessagingTest
         $this->assertMultipleMessages(
             [
                 MessageBuilder::withPayload('some1')
-                    ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $splittedMessages[0]->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID))
+                    ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $requestMessage->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID))
                     ->setHeader(MessageHeaders::SEQUENCE_SIZE, 2)
                     ->setHeader(MessageHeaders::SEQUENCE_NUMBER, 1)
                     ->build(),
                 MessageBuilder::withPayload('some2')
-                    ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $splittedMessages[0]->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID))
+                    ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $requestMessage->getHeaders()->get(MessageHeaders::MESSAGE_CORRELATION_ID))
                     ->setHeader(MessageHeaders::SEQUENCE_SIZE, 2)
                     ->setHeader(MessageHeaders::SEQUENCE_NUMBER, 2)
                     ->build(),

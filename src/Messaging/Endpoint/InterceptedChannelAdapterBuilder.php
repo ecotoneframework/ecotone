@@ -31,19 +31,18 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
         $pollingMetadata = $this->withContinuesPolling() ? $pollingMetadata->setFixedRateInMilliseconds(1) : $pollingMetadata;
         $interceptors = InterceptedConsumer::createInterceptorsForPollingMetadata($pollingMetadata, $referenceSearchService);
 
-        $results = [];
-        foreach ($interceptors as $interceptor) {
-            if ($interceptor->isInterestedInPostSend()) {
-                $this->addAroundInterceptor(
-                    AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
-                        $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME),
-                        $interceptor,
-                        'postSend',
-                        Precedence::ASYNCHRONOUS_CONSUMER_INTERCEPTOR_PRECEDENCE,
-                        ''
-                    )
-                );
-            }
+        if ($interceptors) {
+            $postSendInterceptor = new PostSendInterceptor($interceptors);
+
+            $this->addAroundInterceptor(
+                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
+                    $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME),
+                    $postSendInterceptor,
+                    'postSend',
+                    Precedence::ASYNCHRONOUS_CONSUMER_INTERCEPTOR_PRECEDENCE,
+                    ''
+                )
+            );
         }
 
         $this->inboundGateway->addAroundInterceptor(AcknowledgeConfirmationInterceptor::createAroundInterceptor(

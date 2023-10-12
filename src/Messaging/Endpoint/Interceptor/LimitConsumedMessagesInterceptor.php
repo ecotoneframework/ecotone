@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Endpoint\Interceptor;
 
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Throwable;
 
 /**
@@ -72,16 +71,9 @@ class LimitConsumedMessagesInterceptor implements ConsumerInterceptor
     /**
      * @inheritDoc
      */
-    public function postSend(MethodInvocation $methodInvocation): mixed
+    public function postSend(): void
     {
         $this->currentSentMessages++;
         $this->shouldBeStopped = $this->currentSentMessages >= $this->messageLimit;
-
-        return $methodInvocation->proceed();
-    }
-
-    public function isInterestedInPostSend(): bool
-    {
-        return true;
     }
 }

@@ -62,6 +62,7 @@ use Test\Ecotone\Messaging\Fixture\Handler\Processor\StubCallSavingService;
 use Test\Ecotone\Messaging\Fixture\SameChannelAndRouting\SomeTestCommandHandler;
 use Test\Ecotone\Messaging\Fixture\SameChannelAndRouting\SomeTestEventHandler;
 use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
+use Test\Ecotone\Messaging\Fixture\Service\CalculatingServiceForAsynchronousScenario;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceCalculatingService;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceWithoutReturnValue;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceWithReturnValue;
@@ -433,6 +434,33 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $this->assertNull($calculatingService->getLastResult());
         $configuredMessagingSystem->run('asyncChannel');
         $this->assertEquals(3, $calculatingService->getLastResult());
+    }
+
+    /**
+     * Use this as template for future tests in MessagingSystem, to avoid using low level components wiring
+     *
+     * @template
+     */
+    public function test_registering_multiple_asynchronous_message_handlers_with_interceptors()
+    {
+        $calculatingService = CalculatingServiceForAsynchronousScenario::create(2);
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [CalculatingServiceForAsynchronousScenario::class],
+            [$calculatingService],
+            ServiceConfiguration::createWithAsynchronicityOnly()
+                ->withExtensionObjects([
+                    SimpleMessageChannelBuilder::createQueueChannel('asyncOne'),
+                    SimpleMessageChannelBuilder::createQueueChannel('asyncTwo'),
+                ])
+        );
+
+        $ecotoneLite->sendCommandWithRoutingKey('getResultOne', 2);
+        $ecotoneLite->run('asyncOne');
+        $this->assertEquals(4, $calculatingService->getLastResult());
+
+        $ecotoneLite->sendCommandWithRoutingKey('getResultTwo', 3);
+        $ecotoneLite->run('asyncTwo');
+        $this->assertEquals(6, $calculatingService->getLastResult());
     }
 
     public function test_registering_before_call_intercepted_asynchronous_endpoint_with_two_channels()

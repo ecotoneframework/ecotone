@@ -24,15 +24,9 @@ use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\EventDriven\LazyEventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapterEntrypoint;
 use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
-use Ecotone\Messaging\Endpoint\Interceptor\ConnectionExceptionRetryInterceptor;
-use Ecotone\Messaging\Endpoint\Interceptor\FinishWhenNoMessagesInterceptor;
-use Ecotone\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
-use Ecotone\Messaging\Endpoint\Interceptor\LimitExecutionAmountInterceptor;
-use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
-use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
-use Ecotone\Messaging\Endpoint\Interceptor\TimeLimitInterceptor;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Endpoint\PostSendInterceptor;
 use Ecotone\Messaging\Gateway\ConsoleCommandRunner;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
@@ -97,13 +91,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
         $messagingConfiguration->registerConverter(new DeserializingConverterBuilder());
 
         $messagingConfiguration->registerRelatedInterfaces([
-            $interfaceToCallRegistry->getFor(FinishWhenNoMessagesInterceptor::class, 'postSend'),
-            $interfaceToCallRegistry->getFor(LimitConsumedMessagesInterceptor::class, 'postSend'),
-            $interfaceToCallRegistry->getFor(ConnectionExceptionRetryInterceptor::class, 'postSend'),
-            $interfaceToCallRegistry->getFor(LimitExecutionAmountInterceptor::class, 'postSend'),
-            $interfaceToCallRegistry->getFor(LimitMemoryUsageInterceptor::class, 'postSend'),
-            $interfaceToCallRegistry->getFor(SignalInterceptor::class, 'postSend'),
-            $interfaceToCallRegistry->getFor(TimeLimitInterceptor::class, 'postSend'),
+            $interfaceToCallRegistry->getFor(PostSendInterceptor::class, 'postSend'),
             $interfaceToCallRegistry->getFor(ChainForwardPublisher::class, 'forward'),
             $interfaceToCallRegistry->getFor(BeforeSendGateway::class, 'execute'),
             $interfaceToCallRegistry->getFor(AcknowledgeConfirmationInterceptor::class, 'ack'),

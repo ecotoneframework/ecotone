@@ -25,7 +25,6 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Bridge\Bridge;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterceptedEndpoint;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -49,11 +48,7 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Config\BusModule;
 use Exception;
-use ProxyManager\Autoloader\AutoloaderInterface;
 use Ramsey\Uuid\Uuid;
-
-use function spl_autoload_register;
-use function spl_autoload_unregister;
 
 /**
  * Class Configuration
@@ -62,8 +57,6 @@ use function spl_autoload_unregister;
  */
 final class MessagingSystemConfiguration implements Configuration
 {
-    private static ?AutoloaderInterface $registered_autoloader = null;
-
     /**
      * @var MessageChannelBuilder[]
      */
@@ -661,12 +654,12 @@ final class MessagingSystemConfiguration implements Configuration
                 continue;
             }
 
+            /** Name will be provided during build for given Message Handler. Looking in PollingConsumerBuilder. This is only for pointcut lookup */
             $endpointAnnotations = [new AsynchronousRunningEndpoint('')];
             if ($this->aroundMethodInterceptors) {
                 $aroundInterceptors = $this->getRelatedInterceptors(
                     $this->aroundMethodInterceptors,
                     $consumerFactory->getInterceptedInterface($interfaceRegistry),
-                    /** Name will be provided during build for given Message Handler. Looking in MessagingSystem */
                     $endpointAnnotations,
                     $consumerFactory->getRequiredInterceptorNames(),
                     $interfaceRegistry
@@ -856,9 +849,12 @@ final class MessagingSystemConfiguration implements Configuration
 
         $cacheDirectoryPath = $serviceCacheConfiguration->getPath();
         if (! is_dir($cacheDirectoryPath)) {
-            @mkdir($cacheDirectoryPath, 0775, true);
+            $mkdirResult = @mkdir($cacheDirectoryPath, 0775, true);
+            Assert::isTrue(
+                $mkdirResult,
+                "Not enough permissions to create cache directory {$cacheDirectoryPath}"
+            );
         }
-        Assert::isTrue(is_writable($cacheDirectoryPath), "Not enough permissions to write into cache directory {$cacheDirectoryPath}");
 
         Assert::isFalse(is_file($cacheDirectoryPath), 'Cache directory is file, should be directory');
     }
@@ -871,6 +867,10 @@ final class MessagingSystemConfiguration implements Configuration
     private static function deleteFiles(string $target, bool $deleteDirectory): void
     {
         if (is_dir($target)) {
+            Assert::isTrue(
+                is_writable($target),
+                "Not enough permissions to delete from cache directory {$target}"
+            );
             $files = glob($target . '*', GLOB_MARK);
 
             foreach ($files as $file) {
@@ -881,6 +881,10 @@ final class MessagingSystemConfiguration implements Configuration
                 rmdir($target);
             }
         } elseif (is_file($target)) {
+            Assert::isTrue(
+                is_writable($target),
+                "Not enough permissions to delete cache file {$target}"
+            );
             unlink($target);
         }
     }
@@ -1261,9 +1265,7 @@ final class MessagingSystemConfiguration implements Configuration
         $referenceSearchService = $this->prepareReferenceSearchServiceWithInternalReferences($referenceSearchService, $converters, $interfaceToCallRegistry);
         /** @var ServiceCacheConfiguration $serviceCacheConfiguration */
         $serviceCacheConfiguration = $referenceSearchService->get(ServiceCacheConfiguration::class);
-        /** @var ProxyFactory $proxyFactory */
-        $proxyFactory = ProxyFactory::createWithCache($serviceCacheConfiguration);
-        $this->registerAutoloader($proxyFactory->getConfiguration()->getProxyAutoloader());
+        self::prepareCacheDirectory($serviceCacheConfiguration);
 
         $channelInterceptorsByImportance = $this->channelInterceptorBuilders;
         $channelInterceptorsByChannelName = [];
@@ -1363,14 +1365,5 @@ final class MessagingSystemConfiguration implements Configuration
                 $this->afterCallMethodInterceptors
             )
         );
-    }
-
-    private function registerAutoloader(AutoloaderInterface $autoloader)
-    {
-        if (self::$registered_autoloader) {
-            spl_autoload_unregister(self::$registered_autoloader);
-        }
-        spl_autoload_register($autoloader);
-        self::$registered_autoloader = $autoloader;
     }
 }

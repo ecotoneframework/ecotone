@@ -7,12 +7,17 @@ namespace Ecotone\Messaging\Channel\PollableChannel\InMemory;
 use Ecotone\Messaging\Endpoint\AcknowledgementCallback;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Support\Assert;
 use RuntimeException;
 
 final class InMemoryAcknowledgeCallback implements AcknowledgementCallback
 {
-    public function __construct(private PollableChannel $queueChannel, private Message $message, private bool $isAutoAck = true)
-    {
+    public function __construct(
+        private PollableChannel $queueChannel,
+        private Message $message,
+        private bool $isAutoAck = true,
+        private bool $wasAcked = false
+    ) {
     }
 
     /**
@@ -36,6 +41,9 @@ final class InMemoryAcknowledgeCallback implements AcknowledgementCallback
      */
     public function accept(): void
     {
+        Assert::isFalse($this->wasAcked, 'Trying to acknowledge message that was already acknowledged');
+
+        $this->wasAcked = true;
     }
 
     /**
@@ -43,6 +51,9 @@ final class InMemoryAcknowledgeCallback implements AcknowledgementCallback
      */
     public function reject(): void
     {
+        Assert::isFalse($this->wasAcked, 'Trying to acknowledge message that was already acknowledged');
+
+        $this->wasAcked = true;
     }
 
     private int $requeueCount = 0;

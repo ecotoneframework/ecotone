@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Gateway;
 
 use Ecotone\Messaging\Config\EcotoneRemoteAdapter;
-use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
+use ProxyManager\Autoloader\AutoloaderInterface;
 use ProxyManager\Configuration;
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
 use ProxyManager\Factory\RemoteObjectFactory;
@@ -17,6 +17,9 @@ use ProxyManager\Signature\ClassSignatureGenerator;
 use ProxyManager\Signature\SignatureGenerator;
 use Psr\Container\ContainerInterface;
 
+use function spl_autoload_register;
+use function spl_autoload_unregister;
+
 /**
  * Class LazyProxyConfiguration
  * @package Ecotone\Messaging\Handler\Gateway
@@ -25,6 +28,9 @@ use Psr\Container\ContainerInterface;
 class ProxyFactory
 {
     public const REFERENCE_NAME = 'gatewayProxyConfiguration';
+
+    private static ?AutoloaderInterface $registeredAutoloader = null;
+    private ?Configuration $configuration = null;
 
     private function __construct(private ServiceCacheConfiguration $serviceCacheConfiguration)
     {
@@ -35,15 +41,16 @@ class ProxyFactory
         return new self($serviceCacheConfiguration);
     }
 
-    /**
-     * @return Configuration
-     */
-    public function getConfiguration(): Configuration
+    private function getConfiguration(): Configuration
+    {
+        return $this->configuration ??= $this->buildConfiguration();
+    }
+
+    private function buildConfiguration(): Configuration
     {
         $configuration = new Configuration();
 
         if ($this->serviceCacheConfiguration->shouldUseCache()) {
-            MessagingSystemConfiguration::prepareCacheDirectory($this->serviceCacheConfiguration);
             $configuration->setProxiesTargetDir($this->serviceCacheConfiguration->getPath());
             $fileLocator = new FileLocator($configuration->getProxiesTargetDir());
             $configuration->setGeneratorStrategy(new FileWriterGeneratorStrategy($fileLocator));
@@ -56,6 +63,7 @@ class ProxyFactory
     public function createProxyClassWithAdapter(string $interfaceName, AdapterInterface $adapter): RemoteObjectInterface
     {
         $factory = new RemoteObjectFactory($adapter, $this->getConfiguration());
+        $this->registerProxyAutoloader();
 
         return $factory->createProxy($interfaceName);
     }
@@ -76,5 +84,28 @@ class ProxyFactory
             $interface,
             new EcotoneRemoteAdapter($container, $referenceName)
         );
+    }
+
+    private function registerProxyAutoloader(): void
+    {
+        if (! $this->serviceCacheConfiguration->shouldUseCache()) {
+            return;
+        }
+
+        $autoloader = $this->getConfiguration()->getProxyAutoloader();
+
+        if (self::$registeredAutoloader === $autoloader) {
+            return;
+        }
+
+        if (self::$registeredAutoloader !== null) {
+            // another ProxyFactory instance may have already registered an autoloader.
+            // this should not happen normally, but just in case we will unload
+            // the old autoloader.
+            spl_autoload_unregister(self::$registeredAutoloader);
+        }
+
+        self::$registeredAutoloader = $autoloader;
+        spl_autoload_register(self::$registeredAutoloader);
     }
 }

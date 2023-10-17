@@ -842,8 +842,6 @@ final class MessagingSystemConfiguration implements Configuration
     public static function prepareCacheDirectory(ServiceCacheConfiguration $serviceCacheConfiguration): void
     {
         if (! $serviceCacheConfiguration->shouldUseCache()) {
-            /** We need to clean, in case stale cache exists. So enabling cache will generate fresh one */
-            self::cleanCache($serviceCacheConfiguration);
             return;
         }
 
@@ -855,8 +853,6 @@ final class MessagingSystemConfiguration implements Configuration
                 "Not enough permissions to create cache directory {$cacheDirectoryPath}"
             );
         }
-
-        Assert::isFalse(is_file($cacheDirectoryPath), 'Cache directory is file, should be directory');
     }
 
     public static function cleanCache(ServiceCacheConfiguration $serviceCacheConfiguration): void

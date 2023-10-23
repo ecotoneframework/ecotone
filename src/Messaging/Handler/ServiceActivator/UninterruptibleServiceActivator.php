@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\ServiceActivator;
 
-use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\MessageHandler;
 
 final class UninterruptibleServiceActivator implements MessageHandlerBuilderWithParameterConverters
 {
@@ -18,30 +16,9 @@ final class UninterruptibleServiceActivator implements MessageHandlerBuilderWith
     {
     }
 
-    public static function create(object $objectToInvokeOnReferenceName, string $methodName): self
+    public static function create(DefinedObject $objectToInvokeOnReferenceName, string $methodName): self
     {
         return new self(ServiceActivatorBuilder::createWithDirectReference($objectToInvokeOnReferenceName, $methodName));
-    }
-
-    /**
-     * @param ChannelResolver $channelResolver
-     * @param ReferenceSearchService $referenceSearchService
-     * @return MessageHandler
-     */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
-    {
-        return $this->serviceActivatorBuilder->build($channelResolver, $referenceSearchService);
-    }
-
-    /**
-     * It returns, internal reference objects that will be called during handling method
-     *
-     * @param InterfaceToCallRegistry $interfaceToCallRegistry
-     * @return InterfaceToCall[]
-     */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return $this->serviceActivatorBuilder->resolveRelatedInterfaces($interfaceToCallRegistry);
     }
 
     /**
@@ -92,14 +69,6 @@ final class UninterruptibleServiceActivator implements MessageHandlerBuilderWith
     }
 
     /**
-     * @return string[] empty string means no required reference name exists
-     */
-    public function getRequiredReferenceNames(): array
-    {
-        return $this->serviceActivatorBuilder->getRequiredReferenceNames();
-    }
-
-    /**
      * @param array|ParameterConverterBuilder[] $methodParameterConverterBuilders
      * @return static
      */
@@ -116,6 +85,11 @@ final class UninterruptibleServiceActivator implements MessageHandlerBuilderWith
     public function getParameterConverters(): array
     {
         return $this->serviceActivatorBuilder->getParameterConverters();
+    }
+
+    public function compile(MessagingContainerBuilder $builder): Definition
+    {
+        return $this->serviceActivatorBuilder->compile($builder);
     }
 
     public function __toString(): string

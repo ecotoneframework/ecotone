@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Config\Container\AttributeDefinition;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 
 /**
  * Interface InterceptedEndpoint
@@ -17,7 +18,7 @@ interface InterceptedEndpoint
      * @param AroundInterceptorReference $aroundInterceptorReference
      * @return static
      */
-    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference);
+    public function addAroundInterceptor(AroundInterceptorBuilder $aroundInterceptorReference);
 
     /**
      * @param InterfaceToCallRegistry $interfaceToCallRegistry
@@ -26,23 +27,15 @@ interface InterceptedEndpoint
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall;
 
     /**
-     * @param object[] $endpointAnnotations
+     * @param AttributeDefinition[] $endpointAnnotations
      * @return static
      */
     public function withEndpointAnnotations(iterable $endpointAnnotations);
 
     /**
-     * @return object[]
+     * @return AttributeDefinition[]
      */
     public function getEndpointAnnotations(): array;
-
-    /**
-     * It returns, internal reference objects that will be called during handling method
-     *
-     * @param InterfaceToCallRegistry $interfaceToCallRegistry
-     * @return InterfaceToCall[]
-     */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable;
 
     /**
      * @return string[]

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite\Test\Configuration;
 
-use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Precedence;
 
 final class SerializationChannelAdapterBuilder implements ChannelInterceptorBuilder
@@ -23,26 +23,16 @@ final class SerializationChannelAdapterBuilder implements ChannelInterceptorBuil
         return $this->relatedChannel;
     }
 
-    public function getRequiredReferenceNames(): array
-    {
-        return [];
-    }
-
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return [];
-    }
-
     public function getPrecedence(): int
     {
         return Precedence::DEFAULT_PRECEDENCE;
     }
 
-    public function build(ReferenceSearchService $referenceSearchService): ChannelInterceptor
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        return new SerializationChannelAdapter(
+        return new Definition(SerializationChannelAdapter::class, [
             $this->targetMediaType,
-            $referenceSearchService->get(ConversionService::REFERENCE_NAME)
-        );
+            Reference::to(ConversionService::REFERENCE_NAME),
+        ]);
     }
 }

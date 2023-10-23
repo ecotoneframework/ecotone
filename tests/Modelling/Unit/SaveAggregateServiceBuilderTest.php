@@ -3,12 +3,8 @@
 namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\ClassDefinition;
-use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Store\Document\DocumentStore;
@@ -22,6 +18,7 @@ use Ecotone\Modelling\SaveAggregateService;
 use Ecotone\Modelling\SaveAggregateServiceBuilder;
 use Ecotone\Modelling\StandardRepository;
 use Ecotone\Modelling\StorageEventBus;
+use Ecotone\Test\ComponentTestBuilder;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Test\Ecotone\Modelling\Fixture\Blog\Article;
@@ -61,15 +58,10 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->withAggregateRepositoryFactories(['orderRepository']);
 
         $inMemoryStandardRepository = InMemoryStandardRepository::createEmpty();
-        $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith(
-                [
-                    'orderRepository' => $inMemoryStandardRepository,
-                    EventBus::class => StorageEventBus::create(),
-                ]
-            )
-        );
+        $aggregateCommandHandler    = ComponentTestBuilder::create()
+            ->withReference('orderRepository', $inMemoryStandardRepository)
+            ->withReference(EventBus::class, StorageEventBus::create())
+            ->build($aggregateCallingCommandHandler);
 
         $this->assertNull($inMemoryStandardRepository->findBy(Order::class, ['orderId' => 1]));
 
@@ -97,15 +89,10 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->withAggregateRepositoryFactories(['orderRepository']);
 
         $eventBus = StorageEventBus::create();
-        $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith(
-                [
-                    'orderRepository' => InMemoryStandardRepository::createEmpty(),
-                    EventBus::class => $eventBus,
-                ]
-            )
-        );
+        $aggregateCommandHandler    = ComponentTestBuilder::create()
+            ->withReference('orderRepository', InMemoryStandardRepository::createEmpty())
+            ->withReference(EventBus::class, $eventBus)
+            ->build($aggregateCallingCommandHandler);
 
         $aggregateCommandHandler->handle(
             MessageBuilder::withPayload(CreateOrderCommand::createWith(1, 1, 'Some'))
@@ -130,16 +117,11 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->withAggregateRepositoryFactories(['repository']);
 
         $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
-        $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith(
-                [
-                    'repository' => InMemoryEventSourcedRepository::createEmpty(),
-                    DocumentStore::class => $inMemoryDocumentStore,
-                    EventBus::class => StorageEventBus::create(),
-                ]
-            )
-        );
+        $aggregateCommandHandler = ComponentTestBuilder::create()
+            ->withReference('repository', InMemoryEventSourcedRepository::createEmpty())
+            ->withReference(DocumentStore::class, $inMemoryDocumentStore)
+            ->withReference(EventBus::class, StorageEventBus::create())
+            ->build($aggregateCallingCommandHandler);
 
         $event = new TicketWasStartedEvent(1);
         $ticket = new Ticket();
@@ -171,16 +153,11 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->withAggregateRepositoryFactories(['repository']);
 
         $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
-        $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith(
-                [
-                    'repository' => InMemoryEventSourcedRepository::createEmpty(),
-                    DocumentStore::class => $inMemoryDocumentStore,
-                    EventBus::class => StorageEventBus::create(),
-                ]
-            )
-        );
+        $aggregateCommandHandler = ComponentTestBuilder::create()
+            ->withReference('repository', InMemoryEventSourcedRepository::createEmpty())
+            ->withReference(DocumentStore::class, $inMemoryDocumentStore)
+            ->withReference(EventBus::class, StorageEventBus::create())
+            ->build($aggregateCallingCommandHandler);
 
         $event = new TicketWasStartedEvent(1);
         $ticket = new Ticket();
@@ -209,16 +186,11 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->withAggregateRepositoryFactories(['repository']);
 
         $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
-        $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith(
-                [
-                    'repository' => InMemoryEventSourcedRepository::createEmpty(),
-                    DocumentStore::class => $inMemoryDocumentStore,
-                    EventBus::class => StorageEventBus::create(),
-                ]
-            )
-        );
+        $aggregateCommandHandler = ComponentTestBuilder::create()
+            ->withReference('repository', InMemoryEventSourcedRepository::createEmpty())
+            ->withReference(DocumentStore::class, $inMemoryDocumentStore)
+            ->withReference(EventBus::class, StorageEventBus::create())
+            ->build($aggregateCallingCommandHandler);
 
         $event = new TicketWasStartedEvent(1);
         $ticket = new Ticket();
@@ -249,15 +221,10 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->withAggregateRepositoryFactories(['repository']);
 
         $inMemoryStandardRepository = InMemoryStandardRepository::createEmpty();
-        $aggregateCommandHandler    = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith(
-                [
-                    'repository' => $inMemoryStandardRepository,
-                    EventBus::class => StorageEventBus::create(),
-                ]
-            )
-        );
+        $aggregateCommandHandler = ComponentTestBuilder::create()
+            ->withReference('repository', $inMemoryStandardRepository)
+            ->withReference(EventBus::class, StorageEventBus::create())
+            ->build($aggregateCallingCommandHandler);
 
         $replyChannel = QueueChannel::create();
         $aggregateCommandHandler->handle(
@@ -312,16 +279,10 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->withAggregateRepositoryFactories(['orderRepository'])
             ->withInputChannelName('inputChannel');
 
-        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith(
-                [
-                    'orderRepository' => $orderRepository,
-                    ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                    EventBus::class => StorageEventBus::create(),
-                ]
-            )
-        );
+        $aggregateCommandHandler = ComponentTestBuilder::create()
+            ->withReference('orderRepository', $orderRepository)
+            ->withReference(EventBus::class, StorageEventBus::create())
+            ->build($aggregateCallingCommandHandler);
 
         $aggregateCommandHandler->handle(
             MessageBuilder::withPayload($commandToRun)
@@ -373,16 +334,10 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->withAggregateRepositoryFactories(['orderRepository'])
             ->withInputChannelName('inputChannel');
 
-        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith(
-                [
-                    'orderRepository' => $orderRepository,
-                    ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                    EventBus::class => StorageEventBus::create(),
-                ]
-            )
-        );
+        $aggregateCommandHandler = ComponentTestBuilder::create()
+            ->withReference('orderRepository', $orderRepository)
+            ->withReference(EventBus::class, StorageEventBus::create())
+            ->build($aggregateCallingCommandHandler);
 
         $aggregateCommandHandler->handle(
             MessageBuilder::withPayload($commandToRun)
@@ -406,16 +361,10 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->withAggregateRepositoryFactories(['repository'])
             ->withInputChannelName('inputChannel');
 
-        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith(
-                [
-                    'repository' => InMemoryEventSourcedRepository::createEmpty(),
-                    ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                    EventBus::class => StorageEventBus::create(),
-                ]
-            )
-        );
+        $aggregateCommandHandler = ComponentTestBuilder::create()
+            ->withReference('repository', InMemoryEventSourcedRepository::createEmpty())
+            ->withReference(EventBus::class, StorageEventBus::create())
+            ->build($aggregateCallingCommandHandler);
 
         $this->expectException(NoCorrectIdentifierDefinedException::class);
 
@@ -442,15 +391,10 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createEmpty();
 
-        $aggregateCommandHandler = $aggregateCallingCommandHandler->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith(
-                [
-                    'repository' => $inMemoryEventSourcedRepository,
-                    EventBus::class => StorageEventBus::create(),
-                ]
-            )
-        );
+        $aggregateCommandHandler = ComponentTestBuilder::create()
+            ->withReference('repository', $inMemoryEventSourcedRepository)
+            ->withReference(EventBus::class, StorageEventBus::create())
+            ->build($aggregateCallingCommandHandler);
 
         $aggregateId = ['id' => 123];
         $aggregateCommandHandler->handle(

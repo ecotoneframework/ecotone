@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 
 /**
  * Class ConsumerLifecycleBuilder
@@ -14,9 +14,9 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference
 interface ConsumerLifecycleBuilder
 {
     /**
-     * @param AroundInterceptorReference $aroundInterceptorReference
+     * @param AroundInterceptorBuilder $aroundInterceptorReference
      *
      * @return static
      */
-    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference);
+    public function addAroundInterceptor(AroundInterceptorBuilder $aroundInterceptorReference);
 }

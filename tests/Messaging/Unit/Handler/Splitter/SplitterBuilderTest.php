@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Handler\Splitter;
 
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\Splitter\SplitterBuilder;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ComponentTestBuilder;
 use Exception;
 use Test\Ecotone\Messaging\Fixture\Handler\Splitter\ServiceSplittingArrayPayload;
 use Test\Ecotone\Messaging\Fixture\Handler\Splitter\WrongSplittingService;
@@ -28,12 +27,9 @@ class SplitterBuilderTest extends MessagingTest
 {
     public function test_splitting_incoming_message_where_service_returns_payloads()
     {
-        $splitter = SplitterBuilder::createWithDirectObject(new ServiceSplittingArrayPayload(), 'splitToPayload');
+        $splitter = SplitterBuilder::createWithDefinition(ServiceSplittingArrayPayload::class, 'splitToPayload');
 
-        $splitter = $splitter->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
-        );
+        $splitter = ComponentTestBuilder::create()->build($splitter);
 
         $outputChannel = QueueChannel::create();
         $splitter->handle(MessageBuilder::withPayload([1, 2])->setReplyChannel($outputChannel)->build());
@@ -48,14 +44,11 @@ class SplitterBuilderTest extends MessagingTest
      */
     public function test_throwing_exception_if_splitter_does_not_return_array()
     {
-        $splitter = SplitterBuilder::createWithDirectObject(new WrongSplittingService(), 'splittingWithReturnString');
+        $splitter = SplitterBuilder::createWithDefinition(WrongSplittingService::class, 'splittingWithReturnString');
 
         $this->expectException(InvalidArgumentException::class);
 
-        $splitter->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
-        );
+        ComponentTestBuilder::create()->build($splitter);
     }
 
     /**
@@ -65,12 +58,9 @@ class SplitterBuilderTest extends MessagingTest
      */
     public function test_creating_splitter_with_direct_reference()
     {
-        $splitter = SplitterBuilder::createWithDirectObject(new ServiceSplittingArrayPayload(), 'splitToPayload');
+        $splitter = SplitterBuilder::createWithDefinition(ServiceSplittingArrayPayload::class, 'splitToPayload');
 
-        $splitter = $splitter->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
-        );
+        $splitter = ComponentTestBuilder::create()->build($splitter);
 
         $outputChannel = QueueChannel::create();
         $splitter->handle(MessageBuilder::withPayload([1, 2])->setReplyChannel($outputChannel)->build());
@@ -88,10 +78,7 @@ class SplitterBuilderTest extends MessagingTest
     {
         $splitter = SplitterBuilder::createMessagePayloadSplitter();
 
-        $splitter = $splitter->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
-        );
+        $splitter = ComponentTestBuilder::create()->build($splitter);
 
         $outputChannel = QueueChannel::create();
         $splitter->handle(MessageBuilder::withPayload([1, 2])->setReplyChannel($outputChannel)->build());
@@ -104,10 +91,7 @@ class SplitterBuilderTest extends MessagingTest
     {
         $splitter = SplitterBuilder::createMessagePayloadSplitter();
 
-        $splitter = $splitter->build(
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createEmpty()
-        );
+        $splitter = ComponentTestBuilder::create()->build($splitter);
 
         $outputChannel = QueueChannel::create();
         $splitter->handle(

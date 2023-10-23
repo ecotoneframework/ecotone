@@ -6,7 +6,6 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\ParameterConverter;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
@@ -17,7 +16,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class HeaderExpressionConverter implements ParameterConverter
 {
-    public function __construct(private ReferenceSearchService $referenceSearchService, private ExpressionEvaluationService $expressionEvaluationService, private string $headerName, private string $expression, private bool $isRequired)
+    public function __construct(private ExpressionEvaluationService $expressionEvaluationService, private string $headerName, private string $expression, private bool $isRequired)
     {
     }
 
@@ -37,7 +36,6 @@ class HeaderExpressionConverter implements ParameterConverter
                 'headers' => $message->getHeaders()->headers(),
                 'payload' => $message->getPayload(),
             ],
-            $this->referenceSearchService
         );
     }
 }

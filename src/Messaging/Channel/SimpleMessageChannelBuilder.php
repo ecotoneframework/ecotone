@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
 
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\DefinedObjectWrapper;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
@@ -69,22 +70,6 @@ class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuil
     }
 
     /**
-     * @return string[] empty string means no required reference name exists
-     */
-    public function getRequiredReferenceNames(): array
-    {
-        return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return [];
-    }
-
-    /**
      * @inheritDoc
      */
     public function getMessageChannelName(): string
@@ -102,12 +87,9 @@ class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuil
         return DefaultHeaderMapper::createAllHeadersMapping();
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ReferenceSearchService $referenceSearchService): MessageChannel
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        return $this->messageChannel;
+        return new DefinedObjectWrapper($this->messageChannel);
     }
 
     public function __toString()

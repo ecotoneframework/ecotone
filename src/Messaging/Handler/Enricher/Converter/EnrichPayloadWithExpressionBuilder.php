@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher\Converter;
 
-use Ecotone\Messaging\Handler\Enricher\PropertyEditor;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorBuilder;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class ExpressionSetterBuilder
@@ -75,19 +76,14 @@ class EnrichPayloadWithExpressionBuilder implements PropertyEditorBuilder
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): PropertyEditor
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        /** @var ExpressionEvaluationService $expressionEvaluationService */
-        $expressionEvaluationService = $referenceSearchService->get(ExpressionEvaluationService::REFERENCE);
-
-        return new EnrichPayloadWithExpressionPropertyEditor(
-            $expressionEvaluationService,
-            $referenceSearchService,
-            PropertyEditorAccessor::createWithMapping($referenceSearchService, $this->mappingExpression),
-            PropertyPath::createWith($this->propertyPath),
+        return new Definition(EnrichPayloadWithExpressionPropertyEditor::class, [
+            new Reference(ExpressionEvaluationService::REFERENCE),
+            new Definition(PropertyEditorAccessor::class, [new Reference(ExpressionEvaluationService::REFERENCE), $this->mappingExpression], 'createWithMapping'),
+            new Definition(PropertyPath::class, [$this->propertyPath], 'createWith'),
             $this->expression,
             $this->nullResultExpression,
-            $this->mappingExpression
-        );
+        ]);
     }
 }

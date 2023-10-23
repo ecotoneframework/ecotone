@@ -24,6 +24,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ComponentTestBuilder;
 use Exception;
 use Test\Ecotone\Messaging\Fixture\Conversion\FakeConverterService;
 use Test\Ecotone\Messaging\Fixture\Dto\OrderExample;
@@ -49,7 +50,7 @@ class EnricherBuilderTest extends MessagingTest
 
         $enricher = EnricherBuilder::create([]);
 
-        $enricher->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+        ComponentTestBuilder::create()->build($enricher);
     }
 
     /**
@@ -93,16 +94,9 @@ class EnricherBuilderTest extends MessagingTest
             ->setReplyChannel($outputChannel)
             ->build();
 
-        $enricher = EnricherBuilder::create($setterBuilders)
-            ->withInputChannelName('some')
-            ->build(
-                InMemoryChannelResolver::createEmpty(),
-                InMemoryReferenceSearchService::createWith(
-                    [
-                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                    ]
-                )
-            );
+        $enricher = ComponentTestBuilder::create()
+            ->build(EnricherBuilder::create($setterBuilders)
+                ->withInputChannelName('some'));
 
         $enricher->handle($inputMessage);
     }
@@ -159,16 +153,14 @@ class EnricherBuilderTest extends MessagingTest
             ->setReplyChannel($outputChannel)
             ->build();
 
-        $enricher = EnricherBuilder::create($setterBuilders)
-            ->withInputChannelName('some')
+        $enricher = ComponentTestBuilder::create()
+            ->withReference(
+                ConversionService::REFERENCE_NAME,
+                AutoCollectionConversionService::createWith($converters)
+            )
             ->build(
-                InMemoryChannelResolver::createEmpty(),
-                InMemoryReferenceSearchService::createWith(
-                    [
-                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                        ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith($converters),
-                    ]
-                )
+                EnricherBuilder::create($setterBuilders)
+                    ->withInputChannelName('some')
             );
 
         $enricher->handle($inputMessage);
@@ -311,21 +303,11 @@ class EnricherBuilderTest extends MessagingTest
         $requestChannel = DirectChannel::create();
         $requestChannel->subscribe(ReplyViaHeadersMessageHandler::create($replyPayload));
 
-        $enricher = EnricherBuilder::create($setterBuilders)
-            ->withInputChannelName('some')
-            ->withRequestMessageChannel($requestChannelName)
-            ->build(
-                InMemoryChannelResolver::createFromAssociativeArray(
-                    [
-                        $requestChannelName => $requestChannel,
-                    ]
-                ),
-                InMemoryReferenceSearchService::createWith(
-                    [
-                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                    ]
-                )
-            );
+        $enricher = ComponentTestBuilder::create()
+            ->withChannel($requestChannelName, $requestChannel)
+            ->build(EnricherBuilder::create($setterBuilders)
+                ->withInputChannelName('some')
+                ->withRequestMessageChannel($requestChannelName));
 
         $enricher->handle($inputMessage);
     }
@@ -760,22 +742,12 @@ class EnricherBuilderTest extends MessagingTest
         $messageHandler = ReplyViaHeadersMessageHandler::create($replyPayload);
         $requestChannel->subscribe($messageHandler);
 
-        $enricher = EnricherBuilder::create($setterBuilders)
-            ->withInputChannelName('some')
-            ->withRequestMessageChannel($requestChannelName)
-            ->withRequestPayloadExpression("payload['orders']")
-            ->build(
-                InMemoryChannelResolver::createFromAssociativeArray(
-                    [
-                        $requestChannelName => $requestChannel,
-                    ]
-                ),
-                InMemoryReferenceSearchService::createWith(
-                    [
-                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                    ]
-                )
-            );
+        $enricher = ComponentTestBuilder::create()
+            ->withChannel($requestChannelName, $requestChannel)
+            ->build(EnricherBuilder::create($setterBuilders)
+                ->withInputChannelName('some')
+                ->withRequestMessageChannel($requestChannelName)
+                ->withRequestPayloadExpression("payload['orders']"));
 
         $enricher->handle($inputMessage);
 
@@ -869,22 +841,12 @@ class EnricherBuilderTest extends MessagingTest
         $messageHandler = ReplyViaHeadersMessageHandler::create($replyPayload);
         $requestChannel->subscribe($messageHandler);
 
-        $enricher = EnricherBuilder::create($setterBuilders)
-            ->withInputChannelName('some')
-            ->withRequestMessageChannel($requestChannelName)
-            ->withRequestPayloadExpression("extract(payload['orders'], 'orderId')")
-            ->build(
-                InMemoryChannelResolver::createFromAssociativeArray(
-                    [
-                        $requestChannelName => $requestChannel,
-                    ]
-                ),
-                InMemoryReferenceSearchService::createWith(
-                    [
-                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                    ]
-                )
-            );
+        $enricher = ComponentTestBuilder::create()
+            ->withChannel($requestChannelName, $requestChannel)
+            ->build(EnricherBuilder::create($setterBuilders)
+                ->withInputChannelName('some')
+                ->withRequestMessageChannel($requestChannelName)
+                ->withRequestPayloadExpression("extract(payload['orders'], 'orderId')"));
 
         $enricher->handle($inputMessage);
 
@@ -925,22 +887,12 @@ class EnricherBuilderTest extends MessagingTest
         $messageHandler = ReplyViaHeadersMessageHandler::create($replyPayload);
         $requestChannel->subscribe($messageHandler);
 
-        $enricher = EnricherBuilder::create($setterBuilders)
-            ->withInputChannelName('some')
-            ->withRequestMessageChannel($requestChannelName)
-            ->withRequestPayloadExpression("createArray('ids', extract(payload['orders'], 'orderId', false))")
-            ->build(
-                InMemoryChannelResolver::createFromAssociativeArray(
-                    [
-                        $requestChannelName => $requestChannel,
-                    ]
-                ),
-                InMemoryReferenceSearchService::createWith(
-                    [
-                        ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                    ]
-                )
-            );
+        $enricher = ComponentTestBuilder::create()
+            ->withChannel($requestChannelName, $requestChannel)
+            ->build(EnricherBuilder::create($setterBuilders)
+                ->withInputChannelName('some')
+                ->withRequestMessageChannel($requestChannelName)
+                ->withRequestPayloadExpression("createArray('ids', extract(payload['orders'], 'orderId', false))"));
 
         $enricher->handle($inputMessage);
 

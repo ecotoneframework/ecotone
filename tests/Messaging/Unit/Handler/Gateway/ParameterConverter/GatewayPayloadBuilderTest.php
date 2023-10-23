@@ -4,12 +4,12 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Gateway\ParameterConverter;
 
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Handler\UnionTypeDescriptor;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ComponentTestBuilder;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
@@ -20,8 +20,9 @@ class GatewayPayloadBuilderTest extends TestCase
 {
     public function test_resolving_class_type_when_parameter_is_non_array()
     {
-        $gatewayPayload = GatewayPayloadBuilder::create('some')
-                                ->build(InMemoryReferenceSearchService::createEmpty());
+        $gatewayPayload = ComponentTestBuilder::create()->build(
+            GatewayPayloadBuilder::create('some')
+        );
 
         $this->assertEquals(
             MessageBuilder::withPayload(new stdClass())
@@ -38,8 +39,9 @@ class GatewayPayloadBuilderTest extends TestCase
 
     public function test_resolving_class_type_when_parameter_is_union_type()
     {
-        $gatewayPayload = GatewayPayloadBuilder::create('some')
-            ->build(InMemoryReferenceSearchService::createEmpty());
+        $gatewayPayload = ComponentTestBuilder::create()->build(
+            GatewayPayloadBuilder::create('some')
+        );
 
         $this->assertEquals(
             MessageBuilder::withPayload(new stdClass())
@@ -56,8 +58,7 @@ class GatewayPayloadBuilderTest extends TestCase
 
     public function test_resolving_class_type_when_parameter_is_anything()
     {
-        $gatewayPayload = GatewayPayloadBuilder::create('some')
-            ->build(InMemoryReferenceSearchService::createEmpty());
+        $gatewayPayload = ComponentTestBuilder::create()->build(GatewayPayloadBuilder::create('some'));
 
         $this->assertEquals(
             MessageBuilder::withPayload(new stdClass())

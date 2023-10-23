@@ -30,13 +30,6 @@ interface Module
      */
     public function canHandle($extensionObject): bool;
 
-    /**
-     * Which will be available during build configure phase
-     *
-     * @return RequiredReference[]|OptionalReference[]|string[]
-     */
-    public function getRelatedReferences(): array;
-
     public function getModuleExtensions(array $serviceExtensions): array;
 
     public function getModulePackageName(): string;

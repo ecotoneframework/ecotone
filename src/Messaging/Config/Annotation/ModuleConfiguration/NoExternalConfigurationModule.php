@@ -13,14 +13,6 @@ use Ecotone\Messaging\Config\Annotation\AnnotationModule;
  */
 abstract class NoExternalConfigurationModule implements AnnotationModule
 {
-    /**
-     * @inheritDoc
-     */
-    public function getRelatedReferences(): array
-    {
-        return [];
-    }
-
     public function getModuleExtensions(array $serviceExtensions): array
     {
         return [];

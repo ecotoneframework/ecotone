@@ -5,16 +5,14 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Handler\Logger;
 
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Config\InMemoryChannelResolver;
-use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
-use Ecotone\Messaging\Conversion\ConversionService;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
 use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodArgumentsFactory;
 use Ecotone\Messaging\Support\MessageBuilder;
+
+use Ecotone\Test\ComponentTestBuilder;
 
 use function json_encode;
 
@@ -36,21 +34,17 @@ class LoggingHandlerBuilderTest extends MessagingTest
         $logParameter = InterfaceToCall::create(LoggingInterceptor::class, 'logAfter')->getParameterWithName('log');
         $logger = LoggerExample::create();
         $queueChannel = QueueChannel::create();
-        $loggingHandler = LoggingHandlerBuilder::createForAfter()
-                            ->withOutputMessageChannel('outputChannel')
-                            ->withMethodParameterConverters([
-                                MessageConverterBuilder::create('message'),
-                                MethodArgumentsFactory::getAnnotationValueConverter($logParameter, InterfaceToCall::create(ServiceActivatorWithLoggerExample::class, 'sendMessage'), []),
-                            ])
-                            ->build(
-                                InMemoryChannelResolver::createFromAssociativeArray([
-                                    'outputChannel' => $queueChannel,
-                                ]),
-                                InMemoryReferenceSearchService::createWith([
-                                    ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createWith([]),
-                                    LoggingHandlerBuilder::LOGGER_REFERENCE => $logger,
-                                ])
-                            );
+        $loggingHandler = ComponentTestBuilder::create()
+            ->withChannel('outputChannel', $queueChannel)
+            ->withReference(LoggingHandlerBuilder::LOGGER_REFERENCE, $logger)
+            ->build(
+                LoggingHandlerBuilder::createForAfter()
+                    ->withOutputMessageChannel('outputChannel')
+                    ->withMethodParameterConverters([
+                        MessageConverterBuilder::create('message'),
+                        MethodArgumentsFactory::getAnnotationValueConverter($logParameter, InterfaceToCall::create(ServiceActivatorWithLoggerExample::class, 'sendMessage'), []),
+                    ])
+            );
 
         $message = MessageBuilder::withPayload('some')->build();
         $loggingHandler->handle($message);
@@ -69,21 +63,16 @@ class LoggingHandlerBuilderTest extends MessagingTest
             ->getMock();
 
         $queueChannel = QueueChannel::create();
-        $loggingHandler = LoggingHandlerBuilder::createForBefore()
+        $componentTest = ComponentTestBuilder::create()
+            ->withChannel('outputChannel', $queueChannel)
+            ->withReference(LoggingHandlerBuilder::LOGGER_REFERENCE, $logger)
+        ;
+        $loggingHandler = $componentTest->build(LoggingHandlerBuilder::createForBefore()
             ->withOutputMessageChannel('outputChannel')
             ->withMethodParameterConverters([
                 MessageConverterBuilder::create('message'),
                 MethodArgumentsFactory::getAnnotationValueConverter($logParameter, InterfaceToCall::create(ServiceActivatorWithLoggerExample::class, 'sendMessage'), []),
-            ])
-            ->build(
-                InMemoryChannelResolver::createFromAssociativeArray([
-                    'outputChannel' => $queueChannel,
-                ]),
-                InMemoryReferenceSearchService::createWith([
-                    ConversionService::REFERENCE_NAME => AutoCollectionConversionService::createEmpty(),
-                    LoggingHandlerBuilder::LOGGER_REFERENCE => $logger,
-                ])
-            );
+            ]));
 
         $message = MessageBuilder::withPayload('some')->build();
 

@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher\Converter;
 
-use Ecotone\Messaging\Handler\Enricher\PropertyEditor;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorBuilder;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 
 /**
  * Class StaticHeaderSetterBuilder
@@ -44,15 +46,12 @@ class EnrichHeaderWithValueBuilder implements PropertyEditorBuilder
         return new self($name, $value);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ReferenceSearchService $referenceSearchService): PropertyEditor
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        return EnrichHeaderWithValuePropertyEditor::create(
-            PropertyEditorAccessor::createWithMapping($referenceSearchService, ''),
-            PropertyPath::createWith($this->name),
-            $this->value
-        );
+        return new Definition(EnrichHeaderWithValuePropertyEditor::class, [
+            new Definition(PropertyEditorAccessor::class, [new Reference(ExpressionEvaluationService::REFERENCE), ''], 'createWithMapping'),
+            new Definition(PropertyPath::class, [$this->name], 'createWith'),
+            $this->value,
+        ], 'create');
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Ecotone\Messaging\Handler\Router;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Message;
 
 /**
@@ -10,7 +12,7 @@ use Ecotone\Messaging\Message;
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-final class HeaderMappingRouter
+final class HeaderMappingRouter implements DefinedObject
 {
     private string $headerName;
     private array $headerValueToChannelMapping;
@@ -53,5 +55,13 @@ final class HeaderMappingRouter
         }
 
         return $channelsToRoute;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [
+            $this->headerName,
+            $this->headerValueToChannelMapping,
+        ], 'create');
     }
 }

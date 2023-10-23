@@ -7,7 +7,6 @@ namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
 use Ecotone\Messaging\Handler\MethodArgument;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -18,7 +17,6 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class GatewayPayloadExpressionConverter implements GatewayParameterConverter
 {
-    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
     private \Ecotone\Messaging\Handler\ExpressionEvaluationService $expressionEvaluationService;
     /**s
      * @var string
@@ -29,14 +27,12 @@ class GatewayPayloadExpressionConverter implements GatewayParameterConverter
     /**
      * MessageToExpressionEvaluationParameterConverter constructor.
      *
-     * @param ReferenceSearchService $referenceSearchService
      * @param ExpressionEvaluationService $expressionEvaluationService
      * @param string $parameterName
      * @param string $expression
      */
-    public function __construct(ReferenceSearchService $referenceSearchService, ExpressionEvaluationService $expressionEvaluationService, string $parameterName, string $expression)
+    public function __construct(ExpressionEvaluationService $expressionEvaluationService, string $parameterName, string $expression)
     {
-        $this->referenceSearchService = $referenceSearchService;
         $this->expressionEvaluationService = $expressionEvaluationService;
         $this->parameterName = $parameterName;
         $this->expression = $expression;
@@ -57,7 +53,6 @@ class GatewayPayloadExpressionConverter implements GatewayParameterConverter
                         [
                             'value' => $methodArgument->value(),
                         ],
-                        $this->referenceSearchService
                     )
                 );
     }

@@ -11,7 +11,7 @@ use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\NonProxyGateway;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
@@ -50,7 +50,7 @@ class Gateway implements NonProxyGateway
      * @param int $replyMilliSecondsTimeout
      * @param ReferenceSearchService $referenceSearchService
      * @param ChannelResolver $channelResolver
-     * @param AroundInterceptorReference[] $aroundInterceptors
+     * @param AroundInterceptorBuilder[] $aroundInterceptors
      * @param InputOutputMessageHandlerBuilder[] $sortedBeforeInterceptors
      * @param InputOutputMessageHandlerBuilder[] $sortedAfterInterceptors
      * @param object[] $endpointAnnotations

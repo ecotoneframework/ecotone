@@ -3,12 +3,14 @@
 namespace Ecotone\Modelling\Config\InstantRetry;
 
 use Ecotone\Messaging\Attribute\Parameter\Reference;
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Exception;
 use Psr\Log\LoggerInterface;
 
-class InstantRetryInterceptor
+class InstantRetryInterceptor implements DefinedObject
 {
     public function __construct(private int $maxRetryAttempts, private array $exceptions = [])
     {
@@ -55,5 +57,10 @@ class InstantRetryInterceptor
         }
 
         return false;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [$this->maxRetryAttempts]);
     }
 }

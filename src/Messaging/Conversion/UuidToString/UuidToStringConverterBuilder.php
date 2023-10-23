@@ -4,30 +4,19 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion\UuidToString;
 
-use Ecotone\Messaging\Conversion\Converter;
-use Ecotone\Messaging\Conversion\ConverterBuilder;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Config\Container\CompilableBuilder;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 
 /**
  * Class UuidToStringConverterBuilder
  * @package Ecotone\Messaging\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class UuidToStringConverterBuilder implements ConverterBuilder
+class UuidToStringConverterBuilder implements CompilableBuilder
 {
-    /**
-     * @inheritDoc
-     */
-    public function build(ReferenceSearchService $referenceSearchService): Converter
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        return new UuidToStringConverter();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredReferences(): array
-    {
-        return [];
+        return new Definition(UuidToStringConverter::class);
     }
 }

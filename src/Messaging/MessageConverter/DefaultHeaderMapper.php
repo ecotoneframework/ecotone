@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\MessageConverter;
 
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -19,24 +20,20 @@ class DefaultHeaderMapper implements HeaderMapper
     public const CONVERTED_HEADERS_TO_DIFFERENT_FORMAT = 'ecotone.convertedKeys';
 
     /**
-     * @var string[]
+     * @param string[] $toMessageHeadersMapping
+     * @param string[] $fromMessageHeadersMapping
      */
-    private array $fromMessageHeadersMapping = [];
-    /**
-     * @var string[]
-     */
-    private array $toMessageHeadersMapping = [];
-    private bool $headerNamesToLower;
+    public function __construct(private array $toMessageHeadersMapping, private array $fromMessageHeadersMapping, private bool $headerNamesToLower)
+    {
+    }
 
     /**
      * @param string[] $toMessageHeadersMapping
      * @param string[] $fromMessageHeadersMapping
      */
-    private function __construct(array $toMessageHeadersMapping, array $fromMessageHeadersMapping, bool $headerNamesToLower)
+    private static function create(array $toMessageHeadersMapping, array $fromMessageHeadersMapping, bool $headerNamesToLower): self
     {
-        $this->fromMessageHeadersMapping = $this->prepareRegex($fromMessageHeadersMapping, $headerNamesToLower);
-        $this->toMessageHeadersMapping = $this->prepareRegex($toMessageHeadersMapping, $headerNamesToLower);
-        $this->headerNamesToLower = $headerNamesToLower;
+        return new self(self::prepareRegex($toMessageHeadersMapping, $headerNamesToLower), self::prepareRegex($fromMessageHeadersMapping, $headerNamesToLower), $headerNamesToLower);
     }
 
     /**
@@ -45,7 +42,7 @@ class DefaultHeaderMapper implements HeaderMapper
      */
     public static function createWith(array $toMessageHeadersMapping, array $fromMessageHeadersMapping): self
     {
-        return new self($toMessageHeadersMapping, $fromMessageHeadersMapping, false);
+        return self::create($toMessageHeadersMapping, $fromMessageHeadersMapping, false);
     }
 
     /**
@@ -54,17 +51,17 @@ class DefaultHeaderMapper implements HeaderMapper
      */
     public static function createCaseInsensitiveHeadersWith(array $toMessageHeadersMapping, array $fromMessageHeadersMapping): self
     {
-        return new self($toMessageHeadersMapping, $fromMessageHeadersMapping, true);
+        return self::create($toMessageHeadersMapping, $fromMessageHeadersMapping, true);
     }
 
     public static function createAllHeadersMapping(): self
     {
-        return new self(['*'], ['*'], false);
+        return self::create(['*'], ['*'], false);
     }
 
     public static function createNoMapping(): self
     {
-        return new self([], [], false);
+        return self::create([], [], false);
     }
 
     /**
@@ -81,6 +78,15 @@ class DefaultHeaderMapper implements HeaderMapper
     public function mapFromMessageHeaders(array $headersToBeMapped, ConversionService $conversionService): array
     {
         return $this->mapHeaders($this->fromMessageHeadersMapping, $headersToBeMapped, $conversionService);
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [
+            $this->toMessageHeadersMapping,
+            $this->fromMessageHeadersMapping,
+            $this->headerNamesToLower,
+        ]);
     }
 
     /**
@@ -136,7 +142,7 @@ class DefaultHeaderMapper implements HeaderMapper
      * @param bool $caseInsensitiveHeaderNames
      * @return array
      */
-    private function prepareRegex(array $mappedHeaders, bool $caseInsensitiveHeaderNames): array
+    private static function prepareRegex(array $mappedHeaders, bool $caseInsensitiveHeaderNames): array
     {
         $finalMappingHeaders = [];
         foreach ($mappedHeaders as $targetHeader) {
@@ -145,7 +151,7 @@ class DefaultHeaderMapper implements HeaderMapper
             $transformedHeader = str_replace('*', '.*', $transformedHeader);
 
             if (is_array($transformedHeader)) {
-                $finalMappingHeaders[] = $this->prepareRegex($transformedHeader, $caseInsensitiveHeaderNames);
+                $finalMappingHeaders[] = self::prepareRegex($transformedHeader, $caseInsensitiveHeaderNames);
             } else {
                 $finalMappingHeaders[] = trim($caseInsensitiveHeaderNames ? strtolower($transformedHeader) : $transformedHeader);
             }

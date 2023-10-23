@@ -2,17 +2,19 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\DefinitionHelper;
 use Ecotone\Messaging\Endpoint\PollingConsumer\RejectMessageException;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ComponentTestBuilder;
 use InvalidArgumentException;
 use Throwable;
 
-class DataReturningService
+class DataReturningService implements DefinedObject
 {
     private $data;
     /**
@@ -26,7 +28,7 @@ class DataReturningService
 
     private ?Throwable $exception;
 
-    private function __construct($data, bool $asAMessage, array $headers, ?Throwable $exception)
+    public function __construct($data, bool $asAMessage, array $headers, ?Throwable $exception)
     {
         $this->data = $data;
         $this->asAMessage = $asAMessage;
@@ -36,17 +38,12 @@ class DataReturningService
 
     public static function createServiceActivator($dataToReturn): MessageHandler
     {
-        return self::createServiceActivatorBuilder($dataToReturn)->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty());
-    }
-
-    public static function createExceptionalServiceActivator(): MessageHandler
-    {
-        return (ServiceActivatorBuilder::createWithDirectReference(new self('', false, [], new InvalidArgumentException('error during handling')), 'handle'))->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+        return ComponentTestBuilder::create()->build(self::createServiceActivatorBuilder($dataToReturn));
     }
 
     public static function createServiceActivatorWithReturnMessage($payload, array $headers): MessageHandler
     {
-        return self::createServiceActivatorBuilderWithReturnMessage($payload, $headers)->build(InMemoryChannelResolver::createEmpty(), InMemoryReferenceSearchService::createEmpty());
+        return ComponentTestBuilder::create()->build(self::createServiceActivatorBuilderWithReturnMessage($payload, $headers));
     }
 
     public static function createServiceActivatorBuilder($dataToReturn): ServiceActivatorBuilder
@@ -83,5 +80,15 @@ class DataReturningService
         }
 
         return $this->data;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [
+            $this->data,
+            $this->asAMessage,
+            $this->headers,
+            $this->exception ? DefinitionHelper::buildDefinitionFromInstance($this->exception) : null,
+        ]);
     }
 }

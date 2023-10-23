@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverterBuilder;
 use Ecotone\Messaging\Handler\InterfaceParameter;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class GatewayExpressionBuilder
@@ -47,20 +47,15 @@ class GatewayPayloadExpressionBuilder implements GatewayParameterConverterBuilde
         return $this->parameterName === $parameter->getName();
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ReferenceSearchService $referenceSearchService): GatewayParameterConverter
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        /** @var ExpressionEvaluationService $expressionService */
-        $expressionService = $referenceSearchService->get(ExpressionEvaluationService::REFERENCE);
-        Assert::isSubclassOf($expressionService, ExpressionEvaluationService::class, "You're using expression converter parameter, so you must define reference service " . ExpressionEvaluationService::REFERENCE . ' in your registry container, which is subclass of ' . ExpressionEvaluationService::class);
-
-        return new GatewayPayloadExpressionConverter(
-            $referenceSearchService,
-            $expressionService,
-            $this->parameterName,
-            $this->expression
+        return new Definition(
+            GatewayPayloadExpressionConverter::class,
+            [
+                new Reference(ExpressionEvaluationService::REFERENCE),
+                $this->parameterName,
+                $this->expression,
+            ]
         );
     }
 }

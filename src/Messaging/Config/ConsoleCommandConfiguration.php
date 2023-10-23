@@ -2,9 +2,11 @@
 
 namespace Ecotone\Messaging\Config;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
-class ConsoleCommandConfiguration
+class ConsoleCommandConfiguration implements DefinedObject
 {
     private string $name;
     private string $channelName;
@@ -58,5 +60,14 @@ class ConsoleCommandConfiguration
     public function getParameters(): array
     {
         return $this->parameterNames;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [
+            $this->channelName,
+            $this->name,
+            $this->parameterNames,
+        ], [self::class, 'create']);
     }
 }

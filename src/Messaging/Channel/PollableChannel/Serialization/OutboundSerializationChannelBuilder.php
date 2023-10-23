@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\PollableChannel\Serialization;
 
-use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
-use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\PrecedenceChannelInterceptor;
 
@@ -28,32 +27,19 @@ final class OutboundSerializationChannelBuilder implements ChannelInterceptorBui
         return $this->relatedChannel;
     }
 
-    public function getRequiredReferenceNames(): array
-    {
-        return [];
-    }
-
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return [];
-    }
-
     public function getPrecedence(): int
     {
         return PrecedenceChannelInterceptor::MESSAGE_SERIALIZATION;
     }
 
-    public function build(ReferenceSearchService $referenceSearchService): ChannelInterceptor
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        /** @var ServiceConfiguration $serviceConfiguration */
-        $serviceConfiguration = $referenceSearchService->get(ServiceConfiguration::class);
-
-        return new OutboundSerializationChannelInterceptor(
-            new OutboundMessageConverter(
+        return new Definition(OutboundSerializationChannelInterceptor::class, [
+            new Definition(OutboundMessageConverter::class, [
                 $this->headerMapper,
-                $this->channelConversionMediaType ?: MediaType::parseMediaType($serviceConfiguration->getDefaultSerializationMediaType())
-            ),
-            $referenceSearchService->get(ConversionService::REFERENCE_NAME)
-        );
+                $this->channelConversionMediaType ?: MediaType::parseMediaType($builder->getServiceConfiguration()->getDefaultSerializationMediaType()),
+            ]),
+            Reference::to(ConversionService::REFERENCE_NAME),
+        ]);
     }
 }

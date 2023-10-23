@@ -2,14 +2,15 @@
 
 namespace Ecotone\Messaging\Handler\Bridge;
 
-use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\MessageHandler;
 
 /**
  * Class BridgeBuilder
@@ -22,13 +23,13 @@ class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
 
     private function __construct()
     {
-        $this->bridgeBuilder = ServiceActivatorBuilder::createWithDirectReference(new Bridge(), 'handle');
+        $this->bridgeBuilder = ServiceActivatorBuilder::create(Bridge::class, new InterfaceToCallReference(Bridge::class, 'handle'));
     }
 
     /**
      * @inheritDoc
      */
-    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference): ServiceActivatorBuilder
+    public function addAroundInterceptor(AroundInterceptorBuilder $aroundInterceptorReference): ServiceActivatorBuilder
     {
         $self = clone $this;
 
@@ -138,27 +139,8 @@ class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
         return $this->bridgeBuilder->getInterceptedInterface($interfaceToCallRegistry);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
+    public function compile(MessagingContainerBuilder $builder): Definition|Reference
     {
-        return $this->bridgeBuilder->build($channelResolver, $referenceSearchService);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return $this->bridgeBuilder->resolveRelatedInterfaces($interfaceToCallRegistry);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredReferenceNames(): array
-    {
-        return $this->bridgeBuilder->getRequiredReferenceNames();
+        return $this->bridgeBuilder->compile($builder);
     }
 }

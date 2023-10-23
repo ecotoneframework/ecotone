@@ -7,6 +7,8 @@ namespace Ecotone\Messaging\Conversion;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use ReflectionMethod;
 
 /**
  * Class ReferenceConverter
@@ -28,13 +30,19 @@ class ReferenceServiceConverter implements Converter
      * @param Type $targetType
      * @throws \Ecotone\Messaging\MessagingException
      */
-    private function __construct($object, string $method, Type $sourceType, Type $targetType)
+    public function __construct($object, string $method, Type $sourceType, Type $targetType)
     {
         Assert::isObject($object, '');
         $this->object = $object;
         $this->method = $method;
         $this->sourceType = $sourceType;
         $this->targetType = $targetType;
+
+        $reflectionMethod = new ReflectionMethod($object, $method);
+
+        if (count($reflectionMethod->getParameters()) !== 1) {
+            throw InvalidArgumentException::create("Converter should have only single parameter: {$reflectionMethod}");
+        }
     }
 
     /**

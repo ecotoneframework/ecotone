@@ -2,10 +2,12 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Endpoint;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Transaction\Transactional;
 
 #[Transactional(['transactionFactory1'])]
-class ConsumerContinuouslyWorkingService
+class ConsumerContinuouslyWorkingService implements DefinedObject
 {
     private $receivedPayload;
 
@@ -49,5 +51,10 @@ class ConsumerContinuouslyWorkingService
     public function getReceivedPayload()
     {
         return $this->receivedPayload;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [$this->returnData], 'createWithReturn');
     }
 }

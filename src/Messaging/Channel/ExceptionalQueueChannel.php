@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\PollingConsumer\ConnectionException;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\PollableChannel;
 use RuntimeException;
 
-class ExceptionalQueueChannel implements PollableChannel, MessageChannelWithSerializationBuilder
+class ExceptionalQueueChannel implements PollableChannel, MessageChannelWithSerializationBuilder, DefinedObject
 {
     private int $exceptionCount = 0;
     private QueueChannel $queueChannel;
 
-    private function __construct(private string $channelName, private bool $exceptionOnReceive, private bool $exceptionOnSend, private int $stopFailingAfterAttempt)
+    public function __construct(private string $channelName, private bool $exceptionOnReceive, private bool $exceptionOnSend, private int $stopFailingAfterAttempt)
     {
         $this->queueChannel = QueueChannel::create();
     }
@@ -94,18 +94,18 @@ class ExceptionalQueueChannel implements PollableChannel, MessageChannelWithSeri
         return true;
     }
 
-    public function build(ReferenceSearchService $referenceSearchService): MessageChannel
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        return $this;
+        return $this->getDefinition();
     }
 
-    public function getRequiredReferenceNames(): array
+    public function getDefinition(): Definition
     {
-        return [];
-    }
-
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return [];
+        return new Definition(ExceptionalQueueChannel::class, [
+            $this->channelName,
+            $this->exceptionOnReceive,
+            $this->exceptionOnSend,
+            $this->stopFailingAfterAttempt,
+        ]);
     }
 }

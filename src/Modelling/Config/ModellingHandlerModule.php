@@ -20,6 +20,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResol
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
@@ -296,14 +297,6 @@ class ModellingHandlerModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function getRelatedReferences(): array
-    {
-        return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function canHandle($extensionObject): bool
     {
         return
@@ -325,7 +318,6 @@ class ModellingHandlerModule implements AnnotationModule
     public function prepare(Configuration $messagingConfiguration, array $moduleExtensions, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
-        $messagingConfiguration->requireReferences($this->aggregateRepositoryReferenceNames);
         foreach ($moduleExtensions as $aggregateRepositoryBuilder) {
             if ($aggregateRepositoryBuilder instanceof RepositoryBuilder) {
                 $referenceId = Uuid::uuid4()->toString();
@@ -377,7 +369,7 @@ class ModellingHandlerModule implements AnnotationModule
 
                 $this->registerSaveAggregate($aggregateClassDefinition, $messagingConfiguration, $chainMessageHandlerBuilder, $interfaceToCallRegistry, $baseEventSourcingConfiguration, $inputChannelName);
             } else {
-                Assert::isTrue($interface->hasFirstParameter(), 'Fetchting repository should have at least one parameter for identifiers: ' . $repositoryGateway);
+                Assert::isTrue($interface->hasFirstParameter(), 'Fetching repository should have at least one parameter for identifiers: ' . $repositoryGateway);
                 $this->registerLoadAggregate(
                     $interfaceToCallRegistry->getClassDefinitionFor($interface->getReturnType()),
                     $interface->canItReturnNull(),
@@ -539,7 +531,6 @@ class ModellingHandlerModule implements AnnotationModule
             $saveChannel  = $connectionChannel . 'save';
             $chainHandler = ChainMessageHandlerBuilder::create()
                 ->withEndpointId($endpointId)
-                ->withEndpointAnnotations([$annotation])
                 ->withInputChannelName($connectionChannel)
                 ->withOutputMessageChannel($saveChannel);
 
@@ -558,7 +549,6 @@ class ModellingHandlerModule implements AnnotationModule
                 ->chainInterceptedHandler(
                     CallAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), true, $interfaceToCallRegistry)
                         ->withMethodParameterConverters($parameterConverters)
-                        ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
                         ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames())
                 );
 
@@ -604,7 +594,6 @@ class ModellingHandlerModule implements AnnotationModule
             ChainMessageHandlerBuilder::create()
                 ->withInputChannelName($endpointChannelName)
                 ->withOutputMessageChannel($annotationForMethod->getOutputChannelName())
-                ->withEndpointAnnotations([$annotationForMethod])
                 ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], $handledPayloadType, $interfaceToCallRegistry))
                 ->chain(
                     LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $handledPayloadType, LoadAggregateMode::createThrowOnNotFound(), $interfaceToCallRegistry)
@@ -613,7 +602,6 @@ class ModellingHandlerModule implements AnnotationModule
                 ->chainInterceptedHandler(
                     CallAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), false, $interfaceToCallRegistry)
                         ->withEndpointId($annotationForMethod->getEndpointId())
-                        ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
                         ->withMethodParameterConverters($parameterConverters)
                         ->withRequiredInterceptorNames($annotationForMethod->getRequiredInterceptorNames())
                 )
@@ -652,7 +640,6 @@ class ModellingHandlerModule implements AnnotationModule
                 ->withInputChannelName($endpointInputChannel)
                 ->withOutputMessageChannel($methodAnnotation->getOutputChannelName())
                 ->withEndpointId($methodAnnotation->getEndpointId())
-                ->withEndpointAnnotations([$methodAnnotation])
                 ->withMethodParameterConverters($parameterConverters)
                 ->withRequiredInterceptorNames($methodAnnotation->getRequiredInterceptorNames())
         );
@@ -691,7 +678,7 @@ class ModellingHandlerModule implements AnnotationModule
                         ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
                 )
                 ->chain(
-                    ServiceActivatorBuilder::createWithDirectReference(new FetchAggregate(), 'fetch')
+                    ServiceActivatorBuilder::createWithDefinition(new Definition(FetchAggregate::class), 'fetch')
                         ->withMethodParameterConverters([
                             HeaderBuilder::createOptional('aggregate', AggregateMessage::AGGREGATE_OBJECT),
                         ])

@@ -2,15 +2,13 @@
 
 namespace Ecotone\Modelling\Config;
 
-use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
-use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Exception;
 
 /**
@@ -28,20 +26,18 @@ class BusRouterBuilder implements MessageHandlerBuilder
      */
     private string $inputChannelName;
     private string $type;
-    private MessageHeadersPropagatorInterceptor $messageHeadersPropagator;
 
     /**
      * @param string[]  $channelNamesRouting
      *
      * @throws Exception
      */
-    private function __construct(MessageHeadersPropagatorInterceptor $messageHeadersPropagator, string $endpointId, string $inputChannelName, array $channelNamesRouting, string $type)
+    private function __construct(string $endpointId, string $inputChannelName, array $channelNamesRouting, string $type)
     {
         $this->channelNamesRouting = $channelNamesRouting;
         $this->inputChannelName = $inputChannelName;
         $this->type = $type;
         $this->endpointId = $endpointId;
-        $this->messageHeadersPropagator = $messageHeadersPropagator;
     }
 
     /**
@@ -50,10 +46,9 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws Exception
      */
-    public static function createEventBusByObject(MessageHeadersPropagatorInterceptor $messageHeadersPropagator, array $channelNamesRouting): self
+    public static function createEventBusByObject(array $channelNamesRouting): self
     {
         return new self(
-            $messageHeadersPropagator,
             BusModule::EVENT_CHANNEL_NAME_BY_OBJECT . '.endpoint',
             BusModule::EVENT_CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
@@ -67,10 +62,9 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws Exception
      */
-    public static function createEventBusByName(MessageHeadersPropagatorInterceptor $messageHeadersPropagator, array $channelNamesRouting): self
+    public static function createEventBusByName(array $channelNamesRouting): self
     {
         return new self(
-            $messageHeadersPropagator,
             BusModule::EVENT_CHANNEL_NAME_BY_NAME . '.endpoint',
             BusModule::EVENT_CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
@@ -84,10 +78,9 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws Exception
      */
-    public static function createCommandBusByObject(MessageHeadersPropagatorInterceptor $messageHeadersPropagator, array $channelNamesRouting): self
+    public static function createCommandBusByObject(array $channelNamesRouting): self
     {
         return new self(
-            $messageHeadersPropagator,
             BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT . '.endpoint',
             BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
@@ -101,10 +94,9 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws Exception
      */
-    public static function createCommandBusByName(MessageHeadersPropagatorInterceptor $messageHeadersPropagator, array $channelNamesRouting): self
+    public static function createCommandBusByName(array $channelNamesRouting): self
     {
         return new self(
-            $messageHeadersPropagator,
             BusModule::COMMAND_CHANNEL_NAME_BY_NAME . '.endpoint',
             BusModule::COMMAND_CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
@@ -118,10 +110,9 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws Exception
      */
-    public static function createQueryBusByObject(MessageHeadersPropagatorInterceptor $messageHeadersPropagator, array $channelNamesRouting): self
+    public static function createQueryBusByObject(array $channelNamesRouting): self
     {
         return new self(
-            $messageHeadersPropagator,
             BusModule::QUERY_CHANNEL_NAME_BY_OBJECT . '.endpoint',
             BusModule::QUERY_CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
@@ -135,10 +126,9 @@ class BusRouterBuilder implements MessageHandlerBuilder
      * @return BusRouterBuilder
      * @throws Exception
      */
-    public static function createQueryBusByName(MessageHeadersPropagatorInterceptor $messageHeadersPropagator, array $channelNamesRouting): self
+    public static function createQueryBusByName(array $channelNamesRouting): self
     {
         return new self(
-            $messageHeadersPropagator,
             BusModule::QUERY_CHANNEL_NAME_BY_NAME . '.endpoint',
             BusModule::QUERY_CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
@@ -146,80 +136,58 @@ class BusRouterBuilder implements MessageHandlerBuilder
         );
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        switch ($this->type) {
-            case 'eventByObject': {
-                return RouterBuilder::createRouterFromObject(
-                    new EventBusRouter($this->channelNamesRouting),
-                    'routeByObject'
-                )   ->setResolutionRequired(false)
-                    ->build($channelResolver, $referenceSearchService);
-            }
-            case 'eventByName': {
-                return RouterBuilder::createRouterFromObject(
-                    new EventBusRouter($this->channelNamesRouting),
-                    'routeByName'
-                )
+        $configs = [
+            'eventByObject' => [
+                'class' => EventBusRouter::class,
+                'method' => 'routeByObject',
+                'config' => fn (RouterBuilder $router) => $router->setResolutionRequired(false),
+            ],
+            'eventByName' => [
+                'class' => EventBusRouter::class,
+                'method' => 'routeByName',
+                'config' => fn (RouterBuilder $router) => $router
                     ->setResolutionRequired(false)
                     ->withMethodParameterConverters([
                         HeaderBuilder::createOptional('routedName', BusModule::EVENT_CHANNEL_NAME_BY_NAME),
-                    ])
-                    ->build($channelResolver, $referenceSearchService);
-            }
-            case 'commandByObject': {
-                return RouterBuilder::createRouterFromObject(
-                    new CommandBusRouter($this->channelNamesRouting),
-                    'routeByObject'
-                )->build($channelResolver, $referenceSearchService);
-            }
-            case 'commandByName': {
-                return RouterBuilder::createRouterFromObject(
-                    new CommandBusRouter($this->channelNamesRouting),
-                    'routeByName'
-                )
+                    ]),
+            ],
+            'commandByObject' => [
+                'class' => CommandBusRouter::class,
+                'method' => 'routeByObject',
+                'config' => fn (RouterBuilder $router) => $router,
+            ],
+            'commandByName' => [
+                'class' => CommandBusRouter::class,
+                'method' => 'routeByName',
+                'config' => fn (RouterBuilder $router) => $router
                     ->withMethodParameterConverters([
                         HeaderBuilder::createOptional('name', BusModule::COMMAND_CHANNEL_NAME_BY_NAME),
-                    ])
-                    ->build($channelResolver, $referenceSearchService);
-            }
-            case 'queryByObject': {
-                return RouterBuilder::createRouterFromObject(
-                    new QueryBusRouter($this->channelNamesRouting),
-                    'routeByObject'
-                )->build($channelResolver, $referenceSearchService);
-            }
-            case 'queryByName': {
-                return RouterBuilder::createRouterFromObject(
-                    new QueryBusRouter($this->channelNamesRouting),
-                    'routeByName'
-                )
+                    ]),
+            ],
+            'queryByObject' => [
+                'class' => QueryBusRouter::class,
+                'method' => 'routeByObject',
+                'config' => fn (RouterBuilder $router) => $router,
+            ],
+            'queryByName' => [
+                'class' => QueryBusRouter::class,
+                'method' => 'routeByName',
+                'config' => fn (RouterBuilder $router) => $router
                     ->withMethodParameterConverters([
                         HeaderBuilder::createOptional('name', BusModule::QUERY_CHANNEL_NAME_BY_NAME),
-                    ])
-                    ->build($channelResolver, $referenceSearchService);
-            }
-        }
-
-        throw InvalidArgumentException::create("Incorrect type {$this->type}");
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return [
-            $interfaceToCallRegistry->getFor(QueryBusRouter::class, 'routeByName'),
-            $interfaceToCallRegistry->getFor(QueryBusRouter::class, 'routeByObject'),
-            $interfaceToCallRegistry->getFor(CommandBusRouter::class, 'routeByName'),
-            $interfaceToCallRegistry->getFor(CommandBusRouter::class, 'routeByObject'),
-            $interfaceToCallRegistry->getFor(EventBusRouter::class, 'routeByName'),
-            $interfaceToCallRegistry->getFor(EventBusRouter::class, 'routeByObject'),
+                    ]),
+            ],
         ];
+        $config = $configs[$this->type] ?? throw InvalidArgumentException::create("Incorrect type {$this->type}");
+        $routerReference = $builder->register($config['class'].'.'.$this->type, new Definition($config['class'], [
+            $this->channelNamesRouting,
+        ]));
+        $interfaceToCall = $builder->getInterfaceToCall(new InterfaceToCallReference($config['class'], $config['method']));
+        $router = RouterBuilder::create($routerReference->getId(), $interfaceToCall);
+        $router = $config['config']($router);
+        return $router->compile($builder);
     }
 
     /**
@@ -255,14 +223,6 @@ class BusRouterBuilder implements MessageHandlerBuilder
     public function getInputMessageChannelName(): string
     {
         return $this->inputChannelName;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredReferenceNames(): array
-    {
-        return [];
     }
 
     public function __toString()

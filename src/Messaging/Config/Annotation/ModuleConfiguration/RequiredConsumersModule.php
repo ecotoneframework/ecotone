@@ -68,14 +68,6 @@ class RequiredConsumersModule extends NoExternalConfigurationModule implements A
         return false;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getRelatedReferences(): array
-    {
-        return [];
-    }
-
     public function getModulePackageName(): string
     {
         return ModulePackageList::CORE_PACKAGE;

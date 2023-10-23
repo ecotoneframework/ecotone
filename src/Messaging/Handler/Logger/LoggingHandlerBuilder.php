@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Logger;
 
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
-use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\MessageHandler;
 use Psr\Log\LogLevel;
 
 /**
@@ -33,16 +33,13 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements 
      * @var ParameterConverterBuilder[]
      */
     private array $methodParameterConverters = [];
-    private bool $isBefore;
 
     /**
      * LoggingHandlerBuilder constructor.
      * @param bool $isBefore
      */
-    private function __construct(bool $isBefore)
+    private function __construct(private bool $isBefore)
     {
-        $this->isBefore = $isBefore;
-        $this->methodParameterConverters[] = MessageConverterBuilder::create('message');
     }
 
     /**
@@ -101,30 +98,21 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements 
     /**
      * @inheritDoc
      */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        return
-            ServiceActivatorBuilder::createWithDirectReference(
-                new LoggingInterceptor(
-                    new LoggingService(
-                        $referenceSearchService->get(ConversionService::REFERENCE_NAME),
-                        $referenceSearchService->get(self::LOGGER_REFERENCE)
-                    )
-                ),
-                $this->getMethodName()
-            )
-                ->withMethodParameterConverters($this->getParameterConverters())
-                ->withPassThroughMessageOnVoidInterface(true)
-                ->withOutputMessageChannel($this->outputMessageChannelName)
-                ->build($channelResolver, $referenceSearchService);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return [$interfaceToCallRegistry->getFor(LoggingInterceptor::class, $this->getMethodName())];
+        if (! $builder->has(LoggingInterceptor::class)) {
+            $builder->register(LoggingInterceptor::class, new Definition(LoggingInterceptor::class, [
+                new Definition(LoggingService::class, [Reference::to(ConversionService::REFERENCE_NAME), Reference::to(self::LOGGER_REFERENCE)]),
+            ]));
+        }
+        return ServiceActivatorBuilder::create(
+            LoggingInterceptor::class,
+            $builder->getInterfaceToCall(new InterfaceToCallReference(LoggingInterceptor::class, $this->getMethodName()))
+        )
+            ->withPassThroughMessageOnVoidInterface(true)
+            ->withOutputMessageChannel($this->getOutputMessageChannelName())
+            ->withMethodParameterConverters($this->methodParameterConverters)
+            ->compile($builder);
     }
 
     /**
@@ -133,14 +121,6 @@ class LoggingHandlerBuilder extends InputOutputMessageHandlerBuilder implements 
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
         return $interfaceToCallRegistry->getFor(LoggingInterceptor::class, $this->getMethodName());
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredReferenceNames(): array
-    {
-        return [self::LOGGER_REFERENCE];
     }
 
     /**

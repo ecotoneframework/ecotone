@@ -33,7 +33,7 @@ final class Router implements MessageHandler
      * @param null|string     $defaultResolutionChannelName
      * @param bool            $applySequence
      */
-    private function __construct(ChannelResolver $channelResolver, MessageProcessor $methodInvoker, bool $isResolutionRequired, ?string $defaultResolutionChannelName, bool $applySequence)
+    public function __construct(ChannelResolver $channelResolver, MessageProcessor $methodInvoker, bool $isResolutionRequired, ?string $defaultResolutionChannelName, bool $applySequence)
     {
         $this->channelResolver = $channelResolver;
         $this->methodInvoker = $methodInvoker;

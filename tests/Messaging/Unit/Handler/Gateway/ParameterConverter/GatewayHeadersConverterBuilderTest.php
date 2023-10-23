@@ -4,12 +4,12 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Gateway\ParameterConverter;
 
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ComponentTestBuilder;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
@@ -20,8 +20,9 @@ class GatewayHeadersConverterBuilderTest extends TestCase
 {
     public function test_not_changing_media_type_when_payload_is_not_scalar()
     {
-        $gatewayPayload = GatewayHeadersBuilder::create('some')
-            ->build(InMemoryReferenceSearchService::createEmpty());
+        $gatewayPayload = ComponentTestBuilder::create()->build(
+            GatewayHeadersBuilder::create('some')
+        );
 
         $this->assertEquals(
             MessageBuilder::withPayload(new stdClass())
@@ -39,8 +40,9 @@ class GatewayHeadersConverterBuilderTest extends TestCase
 
     public function test_not_changing_media_type_when_payload_is_incompatible_with_given_type()
     {
-        $gatewayPayload = GatewayHeadersBuilder::create('some')
-            ->build(InMemoryReferenceSearchService::createEmpty());
+        $gatewayPayload = ComponentTestBuilder::create()->build(
+            GatewayHeadersBuilder::create('some')
+        );
 
         $this->assertEquals(
             MessageBuilder::withPayload(new stdClass())
@@ -58,8 +60,9 @@ class GatewayHeadersConverterBuilderTest extends TestCase
 
     public function test_changing_media_type_when_payload_is_compatible_with_given_type()
     {
-        $gatewayPayload = GatewayHeadersBuilder::create('some')
-            ->build(InMemoryReferenceSearchService::createEmpty());
+        $gatewayPayload = ComponentTestBuilder::create()->build(
+            GatewayHeadersBuilder::create('some')
+        );
 
         $this->assertEquals(
             MessageBuilder::withPayload([new stdClass()])
@@ -77,8 +80,9 @@ class GatewayHeadersConverterBuilderTest extends TestCase
 
     public function test_dropping_integration_headers_when_starting_new_flow_using_gateway()
     {
-        $gatewayPayload = GatewayHeadersBuilder::create('some')
-            ->build(InMemoryReferenceSearchService::createEmpty());
+        $gatewayPayload = ComponentTestBuilder::create()->build(
+            GatewayHeadersBuilder::create('some')
+        );
 
         $this->assertEquals(
             MessageBuilder::withPayload([new stdClass()]),

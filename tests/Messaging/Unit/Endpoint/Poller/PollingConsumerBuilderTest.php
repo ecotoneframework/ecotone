@@ -9,17 +9,18 @@ use Ecotone\Messaging\Channel\ExceptionalQueueChannel;
 use Ecotone\Messaging\Channel\PollableChannel\InMemory\InMemoryAcknowledgeCallback;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
+use Ecotone\Messaging\Endpoint\PollingConsumer\InterceptedConsumerRunner;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ComponentTestBuilder;
 use InvalidArgumentException;
 use RuntimeException;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerStoppingService;
@@ -50,15 +51,15 @@ class PollingConsumerBuilderTest extends MessagingTest
         $replyViaHeadersMessageHandlerBuilder = ServiceActivatorBuilder::createWithDirectReference($directObjectReference, 'executeNoReturn')
             ->withEndpointId('test')
             ->withInputChannelName($inputChannelName);
-        $pollingConsumer = $pollingConsumerBuilder->build(
-            InMemoryChannelResolver::createFromAssociativeArray([
-                $inputChannelName => $inputChannel,
-            ]),
-            InMemoryReferenceSearchService::createEmpty(),
-            $replyViaHeadersMessageHandlerBuilder,
-            PollingMetadata::create('some')
-        );
+        /** @var InterceptedConsumerRunner $pollingConsumerRunner */
+        $pollingConsumerRunner = ComponentTestBuilder::create()
+            ->withChannel($inputChannelName, $inputChannel)
+            ->withPollingMetadata(PollingMetadata::create('test'))
+            ->withRegisteredMessageHandlerConsumer($pollingConsumerBuilder, $replyViaHeadersMessageHandlerBuilder)
+            ->getEndpointRunner('test')
+        ;
 
+        $pollingConsumer = $pollingConsumerRunner->createConsumer(null);
         $directObjectReference->setConsumerLifecycle($pollingConsumer);
         $inputChannel->send(MessageBuilder::withPayload('somePayload')->build());
         $pollingConsumer->run();
@@ -85,16 +86,17 @@ class PollingConsumerBuilderTest extends MessagingTest
             ->withEndpointId('test')
             ->withInputChannelName($inputChannelName);
 
-        $pollingConsumer = $pollingConsumerBuilder->build(
-            InMemoryChannelResolver::createFromAssociativeArray([
-                $inputChannelName => $inputChannel,
-                $errorChannelName => $errorChannel,
-            ]),
-            InMemoryReferenceSearchService::createEmpty(),
-            $replyViaHeadersMessageHandlerBuilder,
-            PollingMetadata::create('some')
-                ->setErrorChannelName($errorChannelName)
-        );
+        /** @var InterceptedConsumerRunner $pollingConsumerRunner */
+        $pollingConsumerRunner = ComponentTestBuilder::create()
+            ->withChannel($inputChannelName, $inputChannel)
+            ->withChannel($errorChannelName, $errorChannel)
+            ->withPollingMetadata(PollingMetadata::create('test')
+                ->setErrorChannelName($errorChannelName))
+            ->withRegisteredMessageHandlerConsumer($pollingConsumerBuilder, $replyViaHeadersMessageHandlerBuilder)
+            ->getEndpointRunner('test')
+        ;
+
+        $pollingConsumer = $pollingConsumerRunner->createConsumer(null);
 
         $directObjectReference->setConsumerLifecycle($pollingConsumer);
         $inputChannel->send(MessageBuilder::withPayload('somePayload')->build());
@@ -115,15 +117,16 @@ class PollingConsumerBuilderTest extends MessagingTest
             ->withEndpointId('test')
             ->withInputChannelName($inputChannelName);
 
-        $pollingConsumer = $pollingConsumerBuilder->build(
-            InMemoryChannelResolver::createFromAssociativeArray([
-                $inputChannelName => $inputChannel,
-            ]),
-            InMemoryReferenceSearchService::createEmpty(),
-            $replyViaHeadersMessageHandlerBuilder,
-            PollingMetadata::create('some')
-                ->setConnectionRetryTemplate(RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(1))
-        );
+        /** @var InterceptedConsumerRunner $pollingConsumerRunner */
+        $pollingConsumerRunner = ComponentTestBuilder::create()
+            ->withChannel($inputChannelName, $inputChannel)
+            ->withPollingMetadata(PollingMetadata::create('test')
+                ->setConnectionRetryTemplate(RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(1)))
+            ->withRegisteredMessageHandlerConsumer($pollingConsumerBuilder, $replyViaHeadersMessageHandlerBuilder)
+            ->getEndpointRunner('test')
+        ;
+
+        $pollingConsumer = $pollingConsumerRunner->createConsumer(null);
 
         $inputChannel->send(MessageBuilder::withPayload('somePayload')->build());
         $inputChannel->send(MessageBuilder::withPayload('somePayload')->build());
@@ -149,15 +152,16 @@ class PollingConsumerBuilderTest extends MessagingTest
             ->withEndpointId('test')
             ->withInputChannelName($inputChannelName);
 
-        $pollingConsumer = $pollingConsumerBuilder->build(
-            InMemoryChannelResolver::createFromAssociativeArray([
-                $inputChannelName => $inputChannel,
-            ]),
-            InMemoryReferenceSearchService::createEmpty(),
-            $serviceHandler,
-            PollingMetadata::create('some')
-                ->setConnectionRetryTemplate(RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(2))
-        );
+        /** @var InterceptedConsumerRunner $pollingConsumerRunner */
+        $pollingConsumerRunner = ComponentTestBuilder::create()
+            ->withChannel($inputChannelName, $inputChannel)
+            ->withPollingMetadata(PollingMetadata::create('test')
+                ->setConnectionRetryTemplate(RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(2)))
+            ->withRegisteredMessageHandlerConsumer($pollingConsumerBuilder, $serviceHandler)
+            ->getEndpointRunner('test')
+        ;
+
+        $pollingConsumer = $pollingConsumerRunner->createConsumer(null);
 
         try {
             $pollingConsumer->run();
@@ -302,7 +306,7 @@ class PollingConsumerBuilderTest extends MessagingTest
                 'errorChannel' => $errorChannel,
             ],
             $messageHandler,
-            PollingMetadata::create('some')
+            PollingMetadata::create('some-id')
                 ->setExecutionAmountLimit(1)
                 ->setErrorChannelName('errorChannel')
         );
@@ -334,7 +338,7 @@ class PollingConsumerBuilderTest extends MessagingTest
                 $inputChannelName => $inputChannel,
             ],
             $messageHandler,
-            PollingMetadata::create('some')
+            PollingMetadata::create('some-id')
                 ->setStopOnError(true)
                 ->setExecutionAmountLimit(1)
         );
@@ -368,7 +372,7 @@ class PollingConsumerBuilderTest extends MessagingTest
                 'errorChannel' => $errorChannel,
             ],
             $messageHandler,
-            PollingMetadata::create('some')
+            PollingMetadata::create('some-id')
                 ->setStopOnError(true)
                 ->setExecutionAmountLimit(1)
                 ->setErrorChannelName('errorChannel')
@@ -433,26 +437,32 @@ class PollingConsumerBuilderTest extends MessagingTest
         );
     }
 
-    private function createPollingConsumer(string $inputChannelName, QueueChannel $inputChannel, $messageHandler): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
+    private function createPollingConsumer(string $inputChannelName, QueueChannel $inputChannel, MessageHandlerBuilder $messageHandler): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
     {
-        return (new PollingConsumerBuilder())->build(
-            InMemoryChannelResolver::createFromAssociativeArray([
-                $inputChannelName => $inputChannel,
-            ]),
-            InMemoryReferenceSearchService::createEmpty(),
-            $messageHandler,
-            PollingMetadata::create('some')
-                ->setExecutionAmountLimit(1)
-        );
+        $endpointId = $messageHandler->getEndpointId();
+        /** @var InterceptedConsumerRunner $pollingConsumerRunner */
+        $pollingConsumerRunner = ComponentTestBuilder::create()
+            ->withChannel($inputChannelName, $inputChannel)
+            ->withPollingMetadata(PollingMetadata::create($endpointId)
+                ->setExecutionAmountLimit(1))
+            ->withRegisteredMessageHandlerConsumer(new PollingConsumerBuilder(), $messageHandler)
+            ->getEndpointRunner($endpointId)
+        ;
+
+        return $pollingConsumerRunner->createConsumer(null);
     }
 
-    private function createPollingConsumerWithCustomConfiguration(array $channels, $messageHandler, PollingMetadata  $pollingMetadata): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
+    private function createPollingConsumerWithCustomConfiguration(array $channels, MessageHandlerBuilder $messageHandler, PollingMetadata  $pollingMetadata): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
     {
-        return (new PollingConsumerBuilder())->build(
-            InMemoryChannelResolver::createFromAssociativeArray($channels),
-            InMemoryReferenceSearchService::createEmpty(),
-            $messageHandler,
-            $pollingMetadata
-        );
+        $componentTest = ComponentTestBuilder::create()
+            ->withPollingMetadata($pollingMetadata)
+            ->withRegisteredMessageHandlerConsumer(new PollingConsumerBuilder(), $messageHandler);
+        foreach ($channels as $channelName => $channel) {
+            $componentTest = $componentTest->withChannel($channelName, $channel);
+        }
+        /** @var InterceptedConsumerRunner $pollingConsumerRunner */
+        $pollingConsumerRunner = $componentTest->getEndpointRunner($messageHandler->getEndpointId());
+
+        return $pollingConsumerRunner->createConsumer(null);
     }
 }

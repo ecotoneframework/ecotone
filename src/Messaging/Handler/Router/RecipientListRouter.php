@@ -2,6 +2,8 @@
 
 namespace Ecotone\Messaging\Handler\Router;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Message;
 
 /**
@@ -10,7 +12,7 @@ use Ecotone\Messaging\Message;
  * @author  Dariusz Gafka <dgafka.mail@gmail.com>
  * @internal
  */
-class RecipientListRouter
+class RecipientListRouter implements DefinedObject
 {
     /**
      * @var string[]
@@ -33,5 +35,10 @@ class RecipientListRouter
     public function route(Message $message): array
     {
         return $this->recipientMessageChannels;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [$this->recipientMessageChannels]);
     }
 }

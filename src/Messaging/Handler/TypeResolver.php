@@ -5,6 +5,15 @@ namespace Ecotone\Messaging\Handler;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Attribute\IgnoreDocblockTypeHint;
+use Ecotone\Messaging\Attribute\IsAbstract;
+use Ecotone\Messaging\Config\Container\AttributeDefinition;
+use Ecotone\Messaging\Config\Container\AttributeReference;
+use Ecotone\Messaging\Config\Container\ContainerBuilder;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\InterfaceParameterReference;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
+use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 use Error;
 use ReflectionClass;
 use ReflectionException;
@@ -34,16 +43,16 @@ class TypeResolver
     private const THIS_TYPE_HINT = '$this';
     private const NULL_HINT = 'null';
 
-    private ?AnnotationResolver $annotationParser;
+    private AnnotationResolver $annotationParser;
 
-    private function __construct(?AnnotationResolver $annotationParser)
+    private function __construct(AnnotationResolver $annotationParser)
     {
         $this->annotationParser = $annotationParser;
     }
 
     public static function create(): self
     {
-        return new self(null);
+        return new self(new AnnotationResolver\AttributeResolver());
     }
 
     public static function createWithAnnotationParser(AnnotationResolver $annotationParser): self
@@ -51,7 +60,7 @@ class TypeResolver
         return new self($annotationParser);
     }
 
-    public function getMethodParameters(ReflectionClass $analyzedClass, string $methodName, AnnotationResolver $annotationResolver): iterable
+    public function getMethodParameters(ReflectionClass $analyzedClass, string $methodName): iterable
     {
         $parameters = [];
         $reflectionMethod = $analyzedClass->getMethod($methodName);
@@ -63,7 +72,7 @@ class TypeResolver
             );
             $isAnnotation = false;
             if ($parameterType->isClassOrInterface() && ! $parameterType->isCompoundObjectType() && ! $parameterType->isUnionType()) {
-                $classDefinition = ClassDefinition::createUsingAnnotationParser($parameterType, $annotationResolver);
+                $classDefinition = ClassDefinition::createUsingAnnotationParser($parameterType, $this->annotationParser);
                 $isAnnotation = $classDefinition->isAnnotation();
             }
 
@@ -88,6 +97,128 @@ class TypeResolver
         }
 
         return $parameters;
+    }
+
+    public function registerInterfaceToCallDefinition(ContainerBuilder $builder, InterfaceToCallReference $reference): InterfaceToCallReference
+    {
+        if ($builder->has($reference)) {
+            return $reference;
+        }
+        $interfaceName = $reference->getClassName();
+        $methodName = $reference->getMethodName();
+
+        try {
+            $reflectionClass = new ReflectionClass($interfaceName);
+            $reflectionMethod = self::getMethodOwnerClass($reflectionClass, $methodName)->getMethod($methodName);
+            $parametersReferences = $this->registerMethodParametersDefinitions($builder, $reflectionClass, $methodName);
+            $returnType = $this->getReturnType($reflectionClass, $methodName);
+
+            $classAnnotations = [];
+            foreach ($reflectionClass->getAttributes() as $attribute) {
+                if (class_exists($attribute->getName())) {
+                    $classAnnotations[] = self::registerAttributeDefinition($builder, AttributeDefinition::fromReflection($attribute), $interfaceName, null);
+                }
+            }
+            if ($reflectionClass->isAbstract() && ! $reflectionClass->isInterface()) {
+                $classAnnotations[] = self::registerAttributeDefinition($builder, new AttributeDefinition(IsAbstract::class), $interfaceName, null);
+            }
+            $methodAnnotations = [];
+            foreach ($reflectionMethod->getAttributes() as $attribute) {
+                if (class_exists($attribute->getName())) {
+                    $methodAnnotations[] = self::registerAttributeDefinition($builder, AttributeDefinition::fromReflection($attribute), $interfaceName, $methodName);
+                }
+            }
+
+            $doesReturnTypeAllowNulls = $reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->allowsNull() : true;
+            $isStaticallyCalled       = $reflectionMethod->isStatic();
+        } catch (TypeDefinitionException $definitionException) {
+            throw InvalidArgumentException::create("Interface {$interfaceName} has problem with type declaration. {$definitionException->getMessage()}");
+        }
+
+        $builder->register(
+            $reference,
+            new Definition(InterfaceToCall::class, [
+                $reflectionClass->getName(),
+                $reflectionMethod->getName(),
+                $classAnnotations,
+                $methodAnnotations,
+                $parametersReferences,
+                $returnType,
+                $doesReturnTypeAllowNulls,
+                $isStaticallyCalled,
+            ])
+        );
+
+        return $reference;
+    }
+
+    /**
+     * @return InterfaceParameterReference[]
+     */
+    public function registerMethodParametersDefinitions(ContainerBuilder $builder, ReflectionClass $reflectionClass, string $methodName): array
+    {
+        $parameters = [];
+        $reflectionMethod = $reflectionClass->getMethod($methodName);
+        $docBlockParameterTypeHints = $this->getMethodDocBlockParameterTypeHints($reflectionClass, $reflectionClass, $methodName);
+        foreach ($reflectionMethod->getParameters() as $parameter) {
+            $parameterType = TypeDescriptor::createWithDocBlock(
+                $parameter->getType() ? $this->expandParameterTypeHint($this->getTypeFromReflection($parameter->getType()), $reflectionClass, $reflectionClass, self::getMethodDeclaringClass($reflectionClass, $methodName)) : null,
+                array_key_exists($parameter->getName(), $docBlockParameterTypeHints) ? $docBlockParameterTypeHints[$parameter->getName()] : ''
+            );
+            $isAnnotation = false;
+            if ($parameterType->isClassOrInterface() && ! $parameterType->isCompoundObjectType() && ! $parameterType->isUnionType()) {
+                $classDefinition = ClassDefinition::createUsingAnnotationParser($parameterType, $this->annotationParser);
+                $isAnnotation = $classDefinition->isAnnotation();
+            }
+
+            $parameterAttributes = [];
+            foreach ($parameter->getAttributes() as $attribute) {
+                $parameterAttributes[] = AttributeDefinition::fromReflection($attribute);
+            }
+
+            $parameters[] = $reference = new InterfaceParameterReference($reflectionClass->getName(), $reflectionMethod->getName(), $parameter->getName());
+
+            $builder->register(
+                $reference,
+                new Definition(InterfaceParameter::class, [
+                    $parameter->getName(),
+                    $parameterType,
+                    $parameter->getType() ? $parameter->getType()->allowsNull() : true,
+                    $parameter->isDefaultValueAvailable(),
+                    $parameter->isDefaultValueAvailable() ? $parameter->getDefaultValue() : null,
+                    $isAnnotation,
+                    $parameterAttributes,
+                ])
+            );
+        }
+
+        return $parameters;
+    }
+
+    public function registerAttribute(ContainerBuilder $builder, AttributeReference $attributeReference): void
+    {
+        $className = $attributeReference->getClassName();
+        if ($methodName = $attributeReference->getMethodName()) {
+            $reflection = new ReflectionMethod($className, $methodName);
+        } else {
+            $reflection = new ReflectionClass($className);
+        }
+        $attributes = $reflection->getAttributes($attributeReference->getAttributeClass());
+        if ($attributes > 1) {
+            // Warning ?
+        } elseif ($attributes === 0) {
+            throw new InvalidArgumentException("Invalid attribute reference {$attributeReference}");
+        }
+        self::registerAttributeDefinition($builder, AttributeDefinition::fromReflection($attributes[0]), $className, $methodName);
+    }
+
+    private function registerAttributeDefinition(ContainerBuilder $builder, AttributeDefinition $attributeDefinition, string $className, ?string $methodName = null): Definition|Reference
+    {
+        $reference = new AttributeReference($attributeDefinition->getClassName(), $className, $methodName);
+        if (! $builder->has($reference)) {
+            $builder->register($reference, $attributeDefinition);
+        }
+        return $attributeDefinition;
     }
 
     /**

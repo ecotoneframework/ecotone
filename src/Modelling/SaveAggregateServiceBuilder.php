@@ -2,7 +2,10 @@
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
@@ -12,12 +15,9 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Store\Document\DocumentStore;
-use Ecotone\Messaging\Store\Document\InMemoryDocumentStore;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\AggregateEvents;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
@@ -37,10 +37,6 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
      * @var ParameterConverterBuilder[]
      */
     private array $methodParameterConverterBuilders = [];
-    /**
-     * @var string[]
-     */
-    private array $requiredReferences = [];
     /**
      * @var string[]
      */
@@ -83,14 +79,6 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     }
 
     /**
-     * @inheritDoc
-     */
-    public function getRequiredReferenceNames(): array
-    {
-        return $this->requiredReferences;
-    }
-
-    /**
      * @param string[] $aggregateRepositoryReferenceNames
      */
     public function withAggregateRepositoryFactories(array $aggregateRepositoryReferenceNames): self
@@ -112,62 +100,43 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        $aggregateRepository = $this->isEventSourced
-            ? LazyEventSourcedRepository::create(
+        // TODO: Duplication with LoadAggregateServiceBuilder
+        $repository = $this->isEventSourced
+            ? new Definition(LazyEventSourcedRepository::class, [
                 $this->interfaceToCall->getInterfaceName(),
                 $this->isEventSourced,
-                $channelResolver,
-                $referenceSearchService,
-                $this->aggregateRepositoryReferenceNames
-            ) : LazyStandardRepository::create(
+                array_map(fn ($id) => new Reference($id), $this->aggregateRepositoryReferenceNames),
+            ], 'create')
+            : new Definition(LazyStandardRepository::class, [
                 $this->interfaceToCall->getInterfaceName(),
                 $this->isEventSourced,
-                $channelResolver,
-                $referenceSearchService,
-                $this->aggregateRepositoryReferenceNames
-            );
+                array_map(fn ($id) => new Reference($id), $this->aggregateRepositoryReferenceNames),
+            ], 'create');
 
-        $eventBus = $referenceSearchService->get(EventBus::class);
 
-        return ServiceActivatorBuilder::createWithDirectReference(
-            new SaveAggregateService(
-                $this->interfaceToCall,
-                $this->interfaceToCall->isStaticallyCalled(),
-                $this->isEventSourced,
-                $aggregateRepository,
-                PropertyEditorAccessor::create($referenceSearchService),
-                $this->getPropertyReaderAccessor(),
-                $eventBus,
-                $this->aggregateMethodWithEvents,
-                $this->aggregateIdentifierMapping,
-                $this->aggregateIdentifierGetMethods,
-                $this->aggregateVersionProperty,
-                $this->isAggregateVersionAutomaticallyIncreased,
-                $this->useSnapshot,
-                $this->snapshotTriggerThreshold,
-                $this->useSnapshot ? $referenceSearchService->get($this->documentStoreReference) : InMemoryDocumentStore::createEmpty()
-            ),
-            'save'
-        )
+        $saveAggregateService = new Definition(SaveAggregateService::class, [
+            InterfaceToCallReference::fromInstance($this->interfaceToCall),
+            $this->interfaceToCall->isStaticallyCalled(),
+            $this->isEventSourced,
+            $repository,
+            new Reference(PropertyEditorAccessor::class),
+            new Reference(PropertyReaderAccessor::class),
+            new Reference(EventBus::class),
+            $this->aggregateMethodWithEvents,
+            $this->aggregateIdentifierMapping,
+            $this->aggregateIdentifierGetMethods,
+            $this->aggregateVersionProperty,
+            $this->isAggregateVersionAutomaticallyIncreased,
+            $this->useSnapshot,
+            $this->snapshotTriggerThreshold,
+            $this->useSnapshot ? new Reference($this->documentStoreReference) : null,
+        ]);
+
+        return ServiceActivatorBuilder::createWithDefinition($saveAggregateService, 'save')
             ->withOutputMessageChannel($this->outputMessageChannelName)
-            ->build($channelResolver, $referenceSearchService);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return [
-            $interfaceToCallRegistry->getFor($this->interfaceToCall->getInterfaceName(), $this->interfaceToCall->getMethodName()),
-            $interfaceToCallRegistry->getFor(CallAggregateService::class, 'call'),
-            $interfaceToCallRegistry->getFor(SaveAggregateService::class, 'save'),
-        ];
+            ->compile($builder);
     }
 
     /**
@@ -237,10 +206,5 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         $this->aggregateMethodWithEvents  = $aggregateMethodWithEvents;
         $this->aggregateIdentifierMapping = $aggregateIdentifiers;
         $this->aggregateIdentifierGetMethods = $aggregateIdentifierGetMethods;
-    }
-
-    private function getPropertyReaderAccessor(): PropertyReaderAccessor
-    {
-        return new PropertyReaderAccessor();
     }
 }

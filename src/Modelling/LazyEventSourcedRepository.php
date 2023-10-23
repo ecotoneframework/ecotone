@@ -2,9 +2,6 @@
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
-
 class LazyEventSourcedRepository implements EventSourcedRepository
 {
     private RepositoryStorage $repositoryStorage;
@@ -14,10 +11,10 @@ class LazyEventSourcedRepository implements EventSourcedRepository
         $this->repositoryStorage = $repositoryStorage;
     }
 
-    public static function create(string $aggregateClassName, bool $isEventSourcedAggregate, ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $aggregateRepositoryReferenceNames): self
+    public static function create(string $aggregateClassName, bool $isEventSourcedAggregate, array $aggregateRepositories): self
     {
         /** @phpstan-ignore-next-line */
-        return new static(new RepositoryStorage($aggregateClassName, $isEventSourcedAggregate, $channelResolver, $referenceSearchService, $aggregateRepositoryReferenceNames));
+        return new static(new RepositoryStorage($aggregateClassName, $isEventSourcedAggregate, $aggregateRepositories));
     }
 
     public function canHandle(string $aggregateClassName): bool

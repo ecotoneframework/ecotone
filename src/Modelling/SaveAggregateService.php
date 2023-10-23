@@ -13,6 +13,7 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Metadata\RevisionMetadataEnricher;
 use Ecotone\Messaging\Store\Document\DocumentStore;
+use Ecotone\Messaging\Store\Document\InMemoryDocumentStore;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -41,6 +42,7 @@ class SaveAggregateService
     private bool $isEventSourced;
     private bool $isFactoryMethod;
     private array $aggregateIdentifierGetMethods;
+    private DocumentStore $documentStore;
 
     public function __construct(
         InterfaceToCall|string                    $aggregateInterface,
@@ -57,7 +59,7 @@ class SaveAggregateService
         bool $isAggregateVersionAutomaticallyIncreased,
         private bool $useSnapshot,
         private int $snapshotTriggerThreshold,
-        private DocumentStore $documentStore
+        ?DocumentStore $documentStore
     ) {
         $this->aggregateRepository = $aggregateRepository;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
@@ -71,6 +73,7 @@ class SaveAggregateService
         $this->isEventSourced = $isEventSourced;
         $this->isFactoryMethod = $isFactoryMethod;
         $this->aggregateIdentifierGetMethods = $aggregateIdentifierGetMethods;
+        $this->documentStore = $documentStore ?? InMemoryDocumentStore::createEmpty();
     }
 
     public function save(Message $message, array $metadata): Message

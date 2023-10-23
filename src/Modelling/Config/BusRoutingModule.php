@@ -10,13 +10,15 @@ use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\PropagateHeaders;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
@@ -45,9 +47,8 @@ class BusRoutingModule implements AnnotationModule
     private BusRouterBuilder $commandBusByName;
     private BusRouterBuilder $queryBusByName;
     private BusRouterBuilder $eventBusByName;
-    private MessageHeadersPropagatorInterceptor $messageHeadersPropagator;
 
-    public function __construct(MessageHeadersPropagatorInterceptor $messageHeadersPropagator, BusRouterBuilder $commandBusByObject, BusRouterBuilder $commandBusByName, BusRouterBuilder $queryBusByObject, BusRouterBuilder $queryBusByName, BusRouterBuilder $eventBusByObject, BusRouterBuilder $eventBusByName)
+    public function __construct(BusRouterBuilder $commandBusByObject, BusRouterBuilder $commandBusByName, BusRouterBuilder $queryBusByObject, BusRouterBuilder $queryBusByName, BusRouterBuilder $eventBusByObject, BusRouterBuilder $eventBusByName)
     {
         $this->commandBusByObject       = $commandBusByObject;
         $this->queryBusByObject         = $queryBusByObject;
@@ -55,7 +56,6 @@ class BusRoutingModule implements AnnotationModule
         $this->commandBusByName         = $commandBusByName;
         $this->queryBusByName           = $queryBusByName;
         $this->eventBusByName           = $eventBusByName;
-        $this->messageHeadersPropagator = $messageHeadersPropagator;
     }
 
     /**
@@ -63,18 +63,15 @@ class BusRoutingModule implements AnnotationModule
      */
     public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
-        $messageHeadersPropagator = new MessageHeadersPropagatorInterceptor();
-
         $uniqueObjectChannels = [];
         $uniqueNameChannels = [];
         return new self(
-            $messageHeadersPropagator,
-            BusRouterBuilder::createCommandBusByObject($messageHeadersPropagator, self::getCommandBusByObjectMapping($annotationRegistrationService, $interfaceToCallRegistry, false, $uniqueObjectChannels)),
-            BusRouterBuilder::createCommandBusByName($messageHeadersPropagator, self::getCommandBusByNamesMapping($annotationRegistrationService, $interfaceToCallRegistry, false, $uniqueNameChannels)),
-            BusRouterBuilder::createQueryBusByObject($messageHeadersPropagator, self::getQueryBusByObjectsMapping($annotationRegistrationService, $interfaceToCallRegistry, $uniqueObjectChannels)),
-            BusRouterBuilder::createQueryBusByName($messageHeadersPropagator, self::getQueryBusByNamesMapping($annotationRegistrationService, $interfaceToCallRegistry, $uniqueNameChannels)),
-            BusRouterBuilder::createEventBusByObject($messageHeadersPropagator, self::getEventBusByObjectsMapping($annotationRegistrationService, $interfaceToCallRegistry, false)),
-            BusRouterBuilder::createEventBusByName($messageHeadersPropagator, self::getEventBusByNamesMapping($annotationRegistrationService, $interfaceToCallRegistry, false))
+            BusRouterBuilder::createCommandBusByObject(self::getCommandBusByObjectMapping($annotationRegistrationService, $interfaceToCallRegistry, false, $uniqueObjectChannels)),
+            BusRouterBuilder::createCommandBusByName(self::getCommandBusByNamesMapping($annotationRegistrationService, $interfaceToCallRegistry, false, $uniqueNameChannels)),
+            BusRouterBuilder::createQueryBusByObject(self::getQueryBusByObjectsMapping($annotationRegistrationService, $interfaceToCallRegistry, $uniqueObjectChannels)),
+            BusRouterBuilder::createQueryBusByName(self::getQueryBusByNamesMapping($annotationRegistrationService, $interfaceToCallRegistry, $uniqueNameChannels)),
+            BusRouterBuilder::createEventBusByObject(self::getEventBusByObjectsMapping($annotationRegistrationService, $interfaceToCallRegistry, false)),
+            BusRouterBuilder::createEventBusByName(self::getEventBusByNamesMapping($annotationRegistrationService, $interfaceToCallRegistry, false))
         );
     }
 
@@ -370,13 +367,20 @@ class BusRoutingModule implements AnnotationModule
      */
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
+        $messagingConfiguration->registerServiceDefinition(
+            MessageHeadersPropagatorInterceptor::class,
+            new Definition(MessageHeadersPropagatorInterceptor::class)
+        );
+
+        $propagateHeadersInterfaceToCall = $interfaceToCallRegistry->getFor(MessageHeadersPropagatorInterceptor::class, 'propagateHeaders');
+        $storeHeadersInterfaceToCall = $interfaceToCallRegistry->getFor(MessageHeadersPropagatorInterceptor::class, 'storeHeaders');
         $pointcut = CommandBus::class . '||' . EventBus::class . '||' . QueryBus::class . '||' . AsynchronousRunningEndpoint::class . '||' . PropagateHeaders::class . '||' . MessagingEntrypointWithHeadersPropagation::class;
         $messagingConfiguration
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(
                     MessageHeadersPropagatorInterceptor::class,
-                    $interfaceToCallRegistry->getFor(MessageHeadersPropagatorInterceptor::class, 'propagateHeaders'),
-                    TransformerBuilder::createWithDirectObject($this->messageHeadersPropagator, 'propagateHeaders')
+                    $propagateHeadersInterfaceToCall,
+                    TransformerBuilder::create(MessageHeadersPropagatorInterceptor::class, $propagateHeadersInterfaceToCall)
                         ->withMethodParameterConverters(
                             [
                                 AllHeadersBuilder::createWith('headers'),
@@ -387,12 +391,12 @@ class BusRoutingModule implements AnnotationModule
                 )
             )
             ->registerAroundMethodInterceptor(
-                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
-                    $interfaceToCallRegistry,
-                    $this->messageHeadersPropagator,
-                    'storeHeaders',
+                AroundInterceptorBuilder::create(
+                    MessageHeadersPropagatorInterceptor::class,
+                    $storeHeadersInterfaceToCall,
                     Precedence::ENDPOINT_HEADERS_PRECEDENCE - 1,
-                    $pointcut
+                    $pointcut,
+                    ParameterConverterAnnotationFactory::create()->createParameterConverters($storeHeadersInterfaceToCall),
                 )
             )
             ->registerMessageHandler($this->commandBusByObject)
@@ -412,14 +416,6 @@ class BusRoutingModule implements AnnotationModule
     }
 
     public function getModuleExtensions(array $serviceExtensions): array
-    {
-        return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRelatedReferences(): array
     {
         return [];
     }

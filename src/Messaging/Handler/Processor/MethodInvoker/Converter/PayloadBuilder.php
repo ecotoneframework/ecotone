@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class PayloadParameterConverterBuilder
@@ -18,15 +19,8 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 class PayloadBuilder implements ParameterConverterBuilder
 {
-    private string $parameterName;
-
-    /**
-     * PayloadParameterConverterBuilder constructor.
-     * @param string $parameterName
-     */
-    private function __construct(string $parameterName)
+    private function __construct(private string $parameterName)
     {
-        $this->parameterName = $parameterName;
     }
 
     /**
@@ -38,14 +32,15 @@ class PayloadBuilder implements ParameterConverterBuilder
         return new self($parameterName);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ReferenceSearchService $referenceSearchService, InterfaceToCall $interfaceToCall, InterfaceParameter $interfaceParameter): ParameterConverter
+    public function compile(MessagingContainerBuilder $builder, InterfaceToCall $interfaceToCall): Definition
     {
-        /** @var ConversionService $conversionService */
-        $conversionService = $referenceSearchService->get(ConversionService::REFERENCE_NAME);
-        return PayloadConverter::create($conversionService, $interfaceParameter);
+        $interfaceParameter = $interfaceToCall->getParameterWithName($this->parameterName);
+        return new Definition(PayloadConverter::class, [
+            new Reference(ConversionService::REFERENCE_NAME),
+            $interfaceToCall->getInterfaceName(),
+            $this->parameterName,
+            $interfaceParameter->getTypeDescriptor(),
+        ]);
     }
 
     /**
@@ -54,13 +49,5 @@ class PayloadBuilder implements ParameterConverterBuilder
     public function isHandling(InterfaceParameter $parameter): bool
     {
         return $parameter->getName() === $this->parameterName;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredReferences(): array
-    {
-        return [];
     }
 }

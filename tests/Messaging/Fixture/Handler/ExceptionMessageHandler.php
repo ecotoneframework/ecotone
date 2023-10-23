@@ -2,6 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
 use InvalidArgumentException;
@@ -11,7 +13,7 @@ use InvalidArgumentException;
  * @package Test\Ecotone\Messaging\Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ExceptionMessageHandler implements MessageHandler
+class ExceptionMessageHandler implements MessageHandler, DefinedObject
 {
     public static function create(): self
     {
@@ -29,5 +31,10 @@ class ExceptionMessageHandler implements MessageHandler
     public function __toString()
     {
         return self::class;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [], 'create');
     }
 }

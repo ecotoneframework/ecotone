@@ -10,7 +10,7 @@ class LoadAggregateMode
 
     private int $type;
 
-    private function __construct(string $type)
+    public function __construct(int $type)
     {
         $this->type = $type;
     }
@@ -38,5 +38,10 @@ class LoadAggregateMode
     public function isDroppingMessageOnNotFound(): bool
     {
         return $this->type === self::DROP_ON_NOT_FOUND;
+    }
+
+    public function getType(): int
+    {
+        return $this->type;
     }
 }

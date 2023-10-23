@@ -11,7 +11,7 @@ use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Modelling\CommandBus;
 
@@ -58,14 +58,6 @@ final class InstantRetryModule implements AnnotationModule
         return [];
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function getRelatedReferences(): array
-    {
-        return [];
-    }
-
     public function getModulePackageName(): string
     {
         return ModulePackageList::CORE_PACKAGE;
@@ -75,7 +67,7 @@ final class InstantRetryModule implements AnnotationModule
     {
         $messagingConfiguration
             ->registerAroundMethodInterceptor(
-                AroundInterceptorReference::createWithDirectObjectAndResolveConverters(
+                AroundInterceptorBuilder::createWithDirectObjectAndResolveConverters(
                     $interfaceToCallRegistry,
                     new InstantRetryInterceptor($retryAttempt, $exceptions),
                     'retry',

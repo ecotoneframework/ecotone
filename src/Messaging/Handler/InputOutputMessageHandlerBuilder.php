@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Config\Container\AttributeDefinition;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * Class InputOutputMessageHandlerBuilder
@@ -68,11 +70,11 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     }
 
     /**
-     * @param iterable $endpointAnnotations
-     * @return static
+     * @inheritDoc
      */
     public function withEndpointAnnotations(iterable $endpointAnnotations): self
     {
+        Assert::allInstanceOfType($endpointAnnotations, AttributeDefinition::class);
         $self = clone $this;
         $self->endpointAnnotations = $endpointAnnotations;
 
@@ -80,7 +82,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     }
 
     /**
-     * @return object[]
+     * @inheritDoc
      */
     public function getEndpointAnnotations(): array
     {
@@ -90,7 +92,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     /**
      * @inheritDoc
      */
-    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference): self
+    public function addAroundInterceptor(AroundInterceptorBuilder $aroundInterceptorReference): self
     {
         $self = clone $this;
         $self->orderedAroundInterceptors[] = $aroundInterceptorReference;

@@ -2,6 +2,8 @@
 
 namespace Ecotone\Messaging\Channel;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\SubscribableChannel;
@@ -11,14 +13,14 @@ use Ecotone\Messaging\SubscribableChannel;
  * @package Ecotone\Messaging\Channel
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class PublishSubscribeChannel implements SubscribableChannel
+class PublishSubscribeChannel implements SubscribableChannel, DefinedObject
 {
     /**
      * @var MessageHandler[]
      */
     private array $messageHandlers = [];
 
-    private function __construct(private string $messageChannelName)
+    public function __construct(private string $messageChannelName)
     {
     }
 
@@ -65,5 +67,10 @@ class PublishSubscribeChannel implements SubscribableChannel
     public function __toString()
     {
         return 'publish subscribe: ' . $this->messageChannelName;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [$this->messageChannelName]);
     }
 }

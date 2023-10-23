@@ -4,22 +4,20 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
+use Ecotone\Messaging\Config\Container\BoundParameterConverter;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\InMemoryConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
-use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ComponentTestBuilder;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 use stdClass;
-use Test\Ecotone\Messaging\Fixture\Service\CallableService;
-use Test\Ecotone\Messaging\Fixture\Service\ServiceWithDefaultArgument;
-use Test\Ecotone\Messaging\Fixture\Service\ServiceWithUuidArgument;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\HeadersConversionService;
 
 /**
  * Class HeaderBuilderTest
@@ -35,12 +33,12 @@ class HeaderBuilderTest extends TestCase
      */
     public function test_creating_header_converter()
     {
-        $converter = HeaderBuilder::create('x', 'token');
-        $converter = $converter->build(
-            InMemoryReferenceSearchService::createEmpty(),
-            InterfaceToCall::create(CallableService::class, 'wasCalled'),
-            InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
+        $converter = new BoundParameterConverter(
+            HeaderBuilder::create('some', 'token'),
+            InterfaceToCall::create(HeadersConversionService::class, 'withNullableString')
         );
+        $converter = ComponentTestBuilder::create()
+            ->build($converter);
 
         $this->assertEquals(
             123,
@@ -52,12 +50,12 @@ class HeaderBuilderTest extends TestCase
 
     public function test_creating_optional_header_converter()
     {
-        $converter = HeaderBuilder::createOptional('x', 'token');
-        $converter = $converter->build(
-            InMemoryReferenceSearchService::createEmpty(),
-            InterfaceToCall::create(CallableService::class, 'wasCalled'),
-            InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
-        );
+        $converter = HeaderBuilder::createOptional('some', 'token');
+        $converter = ComponentTestBuilder::create()->build(new BoundParameterConverter(
+            $converter,
+            InterfaceToCall::create(HeadersConversionService::class, 'withNullableString')
+        ));
+
         $this->assertEquals(
             null,
             $converter->getArgumentFrom(
@@ -69,21 +67,23 @@ class HeaderBuilderTest extends TestCase
     public function test_calling_with_json_conversion()
     {
         $personId = '05c60a00-2285-431a-bc3b-f840b4e81230';
-        $converter = HeaderBuilder::create('x', 'personId');
-        $converter = $converter->build(
-            InMemoryReferenceSearchService::createWith([
-                ConversionService::REFERENCE_NAME => InMemoryConversionService::createWithConversion(
+        $converter = HeaderBuilder::create('uuid', 'personId');
+        $converter = ComponentTestBuilder::create()
+            ->withReference(
+                ConversionService::REFERENCE_NAME,
+                InMemoryConversionService::createWithConversion(
                     $personId,
                     MediaType::APPLICATION_JSON,
                     TypeDescriptor::STRING,
                     MediaType::APPLICATION_X_PHP,
-                    UuidInterface::class,
+                    Uuid::class,
                     Uuid::fromString($personId)
-                ),
-            ]),
-            InterfaceToCall::create(ServiceWithUuidArgument::class, 'execute'),
-            InterfaceParameter::createNotNullable('x', TypeDescriptor::createWithDocBlock(UuidInterface::class, '')),
-        );
+                )
+            )
+            ->build(new BoundParameterConverter(
+                $converter,
+                InterfaceToCall::create(HeadersConversionService::class, 'withUuid'),
+            ));
 
         $headerResult = $converter->getArgumentFrom(
             MessageBuilder::withPayload('a')
@@ -98,10 +98,11 @@ class HeaderBuilderTest extends TestCase
     public function test_choosing_php_conversion_when_non_scalar_payload()
     {
         $data = ['name' => 'johny'];
-        $converter = HeaderBuilder::create('x', 'personIds');
-        $converter = $converter->build(
-            InMemoryReferenceSearchService::createWith([
-                ConversionService::REFERENCE_NAME => InMemoryConversionService::createWithoutConversion()
+        $converter = HeaderBuilder::create('uuid', 'personIds');
+        $converter = ComponentTestBuilder::create()
+            ->withReference(
+                ConversionService::REFERENCE_NAME,
+                InMemoryConversionService::createWithoutConversion()
                     ->registerConversion(
                         $data,
                         MediaType::APPLICATION_JSON,
@@ -117,11 +118,12 @@ class HeaderBuilderTest extends TestCase
                         MediaType::APPLICATION_X_PHP,
                         stdClass::class,
                         new stdClass()
-                    ),
-            ]),
-            InterfaceToCall::create(ServiceWithUuidArgument::class, 'execute'),
-            InterfaceParameter::createNotNullable('x', TypeDescriptor::create(stdClass::class)),
-        );
+                    )
+            )
+            ->build(new BoundParameterConverter(
+                $converter,
+                InterfaceToCall::create(HeadersConversionService::class, 'withStdClass'),
+            ));
 
         $headerResult = $converter->getArgumentFrom(
             MessageBuilder::withPayload('a')
@@ -135,21 +137,23 @@ class HeaderBuilderTest extends TestCase
     public function test_calling_with_php_to_php_conversion()
     {
         $personId = '05c60a00-2285-431a-bc3b-f840b4e81230';
-        $converter = HeaderBuilder::create('x', 'personId');
-        $converter = $converter->build(
-            InMemoryReferenceSearchService::createWith([
-                ConversionService::REFERENCE_NAME => InMemoryConversionService::createWithConversion(
+        $converter = HeaderBuilder::create('uuid', 'personId');
+        $converter = ComponentTestBuilder::create()
+            ->withReference(
+                ConversionService::REFERENCE_NAME,
+                InMemoryConversionService::createWithConversion(
                     $personId,
                     MediaType::APPLICATION_X_PHP,
                     TypeDescriptor::STRING,
                     MediaType::APPLICATION_X_PHP,
                     Uuid::class,
                     Uuid::fromString($personId)
-                ),
-            ]),
-            InterfaceToCall::create(ServiceWithUuidArgument::class, 'execute'),
-            InterfaceParameter::createNotNullable('x', TypeDescriptor::createWithDocBlock(Uuid::class, '')),
-        );
+                )
+            )
+            ->build(new BoundParameterConverter(
+                $converter,
+                InterfaceToCall::create(HeadersConversionService::class, 'withUuid'),
+            ));
 
         $headerResult = $converter->getArgumentFrom(
             MessageBuilder::withPayload('a')
@@ -164,11 +168,11 @@ class HeaderBuilderTest extends TestCase
     public function test_passing_default_value_if_exists_and_no_header_found()
     {
         $converter = HeaderBuilder::create('name', 'token');
-        $converter = $converter->build(
-            InMemoryReferenceSearchService::createEmpty(),
-            InterfaceToCall::create(ServiceWithDefaultArgument::class, 'execute'),
-            InterfaceParameter::create('name', TypeDescriptor::createWithDocBlock('string', ''), false, true, '', false, []),
-        );
+        $converter = ComponentTestBuilder::create()
+            ->build(new BoundParameterConverter(
+                $converter,
+                InterfaceToCall::create(HeadersConversionService::class, 'withDefaultValue')
+            ));
 
         $this->assertEquals(
             '',

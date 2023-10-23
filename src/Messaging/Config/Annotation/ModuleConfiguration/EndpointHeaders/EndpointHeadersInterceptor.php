@@ -9,6 +9,8 @@ use Ecotone\Messaging\Attribute\Endpoint\Delayed;
 use Ecotone\Messaging\Attribute\Endpoint\ExpireAfter;
 use Ecotone\Messaging\Attribute\Endpoint\Priority;
 use Ecotone\Messaging\Attribute\Endpoint\RemoveHeader;
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\MessageHeaders;
 
 /**
@@ -16,7 +18,7 @@ use Ecotone\Messaging\MessageHeaders;
  * @package Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class EndpointHeadersInterceptor
+class EndpointHeadersInterceptor implements DefinedObject
 {
     public function addMetadata(?Delayed $deliveryDelay, ?ExpireAfter $timeToLive, ?Priority $priority, ?AddHeader $addHeader, ?RemoveHeader $removeHeader): array
     {
@@ -43,5 +45,10 @@ class EndpointHeadersInterceptor
         }
 
         return $metadata;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class);
     }
 }

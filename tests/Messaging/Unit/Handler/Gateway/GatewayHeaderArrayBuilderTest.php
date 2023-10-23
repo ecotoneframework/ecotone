@@ -3,11 +3,11 @@
 namespace Test\Ecotone\Messaging\Unit\Handler\Gateway;
 
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ComponentTestBuilder;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
@@ -24,8 +24,7 @@ class GatewayHeaderArrayBuilderTest extends MessagingTest
      */
     public function test_evaluating_gateway_parameter()
     {
-        $converter = GatewayHeadersBuilder::create('test')
-            ->build(InMemoryReferenceSearchService::createEmpty());
+        $converter = ComponentTestBuilder::create()->build(GatewayHeadersBuilder::create('test'));
 
         $this->assertEquals(
             MessageBuilder::withPayload('some')
@@ -44,8 +43,9 @@ class GatewayHeaderArrayBuilderTest extends MessagingTest
 
     public function test_throwing_exception_if_passed_argument_is_not_array()
     {
-        $converter = GatewayHeadersBuilder::create('test')
-            ->build(InMemoryReferenceSearchService::createEmpty());
+        $converter = ComponentTestBuilder::create()->build(
+            GatewayHeadersBuilder::create('test')
+        );
 
         $this->expectException(InvalidArgumentException::class);
 

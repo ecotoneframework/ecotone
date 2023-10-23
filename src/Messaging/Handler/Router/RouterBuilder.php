@@ -4,15 +4,19 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Router;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Support\Assert;
+
+use function get_class;
 
 /**
  * Class RouterBuilder
@@ -22,8 +26,6 @@ use Ecotone\Messaging\Support\Assert;
 class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
 {
     private ?string $inputMessageChannelName = null;
-    private string $objectToInvokeReference;
-    private ?object $directObjectToInvoke = null;
     private array $methodParameterConverters = [];
     private bool $resolutionRequired = true;
     /**
@@ -33,51 +35,27 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     private ?string $defaultResolution = null;
     private bool $applySequence = false;
     private ?string $endpointId = '';
+    private ?DefinedObject $directObjectToInvoke = null;
 
-    private function __construct(string $objectToInvokeReference, private string|InterfaceToCall $methodNameOrInterface)
+    private function __construct(private string|Reference|Definition $objectToInvokeReference, private string|InterfaceToCall $methodNameOrInterface)
     {
-        $this->objectToInvokeReference = $objectToInvokeReference;
-
-        if ($objectToInvokeReference) {
-            $this->requiredReferenceNames[] = $objectToInvokeReference;
-        }
     }
 
-    public static function create(string $objectToInvokeReference, InterfaceToCall $interfaceToCall): self
+    public static function create(string|Reference|Definition $objectToInvokeReference, InterfaceToCall $interfaceToCall): self
     {
         return new self($objectToInvokeReference, $interfaceToCall);
     }
 
     public static function createPayloadTypeRouter(array $typeToChannelMapping): self
     {
-        $routerBuilder = new self('', 'route');
-        $routerBuilder->setObjectToInvoke(PayloadTypeRouter::create($typeToChannelMapping));
-
-        return $routerBuilder;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return [$this->methodNameOrInterface instanceof InterfaceToCall
-                ? $this->methodNameOrInterface
-                : $interfaceToCallRegistry->getFor($this->directObjectToInvoke, $this->getMethodName())];
-    }
-
-    public static function createRouterFromObject(object $customRouterObject, string $methodName): self
-    {
-        $routerBuilder = new self('', $methodName);
-        $routerBuilder->setObjectToInvoke($customRouterObject);
+        $routerBuilder = new self(new Definition(PayloadTypeRouter::class, [$typeToChannelMapping], 'create'), 'route');
 
         return $routerBuilder;
     }
 
     public static function createPayloadTypeRouterByClassName(): self
     {
-        $routerBuilder = new self('', 'route');
-        $routerBuilder->setObjectToInvoke(PayloadTypeRouter::createWithRoutingByClass());
+        $routerBuilder = new self(new Definition(PayloadTypeRouter::class, factory: 'createWithRoutingByClass'), 'route');
 
         return $routerBuilder;
     }
@@ -96,25 +74,6 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
         $routerBuilder->setObjectToInvoke(HeaderMappingRouter::create($headerName, $headerValueToChannelMapping));
 
         return $routerBuilder;
-    }
-
-    public static function createHeaderRouter(string $headerName): self
-    {
-        $routerBuilder = new self('', 'route');
-        $routerBuilder->setObjectToInvoke(HeaderRouter::create($headerName));
-
-        return $routerBuilder;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredReferenceNames(): array
-    {
-        $requiredReferenceNames = $this->requiredReferenceNames;
-        $requiredReferenceNames[] = $this->objectToInvokeReference;
-
-        return $requiredReferenceNames;
     }
 
     /**
@@ -159,22 +118,29 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        $objectToInvoke = $this->directObjectToInvoke ? $this->directObjectToInvoke : $referenceSearchService->get($this->objectToInvokeReference);
-        /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
-        $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
-
-        return Router::create(
-            $channelResolver,
-            MethodInvoker::createWith($interfaceToCallRegistry->getFor($objectToInvoke, $this->getMethodName()), $objectToInvoke, $this->methodParameterConverters, $referenceSearchService),
+        if ($this->methodNameOrInterface instanceof InterfaceToCall) {
+            $interfaceToCallReference = InterfaceToCallReference::fromInstance($this->methodNameOrInterface);
+        } elseif ($this->directObjectToInvoke) {
+            $className = get_class($this->directObjectToInvoke);
+            $interfaceToCallReference = new InterfaceToCallReference($className, $this->methodNameOrInterface);
+        } else {
+            $className = $this->objectToInvokeReference instanceof Definition ? $this->objectToInvokeReference->getClassName() : (string) $this->objectToInvokeReference;
+            $interfaceToCallReference = new InterfaceToCallReference($className, $this->methodNameOrInterface);
+        }
+        $methodInvoker = MethodInvokerBuilder::create(
+            $this->directObjectToInvoke ?: $this->objectToInvokeReference,
+            $interfaceToCallReference,
+            $this->methodParameterConverters
+        )->compile($builder);
+        return new Definition(Router::class, [
+            new Reference(ChannelResolver::class),
+            $methodInvoker,
             $this->resolutionRequired,
             $this->defaultResolution,
-            $this->applySequence
-        );
+            $this->applySequence,
+        ]);
     }
 
     /**
@@ -226,7 +192,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
         return $this;
     }
 
-    private function setObjectToInvoke(object $objectToInvoke): void
+    private function setObjectToInvoke(DefinedObject $objectToInvoke): void
     {
         $this->directObjectToInvoke = $objectToInvoke;
     }
@@ -237,10 +203,5 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     public function __toString()
     {
         return sprintf('Router for input channel `%s` with name `%s`', $this->inputMessageChannelName, $this->getEndpointId());
-    }
-
-    private function getMethodName(): string
-    {
-        return $this->methodNameOrInterface instanceof InterfaceToCall ? $this->methodNameOrInterface->getMethodName() : $this->methodNameOrInterface;
     }
 }

@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\MessageHandler;
 
 /**
  * Class ReplyViaHeadersMessageHandlerBuilder
@@ -19,23 +18,8 @@ use Ecotone\Messaging\MessageHandler;
  */
 class ReplyViaHeadersMessageHandlerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
 {
-    private $replyData;
-    /**
-     * @var string
-     */
-    private $inputChannelName;
-    /**
-     * @var bool
-     */
-    private $canAdd;
-
-    /**
-     * ReplyViaHeadersMessageHandlerBuilder constructor.
-     * @param $replyData
-     */
-    private function __construct($replyData)
+    private function __construct(private mixed $replyData)
     {
-        $this->replyData = $replyData;
     }
 
     /**
@@ -50,20 +34,9 @@ class ReplyViaHeadersMessageHandlerBuilder extends InputOutputMessageHandlerBuil
     /**
      * @inheritDoc
      */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        return ReplyViaHeadersMessageHandler::create($this->replyData);
-    }
-
-    /**
-     * @param bool $canAdd
-     * @return ReplyViaHeadersMessageHandlerBuilder
-     */
-    public function shouldAddReplyDataToMessagePayload(bool $canAdd): self
-    {
-        $this->canAdd = $canAdd;
-
-        return $this;
+        return new Definition(ReplyViaHeadersMessageHandler::class, [$this->replyData], 'create');
     }
 
     /**
@@ -72,22 +45,5 @@ class ReplyViaHeadersMessageHandlerBuilder extends InputOutputMessageHandlerBuil
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
         return $interfaceToCallRegistry->getFor(ReplyViaHeadersMessageHandler::class, 'handle');
-    }
-
-
-    /**
-     * @inheritDoc
-     */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredReferenceNames(): array
-    {
-        return [];
     }
 }

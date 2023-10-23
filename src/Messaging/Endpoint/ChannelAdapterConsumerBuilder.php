@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
-use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Handler\InterceptedEndpoint;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Interface ConsumerBuilder
@@ -22,11 +21,6 @@ interface ChannelAdapterConsumerBuilder extends ConsumerLifecycleBuilder, Interc
     public function getEndpointId(): string;
 
     /**
-     * @return string[]
-     */
-    public function getRequiredReferences(): array;
-
-    /**
      * @param MethodInterceptor $methodInterceptor
      * @return $this
      */
@@ -38,13 +32,5 @@ interface ChannelAdapterConsumerBuilder extends ConsumerLifecycleBuilder, Interc
      */
     public function addAfterInterceptor(MethodInterceptor $methodInterceptor): self;
 
-
-    /**
-     * @param ChannelResolver $channelResolver
-     * @param ReferenceSearchService $referenceSearchService
-     *
-     * @param PollingMetadata $pollingMetadata
-     * @return ConsumerLifecycle
-     */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): ConsumerLifecycle;
+    public function registerConsumer(MessagingContainerBuilder $builder): void;
 }

@@ -25,9 +25,4 @@ interface ConsumerLifecycle
      * @return bool
      */
     public function isRunningInSeparateThread(): bool;
-
-    /**
-     * @return string
-     */
-    public function getConsumerName(): string;
 }

@@ -4,24 +4,19 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
 
-use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Config\Container\CompilableBuilder;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 
 /**
  * Class ConverterReferenceBuilder
  * @package Ecotone\Messaging\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ConverterReferenceBuilder implements ConverterBuilder
+class ConverterReferenceBuilder implements CompilableBuilder
 {
-    private string $referenceName;
-
-    /**
-     * ConverterReferenceBuilder constructor.
-     * @param string $referenceName
-     */
-    private function __construct(string $referenceName)
+    private function __construct(private string $referenceName)
     {
-        $this->referenceName = $referenceName;
     }
 
     /**
@@ -33,19 +28,8 @@ class ConverterReferenceBuilder implements ConverterBuilder
         return new self($referenceName);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ReferenceSearchService $referenceSearchService): Converter
+    public function compile(MessagingContainerBuilder $builder): Reference
     {
-        return $referenceSearchService->get($this->referenceName);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredReferences(): array
-    {
-        return [$this->referenceName];
+        return new Reference($this->referenceName);
     }
 }

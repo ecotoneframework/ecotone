@@ -15,12 +15,7 @@ class SymfonyExpressionEvaluationAdapter implements ExpressionEvaluationService
 {
     private ExpressionLanguage $language;
 
-    /**
-     * SymfonyExpressionEvaluationAdapter constructor.
-     *
-     * @param ExpressionLanguage $expressionLanguage
-     */
-    private function __construct(ExpressionLanguage $expressionLanguage)
+    private function __construct(ExpressionLanguage $expressionLanguage, private ReferenceSearchService $referenceSearchService)
     {
         $expressionLanguage->register(
             'extract',
@@ -101,20 +96,20 @@ class SymfonyExpressionEvaluationAdapter implements ExpressionEvaluationService
         $this->language = $expressionLanguage;
     }
 
-    public static function create(): ExpressionEvaluationService
+    public static function create(ReferenceSearchService $referenceSearchService): ExpressionEvaluationService
     {
         if (! class_exists(ExpressionLanguage::class)) {
             return new StubExpressionEvaluationAdapter();
         }
 
-        return new self(new ExpressionLanguage());
+        return new self(new ExpressionLanguage(), $referenceSearchService);
     }
 
     /**
      * @inheritDoc
      */
-    public function evaluate(string $expression, array $evaluationContext, ReferenceSearchService $referenceSearchService)
+    public function evaluate(string $expression, array $evaluationContext)
     {
-        return $this->language->evaluate($expression, array_merge($evaluationContext, ['referenceService' => $referenceSearchService]));
+        return $this->language->evaluate($expression, array_merge($evaluationContext, ['referenceService' => $this->referenceSearchService]));
     }
 }

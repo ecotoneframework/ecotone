@@ -3,16 +3,13 @@
 namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMethodInvocation;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\Assert;
@@ -26,11 +23,9 @@ use Ecotone\Messaging\Support\MessageBuilder;
 class CallAggregateService
 {
     /**
-     * @var ParameterConverterBuilder[]
+     * @var ParameterConverter[]
      */
-    private array $parameterConverterBuilders;
-    private ChannelResolver $channelResolver;
-    private ReferenceSearchService $referenceSearchService;
+    private array $parameterConverters;
     /**
      * @var AroundMethodInterceptor[]
      */
@@ -39,26 +34,16 @@ class CallAggregateService
     private bool $isEventSourced;
     private bool $isFactoryMethod;
     private InterfaceToCall $aggregateInterface;
-    /**
-     * @var PropertyReaderAccessor
-     */
     private PropertyReaderAccessor $propertyReaderAccessor;
-    /**
-     * @var PropertyEditorAccessor
-     */
-    private PropertyEditorAccessor $propertyEditorAccessor;
     private ?string $aggregateVersionProperty;
-    private bool $isAggregateVersionAutomaticallyIncreased;
     private ?string $aggregateMethodWithEvents;
 
-    public function __construct(InterfaceToCall $interfaceToCall, bool $isEventSourced, ChannelResolver $channelResolver, array $parameterConverterBuilders, array $aroundMethodInterceptors, ReferenceSearchService $referenceSearchService, PropertyReaderAccessor $propertyReaderAccessor, PropertyEditorAccessor $propertyEditorAccessor, bool $isCommand, bool $isFactoryMethod, private EventSourcingHandlerExecutor $eventSourcingHandlerExecutor, ?string $aggregateVersionProperty, bool $isAggregateVersionAutomaticallyIncreased, ?string $aggregateMethodWithEvents)
+    public function __construct(InterfaceToCall $interfaceToCall, bool $isEventSourced, array $parameterConverters, array $aroundMethodInterceptors, PropertyReaderAccessor $propertyReaderAccessor, bool $isCommand, bool $isFactoryMethod, private EventSourcingHandlerExecutor $eventSourcingHandlerExecutor, ?string $aggregateVersionProperty, ?string $aggregateMethodWithEvents)
     {
-        Assert::allInstanceOfType($parameterConverterBuilders, ParameterConverterBuilder::class);
+        Assert::allInstanceOfType($parameterConverters, ParameterConverter::class);
         Assert::allInstanceOfType($aroundMethodInterceptors, AroundMethodInterceptor::class);
 
-        $this->parameterConverterBuilders = $parameterConverterBuilders;
-        $this->channelResolver = $channelResolver;
-        $this->referenceSearchService = $referenceSearchService;
+        $this->parameterConverters = $parameterConverters;
         $this->aroundMethodInterceptors = $aroundMethodInterceptors;
         $this->isCommandHandler = $isCommand;
         $this->isEventSourced = $isEventSourced;
@@ -66,8 +51,6 @@ class CallAggregateService
         $this->aggregateInterface = $interfaceToCall;
         $this->aggregateVersionProperty = $aggregateVersionProperty;
         $this->propertyReaderAccessor = $propertyReaderAccessor;
-        $this->propertyEditorAccessor = $propertyEditorAccessor;
-        $this->isAggregateVersionAutomaticallyIncreased = $isAggregateVersionAutomaticallyIncreased;
         $this->aggregateMethodWithEvents = $aggregateMethodWithEvents;
     }
 
@@ -97,11 +80,12 @@ class CallAggregateService
                 ->setHeader(AggregateMessage::TARGET_VERSION, $versionBeforeHandling);
         }
 
-        $methodInvoker = MethodInvoker::createWith(
-            $this->aggregateInterface,
+        $methodInvoker = new MethodInvoker(
             $aggregate ? $aggregate : $this->aggregateInterface->getInterfaceType()->toString(),
-            $this->parameterConverterBuilders,
-            $this->referenceSearchService,
+            $this->aggregateInterface->getMethodName(),
+            $this->parameterConverters,
+            $this->aggregateInterface,
+            false
         );
 
         if ($this->aroundMethodInterceptors) {

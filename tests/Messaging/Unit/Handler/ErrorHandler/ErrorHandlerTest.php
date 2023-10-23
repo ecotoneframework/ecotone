@@ -31,7 +31,7 @@ class ErrorHandlerTest extends TestCase
 
         $consumedChannel = QueueChannel::create();
         $logger = LoggerExample::create();
-        $errorHandler = new ErrorHandler($retryTemplate, false, $logger);
+        $errorHandler = new ErrorHandler($retryTemplate, false);
 
         $this->assertNull(
             $errorHandler->handle(

@@ -25,7 +25,7 @@ class GatewayHeaderConverter implements GatewayParameterConverter
      * @param string $parameterName
      * @param string $headerName
      */
-    private function __construct(string $parameterName, string $headerName)
+    public function __construct(string $parameterName, string $headerName)
     {
         $this->parameterName = $parameterName;
         $this->headerName = $headerName;

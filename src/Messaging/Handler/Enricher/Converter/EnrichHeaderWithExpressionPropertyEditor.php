@@ -8,7 +8,6 @@ use Ecotone\Messaging\Handler\Enricher\PropertyEditor;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Message;
 
 /**
@@ -23,26 +22,23 @@ class EnrichHeaderWithExpressionPropertyEditor implements PropertyEditor
     private \Ecotone\Messaging\Handler\Enricher\PropertyPath $propertyPath;
     private string $expression;
     private \Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor $dataSetter;
-    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
     private string $nullResultExpression;
 
     /**
      * ExpressionSetter constructor.
      *
      * @param ExpressionEvaluationService $expressionEvaluationService
-     * @param ReferenceSearchService $referenceSearchService
      * @param PropertyEditorAccessor $dataSetter
      * @param PropertyPath $propertyPath
      * @param string $nullResultExpression
      * @param string $expression
      */
-    public function __construct(ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, PropertyEditorAccessor $dataSetter, PropertyPath $propertyPath, string $nullResultExpression, string $expression)
+    public function __construct(ExpressionEvaluationService $expressionEvaluationService, PropertyEditorAccessor $dataSetter, PropertyPath $propertyPath, string $nullResultExpression, string $expression)
     {
         $this->expressionEvaluationService = $expressionEvaluationService;
         $this->propertyPath                = $propertyPath;
         $this->expression                  = $expression;
         $this->dataSetter = $dataSetter;
-        $this->referenceSearchService = $referenceSearchService;
         $this->nullResultExpression = $nullResultExpression;
     }
 
@@ -63,7 +59,6 @@ class EnrichHeaderWithExpressionPropertyEditor implements PropertyEditor
                     'headers' => $enrichMessage->getHeaders(),
                 ],
             ],
-            $this->referenceSearchService
         );
 
         return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichMessage->getHeaders()->headers(), $dataToEnrich, $enrichMessage, $replyMessage);

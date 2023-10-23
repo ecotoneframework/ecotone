@@ -8,12 +8,19 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Transformer;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use stdClass;
 
-class StdClassTransformer
+class StdClassTransformer implements DefinedObject
 {
     public function transform(): stdClass
     {
         return new stdClass();
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class);
     }
 }

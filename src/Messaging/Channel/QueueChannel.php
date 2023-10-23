@@ -2,21 +2,25 @@
 
 namespace Ecotone\Messaging\Channel;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\PollableChannel;
 
-class QueueChannel implements PollableChannel
+class QueueChannel implements PollableChannel, DefinedObject
 {
     /**
-     * @param Message[] $queue
+     * @var Message[] $queue
      */
-    private function __construct(private string $name, private array $queue)
+    private array $queue = [];
+
+    public function __construct(private string $name)
     {
     }
 
     public static function create(string $name = 'unknown'): self
     {
-        return new self($name, []);
+        return new self($name);
     }
 
     /**
@@ -46,5 +50,10 @@ class QueueChannel implements PollableChannel
     public function __toString()
     {
         return 'in memory queue: ' . $this->name;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [$this->name]);
     }
 }

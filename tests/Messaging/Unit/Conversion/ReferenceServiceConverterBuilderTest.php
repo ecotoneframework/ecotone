@@ -6,9 +6,9 @@ namespace Test\Ecotone\Messaging\Unit\Conversion;
 
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Conversion\ReferenceServiceConverterBuilder;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Test\ComponentTestBuilder;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
@@ -31,16 +31,14 @@ class ReferenceServiceConverterBuilderTest extends TestCase
     {
         $sourceType = TypeDescriptor::create('array<string>');
         $targetType = TypeDescriptor::create("array<\stdClass>");
-        $referenceService = ReferenceServiceConverterBuilder::create(
-            ExampleConverterService::class,
-            'convert',
-            $sourceType,
-            $targetType
-        )->build(
-            InMemoryReferenceSearchService::createWith([
-                ExampleConverterService::class => new ExampleConverterService(),
-            ])
-        );
+        $referenceService = ComponentTestBuilder::create()
+            ->withReference(ExampleConverterService::class, new ExampleConverterService())
+            ->build(ReferenceServiceConverterBuilder::create(
+                ExampleConverterService::class,
+                'convert',
+                $sourceType,
+                $targetType
+            ));
 
         $this->assertEquals(
             [new stdClass()],
@@ -62,16 +60,14 @@ class ReferenceServiceConverterBuilderTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        ReferenceServiceConverterBuilder::create(
-            ServiceExpectingTwoArguments::class,
-            'withReturnValue',
-            TypeDescriptor::create('array<string>'),
-            TypeDescriptor::create("array<\stdClass>")
-        )->build(
-            InMemoryReferenceSearchService::createWith([
-                ServiceExpectingTwoArguments::class => ServiceExpectingTwoArguments::create(),
-            ])
-        );
+        ComponentTestBuilder::create()
+            ->withReference(ServiceExpectingTwoArguments::class, ServiceExpectingTwoArguments::create())
+            ->build(ReferenceServiceConverterBuilder::create(
+                ServiceExpectingTwoArguments::class,
+                'withReturnValue',
+                TypeDescriptor::create('array<string>'),
+                TypeDescriptor::create("array<\stdClass>")
+            ));
     }
 
     public function test_throwing_exception_if_converter_containing_union_source_type()

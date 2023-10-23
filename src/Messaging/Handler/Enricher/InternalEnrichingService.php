@@ -29,7 +29,6 @@ class InternalEnrichingService
      * @var string[]
      */
     private array $requestHeaders;
-    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
     private \Ecotone\Messaging\Conversion\ConversionService $conversionService;
 
     /**
@@ -43,14 +42,13 @@ class InternalEnrichingService
      * @param string $requestPayloadExpression
      * @param string[] $requestHeaders
      */
-    public function __construct(?EnrichGateway $enrichGateway, ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, ConversionService $conversionService, array $setters, ?string $requestPayloadExpression, array $requestHeaders)
+    public function __construct(?EnrichGateway $enrichGateway, ExpressionEvaluationService $expressionEvaluationService, ConversionService $conversionService, array $setters, ?string $requestPayloadExpression, array $requestHeaders)
     {
         $this->enrichGateway               = $enrichGateway;
         $this->setters                     = $setters;
         $this->expressionEvaluationService = $expressionEvaluationService;
         $this->requestPayloadExpression    = $requestPayloadExpression;
         $this->requestHeaders              = $requestHeaders;
-        $this->referenceSearchService = $referenceSearchService;
         $this->conversionService = $conversionService;
     }
 
@@ -73,7 +71,6 @@ class InternalEnrichingService
                         'headers' => $message->getHeaders()->headers(),
                         'payload' => $message->getPayload(),
                     ],
-                    $this->referenceSearchService
                 );
 
                 $requestMessage->setPayload($requestPayload);

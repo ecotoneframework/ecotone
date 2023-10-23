@@ -2,12 +2,13 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\DefinedObjectWrapper;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\MessageHandler;
 
 /**
@@ -25,10 +26,6 @@ class DumbMessageHandlerBuilder extends InputOutputMessageHandlerBuilder impleme
      * @var string
      */
     private $messageChannel;
-    /**
-     * @var string[]
-     */
-    private $requiredReferenceNames = [];
 
     /**
      * DumbMessageHandlerBuilder constructor.
@@ -39,8 +36,6 @@ class DumbMessageHandlerBuilder extends InputOutputMessageHandlerBuilder impleme
     {
         $this->messageHandler = $messageHandler;
         $this->messageChannel = $inputMessageChannelName;
-
-        $this->requiredReferenceNames = [get_class($this->messageHandler)];
     }
 
     /**
@@ -58,12 +53,9 @@ class DumbMessageHandlerBuilder extends InputOutputMessageHandlerBuilder impleme
         return new self(NoReturnMessageHandler::create(), 'inputChannel');
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        return $this->messageHandler;
+        return new DefinedObjectWrapper($this->messageHandler);
     }
 
     /**
@@ -80,22 +72,6 @@ class DumbMessageHandlerBuilder extends InputOutputMessageHandlerBuilder impleme
     public function withInputChannelName(string $inputChannelName): self
     {
         return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredReferenceNames(): array
-    {
-        return $this->requiredReferenceNames;
     }
 
     /**

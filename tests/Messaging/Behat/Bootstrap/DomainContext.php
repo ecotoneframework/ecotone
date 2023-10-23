@@ -4,17 +4,18 @@ namespace Test\Ecotone\Messaging\Behat\Bootstrap;
 
 use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\TableNode;
+use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
+use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
-use Ecotone\Messaging\Endpoint\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
+use Ecotone\Messaging\Endpoint\PollingConsumer\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlingException;
@@ -39,7 +40,7 @@ class DomainContext implements Context
 {
     private MessagingSystemConfiguration $messagingSystemConfiguration;
     private ?\Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem;
-    private ?\Ecotone\Messaging\Handler\InMemoryReferenceSearchService $inMemoryReferenceSearchService;
+    private ?InMemoryPSRContainer $inMemoryPsrContainer;
     private ?\Ecotone\Messaging\Future $future;
 
     /**
@@ -125,14 +126,9 @@ class DomainContext implements Context
         );
     }
 
-    /**
-     * @param string $className
-     * @return null|object
-     * @throws MessagingException
-     */
     private function registerReference(string $className)
     {
-        $this->inMemoryReferenceSearchService->registerReferencedObject($className, new $className());
+        $this->inMemoryPsrContainer->set($className, new $className());
     }
 
     /**
@@ -209,7 +205,7 @@ class DomainContext implements Context
         $this->messagingSystem = $this->getMessagingSystemConfiguration()
             ->registerConsumerFactory(new EventDrivenConsumerBuilder())
             ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
-            ->buildMessagingSystemFromConfiguration($this->inMemoryReferenceSearchService);
+            ->buildMessagingSystemFromConfiguration($this->inMemoryPsrContainer);
     }
 
     /**
@@ -386,7 +382,8 @@ class DomainContext implements Context
      */
     public function iConfigureMessagingSystem()
     {
-        $this->inMemoryReferenceSearchService = InMemoryReferenceSearchService::createEmpty();
+        $this->inMemoryPsrContainer = InMemoryPSRContainer::createEmpty();
+        $this->inMemoryPsrContainer->set(ServiceCacheConfiguration::REFERENCE_NAME, ServiceCacheConfiguration::noCache());
         $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaults(
             InMemoryModuleMessaging::createEmpty(),
             ServiceConfiguration::createWithAsynchronicityOnly()

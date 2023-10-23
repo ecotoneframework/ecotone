@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
-use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Config\Container\BoundParameterConverter;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
-use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ComponentTestBuilder;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
@@ -37,13 +36,12 @@ class HeaderExpressionBuilderTest extends TestCase
     public function test_creating_payload_expression()
     {
         $converter = HeaderExpressionBuilder::create('x', 'token', 'value ~ 1', true);
-        $converter = $converter->build(
-            InMemoryReferenceSearchService::createWith([
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-            ]),
-            InterfaceToCall::create(CallableService::class, 'wasCalled'),
-            InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
-        );
+        $converter = ComponentTestBuilder::create()
+            ->build(new BoundParameterConverter(
+                $converter,
+                InterfaceToCall::create(CallableService::class, 'wasCalled'),
+                InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', ''))
+            ));
 
         $this->assertEquals(
             '1001',
@@ -63,14 +61,15 @@ class HeaderExpressionBuilderTest extends TestCase
     {
         $converter = HeaderExpressionBuilder::create('x', 'number', "reference('calculatingService').sum(value)", true);
 
-        $converter = $converter->build(
-            InMemoryReferenceSearchService::createWith([
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-                'calculatingService' => CalculatingService::create(1),
-            ]),
-            InterfaceToCall::create(CallableService::class, 'wasCalled'),
-            InterfaceParameter::createNullable('x', TypeDescriptor::create('string')),
-        );
+        $converter = ComponentTestBuilder::create()
+            ->withReference('calculatingService', CalculatingService::create(1))
+            ->build(
+                new BoundParameterConverter(
+                    $converter,
+                    InterfaceToCall::create(CallableService::class, 'wasCalled'),
+                    InterfaceParameter::createNullable('x', TypeDescriptor::create('string'))
+                )
+            );
 
         $this->assertEquals(
             101,
@@ -85,13 +84,12 @@ class HeaderExpressionBuilderTest extends TestCase
     public function test_throwing_exception_if_header_does_not_exists()
     {
         $converter = HeaderExpressionBuilder::create('x', 'token', 'value ~ 1', true);
-        $converter = $converter->build(
-            InMemoryReferenceSearchService::createWith([
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-            ]),
-            InterfaceToCall::create(CallableService::class, 'wasCalled'),
-            InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
-        );
+        $converter = ComponentTestBuilder::create()
+            ->build(new BoundParameterConverter(
+                $converter,
+                InterfaceToCall::create(CallableService::class, 'wasCalled'),
+                InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', ''))
+            ));
 
         $this->expectException(InvalidArgumentException::class);
 
@@ -103,13 +101,12 @@ class HeaderExpressionBuilderTest extends TestCase
     public function test_not_throwing_exception_if_header_does_not_exists_and_is_no_required()
     {
         $converter = HeaderExpressionBuilder::create('x', 'token', 'value ~ 1', false);
-        $converter = $converter->build(
-            InMemoryReferenceSearchService::createWith([
-                ExpressionEvaluationService::REFERENCE => SymfonyExpressionEvaluationAdapter::create(),
-            ]),
-            InterfaceToCall::create(CallableService::class, 'wasCalled'),
-            InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', '')),
-        );
+        $converter = ComponentTestBuilder::create()
+            ->build(new BoundParameterConverter(
+                $converter,
+                InterfaceToCall::create(CallableService::class, 'wasCalled'),
+                InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', ''))
+            ));
 
         $this->assertEquals(
             '1',

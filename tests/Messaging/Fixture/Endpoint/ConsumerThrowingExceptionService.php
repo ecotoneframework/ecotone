@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Endpoint;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 use RuntimeException;
 
@@ -12,7 +14,7 @@ use RuntimeException;
  * @package Test\Ecotone\Messaging\Fixture\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ConsumerThrowingExceptionService
+class ConsumerThrowingExceptionService implements DefinedObject
 {
     /**
      * @var ConsumerLifecycle
@@ -57,5 +59,10 @@ class ConsumerThrowingExceptionService
     public function getCalled(): int
     {
         return $this->called;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class);
     }
 }

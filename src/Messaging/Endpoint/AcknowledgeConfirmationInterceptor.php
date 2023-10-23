@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Endpoint;
 
 use Ecotone\Messaging\Attribute\Parameter\Reference;
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Endpoint\PollingConsumer\RejectMessageException;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
@@ -21,15 +23,11 @@ use Throwable;
  * @package Ecotone\Amqp
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class AcknowledgeConfirmationInterceptor
+class AcknowledgeConfirmationInterceptor implements DefinedObject
 {
-    private function __construct(private bool $shouldStopOnError)
+    public static function createAroundInterceptorBuilder(InterfaceToCallRegistry $interfaceToCallRegistry): AroundInterceptorBuilder
     {
-    }
-
-    public static function createAroundInterceptor(InterfaceToCallRegistry $interfaceToCallRegistry, PollingMetadata $pollingMetadata): AroundInterceptorReference
-    {
-        return AroundInterceptorReference::createWithDirectObjectAndResolveConverters($interfaceToCallRegistry, new self($pollingMetadata->isStoppedOnError()), 'ack', Precedence::MESSAGE_ACKNOWLEDGE_PRECEDENCE, '');
+        return AroundInterceptorBuilder::createWithDirectObjectAndResolveConverters($interfaceToCallRegistry, new self(), 'ack', Precedence::MESSAGE_ACKNOWLEDGE_PRECEDENCE, '');
     }
 
     /**
@@ -82,11 +80,17 @@ class AcknowledgeConfirmationInterceptor
             }
         }
 
-        if ($this->shouldStopOnError && $exception !== null) {
+        $pollingMetadata = $message->getHeaders()->get(MessageHeaders::CONSUMER_POLLING_METADATA);
+        if ($pollingMetadata->isStoppedOnError() === true && $exception !== null) {
             $logger->info('Should stop on error configuration enabled, stopping Message Consumer.');
             throw $exception;
         }
 
         return $result;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class);
     }
 }

@@ -30,7 +30,7 @@ final class InterfaceParameter
      */
     private array $annotations;
 
-    private function __construct(string $name, Type $typeDescriptor, bool $doesAllowNull, bool $hasDefaultValue, $defaultValue, bool $isAnnotation, array $annotations)
+    public function __construct(string $name, Type $typeDescriptor, bool $doesAllowNull, bool $hasDefaultValue, $defaultValue, bool $isAnnotation, array $annotations)
     {
         $this->name = $name;
         $this->typeDescriptor = $typeDescriptor;

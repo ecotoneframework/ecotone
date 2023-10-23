@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Recoverability;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Support\Assert;
 
-final class RetryTemplateBuilder
+final class RetryTemplateBuilder implements DefinedObject
 {
     /**
      * @var int in milliseconds
@@ -16,7 +18,7 @@ final class RetryTemplateBuilder
     private ?int $maxDelay;
     private ?int $maxAttempts;
 
-    private function __construct(int $initialDelay, int $multiplier, ?int $maxDelay, ?int $maxAttempts)
+    public function __construct(int $initialDelay, int $multiplier, ?int $maxDelay, ?int $maxAttempts)
     {
         Assert::isTrue($maxAttempts > 0 || is_null($maxAttempts), 'Max attempts must be greater than 0');
         Assert::isTrue($maxDelay > 0 || is_null($maxDelay), 'Max delay must be greater than 0');
@@ -55,5 +57,18 @@ final class RetryTemplateBuilder
     public function build(): RetryTemplate
     {
         return new RetryTemplate($this->initialDelay, $this->multiplier, $this->maxDelay, $this->maxAttempts);
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(
+            self::class,
+            [
+                $this->initialDelay,
+                $this->multiplier,
+                $this->maxDelay,
+                $this->maxAttempts,
+            ]
+        );
     }
 }

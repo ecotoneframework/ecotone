@@ -6,7 +6,6 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\ParameterConverter;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Message;
 
 /**
@@ -16,7 +15,7 @@ use Ecotone\Messaging\Message;
  */
 class PayloadExpressionConverter implements ParameterConverter
 {
-    public function __construct(private ReferenceSearchService $referenceSearchService, private ExpressionEvaluationService $expressionEvaluationService, private string $expression)
+    public function __construct(private ExpressionEvaluationService $expressionEvaluationService, private string $expression)
     {
     }
 
@@ -32,7 +31,6 @@ class PayloadExpressionConverter implements ParameterConverter
                 'headers' => $message->getHeaders()->headers(),
                 'payload' => $message->getPayload(),
             ],
-            $this->referenceSearchService
         );
     }
 }

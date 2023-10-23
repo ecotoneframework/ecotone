@@ -2,6 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Service;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Transaction\Transactional;
 
@@ -10,7 +12,7 @@ use Ecotone\Messaging\Transaction\Transactional;
  * @package Test\Ecotone\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ServiceWithoutReturnValue implements CallableService
+class ServiceWithoutReturnValue implements CallableService, DefinedObject
 {
     /**
      * @var bool
@@ -48,5 +50,10 @@ class ServiceWithoutReturnValue implements CallableService
 
     public function callWithNullableAnnotation(?Transactional $transactional): void
     {
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [], 'create');
     }
 }

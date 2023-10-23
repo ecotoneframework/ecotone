@@ -42,8 +42,7 @@ class ConverterModuleTest extends AnnotationConfigurationTest
                         TypeDescriptor::create('array<string>'),
                         TypeDescriptor::create("array<\stdClass>")
                     )
-                )
-                ->requireReferences(['exampleConverterService']),
+                ),
             $configuration
         );
     }
@@ -62,8 +61,7 @@ class ConverterModuleTest extends AnnotationConfigurationTest
             $this->createMessagingSystemConfiguration()
                 ->registerConverter(
                     ConverterReferenceBuilder::create(ExampleMediaTypeConverter::class)
-                )
-                ->requireReferences([ExampleMediaTypeConverter::class]),
+                ),
             $configuration
         );
     }

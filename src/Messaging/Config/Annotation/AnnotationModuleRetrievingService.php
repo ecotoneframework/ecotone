@@ -12,13 +12,9 @@ use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Module;
 use Ecotone\Messaging\Config\ModuleRetrievingService;
 use Ecotone\Messaging\ConfigurationVariableService;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ConfigurationVariableBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Messaging\Support\MessageBuilder;
 use ReflectionClass;
 
 class AnnotationModuleRetrievingService implements ModuleRetrievingService
@@ -68,7 +64,7 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
 
             $parameters = [];
             foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
-                $variableName = null;
+                $variableName = $interfaceParameter->getName();
                 if ($interfaceParameter->hasAnnotation(ConfigurationVariable::class)) {
                     /** @var ConfigurationVariable $variable */
                     $variable = $interfaceParameter->getAnnotationsOfType(ConfigurationVariable::class)[0];
@@ -76,10 +72,10 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
                     $variableName = $variable->getName();
                 }
 
-                $parameters[] = ConfigurationVariableBuilder::createFrom($variableName, $interfaceParameter);
+                $parameters[] = $this->variableConfigurationService->getByName($variableName);
             }
-            $methodInvoker = MethodInvoker::createWith($interfaceToCall, $newInstance, $parameters, InMemoryReferenceSearchService::createWith([ConfigurationVariableService::REFERENCE_NAME => $this->variableConfigurationService]));
-            $extensionObjectToResolve = $methodInvoker->executeEndpoint(MessageBuilder::withPayload('stub')->build());
+            // TODO: check from @dgafka
+            $extensionObjectToResolve = $newInstance->{$interfaceToCall->getMethodName()}(...$parameters);
 
             if (! is_array($extensionObjectToResolve)) {
                 Assert::isObject($extensionObjectToResolve, "Incorrect configuration given in {$annotationRegistration->getClassName()}:{$annotationRegistration->getMethodName()}. Configuration returned by ServiceContext must be object or array of objects.");

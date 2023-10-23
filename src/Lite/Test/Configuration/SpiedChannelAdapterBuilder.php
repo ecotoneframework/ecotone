@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite\Test\Configuration;
 
-use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Precedence;
 
 final class SpiedChannelAdapterBuilder implements ChannelInterceptorBuilder
 {
-    public function __construct(private string $relatedChannel, private MessageCollectorHandler $messageCollectorHandler)
+    public function __construct(private string $relatedChannel)
     {
     }
 
@@ -21,23 +21,19 @@ final class SpiedChannelAdapterBuilder implements ChannelInterceptorBuilder
         return $this->relatedChannel;
     }
 
-    public function getRequiredReferenceNames(): array
-    {
-        return [];
-    }
-
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return [];
-    }
-
     public function getPrecedence(): int
     {
         return Precedence::DEFAULT_PRECEDENCE;
     }
 
-    public function build(ReferenceSearchService $referenceSearchService): ChannelInterceptor
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        return new SpiecChannelAdapter($this->relatedChannel, $this->messageCollectorHandler);
+        return new Definition(
+            SpiecChannelAdapter::class,
+            [
+                $this->relatedChannel,
+                new Reference(MessageCollectorHandler::class),
+            ]
+        );
     }
 }

@@ -25,7 +25,7 @@ class GatewayPayloadConverter implements GatewayParameterConverter
      * PayloadMessageParameter constructor.
      * @param string $parameterName
      */
-    private function __construct(string $parameterName)
+    public function __construct(string $parameterName)
     {
         $this->parameterName = $parameterName;
     }

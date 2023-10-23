@@ -4,43 +4,41 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite\Test\Configuration;
 
-use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Modelling\EventSourcedRepository;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Ecotone\Modelling\InMemoryStandardRepository;
 use Ecotone\Modelling\RepositoryBuilder;
-use Ecotone\Modelling\StandardRepository;
 
 final class InMemoryRepositoryBuilder implements RepositoryBuilder
 {
-    public function __construct(private object $inMemoryRepository, private bool $isEventSourced)
+    public function __construct(private array $aggregateClassNames, private bool $isEventSourced)
     {
     }
 
     public static function createForAllStateStoredAggregates(): self
     {
-        return new self(InMemoryStandardRepository::createEmpty(), false);
+        return new self([], false);
     }
 
     public static function createForSetOfStateStoredAggregates(array $aggregateClassNames)
     {
-        return new self(new InMemoryStandardRepository([], $aggregateClassNames), false);
+        return new self($aggregateClassNames, false);
     }
 
     public static function createForAllEventSourcedAggregates(): self
     {
-        return new self(InMemoryEventSourcedRepository::createEmpty(), true);
+        return new self([], true);
     }
 
     public static function createForSetOfEventSourcedAggregates(array $aggregateClassNames)
     {
-        return new self(new InMemoryEventSourcedRepository([], $aggregateClassNames), true);
+        return new self($aggregateClassNames, true);
     }
 
     public function canHandle(string $aggregateClassName): bool
     {
-        return $this->inMemoryRepository->canHandle($aggregateClassName);
+        return isset($this->aggregateClassNames[$aggregateClassName]);
     }
 
     public function isEventSourced(): bool
@@ -48,13 +46,23 @@ final class InMemoryRepositoryBuilder implements RepositoryBuilder
         return $this->isEventSourced;
     }
 
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): EventSourcedRepository|StandardRepository
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        return $this->inMemoryRepository;
-    }
-
-    public function getRepository(): EventSourcedRepository|StandardRepository
-    {
-        return $this->inMemoryRepository;
+        return match ($this->isEventSourced) {
+            true => new Definition(
+                InMemoryEventSourcedRepository::class,
+                [
+                    [],
+                    $this->aggregateClassNames,
+                ]
+            ),
+            false => new Definition(
+                InMemoryStandardRepository::class,
+                [
+                    [],
+                    $this->aggregateClassNames,
+                ]
+            )
+        };
     }
 }

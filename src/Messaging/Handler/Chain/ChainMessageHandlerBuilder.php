@@ -5,17 +5,15 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Chain;
 
 use Ecotone\Messaging\Channel\DirectChannel;
-use Ecotone\Messaging\Config\InMemoryChannelResolver;
-use Ecotone\Messaging\Config\MessagingSystemConfiguration;
-use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Config\Container\ChannelReference;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ramsey\Uuid\Uuid;
@@ -31,20 +29,10 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
      * @var MessageHandlerBuilderWithOutputChannel[]
      */
     private array $chainedMessageHandlerBuilders;
-    /**
-     * @var string[]
-     */
-    private array $requiredReferences = [];
-    /**
-     * @var MessageHandlerBuilder|null
-     */
     private ?MessageHandlerBuilder $outputMessageHandler = null;
 
     private ?int $interceptedHandlerOffset = null;
 
-    /**
-     * ChainMessageHandlerBuilder constructor.
-     */
     private function __construct()
     {
     }
@@ -67,7 +55,6 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
 
     public function chain(MessageHandlerBuilderWithOutputChannel $messageHandler): self
     {
-        $this->requiredReferences = array_merge($this->requiredReferences, MessagingSystemConfiguration::resolveRequiredReferenceForBuilder($messageHandler));
         $outputChannelToKeep = $messageHandler->getOutputMessageChannelName();
         $messageHandler = $messageHandler
             ->withInputChannelName('')
@@ -92,16 +79,12 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
      */
     public function withOutputMessageHandler(MessageHandlerBuilder $outputMessageHandler): self
     {
-        $this->requiredReferences = array_merge($this->requiredReferences, MessagingSystemConfiguration::resolveRequiredReferenceForBuilder($outputMessageHandler));
         $this->outputMessageHandler = $outputMessageHandler;
 
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
         if ($this->outputMessageHandler && $this->outputMessageChannelName) {
             throw InvalidArgumentException::create("Can't configure output message handler and output message channel for chain handler");
@@ -114,11 +97,9 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
             foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
                 $singleHandler = $singleHandler->addAroundInterceptor($aroundInterceptorReference);
             }
-            return $singleHandler->build($channelResolver, $referenceSearchService);
+            return $singleHandler->compile($builder);
         }
 
-        /** @var DirectChannel[] $bridgeChannels */
-        $bridgeChannels = [];
         $messageHandlersToChain = $this->chainedMessageHandlerBuilders;
 
         if ($this->outputMessageHandler) {
@@ -126,15 +107,34 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
         }
 
         $baseKey = Uuid::uuid4()->toString();
-        for ($key = 1; $key < count($messageHandlersToChain); $key++) {
-            $bridgeChannels[$baseKey . $key] = DirectChannel::create($this->inputMessageChannelName . '_chain.' . $baseKey . $key);
+        foreach ($messageHandlersToChain as $key => $messageHandlerBuilder) {
+            $nextHandlerKey = ($key + 1);
+            $currentChannelName = $this->inputMessageChannelName . '_chain.' . $baseKey . $key;
+            if ($key === $this->interceptedHandlerOffset) {
+                foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
+                    $messageHandlerBuilder = $messageHandlerBuilder->addAroundInterceptor($aroundInterceptorReference);
+                }
+            }
+            if ($this->hasNextHandler($messageHandlersToChain, $nextHandlerKey)) {
+                $messageHandlerBuilder = $messageHandlerBuilder->withOutputMessageChannel($this->inputMessageChannelName . '_chain.' . $baseKey . $nextHandlerKey);
+            }
+            $messageHandlerReference = $messageHandlerBuilder->compile($builder);
+            if (! $messageHandlerReference) {
+                // Cant compile
+                throw InvalidArgumentException::create("Can't compile {$messageHandlerBuilder}");
+            }
+            $builder->register(new ChannelReference($currentChannelName), new Definition(DirectChannel::class, [
+                $currentChannelName,
+                $messageHandlerReference,
+            ]));
         }
-        $requestChannel = DirectChannel::create($this->inputMessageChannelName . '_chain.' . $baseKey);
-        $bridgeChannels[$baseKey] = $requestChannel;
 
-        $customChannelResolver = InMemoryChannelResolver::createWithChannelResolver($channelResolver, $bridgeChannels);
+        $chainForwardPublisherReference = new Definition(ChainForwardPublisher::class, [
+            new ChannelReference($this->inputMessageChannelName . '_chain.' . $baseKey . '0'),
+            (bool)$this->outputMessageChannelName,
+        ]);
 
-        $serviceActivator = ServiceActivatorBuilder::createWithDirectReference(new ChainForwardPublisher($requestChannel, (bool)$this->outputMessageChannelName), 'forward')
+        $serviceActivator = ServiceActivatorBuilder::createWithDefinition($chainForwardPublisherReference, 'forward')
             ->withOutputMessageChannel($this->outputMessageChannelName);
 
         if (is_null($this->interceptedHandlerOffset)) {
@@ -143,34 +143,7 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
             }
         }
 
-        for ($key = 0; $key < count($messageHandlersToChain); $key++) {
-            $currentKey = $baseKey . $key;
-            $messageHandlerBuilder = $messageHandlersToChain[$key];
-            $nextHandlerKey = ($key + 1);
-            $previousHandlerKey = ($key - 1);
-
-            if ($key === $this->interceptedHandlerOffset) {
-                foreach ($this->orderedAroundInterceptors as $aroundInterceptorReference) {
-                    $messageHandlerBuilder = $messageHandlerBuilder->addAroundInterceptor($aroundInterceptorReference);
-                }
-            }
-
-            if ($this->hasNextHandler($messageHandlersToChain, $nextHandlerKey)) {
-                $messageHandlerBuilder = $messageHandlerBuilder->withOutputMessageChannel($baseKey . $nextHandlerKey);
-            }
-
-            $messageHandler = $messageHandlerBuilder->build($customChannelResolver, $referenceSearchService);
-
-            if ($this->hasPreviousHandler($messageHandlersToChain, $previousHandlerKey)) {
-                $customChannelResolver->resolve($currentKey)->subscribe($messageHandler);
-            }
-
-            if ($key === 0) {
-                $requestChannel->subscribe($messageHandler);
-            }
-        }
-
-        return $serviceActivator->build($channelResolver, $referenceSearchService);
+        return $serviceActivator->compile($builder);
     }
 
     /**
@@ -184,16 +157,6 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
     }
 
     /**
-     * @param array $messageHandlersToChain
-     * @param $previousHandlerKey
-     * @return bool
-     */
-    private function hasPreviousHandler(array $messageHandlersToChain, $previousHandlerKey): bool
-    {
-        return isset($messageHandlersToChain[$previousHandlerKey]);
-    }
-
-    /**
      * @inheritDoc
      */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
@@ -203,32 +166,5 @@ class ChainMessageHandlerBuilder extends InputOutputMessageHandlerBuilder
         }
 
         return $interfaceToCallRegistry->getFor(ChainForwardPublisher::class, 'forward');
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        $relatedReferences = [];
-        if ($this->outputMessageHandler) {
-            $relatedReferences = array_merge($relatedReferences, $this->outputMessageHandler->resolveRelatedInterfaces($interfaceToCallRegistry));
-        }
-
-        foreach ($this->chainedMessageHandlerBuilders as $chainedMessageHandlerBuilder) {
-            foreach ($chainedMessageHandlerBuilder->resolveRelatedInterfaces($interfaceToCallRegistry) as $resolveRelatedReference) {
-                $relatedReferences[] = $resolveRelatedReference;
-            }
-        }
-
-        return $relatedReferences;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredReferenceNames(): array
-    {
-        return $this->requiredReferences;
     }
 }

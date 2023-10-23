@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher\Converter;
 
-use Ecotone\Messaging\Handler\Enricher\PropertyEditor;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorBuilder;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class ExpressionHeaderSetterBuilder
@@ -59,21 +60,14 @@ class EnrichHeaderWithExpressionBuilder implements PropertyEditorBuilder
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): PropertyEditor
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        /** @var ExpressionEvaluationService $expressionEvaluationService */
-        $expressionEvaluationService = $referenceSearchService->get(ExpressionEvaluationService::REFERENCE);
-
-        return new EnrichHeaderWithExpressionPropertyEditor(
-            $expressionEvaluationService,
-            $referenceSearchService,
-            PropertyEditorAccessor::createWithMapping(
-                $referenceSearchService,
-                ''
-            ),
-            PropertyPath::createWith($this->propertyPath),
+        return new Definition(EnrichHeaderWithExpressionPropertyEditor::class, [
+            new Reference(ExpressionEvaluationService::REFERENCE),
+            new Reference(PropertyEditorAccessor::class),
+            new Definition(PropertyPath::class, [$this->propertyPath], 'createWith'),
             $this->nullResultExpression,
-            $this->expression
-        );
+            $this->expression,
+        ]);
     }
 }

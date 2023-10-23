@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
-final class PollingMetadata
+final class PollingMetadata implements DefinedObject
 {
     public const DEFAULT_MAX_MESSAGES_PER_POLL = 1;
 
@@ -20,38 +22,33 @@ final class PollingMetadata
     public const DEFAULT_STOP_ON_ERROR = false;
     public const DEFAULT_FINISH_WHEN_NO_MESSAGES = false;
 
-    private string $endpointId;
-    private string $cron = '';
-    private string $errorChannelName = '';
-    private bool $isErrorChannelEnabled = true;
-    /**
-     * @var int in milliseconds
-     */
-    private int $fixedRateInMilliseconds = self::DEFAULT_FIXED_RATE;
-    /**
-     * @var int in milliseconds
-     */
-    private int $initialDelayInMilliseconds = self::DEFAULT_INITIAL_DELAY;
-    private int $handledMessageLimit = self::DEFAULT_HANDLED_MESSAGE_LIMIT;
-    private int $memoryLimitInMegabytes = self::DEFAULT_MEMORY_LIMIT_MEGABYTES;
-    private int $executionAmountLimit = self::DEFAULT_EXECUTION_LIMIT;
-    private int $maxMessagePerPoll = self::DEFAULT_MAX_MESSAGES_PER_POLL;
-    private int $executionTimeLimitInMilliseconds = self::DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS;
-    private ?RetryTemplateBuilder $connectionRetryTemplate = null;
-    private bool $withSignalInterceptors = false;
-    private string $triggerReferenceName = '';
-    private string $taskExecutorName = '';
-    private bool $stopOnError = self::DEFAULT_STOP_ON_ERROR;
-    private bool $finishWhenNoMessages = self::DEFAULT_FINISH_WHEN_NO_MESSAGES;
+    private bool $withSignalInterceptors;
+
 
     /**
      * PollingMetadata constructor.
      * @param string $endpointId
      */
-    private function __construct(string $endpointId)
-    {
-        $this->endpointId = $endpointId;
-        $this->withSignalInterceptors = extension_loaded('pcntl');
+    public function __construct(
+        private string $endpointId,
+        private string $cron = '',
+        private string $errorChannelName = '',
+        private bool $isErrorChannelEnabled = true,
+        private int $fixedRateInMilliseconds = self::DEFAULT_FIXED_RATE,
+        private int $initialDelayInMilliseconds = self::DEFAULT_INITIAL_DELAY,
+        private int $handledMessageLimit = self::DEFAULT_HANDLED_MESSAGE_LIMIT,
+        private int $memoryLimitInMegabytes = self::DEFAULT_MEMORY_LIMIT_MEGABYTES,
+        private int $executionAmountLimit = self::DEFAULT_EXECUTION_LIMIT,
+        private int $maxMessagePerPoll = self::DEFAULT_MAX_MESSAGES_PER_POLL,
+        private int $executionTimeLimitInMilliseconds = self::DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS,
+        private ?RetryTemplateBuilder $connectionRetryTemplate = null,
+        ?bool $withSignalInterceptors = null,
+        private string $triggerReferenceName = '',
+        private string $taskExecutorName = '',
+        private bool $stopOnError = self::DEFAULT_STOP_ON_ERROR,
+        private bool $finishWhenNoMessages = self::DEFAULT_FINISH_WHEN_NO_MESSAGES,
+    ) {
+        $this->withSignalInterceptors = $withSignalInterceptors ?? extension_loaded('pcntl');
     }
 
     /**
@@ -434,5 +431,28 @@ final class PollingMetadata
     private function createCopy(): self
     {
         return clone $this;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [
+            $this->endpointId,
+            $this->cron,
+            $this->errorChannelName,
+            $this->isErrorChannelEnabled,
+            $this->fixedRateInMilliseconds,
+            $this->initialDelayInMilliseconds,
+            $this->handledMessageLimit,
+            $this->memoryLimitInMegabytes,
+            $this->executionAmountLimit,
+            $this->maxMessagePerPoll,
+            $this->executionTimeLimitInMilliseconds,
+            $this->connectionRetryTemplate,
+            $this->withSignalInterceptors,
+            $this->triggerReferenceName,
+            $this->taskExecutorName,
+            $this->stopOnError,
+            $this->finishWhenNoMessages,
+        ]);
     }
 }

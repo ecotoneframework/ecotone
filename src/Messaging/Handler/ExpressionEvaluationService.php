@@ -14,9 +14,8 @@ interface ExpressionEvaluationService
     /**
      * @param string $expression
      * @param array $evaluationContext
-     * @param ReferenceSearchService $referenceSearchService
      *
      * @return mixed
      */
-    public function evaluate(string $expression, array $evaluationContext, ReferenceSearchService $referenceSearchService);
+    public function evaluate(string $expression, array $evaluationContext);
 }

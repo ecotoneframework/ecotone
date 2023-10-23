@@ -94,6 +94,10 @@ final class MessageHeaders
      */
     public const POLLED_CHANNEL_NAME = 'polledChannelName';
     /**
+     * Current polling metadata
+     */
+    public const CONSUMER_POLLING_METADATA = 'consumerPollingMetadata';
+    /**
      * Expected content type of reply
      */
     public const REPLY_CONTENT_TYPE = 'replyContentType';
@@ -234,6 +238,7 @@ final class MessageHeaders
             $metadata[self::CONTENT_TYPE],
             $metadata[self::CONSUMER_ACK_HEADER_LOCATION],
             $metadata[self::POLLED_CHANNEL_NAME],
+            $metadata[self::CONSUMER_POLLING_METADATA],
             $metadata[self::REPLY_CHANNEL]
         );
 

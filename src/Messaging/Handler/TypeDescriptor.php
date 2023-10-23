@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -15,7 +17,7 @@ use ReflectionException;
  * @package Ecotone\Messaging\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-final class TypeDescriptor implements Type
+final class TypeDescriptor implements Type, DefinedObject
 {
     public const COLLECTION_TYPE_REGEX = "/[a-zA-Z0-9]*<([\\a-zA-Z0-9,\s]*)>/";
 
@@ -334,7 +336,7 @@ final class TypeDescriptor implements Type
      *
      * @throws MessagingException
      */
-    private function __construct(string $type)
+    public function __construct(string $type)
     {
         $this->type = $type;
     }
@@ -794,5 +796,10 @@ final class TypeDescriptor implements Type
         }
 
         return trim($type);
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [$this->type]);
     }
 }

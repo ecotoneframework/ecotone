@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class ReferenceBuilder
@@ -17,18 +18,8 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
  */
 class ReferenceBuilder implements ParameterConverterBuilder
 {
-    private string $parameterName;
-    private string $referenceServiceName;
-
-    /**
-     * ServiceReferenceParameterConverter constructor.
-     * @param string $parameterName
-     * @param string $referenceName
-     */
-    private function __construct(string $parameterName, string $referenceName)
+    private function __construct(private string $parameterName, private string $referenceServiceName)
     {
-        $this->parameterName = $parameterName;
-        $this->referenceServiceName = $referenceName;
     }
 
     /**
@@ -49,22 +40,8 @@ class ReferenceBuilder implements ParameterConverterBuilder
         return $parameter->getName() === $this->parameterName;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ReferenceSearchService $referenceSearchService, InterfaceToCall $interfaceToCall, InterfaceParameter $interfaceParameter): ParameterConverter
+    public function compile(MessagingContainerBuilder $builder, InterfaceToCall $interfaceToCall): Definition
     {
-        return new ReferenceConverter(
-            $referenceSearchService,
-            $this->referenceServiceName
-        );
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredReferences(): array
-    {
-        return [$this->referenceServiceName];
+        return new Definition(ValueConverter::class, [new Reference($this->referenceServiceName)]);
     }
 }

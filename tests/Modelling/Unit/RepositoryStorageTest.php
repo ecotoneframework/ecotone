@@ -2,8 +2,6 @@
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Messaging\Config\InMemoryChannelResolver;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Ecotone\Modelling\RepositoryStorage;
@@ -30,11 +28,7 @@ class RepositoryStorageTest extends TestCase
         $repositoryStorage = new RepositoryStorage(
             Order::class,
             false,
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith([
-                InMemoryStandardRepository::class => $repository,
-            ]),
-            [InMemoryStandardRepository::class]
+            [InMemoryStandardRepository::class => $repository]
         );
 
         $this->assertEquals(
@@ -50,11 +44,7 @@ class RepositoryStorageTest extends TestCase
         $repositoryStorage = new RepositoryStorage(
             Order::class,
             true,
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith([
-                InMemoryEventSourcedRepository::class => $repository,
-            ]),
-            [InMemoryEventSourcedRepository::class]
+            [InMemoryEventSourcedRepository::class => $repository]
         );
 
         $this->assertEquals(
@@ -70,11 +60,7 @@ class RepositoryStorageTest extends TestCase
         $repositoryStorage = new RepositoryStorage(
             Order::class,
             false,
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith([
-                InMemoryEventSourcedRepository::class => $repository,
-            ]),
-            [InMemoryEventSourcedRepository::class]
+            [InMemoryEventSourcedRepository::class => $repository]
         );
 
         $this->expectException(InvalidArgumentException::class);
@@ -89,11 +75,7 @@ class RepositoryStorageTest extends TestCase
         $repositoryStorage = new RepositoryStorage(
             Order::class,
             true,
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith([
-                InMemoryStandardRepository::class => $repository,
-            ]),
-            [InMemoryStandardRepository::class]
+            [InMemoryStandardRepository::class => $repository]
         );
 
         $this->expectException(InvalidArgumentException::class);
@@ -108,12 +90,10 @@ class RepositoryStorageTest extends TestCase
         $repositoryStorage = new RepositoryStorage(
             Order::class,
             false,
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith([
+            [
                 InMemoryEventSourcedRepository::class => InMemoryEventSourcedRepository::createEmpty(),
                 InMemoryStandardRepository::class => $repository,
-            ]),
-            [InMemoryStandardRepository::class, InMemoryEventSourcedRepository::class]
+            ]
         );
 
         $this->assertEquals(
@@ -129,12 +109,10 @@ class RepositoryStorageTest extends TestCase
         $repositoryStorage = new RepositoryStorage(
             Order::class,
             true,
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith([
+            [
                 InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty(),
                 InMemoryEventSourcedRepository::class => $repository,
-            ]),
-            [InMemoryEventSourcedRepository::class, InMemoryStandardRepository::class]
+            ]
         );
 
         $this->assertEquals(
@@ -150,12 +128,10 @@ class RepositoryStorageTest extends TestCase
         $repositoryStorage = new RepositoryStorage(
             Article::class,
             false,
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith([
+            [
                 'incorrect' => AppointmentStandardRepository::createEmpty(),
                 'correct' => $repository,
-            ]),
-            ['incorrect', 'correct']
+            ]
         );
 
         $this->assertEquals(
@@ -169,12 +145,10 @@ class RepositoryStorageTest extends TestCase
         $repositoryStorage = new RepositoryStorage(
             Article::class,
             false,
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith([
+            [
                 1 => InMemoryEventSourcedRepository::createEmpty(),
                 2 => InMemoryEventSourcedRepository::createEmpty(),
-            ]),
-            [1, 2]
+            ]
         );
 
         $this->expectException(InvalidArgumentException::class);
@@ -189,12 +163,10 @@ class RepositoryStorageTest extends TestCase
         $repositoryStorage = new RepositoryStorage(
             stdClass::class,
             false,
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith([
+            [
                 'incorrect' => AppointmentStandardRepository::createEmpty(),
                 'correct' => $repository,
-            ]),
-            ['incorrect', 'correct']
+            ]
         );
 
         $this->expectException(InvalidArgumentException::class);
@@ -207,11 +179,9 @@ class RepositoryStorageTest extends TestCase
         $repositoryStorage = new RepositoryStorage(
             Appointment::class,
             false,
-            InMemoryChannelResolver::createEmpty(),
-            InMemoryReferenceSearchService::createWith([
+            [
                 AppointmentRepositoryBuilder::class => AppointmentRepositoryBuilder::createEmpty(),
-            ]),
-            [AppointmentRepositoryBuilder::class]
+            ]
         );
 
         $this->assertEquals(

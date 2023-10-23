@@ -2,14 +2,13 @@
 
 namespace Ecotone\Messaging\Handler\Chain;
 
-use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\MessageHandler;
 
 class OutputChannelKeeperBuilder extends InputOutputMessageHandlerBuilder
 {
@@ -25,21 +24,11 @@ class OutputChannelKeeperBuilder extends InputOutputMessageHandlerBuilder
         return $interfaceToCallRegistry->getFor(OutputChannelKeeper::class, 'keep');
     }
 
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
-    {
-        return ServiceActivatorBuilder::createWithDirectReference(
-            new OutputChannelKeeper($this->keeperGateway->buildWithoutProxyObject($referenceSearchService, $channelResolver)),
-            'keep'
-        )->build($channelResolver, $referenceSearchService);
-    }
 
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        return [$interfaceToCallRegistry->getFor(OutputChannelKeeper::class, 'keep')];
-    }
-
-    public function getRequiredReferenceNames(): array
-    {
-        return [];
+        $gateway = $this->keeperGateway->compile($builder);
+        return ServiceActivatorBuilder::createWithDefinition(new Definition(OutputChannelKeeper::class, [$gateway]), 'keep')
+            ->compile($builder);
     }
 }

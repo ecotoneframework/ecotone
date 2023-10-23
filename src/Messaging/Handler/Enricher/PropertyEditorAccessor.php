@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Enricher;
 
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -19,46 +18,18 @@ use ReflectionException;
  */
 class PropertyEditorAccessor
 {
-    private string $mappingExpression;
-    private \Ecotone\Messaging\Handler\ExpressionEvaluationService $expressionEvaluationService;
-    private \Ecotone\Messaging\Handler\ReferenceSearchService $referenceSearchService;
-
-    /**
-     * DataSetter constructor.
-     * @param ExpressionEvaluationService $expressionEvaluationService
-     * @param ReferenceSearchService $referenceSearchService
-     * @param string $mappingExpression
-     */
-    private function __construct(ExpressionEvaluationService $expressionEvaluationService, ReferenceSearchService $referenceSearchService, string $mappingExpression)
+    private function __construct(private ExpressionEvaluationService $expressionEvaluationService, private string $mappingExpression)
     {
-        $this->mappingExpression = $mappingExpression;
-        $this->expressionEvaluationService = $expressionEvaluationService;
-        $this->referenceSearchService = $referenceSearchService;
     }
 
-    /**
-     * @param ReferenceSearchService $referenceSearchService
-     * @param string $mappingExpression
-     * @return PropertyEditorAccessor
-     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
-     */
-    public static function createWithMapping(ReferenceSearchService $referenceSearchService, string $mappingExpression): self
+    public static function createWithMapping(ExpressionEvaluationService $expressionEvaluationService, string $mappingExpression): self
     {
-        return new self(
-            $referenceSearchService->get(ExpressionEvaluationService::REFERENCE),
-            $referenceSearchService,
-            $mappingExpression
-        );
+        return new self($expressionEvaluationService, $mappingExpression);
     }
 
-    /**
-     * @param ReferenceSearchService $referenceSearchService
-     * @return PropertyEditorAccessor
-     * @throws \Ecotone\Messaging\Handler\ReferenceNotFoundException
-     */
-    public static function create(ReferenceSearchService $referenceSearchService): self
+    public static function create(ExpressionEvaluationService $expressionEvaluationService): self
     {
-        return self::createWithMapping($referenceSearchService, '');
+        return self::createWithMapping($expressionEvaluationService, '');
     }
 
     /**
@@ -207,7 +178,6 @@ class PropertyEditorAccessor
                 'requestContext' => $context,
                 'replyContext' => $replyElement,
             ],
-            $this->referenceSearchService
         );
     }
 }

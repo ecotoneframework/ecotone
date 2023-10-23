@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
 
-final class DelayableQueueChannel implements PollableChannel
+final class DelayableQueueChannel implements PollableChannel, DefinedObject
 {
     /**
      * @param Message[] $queue
@@ -74,5 +76,10 @@ final class DelayableQueueChannel implements PollableChannel
     public function __toString()
     {
         return 'in memory delayable: ' . $this->name;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [$this->name], 'create');
     }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
+use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
+use Ecotone\Messaging\Config\Container\GatewayProxyReference;
 use Ecotone\Messaging\Config\EcotoneRemoteAdapter;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
@@ -16,7 +18,6 @@ use ProxyManager\GeneratorStrategy\FileWriterGeneratorStrategy;
 use ProxyManager\Proxy\RemoteObjectInterface;
 use ProxyManager\Signature\ClassSignatureGenerator;
 use ProxyManager\Signature\SignatureGenerator;
-use Psr\Container\ContainerInterface;
 
 use function spl_autoload_register;
 use function spl_autoload_unregister;
@@ -28,18 +29,11 @@ use function spl_autoload_unregister;
  */
 class ProxyFactory
 {
-    public const REFERENCE_NAME = 'gatewayProxyConfiguration';
-
     private static ?AutoloaderInterface $registeredAutoloader = null;
     private ?Configuration $configuration = null;
 
-    private function __construct(private ServiceCacheConfiguration $serviceCacheConfiguration)
+    public function __construct(private ServiceCacheConfiguration $serviceCacheConfiguration)
     {
-    }
-
-    public static function createWithCache(ServiceCacheConfiguration $serviceCacheConfiguration): self
-    {
-        return new self($serviceCacheConfiguration);
     }
 
     private function getConfiguration(): Configuration
@@ -62,7 +56,7 @@ class ProxyFactory
         return $configuration;
     }
 
-    public function createProxyClassWithAdapter(string $interfaceName, AdapterInterface $adapter): RemoteObjectInterface
+    private function createProxyClassWithAdapter(string $interfaceName, AdapterInterface $adapter): RemoteObjectInterface
     {
         $factory = new RemoteObjectFactory($adapter, $this->getConfiguration());
         $this->registerProxyAutoloader();
@@ -70,25 +64,22 @@ class ProxyFactory
         return $factory->createProxy($interfaceName);
     }
 
-    public static function createFor(string $referenceName, ContainerInterface $container, string $interface, ServiceCacheConfiguration $serviceCacheConfiguration): object
+    public static function createFor(string $referenceName, ConfiguredMessagingSystem $messagingSystem, string $interface, ServiceCacheConfiguration $serviceCacheConfiguration): object
     {
-        $proxyFactory = self::createWithCache($serviceCacheConfiguration);
+        $proxyFactory = new self($serviceCacheConfiguration);
 
         return $proxyFactory->createProxyClassWithAdapter(
             $interface,
-            new EcotoneRemoteAdapter($container, $referenceName)
+            new EcotoneRemoteAdapter($messagingSystem, new GatewayProxyReference($referenceName, $interface))
         );
     }
 
-    public function createWithCurrentConfiguration(string $referenceName, ContainerInterface $container, string $interface): object
+    public function createWithCurrentConfiguration(string $referenceName, ConfiguredMessagingSystem $messagingSystem, string $interface): object
     {
-        return $this->createProxyClassWithAdapter(
-            $interface,
-            new EcotoneRemoteAdapter($container, $referenceName)
-        );
+        return self::createFor($referenceName, $messagingSystem, $interface, $this->serviceCacheConfiguration);
     }
 
-    private function registerProxyAutoloader(): void
+    public function registerProxyAutoloader(): void
     {
         if (! $this->serviceCacheConfiguration->shouldUseCache()) {
             return;

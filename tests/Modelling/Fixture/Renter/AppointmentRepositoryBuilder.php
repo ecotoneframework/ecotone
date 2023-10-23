@@ -2,13 +2,13 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Renter;
 
-use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Modelling\EventSourcedRepository;
-use Ecotone\Modelling\RepositoryBuilder;
+use Ecotone\Modelling\LazyRepositoryBuilder;
 use Ecotone\Modelling\StandardRepository;
 
-class AppointmentRepositoryBuilder implements RepositoryBuilder
+class AppointmentRepositoryBuilder implements LazyRepositoryBuilder
 {
     /**
      * @var Appointment[]
@@ -43,8 +43,13 @@ class AppointmentRepositoryBuilder implements RepositoryBuilder
         return false;
     }
 
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): EventSourcedRepository|StandardRepository
+    public function build(): EventSourcedRepository|StandardRepository
     {
         return AppointmentStandardRepository::createWith($this->appointments);
+    }
+
+    public function compile(MessagingContainerBuilder $builder): Definition
+    {
+        return new Definition(AppointmentStandardRepository::class, [$this->appointments], 'createWith');
     }
 }

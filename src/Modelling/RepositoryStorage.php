@@ -2,8 +2,6 @@
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Attribute\Aggregate;
@@ -11,26 +9,24 @@ use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 
 class RepositoryStorage
 {
-    private string $aggregateClassName;
-    private ChannelResolver $channelResolver;
-    private ReferenceSearchService $referenceSearchService;
-    private array $aggregateRepositoryReferenceNames;
-    private bool $isEventSourcedAggregate;
+    /**
+     * @var array<EventSourcedRepository|StandardRepository> $aggregateRepositories
+     */
+    private array $aggregateRepositories;
 
-    public function __construct(string $aggregateClassName, bool $isEventSourcedAggregate, ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, array $aggregateRepositoryReferenceNames)
+    /**
+     * @param array<EventSourcedRepository|StandardRepository> $aggregateRepositories
+     */
+    public function __construct(private string $aggregateClassName, private bool $isEventSourcedAggregate, array $aggregateRepositories)
     {
-        $this->aggregateClassName = $aggregateClassName;
-        $this->isEventSourcedAggregate = $isEventSourcedAggregate;
-        $this->referenceSearchService = $referenceSearchService;
-        $this->aggregateRepositoryReferenceNames = array_values($aggregateRepositoryReferenceNames);
-        $this->channelResolver = $channelResolver;
+        $this->aggregateRepositories = array_values($aggregateRepositories);
     }
 
     public function getRepository(): EventSourcedRepository|StandardRepository
     {
-        if (count($this->aggregateRepositoryReferenceNames) === 1) {
+        if (count($this->aggregateRepositories) === 1) {
             /** @var EventSourcedRepository|StandardRepository|RepositoryBuilder $repository */
-            $repository = $this->referenceSearchService->get($this->aggregateRepositoryReferenceNames[0]);
+            $repository = $this->aggregateRepositories[0];
             if ($this->isEventSourced($repository) && ! $this->isEventSourcedAggregate) {
                 throw InvalidArgumentException::create("There is only one repository registered. For event sourcing usage, however aggregate {$this->aggregateClassName} is not event sourced. If it should be event sourced change attribute to " . EventSourcingAggregate::class);
             } elseif (! $this->isEventSourced($repository) && $this->isEventSourcedAggregate) {
@@ -40,9 +36,9 @@ class RepositoryStorage
             return $this->returnRepository($repository);
         }
 
-        if (count($this->aggregateRepositoryReferenceNames) === 2) {
-            $repositoryOne = $this->referenceSearchService->get($this->aggregateRepositoryReferenceNames[0]);
-            $repositoryTwo = $this->referenceSearchService->get($this->aggregateRepositoryReferenceNames[1]);
+        if (count($this->aggregateRepositories) === 2) {
+            $repositoryOne = $this->aggregateRepositories[0];
+            $repositoryTwo = $this->aggregateRepositories[1];
 
             $repositoryOneIsEventSourced = $this->isEventSourced($repositoryOne);
             $repositoryTwoIsEventSourced = $this->isEventSourced($repositoryTwo);
@@ -60,10 +56,7 @@ class RepositoryStorage
             }
         }
 
-        foreach ($this->aggregateRepositoryReferenceNames as $aggregateRepositoryReferenceName) {
-            /** @var EventSourcedRepository|StandardRepository|RepositoryBuilder $repository */
-            $repository = $this->referenceSearchService->get($aggregateRepositoryReferenceName);
-
+        foreach ($this->aggregateRepositories as $repository) {
             if ($repository->canHandle($this->aggregateClassName)) {
                 return $this->returnRepository($repository);
             }
@@ -72,10 +65,12 @@ class RepositoryStorage
         throw InvalidArgumentException::create('There is no repository available for aggregate: ' . $this->aggregateClassName);
     }
 
-    private function returnRepository(EventSourcedRepository|StandardRepository|RepositoryBuilder $repository): EventSourcedRepository|StandardRepository
+    private function returnRepository(EventSourcedRepository|StandardRepository|LazyRepositoryBuilder $repository): EventSourcedRepository|StandardRepository
     {
-        if ($repository instanceof RepositoryBuilder) {
-            $repository = $repository->build($this->channelResolver, $this->referenceSearchService);
+        // TODO: is RepositoryBuilder a public interface (regarding BC) ?
+        // it does not make much sense with containers to have a lazy builder
+        if ($repository instanceof LazyRepositoryBuilder) {
+            $repository = $repository->build();
         }
 
         if ($this->isEventSourcedAggregate) {

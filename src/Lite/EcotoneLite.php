@@ -13,11 +13,12 @@ use Ecotone\Lite\Test\TestConfiguration;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
-use Ecotone\Messaging\Config\MessagingSystem;
+use Ecotone\Messaging\Config\Container\ContainerConfig;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -28,7 +29,6 @@ use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
 use Ecotone\Modelling\Config\RegisterAggregateRepositoryChannels;
 use Psr\Container\ContainerInterface;
-use Psr\Log\NullLogger;
 
 final class EcotoneLite
 {
@@ -151,7 +151,7 @@ final class EcotoneLite
 
     /**
      * @param string[] $packagesToEnable
-     * @param GatewayAwareContainer|object[] $containerOrAvailableServices
+     * @param ContainerInterface|object[] $containerOrAvailableServices
      * @param string[] $classesToResolve
      * @param array<string,string> $configurationVariables
      */
@@ -163,47 +163,54 @@ final class EcotoneLite
             $serviceConfiguration = ServiceConfiguration::createWithDefaults();
         }
 
-        $container = $containerOrAvailableServices instanceof ContainerInterface ? $containerOrAvailableServices : InMemoryPSRContainer::createFromAssociativeArray($containerOrAvailableServices);
+        $externalContainer = $containerOrAvailableServices instanceof ContainerInterface ? $containerOrAvailableServices : InMemoryPSRContainer::createFromAssociativeArray($containerOrAvailableServices);
 
         $serviceCacheConfiguration = new ServiceCacheConfiguration(
             $serviceConfiguration->getCacheDirectoryPath(),
             $useCachedVersion
         );
-        $messagingConfiguration = MessagingSystemConfiguration::prepare(
-            $pathToRootCatalog,
-            InMemoryConfigurationVariableService::create($configurationVariables),
-            $serviceConfiguration,
-            $serviceCacheConfiguration,
-            $classesToResolve,
-            $enableTesting
-        );
+        $configurationVariableService = InMemoryConfigurationVariableService::create($configurationVariables);
+        $definitionHolder = null;
 
-        if ($allowGatewaysToBeRegisteredInContainer) {
-            Assert::isTrue(method_exists($container, 'set'), 'Gateways registration was enabled however given container has no `set` method. Please add it or turn off the option.');
-            foreach ($messagingConfiguration->getRegisteredGateways() as $gatewayProxyBuilder) {
-                $container->set($gatewayProxyBuilder->getReferenceName(), ProxyFactory::createFor(
-                    $gatewayProxyBuilder->getReferenceName(),
-                    $container,
-                    $gatewayProxyBuilder->getInterfaceName(),
-                    $serviceCacheConfiguration
-                ));
+        $proxyFactory = new ProxyFactory($serviceCacheConfiguration);
+        $messagingSystemCachePath = $serviceCacheConfiguration->getPath() . DIRECTORY_SEPARATOR . 'messaging_system';
+        if ($serviceCacheConfiguration->shouldUseCache() && file_exists($messagingSystemCachePath)) {
+            /** It may fail on deserialization, then return `false` and we can build new one */
+            $definitionHolder = unserialize(file_get_contents($messagingSystemCachePath));
+        }
+
+        if (! $definitionHolder) {
+            $messagingConfiguration = MessagingSystemConfiguration::prepare(
+                $pathToRootCatalog,
+                $configurationVariableService,
+                $serviceConfiguration,
+                $classesToResolve,
+                $enableTesting
+            );
+            $definitionHolder = ContainerConfig::buildDefinitionHolder($messagingConfiguration);
+
+            if ($serviceCacheConfiguration->shouldUseCache()) {
+                MessagingSystemConfiguration::prepareCacheDirectory($serviceCacheConfiguration);
+                file_put_contents($messagingSystemCachePath, serialize($definitionHolder));
             }
         }
 
-        $referenceSearchService = new PsrContainerReferenceSearchService($container, [
-            'logger' => new NullLogger(),
-            ServiceCacheConfiguration::REFERENCE_NAME => $serviceCacheConfiguration,
-        ]);
+        $container = new LazyInMemoryContainer($definitionHolder->getDefinitions(), $externalContainer);
+        $container->set(ProxyFactory::class, $proxyFactory);
+        $container->set(ConfigurationVariableService::REFERENCE_NAME, $configurationVariableService);
 
-        $messagingSystem = $messagingConfiguration->buildMessagingSystemFromConfiguration($referenceSearchService);
-
-        $referenceSearchService->setConfiguredMessagingSystem($messagingSystem);
+        $messagingSystem = $container->get(ConfiguredMessagingSystem::class);
 
         if ($allowGatewaysToBeRegisteredInContainer) {
-            $container->set(ConfiguredMessagingSystem::class, $messagingSystem);
-        } elseif ($container->has(ConfiguredMessagingSystem::class)) {
-            /** @var MessagingSystem $alreadyConfiguredMessaging */
-            $alreadyConfiguredMessaging = $container->get(ConfiguredMessagingSystem::class);
+            Assert::isTrue(method_exists($externalContainer, 'set'), 'Gateways registration was enabled however given container has no `set` method. Please add it or turn off the option.');
+            $externalContainer->set(ConfiguredMessagingSystem::class, $messagingSystem);
+            foreach ($messagingSystem->getGatewayList() as $gatewayReference) {
+                $gatewayReferenceName = $gatewayReference->getReferenceName();
+                $externalContainer->set($gatewayReferenceName, $messagingSystem->getGatewayByName($gatewayReferenceName));
+            }
+        } elseif ($externalContainer->has(ConfiguredMessagingSystem::class)) {
+            /** @var ConfiguredMessagingSystem $alreadyConfiguredMessaging */
+            $alreadyConfiguredMessaging = $externalContainer->get(ConfiguredMessagingSystem::class);
 
             $alreadyConfiguredMessaging->replaceWith($messagingSystem);
         }

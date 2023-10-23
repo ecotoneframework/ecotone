@@ -2,12 +2,15 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Service;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
+
 /**
  * Class ServiceWithReturnValue
  * @package Test\Ecotone\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ServiceWithReturnValue implements CallableService
+class ServiceWithReturnValue implements CallableService, DefinedObject
 {
     /**
      * @var bool
@@ -34,5 +37,10 @@ class ServiceWithReturnValue implements CallableService
     public function wasCalled(): bool
     {
         return $this->wasCalled;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, factory: 'create');
     }
 }

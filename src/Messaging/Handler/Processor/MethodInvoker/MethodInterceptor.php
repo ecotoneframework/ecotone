@@ -9,8 +9,6 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
-use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * Class Interceptor
@@ -64,12 +62,7 @@ class MethodInterceptor implements InterceptorWithPointCut
     }
 
     /**
-     * @param InterfaceToCall $interceptedInterface
-     * @param array           $endpointAnnotations
-     *
-     * @return static
-     * @throws MessagingException
-     * @throws InvalidArgumentException
+     * @inheritDoc
      */
     public function addInterceptedInterfaceToCall(InterfaceToCall $interceptedInterface, array $endpointAnnotations): self
     {
@@ -78,12 +71,11 @@ class MethodInterceptor implements InterceptorWithPointCut
 
         if ($interceptedMessageHandler instanceof MessageHandlerBuilderWithParameterConverters) {
             $interceptedMessageHandler->withMethodParameterConverters(
-                MethodArgumentsFactory::createDefaultMethodParameters(
+                MethodArgumentsFactory::createInterceptedInterfaceAnnotationMethodParameters(
                     $this->interceptorInterfaceToCall,
                     $interceptedMessageHandler->getParameterConverters(),
                     $endpointAnnotations,
                     $interceptedInterface,
-                    false
                 )
             );
         }

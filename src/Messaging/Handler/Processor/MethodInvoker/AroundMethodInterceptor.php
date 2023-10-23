@@ -17,7 +17,7 @@ class AroundMethodInterceptor
     /**
      * @param ParameterConverter[] $parameterConverters
      */
-    private function __construct(private object $referenceToCall, private InterfaceToCall $interceptorInterfaceToCall, private array $parameterConverters, private bool $hasMethodInvocation)
+    public function __construct(private object $referenceToCall, private InterfaceToCall $interceptorInterfaceToCall, private array $parameterConverters, private bool $hasMethodInvocation)
     {
         if ($interceptorInterfaceToCall->canReturnValue() && ! $this->hasMethodInvocation) {
             throw InvalidArgumentException::create("Trying to register {$interceptorInterfaceToCall} as Around Advice which can return value, but doesn't control invocation using " . MethodInvocation::class . '. Have you wanted to register Before/After Advice or forgot to type hint MethodInvocation?');

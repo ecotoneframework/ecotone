@@ -6,13 +6,15 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
+use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConverterModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\SerializerModule;
+use Ecotone\Messaging\Config\Container\ContainerConfig;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use Ecotone\Messaging\Gateway\Converter\Serializer;
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\MessagingException;
@@ -48,9 +50,11 @@ class SerializerModuleTest extends AnnotationConfigurationTest
         $serializerModule->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $configuration->registerConsumerFactory(new EventDrivenConsumerBuilder());
-        $messagingSystem = $configuration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([
+        $container = InMemoryPSRContainer::createFromAssociativeArray([
             ExampleSingleConverterService::class => new ExampleSingleConverterService(),
-        ]));
+            ServiceCacheConfiguration::REFERENCE_NAME => ServiceCacheConfiguration::noCache(),
+        ]);
+        $messagingSystem = ContainerConfig::buildMessagingSystemInMemoryContainer($configuration, $container);
         /** @var Serializer $gateway */
         $gateway = $messagingSystem->getGatewayByName(Serializer::class);
 
@@ -73,9 +77,12 @@ class SerializerModuleTest extends AnnotationConfigurationTest
         $serializerModule->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
         $configuration->registerConsumerFactory(new EventDrivenConsumerBuilder());
-        $messagingSystem = $configuration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([
+        $container = InMemoryPSRContainer::createFromAssociativeArray([
             ExampleSingleConverterService::class => new ExampleSingleConverterService(),
-        ]));
+            ServiceCacheConfiguration::REFERENCE_NAME => ServiceCacheConfiguration::noCache(),
+        ]);
+        $messagingSystem = ContainerConfig::buildMessagingSystemInMemoryContainer($configuration, $container);
+
         /** @var Serializer $gateway */
         $gateway = $messagingSystem->getGatewayByName(Serializer::class);
 

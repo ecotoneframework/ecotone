@@ -45,7 +45,6 @@ class EndpointHeadersInterceptorModule extends NoExternalConfigurationModule imp
                 ExpireAfter::class . '||' . Priority::class . '||' . Delayed::class . '||' . AddHeader::class . '||' . RemoveHeader::class
             )
         );
-        $messagingConfiguration->registerRelatedInterfaces([$interfaceToCall]);
     }
 
     /**

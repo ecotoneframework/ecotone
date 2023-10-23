@@ -2,24 +2,16 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 class AllHeadersBuilder implements ParameterConverterBuilder
 {
-    private string $parameterName;
-
-    /**
-     * AllHeadersConverter constructor.
-     *
-     * @param string $parameterName
-     */
-    private function __construct(string $parameterName)
+    private function __construct(private string $parameterName)
     {
-        $this->parameterName = $parameterName;
     }
 
     /**
@@ -35,24 +27,14 @@ class AllHeadersBuilder implements ParameterConverterBuilder
     /**
      * @inheritDoc
      */
-    public function getRequiredReferences(): array
-    {
-        return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function isHandling(InterfaceParameter $parameter): bool
     {
         return $parameter->getName() === $this->parameterName;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ReferenceSearchService $referenceSearchService, InterfaceToCall $interfaceToCall, InterfaceParameter $interfaceParameter): ParameterConverter
+
+    public function compile(MessagingContainerBuilder $builder, InterfaceToCall $interfaceToCall): Definition
     {
-        return new AllHeadersConverter();
+        return new Definition(AllHeadersConverter::class);
     }
 }

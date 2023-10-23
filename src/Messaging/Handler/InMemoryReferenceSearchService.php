@@ -9,6 +9,7 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
+use Psr\Container\ContainerInterface;
 use Psr\Log\NullLogger;
 
 /**
@@ -22,15 +23,15 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
      * @var object[]
      */
     private ?array $objectsToResolve = null;
-    private ?ReferenceSearchService $referenceSearchService = null;
+    private ?ContainerInterface $referenceSearchService = null;
 
     /**
      * @param array|object[]              $objectsToResolve
      */
-    private function __construct(array $objectsToResolve, ?ReferenceSearchService $referenceSearchService, ServiceConfiguration $serviceConfiguration)
+    private function __construct(array $objectsToResolve, ?ContainerInterface $referenceSearchService, ServiceConfiguration $serviceConfiguration)
     {
         if (! array_key_exists(ExpressionEvaluationService::REFERENCE, $objectsToResolve)) {
-            $objectsToResolve[ExpressionEvaluationService::REFERENCE] = SymfonyExpressionEvaluationAdapter::create();
+            $objectsToResolve[ExpressionEvaluationService::REFERENCE] = SymfonyExpressionEvaluationAdapter::create($this);
         }
         if (! array_key_exists(InterfaceToCallRegistry::REFERENCE_NAME, $objectsToResolve)) {
             $objectsToResolve[InterfaceToCallRegistry::REFERENCE_NAME] = InterfaceToCallRegistry::createEmpty();
@@ -79,7 +80,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
      * @return InMemoryReferenceSearchService
      * @throws MessagingException
      */
-    public static function createWithReferenceService(ReferenceSearchService $referenceSearchService, array $objects, ServiceConfiguration $serviceConfiguration): self
+    public static function createWithContainer(ContainerInterface $referenceSearchService, array $objects, ServiceConfiguration $serviceConfiguration): self
     {
         return new self($objects, $referenceSearchService, $serviceConfiguration);
     }

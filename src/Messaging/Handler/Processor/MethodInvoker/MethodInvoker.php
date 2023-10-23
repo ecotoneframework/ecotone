@@ -6,8 +6,6 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\ParameterConverter;
-use Ecotone\Messaging\Handler\ParameterConverterBuilder;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
@@ -39,7 +37,7 @@ final class MethodInvoker implements MessageProcessor
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    private function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters, InterfaceToCall $interfaceToCall, bool $canInterceptorReplaceArguments)
+    public function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters, InterfaceToCall $interfaceToCall, bool $canInterceptorReplaceArguments)
     {
         Assert::allInstanceOfType($methodParameterConverters, ParameterConverter::class);
 
@@ -48,20 +46,6 @@ final class MethodInvoker implements MessageProcessor
         $this->objectMethodName = $objectMethodName;
         $this->interfaceToCall = $interfaceToCall;
         $this->canInterceptorReplaceArguments = $canInterceptorReplaceArguments;
-    }
-
-    /**
-     * @param ParameterConverterBuilder[] $methodParametersConverterBuilders
-     */
-    public static function createWith(InterfaceToCall $interfaceToCall, $objectToInvokeOn, array $methodParametersConverterBuilders, ReferenceSearchService $referenceSearchService, array $endpointAnnotations = []): self
-    {
-        $methodParametersConverterBuilders = MethodArgumentsFactory::createDefaultMethodParameters($interfaceToCall, $methodParametersConverterBuilders, $endpointAnnotations, null, false);
-        $methodParameterConverters         = [];
-        foreach ($methodParametersConverterBuilders as $index => $methodParameter) {
-            $methodParameterConverters[] = $methodParameter->build($referenceSearchService, $interfaceToCall, $interfaceToCall->getParameterAtIndex($index));
-        }
-
-        return new self($objectToInvokeOn, $interfaceToCall->getMethodName(), $methodParameterConverters, $interfaceToCall, true);
     }
 
     /**

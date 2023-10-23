@@ -13,15 +13,8 @@ use Throwable;
 
 class ErrorChannelInterceptor
 {
-    private \Ecotone\Messaging\MessageChannel $errorChannel;
-
-    /**
-     * ErrorChannelInterceptor constructor.
-     * @param MessageChannel $errorChannel
-     */
-    public function __construct(MessageChannel $errorChannel)
+    public function __construct(private MessageChannel $errorChannel)
     {
-        $this->errorChannel = $errorChannel;
     }
 
     public function handle(MethodInvocation $methodInvocation, Message $requestMessage)

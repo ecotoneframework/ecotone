@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Config\Container\BoundParameterConverter;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ComponentTestBuilder;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
-use stdClass;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 
 /**
@@ -30,9 +31,12 @@ class StaticBuilderTest extends TestCase
     {
         $interfaceToCall = InterfaceToCall::create(ServiceExpectingOneArgument::class, 'withoutReturnValue');
         $interfaceParameter = $interfaceToCall->getInterfaceParameters()[0];
-        $value = new stdClass();
-        $converter = new ValueBuilder($interfaceParameter->getName(), $value);
-        $converter = $converter->build(InMemoryReferenceSearchService::createEmpty(), $interfaceToCall, $interfaceParameter);
+        $value = PollingMetadata::create('some-id');
+        $converter = new BoundParameterConverter(
+            new ValueBuilder($interfaceParameter->getName(), $value),
+            $interfaceToCall,
+        );
+        $converter = ComponentTestBuilder::create()->build($converter);
 
         $this->assertEquals(
             $value,

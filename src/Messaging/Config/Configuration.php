@@ -6,24 +6,25 @@ namespace Ecotone\Messaging\Config;
 
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
-use Ecotone\Messaging\Conversion\ConverterBuilder;
+use Ecotone\Messaging\Config\Container\CompilableBuilder;
+use Ecotone\Messaging\Config\Container\Compiler\CompilerPass;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\Type;
+use Psr\Container\ContainerInterface;
 
 /**
  * Class Configuration
  * @package Ecotone\Messaging\Config
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-interface Configuration
+interface Configuration extends CompilerPass
 {
     /**
      * @param MessageChannelBuilder $messageChannelBuilder
@@ -76,22 +77,16 @@ interface Configuration
     public function registerBeforeMethodInterceptor(MethodInterceptor $methodInterceptor): Configuration;
 
     /**
-     * @param \Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference $aroundInterceptorReference
+     * @param \Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder $aroundInterceptorReference
      * @return Configuration
      */
-    public function registerAroundMethodInterceptor(AroundInterceptorReference $aroundInterceptorReference): Configuration;
+    public function registerAroundMethodInterceptor(AroundInterceptorBuilder $aroundInterceptorReference): Configuration;
 
     /**
      * @param MethodInterceptor $methodInterceptor
      * @return Configuration
      */
     public function registerAfterMethodInterceptor(MethodInterceptor $methodInterceptor): Configuration;
-
-    /**
-     * @param string[] $referenceNames
-     * @return Configuration
-     */
-    public function requireReferences(array $referenceNames): Configuration;
 
     public function requireConsumer(string $endpointId): Configuration;
 
@@ -115,22 +110,6 @@ interface Configuration
     public function registerGatewayBuilder(GatewayProxyBuilder $gatewayBuilder): Configuration;
 
     /**
-     * @return string[]
-     */
-    public function getRequiredReferences(): array;
-
-    /**
-     * @return string[]
-     */
-    public function getOptionalReferences(): array;
-
-    /**
-     * @param InterfaceToCall[] $relatedInterfaces
-     * @return Configuration
-     */
-    public function registerRelatedInterfaces(array $relatedInterfaces): Configuration;
-
-    /**
      * @return GatewayProxyBuilder[]
      */
     public function getRegisteredGateways(): array;
@@ -149,15 +128,10 @@ interface Configuration
     public function registerInternalGateway(Type $interfaceName): Configuration;
 
     /**
-     * @return bool
-     */
-    public function isLazyLoaded(): bool;
-
-    /**
-     * @param ConverterBuilder $converterBuilder
+     * @param CompilableBuilder $converterBuilder
      * @return Configuration
      */
-    public function registerConverter(ConverterBuilder $converterBuilder): Configuration;
+    public function registerConverter(CompilableBuilder $converterBuilder): Configuration;
 
     /**
      * @param string $referenceName
@@ -165,9 +139,7 @@ interface Configuration
      */
     public function registerMessageConverter(string $referenceName): Configuration;
 
-    /**
-     * @param ReferenceSearchService $externalReferenceSearchService
-     * @return ConfiguredMessagingSystem
-     */
-    public function buildMessagingSystemFromConfiguration(ReferenceSearchService $externalReferenceSearchService): ConfiguredMessagingSystem;
+    public function buildMessagingSystemFromConfiguration(?ContainerInterface $externalReferenceSearchService = null): ConfiguredMessagingSystem;
+
+    public function registerServiceDefinition(string|Reference $id, Container\Definition $definition): Configuration;
 }

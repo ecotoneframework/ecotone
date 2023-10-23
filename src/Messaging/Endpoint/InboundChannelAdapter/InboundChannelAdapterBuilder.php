@@ -4,19 +4,17 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
 
-use Ecotone\Messaging\Endpoint\InboundChannelAdapterEntrypoint;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\InterceptedChannelAdapterBuilder;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Endpoint\PollingConsumer\MessagePoller\InvocationPollerAdapter;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -34,7 +32,8 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
 
     private function __construct(string $requestChannelName, string $referenceName, private InterfaceToCall $interfaceToCall)
     {
-        $this->inboundGateway = GatewayProxyBuilder::create($referenceName, InboundGatewayEntrypoint::class, 'executeEntrypoint', $requestChannelName);
+        $this->inboundGateway = GatewayProxyBuilder::create($referenceName, InboundGatewayEntrypoint::class, 'executeEntrypoint', $requestChannelName)
+            ->withAnnotatedInterface($this->interfaceToCall);
         $this->referenceName = $referenceName;
         $this->requestChannelName = $requestChannelName;
     }
@@ -50,14 +49,6 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
         $self->directObject = $objectToInvoke;
 
         return $self;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredReferences(): array
-    {
-        return array_merge([$this->referenceName], $this->inboundGateway->getRequiredReferences());
     }
 
     /**
@@ -102,19 +93,11 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
     /**
      * @inheritDoc
      */
-    public function addAroundInterceptor(AroundInterceptorReference $aroundInterceptorReference): self
+    public function addAroundInterceptor(AroundInterceptorBuilder $aroundInterceptorReference): self
     {
         $this->inboundGateway->addAroundInterceptor($aroundInterceptorReference);
 
         return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return array_merge([$interfaceToCallRegistry->getFor(InboundChannelAdapterEntrypoint::class, 'executeEntrypoint')], $this->inboundGateway->resolveRelatedInterfaces($interfaceToCallRegistry));
     }
 
     /**
@@ -166,68 +149,28 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
         return false;
     }
 
-    /**
-     * @inheritDoc
-     */
-    protected function createInboundChannelAdapter(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, PollingMetadata $pollingMetadata): InboundChannelTaskExecutor
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
         Assert::notNullAndEmpty($this->endpointId, "Endpoint Id for inbound channel adapter can't be empty");
-
-        $referenceService = $this->directObject ?: $referenceSearchService->get($this->referenceName);
-
-        $registeredAnnotations = $this->getEndpointAnnotations();
-        foreach ($this->interfaceToCall->getMethodAnnotations() as $annotation) {
-            if ($this->canBeAddedToRegisteredAnnotations($registeredAnnotations, $annotation)) {
-                $registeredAnnotations[] = $annotation;
-            }
-        }
-        foreach ($this->interfaceToCall->getClassAnnotations() as $annotation) {
-            if ($this->canBeAddedToRegisteredAnnotations($registeredAnnotations, $annotation)) {
-                $registeredAnnotations[] = $annotation;
-            }
-        }
-        $this->inboundGateway->withEndpointAnnotations($registeredAnnotations);
 
         if (! $this->interfaceToCall->hasNoParameters()) {
             throw InvalidArgumentException::create("{$this->interfaceToCall} for InboundChannelAdapter should not have any parameters");
         }
 
+        $objectReference = $this->directObject ?: new Reference($this->referenceName);
         $methodName = $this->interfaceToCall->getMethodName();
         if ($this->interfaceToCall->hasReturnTypeVoid()) {
             if ($this->requestChannelName !== NullableMessageChannel::CHANNEL_NAME) {
                 throw InvalidArgumentException::create("{$this->interfaceToCall} for InboundChannelAdapter should not be void, if channel name is not nullChannel");
             }
 
-            $referenceService = new PassThroughService($referenceService, $methodName);
+            $objectReference = new Definition(PassThroughService::class, [$objectReference, $methodName]);
             $methodName = 'execute';
         }
 
-        $gateway = $this->inboundGateway
-            ->buildWithoutProxyObject($referenceSearchService, $channelResolver);
-
-        return new InboundChannelTaskExecutor(
-            $gateway,
-            $referenceService,
-            $methodName
-        );
-    }
-
-
-    /**
-     * @param array $registeredAnnotations
-     * @param object $annotation
-     * @return bool
-     * @throws MessagingException
-     * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
-     */
-    private function canBeAddedToRegisteredAnnotations(array $registeredAnnotations, object $annotation): bool
-    {
-        foreach ($registeredAnnotations as $registeredAnnotation) {
-            if (TypeDescriptor::createFromVariable($registeredAnnotation)->equals(TypeDescriptor::createFromVariable($annotation))) {
-                return false;
-            }
-        }
-
-        return true;
+        return new Definition(InvocationPollerAdapter::class, [
+            $objectReference,
+            $methodName,
+        ]);
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
@@ -11,7 +13,7 @@ use Ecotone\Messaging\MessageHandler;
  * @package Test\Ecotone\Messaging\Fixture\Handler
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class NoReturnMessageHandler implements MessageHandler
+class NoReturnMessageHandler implements MessageHandler, DefinedObject
 {
     /** @var  bool */
     private $wasCalled = false;
@@ -55,5 +57,10 @@ class NoReturnMessageHandler implements MessageHandler
     public function __toString()
     {
         return self::class;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class);
     }
 }

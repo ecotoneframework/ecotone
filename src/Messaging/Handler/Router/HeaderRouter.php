@@ -8,7 +8,7 @@ class HeaderRouter
 {
     private string $headerName;
 
-    private function __construct(string $headerName)
+    public function __construct(string $headerName)
     {
         $this->headerName = $headerName;
     }

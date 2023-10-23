@@ -6,12 +6,11 @@ namespace Ecotone\Messaging\Endpoint\EventDriven;
 
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\Container\ChannelReference;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\SubscribableChannel;
 
 /**
@@ -24,16 +23,15 @@ class EventDrivenConsumerBuilder implements MessageHandlerConsumerBuilder
     /**
      * @inheritDoc
      */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService, MessageHandlerBuilder $messageHandlerBuilder, PollingMetadata $pollingMetadata): ConsumerLifecycle
+    public function registerConsumer(MessagingContainerBuilder $builder, MessageHandlerBuilder $messageHandlerBuilder): void
     {
-        /** @var SubscribableChannel $subscribableChannel */
-        $subscribableChannel = $channelResolver->resolve($messageHandlerBuilder->getInputMessageChannelName());
-
-        return new EventDrivenConsumer(
-            $messageHandlerBuilder->getEndpointId(),
-            $subscribableChannel,
-            $messageHandlerBuilder->build($channelResolver, $referenceSearchService)
-        );
+        $inputChannel = $messageHandlerBuilder->getInputMessageChannelName();
+        $channelDefinition = $builder->getDefinition(new ChannelReference($inputChannel));
+        if (! is_a($channelDefinition->getClassName(), SubscribableChannel::class, true)) {
+            throw ConfigurationException::create("Channel {$inputChannel} is not subscribable");
+        }
+        $messageHandlerReference = $messageHandlerBuilder->compile($builder);
+        $channelDefinition->addMethodCall('subscribe', [$messageHandlerReference]);
     }
 
     public function isPollingConsumer(): bool

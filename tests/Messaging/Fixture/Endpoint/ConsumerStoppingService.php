@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Endpoint;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 
 /**
@@ -11,7 +13,7 @@ use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
  * @package Test\Ecotone\Messaging\Fixture\Endpoint
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ConsumerStoppingService
+class ConsumerStoppingService implements DefinedObject
 {
     /**
      * @var ConsumerLifecycle
@@ -75,5 +77,10 @@ class ConsumerStoppingService
     public function getReceivedPayload()
     {
         return $this->receivedPayload;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [$this->returnValue], 'create');
     }
 }

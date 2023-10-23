@@ -3,6 +3,7 @@
 namespace Test\Ecotone\Modelling\Fixture\MetadataPropagatingWithDoubleEventHandlers;
 
 use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventHandler;
@@ -56,6 +57,13 @@ class OrderService
     public function sendNotification($command, array $headers): void
     {
         $this->notificationHeaders[] = $headers;
+    }
+
+    #[Asynchronous('orders')]
+    #[CommandHandler('sendNotificationViaCommandBus', endpointId: 'sendNotificationViaCommandBusEndpointId')]
+    public function sendNotificationViaCommandBus(#[Reference] EventBus $eventBus): void
+    {
+        $eventBus->publish(new OrderWasPlaced());
     }
 
     #[QueryHandler('getNotificationHeaders')]

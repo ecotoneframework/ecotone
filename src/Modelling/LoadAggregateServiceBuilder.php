@@ -2,29 +2,30 @@
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Config\Container\CompilableBuilder;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
+use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\MessageHandler;
 use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\TargetAggregateVersion;
 
-class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
+class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder implements CompilableBuilder
 {
     private string $aggregateClassName;
     private string $methodName;
     private ?string $messageVersionPropertyName;
     private ?string $aggregateVersionPropertyName = null;
     private array $aggregateRepositoryReferenceNames;
-    private ?string $handledMessageClassName;
     private EventSourcingHandlerExecutor $eventSourcingHandlerExecutor;
     private LoadAggregateMode $loadAggregateMode;
     private bool $isEventSourced;
@@ -34,7 +35,6 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
     {
         $this->aggregateClassName      = $aggregateClassName;
         $this->methodName              = $methodName;
-        $this->handledMessageClassName = $handledMessageClass;
         $this->loadAggregateMode = $loadAggregateMode;
 
         $this->initialize($aggregateClassName, $handledMessageClass, $interfaceToCallRegistry);
@@ -50,41 +50,44 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
         return $interfaceToCallRegistry->getFor($this->aggregateClassName, $this->methodName);
     }
 
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        $aggregateRepository = $this->isEventSourced
-            ? LazyEventSourcedRepository::create(
+        $repository = $this->isEventSourced
+            ? new Definition(LazyEventSourcedRepository::class, [
                 $this->aggregateClassName,
                 $this->isEventSourced,
-                $channelResolver,
-                $referenceSearchService,
-                $this->aggregateRepositoryReferenceNames
-            ) : LazyStandardRepository::create(
+                array_map(fn ($id) => new Reference($id), $this->aggregateRepositoryReferenceNames),
+            ], 'create')
+            : new Definition(LazyStandardRepository::class, [
                 $this->aggregateClassName,
                 $this->isEventSourced,
-                $channelResolver,
-                $referenceSearchService,
-                $this->aggregateRepositoryReferenceNames
-            );
+                array_map(fn ($id) => new Reference($id), $this->aggregateRepositoryReferenceNames),
+            ], 'create');
 
-        return ServiceActivatorBuilder::createWithDirectReference(
-            new LoadAggregateService(
-                $aggregateRepository,
-                $this->aggregateClassName,
-                $this->isEventSourced,
-                $this->methodName,
-                $this->messageVersionPropertyName,
-                $this->aggregateVersionPropertyName,
-                $this->isAggregateVersionAutomaticallyIncreased,
-                new PropertyReaderAccessor(),
-                PropertyEditorAccessor::create($referenceSearchService),
-                $this->eventSourcingHandlerExecutor,
-                $this->loadAggregateMode
-            ),
-            'load'
-        )
+        if (! $builder->has(PropertyEditorAccessor::class)) {
+            $builder->register(PropertyEditorAccessor::class, new Definition(PropertyEditorAccessor::class, [
+                new Reference(ExpressionEvaluationService::REFERENCE),
+            ], 'create'));
+        }
+
+        $loadAggregateService = new Definition(LoadAggregateService::class, [
+            $repository,
+            $this->aggregateClassName,
+            $this->isEventSourced,
+            $this->methodName,
+            $this->messageVersionPropertyName,
+            $this->aggregateVersionPropertyName,
+            $this->isAggregateVersionAutomaticallyIncreased,
+            new Reference(PropertyReaderAccessor::class),
+            new Reference(PropertyEditorAccessor::class),
+            $this->eventSourcingHandlerExecutor,
+            new Definition(LoadAggregateMode::class, [$this->loadAggregateMode->getType()]),
+        ]);
+
+
+        return ServiceActivatorBuilder::createWithDefinition($loadAggregateService, 'load')
             ->withOutputMessageChannel($this->getOutputMessageChannelName())
-            ->build($channelResolver, $referenceSearchService);
+            ->compile($builder);
     }
 
     /**
@@ -95,18 +98,6 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder
         $this->aggregateRepositoryReferenceNames = $aggregateRepositoryReferenceNames;
 
         return $this;
-    }
-
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return [
-            $interfaceToCallRegistry->getFor(LoadAggregateService::class, 'load'),
-        ];
-    }
-
-    public function getRequiredReferenceNames(): array
-    {
-        return [];
     }
 
     private function initialize(ClassDefinition $aggregateClassDefinition, ?ClassDefinition $handledMessageClassName, InterfaceToCallRegistry $interfaceToCallRegistry): void

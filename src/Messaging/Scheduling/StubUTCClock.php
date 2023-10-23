@@ -42,6 +42,16 @@ class StubUTCClock implements Clock
         return $this->currentTime;
     }
 
+    public function sleep(int $seconds): void
+    {
+        $this->currentTime += $seconds * 1000;
+    }
+
+    public function usleep(int $microseconds): void
+    {
+        $this->currentTime += (int)round($microseconds / 1000);
+    }
+
     /**
      * @param string $newCurrentTime
      * @return void

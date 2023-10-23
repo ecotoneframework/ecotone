@@ -2,6 +2,9 @@
 
 namespace Ecotone\Modelling;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -10,12 +13,12 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
 use ReflectionClass;
 
-final class EventSourcingHandlerExecutor
+final class EventSourcingHandlerExecutor implements DefinedObject
 {
     /**
      * @param InterfaceToCall[] $eventSourcingHandlerMethods
      */
-    private function __construct(private string $aggregateClassName, private array $eventSourcingHandlerMethods)
+    public function __construct(private string $aggregateClassName, private array $eventSourcingHandlerMethods)
     {
     }
 
@@ -87,5 +90,17 @@ final class EventSourcingHandlerExecutor
         }
 
         return new static($classDefinition->getClassType()->toString(), $eventSourcingHandlerMethods);
+    }
+
+    public function getDefinition(): Definition
+    {
+        $interfaceToCallReferences = [];
+        foreach ($this->eventSourcingHandlerMethods as $methodInterface) {
+            $interfaceToCallReferences[] = InterfaceToCallReference::fromInstance($methodInterface);
+        }
+        return new Definition(self::class, [
+            $this->aggregateClassName,
+            $interfaceToCallReferences,
+        ]);
     }
 }

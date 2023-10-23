@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
@@ -14,7 +16,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  * @package Ecotone\Messaging\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-final class MediaType
+final class MediaType implements DefinedObject
 {
     public const TEXT_XML = 'text/xml';
     public const TEXT_JSON = 'text/json';
@@ -355,5 +357,14 @@ final class MediaType
         }
 
         return "{$this->type}/{$this->subtype}{$parameters}";
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [
+            $this->type,
+            $this->subtype,
+            $this->parameters,
+        ], 'createWithParameters');
     }
 }

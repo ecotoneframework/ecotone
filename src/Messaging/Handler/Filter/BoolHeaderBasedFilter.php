@@ -2,9 +2,11 @@
 
 namespace Ecotone\Messaging\Handler\Filter;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Message;
 
-final class BoolHeaderBasedFilter
+final class BoolHeaderBasedFilter implements DefinedObject
 {
     public function __construct(private string $headerName, private ?bool $defaultResultWhenHeaderIsMissing)
     {
@@ -17,5 +19,13 @@ final class BoolHeaderBasedFilter
         }
 
         return (bool)$message->getHeaders()->get($this->headerName);
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [
+            $this->headerName,
+            $this->defaultResultWhenHeaderIsMissing,
+        ]);
     }
 }

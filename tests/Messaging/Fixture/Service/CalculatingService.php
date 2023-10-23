@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Service;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
+
 /**
  * Class CalculatingService
  * @package Test\Ecotone\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class CalculatingService
+class CalculatingService implements DefinedObject
 {
     /**
      * @var int
@@ -57,5 +60,10 @@ class CalculatingService
     public function getLastResult()
     {
         return $this->lastResult;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [$this->secondValueForMathOperations], 'create');
     }
 }

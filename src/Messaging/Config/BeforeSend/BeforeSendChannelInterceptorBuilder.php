@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\BeforeSend;
 
-use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\DirectChannel;
-use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Config\Container\ChannelReference;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ramsey\Uuid\Uuid;
 
 class BeforeSendChannelInterceptorBuilder implements ChannelInterceptorBuilder
@@ -27,7 +26,7 @@ class BeforeSendChannelInterceptorBuilder implements ChannelInterceptorBuilder
         $this->methodInterceptor = $methodInterceptor;
 
         $this->internalRequestChannelName = Uuid::uuid4()->toString();
-        $this->gateway                    = GatewayProxyBuilder::create(BeforeSendGateway::class, BeforeSendGateway::class, 'execute', $this->internalRequestChannelName);
+        $this->gateway                    = GatewayProxyBuilder::create(BeforeSendGateway::class . $this->internalRequestChannelName, BeforeSendGateway::class, 'execute', $this->internalRequestChannelName);
     }
 
     /**
@@ -41,22 +40,6 @@ class BeforeSendChannelInterceptorBuilder implements ChannelInterceptorBuilder
     /**
      * @inheritDoc
      */
-    public function getRequiredReferenceNames(): array
-    {
-        return [];
-    }
-
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return array_merge(
-            $this->gateway->resolveRelatedInterfaces($interfaceToCallRegistry),
-            $this->methodInterceptor->getMessageHandler()->resolveRelatedInterfaces($interfaceToCallRegistry)
-        );
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getPrecedence(): int
     {
         return $this->methodInterceptor->getPrecedence();
@@ -65,26 +48,13 @@ class BeforeSendChannelInterceptorBuilder implements ChannelInterceptorBuilder
     /**
      * @inheritDoc
      */
-    public function build(ReferenceSearchService $referenceSearchService): ChannelInterceptor
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        $messageHandler = $this->methodInterceptor->getInterceptingObject()->build(
-            InMemoryChannelResolver::createEmpty(),
-            $referenceSearchService
-        );
+        $messageHandler = $this->methodInterceptor->getInterceptingObject()->compile($builder);
+        $builder->register(new ChannelReference($this->internalRequestChannelName), new Definition(DirectChannel::class, [$this->internalRequestChannelName, $messageHandler]));
+        $gateway = $this->gateway->compile($builder);
 
-        $directChannel = DirectChannel::create();
-        $directChannel->subscribe($messageHandler);
-        /** @var BeforeSendGateway $gateway */
-        $gateway = $this->gateway->buildWithoutProxyObject(
-            $referenceSearchService,
-            InMemoryChannelResolver::createFromAssociativeArray(
-                [
-                    $this->internalRequestChannelName => $directChannel,
-                ]
-            )
-        );
-
-        return new BeforeSendChannelInterceptor($gateway);
+        return new Definition(BeforeSendChannelInterceptor::class, [$gateway]);
     }
 
     public function __toString()

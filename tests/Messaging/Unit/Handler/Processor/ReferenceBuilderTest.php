@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
-use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
+use Ecotone\Messaging\Config\Container\BoundParameterConverter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ComponentTestBuilder;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use stdClass;
@@ -32,10 +33,13 @@ class ReferenceBuilderTest extends TestCase
         $interfaceToCall = InterfaceToCall::create(ServiceExpectingOneArgument::class, 'withUnionParameter');
         $interfaceParameter = $interfaceToCall->getInterfaceParameters()[0];
         $value = new stdClass();
-        $converter = ReferenceBuilder::create($interfaceParameter->getName(), $referenceName)
-            ->build(InMemoryReferenceSearchService::createWith([
-                $referenceName => $value,
-            ]), $interfaceToCall, $interfaceParameter);
+        $converter = ComponentTestBuilder::create()
+            ->withReference($referenceName, $value)
+            ->build(new BoundParameterConverter(
+                ReferenceBuilder::create($interfaceParameter->getName(), $referenceName),
+                $interfaceToCall,
+                $interfaceParameter
+            ));
 
         $this->assertEquals(
             $value,
@@ -54,10 +58,13 @@ class ReferenceBuilderTest extends TestCase
         $interfaceToCall = InterfaceToCall::create(ServiceExpectingOneArgument::class, 'withUnionParameter');
         $interfaceParameter = $interfaceToCall->getInterfaceParameters()[0];
         $value = new stdClass();
-        $converter = ReferenceBuilder::create($interfaceParameter->getName(), stdClass::class)
-            ->build(InMemoryReferenceSearchService::createWith([
-                stdClass::class => $value,
-            ]), $interfaceToCall, $interfaceParameter);
+        $converter = ComponentTestBuilder::create()
+            ->withReference(stdClass::class, $value)
+            ->build(new BoundParameterConverter(
+                ReferenceBuilder::create($interfaceParameter->getName(), stdClass::class),
+                $interfaceToCall,
+                $interfaceParameter
+            ));
 
         $this->assertEquals(
             $value,

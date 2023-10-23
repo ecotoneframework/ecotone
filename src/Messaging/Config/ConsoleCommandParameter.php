@@ -2,9 +2,12 @@
 
 namespace Ecotone\Messaging\Config;
 
-class ConsoleCommandParameter
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
+
+class ConsoleCommandParameter implements DefinedObject
 {
-    private function __construct(private string $name, private string $messageHeaderName, private bool $isOption, private mixed $defaultValue, private bool $hasDefaultValue)
+    public function __construct(private string $name, private string $messageHeaderName, private bool $isOption, private mixed $defaultValue, private bool $hasDefaultValue)
     {
     }
 
@@ -41,5 +44,16 @@ class ConsoleCommandParameter
     public function hasDefaultValue(): bool
     {
         return $this->hasDefaultValue;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [
+            $this->name,
+            $this->messageHeaderName,
+            $this->isOption,
+            $this->defaultValue,
+            $this->hasDefaultValue,
+        ]);
     }
 }

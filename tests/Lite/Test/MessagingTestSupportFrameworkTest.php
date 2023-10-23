@@ -407,27 +407,6 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $this->assertEquals([new Notification()], $ecotoneTestSupport->getMessagingTestSupport()->getRecordedEvents());
     }
 
-    public function test_fetching_with_possible_suffix_alias()
-    {
-        $inMemoryPSRContainer = InMemoryPSRContainer::createFromAssociativeArray([
-            OrderService::class . '-proxy' => new OrderService(),
-        ]);
-        $ecotoneTestSupport = EcotoneLite::bootstrapForTesting(
-            [OrderService::class],
-            $inMemoryPSRContainer,
-            ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
-            allowGatewaysToBeRegisteredInContainer: true
-        );
-
-        $orderId = '123';
-        $inMemoryPSRContainer->get(CommandBus::class)->sendWithRouting('order.register', new PlaceOrder($orderId));
-
-        $testSupportGateway = $ecotoneTestSupport->getMessagingTestSupport();
-
-        $this->assertEquals([new OrderWasPlaced($orderId)], $testSupportGateway->getRecordedEvents());
-    }
-
     public function test_add_gateways_to_container()
     {
         $inMemoryPSRContainer = InMemoryPSRContainer::createFromAssociativeArray([

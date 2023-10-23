@@ -20,33 +20,16 @@ use ReflectionException;
  */
 class InterfaceToCall
 {
-    private ?string $interfaceName;
     private ?Type $interfaceType;
-    private ?string $methodName;
-    /**
-     * @var InterfaceParameter[]
-     */
-    private ?iterable $parameters;
-    private ?Type $returnType;
-    private ?bool $doesReturnTypeAllowNulls;
-    private ?bool $isStaticallyCalled;
-    /**
-     * @var object[]
-     */
-    private array $methodAnnotations;
-    /**
-     * @var object[]
-     */
-    private array $classAnnotations;
 
     /**
+     * @param object[]        $classAnnotations
      * @param object[]        $methodAnnotations
+     * @param InterfaceParameter[] $parameters
      */
-    private function __construct(string $interfaceName, string $methodName, array $classAnnotations, array $methodAnnotations, AnnotationResolver $annotationResolver)
+    public function __construct(private string $interfaceName, private string $methodName, private array $classAnnotations, private array $methodAnnotations, private iterable $parameters, private ?Type $returnType, private bool $doesReturnTypeAllowNulls, private bool $isStaticallyCalled)
     {
-        $this->methodAnnotations = $methodAnnotations;
-        $this->classAnnotations = $classAnnotations;
-        $this->initialize($interfaceName, $methodName, $annotationResolver);
+        $this->interfaceType = TypeDescriptor::create($interfaceName);
     }
 
     public static function create(string|object $interfaceOrObjectName, string $methodName): self
@@ -55,26 +38,39 @@ class InterfaceToCall
         if (is_object($interfaceOrObjectName)) {
             $interface = get_class($interfaceOrObjectName);
         }
-
         $annotationParser = InMemoryAnnotationFinder::createFrom([$interface]);
-
-        $methodAnnotations = $annotationParser->getAnnotationsForMethod($interface, $methodName);
-        $classAnnotations = $annotationParser->getAnnotationsForClass($interface);
-
-        return new self($interface, $methodName, $classAnnotations, $methodAnnotations, $annotationParser);
+        return self::createWithAnnotationFinder($interface, $methodName, $annotationParser);
     }
 
     public static function createWithAnnotationFinder(string|object $interfaceOrObjectName, string $methodName, AnnotationResolver $annotationParser): self
     {
-        $interface = $interfaceOrObjectName;
+        $interfaceName = $interfaceOrObjectName;
         if (is_object($interfaceOrObjectName)) {
-            $interface = get_class($interfaceOrObjectName);
+            $interfaceName = get_class($interfaceOrObjectName);
         }
 
-        $methodAnnotations = $annotationParser->getAnnotationsForMethod($interface, $methodName);
-        $classAnnotations = $annotationParser->getAnnotationsForClass($interface);
+        $methodAnnotations = $annotationParser->getAnnotationsForMethod($interfaceName, $methodName);
+        $classAnnotations = $annotationParser->getAnnotationsForClass($interfaceName);
 
-        return new self($interface, $methodName, $classAnnotations, $methodAnnotations, $annotationParser);
+        try {
+            $typeResolver        = TypeResolver::createWithAnnotationParser($annotationParser);
+            try {
+                $reflectionClass = new ReflectionClass($interfaceName);
+                $reflectionMethod = $reflectionClass->getMethod($methodName);
+            } catch (ReflectionException) {
+                throw InvalidArgumentException::create("Interface {$interfaceName} has no method named {$methodName}");
+            }
+
+            $parameters = $typeResolver->getMethodParameters($reflectionClass, $methodName);
+            $returnType = $typeResolver->getReturnType($reflectionClass, $methodName);
+
+            $doesReturnTypeAllowNulls = $reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->allowsNull() : true;
+            $isStaticallyCalled       = $reflectionMethod->isStatic();
+        } catch (TypeDefinitionException $definitionException) {
+            throw InvalidArgumentException::create("Interface {$interfaceName} has problem with type declaration. {$definitionException->getMessage()}");
+        }
+
+        return new self($interfaceName, $methodName, $classAnnotations, $methodAnnotations, $parameters, $returnType, $doesReturnTypeAllowNulls, $isStaticallyCalled);
     }
 
     public function getInterfaceName(): ?string
@@ -258,7 +254,7 @@ class InterfaceToCall
     /**
      * @return array|InterfaceParameter[]
      */
-    public function getInterfaceParameters(): ?iterable
+    public function getInterfaceParameters(): iterable
     {
         return $this->parameters;
     }
@@ -434,29 +430,5 @@ class InterfaceToCall
     private function parameterAmount(): int
     {
         return count($this->getInterfaceParameters());
-    }
-
-    private function initialize(string $interfaceName, string $methodName, AnnotationResolver $annotationResolver): void
-    {
-        try {
-            $typeResolver        = TypeResolver::create();
-            $this->interfaceType = TypeDescriptor::create($interfaceName);
-            $this->interfaceName = $this->interfaceType->toString();
-            $this->methodName    = $methodName;
-            try {
-                $reflectionClass = new ReflectionClass($interfaceName);
-                $reflectionMethod = $reflectionClass->getMethod($methodName);
-            } catch (ReflectionException) {
-                throw InvalidArgumentException::create("Interface {$interfaceName} has no method named {$methodName}");
-            }
-
-            $this->parameters = $typeResolver->getMethodParameters($reflectionClass, $methodName, $annotationResolver);
-            $this->returnType = $typeResolver->getReturnType($reflectionClass, $methodName);
-
-            $this->doesReturnTypeAllowNulls = $reflectionMethod->getReturnType() ? $reflectionMethod->getReturnType()->allowsNull() : true;
-            $this->isStaticallyCalled       = $reflectionMethod->isStatic();
-        } catch (TypeDefinitionException $definitionException) {
-            throw InvalidArgumentException::create("Interface {$this} has problem with type declaration. {$definitionException->getMessage()}");
-        }
     }
 }

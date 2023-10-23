@@ -7,6 +7,7 @@ use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
@@ -83,8 +84,15 @@ class DistributedGatewayModule extends NoExternalConfigurationModule implements 
                     GatewayHeaderBuilder::create('mediaType', MessageHeaders::CONTENT_TYPE),
                 ])
         );
+        $messagingConfiguration->registerServiceDefinition(
+            DistributedMessageHandler::class,
+            new Definition(DistributedMessageHandler::class, [
+                $this->distributedEventHandlerRoutingKeys,
+                $this->distributedCommandHandlerRoutingKeys,
+            ])
+        );
         $messagingConfiguration->registerMessageHandler(
-            ServiceActivatorBuilder::createWithDirectReference(new DistributedMessageHandler($this->distributedEventHandlerRoutingKeys, $this->distributedCommandHandlerRoutingKeys), 'handle')
+            ServiceActivatorBuilder::create(DistributedMessageHandler::class, $interfaceToCallRegistry->getFor(DistributedMessageHandler::class, 'handle'))
                 ->withInputChannelName(DistributionEntrypoint::DISTRIBUTED_CHANNEL)
                 ->withMethodParameterConverters([
                     PayloadBuilder::create('payload'),

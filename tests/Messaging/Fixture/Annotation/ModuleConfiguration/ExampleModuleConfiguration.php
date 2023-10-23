@@ -75,14 +75,6 @@ class ExampleModuleConfiguration implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function getRelatedReferences(): array
-    {
-        return [stdClass::class];
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function canHandle($extensionObject): bool
     {
         return $extensionObject instanceof stdClass;

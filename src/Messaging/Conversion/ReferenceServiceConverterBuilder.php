@@ -4,40 +4,24 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
 
-use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Config\Container\CompilableBuilder;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Messaging\Support\InvalidArgumentException;
-use ReflectionMethod;
 
 /**
  * Class ReferenceConverterBuilder
  * @package Ecotone\Messaging\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ReferenceServiceConverterBuilder implements ConverterBuilder
+class ReferenceServiceConverterBuilder implements CompilableBuilder
 {
-    private string $referenceName;
-    private string $methodName;
-    private \Ecotone\Messaging\Handler\Type $sourceType;
-    private \Ecotone\Messaging\Handler\Type $targetType;
-
-    /**
-     * ReferenceConverter constructor.
-     * @param string $referenceName
-     * @param string $method
-     * @param Type $sourceType
-     * @param Type $targetType
-     */
-    private function __construct(string $referenceName, string $method, Type $sourceType, Type $targetType)
+    private function __construct(private string $referenceName, private string $methodName, private Type $sourceType, private Type $targetType)
     {
-        Assert::isFalse($sourceType->isUnionType(), "Source type for converter cannot be union type, {$sourceType} given for {$referenceName}:{$method}.");
-        Assert::isFalse($targetType->isUnionType(), "Source type for converter cannot be union type, {$targetType} given for {$referenceName}:{$method}.");
-
-        $this->referenceName = $referenceName;
-        $this->methodName = $method;
-        $this->sourceType = $sourceType;
-        $this->targetType = $targetType;
+        Assert::isFalse($sourceType->isUnionType(), "Source type for converter cannot be union type, {$sourceType} given for {$referenceName}:{$methodName}.");
+        Assert::isFalse($targetType->isUnionType(), "Source type for converter cannot be union type, {$targetType} given for {$referenceName}:{$methodName}.");
     }
 
     /**
@@ -52,32 +36,13 @@ class ReferenceServiceConverterBuilder implements ConverterBuilder
         return new self($referenceName, $method, $sourceType, $targetType);
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ReferenceSearchService $referenceSearchService): Converter
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        $object = $referenceSearchService->get($this->referenceName);
-
-        $reflectionMethod = new ReflectionMethod($object, $this->methodName);
-
-        if (count($reflectionMethod->getParameters()) !== 1) {
-            throw InvalidArgumentException::create("Converter should have only single parameter: {$reflectionMethod}");
-        }
-
-        return ReferenceServiceConverter::create(
-            $object,
+        return new Definition(ReferenceServiceConverter::class, [
+            new Reference($this->referenceName),
             $this->methodName,
             $this->sourceType,
-            $this->targetType
-        );
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredReferences(): array
-    {
-        return [$this->referenceName];
+            $this->targetType,
+        ]);
     }
 }

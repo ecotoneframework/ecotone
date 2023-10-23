@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\MessageHandler;
 
 /**
  * Class ModuleMessageHandlerBuilder
@@ -53,14 +53,10 @@ class ReferenceMessageHandlerBuilderExample extends InputOutputMessageHandlerBui
         return $this->module;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
+    public function compile(MessagingContainerBuilder $builder): Definition|Reference
     {
-        $this->module = $referenceSearchService->get($this->moduleName);
-
-        return ReplyViaHeadersMessageHandler::create('some');
+        // TODO: this seems useless
+        return new Definition(ReplyViaHeadersMessageHandler::class, ['some'], 'create');
     }
 
     /**
@@ -71,14 +67,6 @@ class ReferenceMessageHandlerBuilderExample extends InputOutputMessageHandlerBui
         $this->channelName = $inputChannelName;
 
         return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return [];
     }
 
     /**
@@ -95,14 +83,6 @@ class ReferenceMessageHandlerBuilderExample extends InputOutputMessageHandlerBui
     public function getInputMessageChannelName(): string
     {
         return $this->channelName;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredReferenceNames(): array
-    {
-        return [];
     }
 
     /**

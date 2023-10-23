@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Service;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ramsey\Uuid\UuidInterface;
 use stdClass;
 
@@ -12,7 +14,7 @@ use stdClass;
  * @package Test\Ecotone\Messaging\Fixture\Service
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class ServiceExpectingOneArgument
+class ServiceExpectingOneArgument implements DefinedObject
 {
     private $wasCalled = false;
 
@@ -87,5 +89,10 @@ class ServiceExpectingOneArgument
     public function wasCalled(): bool
     {
         return $this->wasCalled;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class);
     }
 }

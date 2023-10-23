@@ -5,19 +5,17 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Enricher;
 
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
-use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorReference;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\Handler\RequestReplyProducer;
-use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\Assert;
 use Ramsey\Uuid\Uuid;
 
@@ -116,34 +114,12 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
     /**
      * @inheritDoc
      */
-    public function getRequiredReferenceNames(): array
-    {
-        return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function resolveRelatedInterfaces(InterfaceToCallRegistry $interfaceToCallRegistry): iterable
-    {
-        return [
-            $interfaceToCallRegistry->getFor(InternalEnrichingService::class, 'enrich'),
-            $interfaceToCallRegistry->getFor(EnrichGateway::class, 'execute'),
-        ];
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
         return $interfaceToCallRegistry->getFor(InternalEnrichingService::class, 'enrich');
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ChannelResolver $channelResolver, ReferenceSearchService $referenceSearchService): MessageHandler
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
         if (empty($this->propertyEditors)) {
             throw ConfigurationException::create("Can't configure enricher with no property setters");
@@ -151,42 +127,32 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
 
         $propertySetters = [];
         foreach ($this->propertyEditors as $setterBuilder) {
-            $propertySetters[] = $setterBuilder->build($referenceSearchService);
+            $propertySetters[] = $setterBuilder->compile($builder);
         }
 
         $gateway = null;
         if ($this->requestChannelName) {
-            /** @var EnrichGateway $gateway */
-            $gateway = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), EnrichGateway::class, 'execute', $this->requestChannelName)
-                        ->build($referenceSearchService, $channelResolver);
+            $gatewayBuilder = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), EnrichGateway::class, 'execute', $this->requestChannelName);
+            $gatewayBuilder->compile($builder);
+            $gateway = $gatewayBuilder->registerProxy($builder);
         }
 
-        $internalEnrichingService = new InternalEnrichingService(
+        $internalEnrichingService = new Definition(InternalEnrichingService::class, [
             $gateway,
-            $referenceSearchService->get(ExpressionEvaluationService::REFERENCE),
-            $referenceSearchService,
-            $referenceSearchService->get(ConversionService::REFERENCE_NAME),
+            new Reference(ExpressionEvaluationService::REFERENCE),
+            new Reference(ConversionService::REFERENCE_NAME),
             $propertySetters,
             $this->requestPayloadExpression,
-            $this->requestHeaders
-        );
+            $this->requestHeaders,
+        ]);
 
-        /** @var InterfaceToCallRegistry $interfaceToCallRegistry */
-        $interfaceToCallRegistry = $referenceSearchService->get(InterfaceToCallRegistry::REFERENCE_NAME);
-        $interfaceToCall = $interfaceToCallRegistry->getFor($internalEnrichingService, 'enrich');
+        return ServiceActivatorBuilder::createWithDefinition($internalEnrichingService, 'enrich')
+                ->withEndpointId($this->getEndpointId())
+                ->withInputChannelName($this->getInputMessageChannelName())
+                ->withOutputMessageChannel($this->outputMessageChannelName)
+                ->withAroundInterceptors($this->orderedAroundInterceptors)
+                ->withEndpointAnnotations($this->getEndpointAnnotations())
+                ->compile($builder);
 
-        return RequestReplyProducer::createRequestAndReply(
-            $this->outputMessageChannelName,
-            MethodInvoker::createWith(
-                $interfaceToCall,
-                $internalEnrichingService,
-                [],
-                $referenceSearchService,
-                $this->getEndpointAnnotations()
-            ),
-            $channelResolver,
-            false,
-            aroundInterceptors: AroundInterceptorReference::createAroundInterceptorsWithChannel($referenceSearchService, $this->orderedAroundInterceptors, $this->getEndpointAnnotations(), $interfaceToCall),
-        );
     }
 }

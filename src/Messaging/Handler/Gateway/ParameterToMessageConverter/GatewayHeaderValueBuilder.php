@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
-use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverterBuilder;
 use Ecotone\Messaging\Handler\InterfaceParameter;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**
  * Class StaticHeaderToMessageConverterBuilder
@@ -48,11 +48,14 @@ class GatewayHeaderValueBuilder implements GatewayParameterConverterBuilder
         return false;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function build(ReferenceSearchService $referenceSearchService): GatewayParameterConverter
+    public function compile(MessagingContainerBuilder $builder): Definition
     {
-        return GatewayHeaderValueConverter::create($this->headerName, $this->headerValue);
+        return new Definition(
+            GatewayHeaderValueConverter::class,
+            [
+                $this->headerName,
+                $this->headerValue,
+            ]
+        );
     }
 }

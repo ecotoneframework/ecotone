@@ -2,12 +2,15 @@
 
 namespace Ecotone\Messaging;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
+
 /**
  * Class NullableMessageChannel
  * @package Ecotone\Messaging
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-final class NullableMessageChannel implements SubscribableChannel, PollableChannel
+final class NullableMessageChannel implements SubscribableChannel, PollableChannel, DefinedObject
 {
     public const CHANNEL_NAME = 'nullChannel';
 
@@ -56,5 +59,10 @@ final class NullableMessageChannel implements SubscribableChannel, PollableChann
     public function __toString()
     {
         return 'null';
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class);
     }
 }

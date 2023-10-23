@@ -9,36 +9,30 @@ use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingCommands\MessagingCommandsModule;
-use Ecotone\Messaging\Config\BeforeSend\BeforeSendGateway;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Config\RequiredReference;
 use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverterBuilder;
 use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverterBuilder;
 use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverterBuilder;
 use Ecotone\Messaging\Conversion\UuidToString\UuidToStringConverterBuilder;
-use Ecotone\Messaging\Endpoint\AcknowledgeConfirmationInterceptor;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
-use Ecotone\Messaging\Endpoint\EventDriven\LazyEventDrivenConsumerBuilder;
-use Ecotone\Messaging\Endpoint\InboundChannelAdapterEntrypoint;
 use Ecotone\Messaging\Endpoint\InboundGatewayEntrypoint;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Endpoint\PostSendInterceptor;
 use Ecotone\Messaging\Gateway\ConsoleCommandRunner;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
-use Ecotone\Messaging\Handler\Chain\ChainForwardPublisher;
 use Ecotone\Messaging\Handler\Enricher\EnrichGateway;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\Router\HeaderRouter;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
@@ -76,11 +70,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
             }
         }
 
-        if ($messagingConfiguration->isLazyLoaded()) {
-            $messagingConfiguration->registerConsumerFactory(new LazyEventDrivenConsumerBuilder());
-        } else {
-            $messagingConfiguration->registerConsumerFactory(new EventDrivenConsumerBuilder());
-        }
+        $messagingConfiguration->registerConsumerFactory(new EventDrivenConsumerBuilder());
         $messagingConfiguration->registerConsumerFactory(new PollingConsumerBuilder());
 
         $messagingConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
@@ -90,23 +80,17 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
         $messagingConfiguration->registerConverter(new SerializingConverterBuilder());
         $messagingConfiguration->registerConverter(new DeserializingConverterBuilder());
 
-        $messagingConfiguration->registerRelatedInterfaces([
-            $interfaceToCallRegistry->getFor(PostSendInterceptor::class, 'postSend'),
-            $interfaceToCallRegistry->getFor(ChainForwardPublisher::class, 'forward'),
-            $interfaceToCallRegistry->getFor(BeforeSendGateway::class, 'execute'),
-            $interfaceToCallRegistry->getFor(AcknowledgeConfirmationInterceptor::class, 'ack'),
-            $interfaceToCallRegistry->getFor(InboundGatewayEntrypoint::class, 'executeEntrypoint'),
-            $interfaceToCallRegistry->getFor(InboundChannelAdapterEntrypoint::class, 'executeEntrypoint'),
-            $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'logException'),
-        ]);
         $messagingConfiguration
             ->registerInternalGateway(TypeDescriptor::create(InboundGatewayEntrypoint::class))
             ->registerInternalGateway(TypeDescriptor::create(EnrichGateway::class));
 
         $messagingConfiguration
             ->registerMessageHandler(
-                RouterBuilder::createHeaderRouter(MessagingEntrypoint::ENTRYPOINT)
-                    ->withInputChannelName(MessagingEntrypoint::ENTRYPOINT)
+                RouterBuilder::create(
+                    new Definition(HeaderRouter::class, [MessagingEntrypoint::ENTRYPOINT]),
+                    $interfaceToCallRegistry->getFor(HeaderRouter::class, 'route')
+                )
+                ->withInputChannelName(MessagingEntrypoint::ENTRYPOINT)
             );
 
         $messagingConfiguration->registerGatewayBuilder(
@@ -203,16 +187,6 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
             $extensionObject instanceof ChannelAdapterConsumerBuilder
             ||
             $extensionObject instanceof PollingMetadata;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRelatedReferences(): array
-    {
-        return [
-            RequiredReference::create(InterfaceToCallRegistry::REFERENCE_NAME),
-        ];
     }
 
     public function getModulePackageName(): string

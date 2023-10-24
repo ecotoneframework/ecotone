@@ -7,6 +7,7 @@ use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\Container\Compiler\ContainerDefinitionsHolder;
 use Ecotone\Messaging\Config\Container\Compiler\RegisterInterfaceToCallReferences;
+use Ecotone\Messaging\Config\Container\Compiler\ValidityCheckPass;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
@@ -24,6 +25,7 @@ class ContainerConfig
         $containerBuilder = new ContainerBuilder();
         $containerBuilder->addCompilerPass($configuration);
         $containerBuilder->addCompilerPass(new RegisterInterfaceToCallReferences());
+        $containerBuilder->addCompilerPass(new ValidityCheckPass());
         $containerBuilder->compile();
         $container = new LazyInMemoryContainer($containerBuilder->getDefinitions(), $externalContainer);
         $container->set(ConfigurationVariableService::REFERENCE_NAME, $configurationVariableService ?? InMemoryConfigurationVariableService::createEmpty());
@@ -38,6 +40,7 @@ class ContainerConfig
         $ecotoneBuilder = new ContainerBuilder();
         $ecotoneBuilder->addCompilerPass($configuration);
         $ecotoneBuilder->addCompilerPass(new RegisterInterfaceToCallReferences());
+        $ecotoneBuilder->addCompilerPass(new ValidityCheckPass());
         $ecotoneBuilder->addCompilerPass($definitionHolder);
         $ecotoneBuilder->compile();
         return $definitionHolder;

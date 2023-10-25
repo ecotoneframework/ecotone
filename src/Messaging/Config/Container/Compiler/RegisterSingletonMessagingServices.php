@@ -10,15 +10,14 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\Container\ReferenceSearchServiceWithContainer;
 use Ecotone\Messaging\Config\MessagingSystemContainer;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
-use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Handler\Bridge\Bridge;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
-use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Scheduling\Clock;
 use Ecotone\Messaging\Scheduling\EpochBasedClock;
@@ -34,11 +33,10 @@ class RegisterSingletonMessagingServices implements CompilerPass
         $this->registerDefault($builder, ChannelResolver::class, new Definition(ChannelResolverWithContainer::class, [new Reference(ContainerInterface::class)]));
         $this->registerDefault($builder, ReferenceSearchService::class, new Definition(ReferenceSearchServiceWithContainer::class, [new Reference(ContainerInterface::class)]));
         $this->registerDefault($builder, ExpressionEvaluationService::REFERENCE, new Definition(SymfonyExpressionEvaluationAdapter::class, [new Reference(ReferenceSearchService::class)], 'create'));
-        $this->registerDefault($builder, ServiceCacheConfiguration::class, new Definition(ServiceCacheConfiguration::class, factory: 'noCache'));
+        $this->registerDefault($builder, ProxyFactory::class, new Definition(ProxyFactory::class, [new Reference(ServiceCacheConfiguration::REFERENCE_NAME)]));
         $this->registerDefault($builder, PropertyEditorAccessor::class, new Definition(PropertyEditorAccessor::class, [new Reference(ExpressionEvaluationService::REFERENCE)], 'create'));
         $this->registerDefault($builder, PropertyReaderAccessor::class, new Definition(PropertyReaderAccessor::class));
         $this->registerDefault($builder, ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), [], []]));
-        $this->registerDefault($builder, ConfigurationVariableService::class, new Definition(InMemoryConfigurationVariableService::class, [], 'createEmpty'));
     }
 
     private function registerDefault(ContainerBuilder $builder, string $id, object|array|string $definition): void

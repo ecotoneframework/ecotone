@@ -20,7 +20,6 @@ use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Handler\ClassDefinition;
-use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Ecotone\Messaging\Support\Assert;
@@ -172,7 +171,6 @@ final class EcotoneLite
         $configurationVariableService = InMemoryConfigurationVariableService::create($configurationVariables);
         $definitionHolder = null;
 
-        $proxyFactory = new ProxyFactory($serviceCacheConfiguration);
         $messagingSystemCachePath = $serviceCacheConfiguration->getPath() . DIRECTORY_SEPARATOR . 'messaging_system';
         if ($serviceCacheConfiguration->shouldUseCache() && file_exists($messagingSystemCachePath)) {
             /** It may fail on deserialization, then return `false` and we can build new one */
@@ -196,7 +194,7 @@ final class EcotoneLite
         }
 
         $container = new LazyInMemoryContainer($definitionHolder->getDefinitions(), $externalContainer);
-        $container->set(ProxyFactory::class, $proxyFactory);
+        $container->set(ServiceCacheConfiguration::class, $serviceCacheConfiguration);
         $container->set(ConfigurationVariableService::REFERENCE_NAME, $configurationVariableService);
 
         $messagingSystem = $container->get(ConfiguredMessagingSystem::class);

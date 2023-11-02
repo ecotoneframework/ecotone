@@ -10,6 +10,10 @@ namespace Ecotone\Messaging;
 interface Precedence
 {
     /**
+     * Tracing hooks in at this level
+     */
+    public const TRACING_PRECEDENCE = Precedence::ERROR_CHANNEL_PRECEDENCE - 101;
+    /**
      * Message consumer polling interceptors are run at this precedence
      */
     public const ASYNCHRONOUS_CONSUMER_INTERCEPTOR_PRECEDENCE = Precedence::ERROR_CHANNEL_PRECEDENCE - 100;

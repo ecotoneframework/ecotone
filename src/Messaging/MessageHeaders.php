@@ -110,9 +110,6 @@ final class MessageHeaders
 
     public const CHANNEL_SEND_RETRY_NUMBER = 'channelSendRetryNumber';
 
-    /** This is needed for tracing, to pass context around within same process */
-    public const NON_PROPAGATED_CONTEXT = 'nonPropagatedContext';
-
     private array $headers;
 
     /**
@@ -243,7 +240,6 @@ final class MessageHeaders
             $metadata[self::POLLED_CHANNEL_NAME],
             $metadata[self::CONSUMER_POLLING_METADATA],
             $metadata[self::REPLY_CHANNEL],
-            $metadata[self::NON_PROPAGATED_CONTEXT]
         );
 
         return $metadata;

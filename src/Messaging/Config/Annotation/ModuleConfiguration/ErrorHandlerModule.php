@@ -13,7 +13,7 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Recoverability\ErrorHandler;
 use Ecotone\Messaging\Handler\Recoverability\ErrorHandlerConfiguration;
@@ -62,7 +62,7 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
                 ->withEndpointId('error_handler.' . $extensionObject->getErrorChannelName())
                 ->withInputChannelName($extensionObject->getErrorChannelName())
                 ->withMethodParameterConverters([
-                    ReferenceBuilder::create('logger', LoggingHandlerBuilder::LOGGER_REFERENCE),
+                    ReferenceBuilder::create('logger', LoggingGateway::class),
                 ]);
             if ($extensionObject->getDeadLetterQueueChannel()) {
                 $errorHandler = $errorHandler->withOutputMessageChannel($extensionObject->getDeadLetterQueueChannel());

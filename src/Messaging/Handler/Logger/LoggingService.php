@@ -4,6 +4,9 @@ declare(strict_types=0);
 
 namespace Ecotone\Messaging\Handler\Logger;
 
+use Ecotone\Messaging\Attribute\Parameter\Header;
+use Ecotone\Messaging\Attribute\Parameter\Payload;
+use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
@@ -11,6 +14,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -21,6 +25,11 @@ use Throwable;
  */
 class LoggingService
 {
+    public const CONTEXT_MESSAGE_HEADER = 'ecotone.logging.contextMessage';
+    public const CONTEXT_EXCEPTION_HEADER = 'ecotone.logging.exceptionMessage';
+    public const INFO_LOGGING_CHANNEL = 'infoLoggingChannel';
+    public const ERROR_LOGGING_CHANNEL = 'errorLoggingChannel';
+
     private \Ecotone\Messaging\Conversion\ConversionService $conversionService;
     private \Psr\Log\LoggerInterface $logger;
 
@@ -33,6 +42,42 @@ class LoggingService
     {
         $this->conversionService = $conversionService;
         $this->logger = $logger;
+    }
+
+    #[ServiceActivator(self::INFO_LOGGING_CHANNEL)]
+    public function info(
+        #[Payload] string $text,
+        #[Header(self::CONTEXT_MESSAGE_HEADER)] Message $message,
+        #[Header(self::CONTEXT_EXCEPTION_HEADER)] ?Exception $exception,
+    ): void {
+        $this->logger->info(
+            $text,
+            [
+                'message_id' => $message->getHeaders()->getMessageId(),
+                'correlation_id' => $message->getHeaders()->getCorrelationId(),
+                'parent_id' => $message->getHeaders()->getParentId(),
+                'headers' => (string)$message->getHeaders(),
+                'exception' => $exception,
+            ]
+        );
+    }
+
+    #[ServiceActivator(self::ERROR_LOGGING_CHANNEL)]
+    public function error(
+        #[Payload] string $text,
+        #[Header(self::CONTEXT_MESSAGE_HEADER)] Message $message,
+        #[Header(self::CONTEXT_EXCEPTION_HEADER)] ?Exception $exception,
+    ): void {
+        $this->logger->critical(
+            $text,
+            [
+                'message_id' => $message->getHeaders()->getMessageId(),
+                'correlation_id' => $message->getHeaders()->getCorrelationId(),
+                'parent_id' => $message->getHeaders()->getParentId(),
+                'headers' => (string)$message->getHeaders(),
+                'exception' => $exception,
+            ]
+        );
     }
 
     /**

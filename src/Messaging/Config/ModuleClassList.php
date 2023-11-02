@@ -39,6 +39,8 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ServiceActivatorModu
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\SplitterModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\TransformerModule;
 use Ecotone\Messaging\Handler\Logger\Config\LoggingModule;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
+use Ecotone\Messaging\Handler\Logger\LoggingService;
 use Ecotone\Modelling\Config\BusModule;
 use Ecotone\Modelling\Config\BusRoutingModule;
 use Ecotone\Modelling\Config\DistributedGatewayModule;
@@ -77,6 +79,10 @@ class ModuleClassList
         TransformerModule::class,
         MessageConsumerModule::class,
         InstantRetryModule::class,
+
+        /** Attribute based configurations */
+        LoggingGateway::class,
+        LoggingService::class,
     ];
 
     public const ASYNCHRONOUS_MODULE = [

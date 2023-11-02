@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\Collector;
 
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Message;
-use Psr\Log\LoggerInterface;
 
 /**
  * This is responsible for collecting message in order to send them later.
@@ -39,19 +39,22 @@ final class CollectorStorage
         return $this->enabled;
     }
 
-    public function collect(Message $message, LoggerInterface $logger): void
+    public function collect(Message $message, LoggingGateway $logger): void
     {
-        $logger->info(sprintf('Collecting message with id: %s', $message->getHeaders()->getMessageId()));
+        $logger->info(
+            sprintf('Collecting message with id: %s', $message->getHeaders()->getMessageId()),
+            $message
+        );
         $this->collectedMessages[] = $message;
     }
 
     /**
      * @return Message[]
      */
-    public function releaseMessages(LoggerInterface $logger): array
+    public function releaseMessages(LoggingGateway $logger, Message $message): array
     {
         if (count($this->collectedMessages) > 0) {
-            $logger->info(sprintf('Releasing collected %s message(s) to send them to Message Channels', count($this->collectedMessages)));
+            $logger->info(sprintf('Releasing collected %s message(s) to send them to Message Channels', count($this->collectedMessages)), $message);
         }
         $collectedMessages = $this->collectedMessages;
         $this->disable();

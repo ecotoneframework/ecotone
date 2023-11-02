@@ -664,7 +664,7 @@ final class MessagingSystemConfiguration implements Configuration
                 $serviceConfiguration->getNamespaces(),
                 $serviceConfiguration->getEnvironment(),
                 $serviceConfiguration->getLoadedCatalog() ?? '',
-                array_filter($modulesClasses, fn (string $moduleClassName): bool => class_exists($moduleClassName)),
+                array_filter($modulesClasses, fn (string $moduleClassName): bool => class_exists($moduleClassName) || interface_exists($moduleClassName)),
                 $userLandClassesToRegister,
                 $enableTestPackage
             ),

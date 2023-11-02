@@ -24,6 +24,8 @@ use Ecotone\Messaging\Endpoint\EndpointRunner;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
+use Ecotone\Messaging\Handler\Logger\StubLoggingGateway;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
@@ -46,6 +48,7 @@ class ComponentTestBuilder
         $container = InMemoryPSRContainer::createFromAssociativeArray([
             ServiceCacheConfiguration::class => ServiceCacheConfiguration::noCache(),
             ConfigurationVariableService::REFERENCE_NAME => InMemoryConfigurationVariableService::createEmpty(),
+            LoggingGateway::class => StubLoggingGateway::create(),
         ]);
         $containerBuilder = new ContainerBuilder();
         $containerBuilder->addCompilerPass(new RegisterSingletonMessagingServices());

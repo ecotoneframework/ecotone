@@ -6,6 +6,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler\ErrorHandler;
 
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
+use Ecotone\Messaging\Handler\Logger\StubLoggingGateway;
 use Ecotone\Messaging\Handler\MessageHandlingException;
 use Ecotone\Messaging\Handler\Recoverability\ErrorHandler;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
@@ -15,7 +16,6 @@ use Ecotone\Messaging\Support\ErrorMessage;
 use Ecotone\Messaging\Support\MessageBuilder;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
-use Test\Ecotone\Messaging\Unit\Handler\Logger\LoggerExample;
 use Throwable;
 
 /**
@@ -30,7 +30,7 @@ class ErrorHandlerTest extends TestCase
             ->build();
 
         $consumedChannel = QueueChannel::create();
-        $logger = LoggerExample::create();
+        $logger = StubLoggingGateway::create();
         $errorHandler = new ErrorHandler($retryTemplate, false);
 
         $this->assertNull(
@@ -80,7 +80,7 @@ class ErrorHandlerTest extends TestCase
                     ->build()
             ),
             InMemoryChannelResolver::createFromAssociativeArray(['errorChannel' => $consumedChannel]),
-            LoggerExample::create()
+            StubLoggingGateway::create()
         );
 
         $this->assertEquals(40, $consumedChannel->receive()->getHeaders()->get(MessageHeaders::DELIVERY_DELAY));
@@ -93,7 +93,7 @@ class ErrorHandlerTest extends TestCase
             ->build();
 
         $consumedChannel = QueueChannel::create();
-        $logger = LoggerExample::create();
+        $logger = StubLoggingGateway::create();
         $errorHandler = new ErrorHandler($retryTemplate, true);
 
         $resultMessage = $errorHandler->handle(
@@ -120,7 +120,7 @@ class ErrorHandlerTest extends TestCase
             ->build();
 
         $consumedChannel = QueueChannel::create();
-        $logger = LoggerExample::create();
+        $logger = StubLoggingGateway::create();
         $errorHandler = new ErrorHandler($retryTemplate, false);
 
         $resultMessage = $errorHandler->handle(
@@ -157,7 +157,7 @@ class ErrorHandlerTest extends TestCase
                 new InvalidArgumentException('causation')
             ),
             InMemoryChannelResolver::createFromAssociativeArray(['errorChannel' => $consumedChannel]),
-            LoggerExample::create()
+            StubLoggingGateway::create()
         );
 
         $this->assertEquals('causation', $resultMessage->getHeaders()->get(ErrorHandler::EXCEPTION_MESSAGE));
@@ -182,7 +182,7 @@ class ErrorHandlerTest extends TestCase
                 new InvalidArgumentException()
             ),
             InMemoryChannelResolver::createEmpty(),
-            LoggerExample::create()
+            StubLoggingGateway::create()
         );
     }
 }

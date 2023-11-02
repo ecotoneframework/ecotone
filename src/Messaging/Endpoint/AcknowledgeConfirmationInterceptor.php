@@ -9,13 +9,13 @@ use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Endpoint\PollingConsumer\RejectMessageException;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Precedence;
-use Psr\Log\LoggerInterface;
 use Throwable;
 
 /**
@@ -37,14 +37,15 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
      * @throws Throwable
      * @throws MessagingException
      */
-    public function ack(MethodInvocation $methodInvocation, Message $message, #[Reference('logger')] LoggerInterface $logger)
+    public function ack(MethodInvocation $methodInvocation, Message $message, #[Reference] LoggingGateway $logger)
     {
         $logger->info(
             sprintf(
                 'Message with id `%s` received from Message Channel `%s`',
                 $message->getHeaders()->getMessageId(),
                 $message->getHeaders()->containsKey(MessageHeaders::POLLED_CHANNEL_NAME) ? $message->getHeaders()->get(MessageHeaders::POLLED_CHANNEL_NAME) : 'unknown'
-            )
+            ),
+            $message
         );
         if (! $message->getHeaders()->containsKey(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION)) {
             return $methodInvocation->proceed();
@@ -59,12 +60,18 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
 
             if ($amqpAcknowledgementCallback->isAutoAck()) {
                 $amqpAcknowledgementCallback->accept();
-                $logger->info(sprintf('Message with id `%s` acknowledged in Message Channel', $message->getHeaders()->getMessageId()));
+                $logger->info(
+                    sprintf('Message with id `%s` acknowledged in Message Channel', $message->getHeaders()->getMessageId()),
+                    $message
+                );
             }
         } catch (RejectMessageException $exception) {
             if ($amqpAcknowledgementCallback->isAutoAck()) {
                 $amqpAcknowledgementCallback->reject();
-                $logger->info(sprintf('Message with id `%s` rejected in Message Channel', $message->getHeaders()->getMessageId()));
+                $logger->info(
+                    sprintf('Message with id `%s` rejected in Message Channel', $message->getHeaders()->getMessageId()),
+                    $message
+                );
             }
         } catch (Throwable $exception) {
             if ($amqpAcknowledgementCallback->isAutoAck()) {
@@ -75,14 +82,17 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
                         $message->getHeaders()->getMessageId(),
                         $exception->getMessage()
                     ),
-                    ['exception' => $exception]
+                    $message
                 );
             }
         }
 
         $pollingMetadata = $message->getHeaders()->get(MessageHeaders::CONSUMER_POLLING_METADATA);
         if ($pollingMetadata->isStoppedOnError() === true && $exception !== null) {
-            $logger->info('Should stop on error configuration enabled, stopping Message Consumer.');
+            $logger->info(
+                'Should stop on error configuration enabled, stopping Message Consumer.',
+                $message
+            );
             throw $exception;
         }
 

@@ -9,7 +9,7 @@ use Ecotone\Messaging\Channel\Collector\MessageCollectorChannelInterceptor;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\PrecedenceChannelInterceptor;
 
 final class CollectorChannelInterceptorBuilder implements ChannelInterceptorBuilder
@@ -34,7 +34,7 @@ final class CollectorChannelInterceptorBuilder implements ChannelInterceptorBuil
             MessageCollectorChannelInterceptor::class,
             [
                 $this->collectorStorageReference,
-                new Reference(LoggingHandlerBuilder::LOGGER_REFERENCE),
+                new Reference(LoggingGateway::class),
             ]
         );
     }

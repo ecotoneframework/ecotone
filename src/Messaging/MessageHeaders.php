@@ -110,6 +110,8 @@ final class MessageHeaders
 
     public const CHANNEL_SEND_RETRY_NUMBER = 'channelSendRetryNumber';
 
+    public const TEMPORARY_SPAN_CONTEXT_HEADER = 'ecotone.temporarySpanContext';
+
     private array $headers;
 
     /**
@@ -240,6 +242,7 @@ final class MessageHeaders
             $metadata[self::POLLED_CHANNEL_NAME],
             $metadata[self::CONSUMER_POLLING_METADATA],
             $metadata[self::REPLY_CHANNEL],
+            $metadata[self::TEMPORARY_SPAN_CONTEXT_HEADER]
         );
 
         return $metadata;

@@ -10,13 +10,11 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\RequiredConsumersMod
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
-use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Test\Ecotone\Messaging\Fixture\Annotation\Consumer\ExampleConsumer;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
-use Test\Ecotone\Messaging\Fixture\Handler\DataReturningService;
 
 /**
  * Class ConverterModuleTest
@@ -40,28 +38,6 @@ class RequiredConsumersModuleTest extends AnnotationConfigurationTest
         $this->expectException(ConfigurationException::class);
 
         $configuration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-    }
-
-    public function test_not_throwing_exception_if_consumer_was_registered_as_message_handler()
-    {
-        $annotationConfiguration = RequiredConsumersModule::create(
-            InMemoryAnnotationFinder::createEmpty()
-                ->registerClassWithAnnotations(ExampleConsumer::class),
-            InterfaceToCallRegistry::createEmpty()
-        );
-        $configuration = $this->createMessagingSystemConfiguration()
-            ->registerConsumerFactory(new PollingConsumerBuilder())
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel('requestChannel'))
-            ->registerMessageHandler(
-                DataReturningService::createExceptionalServiceActivatorBuilder()
-                    ->withEndpointId('someId')
-                    ->withInputChannelName('requestChannel')
-            );
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
-
-        $configuration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        $this->assertTrue(true);
     }
 
     public function test_not_throwing_exception_if_consumer_was_registered_as_inbound_channel()

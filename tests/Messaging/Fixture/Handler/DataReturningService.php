@@ -4,7 +4,6 @@ namespace Test\Ecotone\Messaging\Fixture\Handler;
 
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Config\Container\DefinitionHelper;
 use Ecotone\Messaging\Endpoint\PollingConsumer\RejectMessageException;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Message;
@@ -12,7 +11,6 @@ use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Test\ComponentTestBuilder;
 use InvalidArgumentException;
-use Throwable;
 
 class DataReturningService implements DefinedObject
 {
@@ -26,14 +24,16 @@ class DataReturningService implements DefinedObject
      */
     private $headers;
 
-    private ?Throwable $exception;
+    private bool $exception;
+    private bool $rejectException;
 
-    public function __construct($data, bool $asAMessage, array $headers, ?Throwable $exception)
+    public function __construct($data, bool $asAMessage, array $headers, bool $exception = false, bool $rejectException = false)
     {
         $this->data = $data;
         $this->asAMessage = $asAMessage;
         $this->headers = $headers;
         $this->exception = $exception;
+        $this->rejectException = $rejectException;
     }
 
     public static function createServiceActivator($dataToReturn): MessageHandler
@@ -48,28 +48,32 @@ class DataReturningService implements DefinedObject
 
     public static function createServiceActivatorBuilder($dataToReturn): ServiceActivatorBuilder
     {
-        return ServiceActivatorBuilder::createWithDirectReference(new self($dataToReturn, false, [], null), 'handle');
+        return ServiceActivatorBuilder::createWithDirectReference(new self($dataToReturn, false, [], false), 'handle');
     }
 
     public static function createExceptionalServiceActivatorBuilder(): ServiceActivatorBuilder
     {
-        return (ServiceActivatorBuilder::createWithDirectReference(new self('', false, [], new InvalidArgumentException('error during handling')), 'handle'));
+        return (ServiceActivatorBuilder::createWithDirectReference(new self('', false, [], true), 'handle'));
     }
 
     public static function createServiceActivatorBuilderWithReturnMessage($payload, array $headers): ServiceActivatorBuilder
     {
-        return ServiceActivatorBuilder::createWithDirectReference(new self($payload, true, $headers, null), 'handle');
+        return ServiceActivatorBuilder::createWithDirectReference(new self($payload, true, $headers, false), 'handle');
     }
 
     public static function createServiceActivatorBuilderWithRejectException(): ServiceActivatorBuilder
     {
-        return ServiceActivatorBuilder::createWithDirectReference(new self('', true, [], new RejectMessageException('rejecting message')), 'handle');
+        return ServiceActivatorBuilder::createWithDirectReference(new self('', true, [], true, true), 'handle');
     }
 
     public function handle(Message $message)
     {
         if ($this->exception) {
-            throw new $this->exception();
+            if ($this->rejectException) {
+                throw new RejectMessageException('rejecting message');
+            }
+
+            throw new InvalidArgumentException('error during handling');
         }
 
         if ($this->asAMessage) {
@@ -88,7 +92,8 @@ class DataReturningService implements DefinedObject
             $this->data,
             $this->asAMessage,
             $this->headers,
-            $this->exception ? DefinitionHelper::buildDefinitionFromInstance($this->exception) : null,
+            $this->exception,
+            $this->rejectException,
         ]);
     }
 }

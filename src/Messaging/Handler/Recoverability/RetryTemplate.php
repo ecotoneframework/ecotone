@@ -7,8 +7,9 @@ namespace Ecotone\Messaging\Handler\Recoverability;
 use Closure;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\Assert;
-use Psr\Log\LoggerInterface;
 use Throwable;
 
 /**
@@ -48,7 +49,7 @@ final class RetryTemplate implements DefinedObject
         return $this->delayForRetryNumber($retryNumber);
     }
 
-    public function runCallbackWithRetries(Closure $closure, string $exceptionClass, LoggerInterface $logger, string $retryMessage): void
+    public function runCallbackWithRetries(Closure $closure, Message $message, string $exceptionClass, LoggingGateway $logger, string $retryMessage): void
     {
         $retryNumber = 0;
         do {
@@ -64,7 +65,7 @@ final class RetryTemplate implements DefinedObject
                     throw $exception;
                 }
 
-                $logger->info($retryMessage, ['exception' => $exception]);
+                $logger->info($retryMessage, $message, $exception);
                 $retryNumber++;
                 usleep($this->calculateNextDelay($retryNumber) * 1000);
             }

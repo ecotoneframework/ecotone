@@ -14,7 +14,6 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Exception;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -48,7 +47,7 @@ class LoggingService
     public function info(
         #[Payload] string $text,
         #[Header(self::CONTEXT_MESSAGE_HEADER)] Message $message,
-        #[Header(self::CONTEXT_EXCEPTION_HEADER)] ?Exception $exception,
+        #[Header(self::CONTEXT_EXCEPTION_HEADER)] ?Throwable $exception,
     ): void {
         $this->logger->info(
             $text,
@@ -66,7 +65,7 @@ class LoggingService
     public function error(
         #[Payload] string $text,
         #[Header(self::CONTEXT_MESSAGE_HEADER)] Message $message,
-        #[Header(self::CONTEXT_EXCEPTION_HEADER)] ?Exception $exception,
+        #[Header(self::CONTEXT_EXCEPTION_HEADER)] ?Throwable $exception,
     ): void {
         $this->logger->critical(
             $text,

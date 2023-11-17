@@ -10,6 +10,7 @@ use Ecotone\Messaging\Future;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Modelling\Attribute\Aggregate;
 use ReflectionClass;
 use ReflectionException;
 
@@ -430,5 +431,21 @@ class InterfaceToCall
     private function parameterAmount(): int
     {
         return count($this->getInterfaceParameters());
+    }
+
+    public function isReturningAggregate(InterfaceToCallRegistry $interfaceToCallRegistry): bool
+    {
+        if ($this->getReturnType()?->isClassNotInterface()) {
+            $returnTypeInterface = $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($this->getReturnType()->toString()));
+
+            return $returnTypeInterface->hasClassAnnotation(TypeDescriptor::create(Aggregate::class));
+        }
+
+        return false;
+    }
+
+    public function isFactoryMethod(): bool
+    {
+        return $this->isStaticallyCalled || $this->methodName === '__construct';
     }
 }

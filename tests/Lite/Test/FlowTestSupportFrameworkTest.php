@@ -15,7 +15,7 @@ use Test\Ecotone\Modelling\Fixture\OrderAggregate\Order;
  */
 final class FlowTestSupportFrameworkTest extends TestCase
 {
-    public function test_collecting_commands_routing()
+    public function test_collecting_commands_routing(): void
     {
         $flowSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class],
@@ -32,7 +32,7 @@ final class FlowTestSupportFrameworkTest extends TestCase
         );
     }
 
-    public function test_providing_initial_state_in_form_of_state_stored_aggregate()
+    public function test_providing_initial_state_in_form_of_state_stored_aggregate(): void
     {
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting([Order::class]);
 
@@ -48,7 +48,7 @@ final class FlowTestSupportFrameworkTest extends TestCase
         );
     }
 
-    public function test_state_stored_aggregate()
+    public function test_state_stored_aggregate(): void
     {
         $flowSupport = EcotoneLite::bootstrapFlowTesting([Order::class]);
 

@@ -151,7 +151,7 @@ final class FlowTestSupport
     }
 
     /**
-     * @param Event[]|object[]|array[] $streamEvents
+     * @param Event[]|object[]|array[] $events
      */
     public function withEventsFor(string|object|array $identifiers, string $aggregateClass, array $events, int $aggregateVersion = 0): self
     {
@@ -160,7 +160,8 @@ final class FlowTestSupport
             [
                 AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => is_object($identifiers) ? (string)$identifiers : $identifiers,
                 AggregateMessage::TARGET_VERSION => $aggregateVersion,
-                AggregateMessage::AGGREGATE_OBJECT => $aggregateClass,
+                AggregateMessage::RESULT_AGGREGATE_OBJECT => $aggregateClass,
+                AggregateMessage::RESULT_AGGREGATE_EVENTS => $events,
             ],
             ModellingHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregateClass)
         );
@@ -168,15 +169,12 @@ final class FlowTestSupport
         return $this->discardRecordedMessages();
     }
 
-    /**
-     * @param Event[]|object[]|array[] $streamEvents
-     */
     public function withStateFor(object $aggregate): self
     {
         $this->messagingEntrypoint->sendWithHeaders(
             $aggregate,
             [
-                AggregateMessage::AGGREGATE_OBJECT => $aggregate,
+                AggregateMessage::RESULT_AGGREGATE_OBJECT => $aggregate,
             ],
             ModellingHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregate::class)
         );

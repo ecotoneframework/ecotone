@@ -51,6 +51,11 @@ class AnnotatedMethod implements AnnotatedFinding
         return $this->methodName;
     }
 
+    public function isMagicMethod(): bool
+    {
+        return str_starts_with($this->methodName, '__');
+    }
+
     /**
      * @return object[]
      */

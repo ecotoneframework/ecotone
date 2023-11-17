@@ -10,6 +10,8 @@ interface AnnotatedFinding
 
     public function getMethodName(): string;
 
+    public function isMagicMethod(): bool;
+
     /**
      * @return object[]
      */

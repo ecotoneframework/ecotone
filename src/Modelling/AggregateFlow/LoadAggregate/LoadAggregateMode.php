@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Modelling;
+namespace Ecotone\Modelling\AggregateFlow\LoadAggregate;
 
 class LoadAggregateMode
 {

@@ -8,11 +8,11 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\AggregateFlow\LoadAggregate\LoadAggregateMode;
+use Ecotone\Modelling\AggregateFlow\LoadAggregate\LoadAggregateServiceBuilder;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
-use Ecotone\Modelling\LoadAggregateMode;
-use Ecotone\Modelling\LoadAggregateServiceBuilder;
 use Ecotone\Modelling\SnapshotEvent;
 use Ecotone\Test\ComponentTestBuilder;
 use PHPUnit\Framework\TestCase;
@@ -65,7 +65,7 @@ class LoadAggregateServiceBuilderTest extends TestCase
 
         $this->assertEquals(
             $appointment,
-            $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT)
+            $replyChannel->receive()->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT)
         );
     }
 
@@ -98,7 +98,7 @@ class LoadAggregateServiceBuilderTest extends TestCase
         $ticket->setVersion(1);
 
         /** @var Ticket $reconstructedTicket */
-        $reconstructedTicket = $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT);
+        $reconstructedTicket = $replyChannel->receive()->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT);
         $this->assertEquals(
             $ticket,
             $reconstructedTicket
@@ -136,7 +136,7 @@ class LoadAggregateServiceBuilderTest extends TestCase
         $ticket->setVersion(2);
 
         /** @var Ticket $ticket */
-        $reconstructedTicket = $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT);
+        $reconstructedTicket = $replyChannel->receive()->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT);
         $this->assertEquals(
             $ticket,
             $reconstructedTicket
@@ -171,7 +171,7 @@ class LoadAggregateServiceBuilderTest extends TestCase
 
         $this->assertEquals(
             $appointment,
-            $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_OBJECT)
+            $replyChannel->receive()->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT)
         );
     }
 

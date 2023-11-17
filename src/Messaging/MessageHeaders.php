@@ -277,8 +277,11 @@ final class MessageHeaders
     {
         unset(
             $metadata[AggregateMessage::AGGREGATE_ID],
+            $metadata[AggregateMessage::CALLED_AGGREGATE_OBJECT],
+            $metadata[AggregateMessage::CALLED_AGGREGATE_EVENTS],
             $metadata[AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER],
-            $metadata[AggregateMessage::AGGREGATE_OBJECT],
+            $metadata[AggregateMessage::RESULT_AGGREGATE_OBJECT],
+            $metadata[AggregateMessage::RESULT_AGGREGATE_EVENTS],
             $metadata[AggregateMessage::TARGET_VERSION]
         );
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace Ecotone\Modelling;
+namespace Ecotone\Modelling\AggregateFlow\LoadAggregate;
 
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
@@ -18,6 +18,9 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\TargetAggregateVersion;
+use Ecotone\Modelling\EventSourcingHandlerExecutor;
+use Ecotone\Modelling\LazyEventSourcedRepository;
+use Ecotone\Modelling\LazyStandardRepository;
 
 class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder implements CompilableBuilder
 {
@@ -52,38 +55,17 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
 
     public function compile(MessagingContainerBuilder $builder): Definition
     {
-        $repository = $this->isEventSourced
-            ? new Definition(LazyEventSourcedRepository::class, [
-                $this->aggregateClassName,
-                $this->isEventSourced,
-                array_map(fn ($id) => new Reference($id), $this->aggregateRepositoryReferenceNames),
-            ], 'create')
-            : new Definition(LazyStandardRepository::class, [
-                $this->aggregateClassName,
-                $this->isEventSourced,
-                array_map(fn ($id) => new Reference($id), $this->aggregateRepositoryReferenceNames),
-            ], 'create');
-
         if (! $builder->has(PropertyEditorAccessor::class)) {
             $builder->register(PropertyEditorAccessor::class, new Definition(PropertyEditorAccessor::class, [
                 new Reference(ExpressionEvaluationService::REFERENCE),
             ], 'create'));
         }
 
-        $loadAggregateService = new Definition(LoadAggregateService::class, [
-            $repository,
-            $this->aggregateClassName,
-            $this->isEventSourced,
-            $this->methodName,
-            $this->messageVersionPropertyName,
-            $this->aggregateVersionPropertyName,
-            $this->isAggregateVersionAutomaticallyIncreased,
-            new Reference(PropertyReaderAccessor::class),
-            new Reference(PropertyEditorAccessor::class),
-            $this->eventSourcingHandlerExecutor,
-            new Definition(LoadAggregateMode::class, [$this->loadAggregateMode->getType()]),
-        ]);
-
+        if ($this->isEventSourced) {
+            $loadAggregateService = $this->loadEventSourcingAggregateService();
+        } else {
+            $loadAggregateService = $this->loadStateBasedAggregateService();
+        }
 
         return ServiceActivatorBuilder::createWithDefinition($loadAggregateService, 'load')
             ->withOutputMessageChannel($this->getOutputMessageChannelName())
@@ -112,7 +94,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 }
             }
         }
-        $versionAnnotation             = TypeDescriptor::create(AggregateVersion::class);
+        $versionAnnotation = TypeDescriptor::create(AggregateVersion::class);
         foreach ($aggregateClassDefinition->getProperties() as $property) {
             if ($property->hasAnnotation($versionAnnotation)) {
                 /** @var AggregateVersion $annotation */
@@ -124,5 +106,50 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
 
         $this->messageVersionPropertyName = $aggregateMessageVersionPropertyName;
         $this->eventSourcingHandlerExecutor = EventSourcingHandlerExecutor::createFor($aggregateClassDefinition, $this->isEventSourced, $interfaceToCallRegistry);
+    }
+
+    private function loadEventSourcingAggregateService(): Definition
+    {
+        $repository = new Definition(LazyEventSourcedRepository::class, [
+            $this->aggregateClassName,
+            $this->isEventSourced,
+            array_map(fn ($id) => new Reference($id), $this->aggregateRepositoryReferenceNames),
+        ], 'create')
+        ;
+
+        return new Definition(LoadEventSourcingAggregateService::class, [
+            $repository,
+            $this->aggregateClassName,
+            $this->methodName,
+            $this->messageVersionPropertyName,
+            $this->aggregateVersionPropertyName,
+            $this->isAggregateVersionAutomaticallyIncreased,
+            new Reference(PropertyReaderAccessor::class),
+            new Reference(PropertyEditorAccessor::class),
+            $this->eventSourcingHandlerExecutor,
+            new Definition(LoadAggregateMode::class, [$this->loadAggregateMode->getType()]),
+        ]);
+    }
+
+    private function loadStateBasedAggregateService(): Definition
+    {
+        $repository = new Definition(LazyStandardRepository::class, [
+            $this->aggregateClassName,
+            $this->isEventSourced,
+            array_map(fn ($id) => new Reference($id), $this->aggregateRepositoryReferenceNames),
+        ], 'create')
+        ;
+
+        return new Definition(LoadStateBasedAggregateService::class, [
+            $repository,
+            $this->aggregateClassName,
+            $this->methodName,
+            $this->messageVersionPropertyName,
+            $this->aggregateVersionPropertyName,
+            $this->isAggregateVersionAutomaticallyIncreased,
+            new Reference(PropertyReaderAccessor::class),
+            new Reference(PropertyEditorAccessor::class),
+            new Definition(LoadAggregateMode::class, [$this->loadAggregateMode->getType()]),
+        ]);
     }
 }

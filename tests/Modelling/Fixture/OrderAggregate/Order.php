@@ -8,7 +8,7 @@ use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\Attribute\QueryHandler;
-use Ecotone\Modelling\WithAggregateEvents;
+use Ecotone\Modelling\WithEvents;
 use Test\Ecotone\Modelling\Fixture\Order\OrderWasPlaced;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 
@@ -16,7 +16,7 @@ use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 #[Aggregate]
 class Order
 {
-    use WithAggregateEvents;
+    use WithEvents;
 
     #[Identifier]
     private $orderId;

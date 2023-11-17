@@ -202,4 +202,16 @@ class ClassDefinition
     {
         return $this->getClassType()->toString();
     }
+
+    public function getMethodWithAnnotation(Type $annotation, InterfaceToCallRegistry $interfaceToCallRegistry): ?string
+    {
+        foreach ($this->getPublicMethodNames() as $method) {
+            $methodToCheck = $interfaceToCallRegistry->getFor($this->getClassType()->toString(), $method);
+            if ($methodToCheck->hasMethodAnnotation($annotation)) {
+                return $method;
+            }
+        }
+
+        return null;
+    }
 }

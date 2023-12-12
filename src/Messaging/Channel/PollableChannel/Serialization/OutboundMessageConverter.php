@@ -28,6 +28,7 @@ class OutboundMessageConverter
         $messagePayload = $messageToConvert->getPayload();
 
         $applicationHeaders = $messageToConvert->getHeaders()->headers() ?? [];
+        $applicationHeaders = MessageHeaders::unsetAggregateKeys($applicationHeaders);
         $applicationHeaders = MessageHeaders::unsetEnqueueMetadata($applicationHeaders);
 
         $applicationHeaders                             = $this->headerMapper->mapFromMessageHeaders($applicationHeaders, $conversionService);

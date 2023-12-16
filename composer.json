@@ -44,7 +44,7 @@
         "phpunit/phpunit": "^9.5",
         "behat/behat": "^3.10",
         "phpstan/phpstan": "^1.8",
-        "symfony/expression-language": "^6.0"
+        "symfony/expression-language": "^6.0|^7.0"
     },
     "scripts": {
         "tests:phpstan": "vendor/bin/phpstan",
@@ -62,7 +62,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "1.207.0-dev"
+            "dev-main": "1.208.0-dev"
         },
         "ecotone": {
             "repository": "ecotone"

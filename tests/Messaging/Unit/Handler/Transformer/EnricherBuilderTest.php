@@ -42,7 +42,7 @@ class EnricherBuilderTest extends MessagingTest
 {
     /**
      * @throws ConfigurationException
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_throwing_exception_if_no_property_or_header_setters_configured()
     {
@@ -56,7 +56,7 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws Exception
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_enriching_array_with_multiple_static_properties()
     {
@@ -86,7 +86,7 @@ class EnricherBuilderTest extends MessagingTest
      * @param array $setterBuilders
      * @throws ConfigurationException
      * @throws Exception
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     private function createEnricherAndHandle(MessageBuilder $inputMessage, QueueChannel $outputChannel, array $setterBuilders): void
     {
@@ -104,7 +104,7 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws Exception
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_enriching_message_with_content_type_conversion()
     {
@@ -197,7 +197,7 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws Exception
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_enriching_property_with_quotes_in_names()
     {
@@ -224,7 +224,7 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws Exception
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_copying_headers_from_input_message()
     {
@@ -246,7 +246,7 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws Exception
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function test_enriching_with_static_headers()
     {
@@ -292,7 +292,7 @@ class EnricherBuilderTest extends MessagingTest
      * @param array $setterBuilders
      * @throws ConfigurationException
      * @throws Exception
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     private function createEnricherWithRequestChannelAndHandle(MessageBuilder $inputMessage, QueueChannel $outputChannel, $replyPayload, array $setterBuilders): void
     {
@@ -757,7 +757,7 @@ class EnricherBuilderTest extends MessagingTest
     /**
      * @throws ConfigurationException
      * @throws Exception
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     public function TODO_test_converting_reply_message_for_evaluation()
     {

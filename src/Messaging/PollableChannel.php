@@ -13,7 +13,7 @@ interface PollableChannel extends MessageChannel, MessagePoller
 {
     /**
      * Receive a message from this channel.
-     * Return the next available {@see \Ecotone\Messaging\Message} or {@see null} if interrupted.
+     * Return the next available {@see Message} or {@see null} if interrupted.
      */
     public function receive(): ?Message;
 }

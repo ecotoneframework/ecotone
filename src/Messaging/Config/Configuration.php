@@ -77,7 +77,7 @@ interface Configuration extends CompilerPass
     public function registerBeforeMethodInterceptor(MethodInterceptor $methodInterceptor): Configuration;
 
     /**
-     * @param \Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder $aroundInterceptorReference
+     * @param AroundInterceptorBuilder $aroundInterceptorReference
      * @return Configuration
      */
     public function registerAroundMethodInterceptor(AroundInterceptorBuilder $aroundInterceptorReference): Configuration;

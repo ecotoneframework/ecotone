@@ -340,7 +340,7 @@ final class MessageHeaders
     /**
      * @param string $headerName
      * @return mixed
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     final public function get(string $headerName)
     {
@@ -457,7 +457,7 @@ final class MessageHeaders
 
     /**
      * @param array|string[] $headers
-     * @throws \Ecotone\Messaging\MessagingException
+     * @throws MessagingException
      */
     private function initialize(array $headers): void
     {

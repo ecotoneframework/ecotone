@@ -275,10 +275,10 @@ class RequestReplyProducerTest extends MessagingTest
     }
 
     /**
-     * @param \Ecotone\Messaging\Handler\MessageProcessor $replyMessageProducer
+     * @param MessageProcessor $replyMessageProducer
      * @param MessageChannel|null $outputChannel
      * @param bool $requireReply
-     * @return \Ecotone\Messaging\Handler\RequestReplyProducer
+     * @return RequestReplyProducer
      */
     private function createRequestReplyProducer(MessageProcessor $replyMessageProducer, MessageChannel $outputChannel = null, bool $requireReply = false): RequestReplyProducer
     {
@@ -291,10 +291,10 @@ class RequestReplyProducerTest extends MessagingTest
     }
 
     /**
-     * @param \Ecotone\Messaging\Handler\MessageProcessor $replyMessageProducer
+     * @param MessageProcessor $replyMessageProducer
      * @param array $messageChannels
      * @param string|null $outputChannelName
-     * @return \Ecotone\Messaging\Handler\RequestReplyProducer
+     * @return RequestReplyProducer
      * @throws MessagingException
      * @throws \Ecotone\Messaging\Handler\DestinationResolutionException
      */

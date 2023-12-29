@@ -31,7 +31,7 @@ class HeaderExpressionBuilderTest extends TestCase
      * @throws ReflectionException
      * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function test_creating_payload_expression()
     {

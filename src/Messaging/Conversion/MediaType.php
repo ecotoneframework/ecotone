@@ -184,7 +184,7 @@ final class MediaType implements DefinedObject
      * @param string $mediaType
      * @return MediaType
      * @throws \Ecotone\Messaging\MessagingException
-     * @throws \Ecotone\Messaging\Support\InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public static function parseMediaType(string $mediaType): self
     {

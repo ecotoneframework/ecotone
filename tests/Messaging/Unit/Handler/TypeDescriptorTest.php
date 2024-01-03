@@ -43,6 +43,19 @@ class TypeDescriptorTest extends TestCase
         );
     }
 
+    public function test_is_non_class_collection()
+    {
+        $this->assertFalse(TypeDescriptor::create('string')->isArrayButNotClassBasedCollection());
+        $this->assertTrue(TypeDescriptor::create('array')->isArrayButNotClassBasedCollection());
+        $this->assertTrue(TypeDescriptor::createIterable()->isArrayButNotClassBasedCollection());
+        $this->assertTrue(TypeDescriptor::create('array<string>')->isArrayButNotClassBasedCollection());
+        $this->assertTrue(TypeDescriptor::create('array<string, string>')->isArrayButNotClassBasedCollection());
+        $this->assertFalse(TypeDescriptor::create('array<\stdClass>')->isArrayButNotClassBasedCollection());
+        $this->assertFalse(TypeDescriptor::create('array<string, \stdClass>')->isArrayButNotClassBasedCollection());
+        $this->assertTrue(TypeDescriptor::create('array<array<string,int>>')->isArrayButNotClassBasedCollection());
+        $this->assertTrue(TypeDescriptor::create('array<string, array<string,int>>')->isArrayButNotClassBasedCollection());
+    }
+
     /**
      * @throws TypeDefinitionException
      * @throws MessagingException
@@ -593,15 +606,25 @@ class TypeDescriptorTest extends TestCase
         $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([]));
         $this->assertEquals(stdClass::class, TypeDescriptor::createFromVariable(new stdClass()));
         $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([]));
-        $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([1, 2, 3]));
+        $this->assertEquals(TypeDescriptor::createCollection('int'), TypeDescriptor::createFromVariable([1, 2, 3]));
+        $this->assertEquals(TypeDescriptor::create('array<string, int>'), TypeDescriptor::createFromVariable(['bla' => 1, 'bla2' => 2, 'bla3' => 3]));
         $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([new stdClass(), 12]));
         $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::createFromVariable([new stdClass(), OrderExample::createFromId(1)]));
         $this->assertEquals(TypeDescriptor::createCollection(stdClass::class), TypeDescriptor::createFromVariable([new stdClass()]));
         $this->assertEquals(TypeDescriptor::createCollection(stdClass::class), TypeDescriptor::createFromVariable([new stdClass(), new stdClass()]));
         $this->assertEquals(TypeDescriptor::RESOURCE, TypeDescriptor::createFromVariable(fopen('file', 'w+')));
         $this->assertEquals(TypeDescriptor::NULL, TypeDescriptor::createFromVariable(null));
-        $this->assertEquals(TypeDescriptor::CLOSURE, TypeDescriptor::createFromVariable(function () {
-        })->toString());
+        $this->assertEquals(TypeDescriptor::CLOSURE, TypeDescriptor::createFromVariable(function () {})->toString());
+        $this->assertEquals('array<array<string,int>>', TypeDescriptor::createFromVariable([['bla' => 1, 'bla2' => 2, 'bla3' => 3]])->toString());
+        $this->assertEquals('array<string,null>', TypeDescriptor::createFromVariable(['test' => null])->toString());
+        $this->assertEquals('array', TypeDescriptor::createFromVariable(['test' => null, 'test2' => '123'])->toString());
+    }
+
+    public function test_resolving_structured_array_type()
+    {
+        $this->assertEquals(TypeDescriptor::create('array<int, array>'), TypeDescriptor::create('array<int, array{person_id: string}>'));
+        $this->assertEquals(TypeDescriptor::ARRAY, TypeDescriptor::create('array{person_id: string}'));
+        $this->assertEquals(TypeDescriptor::create('array<string, array>'), TypeDescriptor::create('array<string, array{person_id: string}>'));
     }
 
     /**
@@ -622,6 +645,22 @@ class TypeDescriptorTest extends TestCase
         $this->assertEquals(
             [TypeDescriptor::createStringType(), TypeDescriptor::createIntegerType()],
             TypeDescriptor::create('array<string,int>')->resolveGenericTypes()
+        );
+    }
+
+    public function test_creating_collection_type_with_nested_generic_types()
+    {
+        $this->assertEquals(
+            [TypeDescriptor::createStringType(), TypeDescriptor::createCollection('int')],
+            TypeDescriptor::create('array<string,array<int>>')->resolveGenericTypes()
+        );
+    }
+
+    public function test_creating_collection_type_with_two_types_and_nested_generic_type()
+    {
+        $this->assertEquals(
+            [TypeDescriptor::createStringType(), TypeDescriptor::createCollection('int')],
+            TypeDescriptor::create('array<string,array<int>>')->resolveGenericTypes()
         );
     }
 

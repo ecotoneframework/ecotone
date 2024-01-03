@@ -296,7 +296,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 }
 
                 /** @var AggregateIdentifierMethod $attribute */
-                $attribute = $methodToCheck->getMethodAnnotation($aggregateIdentifierGetMethodAttribute);
+                $attribute = $methodToCheck->getSingleMethodAnnotationOf($aggregateIdentifierGetMethodAttribute);
                 $aggregateIdentifiers[$attribute->getIdentifierPropertyName()] = null;
                 $aggregateIdentifierGetMethods[$attribute->getIdentifierPropertyName()] = $method;
             }

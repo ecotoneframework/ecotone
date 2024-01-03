@@ -90,7 +90,7 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
 
             if ($methodToCheck->hasMethodAnnotation($aggregateIdentifierMethod)) {
                 /** @var AggregateIdentifierMethod $attribute */
-                $attribute = $methodToCheck->getMethodAnnotation($aggregateIdentifierMethod);
+                $attribute = $methodToCheck->getSingleMethodAnnotationOf($aggregateIdentifierMethod);
 
                 if ($attribute->getIdentifierPropertyName() === $propertyName) {
                     return true;
@@ -117,7 +117,7 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
 
             if ($methodToCheck->hasMethodAnnotation($aggregateIdentifierMethod)) {
                 /** @var AggregateIdentifierMethod $attribute */
-                $attribute = $methodToCheck->getMethodAnnotation($aggregateIdentifierMethod);
+                $attribute = $methodToCheck->getSingleMethodAnnotationOf($aggregateIdentifierMethod);
                 $aggregatePayloadIdentifiersMapping[$attribute->getIdentifierPropertyName()] = null;
             }
         }

@@ -192,7 +192,7 @@ final class AroundInterceptorBuilder implements InterceptorWithPointCut
                 $converterDefinitions[] = PayloadBuilder::create($parameter->getName())->compile($builder, $interceptingInterface);
                 $hasPayloadConverter = true;
                 continue;
-            } elseif ($parameter->getTypeDescriptor()->isNonCollectionArray()) {
+            } elseif ($parameter->getTypeDescriptor()->isArrayButNotClassBasedCollection()) {
                 $converterDefinitions[] = AllHeadersBuilder::createWith($parameter->getName())->compile($builder, $interceptingInterface);
                 continue;
             } elseif ($parameter->getTypeDescriptor()->isClassOrInterface()) {

@@ -13,6 +13,7 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\MessageConverter;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Generator;
 
 class GatewayReplyConverter
 {
@@ -28,10 +29,11 @@ class GatewayReplyConverter
 
     public function convert(mixed $result, ?MediaType $replyContentType)
     {
+        $targetType = $this->interfaceToCall->getReturnType();
         foreach ($this->messageConverters as $messageConverter) {
             $reply = $messageConverter->fromMessage(
                 $result,
-                $this->interfaceToCall->getReturnType()
+                $targetType
             );
 
             if ($reply) {
@@ -55,9 +57,23 @@ class GatewayReplyConverter
         }
 
         if (! $replyContentType) {
-            if (! $this->interfaceToCall->getReturnType()->isMessage() && ! $sourceType->isCompatibleWith($this->interfaceToCall->getReturnType())) {
-                if ($this->conversionService->canConvert($sourceType, $sourceMediaType, $this->interfaceToCall->getReturnType(), MediaType::createApplicationXPHP())) {
-                    return $this->conversionService->convert($data, $sourceType, $sourceMediaType, $this->interfaceToCall->getReturnType(), MediaType::createApplicationXPHP());
+            if ($data instanceof Generator) {
+                $isCollection = $targetType->isCollection();
+                $genericType = null;
+                if ($isCollection) {
+                    $resolvedTypes = $targetType->resolveGenericTypes();
+
+                    if (count($resolvedTypes) === 1) {
+                        $genericType = $resolvedTypes[0];
+                    }
+                }
+
+                return $this->yieldResults($data, $isCollection, $genericType);
+            }
+
+            if (! $targetType->isMessage() && ! $sourceType->isCompatibleWith($targetType)) {
+                if ($this->conversionService->canConvert($sourceType, $sourceMediaType, $targetType, MediaType::createApplicationXPHP())) {
+                    return $this->conversionService->convert($data, $sourceType, $sourceMediaType, $targetType, MediaType::createApplicationXPHP());
                 }
             }
 
@@ -100,5 +116,20 @@ class GatewayReplyConverter
         }
 
         return $data;
+    }
+
+    private function yieldResults(Generator $data, bool $isCollection, ?TypeDescriptor $expectedType): Generator
+    {
+        foreach ($data as $result) {
+            if ($expectedType !== null) {
+                $sourceType = TypeDescriptor::createFromVariable($result);
+
+                if ($isCollection && ! $sourceType->isCompatibleWith($expectedType)) {
+                    $result = $this->conversionService->convert($result, $sourceType, MediaType::createApplicationXPHP(), $expectedType, MediaType::createApplicationXPHP());
+                }
+            }
+
+            yield $result;
+        }
     }
 }

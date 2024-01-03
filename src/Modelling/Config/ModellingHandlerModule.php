@@ -363,7 +363,7 @@ class ModellingHandlerModule implements AnnotationModule
                     Assert::isTrue($interface->hasSecondParameter(), 'Saving repository should have first parameter as identifier and second as array of events in: ' . $repositoryGateway);
 
                     /** @var RelatedAggregate $relatedAggregate */
-                    $relatedAggregate = $interface->getMethodAnnotation(TypeDescriptor::create(RelatedAggregate::class));
+                    $relatedAggregate = $interface->getSingleMethodAnnotationOf(TypeDescriptor::create(RelatedAggregate::class));
 
                     $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($relatedAggregate->getClassName()));
 

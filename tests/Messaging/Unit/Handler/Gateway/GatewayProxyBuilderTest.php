@@ -13,7 +13,6 @@ use Ecotone\Messaging\Conversion\InMemoryConversionService;
 use Ecotone\Messaging\Conversion\JsonToArray\JsonToArrayConverter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverter;
-use Ecotone\Messaging\Conversion\UuidToString\UuidToStringConverter;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
@@ -50,6 +49,7 @@ use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInte
 use Test\Ecotone\Messaging\Fixture\Channel\PollingChannelThrowingException;
 use Test\Ecotone\Messaging\Fixture\Handler\DataReturningService;
 use Test\Ecotone\Messaging\Fixture\Handler\ExceptionMessageHandler;
+use Test\Ecotone\Messaging\Fixture\Handler\Gateway\IteratorReturningGateway;
 use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MessageReturningGateway;
 use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MixedReturningGateway;
 use Test\Ecotone\Messaging\Fixture\Handler\Gateway\StringReturningGateway;
@@ -1088,29 +1088,116 @@ class GatewayProxyBuilderTest extends MessagingTest
         $this->assertEquals([1, 1], $gateway->executeNoParameter());
     }
 
-    public function test_converting_from_reply_header_type_to_expected_one()
+    public function test_returning_generator_without_any_type_defined()
     {
         $requestChannelName = 'request-channel';
         $requestChannel = DirectChannel::create();
-        $requestChannel->subscribe(DataReturningService::createServiceActivatorWithReturnMessage([
-            Uuid::fromString('e7019549-9733-45a3-b088-783de2b2357f'),
-            Uuid::fromString('30ae8690-c729-447c-b9f9-bafd668cb01e'),
-        ], [MessageHeaders::CONTENT_TYPE => MediaType::createApplicationXPHPWithTypeParameter("array<Ramsey\Uuid\Uuid>")->toString()]));
+        $requestChannel->subscribe(DataReturningService::createServiceActivatorWithGenerator([1, 2]));
 
-        $expectedMediaType = MediaType::createApplicationXPHPWithTypeParameter('array<string>')->toString();
-        $gatewayBuilder = GatewayProxyBuilder::create('ref-name', MessageReturningGateway::class, 'executeNoParameter', $requestChannelName)
-            ->withReplyContentType($expectedMediaType);
+        $gatewayBuilder = GatewayProxyBuilder::create('ref-name', IteratorReturningGateway::class, 'executeIteratorWithoutType', $requestChannelName);
+        $expectedResultSet = [1, 2];
 
-        /** @var MessageReturningGateway $gateway */
+        /** @var IteratorReturningGateway $gateway */
         $gateway = ComponentTestBuilder::create()
             ->withChannel($requestChannelName, $requestChannel)
-            ->withReference(ConversionService::REFERENCE_NAME, AutoCollectionConversionService::createWith([new UuidToStringConverter()]))
             ->buildWithProxy($gatewayBuilder);
 
-        $message = $gateway->executeNoParameter();
-        $this->assertNotInstanceOf(Uuid::class, $message->getPayload()[0]);
-        $this->assertEquals(['e7019549-9733-45a3-b088-783de2b2357f', '30ae8690-c729-447c-b9f9-bafd668cb01e'], $message->getPayload());
-        $this->assertEquals($expectedMediaType, $message->getHeaders()->getContentType()->toString());
+        $resultSet = [];
+        foreach ($gateway->executeIteratorWithoutType() as $item) {
+            $resultSet[] = $item;
+        }
+
+        $this->assertEquals($expectedResultSet, $resultSet);
+    }
+
+    public function test_returning_generator_without_conversion()
+    {
+        $requestChannelName = 'request-channel';
+        $requestChannel = DirectChannel::create();
+        $requestChannel->subscribe(DataReturningService::createServiceActivatorWithGenerator([1, 2]));
+
+        $gatewayBuilder = GatewayProxyBuilder::create('ref-name', IteratorReturningGateway::class, 'executeIteratorWithScalarType', $requestChannelName);
+        $expectedResultSet = [1, 2];
+
+        /** @var IteratorReturningGateway $gateway */
+        $gateway = ComponentTestBuilder::create()
+            ->withChannel($requestChannelName, $requestChannel)
+            ->buildWithProxy($gatewayBuilder);
+
+        $resultSet = [];
+        foreach ($gateway->executeIteratorWithScalarType() as $item) {
+            $resultSet[] = $item;
+        }
+
+        $this->assertEquals($expectedResultSet, $resultSet);
+    }
+
+    public function test_returning_generator_without_conversion_due_to_complex_return_type()
+    {
+        $requestChannelName = 'request-channel';
+        $requestChannel = DirectChannel::create();
+        $expectedResultSet = [new stdClass(), 5];
+        $requestChannel->subscribe(DataReturningService::createServiceActivatorWithGenerator($expectedResultSet));
+
+        $gatewayBuilder = GatewayProxyBuilder::create('ref-name', IteratorReturningGateway::class, 'executeWithAdvancedIterator', $requestChannelName);
+
+        /** @var IteratorReturningGateway $gateway */
+        $gateway = ComponentTestBuilder::create()
+            ->withChannel($requestChannelName, $requestChannel)
+            ->buildWithProxy($gatewayBuilder);
+
+        $resultSet = [];
+        foreach ($gateway->executeWithAdvancedIterator() as $item) {
+            $resultSet[] = $item;
+        }
+
+        $this->assertEquals($expectedResultSet, $resultSet);
+    }
+
+    public function test_returning_generator_with_conversion()
+    {
+        $requestChannelName = 'request-channel';
+        $requestChannel = DirectChannel::create();
+        $requestChannel->subscribe(DataReturningService::createServiceActivatorWithGenerator([1, 2]));
+
+        $gatewayBuilder = GatewayProxyBuilder::create('ref-name', IteratorReturningGateway::class, 'executeIterator', $requestChannelName);
+        $resultOne = new stdClass();
+        $resultOne->id = 1;
+        $resultTwo = new stdClass();
+        $resultTwo->id = 2;
+        $expectedResultSet = [$resultOne, $resultTwo];
+
+        /** @var IteratorReturningGateway $gateway */
+        $gateway = ComponentTestBuilder::create()
+            ->withChannel($requestChannelName, $requestChannel)
+            ->withReference(
+                ConversionService::REFERENCE_NAME,
+                InMemoryConversionService::createWithoutConversion()
+                    ->registerConversion(
+                        1,
+                        MediaType::APPLICATION_X_PHP,
+                        TypeDescriptor::createIntegerType()->toString(),
+                        MediaType::APPLICATION_X_PHP,
+                        TypeDescriptor::create(stdClass::class)->toString(),
+                        $resultOne
+                    )
+                    ->registerConversion(
+                        2,
+                        MediaType::APPLICATION_X_PHP,
+                        TypeDescriptor::createIntegerType()->toString(),
+                        MediaType::APPLICATION_X_PHP,
+                        TypeDescriptor::create(stdClass::class)->toString(),
+                        $resultTwo
+                    )
+            )
+            ->buildWithProxy($gatewayBuilder);
+
+        $resultSet = [];
+        foreach ($gateway->executeIterator() as $item) {
+            $resultSet[] = $item;
+        }
+
+        $this->assertEquals($expectedResultSet, $resultSet);
     }
 
     public function test_forcing_conversion_when_target_type_is_array_and_source_is_also_array()

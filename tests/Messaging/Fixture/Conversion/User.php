@@ -138,4 +138,14 @@ interface User
      * @var stdClass[]|stdClass $param
      */
     public function withUnionParameterTypeWithUnionDocblockType(array|int|string $param): void;
+
+    /**
+     * @param array<int, array{person_id: string}> $param
+     */
+    public function withStructuredArrayCollectionType(array $param): void;
+
+    /**
+     * @return array<int, array{person_id: string}>
+     */
+    public function withStructuredArrayCollectionReturnType(): array;
 }

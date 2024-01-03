@@ -63,7 +63,7 @@ interface Type
     /**
      * @return bool
      */
-    public function isNonCollectionArray(): bool;
+    public function isArrayButNotClassBasedCollection(): bool;
 
     /**
      * @return bool
@@ -79,6 +79,8 @@ interface Type
      * @return bool
      */
     public function isString(): bool;
+
+    public function isInteger(): bool;
 
     /**
      * @return bool

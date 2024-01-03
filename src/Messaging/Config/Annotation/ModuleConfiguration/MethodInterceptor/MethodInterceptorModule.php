@@ -80,7 +80,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
 
             if ($interceptorInterface->hasMethodAnnotation($aroundAnnotation)) {
                 /** @var Around $aroundInterceptor */
-                $aroundInterceptor    = $interceptorInterface->getMethodAnnotation($aroundAnnotation);
+                $aroundInterceptor    = $interceptorInterface->getSingleMethodAnnotationOf($aroundAnnotation);
                 $aroundInterceptors[] = AroundInterceptorBuilder::create(
                     AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),
                     $interceptorInterface,
@@ -92,7 +92,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
 
             if ($interceptorInterface->hasMethodAnnotation($beforeSendAnnotation)) {
                 /** @var Before $beforeInterceptor */
-                $beforeSendInterceptor    = $interceptorInterface->getMethodAnnotation($beforeSendAnnotation);
+                $beforeSendInterceptor    = $interceptorInterface->getSingleMethodAnnotationOf($beforeSendAnnotation);
                 $beforeSendInterceptors[] = MethodInterceptor::create(
                     AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),
                     $interceptorInterface,
@@ -104,7 +104,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
 
             if ($interceptorInterface->hasMethodAnnotation($beforeAnnotation)) {
                 /** @var Before $beforeInterceptor */
-                $beforeInterceptor     = $interceptorInterface->getMethodAnnotation($beforeAnnotation);
+                $beforeInterceptor     = $interceptorInterface->getSingleMethodAnnotationOf($beforeAnnotation);
                 $preCallInterceptors[] = MethodInterceptor::create(
                     AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),
                     $interceptorInterface,
@@ -116,7 +116,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
 
             if ($interceptorInterface->hasMethodAnnotation($afterAnnotation)) {
                 /** @var After $afterInterceptor */
-                $afterInterceptor       = $interceptorInterface->getMethodAnnotation($afterAnnotation);
+                $afterInterceptor       = $interceptorInterface->getSingleMethodAnnotationOf($afterAnnotation);
                 $postCallInterceptors[] = MethodInterceptor::create(
                     AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),
                     $interceptorInterface,

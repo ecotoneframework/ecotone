@@ -46,6 +46,13 @@ class DataReturningService implements DefinedObject
         return ComponentTestBuilder::create()->build(self::createServiceActivatorBuilderWithReturnMessage($payload, $headers));
     }
 
+    public static function createServiceActivatorWithGenerator(array $payload): MessageHandler
+    {
+        return ComponentTestBuilder::create()->build(
+            ServiceActivatorBuilder::createWithDirectReference(new self($payload, false, [], false), 'iterate')
+        );
+    }
+
     public static function createServiceActivatorBuilder($dataToReturn): ServiceActivatorBuilder
     {
         return ServiceActivatorBuilder::createWithDirectReference(new self($dataToReturn, false, [], false), 'handle');
@@ -84,6 +91,13 @@ class DataReturningService implements DefinedObject
         }
 
         return $this->data;
+    }
+
+    public function iterate()
+    {
+        foreach ($this->data as $item) {
+            yield $item;
+        }
     }
 
     public function getDefinition(): Definition

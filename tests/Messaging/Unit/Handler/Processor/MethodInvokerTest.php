@@ -468,7 +468,7 @@ class MethodInvokerTest extends MessagingTest
         $replyMessage = $methodInvocation->executeEndpoint(MessageBuilder::withPayload(['test'])->build());
 
         $this->assertEquals(
-            MediaType::createApplicationXPHPWithTypeParameter('array')->toString(),
+            MediaType::createApplicationXPHPWithTypeParameter('array<string>')->toString(),
             $replyMessage->getHeaders()->getContentType()->toString()
         );
     }

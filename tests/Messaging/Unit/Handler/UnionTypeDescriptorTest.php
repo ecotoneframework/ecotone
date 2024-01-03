@@ -134,13 +134,13 @@ class UnionTypeDescriptorTest extends TestCase
         $this->assertTrue(
             UnionTypeDescriptor::createWith([
                 TypeDescriptor::createArrayType(),
-            ])->isNonCollectionArray()
+            ])->isArrayButNotClassBasedCollection()
         );
 
         $this->assertFalse(
             UnionTypeDescriptor::createWith([
                 TypeDescriptor::createCollection(stdClass::class),
-            ])->isNonCollectionArray()
+            ])->isArrayButNotClassBasedCollection()
         );
     }
 

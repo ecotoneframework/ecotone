@@ -34,8 +34,8 @@ class TypeResolver
     private const SINGLE_USE_STATEMENTS_REGEX = '/^[^\S\r\na-zA-Z0-9]*use[\s]*([^;\n\}]*)[\s]*;$/m';
     private const GROUP_USE_STATEMENTS_REGEX = '/^[^\S\r\n]*use[[\s]*([^;\n]*)[\s]*{([a-zA-Z0-9\s\n\r,]*)};$/m';
 
-    private const METHOD_DOC_BLOCK_TYPE_HINT_REGEX = '~@param[\s]*([^\n\$\s]*)[\s]*\$([a-zA-Z0-9]*)~';
-    private const METHOD_RETURN_TYPE_HINT_REGEX = '~@return[\s]*([^\n\s]*)~';
+    private const METHOD_DOC_BLOCK_TYPE_HINT_REGEX = '~@param[\s]*([^\n\$]*?)[\s]*\$([a-zA-Z0-9]*)~';
+    private const METHOD_RETURN_TYPE_HINT_REGEX = '~@return[\s]*([^\n]*)~';
     private const CLASS_PROPERTY_TYPE_HINT_REGEX = "#@var[\s]*([^\n\$\s]*)#";
 
     private const SELF_TYPE_HINT = 'self';

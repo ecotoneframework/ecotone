@@ -43,7 +43,7 @@ class MethodCallToMessageConverter
         foreach ($this->methodArgumentConverters as $methodParameterConverter) {
             if (empty($methodArguments) && $methodParameterConverter->isSupporting(null) && ! $this->isPayloadConverter($methodParameterConverter)) {
                 $messageBuilder = $methodParameterConverter->convertToMessage(null, $messageBuilder);
-                break;
+                continue;
             }
 
             foreach ($methodArguments as $methodArgument) {

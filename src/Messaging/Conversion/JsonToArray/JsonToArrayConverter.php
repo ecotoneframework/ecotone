@@ -33,7 +33,7 @@ class JsonToArrayConverter implements Converter
         return
             $sourceType->equals(TypeDescriptor::createStringType())
             && $sourceMediaType->isCompatibleWithParsed(MediaType::APPLICATION_JSON)
-            && $targetType->isIterable() && ! $targetType->isCollection()
+            && $targetType->isArrayButNotClassBasedCollection()
             && $targetMediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP);
     }
 }

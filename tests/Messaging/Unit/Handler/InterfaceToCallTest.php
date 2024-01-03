@@ -123,7 +123,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            TypeDescriptor::create('array'),
+            TypeDescriptor::create('array<mixed>'),
             $interfaceToCall->getReturnType()
         );
     }
@@ -150,6 +150,32 @@ class InterfaceToCallTest extends TestCase
 
         $this->assertEquals(
             TypeDescriptor::create("\stdClass[]|int"),
+            $interfaceToCall->getReturnType()
+        );
+    }
+
+    public function test_structured_array_collection_type_docblock()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            User::class,
+            'withStructuredArrayCollectionType'
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::create('array<int, array>'),
+            $interfaceToCall->getParameterWithName('param')->getTypeDescriptor()
+        );
+    }
+
+    public function test_structured_array_collection_type_docblock_return_type()
+    {
+        $interfaceToCall = InterfaceToCall::create(
+            User::class,
+            'withStructuredArrayCollectionReturnType'
+        );
+
+        $this->assertEquals(
+            TypeDescriptor::create('array<int, array>'),
             $interfaceToCall->getReturnType()
         );
     }
@@ -589,11 +615,11 @@ class InterfaceToCallTest extends TestCase
 
         $this->assertEquals(
             new ClassReference('exampleConverterService'),
-            $interfaceToCall->getClassAnnotation(TypeDescriptor::create(ClassReference::class))
+            $interfaceToCall->getSingleClassAnnotationOf(TypeDescriptor::create(ClassReference::class))
         );
         $this->assertEquals(
             new Converter(),
-            $interfaceToCall->getMethodAnnotation(TypeDescriptor::create(Converter::class))
+            $interfaceToCall->getSingleMethodAnnotationOf(TypeDescriptor::create(Converter::class))
         );
     }
 
@@ -603,7 +629,7 @@ class InterfaceToCallTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $interfaceToCall->getMethodAnnotation(TypeDescriptor::create(ClassReference::class));
+        $interfaceToCall->getSingleMethodAnnotationOf(TypeDescriptor::create(ClassReference::class));
     }
 
     public function test_throwing_exception_when_retrieving_not_existing_class_annotation()
@@ -612,7 +638,7 @@ class InterfaceToCallTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $interfaceToCall->getClassAnnotation(TypeDescriptor::create(Asynchronous::class));
+        $interfaceToCall->getSingleClassAnnotationOf(TypeDescriptor::create(Asynchronous::class));
     }
 
     public function test_not_throwing_exception_when_retrieving_constructor_parameter_attributes()

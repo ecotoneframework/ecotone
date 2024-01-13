@@ -22,7 +22,7 @@ return static function (ContainerConfigurator $containerConfigurator): void {
     $parameters->set('php_version_features', '7.4');
 
     $parameters->set(Option::EXCLUDE_RECTORS, [
-        \Rector\DeadCode\Rector\FunctionLike\RemoveOverriddenValuesRector::class,
+        Rector\DeadCode\Rector\FunctionLike\RemoveOverriddenValuesRector::class,
         Rector\DeadCode\Rector\ClassConst\RemoveUnusedClassConstantRector::class,
         Rector\DeadCode\Rector\ClassMethod\RemoveUnusedParameterRector::class,
         Rector\DeadCode\Rector\Property\RemoveUnusedPrivatePropertyRector::class,

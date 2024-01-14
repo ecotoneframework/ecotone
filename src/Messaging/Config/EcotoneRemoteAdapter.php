@@ -14,7 +14,7 @@ class EcotoneRemoteAdapter implements AdapterInterface
     {
     }
 
-    public function call(string $wrappedClass, string $method, array $params = [])
+    public function call(string $wrappedClass, string $method, array $params = []): mixed
     {
         /** @var Gateway $gateway */
         $gateway = $this->messagingSystem->getNonProxyGatewayByName($this->gatewayProxyReference->gatewayReferenceForMethod($method));

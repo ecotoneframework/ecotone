@@ -21,7 +21,7 @@ class LazyInMemoryContainer implements ContainerInterface
         $this->resolvedObjects[ContainerInterface::class] = $this;
     }
 
-    public function get(string $id)
+    public function get(string $id): mixed
     {
         return $this->resolveReference(new Reference($id));
     }

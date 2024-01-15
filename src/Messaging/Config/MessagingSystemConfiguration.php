@@ -1020,7 +1020,7 @@ final class MessagingSystemConfiguration implements Configuration
         return $this;
     }
 
-    public function registerServiceDefinition(string|Reference $id, Container\Definition|array $definition = []): Configuration
+    public function registerServiceDefinition(string|Reference $id, Definition|array $definition = []): Configuration
     {
         if (! isset($this->serviceDefinitions[(string) $id])) {
             if (is_array($definition)) {

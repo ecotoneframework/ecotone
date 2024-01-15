@@ -15,7 +15,7 @@ use Ecotone\Messaging\Transaction\TransactionFactory;
  */
 class NullTransactionFactory implements TransactionFactory
 {
-    private ?\Ecotone\Messaging\Transaction\Transaction $predefinedTransaction;
+    private ?Transaction $predefinedTransaction;
 
     /**
      * NullTransactionFactory constructor.

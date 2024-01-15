@@ -16,7 +16,7 @@ use Ecotone\Messaging\Support\Assert;
 class InMemoryChannelResolver implements ChannelResolver
 {
     private ?array $resolvableChannels = null;
-    private ?\Ecotone\Messaging\Handler\ChannelResolver $externalChannelResolver = null;
+    private ?ChannelResolver $externalChannelResolver = null;
 
     /**
      * InMemoryChannelResolver constructor.

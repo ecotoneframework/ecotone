@@ -19,8 +19,8 @@ class ReferenceServiceConverter implements Converter
 {
     private object $object;
     private string $method;
-    private \Ecotone\Messaging\Handler\Type $sourceType;
-    private \Ecotone\Messaging\Handler\Type $targetType;
+    private Type $sourceType;
+    private Type $targetType;
 
     /**
      * ReferenceConverter constructor.

@@ -20,9 +20,9 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class GatewayInternalHandler
 {
-    private \Ecotone\Messaging\MessageChannel $requestChannel;
-    private ?\Ecotone\Messaging\PollableChannel $replyChannel;
-    private \Ecotone\Messaging\Handler\InterfaceToCall $interfaceToCall;
+    private MessageChannel $requestChannel;
+    private ?PollableChannel $replyChannel;
+    private InterfaceToCall $interfaceToCall;
     private int $replyMilliSecondsTimeout;
 
     /**

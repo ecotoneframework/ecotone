@@ -18,8 +18,8 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 final class Router implements MessageHandler
 {
-    private \Ecotone\Messaging\Handler\ChannelResolver $channelResolver;
-    private \Ecotone\Messaging\Handler\MessageProcessor $methodInvoker;
+    private ChannelResolver $channelResolver;
+    private MessageProcessor $methodInvoker;
     private bool $isResolutionRequired;
     private ?string $defaultResolutionChannelName;
     private bool $applySequence;

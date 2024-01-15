@@ -32,7 +32,7 @@ abstract class MessagingException extends Exception
 
     public const WRONG_EXPRESSION_TO_EVALUATE = 300;
 
-    private ?\Ecotone\Messaging\Message $failedMessage = null;
+    private ?Message $failedMessage = null;
     private ?Throwable $cause = null;
 
     /**

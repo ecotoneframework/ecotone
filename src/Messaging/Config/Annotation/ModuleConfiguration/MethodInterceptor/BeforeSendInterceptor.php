@@ -17,7 +17,7 @@ use Throwable;
  */
 class BeforeSendInterceptor implements ChannelInterceptor
 {
-    private \Ecotone\Messaging\Handler\NonProxyGateway $entrypointGateway;
+    private NonProxyGateway $entrypointGateway;
 
     /**
      * BeforeSendInterceptor constructor.

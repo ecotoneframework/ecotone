@@ -17,7 +17,7 @@ use ReflectionException;
 final class InterfaceParameter
 {
     private string $name;
-    private \Ecotone\Messaging\Handler\Type $typeDescriptor;
+    private Type $typeDescriptor;
     private bool $doesAllowNull;
     /**
      * @var mixed

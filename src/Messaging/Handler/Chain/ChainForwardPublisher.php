@@ -15,7 +15,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class ChainForwardPublisher
 {
-    private \Ecotone\Messaging\MessageChannel $requestChannel;
+    private MessageChannel $requestChannel;
     private bool $hasOutputChannel;
 
     public function __construct(MessageChannel $requestChannel, bool $hasOutputChannel)

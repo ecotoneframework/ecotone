@@ -19,7 +19,7 @@ use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
  */
 class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
 {
-    private \Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder $bridgeBuilder;
+    private ServiceActivatorBuilder $bridgeBuilder;
 
     private function __construct()
     {

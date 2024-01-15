@@ -17,7 +17,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class GatewayPayloadExpressionConverter implements GatewayParameterConverter
 {
-    private \Ecotone\Messaging\Handler\ExpressionEvaluationService $expressionEvaluationService;
+    private ExpressionEvaluationService $expressionEvaluationService;
     /**s
      * @var string
      */

@@ -19,7 +19,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class MethodCallToMessageConverter
 {
-    private ?\Ecotone\Messaging\Handler\InterfaceToCall $interfaceToCall;
+    private ?InterfaceToCall $interfaceToCall;
     private ?array $methodArgumentConverters;
 
     /**

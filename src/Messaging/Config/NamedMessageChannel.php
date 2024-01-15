@@ -14,7 +14,7 @@ use Ecotone\Messaging\MessageChannel;
 class NamedMessageChannel
 {
     private string $channelName;
-    private \Ecotone\Messaging\MessageChannel $messageChannel;
+    private MessageChannel $messageChannel;
 
     /**
      * ResolvableChannel constructor.

@@ -29,8 +29,8 @@ class LoggingService
     public const INFO_LOGGING_CHANNEL = 'infoLoggingChannel';
     public const ERROR_LOGGING_CHANNEL = 'errorLoggingChannel';
 
-    private \Ecotone\Messaging\Conversion\ConversionService $conversionService;
-    private \Psr\Log\LoggerInterface $logger;
+    private ConversionService $conversionService;
+    private LoggerInterface $logger;
 
     /**
      * LoggingService constructor.

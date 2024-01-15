@@ -17,8 +17,8 @@ use Ecotone\Messaging\MessageHeaders;
  */
 class MessageFilter
 {
-    private \Ecotone\Messaging\Handler\MessageProcessor $messageSelector;
-    private ?\Ecotone\Messaging\MessageChannel $discardChannel;
+    private MessageProcessor $messageSelector;
+    private ?MessageChannel $discardChannel;
     private bool $throwExceptionOnDiscard;
 
     /**

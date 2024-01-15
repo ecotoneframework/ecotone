@@ -22,14 +22,14 @@ use Ecotone\Messaging\Support\MessageBuilder;
 class InternalEnrichingService
 {
     private array $setters;
-    private ?\Ecotone\Messaging\Handler\Enricher\EnrichGateway $enrichGateway;
+    private ?EnrichGateway $enrichGateway;
     private ?string $requestPayloadExpression;
-    private \Ecotone\Messaging\Handler\ExpressionEvaluationService $expressionEvaluationService;
+    private ExpressionEvaluationService $expressionEvaluationService;
     /**
      * @var string[]
      */
     private array $requestHeaders;
-    private \Ecotone\Messaging\Conversion\ConversionService $conversionService;
+    private ConversionService $conversionService;
 
     /**
      * InternalEnrichingService constructor.

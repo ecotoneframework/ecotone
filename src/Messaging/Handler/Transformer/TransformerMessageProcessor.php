@@ -18,7 +18,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class TransformerMessageProcessor implements MessageProcessor
 {
-    private \Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker $methodInvoker;
+    private MethodInvoker $methodInvoker;
 
     /**
      * TransformerMessageProcessor constructor.

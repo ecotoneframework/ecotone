@@ -17,8 +17,8 @@ use Ecotone\Messaging\Message;
  */
 class EnrichPayloadWithValuePropertyEditor implements PropertyEditor
 {
-    private \Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor $payloadPropertySetter;
-    private \Ecotone\Messaging\Handler\Enricher\PropertyPath $propertyPath;
+    private PropertyEditorAccessor $payloadPropertySetter;
+    private PropertyPath $propertyPath;
     /**
      * @var mixed
      */

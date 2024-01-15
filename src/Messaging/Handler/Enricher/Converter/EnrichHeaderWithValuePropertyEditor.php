@@ -17,12 +17,12 @@ use Ecotone\Messaging\Message;
  */
 class EnrichHeaderWithValuePropertyEditor implements PropertyEditor
 {
-    private \Ecotone\Messaging\Handler\Enricher\PropertyPath $propertyPath;
+    private PropertyPath $propertyPath;
     /**
      * @var mixed
      */
     private $value;
-    private \Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor $dataSetter;
+    private PropertyEditorAccessor $dataSetter;
 
     /**
      * StaticHeaderSetter constructor.

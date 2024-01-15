@@ -20,8 +20,8 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class WrapWithMessageBuildProcessor implements MessageProcessor
 {
-    private \Ecotone\Messaging\Handler\InterfaceToCall $interfaceToCall;
-    private \Ecotone\Messaging\Handler\MessageProcessor $messageProcessor;
+    private InterfaceToCall $interfaceToCall;
+    private MessageProcessor $messageProcessor;
 
     /**
      * WrapWithMessageProcessor constructor.

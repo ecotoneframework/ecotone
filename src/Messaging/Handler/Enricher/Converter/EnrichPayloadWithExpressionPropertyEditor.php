@@ -19,10 +19,10 @@ use Ecotone\Messaging\Message;
  */
 class EnrichPayloadWithExpressionPropertyEditor implements PropertyEditor
 {
-    private \Ecotone\Messaging\Handler\ExpressionEvaluationService $expressionEvaluationService;
-    private \Ecotone\Messaging\Handler\Enricher\PropertyPath $propertyPath;
+    private ExpressionEvaluationService $expressionEvaluationService;
+    private PropertyPath $propertyPath;
     private string $expression;
-    private \Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor $dataSetter;
+    private PropertyEditorAccessor $dataSetter;
     private string $nullResultExpression;
 
     /**

@@ -13,8 +13,8 @@ use Ecotone\Messaging\MessagingException;
  */
 final class ErrorMessage implements Message
 {
-    private \Ecotone\Messaging\MessagingException $messagingException;
-    private \Ecotone\Messaging\MessageHeaders $messageHeaders;
+    private MessagingException $messagingException;
+    private MessageHeaders $messageHeaders;
 
     /**
      * ErrorMessage constructor.

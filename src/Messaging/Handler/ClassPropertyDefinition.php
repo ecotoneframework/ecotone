@@ -16,7 +16,7 @@ final class ClassPropertyDefinition
     private const PRIVATE_VISIBILITY = 'private';
 
     private string $name;
-    private \Ecotone\Messaging\Handler\Type $type;
+    private Type $type;
     private bool $isNullable;
     private bool $isStatic;
     private string $visibility;

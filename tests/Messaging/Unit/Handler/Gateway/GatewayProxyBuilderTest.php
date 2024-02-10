@@ -4,7 +4,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Gateway;
 
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Config\BeforeSend\BeforeSendGateway;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor\BeforeSendGateway;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Conversion\ArrayToJson\ArrayToJsonConverter;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;

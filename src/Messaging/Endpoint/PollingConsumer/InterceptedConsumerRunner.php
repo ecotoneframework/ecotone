@@ -6,6 +6,7 @@ use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 use Ecotone\Messaging\Endpoint\EndpointRunner;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\MessagePoller;
 use Ecotone\Messaging\Scheduling\Clock;
@@ -21,7 +22,8 @@ class InterceptedConsumerRunner implements EndpointRunner
         private MessagePoller $messagePoller,
         private PollingMetadata $defaultPollingMetadata,
         private Clock $clock,
-        private LoggerInterface $logger
+        private LoggerInterface $logger,
+        private MessagingEntrypoint $messagingEntrypoint,
     ) {
     }
 
@@ -41,7 +43,7 @@ class InterceptedConsumerRunner implements EndpointRunner
             $pollingMetadata->getCron()
                 ? CronTrigger::createWith($pollingMetadata->getCron())
                 : PeriodicTrigger::create($pollingMetadata->getFixedRateInMilliseconds(), $pollingMetadata->getInitialDelayInMilliseconds()),
-            new PollToGatewayTaskExecutor($this->messagePoller, $interceptedGateway),
+            new PollToGatewayTaskExecutor($this->messagePoller, $interceptedGateway, $this->messagingEntrypoint),
         );
 
         if ($interceptors) {

@@ -12,7 +12,7 @@ class ChannelResolverWithContainer implements ChannelResolver
     {
     }
 
-    public function resolve($channelName): MessageChannel
+    public function resolve(string|MessageChannel $channelName): MessageChannel
     {
         if ($channelName instanceof MessageChannel) {
             return $channelName;

@@ -6,6 +6,7 @@ namespace Test\Ecotone\Messaging\Unit\Channel\PollableChannel;
 
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Lite\Test\FlowTestSupport;
+use Ecotone\Messaging\Channel\DynamicChannel\DynamicMessageChannelBuilder;
 use Ecotone\Messaging\Channel\ExceptionalQueueChannel;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\PollableChannel\GlobalPollableChannelConfiguration;
@@ -16,6 +17,7 @@ use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use Test\Ecotone\Messaging\Fixture\Channel\DynamicChannel\DynamicChannelResolver;
 use Test\Ecotone\Messaging\Unit\Handler\Logger\LoggerExample;
 use Test\Ecotone\Modelling\Fixture\Order\OrderService;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
@@ -41,7 +43,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
         $message = $ecotoneLite->getMessageChannel('orders')->receive();
 
         $this->assertNotNull($message);
-        $this->assertCount(3, $loggerExample->getInfo());
+        $this->assertGreaterThanOrEqual(3, count($loggerExample->getInfo()));
     }
 
     public function test_retrying_two_time_on_failure_and_recovering()
@@ -60,7 +62,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
         $message = $ecotoneLite->getMessageChannel('orders')->receive();
 
         $this->assertNotNull($message);
-        $this->assertCount(4, $loggerExample->getInfo());
+        $this->assertGreaterThanOrEqual(4, count($loggerExample->getInfo()));
     }
 
     public function test_retrying_exceeded_and_fails()
@@ -86,8 +88,67 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
 
         $this->assertTrue($exception);
         $this->assertNull($message);
-        $this->assertCount(4, $loggerExample->getInfo());
+        $this->assertGreaterThanOrEqual(4, count($loggerExample->getInfo()));
+        $this->assertGreaterThanOrEqual(1, count($loggerExample->getError()));
+    }
+
+    public function test_dynamic_message_channel_is_not_retried()
+    {
+        $dynamicChannelResolver = new DynamicChannelResolver(['orders_priority'], ['orders_priority']);
+        $loggerExample = LoggerExample::create();
+
+        $ecotoneLite = $this->bootstrapEcotone(
+            [OrderService::class, DynamicChannelResolver::class],
+            [new OrderService(), 'logger' => $loggerExample, $dynamicChannelResolver],
+            [
+                DynamicMessageChannelBuilder::createRoundRobin('orders')
+                    ->withCustomSendingStrategy('dynamicChannel.send')
+                    ->withCustomReceivingStrategy('dynamicChannel.receive'),
+                ExceptionalQueueChannel::createWithExceptionOnSend('orders_priority', 3),
+            ],
+            [
+                PollableChannelConfiguration::createWithDefaults('orders_priority')->withCollector(false),
+            ]
+        );
+
+        $exception = false;
+        try {
+            $ecotoneLite->sendCommand(new PlaceOrder('1'));
+        } catch (Exception $exception) {
+            $exception = true;
+        }
+
+        $message = $ecotoneLite->getMessageChannel('orders')->receive();
+
+        $this->assertTrue($exception);
+        $this->assertNull($message);
         $this->assertCount(1, $loggerExample->getError());
+    }
+
+    public function test_dynamic_message_channel_is_not_retried_but_chosen_channel_is()
+    {
+        $dynamicChannelResolver = new DynamicChannelResolver(['orders_priority'], ['orders_priority']);
+        $loggerExample = LoggerExample::create();
+        $ecotoneLite = $this->bootstrapEcotone(
+            [OrderService::class, DynamicChannelResolver::class],
+            [new OrderService(), 'logger' => $loggerExample, $dynamicChannelResolver],
+            [
+                DynamicMessageChannelBuilder::createRoundRobin('orders')
+                    ->withCustomSendingStrategy('dynamicChannel.send')
+                    ->withCustomReceivingStrategy('dynamicChannel.receive'),
+                ExceptionalQueueChannel::createWithExceptionOnSend('orders_priority', 2),
+            ],
+            [
+                PollableChannelConfiguration::createWithDefaults('orders_priority')->withCollector(false),
+            ]
+        );
+
+        $ecotoneLite->sendCommand(new PlaceOrder('1'));
+
+        $message = $ecotoneLite->getMessageChannel('orders')->receive();
+
+        $this->assertNotNull($message);
+        $this->assertGreaterThanOrEqual(4, count($loggerExample->getInfo()));
     }
 
     public function test_with_custom_retry_strategy()

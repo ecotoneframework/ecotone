@@ -142,4 +142,6 @@ interface Configuration extends CompilerPass
     public function buildMessagingSystemFromConfiguration(?ContainerInterface $externalReferenceSearchService = null): ConfiguredMessagingSystem;
 
     public function registerServiceDefinition(string|Reference $id, Container\Definition $definition): Configuration;
+
+    public function registerServiceAlias(string|Reference $id, Reference $aliasTo): Configuration;
 }

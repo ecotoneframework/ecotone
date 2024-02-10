@@ -3,7 +3,9 @@
 namespace Ecotone\Modelling\Config;
 
 use Ecotone\Messaging\Handler\DestinationResolutionException;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\Assert;
 
 /**
@@ -13,19 +15,19 @@ use Ecotone\Messaging\Support\Assert;
  */
 class QueryBusRouter
 {
-    private array $channelMapping = [];
-
     /**
      * CommandBusRouter constructor.
      *
      * @param array           $channelMapping
      */
-    public function __construct(array $channelMapping)
-    {
-        $this->channelMapping = $channelMapping;
+    public function __construct(
+        private array $channelMapping,
+        private LoggingGateway $loggingGateway
+    ) {
+
     }
 
-    public function routeByObject(object $object): array
+    public function routeByObject(object $object, Message $message): array
     {
         Assert::isObject($object, 'Passed non object value to Query Bus: ' . TypeDescriptor::createFromVariable($object)->toString() . '. Did you wanted to use convertAndSend?');
 
@@ -34,10 +36,11 @@ class QueryBusRouter
             throw DestinationResolutionException::create("Can't send query to {$className}. No Query Handler defined for it. Have you forgot to add #[QueryHandler] to method?");
         }
 
+        $this->loggingGateway->info(sprintf('Sending Query Message using Class routing: %s.', $className), $message);
         return $this->channelMapping[$className];
     }
 
-    public function routeByName(?string $name): array
+    public function routeByName(?string $name, Message $message): array
     {
         if (is_null($name)) {
             throw DestinationResolutionException::create('Lack of routing key for sending via Query Bus');
@@ -47,6 +50,7 @@ class QueryBusRouter
             throw DestinationResolutionException::create("Can't send query to {$name}. No Query Handler defined for it. Have you forgot to add #[QueryHandler] to method?");
         }
 
+        $this->loggingGateway->info(sprintf('Sending Query Message using Named routing: %s.', $name), $message);
         return $this->channelMapping[$name];
     }
 }

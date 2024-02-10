@@ -31,25 +31,19 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 class MethodInterceptorModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public const MODULE_NAME = 'methodInterceptorModule';
-    private array $postCallInterceptors;
-    private array $preCallInterceptors;
-    private array $aroundInterceptors;
-    private array $beforeSendInterceptors;
 
     /**
-     * MethodInterceptorModule constructor.
-     *
      * @param MethodInterceptor[]          $beforeSendInterceptors
      * @param MethodInterceptor[]          $preCallInterceptors
      * @param AroundInterceptorBuilder[] $aroundInterceptors
      * @param MethodInterceptor[]          $postCallInterceptors
      */
-    private function __construct(array $beforeSendInterceptors, array $preCallInterceptors, array $aroundInterceptors, array $postCallInterceptors)
-    {
-        $this->preCallInterceptors         = $preCallInterceptors;
-        $this->postCallInterceptors        = $postCallInterceptors;
-        $this->aroundInterceptors          = $aroundInterceptors;
-        $this->beforeSendInterceptors      = $beforeSendInterceptors;
+    private function __construct(
+        private array $beforeSendInterceptors,
+        private array $preCallInterceptors,
+        private array $aroundInterceptors,
+        private array $postCallInterceptors
+    ) {
     }
 
     /**
@@ -91,7 +85,7 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
             }
 
             if ($interceptorInterface->hasMethodAnnotation($beforeSendAnnotation)) {
-                /** @var Before $beforeInterceptor */
+                /** @var Presend $beforeInterceptor */
                 $beforeSendInterceptor    = $interceptorInterface->getSingleMethodAnnotationOf($beforeSendAnnotation);
                 $beforeSendInterceptors[] = MethodInterceptor::create(
                     AnnotatedDefinitionReference::getReferenceFor($methodInterceptor),

@@ -2,10 +2,7 @@
 
 namespace Ecotone\Messaging\Handler;
 
-use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\MessageChannel;
-use Ecotone\Messaging\PollableChannel;
-use Ecotone\Messaging\SubscribableChannel;
 
 /**
  * Interface ChannelResolver
@@ -15,12 +12,9 @@ use Ecotone\Messaging\SubscribableChannel;
 interface ChannelResolver
 {
     /**
-     * @param string|MessageChannel $channelName
-     * @return MessageChannel|PollableChannel|SubscribableChannel|DirectChannel
-     *
      * @throws DestinationResolutionException
      */
-    public function resolve($channelName): MessageChannel;
+    public function resolve(string|MessageChannel $channelName): MessageChannel;
 
     /**
      * @param string $channelName

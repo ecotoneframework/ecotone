@@ -8,6 +8,7 @@ use Ecotone\Lite\EcotoneLite;
 use Ecotone\Lite\Test\FlowTestSupport;
 use Ecotone\Messaging\Channel\Collector\CollectedMessage;
 use Ecotone\Messaging\Channel\Collector\Config\CollectorConfiguration;
+use Ecotone\Messaging\Channel\DynamicChannel\DynamicMessageChannelBuilder;
 use Ecotone\Messaging\Channel\ExceptionalQueueChannel;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\PollableChannel\GlobalPollableChannelConfiguration;
@@ -24,6 +25,8 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
 use function str_contains;
+
+use Test\Ecotone\Messaging\Fixture\Channel\DynamicChannel\DynamicChannelResolver;
 
 use Test\Ecotone\Modelling\Fixture\Collector\BetNotificator;
 use Test\Ecotone\Modelling\Fixture\Collector\BetService;
@@ -52,6 +55,59 @@ final class CollectorModuleTest extends TestCase
 
         $this->assertCount(0, $ecotoneLite->sendQueryWithRouting('order.getOrders'));
         $this->assertEquals($command, $ecotoneLite->getMessageChannel('orders')->receive()->getPayload());
+    }
+
+    public function test_collected_messages_are_not_duplicated_when_using_round_robin()
+    {
+        $ecotoneLite = $this->bootstrapEcotone(
+            [OrderService::class],
+            [new OrderService()],
+            [
+                DynamicMessageChannelBuilder::createRoundRobin('orders', ['orders_priority']),
+                SimpleMessageChannelBuilder::createQueueChannel('orders_priority', conversionMediaType: MediaType::createApplicationXPHP()),
+            ],
+            [
+                PollableChannelConfiguration::neverRetry('orders')->withCollector(true),
+                PollableChannelConfiguration::neverRetry('orders_priority')->withCollector(true),
+            ]
+        );
+
+        $command = new PlaceOrder('1');
+        $ecotoneLite->sendCommand($command);
+
+        $this->assertCount(0, $ecotoneLite->sendQueryWithRouting('order.getOrders'));
+        $this->assertEquals($command, $ecotoneLite->getMessageChannel('orders')->receive()->getPayload());
+        $this->assertNull($ecotoneLite->getMessageChannel('orders')->receive());
+    }
+
+    public function test_collected_messages_are_not_duplicated_when_using_dynamic_channel()
+    {
+        $dynamicChannelResolver = new DynamicChannelResolver(
+            ['orders_priority'],
+            ['orders_priority']
+        );
+
+        $ecotoneLite = $this->bootstrapEcotone(
+            [OrderService::class, DynamicChannelResolver::class],
+            [new OrderService(), $dynamicChannelResolver],
+            [
+                DynamicMessageChannelBuilder::createRoundRobin('orders')
+                    ->withCustomSendingStrategy('dynamicChannel.send')
+                    ->withCustomReceivingStrategy('dynamicChannel.receive'),
+                SimpleMessageChannelBuilder::createQueueChannel('orders_priority', conversionMediaType: MediaType::createApplicationXPHP()),
+            ],
+            [
+                PollableChannelConfiguration::neverRetry('orders')->withCollector(true),
+                PollableChannelConfiguration::neverRetry('orders_priority')->withCollector(true),
+            ]
+        );
+
+        $command = new PlaceOrder('1');
+        $ecotoneLite->sendCommand($command);
+
+        $this->assertCount(0, $ecotoneLite->sendQueryWithRouting('order.getOrders'));
+        $this->assertEquals($command, $ecotoneLite->getMessageChannel('orders')->receive()->getPayload());
+        $this->assertNull($ecotoneLite->getMessageChannel('orders')->receive());
     }
 
     public function test_collected_message_is_delayed_so_messages_are_not_sent_on_handler_exception()

@@ -17,13 +17,21 @@ final class StubLoggingGateway implements LoggingGateway
         return new self();
     }
 
-    public function info(string $text, Message $message, ?Throwable $exception = null): void
-    {
+    public function info(
+        string                                              $text,
+        ?Message     $message = null,
+        ?Throwable $exception = null,
+        array           $contextData = [],
+    ): void {
         $this->info[] = $text;
     }
 
-    public function error(string $text, Message $message, ?Throwable $exception = null): void
-    {
+    public function error(
+        string                                              $text,
+        Message      $message,
+        ?Throwable $exception = null,
+        array           $contextData = [],
+    ): void {
         $this->critical[] = $text;
     }
 

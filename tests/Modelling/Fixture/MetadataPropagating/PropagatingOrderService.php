@@ -1,0 +1,18 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Test\Ecotone\Modelling\Fixture\MetadataPropagating;
+
+final class PropagatingOrderService
+{
+    public function placeOrderWithPropagation(PropagatingGateway $propagatingGateway): void
+    {
+        $propagatingGateway->placeOrderWithPropagation([]);
+    }
+
+    public function placeOrderWithoutPropagation(PropagatingGateway $propagatingGateway): void
+    {
+        $propagatingGateway->placeOrderWithoutPropagation([]);
+    }
+}

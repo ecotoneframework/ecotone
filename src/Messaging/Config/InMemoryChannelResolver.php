@@ -82,7 +82,7 @@ class InMemoryChannelResolver implements ChannelResolver
     /**
      * @inheritDoc
      */
-    public function resolve($channelName): MessageChannel
+    public function resolve(string|MessageChannel $channelName): MessageChannel
     {
         if ($channelName instanceof MessageChannel) {
             return $channelName;

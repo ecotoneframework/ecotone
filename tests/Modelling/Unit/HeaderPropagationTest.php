@@ -8,7 +8,11 @@ use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\MessageHeaders;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
+use Test\Ecotone\Modelling\Fixture\MetadataPropagating\FakeLoggingGateway;
+use Test\Ecotone\Modelling\Fixture\MetadataPropagating\FakeLoggingService;
 use Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService;
+use Test\Ecotone\Modelling\Fixture\MetadataPropagating\PropagatingGateway;
+use Test\Ecotone\Modelling\Fixture\MetadataPropagating\PropagatingOrderService;
 
 /**
  * @covers \Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor
@@ -80,5 +84,53 @@ final class HeaderPropagationTest extends TestCase
 
         $this->assertSame($messageId, $headers->getMessageId());
         $this->assertNull($headers->getParentId());
+    }
+
+    public function test_will_propagate_custom_message_gateway()
+    {
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [OrderService::class, PropagatingGateway::class, PropagatingOrderService::class],
+            [new OrderService(), new PropagatingOrderService()],
+        );
+
+        $ecotoneTestSupport->getGateway(PropagatingGateway::class)->placeOrderWithPropagation([
+            'token' => '123',
+        ]);
+
+        $headers = $ecotoneTestSupport->getRecordedEventHeaders()[0];
+
+        $this->assertSame('123', $headers->get('token'));
+    }
+
+    public function test_will_not_propagate_when_propagation_of_message_gateway_is_disabled()
+    {
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [OrderService::class, PropagatingGateway::class, PropagatingOrderService::class],
+            [new OrderService(), new PropagatingOrderService()],
+        );
+
+        $ecotoneTestSupport->getGateway(PropagatingGateway::class)->placeOrderWithoutPropagation([
+            'token' => '123',
+        ]);
+
+        $headers = $ecotoneTestSupport->getRecordedEventHeaders()[0];
+
+        $this->assertFalse($headers->containsKey('token'));
+    }
+
+    public function test_interceptors_which_do_not_propagate_do_not_affect_event_bus_propagation()
+    {
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [OrderService::class, FakeLoggingService::class, FakeLoggingGateway::class, PropagatingGateway::class],
+            [new OrderService(), new FakeLoggingService()],
+        );
+
+        $ecotoneTestSupport->getGateway(PropagatingGateway::class)->placeOrderWithPropagation([
+            'token' => '123',
+        ]);
+
+        $headers = $ecotoneTestSupport->getRecordedEventHeaders()[0];
+
+        $this->assertSame('123', $headers->get('token'));
     }
 }

@@ -26,6 +26,7 @@ class LoggingService
 {
     public const CONTEXT_MESSAGE_HEADER = 'ecotone.logging.contextMessage';
     public const CONTEXT_EXCEPTION_HEADER = 'ecotone.logging.exceptionMessage';
+    public const CONTEXT_DATA_HEADER = 'ecotone.logging.contextData';
     public const INFO_LOGGING_CHANNEL = 'infoLoggingChannel';
     public const ERROR_LOGGING_CHANNEL = 'errorLoggingChannel';
 
@@ -46,18 +47,25 @@ class LoggingService
     #[ServiceActivator(self::INFO_LOGGING_CHANNEL)]
     public function info(
         #[Payload] string $text,
-        #[Header(self::CONTEXT_MESSAGE_HEADER)] Message $message,
+        #[Header(self::CONTEXT_MESSAGE_HEADER)] ?Message $message,
         #[Header(self::CONTEXT_EXCEPTION_HEADER)] ?Throwable $exception,
+        #[Header(self::CONTEXT_DATA_HEADER)] array $contextData,
     ): void {
+        if ($message === null) {
+            $this->logger->info($text, $contextData);
+
+            return;
+        }
+
         $this->logger->info(
             $text,
-            [
+            array_merge($contextData, [
                 'message_id' => $message->getHeaders()->getMessageId(),
                 'correlation_id' => $message->getHeaders()->getCorrelationId(),
                 'parent_id' => $message->getHeaders()->getParentId(),
                 'headers' => (string)$message->getHeaders(),
                 'exception' => $exception,
-            ]
+            ])
         );
     }
 
@@ -66,16 +74,17 @@ class LoggingService
         #[Payload] string $text,
         #[Header(self::CONTEXT_MESSAGE_HEADER)] Message $message,
         #[Header(self::CONTEXT_EXCEPTION_HEADER)] ?Throwable $exception,
+        #[Header(self::CONTEXT_DATA_HEADER)] array $contextData,
     ): void {
         $this->logger->critical(
             $text,
-            [
+            array_merge($contextData, [
                 'message_id' => $message->getHeaders()->getMessageId(),
                 'correlation_id' => $message->getHeaders()->getCorrelationId(),
                 'parent_id' => $message->getHeaders()->getParentId(),
                 'headers' => (string)$message->getHeaders(),
                 'exception' => $exception,
-            ]
+            ])
         );
     }
 

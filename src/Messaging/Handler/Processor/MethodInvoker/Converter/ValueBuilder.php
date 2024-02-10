@@ -19,6 +19,11 @@ class ValueBuilder implements ParameterConverterBuilder
     {
     }
 
+    public static function create(string $parameterName, mixed $staticValue): self
+    {
+        return new self($parameterName, $staticValue);
+    }
+
     /**
      * @inheritDoc
      */

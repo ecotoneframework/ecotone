@@ -9,6 +9,7 @@ use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Channel\Collector\CollectorSenderInterceptor;
 use Ecotone\Messaging\Channel\Collector\CollectorStorage;
+use Ecotone\Messaging\Channel\DynamicChannel\DynamicMessageChannelBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\PollableChannel\GlobalPollableChannelConfiguration;
 use Ecotone\Messaging\Channel\PollableChannel\PollableChannelConfiguration;
@@ -99,7 +100,8 @@ final class CollectorModule extends NoExternalConfigurationModule implements Ann
         return
             $extensionObject instanceof PollableChannelConfiguration
             || $extensionObject instanceof GlobalPollableChannelConfiguration
-            || ($extensionObject instanceof MessageChannelBuilder && $extensionObject->isPollable());
+            /** Dynamic and RoundRobin are proxies, therefore should not be intercepted */
+            || ($extensionObject instanceof MessageChannelBuilder && $extensionObject->isPollable() && ! ($extensionObject instanceof DynamicMessageChannelBuilder));
     }
 
     public function getModulePackageName(): string

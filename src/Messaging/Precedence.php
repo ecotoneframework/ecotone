@@ -41,10 +41,14 @@ interface Precedence
      * Database transactions are started at this precedence
      */
     public const DATABASE_TRANSACTION_PRECEDENCE = -2000;
+
+    public const BETWEEN_INSTANT_RETRY_AND_TRANSACTION_PRECEDENCE = -2001;
+
     /**
      * Retrying is executed before transactions, as we want to retry completely from the beginning (for example to recover from mysql gone away)
      */
-    public const AROUND_INSTANT_RETRY_PRECEDENCE = -2001;
+    public const AROUND_INSTANT_RETRY_PRECEDENCE = -2002;
+
     /**
      * Lazy events are published at this precedence
      */

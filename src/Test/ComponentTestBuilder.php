@@ -24,6 +24,8 @@ use Ecotone\Messaging\Endpoint\EndpointRunner;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\StorageMessagingEntrypoint;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Logger\StubLoggingGateway;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
@@ -49,6 +51,7 @@ class ComponentTestBuilder
             ServiceCacheConfiguration::class => ServiceCacheConfiguration::noCache(),
             ConfigurationVariableService::REFERENCE_NAME => InMemoryConfigurationVariableService::createEmpty(),
             LoggingGateway::class => StubLoggingGateway::create(),
+            MessagingEntrypoint::class => StorageMessagingEntrypoint::create(),
         ]);
         $containerBuilder = new ContainerBuilder();
         $containerBuilder->addCompilerPass(new RegisterSingletonMessagingServices());

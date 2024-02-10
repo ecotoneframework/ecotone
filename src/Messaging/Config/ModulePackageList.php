@@ -15,6 +15,7 @@ final class ModulePackageList
     public const EVENT_SOURCING_PACKAGE = 'eventSourcing';
     public const JMS_CONVERTER_PACKAGE = 'jmsConverter';
     public const TRACING_PACKAGE = 'tracing';
+    public const LARAVEL_PACKAGE = 'laravel';
     public const TEST_PACKAGE = 'test';
 
     public static function getModuleClassesForPackage(string $packageName): array
@@ -30,6 +31,7 @@ final class ModulePackageList
             ModulePackageList::JMS_CONVERTER_PACKAGE => ModuleClassList::JMS_CONVERTER_MODULES,
             ModulePackageList::TRACING_PACKAGE => ModuleClassList::TRACING_MODULES,
             ModulePackageList::TEST_PACKAGE => ModuleClassList::TEST_MODULES,
+            ModulePackageList::LARAVEL_PACKAGE => ModuleClassList::LARAVEL_MODULES,
             default => throw ConfigurationException::create(sprintf('Given unknown package name %s. Available packages name are: %s', $packageName, implode(',', self::allPackages())))
         };
     }
@@ -49,6 +51,7 @@ final class ModulePackageList
             self::EVENT_SOURCING_PACKAGE,
             self::JMS_CONVERTER_PACKAGE,
             self::TRACING_PACKAGE,
+            self::LARAVEL_PACKAGE,
         ];
     }
 

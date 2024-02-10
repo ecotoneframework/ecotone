@@ -2,26 +2,36 @@
 
 namespace Ecotone\Modelling\MessageHandling\MetadataPropagator;
 
+use Ecotone\Messaging\Attribute\PropagateHeaders;
+use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 
 class MessageHeadersPropagatorInterceptor
 {
+    public const GET_CURRENTLY_PROPAGATED_HEADERS_CHANNEL = 'ecotone.getCurrentlyPropagatedHeaders';
+    public const ENABLE_POLLING_CONSUMER_PROPAGATION_CONTEXT = 'ecotone.enablePollingConsumerPropagation';
+    public const DISABLE_POLLING_CONSUMER_PROPAGATION_CONTEXT = 'ecotone.disablePollingConsumerPropagation';
+    public const IS_POLLING_CONSUMER_PROPAGATION_CONTEXT = 'ecotone.isPollingConsumerPropagation';
     private array $currentlyPropagatedHeaders = [];
+    private bool $isPollingConsumer = false;
 
-    public function storeHeaders(MethodInvocation $methodInvocation, Message $message)
+    public function storeHeaders(MethodInvocation $methodInvocation, Message $message, ?PropagateHeaders $propagateHeaders = null)
     {
-        $userlandHeaders = MessageHeaders::unsetAllFrameworkHeaders($message->getHeaders()->headers());
-        $userlandHeaders[MessageHeaders::MESSAGE_ID] = $message->getHeaders()->getMessageId();
-        $userlandHeaders[MessageHeaders::MESSAGE_CORRELATION_ID] = $message->getHeaders()->getCorrelationId();
+        if ($propagateHeaders !== null && ! $propagateHeaders->doPropagation()) {
+            $userlandHeaders = [];
+        } else {
+            $userlandHeaders = MessageHeaders::unsetAllFrameworkHeaders($message->getHeaders()->headers());
+            $userlandHeaders[MessageHeaders::MESSAGE_ID] = $message->getHeaders()->getMessageId();
+            $userlandHeaders[MessageHeaders::MESSAGE_CORRELATION_ID] = $message->getHeaders()->getCorrelationId();
+        }
 
         $this->currentlyPropagatedHeaders[] = $userlandHeaders;
-
         try {
             $reply = $methodInvocation->proceed();
         } finally {
-            array_shift($this->currentlyPropagatedHeaders);
+            array_pop($this->currentlyPropagatedHeaders);
         }
 
         return $reply;
@@ -36,6 +46,10 @@ class MessageHeadersPropagatorInterceptor
         return MessageHeaders::propagateContextHeaders($this->getLastHeaders(), $headers);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
+    #[ServiceActivator(self::GET_CURRENTLY_PROPAGATED_HEADERS_CHANNEL)]
     public function getLastHeaders(): array
     {
         $headers = end($this->currentlyPropagatedHeaders);
@@ -45,6 +59,24 @@ class MessageHeadersPropagatorInterceptor
         }
 
         return $headers;
+    }
+
+    #[ServiceActivator(self::ENABLE_POLLING_CONSUMER_PROPAGATION_CONTEXT)]
+    public function enablePollingConsumerPropagation(): void
+    {
+        $this->isPollingConsumer = true;
+    }
+
+    #[ServiceActivator(self::DISABLE_POLLING_CONSUMER_PROPAGATION_CONTEXT)]
+    public function disablePollingConsumerPropagation(): void
+    {
+        $this->isPollingConsumer = false;
+    }
+
+    #[ServiceActivator(self::IS_POLLING_CONSUMER_PROPAGATION_CONTEXT)]
+    public function isPollingConsumer(): bool
+    {
+        return $this->isPollingConsumer;
     }
 
     private function isCalledForFirstTime($headers): bool

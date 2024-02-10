@@ -237,8 +237,8 @@ final class EcotoneLite
     private static function prepareForFlowTesting(?ServiceConfiguration $configuration, array $packagesToSkip, array $classesToResolve, bool $addInMemoryStateStoredRepository, ?array $enableAsynchronousProcessing): ServiceConfiguration
     {
         if ($enableAsynchronousProcessing !== null) {
-            if ($configuration !== null) {
-                Assert::isFalse($configuration->areSkippedPackagesDefined(), 'If you use `enableAsynchronousProcessing` configuration, you can\'t use `skippedPackages` configuration. Enable asynchronous processing manually or avoid using skippedPackages.');
+            if ($configuration !== null && in_array(ModulePackageList::ASYNCHRONOUS_PACKAGE, $configuration->getSkippedModulesPackages())) {
+                Assert::isFalse($configuration->areSkippedPackagesDefined(), 'If you use `enableAsynchronousProcessing` configuration, you can\'t use `skippedPackages` amd skip Asynchronous Package. Please allows asynchronous package.');
             }
             Assert::isTrue($enableAsynchronousProcessing !== [], 'For enabled asynchronous processing you must provide Message Channel');
         }

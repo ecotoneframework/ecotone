@@ -7,6 +7,7 @@ use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Messaging\Attribute\MessageGateway;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\PropagateHeaders;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
@@ -18,6 +19,7 @@ use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Logger\Config\MessageHandlerLogger;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
@@ -371,10 +373,22 @@ class BusRoutingModule implements AnnotationModule
             MessageHeadersPropagatorInterceptor::class,
             new Definition(MessageHeadersPropagatorInterceptor::class)
         );
+        $messagingConfiguration->registerServiceDefinition(
+            MessageHandlerLogger::class,
+            new Definition(MessageHandlerLogger::class)
+        );
 
         $propagateHeadersInterfaceToCall = $interfaceToCallRegistry->getFor(MessageHeadersPropagatorInterceptor::class, 'propagateHeaders');
         $storeHeadersInterfaceToCall = $interfaceToCallRegistry->getFor(MessageHeadersPropagatorInterceptor::class, 'storeHeaders');
-        $pointcut = CommandBus::class . '||' . EventBus::class . '||' . QueryBus::class . '||' . AsynchronousRunningEndpoint::class . '||' . PropagateHeaders::class . '||' . MessagingEntrypointWithHeadersPropagation::class;
+        $pointcut =
+            CommandBus::class . '||' .
+            EventBus::class . '||' .
+            QueryBus::class . '||' .
+            AsynchronousRunningEndpoint::class . '||' .
+            PropagateHeaders::class . '||' .
+            MessagingEntrypointWithHeadersPropagation::class . '||' .
+            MessageGateway::class;
+
         $messagingConfiguration
             ->registerBeforeMethodInterceptor(
                 MethodInterceptor::create(

@@ -3,7 +3,9 @@
 namespace Ecotone\Modelling\Config;
 
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
 use ReflectionClass;
 use ReflectionException;
 
@@ -14,14 +16,14 @@ use ReflectionException;
  */
 class EventBusRouter
 {
-    private array $channelMapping = [];
+    public function __construct(
+        private array $channelMapping,
+        private LoggingGateway $loggingGateway
+    ) {
 
-    public function __construct(array $channelMapping)
-    {
-        $this->channelMapping = $channelMapping;
     }
 
-    public function routeByObject(object $object): array
+    public function routeByObject(object $object, Message $message): array
     {
         $resolvedChannels = [];
         $reflectionClass = new ReflectionClass($object);
@@ -32,8 +34,14 @@ class EventBusRouter
         while ($parent = $parent->getParentClass()) {
             $resolvedChannels = array_merge($resolvedChannels, $this->getChannelsForClassName($parent));
         }
+        $channelsToSend = array_values(array_unique(array_merge($resolvedChannels, $this->getChannelsForClassName($reflectionClass))));
 
-        return array_values(array_unique(array_merge($resolvedChannels, $this->getChannelsForClassName($reflectionClass))));
+        $this->loggingGateway->info(
+            sprintf('Publishing Event Message using Class routing: %s.', $reflectionClass->getName()),
+            $message,
+            contextData: ['resolvedChannels' => $channelsToSend]
+        );
+        return $channelsToSend;
     }
 
     /**
@@ -63,20 +71,26 @@ class EventBusRouter
      * @return array
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function routeByName(?string $routedName): array
+    public function routeByName(?string $routedName, Message $message): array
     {
         if (is_null($routedName)) {
             throw ConfigurationException::create('Lack of routing key for sending via EventBus');
         }
 
-        $resultChannels = [];
+        $resolvedChannels = [];
         foreach ($this->channelMapping as $listenFor => $destinationChannels) {
             if (self::doesListenForRoutedName($listenFor, $routedName)) {
-                $resultChannels = array_merge($resultChannels, $destinationChannels);
+                $resolvedChannels = array_merge($resolvedChannels, $destinationChannels);
             }
         }
+        $resolvedChannels = array_unique($resolvedChannels);
 
-        return array_unique($resultChannels);
+        $this->loggingGateway->info(
+            sprintf('Publishing Event Message using Named routing: %s.', $routedName),
+            $message,
+            contextData: ['resolvedChannels' => $resolvedChannels]
+        );
+        return $resolvedChannels;
     }
 
     public static function isRegexBasedRoute(string $channelName): bool

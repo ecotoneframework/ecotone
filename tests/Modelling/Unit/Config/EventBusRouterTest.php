@@ -2,7 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Unit\Config;
 
+use Ecotone\Messaging\Handler\Logger\StubLoggingGateway;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Config\EventBusRouter;
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -26,7 +28,7 @@ class EventBusRouterTest extends TestCase
 
         $this->assertEquals(
             [stdClass::class],
-            $this->createEventRouter($classNameToChannelNameMapping)->routeByObject(new stdClass())
+            $this->createEventRouter($classNameToChannelNameMapping)->routeByObject(new stdClass(), MessageBuilder::withPayload('a')->build())
         );
     }
 
@@ -36,7 +38,7 @@ class EventBusRouterTest extends TestCase
 
         $this->assertEquals(
             [stdClass::class],
-            $this->createEventRouter($classNameToChannelNameMapping)->routeByObject(new stdClass())
+            $this->createEventRouter($classNameToChannelNameMapping)->routeByObject(new stdClass(), MessageBuilder::withPayload('a')->build())
         );
     }
 
@@ -50,7 +52,7 @@ class EventBusRouterTest extends TestCase
 
         $this->assertEquals(
             ['abstractSuperAdmin', 'superAdmin'],
-            $this->createEventRouter($classNameToChannelNameMapping)->routeByObject(new SuperAdmin())
+            $this->createEventRouter($classNameToChannelNameMapping)->routeByObject(new SuperAdmin(), MessageBuilder::withPayload('a')->build())
         );
     }
 
@@ -65,7 +67,7 @@ class EventBusRouterTest extends TestCase
 
         $this->assertEquals(
             ['admin', 'email', 'superAdmin'],
-            $this->createEventRouter($classNameToChannelNameMapping)->routeByObject(new SuperAdmin())
+            $this->createEventRouter($classNameToChannelNameMapping)->routeByObject(new SuperAdmin(), MessageBuilder::withPayload('a')->build())
         );
     }
 
@@ -75,7 +77,7 @@ class EventBusRouterTest extends TestCase
 
         $this->assertEquals(
             ['channel'],
-            $this->createEventRouter($classNameToChannelNameMapping)->routeByName('createOffer')
+            $this->createEventRouter($classNameToChannelNameMapping)->routeByName('createOffer', MessageBuilder::withPayload('a')->build())
         );
     }
 
@@ -85,7 +87,7 @@ class EventBusRouterTest extends TestCase
 
         $this->assertEquals(
             ['someId'],
-            $this->createEventRouter($classNameToChannelNameMapping)->routeByName('input.test')
+            $this->createEventRouter($classNameToChannelNameMapping)->routeByName('input.test', MessageBuilder::withPayload('a')->build())
         );
     }
 
@@ -95,7 +97,7 @@ class EventBusRouterTest extends TestCase
 
         $this->assertEquals(
             ['someId1', 'someId2'],
-            $this->createEventRouter($classNameToChannelNameMapping)->routeByName('input.test')
+            $this->createEventRouter($classNameToChannelNameMapping)->routeByName('input.test', MessageBuilder::withPayload('a')->build())
         );
     }
 
@@ -106,6 +108,6 @@ class EventBusRouterTest extends TestCase
      */
     private function createEventRouter(array $classNameToChannelNameMapping): EventBusRouter
     {
-        return new EventBusRouter($classNameToChannelNameMapping);
+        return new EventBusRouter($classNameToChannelNameMapping, new StubLoggingGateway());
     }
 }

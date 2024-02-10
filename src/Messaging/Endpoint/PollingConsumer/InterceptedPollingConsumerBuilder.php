@@ -15,6 +15,7 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Endpoint\AcknowledgeConfirmationInterceptor;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapterEntrypoint;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
+use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InterceptedEndpoint;
@@ -164,6 +165,7 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
             new PollingMetadataReference($endpointId),
             new Reference(Clock::class),
             new Reference(LoggerInterface::class),
+            new Reference(MessagingEntrypoint::class),
         ]);
         $builder->registerPollingEndpoint($endpointId, $consumerRunner);
     }

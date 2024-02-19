@@ -11,13 +11,23 @@ class Reference
 {
     public string $referenceName;
 
-    public function __construct(string $referenceName = '')
-    {
+    private ?string $expression;
+
+    public function __construct(
+        string $referenceName = '',
+        ?string $expression = null,
+    ) {
         $this->referenceName = $referenceName;
+        $this->expression    = $expression;
     }
 
     public function getReferenceName(): string
     {
         return $this->referenceName;
+    }
+
+    public function getExpression(): ?string
+    {
+        return $this->expression;
     }
 }

@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Config;
 
 abstract class ConnectionReference
 {
-    public function __construct(private string $referenceName)
+    public function __construct(private string $referenceName, private ?string $connectionName)
     {
 
     }
@@ -16,8 +16,13 @@ abstract class ConnectionReference
         return $this->referenceName;
     }
 
+    public function getConnectionName(): ?string
+    {
+        return $this->connectionName;
+    }
+
     public function __toString(): string
     {
-        return $this->referenceName;
+        return $this->connectionName;
     }
 }

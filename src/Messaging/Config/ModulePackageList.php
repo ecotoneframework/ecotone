@@ -16,6 +16,7 @@ final class ModulePackageList
     public const JMS_CONVERTER_PACKAGE = 'jmsConverter';
     public const TRACING_PACKAGE = 'tracing';
     public const LARAVEL_PACKAGE = 'laravel';
+    public const SYMFONY_PACKAGE = 'symfony';
     public const TEST_PACKAGE = 'test';
 
     public static function getModuleClassesForPackage(string $packageName): array
@@ -32,6 +33,7 @@ final class ModulePackageList
             ModulePackageList::TRACING_PACKAGE => ModuleClassList::TRACING_MODULES,
             ModulePackageList::TEST_PACKAGE => ModuleClassList::TEST_MODULES,
             ModulePackageList::LARAVEL_PACKAGE => ModuleClassList::LARAVEL_MODULES,
+            ModulePackageList::SYMFONY_PACKAGE => ModuleClassList::SYMFONY_MODULES,
             default => throw ConfigurationException::create(sprintf('Given unknown package name %s. Available packages name are: %s', $packageName, implode(',', self::allPackages())))
         };
     }
@@ -52,6 +54,7 @@ final class ModulePackageList
             self::JMS_CONVERTER_PACKAGE,
             self::TRACING_PACKAGE,
             self::LARAVEL_PACKAGE,
+            self::SYMFONY_PACKAGE,
         ];
     }
 

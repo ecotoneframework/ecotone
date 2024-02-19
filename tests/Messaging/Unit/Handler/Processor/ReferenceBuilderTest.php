@@ -73,4 +73,32 @@ class ReferenceBuilderTest extends TestCase
             )
         );
     }
+
+    /**
+     * @throws ReflectionException
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_creating_reference_converter_with_expression()
+    {
+        $referenceName = 'refName';
+        $interfaceToCall = InterfaceToCall::create(ServiceExpectingOneArgument::class, 'withUnionParameter');
+        $interfaceParameter = $interfaceToCall->getInterfaceParameters()[0];
+        $value = new stdClass();
+        $value->name = 'someName';
+
+        $converter = ComponentTestBuilder::create()
+            ->withReference($referenceName, $value)
+            ->build(new BoundParameterConverter(
+                ReferenceBuilder::create($interfaceParameter->getName(), $referenceName, 'service.name'),
+                $interfaceToCall,
+                $interfaceParameter
+            ));
+
+        $this->assertEquals(
+            'someName',
+            $converter->getArgumentFrom(
+                MessageBuilder::withPayload('paramName')->build(),
+            )
+        );
+    }
 }

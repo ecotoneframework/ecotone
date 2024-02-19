@@ -91,7 +91,11 @@ class ParameterConverterAnnotationFactory
                     return PayloadBuilder::create($interfaceParameter->getName());
                 }
             } elseif ($annotation instanceof Reference) {
-                return ReferenceBuilder::create($interfaceParameter->getName(), $annotation->getReferenceName() ? $annotation->getReferenceName() : $interfaceParameter->getTypeHint());
+                return ReferenceBuilder::create(
+                    $interfaceParameter->getName(),
+                    $annotation->getReferenceName() ?: $interfaceParameter->getTypeHint(),
+                    $annotation->getExpression(),
+                );
             } elseif ($annotation instanceof Headers) {
                 return AllHeadersBuilder::createWith($interfaceParameter->getName());
             } elseif ($annotation instanceof ConfigurationVariable) {

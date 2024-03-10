@@ -8,6 +8,9 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 
 class ConsoleCommandConfiguration implements DefinedObject
 {
+    public const HEADER_PARAMETER_NAME = 'header';
+    public const HEADER_NAME = 'console_headers';
+
     private string $name;
     private string $channelName;
     /**
@@ -22,6 +25,14 @@ class ConsoleCommandConfiguration implements DefinedObject
     {
         $this->name               = $name;
         $this->channelName = $channelName;
+        $parameterNames[] = ConsoleCommandParameter::createWithDefaultValue(
+            self::HEADER_PARAMETER_NAME,
+            '',
+            true,
+            true,
+            [],
+        );
+
         $this->parameterNames = $parameterNames;
     }
 

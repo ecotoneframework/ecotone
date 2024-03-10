@@ -68,7 +68,7 @@ class ParameterConverterAnnotationFactory
         return $parameterConverters;
     }
 
-    private function getConverterFor(InterfaceParameter $interfaceParameter): ParameterConverterBuilder|null
+    public function getConverterFor(InterfaceParameter $interfaceParameter): ParameterConverterBuilder|null
     {
         foreach ($interfaceParameter->getAnnotations() as $annotation) {
             if ($annotation instanceof Header) {

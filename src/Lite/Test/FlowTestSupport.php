@@ -335,4 +335,14 @@ final class FlowTestSupport
     {
         return $this->configuredMessagingSystem->getGatewayByName($referenceName);
     }
+
+    /**
+     * @param array<string, mixed> $parameters
+     */
+    public function runConsoleCommand(string $name, array $parameters)
+    {
+        $this->configuredMessagingSystem->runConsoleCommand($name, $parameters);
+
+        return $this;
+    }
 }

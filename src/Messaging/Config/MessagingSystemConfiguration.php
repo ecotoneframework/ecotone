@@ -7,6 +7,7 @@ namespace Ecotone\Messaging\Config;
 use function array_map;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
+
 use Ecotone\AnnotationFinder\AnnotationFinderFactory;
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
@@ -35,7 +36,7 @@ use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -1137,7 +1138,7 @@ final class MessagingSystemConfiguration implements Configuration
 
         foreach ($this->consoleCommands as $consoleCommandConfiguration) {
             $builder->register("console.{$consoleCommandConfiguration->getName()}", new Definition(ConsoleCommandRunner::class, [
-                Reference::to(MessagingEntrypoint::class),
+                Reference::to(MessagingEntrypointWithHeadersPropagation::class),
                 $consoleCommandConfiguration,
             ]));
         }

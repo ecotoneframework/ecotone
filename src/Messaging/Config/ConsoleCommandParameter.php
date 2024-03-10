@@ -7,18 +7,18 @@ use Ecotone\Messaging\Config\Container\Definition;
 
 class ConsoleCommandParameter implements DefinedObject
 {
-    public function __construct(private string $name, private string $messageHeaderName, private bool $isOption, private mixed $defaultValue, private bool $hasDefaultValue)
+    public function __construct(private string $name, private string $messageHeaderName, private bool $isOption, private bool $isArray, private mixed $defaultValue, private bool $hasDefaultValue)
     {
     }
 
-    public static function create(string $name, string $messageHeaderName, bool $isOption): self
+    public static function create(string $name, string $messageHeaderName, bool $isOption, bool $isArray = false): self
     {
-        return new self($name, $messageHeaderName, $isOption, null, false);
+        return new self($name, $messageHeaderName, $isOption, $isArray, null, false);
     }
 
-    public static function createWithDefaultValue(string $name, string $messageHeaderName, bool $isOption, $defaultValue): self
+    public static function createWithDefaultValue(string $name, string $messageHeaderName, bool $isOption, bool $isArray, mixed $defaultValue): self
     {
-        return new self($name, $messageHeaderName, $isOption, $defaultValue, true);
+        return new self($name, $messageHeaderName, $isOption, $isArray, $defaultValue, true);
     }
 
     public function getName(): string
@@ -46,12 +46,18 @@ class ConsoleCommandParameter implements DefinedObject
         return $this->hasDefaultValue;
     }
 
+    public function isArray(): bool
+    {
+        return $this->isArray;
+    }
+
     public function getDefinition(): Definition
     {
         return new Definition(self::class, [
             $this->name,
             $this->messageHeaderName,
             $this->isOption,
+            $this->isArray,
             $this->defaultValue,
             $this->hasDefaultValue,
         ]);

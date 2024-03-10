@@ -29,6 +29,7 @@ use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -2157,11 +2158,12 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $queueChannel = QueueChannel::create();
         $consoleCommand = ConsoleCommandConfiguration::create($channelName, $consoleCommandName, [
             ConsoleCommandParameter::create('id', 'header.id', false),
-            ConsoleCommandParameter::createWithDefaultValue('token', 'header.token', false, 123),
+            ConsoleCommandParameter::createWithDefaultValue('token', 'header.token', false, false, 123),
         ]);
 
         $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
             ->registerGatewayBuilder(GatewayProxyBuilder::create(MessagingEntrypoint::class, MessagingEntrypoint::class, 'sendWithHeaders', $channelName))
+            ->registerGatewayBuilder(GatewayProxyBuilder::create(MessagingEntrypointWithHeadersPropagation::class, MessagingEntrypointWithHeadersPropagation::class, 'sendWithHeaders', $channelName))
             ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, $queueChannel))
             ->registerConsoleCommand($consoleCommand)
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
@@ -2180,11 +2182,12 @@ class MessagingSystemConfigurationTest extends MessagingTest
         $queueChannel = QueueChannel::create();
         $consoleCommand = ConsoleCommandConfiguration::create($channelName, $consoleCommandName, [
             ConsoleCommandParameter::create('id', 'header.id', false),
-            ConsoleCommandParameter::createWithDefaultValue('token', 'header.token', false, 123),
+            ConsoleCommandParameter::createWithDefaultValue('token', 'header.token', false, false, 123),
         ]);
 
         $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
             ->registerGatewayBuilder(GatewayProxyBuilder::create(MessagingEntrypoint::class, MessagingEntrypoint::class, 'sendWithHeaders', $channelName))
+            ->registerGatewayBuilder(GatewayProxyBuilder::create(MessagingEntrypointWithHeadersPropagation::class, MessagingEntrypointWithHeadersPropagation::class, 'sendWithHeaders', $channelName))
             ->registerMessageChannel(SimpleMessageChannelBuilder::create($channelName, $queueChannel))
             ->registerConsoleCommand($consoleCommand)
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());

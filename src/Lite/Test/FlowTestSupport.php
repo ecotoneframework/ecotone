@@ -288,7 +288,7 @@ final class FlowTestSupport
      * @param class-string<T> $className
      * @return T
      */
-    public function getAggregate(string $className, string|array|object $identifiers): object
+    public function getAggregate(string $className, string|int|array|object $identifiers): object
     {
         return $this->messagingEntrypoint->sendWithHeaders(
             [],

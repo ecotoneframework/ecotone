@@ -30,6 +30,8 @@ class StringToUuidConverter implements Converter
      */
     public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
     {
-        return $sourceType->isString() && $targetType->isClassOfType(UuidInterface::class);
+        return $sourceType->isString()
+            && $sourceMediaType->isCompatibleWith(MediaType::createApplicationXPHP())
+            && $targetType->isClassOfType(UuidInterface::class);
     }
 }

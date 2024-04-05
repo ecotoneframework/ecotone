@@ -8,6 +8,7 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\UnionTypeDescriptor;
 
 /**
  * Class DefaultHeaderMapper
@@ -16,7 +17,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
  */
 class DefaultHeaderMapper implements HeaderMapper
 {
-    public const DEFAULT_HEADER_CONVERSION_MEDIA_TYPE = MediaType::APPLICATION_JSON;
+    public const FALLBACK_HEADER_CONVERSION_MEDIA_TYPE = MediaType::APPLICATION_JSON;
     public const CONVERTED_HEADERS_TO_DIFFERENT_FORMAT = 'ecotone.convertedKeys';
 
     /**
@@ -168,23 +169,23 @@ class DefaultHeaderMapper implements HeaderMapper
             $conversionService->canConvert(
                 TypeDescriptor::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
-                TypeDescriptor::createStringType(),
-                MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
+                UnionTypeDescriptor::createWith([TypeDescriptor::createStringType(), TypeDescriptor::createIntegerType()]),
+                MediaType::createApplicationXPHP()
             )
         ) {
             $convertedHeaders[$mappedHeader] =  $conversionService->convert(
                 $value,
                 TypeDescriptor::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
-                TypeDescriptor::createStringType(),
-                MediaType::parseMediaType(self::DEFAULT_HEADER_CONVERSION_MEDIA_TYPE)
+                UnionTypeDescriptor::createWith([TypeDescriptor::createStringType(), TypeDescriptor::createIntegerType()]),
+                MediaType::createApplicationXPHP()
             );
         } elseif (
             $conversionService->canConvert(
                 TypeDescriptor::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
                 TypeDescriptor::createStringType(),
-                MediaType::createApplicationXPHP()
+                MediaType::parseMediaType(self::FALLBACK_HEADER_CONVERSION_MEDIA_TYPE)
             )
         ) {
             $convertedHeaders[$mappedHeader] =  $conversionService->convert(
@@ -192,7 +193,7 @@ class DefaultHeaderMapper implements HeaderMapper
                 TypeDescriptor::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
                 TypeDescriptor::createStringType(),
-                MediaType::createApplicationXPHP()
+                MediaType::parseMediaType(self::FALLBACK_HEADER_CONVERSION_MEDIA_TYPE)
             );
         }
 

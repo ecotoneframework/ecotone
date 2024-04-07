@@ -3,11 +3,11 @@
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 
 use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\Attribute\IgnorePayload;
 use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Modelling\Attribute\Version;
 use Ecotone\Modelling\WithAggregateEvents;
 
 #[Aggregate]
@@ -25,7 +25,7 @@ class Order implements VersionAggregate
      * @var string
      */
     private $shippingAddress;
-    #[AggregateVersion]
+    #[Version]
     private $version;
     /**
      * @var string|null

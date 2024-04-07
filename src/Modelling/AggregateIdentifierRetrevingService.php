@@ -6,6 +6,7 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
+use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
@@ -18,26 +19,24 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class AggregateIdentifierRetrevingService
 {
-    private ConversionService $conversionService;
-    private TypeDescriptor $typeToConvertTo;
-    private array $payloadIdentifierMapping;
-    private array $metadataIdentifierMapping;
-    private PropertyReaderAccessor $propertyReaderAccessor;
+    public function __construct(
+        private string $aggregateClassName,
+        private ConversionService $conversionService,
+        private PropertyReaderAccessor $propertyReaderAccessor,
+        private TypeDescriptor $typeToConvertTo,
+        private array $metadataIdentifierMapping,
+        private array $messageIdentifierMapping,
+        private array $identifierMapping,
+        private ExpressionEvaluationService $expressionEvaluationService,
+    ) {
 
-    public function __construct(private string $aggregateClassName, ConversionService $conversionService, PropertyReaderAccessor $propertyReaderAccessor, TypeDescriptor $typeToConvertTo, array $metadataIdentifierMapping, array $payloadIdentifierMapping)
-    {
-        $this->conversionService         = $conversionService;
-        $this->propertyReaderAccessor    = $propertyReaderAccessor;
-        $this->metadataIdentifierMapping = $metadataIdentifierMapping;
-        $this->payloadIdentifierMapping = $payloadIdentifierMapping;
-        $this->typeToConvertTo = $typeToConvertTo;
     }
 
     public function convert(Message $message): Message
     {
         if ($message->getHeaders()->containsKey(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER)) {
             $aggregateIds = $message->getHeaders()->get(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER);
-            $aggregateIds = is_array($aggregateIds) ? $aggregateIds : [array_key_first($this->payloadIdentifierMapping) => $aggregateIds];
+            $aggregateIds = is_array($aggregateIds) ? $aggregateIds : [array_key_first($this->messageIdentifierMapping) => $aggregateIds];
 
             return MessageBuilder::fromMessage($message)
                 ->setHeader(AggregateMessage::AGGREGATE_ID, AggregateIdResolver::resolveArrayOfIdentifiers($this->aggregateClassName, $aggregateIds))
@@ -65,7 +64,7 @@ class AggregateIdentifierRetrevingService
         }
 
         $aggregateIdentifiers = [];
-        foreach ($this->payloadIdentifierMapping as $aggregateIdentifierName => $aggregateIdentifierMappingName) {
+        foreach ($this->messageIdentifierMapping as $aggregateIdentifierName => $aggregateIdentifierMappingName) {
             if (is_null($aggregateIdentifierMappingName)) {
                 $aggregateIdentifiers[$aggregateIdentifierName] = null;
                 continue;
@@ -81,6 +80,12 @@ class AggregateIdentifierRetrevingService
             if (array_key_exists($headerName, $metadata)) {
                 $aggregateIdentifiers[$identifierName] = $metadata[$headerName];
             }
+        }
+        foreach ($this->identifierMapping as $identifierName => $expression) {
+            $aggregateIdentifiers[$identifierName] = $this->expressionEvaluationService->evaluate($expression, [
+                'headers' => $metadata,
+                'payload' => $payload,
+            ]);
         }
 
         return MessageBuilder::fromMessage($message)

@@ -5,8 +5,11 @@ namespace Ecotone\Modelling\Attribute;
 use Attribute;
 use Ecotone\Messaging\Support\Assert;
 
+/**
+ * @deprecated Ecotone 2.0 will drop this attribute. Use #[IdentifierMethod] instead
+ */
 #[Attribute(Attribute::TARGET_METHOD)]
-final class AggregateIdentifierMethod
+class AggregateIdentifierMethod
 {
     private string $identifierPropertyName;
 

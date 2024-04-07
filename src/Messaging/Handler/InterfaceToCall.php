@@ -105,7 +105,7 @@ class InterfaceToCall
     public function hasMethodAnnotation(Type $className): bool
     {
         foreach ($this->methodAnnotations as $methodAnnotation) {
-            if (TypeDescriptor::createFromVariable($methodAnnotation)->equals($className)) {
+            if (TypeDescriptor::createFromVariable($methodAnnotation)->isCompatibleWith($className)) {
                 return true;
             }
         }
@@ -123,7 +123,7 @@ class InterfaceToCall
     public function hasClassAnnotation(Type $className): bool
     {
         foreach ($this->getClassAnnotations() as $classAnnotation) {
-            if (TypeDescriptor::createFromVariable($classAnnotation)->equals($className)) {
+            if (TypeDescriptor::createFromVariable($classAnnotation)->isCompatibleWith($className)) {
                 return true;
             }
         }
@@ -134,7 +134,7 @@ class InterfaceToCall
     public function getSingleClassAnnotationOf(Type $className): object
     {
         foreach ($this->getClassAnnotations() as $classAnnotation) {
-            if (TypeDescriptor::createFromVariable($classAnnotation)->equals($className)) {
+            if (TypeDescriptor::createFromVariable($classAnnotation)->isCompatibleWith($className)) {
                 return $classAnnotation;
             }
         }
@@ -149,7 +149,7 @@ class InterfaceToCall
     {
         $annotations = [];
         foreach ($this->getClassAnnotations() as $classAnnotation) {
-            if (TypeDescriptor::createFromVariable($classAnnotation)->equals($className)) {
+            if (TypeDescriptor::createFromVariable($classAnnotation)->isCompatibleWith($className)) {
                 $annotations[] = $classAnnotation;
             }
         }
@@ -165,7 +165,7 @@ class InterfaceToCall
     public function getSingleMethodAnnotationOf(Type $className): object
     {
         foreach ($this->methodAnnotations as $methodAnnotation) {
-            if (TypeDescriptor::createFromVariable($methodAnnotation)->equals($className)) {
+            if (TypeDescriptor::createFromVariable($methodAnnotation)->isCompatibleWith($className)) {
                 return $methodAnnotation;
             }
         }
@@ -180,7 +180,7 @@ class InterfaceToCall
     {
         $methodAnnotations = [];
         foreach ($this->methodAnnotations as $methodAnnotation) {
-            if (TypeDescriptor::createFromVariable($methodAnnotation)->equals($className)) {
+            if (TypeDescriptor::createFromVariable($methodAnnotation)->isCompatibleWith($className)) {
                 $methodAnnotations[] = $methodAnnotation;
             }
         }

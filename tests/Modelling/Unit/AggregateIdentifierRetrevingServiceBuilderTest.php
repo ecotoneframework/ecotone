@@ -32,6 +32,7 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         $aggregateCallingCommandHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
             ClassDefinition::createFor(TypeDescriptor::create(OrderFulfilment::class)),
             ['orderId' => 'paymentId'],
+            [],
             ClassDefinition::createFor(TypeDescriptor::create(PaymentWasDoneEvent::class)),
             InterfaceToCallRegistry::createEmpty()
         );
@@ -58,6 +59,7 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         $aggregateRetrevingServiceHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
             ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodForEventSourcedAggregate::class)),
             ['id' => 'orderId'],
+            [],
             null,
             InterfaceToCallRegistry::createEmpty()
         );
@@ -83,6 +85,7 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         $aggregateCallingCommandHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
             ClassDefinition::createFor(TypeDescriptor::create(Basket::class)),
             [],
+            [],
             null,
             InterfaceToCallRegistry::createEmpty()
         );
@@ -107,6 +110,7 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
     {
         $aggregateCallingCommandHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
             ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
+            [],
             [],
             ClassDefinition::createFor(TypeDescriptor::create(ChangeArticleContentCommand::class)),
             InterfaceToCallRegistry::createEmpty()
@@ -135,6 +139,7 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         AggregateIdentifierRetrevingServiceBuilder::createWith(
             ClassDefinition::createFor(TypeDescriptor::create(Product::class)),
             [],
+            [],
             null,
             InterfaceToCallRegistry::createEmpty()
         );
@@ -147,6 +152,7 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         AggregateIdentifierRetrevingServiceBuilder::createWith(
             ClassDefinition::createFor(TypeDescriptor::create(OrderFulfilment::class)),
             ['some' => 'paymentId', 'orderId' => 'x'],
+            [],
             ClassDefinition::createFor(TypeDescriptor::create(PaymentWasDoneEvent::class)),
             InterfaceToCallRegistry::createEmpty()
         );

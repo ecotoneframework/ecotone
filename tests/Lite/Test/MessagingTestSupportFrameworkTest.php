@@ -15,6 +15,7 @@ use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\DestinationResolutionException;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Scheduling\TimeSpan;
 use Ecotone\Modelling\CommandBus;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
@@ -144,21 +145,18 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, PlaceOrderConverter::class],
             [new OrderService(), new PlaceOrderConverter(), 'logger' => new NullLogger()],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    TestConfiguration::createWithDefaults()
-                        ->withSpyOnChannel('orders'),
-                ]),
             enableAsynchronousProcessing: [
                 SimpleMessageChannelBuilder::createQueueChannel('orders', conversionMediaType: MediaType::createApplicationXPHPArray()),
             ],
+            testConfiguration: TestConfiguration::createWithDefaults()
+                ->withSpyOnChannel('orders')
         );
 
         $ecotoneTestSupport->sendCommandWithRoutingKey('order.register', new PlaceOrder('someId'));
 
         $this->assertEquals(
             [['orderId' => 'someId']],
-            $ecotoneTestSupport->getSpiedChannelRecordedMessagePayloads('orders')
+            $ecotoneTestSupport->getRecordedMessagePayloadsFrom('orders')
         );
 
         /** Failing on event serialization */
@@ -189,14 +187,14 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport->getMessagingTestSupport()->discardRecordedMessages();
         $this->assertCount(
             0,
-            $ecotoneTestSupport->getMessagingTestSupport()->getSpiedChannelRecordedMessages('orders')
+            $ecotoneTestSupport->getMessagingTestSupport()->getRecordedEcotoneMessagesFrom('orders')
         );
 
         $ecotoneTestSupport->run('orders');
 
         $this->assertEquals(
             ['orderId' => 'someId'],
-            $ecotoneTestSupport->getMessagingTestSupport()->getSpiedChannelRecordedMessages('orders')[0]->getPayload()
+            $ecotoneTestSupport->getMessagingTestSupport()->getRecordedEcotoneMessagesFrom('orders')[0]->getPayload()
         );
 
         $this->assertEquals([$orderId], $ecotoneTestSupport->getQueryBus()->sendWithRouting('order.getNotifiedOrders'));
@@ -462,34 +460,53 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $this->assertNotEmpty($ecotoneLite->getQueryBus()->sendWithRouting('order.getOrders'));
     }
 
-    public function test_releasing_delayed_message()
+    public function test_releasing_delayed_message_with_passed_milliseconds()
     {
-        $ecotoneTestSupport = EcotoneLite::bootstrapForTesting(
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, PlaceOrderConverter::class, OrderWasPlacedConverter::class],
             [new OrderService(), new PlaceOrderConverter(), new OrderWasPlacedConverter()],
-            ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('orders', true, MediaType::createApplicationXPHPArray()),
-                    PollingMetadata::create('orders')
-                        ->withTestingSetup(2, maxExecutionTimeInMilliseconds: 1000),
-                ]),
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('orders', true, MediaType::createApplicationXPHPArray()),
+            ]
         );
 
         $orderId = 'someId';
-        $ecotoneTestSupport->getCommandBus()->sendWithRouting('order.register', new PlaceOrder($orderId), metadata: [
+        $ecotoneTestSupport->sendCommandWithRoutingKey('order.register', new PlaceOrder($orderId), metadata: [
             MessageHeaders::DELIVERY_DELAY => 100,
         ]);
 
         $ecotoneTestSupport->run('orders');
-        $this->assertEquals([], $ecotoneTestSupport->getQueryBus()->sendWithRouting('order.getNotifiedOrders'));
+        $this->assertEquals([], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
 
-        $ecotoneTestSupport->getMessagingTestSupport()->releaseMessagesAwaitingFor('orders', 10);
-        $ecotoneTestSupport->run('orders');
-        $this->assertEquals([], $ecotoneTestSupport->getQueryBus()->sendWithRouting('order.getNotifiedOrders'));
+        $ecotoneTestSupport->releaseAwaitingMessagesAndRunConsumer('orders', 10);
+        $this->assertEquals([], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
 
-        $ecotoneTestSupport->getMessagingTestSupport()->releaseMessagesAwaitingFor('orders', 100);
+        $ecotoneTestSupport->releaseAwaitingMessagesAndRunConsumer('orders', 100);
+        $this->assertEquals([$orderId], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
+    }
+
+    public function test_releasing_delayed_message()
+    {
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [OrderService::class, PlaceOrderConverter::class, OrderWasPlacedConverter::class],
+            [new OrderService(), new PlaceOrderConverter(), new OrderWasPlacedConverter()],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('orders', true, MediaType::createApplicationXPHPArray()),
+            ]
+        );
+
+        $orderId = 'someId';
+        $ecotoneTestSupport->sendCommandWithRoutingKey('order.register', new PlaceOrder($orderId), metadata: [
+            MessageHeaders::DELIVERY_DELAY => new TimeSpan(100),
+        ]);
+
         $ecotoneTestSupport->run('orders');
-        $this->assertEquals([$orderId], $ecotoneTestSupport->getQueryBus()->sendWithRouting('order.getNotifiedOrders'));
+        $this->assertEquals([], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
+
+        $ecotoneTestSupport->releaseAwaitingMessagesAndRunConsumer('orders', new TimeSpan(milliseconds: 10));
+        $this->assertEquals([], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
+
+        $ecotoneTestSupport->releaseAwaitingMessagesAndRunConsumer('orders', new TimeSpan(100));
+        $this->assertEquals([$orderId], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
     }
 }

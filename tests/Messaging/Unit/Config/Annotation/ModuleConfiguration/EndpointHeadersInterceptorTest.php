@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\Messaging\Attribute\Endpoint\AddHeader;
-use Ecotone\Messaging\Attribute\Endpoint\Delayed;
-use Ecotone\Messaging\Attribute\Endpoint\ExpireAfter;
-use Ecotone\Messaging\Attribute\Endpoint\Priority;
-use Ecotone\Messaging\Attribute\Endpoint\RemoveHeader;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders\EndpointHeadersInterceptor;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Lite\Test\TestConfiguration;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\MessageHeaders;
 use PHPUnit\Framework\TestCase;
+use Test\Ecotone\Messaging\Fixture\AddHeaders\AddingMultipleHeaders;
 
 /**
  * Class EndpointHeadersInterceptorTest
@@ -22,58 +20,31 @@ use PHPUnit\Framework\TestCase;
  */
 class EndpointHeadersInterceptorTest extends TestCase
 {
-    public function test_adding_delivery_delay()
+    public function test_adding_multiple_headers()
     {
-        $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
-        $annotation = new Delayed(1);
-
-        $this->assertEquals(
-            [MessageHeaders::DELIVERY_DELAY => 1],
-            $endpointHeadersInterceptor->addMetadata($annotation, null, null, null, null)
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [
+                AddingMultipleHeaders::class,
+            ],
+            [
+                AddingMultipleHeaders::class => new AddingMultipleHeaders(),
+            ],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ],
+            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async')
         );
-    }
 
-    public function test_adding_time_to_live()
-    {
-        $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
-        $annotation = new ExpireAfter(1);
+        $headers = $ecotoneLite
+            ->sendCommandWithRoutingKey('addHeaders', metadata: [
+                'user' => '1233',
+            ])
+            ->getRecordedEcotoneMessagesFrom('async')[0]->getHeaders()->headers();
 
-        $this->assertEquals(
-            [MessageHeaders::TIME_TO_LIVE => 1],
-            $endpointHeadersInterceptor->addMetadata(null, $annotation, null, null, null)
-        );
-    }
-
-    public function test_adding_priority()
-    {
-        $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
-        $annotation = new Priority(1);
-
-        $this->assertEquals(
-            [MessageHeaders::PRIORITY => 1],
-            $endpointHeadersInterceptor->addMetadata(null, null, $annotation, null, null)
-        );
-    }
-
-    public function test_adding_header()
-    {
-        $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
-        $annotation = new AddHeader('token', 123);
-
-        $this->assertEquals(
-            ['token' => 123],
-            $endpointHeadersInterceptor->addMetadata(null, null, null, $annotation, null)
-        );
-    }
-
-    public function test_removing_header()
-    {
-        $endpointHeadersInterceptor = new EndpointHeadersInterceptor();
-        $annotation = new RemoveHeader('token');
-
-        $this->assertEquals(
-            ['token' => null],
-            $endpointHeadersInterceptor->addMetadata(null, null, null, null, $annotation)
-        );
+        $this->assertEquals(1001, $headers[MessageHeaders::TIME_TO_LIVE]);
+        $this->assertEquals(1000, $headers[MessageHeaders::DELIVERY_DELAY]);
+        $this->assertEquals(1, $headers[MessageHeaders::PRIORITY]);
+        $this->assertEquals(123, $headers['token']);
+        $this->assertArrayNotHasKey('user', $headers);
     }
 }

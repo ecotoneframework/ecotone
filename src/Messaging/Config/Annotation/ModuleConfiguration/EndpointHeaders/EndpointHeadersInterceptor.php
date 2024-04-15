@@ -6,9 +6,9 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeader
 
 use Ecotone\Messaging\Attribute\Endpoint\AddHeader;
 use Ecotone\Messaging\Attribute\Endpoint\Delayed;
-use Ecotone\Messaging\Attribute\Endpoint\ExpireAfter;
 use Ecotone\Messaging\Attribute\Endpoint\Priority;
 use Ecotone\Messaging\Attribute\Endpoint\RemoveHeader;
+use Ecotone\Messaging\Attribute\Endpoint\TimeToLive;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\MessageHeaders;
@@ -20,24 +20,24 @@ use Ecotone\Messaging\MessageHeaders;
  */
 class EndpointHeadersInterceptor implements DefinedObject
 {
-    public function addMetadata(?Delayed $deliveryDelay, ?ExpireAfter $timeToLive, ?Priority $priority, ?AddHeader $addHeader, ?RemoveHeader $removeHeader): array
+    public function addMetadata(?AddHeader $addHeader, ?Delayed $delayed, ?Priority $priority, ?TimeToLive $timeToLive, ?RemoveHeader $removeHeader): array
     {
         $metadata = [];
 
-        if ($deliveryDelay) {
-            $metadata[MessageHeaders::DELIVERY_DELAY] = $deliveryDelay->getTime();
+        if ($addHeader) {
+            $metadata[$addHeader->getHeaderName()] = $addHeader->getHeaderValue();
         }
 
-        if ($timeToLive) {
-            $metadata[MessageHeaders::TIME_TO_LIVE] = $timeToLive->getTime();
+        if ($delayed) {
+            $metadata[MessageHeaders::DELIVERY_DELAY] = $delayed->getHeaderValue();
         }
 
         if ($priority) {
-            $metadata[MessageHeaders::PRIORITY] = $priority->getNumber();
+            $metadata[MessageHeaders::PRIORITY] = $priority->getHeaderValue();
         }
 
-        if ($addHeader) {
-            $metadata[$addHeader->getHeaderName()] = $addHeader->getHeaderValue();
+        if ($timeToLive) {
+            $metadata[MessageHeaders::TIME_TO_LIVE] = $timeToLive->getHeaderValue();
         }
 
         if ($removeHeader) {

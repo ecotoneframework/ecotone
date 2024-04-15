@@ -12,6 +12,9 @@ use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\Saga;
 
 #[ModuleAnnotation]
 class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
@@ -21,6 +24,10 @@ class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
      */
     public static function createMessageHandlerFrom(AnnotatedFinding $annotationRegistration, InterfaceToCallRegistry $interfaceToCallRegistry): MessageHandlerBuilderWithParameterConverters
     {
+        if ($annotationRegistration->hasClassAnnotation(Saga::class) || $annotationRegistration->hasClassAnnotation(Aggregate::class)) {
+            throw InvalidArgumentException::create("Message Handler or Service Activator works as stateless Handler and can't be used on Aggregate or Saga");
+        }
+
         /** @var ServiceActivator $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
@@ -29,7 +36,8 @@ class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
             ->withRequiredReply($annotation->isRequiresReply())
             ->withOutputMessageChannel($annotation->getOutputChannelName())
             ->withInputChannelName($annotation->getInputChannelName())
-            ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames());
+            ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames())
+            ->withChangingHeaders($annotation->isChangingHeaders());
     }
 
     /**

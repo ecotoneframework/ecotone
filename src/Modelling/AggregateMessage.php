@@ -17,4 +17,5 @@ interface AggregateMessage
     public const TARGET_VERSION = 'ecotone.modelling.aggregate.target_version';
     public const CALLED_AGGREGATE_EVENTS = 'ecotone.modelling.called_aggregate_events';
     public const RESULT_AGGREGATE_EVENTS = 'ecotone.modelling.result_aggregate_events';
+    public const NULL_EXECUTION_RESULT = 'ecotone.modelling.is_nullable_execution_result';
 }

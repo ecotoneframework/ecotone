@@ -2,6 +2,8 @@
 
 namespace Ecotone\Messaging\Channel\PollableChannel\Serialization;
 
+use Ecotone\Messaging\Scheduling\TimeSpan;
+
 class OutboundMessage
 {
     /** @var mixed */
@@ -17,13 +19,13 @@ class OutboundMessage
     /** @var int|null */
     private $priority;
 
-    public function __construct($payload, array $headers, ?string $contentType, ?int $deliveryDelay, ?int $timeToLive, ?int $priority)
+    public function __construct($payload, array $headers, ?string $contentType, int|TimeSpan|null $deliveryDelay, int|TimeSpan|null $timeToLive, ?int $priority)
     {
         $this->payload = $payload;
         $this->headers = $headers;
         $this->contentType = $contentType;
-        $this->deliveryDelay = $deliveryDelay;
-        $this->timeToLive = $timeToLive;
+        $this->deliveryDelay = $deliveryDelay instanceof TimeSpan ? $deliveryDelay->toMilliseconds() : $deliveryDelay;
+        $this->timeToLive = $timeToLive instanceof TimeSpan ? $timeToLive->toMilliseconds() : $timeToLive;
         $this->priority = $priority;
     }
 

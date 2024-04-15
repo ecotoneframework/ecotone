@@ -19,7 +19,7 @@ interface SubscribableChannel extends MessageChannel
     public function subscribe(MessageHandler $messageHandler): void;
 
     /**
-     * Un-register a {@link MessageHandler}.
+     * Un-register a {@link InternalHandler}.
      *
      * @param MessageHandler $messageHandler
      * @return void

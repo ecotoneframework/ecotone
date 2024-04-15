@@ -7,8 +7,10 @@ namespace Ecotone\Lite\Test\Configuration;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Lite\Test\MessagingTestSupport;
 use Ecotone\Lite\Test\TestConfiguration;
+use Ecotone\Messaging\Attribute\InternalHandler;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
@@ -28,6 +30,8 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Precedence;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
@@ -46,12 +50,43 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
     public const GET_RECORDED_QUERY_MESSAGES = 'getRecordedQueryMessages';
     public const DISCARD_MESSAGES = 'discardRecordedMessages';
     public const RELEASE_DELAYED_MESSAGES = 'releaseMessagesAwaitingFor';
-    public const GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS = 'getSpiedChannelRecordedMessagePayloads';
-    public const GET_SPIED_CHANNEL_RECORDED_MESSAGES = 'getSpiedChannelRecordedMessages';
+    public const GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS = 'getRecordedMessagePayloadsFrom';
+    public const GET_SPIED_CHANNEL_RECORDED_MESSAGES = 'getRecordedEcotoneMessagesFrom';
+
+    private function __construct(private array $spiedChannels)
+    {
+
+    }
 
     public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
-        return new self();
+        $spiedChannels = [];
+        foreach ($annotationRegistrationService->findAnnotatedMethods(CommandHandler::class) as $messageHandler) {
+            /** @var CommandHandler $attribute */
+            $attribute = $messageHandler->getAnnotationForMethod();
+
+            if ($attribute->getOutputChannelName()) {
+                $spiedChannels[] = $attribute->getOutputChannelName();
+            }
+        }
+        foreach ($annotationRegistrationService->findAnnotatedMethods(EventHandler::class) as $messageHandler) {
+            /** @var EventHandler $attribute */
+            $attribute = $messageHandler->getAnnotationForMethod();
+
+            if ($attribute->getOutputChannelName()) {
+                $spiedChannels[] = $attribute->getOutputChannelName();
+            }
+        }
+        foreach ($annotationRegistrationService->findAnnotatedMethods(InternalHandler::class) as $messageHandler) {
+            /** @var InternalHandler $attribute */
+            $attribute = $messageHandler->getAnnotationForMethod();
+
+            if ($attribute->getOutputChannelName()) {
+                $spiedChannels[] = $attribute->getOutputChannelName();
+            }
+        }
+
+        return new self($spiedChannels);
     }
 
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
@@ -87,43 +122,45 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
             $messagingConfiguration
                 ->registerChannelInterceptor(new SerializationChannelAdapterBuilder($testConfiguration->getChannelToConvertOn(), $testConfiguration->getPollableChannelMediaTypeConversion()));
         }
-        if ($testConfiguration->getSpiedChannels()) {
-            foreach ($testConfiguration->getSpiedChannels() as $spiedChannel) {
-                $messagingConfiguration
-                    ->registerChannelInterceptor(new SpiedChannelAdapterBuilder($spiedChannel))
-                    ->registerMessageHandler(ServiceActivatorBuilder::create(
-                        MessageCollectorHandler::class,
-                        self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS
-                    )
-                        ->withMethodParameterConverters([
-                            HeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
-                        ])
-                        ->withInputChannelName(self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS)))
-                    ->registerMessageHandler(ServiceActivatorBuilder::create(
-                        MessageCollectorHandler::class,
-                        self::GET_SPIED_CHANNEL_RECORDED_MESSAGES
-                    )
-                        ->withMethodParameterConverters([
-                            HeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
-                        ])
-                        ->withInputChannelName(self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGES)))
-                    ->registerGatewayBuilder(GatewayProxyBuilder::create(
-                        MessagingTestSupport::class,
-                        MessagingTestSupport::class,
-                        self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS,
-                        self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS)
-                    )->withParameterConverters([
-                        GatewayHeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
-                    ]))
-                    ->registerGatewayBuilder(GatewayProxyBuilder::create(
-                        MessagingTestSupport::class,
-                        MessagingTestSupport::class,
-                        self::GET_SPIED_CHANNEL_RECORDED_MESSAGES,
-                        self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGES)
-                    )->withParameterConverters([
-                        GatewayHeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
-                    ]));
-            }
+
+        foreach ($this->spiedChannels as $spiedChannel) {
+            $messagingConfiguration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($spiedChannel));
+        }
+        foreach (array_unique(array_merge($testConfiguration->getSpiedChannels(), $this->spiedChannels)) as $spiedChannel) {
+            $messagingConfiguration
+                ->registerChannelInterceptor(new SpiedChannelAdapterBuilder($spiedChannel))
+                ->registerMessageHandler(ServiceActivatorBuilder::create(
+                    MessageCollectorHandler::class,
+                    self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS
+                )
+                    ->withMethodParameterConverters([
+                        HeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
+                    ])
+                    ->withInputChannelName(self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS)))
+                ->registerMessageHandler(ServiceActivatorBuilder::create(
+                    MessageCollectorHandler::class,
+                    self::GET_SPIED_CHANNEL_RECORDED_MESSAGES
+                )
+                    ->withMethodParameterConverters([
+                        HeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
+                    ])
+                    ->withInputChannelName(self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGES)))
+                ->registerGatewayBuilder(GatewayProxyBuilder::create(
+                    MessagingTestSupport::class,
+                    MessagingTestSupport::class,
+                    self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS,
+                    self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS)
+                )->withParameterConverters([
+                    GatewayHeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
+                ]))
+                ->registerGatewayBuilder(GatewayProxyBuilder::create(
+                    MessagingTestSupport::class,
+                    MessagingTestSupport::class,
+                    self::GET_SPIED_CHANNEL_RECORDED_MESSAGES,
+                    self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGES)
+                )->withParameterConverters([
+                    GatewayHeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
+                ]));
         }
     }
 

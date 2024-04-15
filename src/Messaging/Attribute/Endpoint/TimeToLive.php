@@ -9,13 +9,13 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Scheduling\TimeSpan;
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-class Delayed extends AddHeader
+class TimeToLive extends AddHeader
 {
     /**
      * @param int|TimeSpan $time if integer is provided it is treated as milliseconds
      */
     public function __construct(int|TimeSpan $time)
     {
-        parent::__construct(MessageHeaders::DELIVERY_DELAY, $time instanceof TimeSpan ? $time->toMilliseconds() : $time);
+        parent::__construct(MessageHeaders::TIME_TO_LIVE, $time instanceof TimeSpan ? $time->toMilliseconds() : $time);
     }
 }

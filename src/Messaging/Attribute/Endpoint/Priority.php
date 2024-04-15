@@ -5,19 +5,13 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Attribute\Endpoint;
 
 use Attribute;
+use Ecotone\Messaging\MessageHeaders;
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-class Priority
+class Priority extends AddHeader
 {
-    private int $number;
-
     public function __construct(int $number)
     {
-        $this->number = $number;
-    }
-
-    public function getNumber(): int
-    {
-        return $this->number;
+        parent::__construct(MessageHeaders::PRIORITY, $number);
     }
 }

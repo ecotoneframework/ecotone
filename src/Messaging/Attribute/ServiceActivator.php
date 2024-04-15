@@ -11,8 +11,14 @@ class ServiceActivator extends InputOutputEndpointAnnotation
 {
     private bool $requiresReply;
 
-    public function __construct(string $inputChannelName, string $endpointId = '', string $outputChannelName = '', bool $requiresReply = false, array $requiredInterceptorNames = [])
-    {
+    public function __construct(
+        string $inputChannelName,
+        string $endpointId = '',
+        string $outputChannelName = '',
+        bool $requiresReply = false,
+        array $requiredInterceptorNames = [],
+        private bool $changingHeaders = false,
+    ) {
         parent::__construct($inputChannelName, $endpointId, $outputChannelName, $requiredInterceptorNames);
         $this->requiresReply = $requiresReply;
     }
@@ -20,5 +26,10 @@ class ServiceActivator extends InputOutputEndpointAnnotation
     public function isRequiresReply(): bool
     {
         return $this->requiresReply;
+    }
+
+    public function isChangingHeaders(): bool
+    {
+        return $this->changingHeaders;
     }
 }

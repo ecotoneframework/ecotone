@@ -25,13 +25,18 @@ final class PublishAggregateEventsService
     {
     }
 
-    public function publish(Message $message, array $metadata): Message
+    public function publish(Message $message, array $metadata): ?Message
     {
         $resultAggregateEvents = $message->getHeaders()->containsKey(AggregateMessage::RESULT_AGGREGATE_EVENTS) ? $message->getHeaders()->get(AggregateMessage::RESULT_AGGREGATE_EVENTS) : [];
         $calledAggregateEvents = $message->getHeaders()->containsKey(AggregateMessage::CALLED_AGGREGATE_EVENTS) ? $message->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_EVENTS) : [];
 
         $this->publishEvents($this->resolveEvents($resultAggregateEvents, $message, $metadata, $this->calledInterface));
         $this->publishEvents($this->resolveEvents($calledAggregateEvents, $message, $metadata, $this->calledInterface));
+
+        $isExecutionResultNull = $message->getHeaders()->containsKey(AggregateMessage::NULL_EXECUTION_RESULT) ? $message->getHeaders()->get(AggregateMessage::NULL_EXECUTION_RESULT) : false;
+        if ($isExecutionResultNull) {
+            return null;
+        }
 
         return MessageBuilder::fromMessage($message)->build();
     }

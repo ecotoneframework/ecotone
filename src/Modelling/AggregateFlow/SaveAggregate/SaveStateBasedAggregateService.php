@@ -67,8 +67,7 @@ final class SaveStateBasedAggregateService implements SaveAggregateService
         }
 
         return MessageBuilder::fromMessage($message)
-            ->build()
-        ;
+            ->build();
     }
 
     private function getAggregateIds(array $aggregateIds, object $aggregate, bool $throwOnNoIdentifier): array

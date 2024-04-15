@@ -128,7 +128,7 @@ class AggregateIdentifierRetrevingServiceBuilder extends InputOutputMessageHandl
         }
 
         if (empty($messageIdentifiersMapping)) {
-            throw InvalidArgumentException::create("Aggregate {$aggregateClassDefinition} has no identifiers defined. How you forgot to mark #[AggregateIdentifier]?");
+            throw InvalidArgumentException::create("Aggregate {$aggregateClassDefinition} has no identifiers defined. Have you forgot to add #[Identifier]?");
         }
 
         foreach ($metadataIdentifierMapping as $propertyName => $mappingName) {

@@ -172,4 +172,46 @@ class ServiceActivatorBuilderTest extends MessagingTest
             $replyChannel->receive()->getPayload()
         );
     }
+
+    public function test_returning_array_from_service_activator()
+    {
+        $objectToInvoke = ServiceExpectingOneArgument::create();
+
+        $serviceActivator = ComponentTestBuilder::create()->build(ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'withArrayReturnValue'));
+
+        $replyChannel = QueueChannel::create();
+        $message = MessageBuilder::withPayload('test')
+            ->setReplyChannel($replyChannel)
+            ->build();
+        $serviceActivator->handle($message);
+
+        $receivedMessage = $replyChannel->receive();
+
+        $this->assertNotNull($receivedMessage);
+        $this->assertEquals(['some' => 'test'], $receivedMessage->getPayload());
+        $this->assertArrayNotHasKey('some', $receivedMessage->getHeaders()->headers());
+    }
+
+    public function test_returning_array_and_changing_headers_from_service_activator()
+    {
+        $objectToInvoke = ServiceExpectingOneArgument::create();
+
+        $serviceActivator = ComponentTestBuilder::create()->build(
+            ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'withArrayReturnValue')
+                ->withChangingHeaders(true)
+        );
+
+        $replyChannel = QueueChannel::create();
+        $message = MessageBuilder::withPayload('test')
+            ->setReplyChannel($replyChannel)
+            ->build();
+        $serviceActivator->handle($message);
+
+        $receivedMessage = $replyChannel->receive();
+
+        $this->assertNotNull($receivedMessage);
+        $this->assertEquals('test', $receivedMessage->getPayload());
+        $this->assertArrayHasKey('some', $receivedMessage->getHeaders()->headers());
+        $this->assertEquals('test', $receivedMessage->getHeaders()->get('some'));
+    }
 }

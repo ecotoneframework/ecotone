@@ -40,6 +40,7 @@ final class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder imp
     private array $methodParameterConverterBuilders = [];
     private bool $shouldPassThroughMessage = false;
     private bool $shouldWrapResultInMessage = true;
+    private bool $changeHeaders = false;
 
     private ?InterfaceToCall $annotatedInterfaceToCall = null;
 
@@ -124,6 +125,13 @@ final class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder imp
         return $this;
     }
 
+    public function withChangingHeaders(bool $changeHeaders): self
+    {
+        $this->changeHeaders = $changeHeaders;
+
+        return $this;
+    }
+
     /**
      * @inheritDoc
      */
@@ -151,10 +159,11 @@ final class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder imp
             $this->getEndpointAnnotations(),
         )->compile($builder);
 
-        if ($this->shouldWrapResultInMessage) {
+        if ($this->shouldWrapResultInMessage || $this->changeHeaders) {
             $methodInvokerDefinition = new Definition(WrapWithMessageBuildProcessor::class, [
                 $this->interfaceToCallReference,
                 $methodInvokerDefinition,
+                $this->changeHeaders,
             ]);
         }
         $handlerDefinition = new Definition(RequestReplyProducer::class, [

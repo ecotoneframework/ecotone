@@ -79,15 +79,15 @@ final class MessageCollectorHandler
     /**
      * @return mixed[]
      */
-    public function getSpiedChannelRecordedMessagePayloads(string $channelName): array
+    public function getRecordedMessagePayloadsFrom(string $channelName): array
     {
-        return array_map(fn (Message $message) => $message->getPayload(), $this->getSpiedChannelRecordedMessages($channelName));
+        return array_map(fn (Message $message) => $message->getPayload(), $this->getRecordedEcotoneMessagesFrom($channelName));
     }
 
     /**
      * @return Message[]
      */
-    public function getSpiedChannelRecordedMessages(string $channelName): array
+    public function getRecordedEcotoneMessagesFrom(string $channelName): array
     {
         if (! isset($this->spiedChannelsMessages[$channelName])) {
             return [];

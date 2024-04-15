@@ -4,9 +4,6 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeader
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\Endpoint\AddHeader;
-use Ecotone\Messaging\Attribute\Endpoint\Delayed;
-use Ecotone\Messaging\Attribute\Endpoint\ExpireAfter;
-use Ecotone\Messaging\Attribute\Endpoint\Priority;
 use Ecotone\Messaging\Attribute\Endpoint\RemoveHeader;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
@@ -42,7 +39,7 @@ class EndpointHeadersInterceptorModule extends NoExternalConfigurationModule imp
                 $interfaceToCall,
                 TransformerBuilder::createWithDirectObject(new EndpointHeadersInterceptor(), 'addMetadata'),
                 Precedence::ENDPOINT_HEADERS_PRECEDENCE,
-                ExpireAfter::class . '||' . Priority::class . '||' . Delayed::class . '||' . AddHeader::class . '||' . RemoveHeader::class
+                AddHeader::class . '||' . RemoveHeader::class
             )
         );
     }

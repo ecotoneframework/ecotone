@@ -11,6 +11,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodCall;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Handler\UnionTypeDescriptor;
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -20,23 +21,16 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class WrapWithMessageBuildProcessor implements MessageProcessor
 {
-    private InterfaceToCall $interfaceToCall;
-    private MessageProcessor $messageProcessor;
-
-    /**
-     * WrapWithMessageProcessor constructor.
-     * @param InterfaceToCall $interfaceToCall
-     * @param MessageProcessor $messageProcessor
-     */
-    public function __construct(InterfaceToCall $interfaceToCall, MessageProcessor $messageProcessor)
-    {
-        $this->interfaceToCall = $interfaceToCall;
-        $this->messageProcessor = $messageProcessor;
+    public function __construct(
+        private InterfaceToCall $interfaceToCall,
+        private MessageProcessor $messageProcessor,
+        private bool $shouldChangeMessageHeaders
+    ) {
     }
 
-    public static function createWith(InterfaceToCall $interfaceToCall, MessageProcessor $messageProcessor)
+    public static function createWith(InterfaceToCall $interfaceToCall, MessageProcessor $messageProcessor, bool $shouldChangeMessageHeaders = false)
     {
-        return new self($interfaceToCall, $messageProcessor);
+        return new self($interfaceToCall, $messageProcessor, $shouldChangeMessageHeaders);
     }
 
     /**
@@ -48,6 +42,15 @@ class WrapWithMessageBuildProcessor implements MessageProcessor
 
         if (is_null($result)) {
             return null;
+        }
+
+        if ($this->shouldChangeMessageHeaders) {
+            Assert::isFalse($result instanceof Message, 'Message should not be returned when changing headers in ' . $this->interfaceToCall->toString());
+            Assert::isTrue(is_array($result), 'Result should be an array when changing headers in ' . $this->interfaceToCall->toString());
+
+            return MessageBuilder::fromMessage($message)
+                ->setMultipleHeaders($result)
+                ->build();
         }
 
         if ($result instanceof Message) {

@@ -47,12 +47,12 @@ interface MessagingTestSupport
     /**
      * @return mixed[]
      */
-    public function getSpiedChannelRecordedMessagePayloads(string $channelName): array;
+    public function getRecordedMessagePayloadsFrom(string $channelName): array;
 
     /**
      * @return Message[]
      */
-    public function getSpiedChannelRecordedMessages(string $channelName): array;
+    public function getRecordedEcotoneMessagesFrom(string $channelName): array;
 
     public function discardRecordedMessages(): void;
 

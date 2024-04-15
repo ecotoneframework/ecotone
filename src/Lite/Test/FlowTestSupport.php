@@ -15,6 +15,7 @@ use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Scheduling\TimeSpan;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\CommandBus;
@@ -84,9 +85,12 @@ final class FlowTestSupport
         return $this;
     }
 
-    public function releaseAwaitingMessagesAndRunConsumer(string $channelName, int $timeInMilliseconds, ?ExecutionPollingMetadata $executionPollingMetadata = null): self
+    /**
+     * @param int $time Time in milliseconds or DelayedTime object
+     */
+    public function releaseAwaitingMessagesAndRunConsumer(string $channelName, int|TimeSpan $time, ?ExecutionPollingMetadata $executionPollingMetadata = null): self
     {
-        $this->testSupportGateway->releaseMessagesAwaitingFor($channelName, $timeInMilliseconds);
+        $this->testSupportGateway->releaseMessagesAwaitingFor($channelName, $time instanceof TimeSpan ? $time->toMilliseconds() : $time);
         $this->run($channelName, $executionPollingMetadata);
 
         return $this;
@@ -95,17 +99,17 @@ final class FlowTestSupport
     /**
      * @return mixed[]
      */
-    public function getSpiedChannelRecordedMessagePayloads(string $channelName): array
+    public function getRecordedMessagePayloadsFrom(string $channelName): array
     {
-        return $this->testSupportGateway->getSpiedChannelRecordedMessagePayloads($channelName);
+        return $this->testSupportGateway->getRecordedMessagePayloadsFrom($channelName);
     }
 
     /**
      * @return Message[]
      */
-    public function getSpiedChannelRecordedMessages(string $channelName): array
+    public function getRecordedEcotoneMessagesFrom(string $channelName): array
     {
-        return $this->testSupportGateway->getSpiedChannelRecordedMessages($channelName);
+        return $this->testSupportGateway->getRecordedEcotoneMessagesFrom($channelName);
     }
 
     public function getMessageChannel(string $channelName): MessageChannel|PollableChannel
@@ -220,6 +224,8 @@ final class FlowTestSupport
     }
 
     /**
+     * This will only be recorded when Message was sent via Event Bus
+     *
      * @return mixed[]
      */
     public function getRecordedEvents(): array
@@ -228,6 +234,8 @@ final class FlowTestSupport
     }
 
     /**
+     * This will only be recorded when Message was sent via Event Bus
+     *
      * @return MessageHeaders[]
      */
     public function getRecordedEventHeaders(): array
@@ -236,6 +244,8 @@ final class FlowTestSupport
     }
 
     /**
+     * This will only be recorded when Message was sent via Event Bus
+     *
      * @return MessageHeaders[]
      */
     public function getRecordedEventRouting(): array
@@ -244,6 +254,8 @@ final class FlowTestSupport
     }
 
     /**
+     * This will only be recorded when Message was sent via Command Bus
+     *
      * @return mixed[]
      */
     public function getRecordedCommands(): array
@@ -252,6 +264,8 @@ final class FlowTestSupport
     }
 
     /**
+     * This will only be recorded when Message was sent via Command Bus
+     *
      * @return MessageHeaders[]
      */
     public function getRecordedCommandHeaders(): array
@@ -260,6 +274,8 @@ final class FlowTestSupport
     }
 
     /**
+     * This will only be recorded when Message was sent via Command Bus
+     *
      * @return string[]
      * @throws MessagingException
      */

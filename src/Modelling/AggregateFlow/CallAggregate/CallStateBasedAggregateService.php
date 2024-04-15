@@ -70,6 +70,10 @@ final class CallStateBasedAggregateService implements CallAggregateService
             ;
         }
 
+        if ($this->isCommandHandler && is_null($result)) {
+            $resultMessage = $resultMessage->setHeader(AggregateMessage::NULL_EXECUTION_RESULT, true);
+        }
+
         if ($this->isCommandHandler || ! is_null($result)) {
             return $resultMessage->build();
         }

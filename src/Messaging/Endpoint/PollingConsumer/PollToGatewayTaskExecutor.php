@@ -36,6 +36,7 @@ class PollToGatewayTaskExecutor implements TaskExecutor
                     ->setHeader(MessageHeaders::CONSUMER_POLLING_METADATA, $pollingMetadata)
                     ->build(),
             ]);
+            gc_collect_cycles();
         }
     }
 }

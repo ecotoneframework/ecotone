@@ -27,6 +27,7 @@ use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
 use Ecotone\Modelling\Config\RegisterAggregateRepositoryChannels;
 use Psr\Container\ContainerInterface;
+use ReflectionClass;
 
 final class EcotoneLite
 {
@@ -148,6 +149,36 @@ final class EcotoneLite
             ->getFlowTestSupport();
     }
 
+    private static function getFileNameBasedOnConfig(
+        bool $useCachedVersion,
+        array $classesToResolve,
+        ServiceConfiguration $serviceConfiguration,
+        array $configurationVariables,
+        bool $enableTesting
+    ): string {
+        if ($useCachedVersion) {
+            return 'messaging';
+        }
+
+        // this is temporary cache based on if files have changed
+        // get file contents based on class names, configuration and configuration variables
+        $fileSha = '';
+
+        foreach ($classesToResolve as $class) {
+            $filePath = (new ReflectionClass($class))->getFileName();
+
+            if ($filePath) {
+                $fileSha .= sha1_file($filePath);
+            }
+        }
+
+        $fileSha .= sha1(serialize($serviceConfiguration));
+        $fileSha .= sha1(serialize($configurationVariables));
+        $fileSha .= $enableTesting ? 'true' : 'false';
+
+        return sha1($fileSha);
+    }
+
     /**
      * @param string[] $packagesToEnable
      * @param ContainerInterface|object[] $containerOrAvailableServices
@@ -166,12 +197,12 @@ final class EcotoneLite
 
         $serviceCacheConfiguration = new ServiceCacheConfiguration(
             $serviceConfiguration->getCacheDirectoryPath(),
-            $useCachedVersion
+            true,
         );
         $configurationVariableService = InMemoryConfigurationVariableService::create($configurationVariables);
         $definitionHolder = null;
 
-        $messagingSystemCachePath = $serviceCacheConfiguration->getPath() . DIRECTORY_SEPARATOR . 'messaging_system';
+        $messagingSystemCachePath = $serviceCacheConfiguration->getPath() . DIRECTORY_SEPARATOR . self::getFileNameBasedOnConfig($useCachedVersion, $classesToResolve, $serviceConfiguration, $configurationVariables, $enableTesting);
         if ($serviceCacheConfiguration->shouldUseCache() && file_exists($messagingSystemCachePath)) {
             /** It may fail on deserialization, then return `false` and we can build new one */
             $definitionHolder = unserialize(file_get_contents($messagingSystemCachePath));
@@ -217,6 +248,7 @@ final class EcotoneLite
             $messagingSystem = new ConfiguredMessagingSystemWithTestSupport($messagingSystem);
         }
 
+        gc_collect_cycles();
         return $messagingSystem;
     }
 

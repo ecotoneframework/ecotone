@@ -17,9 +17,9 @@ use Ecotone\Modelling\Attribute\EventSourcingSaga;
 class InMemoryEventSourcedRepository implements EventSourcedRepository
 {
     private array $eventsPerAggregate;
-    private array $aggregateTypes;
+    private ?array $aggregateTypes;
 
-    public function __construct(array $eventsPerAggregate = [], array $aggregateTypes = [])
+    public function __construct(array $eventsPerAggregate = [], ?array $aggregateTypes = [])
     {
         $this->eventsPerAggregate = $eventsPerAggregate;
         $this->aggregateTypes = $aggregateTypes;
@@ -47,6 +47,10 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
      */
     public function canHandle(string $aggregateClassName): bool
     {
+        if ($this->aggregateTypes === null) {
+            return false;
+        }
+
         if (in_array($aggregateClassName, $this->aggregateTypes)) {
             return true;
         }

@@ -107,7 +107,7 @@ final class EcotoneLite
         $configuration = self::prepareForFlowTesting($configuration, ModulePackageList::allPackages(), $classesToResolve, $addInMemoryStateStoredRepository, $enableAsynchronousProcessing, $testConfiguration);
 
         if ($addEventSourcedRepository) {
-            $configuration = $configuration->addExtensionObject(InMemoryRepositoryBuilder::createForAllEventSourcedAggregates());
+            $configuration = $configuration->addExtensionObject(InMemoryRepositoryBuilder::createDefaultEventSourcedRepository());
         }
 
         return self::prepareConfiguration($containerOrAvailableServices, $configuration, $classesToResolve, $configurationVariables, $pathToRootCatalog, true, $allowGatewaysToBeRegisteredInContainer, false)
@@ -318,7 +318,7 @@ final class EcotoneLite
 
         if ($addInMemoryStateStoredRepository) {
             $configuration = $configuration
-                ->addExtensionObject(InMemoryRepositoryBuilder::createForAllStateStoredAggregates());
+                ->addExtensionObject(InMemoryRepositoryBuilder::createDefaultStateStoredRepository());
         }
 
         return $configuration;

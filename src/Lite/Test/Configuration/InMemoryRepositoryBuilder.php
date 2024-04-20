@@ -12,13 +12,18 @@ use Ecotone\Modelling\RepositoryBuilder;
 
 final class InMemoryRepositoryBuilder implements RepositoryBuilder
 {
-    public function __construct(private array $aggregateClassNames, private bool $isEventSourced)
+    public function __construct(private ?array $aggregateClassNames, private bool $isEventSourced)
     {
     }
 
     public static function createForAllStateStoredAggregates(): self
     {
         return new self([], false);
+    }
+
+    public static function createDefaultStateStoredRepository(): self
+    {
+        return new self(null, false);
     }
 
     public static function createForSetOfStateStoredAggregates(array $aggregateClassNames)
@@ -31,13 +36,17 @@ final class InMemoryRepositoryBuilder implements RepositoryBuilder
         return new self([], true);
     }
 
-    public static function createForSetOfEventSourcedAggregates(array $aggregateClassNames)
+    public static function createDefaultEventSourcedRepository()
     {
-        return new self($aggregateClassNames, true);
+        return new self(null, true);
     }
 
     public function canHandle(string $aggregateClassName): bool
     {
+        if ($this->aggregateClassNames === null) {
+            return false;
+        }
+
         return isset($this->aggregateClassNames[$aggregateClassName]);
     }
 

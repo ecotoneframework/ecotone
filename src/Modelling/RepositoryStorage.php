@@ -10,23 +10,26 @@ use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 class RepositoryStorage
 {
     /**
-     * @var array<EventSourcedRepository|StandardRepository> $aggregateRepositories
+     * @var array<EventSourcedRepository|StandardRepository|RepositoryBuilder> $repositories
      */
-    private array $aggregateRepositories;
+    private array $repositories;
 
     /**
      * @param array<EventSourcedRepository|StandardRepository> $aggregateRepositories
      */
     public function __construct(private string $aggregateClassName, private bool $isEventSourcedAggregate, array $aggregateRepositories)
     {
-        $this->aggregateRepositories = array_values($aggregateRepositories);
+        $this->repositories = array_values($aggregateRepositories);
+
+        foreach ($this->repositories as $repository) {
+            Assert::isTrue($repository instanceof EventSourcedRepository || $repository instanceof StandardRepository || $repository instanceof RepositoryBuilder, 'Invalid repository type provided. Expected EventSourcedRepository, StandardRepository. Got ' . get_class($repository) . '. Have you forgot to implement Interface?');
+        }
     }
 
     public function getRepository(): EventSourcedRepository|StandardRepository
     {
-        if (count($this->aggregateRepositories) === 1) {
-            /** @var EventSourcedRepository|StandardRepository|RepositoryBuilder $repository */
-            $repository = $this->aggregateRepositories[0];
+        if (count($this->repositories) === 1) {
+            $repository = $this->repositories[0];
             if ($this->isEventSourced($repository) && ! $this->isEventSourcedAggregate) {
                 throw InvalidArgumentException::create("There is only one repository registered. For event sourcing usage, however aggregate {$this->aggregateClassName} is not event sourced. If it should be event sourced change attribute to " . EventSourcingAggregate::class);
             } elseif (! $this->isEventSourced($repository) && $this->isEventSourcedAggregate) {
@@ -36,33 +39,30 @@ class RepositoryStorage
             return $this->returnRepository($repository);
         }
 
-        if (count($this->aggregateRepositories) === 2) {
-            $repositoryOne = $this->aggregateRepositories[0];
-            $repositoryTwo = $this->aggregateRepositories[1];
-
-            $repositoryOneIsEventSourced = $this->isEventSourced($repositoryOne);
-            $repositoryTwoIsEventSourced = $this->isEventSourced($repositoryTwo);
-
-            if (
-                ($repositoryOneIsEventSourced && ! $repositoryTwoIsEventSourced)
-                ||
-                (! $repositoryOneIsEventSourced && $repositoryTwoIsEventSourced)
-            ) {
-                if ($this->isEventSourcedAggregate) {
-                    return $this->returnRepository($repositoryOneIsEventSourced ? $repositoryOne : $repositoryTwo);
-                }
-
-                return $this->returnRepository($repositoryOneIsEventSourced ? $repositoryTwo : $repositoryOne);
+        $eventSourcingRepositories = [];
+        $standardRepositories = [];
+        foreach ($this->repositories as $repository) {
+            if ($this->isEventSourced($repository)) {
+                $eventSourcingRepositories[] = $repository;
+            } else {
+                $standardRepositories[] = $repository;
             }
         }
 
-        foreach ($this->aggregateRepositories as $repository) {
+        if ($this->isEventSourcedAggregate && count($eventSourcingRepositories) === 1) {
+            return $this->returnRepository($eventSourcingRepositories[0]);
+        }
+        if (! $this->isEventSourcedAggregate && count($standardRepositories) === 1) {
+            return $this->returnRepository($standardRepositories[0]);
+        }
+
+        foreach ($this->repositories as $repository) {
             if ($repository->canHandle($this->aggregateClassName)) {
                 return $this->returnRepository($repository);
             }
         }
 
-        throw InvalidArgumentException::create('There is no repository available for aggregate: ' . $this->aggregateClassName);
+        throw InvalidArgumentException::create('There is no repository available for aggregate: ' . $this->aggregateClassName . '. This happens because are multiple Repositories of given type registered, therefore each Repository need to specify which aggregate it can handle. If this fails during Ecotone Lite tests, consider turning off default In Memory implementations.');
     }
 
     private function returnRepository(EventSourcedRepository|StandardRepository|LazyRepositoryBuilder $repository): EventSourcedRepository|StandardRepository

@@ -15,9 +15,9 @@ class InMemoryStandardRepository implements StandardRepository
      * @var object[]
      */
     private array $aggregates;
-    private array $aggregateTypes;
+    private ?array $aggregateTypes;
 
-    public function __construct(array $aggregates = [], array $aggregateTypes = [])
+    public function __construct(array $aggregates = [], ?array $aggregateTypes = [])
     {
         $this->aggregates = $aggregates;
         $this->aggregateTypes = $aggregateTypes;
@@ -35,6 +35,10 @@ class InMemoryStandardRepository implements StandardRepository
      */
     public function canHandle(string $aggregateClassName): bool
     {
+        if ($this->aggregateTypes === null) {
+            return false;
+        }
+
         if (in_array($aggregateClassName, $this->aggregateTypes)) {
             return true;
         }

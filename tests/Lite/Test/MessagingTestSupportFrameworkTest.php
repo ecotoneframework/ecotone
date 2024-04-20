@@ -11,7 +11,6 @@ use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Conversion\ConversionException;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\DestinationResolutionException;
 use Ecotone\Messaging\MessageHeaders;
@@ -162,7 +161,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         /** Failing on event serialization */
         $this->expectException(ConversionException::class);
 
-        $ecotoneTestSupport->run('orders', ExecutionPollingMetadata::createWithTestingSetup());
+        $ecotoneTestSupport->run('orders');
     }
 
     public function test_serializing_command_and_event_before_sending_to_asynchronous_channel()

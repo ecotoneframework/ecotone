@@ -26,6 +26,9 @@ use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
 use Ecotone\Modelling\Config\RegisterAggregateRepositoryChannels;
+
+use function json_decode;
+
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 
@@ -150,6 +153,7 @@ final class EcotoneLite
     }
 
     private static function getFileNameBasedOnConfig(
+        string $pathToRootCatalog,
         bool $useCachedVersion,
         array $classesToResolve,
         ServiceConfiguration $serviceConfiguration,
@@ -163,6 +167,10 @@ final class EcotoneLite
         // this is temporary cache based on if files have changed
         // get file contents based on class names, configuration and configuration variables
         $fileSha = '';
+
+        if (file_exists($pathToRootCatalog . 'composer.lock')) {
+            $fileSha .= sha1_file($pathToRootCatalog . 'composer.lock');
+        }
 
         foreach ($classesToResolve as $class) {
             $filePath = (new ReflectionClass($class))->getFileName();
@@ -197,12 +205,12 @@ final class EcotoneLite
 
         $serviceCacheConfiguration = new ServiceCacheConfiguration(
             $serviceConfiguration->getCacheDirectoryPath(),
-            true,
+            self::shouldUseAutomaticCache($useCachedVersion, $pathToRootCatalog),
         );
         $configurationVariableService = InMemoryConfigurationVariableService::create($configurationVariables);
         $definitionHolder = null;
 
-        $messagingSystemCachePath = $serviceCacheConfiguration->getPath() . DIRECTORY_SEPARATOR . self::getFileNameBasedOnConfig($useCachedVersion, $classesToResolve, $serviceConfiguration, $configurationVariables, $enableTesting);
+        $messagingSystemCachePath = $serviceCacheConfiguration->getPath() . DIRECTORY_SEPARATOR . self::getFileNameBasedOnConfig($pathToRootCatalog, $useCachedVersion, $classesToResolve, $serviceConfiguration, $configurationVariables, $enableTesting);
         if ($serviceCacheConfiguration->shouldUseCache() && file_exists($messagingSystemCachePath)) {
             /** It may fail on deserialization, then return `false` and we can build new one */
             $definitionHolder = unserialize(file_get_contents($messagingSystemCachePath));
@@ -314,5 +322,24 @@ final class EcotoneLite
         }
 
         return $configuration;
+    }
+
+    private static function shouldUseAutomaticCache(bool $useCachedVersion, string $pathToRootCatalog): bool
+    {
+        if (! $useCachedVersion && file_exists($pathToRootCatalog . 'composer.json')) {
+            $composer = json_decode(file_get_contents($pathToRootCatalog . 'composer.json'), true);
+            if (! self::isRunningTestsForEcotoneFramework($composer['name'])) {
+                $useCachedVersion = true;
+            }
+        } else {
+            $useCachedVersion = true;
+        }
+
+        return $useCachedVersion;
+    }
+
+    private static function isRunningTestsForEcotoneFramework($name): bool
+    {
+        return str_starts_with($name, 'ecotone/');
     }
 }

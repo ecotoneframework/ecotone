@@ -10,6 +10,7 @@ use Ecotone\Messaging\Attribute\EndpointAnnotation;
 use Ecotone\Messaging\Attribute\InternalHandler;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Channel\CombinedMessageChannel;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
@@ -113,6 +114,7 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
     {
         return
             $extensionObject instanceof CombinedMessageChannel
+            || ($extensionObject instanceof SimpleMessageChannelBuilder && $extensionObject->isPollable())
             || $extensionObject instanceof ServiceConfiguration
             || $extensionObject instanceof PollingMetadata;
     }
@@ -124,6 +126,7 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
     {
         $serviceConfiguration = ExtensionObjectResolver::resolveUnique(ServiceConfiguration::class, $extensionObjects, ServiceConfiguration::createWithDefaults());
         $pollingMetadata = ExtensionObjectResolver::resolve(PollingMetadata::class, $extensionObjects);
+        $polingChannelBuilders = ExtensionObjectResolver::resolve(SimpleMessageChannelBuilder::class, $extensionObjects);
 
         $combinedMessageChannels = [];
         /** @var CombinedMessageChannel $combinedMessageChannel */
@@ -147,6 +150,16 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
             if ($serviceConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
                 foreach ($asyncChannelsResolved as $asyncEndpointChannel) {
                     if (! $this->hasPollingMetadata($pollingMetadata, $asyncEndpointChannel)) {
+                        if ($this->isInMemoryPollableChannel($polingChannelBuilders, $asyncEndpointChannel)) {
+                            $messagingConfiguration->registerPollingMetadata(
+                                PollingMetadata::create($asyncEndpointChannel)
+                                    ->setStopOnError(true)
+                                    ->setFinishWhenNoMessages(true)
+                            );
+
+                            continue;
+                        }
+
                         $messagingConfiguration->registerPollingMetadata(
                             PollingMetadata::create($asyncEndpointChannel)
                                 ->withTestingSetup(100, 100, true)
@@ -166,6 +179,20 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
     {
         foreach ($pollingMetadata as $pollingMetadataForChannel) {
             if ($pollingMetadataForChannel->getEndpointId() === $asyncEndpoint) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @param SimpleMessageChannelBuilder[] $polingChannelBuilders
+     */
+    private function isInMemoryPollableChannel(array $polingChannelBuilders, string $asyncEndpointChannel): bool
+    {
+        foreach ($polingChannelBuilders as $polingChannelBuilder) {
+            if ($polingChannelBuilder->getMessageChannelName() === $asyncEndpointChannel) {
                 return true;
             }
         }

@@ -196,7 +196,7 @@ final class EcotoneLite
     private static function prepareConfiguration(ContainerInterface|array $containerOrAvailableServices, ?ServiceConfiguration $serviceConfiguration, array $classesToResolve, array $configurationVariables, ?string $pathToRootCatalog, bool $enableTesting, bool $allowGatewaysToBeRegisteredInContainer, bool $useCachedVersion): ConfiguredMessagingSystemWithTestSupport|ConfiguredMessagingSystem
     {
         //        moving out of vendor catalog
-        $pathToRootCatalog = $pathToRootCatalog ?: __DIR__ . '/../../../../';
+        $pathToRootCatalog = $pathToRootCatalog ?: __DIR__ . '/../../../../../';
         if (is_null($serviceConfiguration)) {
             $serviceConfiguration = ServiceConfiguration::createWithDefaults();
         }
@@ -328,7 +328,7 @@ final class EcotoneLite
     {
         if (! $useCachedVersion && file_exists($pathToRootCatalog . 'composer.json')) {
             $composer = json_decode(file_get_contents($pathToRootCatalog . 'composer.json'), true);
-            if (! self::isRunningTestsForEcotoneFramework($composer['name'])) {
+            if (! isset($composer['name']) || ! self::isRunningTestsForEcotoneFramework($composer['name'])) {
                 $useCachedVersion = true;
             }
         } else {
@@ -340,6 +340,6 @@ final class EcotoneLite
 
     private static function isRunningTestsForEcotoneFramework($name): bool
     {
-        return str_starts_with($name, 'ecotone/');
+        return str_starts_with($name, 'ecotone');
     }
 }

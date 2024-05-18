@@ -12,6 +12,9 @@ final class CombinedMessageChannel
     {
         Assert::notNull($referenceName, 'Reference name can not be null');
         Assert::notNullAndEmpty($this->combinedChannels, 'Combined channels can not be empty');
+        foreach ($this->combinedChannels as $combinedChannel) {
+            Assert::isTrue(is_string($combinedChannel), sprintf('Combined channel for %s should be a name (string). Register concrete Message Channel implementations in Service Context.', $this->referenceName));
+        }
     }
 
     public static function create(string $referenceName, array $combinedChannels): self

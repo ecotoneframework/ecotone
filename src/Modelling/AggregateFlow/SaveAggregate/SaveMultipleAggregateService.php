@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Modelling\AggregateFlow\SaveAggregate;
 
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\SaveAggregateService;
@@ -24,6 +25,8 @@ final class SaveMultipleAggregateService implements SaveAggregateService
         }
 
         if ($message->getHeaders()->containsKey(AggregateMessage::RESULT_AGGREGATE_OBJECT)) {
+            $metadata = MessageHeaders::unsetAggregateKeys($metadata);
+            $metadata[AggregateMessage::RESULT_AGGREGATE_OBJECT] = $message->getHeaders()->get(AggregateMessage::RESULT_AGGREGATE_OBJECT);
             $this->saveResultAggregateService->save($message, $metadata);
         }
 

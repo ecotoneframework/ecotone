@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite;
 
+use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
+use Ecotone\AnnotationFinder\FileSystem\RootCatalogNotFound;
 use Ecotone\Dbal\Configuration\DbalConfiguration;
 use Ecotone\EventSourcing\EventSourcingConfiguration;
 use Ecotone\Lite\Test\Configuration\InMemoryRepositoryBuilder;
@@ -193,10 +195,23 @@ final class EcotoneLite
      * @param string[] $classesToResolve
      * @param array<string,string> $configurationVariables
      */
-    private static function prepareConfiguration(ContainerInterface|array $containerOrAvailableServices, ?ServiceConfiguration $serviceConfiguration, array $classesToResolve, array $configurationVariables, ?string $pathToRootCatalog, bool $enableTesting, bool $allowGatewaysToBeRegisteredInContainer, bool $useCachedVersion): ConfiguredMessagingSystemWithTestSupport|ConfiguredMessagingSystem
+    private static function prepareConfiguration(ContainerInterface|array $containerOrAvailableServices, ?ServiceConfiguration $serviceConfiguration, array $classesToResolve, array $configurationVariables, ?string $originalPathToRootCatalog, bool $enableTesting, bool $allowGatewaysToBeRegisteredInContainer, bool $useCachedVersion): ConfiguredMessagingSystemWithTestSupport|ConfiguredMessagingSystem
     {
-        //        moving out of vendor catalog
-        $pathToRootCatalog = $pathToRootCatalog ?: __DIR__ . '/../../../../../';
+        // moving out of vendor catalog
+        $pathToRootCatalog = $originalPathToRootCatalog ?: __DIR__ . '/../../../../';
+        try {
+            $pathToRootCatalog = FileSystemAnnotationFinder::getRealRootCatalog($pathToRootCatalog, $pathToRootCatalog);
+        } catch (RootCatalogNotFound $exception) {
+            // This will be used when symlinks to Ecotone packages are used (e.g. Split Testing - Github Actions)
+            $debug = debug_backtrace();
+            $pathToRootCatalog = FileSystemAnnotationFinder::getRealRootCatalog(
+                dirname(array_pop($debug)['file']),
+                $pathToRootCatalog
+            );
+        }
+
+
+
         if (is_null($serviceConfiguration)) {
             $serviceConfiguration = ServiceConfiguration::createWithDefaults();
         }
@@ -326,8 +341,9 @@ final class EcotoneLite
 
     private static function shouldUseAutomaticCache(bool $useCachedVersion, string $pathToRootCatalog): bool
     {
-        if (! $useCachedVersion && file_exists($pathToRootCatalog . 'composer.json')) {
-            $composer = json_decode(file_get_contents($pathToRootCatalog . 'composer.json'), true);
+        $composerPath = $pathToRootCatalog . DIRECTORY_SEPARATOR . 'composer.json';
+        if (! $useCachedVersion && file_exists($composerPath)) {
+            $composer = json_decode(file_get_contents($composerPath), true);
             if (! isset($composer['name']) || ! self::isRunningTestsForEcotoneFramework($composer['name'])) {
                 $useCachedVersion = true;
             }

@@ -37,6 +37,13 @@ class Order
         return new self($placeOrder->getOrderId());
     }
 
+    #[CommandHandler('order.cancel_from_metadata', 'orderCancelFromMetadata')]
+    public function cancelFromMetadata(): void
+    {
+        $this->isCancelled = true;
+        $this->recordThat(new OrderCancelled($this->orderId));
+    }
+
     #[CommandHandler('order.cancel', 'orderCancel')]
     public function cancel(): void
     {

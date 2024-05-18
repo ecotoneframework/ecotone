@@ -208,6 +208,7 @@ final class MessageHeaders
         $metadata = self::unsetEnqueueMetadata($metadata);
         $metadata = self::unsetDistributionKeys($metadata);
         $metadata = self::unsetBusKeys($metadata);
+        unset($metadata[AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER]);
 
         return self::unsetAggregateKeys($metadata);
     }
@@ -279,10 +280,11 @@ final class MessageHeaders
             $metadata[AggregateMessage::AGGREGATE_ID],
             $metadata[AggregateMessage::CALLED_AGGREGATE_OBJECT],
             $metadata[AggregateMessage::CALLED_AGGREGATE_EVENTS],
-            $metadata[AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER],
             $metadata[AggregateMessage::RESULT_AGGREGATE_OBJECT],
             $metadata[AggregateMessage::RESULT_AGGREGATE_EVENTS],
-            $metadata[AggregateMessage::TARGET_VERSION]
+            $metadata[AggregateMessage::TARGET_VERSION],
+            $metadata[AggregateMessage::AGGREGATE_OBJECT_EXISTS],
+            $metadata[AggregateMessage::NULL_EXECUTION_RESULT],
         );
 
         return $metadata;

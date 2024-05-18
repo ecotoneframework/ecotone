@@ -40,6 +40,7 @@ class AggregateIdentifierRetrevingService
 
             return MessageBuilder::fromMessage($message)
                 ->setHeader(AggregateMessage::AGGREGATE_ID, AggregateIdResolver::resolveArrayOfIdentifiers($this->aggregateClassName, $aggregateIds))
+                ->removeHeader(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER)
                 ->build();
         }
 

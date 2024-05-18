@@ -52,7 +52,7 @@ final class InMemoryDocumentStore implements DocumentStore
         $this->collection[$collectionName][$documentId] = $document;
     }
 
-    public function upsertDocument(string $collectionName, string $documentId, object|array|string $document): void
+    public function upsertDocument(string $collectionName, string|int $documentId, object|array|string $document): void
     {
         $this->collection[$collectionName][$documentId] = $document;
     }

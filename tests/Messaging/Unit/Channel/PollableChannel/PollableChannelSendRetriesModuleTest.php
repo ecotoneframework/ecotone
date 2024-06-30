@@ -14,11 +14,11 @@ use Ecotone\Messaging\Channel\PollableChannel\PollableChannelConfiguration;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
+use Ecotone\Test\LoggerExample;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use Test\Ecotone\Messaging\Fixture\Channel\DynamicChannel\DynamicChannelResolver;
-use Test\Ecotone\Messaging\Unit\Handler\Logger\LoggerExample;
 use Test\Ecotone\Modelling\Fixture\Order\OrderService;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 

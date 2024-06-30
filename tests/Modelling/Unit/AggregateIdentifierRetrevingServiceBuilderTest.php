@@ -2,7 +2,6 @@
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -29,132 +28,146 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
     public function test_loading_aggregate_by_metadata()
     {
         $headerName                            = 'paymentId';
-        $aggregateCallingCommandHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
-            ClassDefinition::createFor(TypeDescriptor::create(OrderFulfilment::class)),
-            ['orderId' => 'paymentId'],
-            [],
-            ClassDefinition::createFor(TypeDescriptor::create(PaymentWasDoneEvent::class)),
-            InterfaceToCallRegistry::createEmpty()
-        );
-
         $orderId                 = 1000;
-        $aggregateCommandHandler = ComponentTestBuilder::create()
-            ->withReference('repository', InMemoryStandardRepository::createEmpty())
-            ->build($aggregateCallingCommandHandler);
 
-        $replyChannel = QueueChannel::create();
-        $command = PaymentWasDoneEvent::create();
-        $aggregateCommandHandler->handle(
-            MessageBuilder::withPayload($command)
+        $messaging = ComponentTestBuilder::create()
+            ->withReference('repository', InMemoryStandardRepository::createEmpty())
+            ->withMessageHandler(
+                AggregateIdentifierRetrevingServiceBuilder::createWith(
+                    ClassDefinition::createFor(TypeDescriptor::create(OrderFulfilment::class)),
+                    ['orderId' => $headerName],
+                    [],
+                    ClassDefinition::createFor(TypeDescriptor::create(PaymentWasDoneEvent::class)),
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
+
+        $message = $messaging->sendDirectToChannelWithMessageReply(
+            $inputChannel,
+            MessageBuilder::withPayload(PaymentWasDoneEvent::create())
                 ->setHeader($headerName, $orderId)
-                ->setReplyChannel($replyChannel)->build()
+                ->build()
         );
 
-        $this->assertEquals(['orderId' => $orderId], $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_ID));
+        $this->assertEquals(['orderId' => $orderId], $message->getHeaders()->get(AggregateMessage::AGGREGATE_ID));
     }
 
     public function test_loading_aggregate_by_metadata_with_public_method_identifier()
     {
         $headerName                            = 'orderId';
-        $aggregateRetrevingServiceHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
-            ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodForEventSourcedAggregate::class)),
-            ['id' => 'orderId'],
-            [],
-            null,
-            InterfaceToCallRegistry::createEmpty()
-        );
-
         $orderId                 = 1000;
-        $aggregateRetrievingService = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('repository', InMemoryStandardRepository::createEmpty())
-            ->build($aggregateRetrevingServiceHandler);
+            ->withMessageHandler(
+                AggregateIdentifierRetrevingServiceBuilder::createWith(
+                    ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodForEventSourcedAggregate::class)),
+                    ['id' => 'orderId'],
+                    [],
+                    null,
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $replyChannel = QueueChannel::create();
-        $command = PaymentWasDoneEvent::create();
-        $aggregateRetrievingService->handle(
-            MessageBuilder::withPayload($command)
+        $message = $messaging->sendDirectToChannelWithMessageReply(
+            $inputChannel,
+            MessageBuilder::withPayload(PaymentWasDoneEvent::create())
                 ->setHeader($headerName, $orderId)
-                ->setReplyChannel($replyChannel)->build()
+                ->build()
         );
 
-        $this->assertEquals(['id' => $orderId], $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_ID));
+        $this->assertEquals(['id' => $orderId], $message->getHeaders()->get(AggregateMessage::AGGREGATE_ID));
     }
 
     public function test_providing_override_aggregate_identifier()
     {
-        $aggregateCallingCommandHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
-            ClassDefinition::createFor(TypeDescriptor::create(Basket::class)),
-            [],
-            [],
-            null,
-            InterfaceToCallRegistry::createEmpty()
-        );
-
         $orderId                 = 1000;
-        $aggregateCommandHandler = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('repository', InMemoryStandardRepository::createEmpty())
-            ->build($aggregateCallingCommandHandler);
+            ->withMessageHandler(
+                AggregateIdentifierRetrevingServiceBuilder::createWith(
+                    ClassDefinition::createFor(TypeDescriptor::create(Basket::class)),
+                    [],
+                    [],
+                    null,
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $replyChannel = QueueChannel::create();
-        $command = PaymentWasDoneEvent::create();
-        $aggregateCommandHandler->handle(
-            MessageBuilder::withPayload($command)
+        $message = $messaging->sendDirectToChannelWithMessageReply(
+            $inputChannel,
+            MessageBuilder::withPayload(PaymentWasDoneEvent::create())
                 ->setHeader(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER, $orderId)
-                ->setReplyChannel($replyChannel)->build()
+                ->build()
         );
 
-        $this->assertEquals(['userId' => $orderId], $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_ID));
+        $this->assertEquals(['userId' => $orderId], $message->getHeaders()->get(AggregateMessage::AGGREGATE_ID));
     }
 
     public function test_providing_override_aggregate_identifier_as_array()
     {
-        $aggregateCallingCommandHandler = AggregateIdentifierRetrevingServiceBuilder::createWith(
-            ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
-            [],
-            [],
-            ClassDefinition::createFor(TypeDescriptor::create(ChangeArticleContentCommand::class)),
-            InterfaceToCallRegistry::createEmpty()
-        );
-
         $aggregateIds                 = ['author' => 1000, 'title' => 'Some'];
-        $aggregateCommandHandler = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('repository', InMemoryStandardRepository::createEmpty())
-            ->build($aggregateCallingCommandHandler);
+            ->withMessageHandler(
+                AggregateIdentifierRetrevingServiceBuilder::createWith(
+                    ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
+                    [],
+                    [],
+                    ClassDefinition::createFor(TypeDescriptor::create(ChangeArticleContentCommand::class)),
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $replyChannel = QueueChannel::create();
-        $command = PaymentWasDoneEvent::create();
-        $aggregateCommandHandler->handle(
-            MessageBuilder::withPayload($command)
+        $message = $messaging->sendDirectToChannelWithMessageReply(
+            $inputChannel,
+            MessageBuilder::withPayload(PaymentWasDoneEvent::create())
                 ->setHeader(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER, $aggregateIds)
-                ->setReplyChannel($replyChannel)->build()
+                ->build()
         );
 
-        $this->assertEquals($aggregateIds, $replyChannel->receive()->getHeaders()->get(AggregateMessage::AGGREGATE_ID));
+        $this->assertEquals($aggregateIds, $message->getHeaders()->get(AggregateMessage::AGGREGATE_ID));
     }
 
     public function test_throwing_exception_if_aggregate_has_no_identifiers_defined()
     {
         $this->expectException(InvalidArgumentException::class);
 
-        AggregateIdentifierRetrevingServiceBuilder::createWith(
-            ClassDefinition::createFor(TypeDescriptor::create(Product::class)),
-            [],
-            [],
-            null,
-            InterfaceToCallRegistry::createEmpty()
-        );
+        ComponentTestBuilder::create()
+            ->withMessageHandler(
+                AggregateIdentifierRetrevingServiceBuilder::createWith(
+                    ClassDefinition::createFor(TypeDescriptor::create(Product::class)),
+                    [],
+                    [],
+                    null,
+                    InterfaceToCallRegistry::createEmpty()
+                )
+            )
+            ->build()
+        ;
     }
 
     public function test_throwing_exception_if_metadata_identifier_mapping_points_to_non_existing_aggregate_id()
     {
         $this->expectException(InvalidArgumentException::class);
 
-        AggregateIdentifierRetrevingServiceBuilder::createWith(
-            ClassDefinition::createFor(TypeDescriptor::create(OrderFulfilment::class)),
-            ['some' => 'paymentId', 'orderId' => 'x'],
-            [],
-            ClassDefinition::createFor(TypeDescriptor::create(PaymentWasDoneEvent::class)),
-            InterfaceToCallRegistry::createEmpty()
-        );
+        ComponentTestBuilder::create()
+            ->withMessageHandler(
+                AggregateIdentifierRetrevingServiceBuilder::createWith(
+                    ClassDefinition::createFor(TypeDescriptor::create(OrderFulfilment::class)),
+                    ['some' => 'paymentId', 'orderId' => 'x'],
+                    [],
+                    ClassDefinition::createFor(TypeDescriptor::create(PaymentWasDoneEvent::class)),
+                    InterfaceToCallRegistry::createEmpty()
+                )
+            )
+            ->build();
     }
 }

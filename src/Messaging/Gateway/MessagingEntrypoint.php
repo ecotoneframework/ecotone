@@ -15,6 +15,8 @@ interface MessagingEntrypoint
 
     public function sendWithHeaders(#[Payload] $payload, #[Headers] array $headers, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel): mixed;
 
+    public function sendWithHeadersWithMessageReply(#[Payload] $payload, #[Headers] array $headers, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel): ?Message;
+
     /**
      * It must contain {MessagingEntrypoint::ENTRYPOINT} header
      */

@@ -46,20 +46,24 @@ class CallAggregateServiceBuilderTest extends TestCase
     public function test_calling_existing_aggregate_method_with_command_class(): void
     {
         $aggregate                      = AggregateWithoutMessageClassesExample::create();
-        $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
-            'doSomething',
-            true,
-            InterfaceToCallRegistry::createEmpty()
-        );
 
-        $aggregateCommandHandler = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('repository', InMemoryStandardRepository::createEmpty())
-            ->build($aggregateCallingCommandHandler);
+            ->withMessageHandler(
+                CallAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
+                    'doSomething',
+                    true,
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
         $this->assertNull($aggregate->getChangedState());
 
-        $aggregateCommandHandler->handle(
+        $messaging->sendMessageDirectToChannel(
+            $inputChannel,
             MessageBuilder::withPayload(['id' => 1])
                 ->setHeader(AggregateMessage::CALLED_AGGREGATE_OBJECT, $aggregate)
                 ->build()
@@ -74,28 +78,27 @@ class CallAggregateServiceBuilderTest extends TestCase
         $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, 'Poland'));
         $order->increaseAggregateVersion();
 
-        $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
-            'getAmountWithQuery',
-            true,
-            InterfaceToCallRegistry::createEmpty()
-        );
-
-        $aggregateQueryHandler = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('orderRepository', InMemoryStandardRepository::createEmpty())
-            ->build($aggregateCallingCommandHandler);
-
-        $replyChannel = QueueChannel::create();
-        $aggregateQueryHandler->handle(
-            MessageBuilder::withPayload(GetOrderAmountQuery::createWith(1))
-                ->setHeader(AggregateMessage::CALLED_AGGREGATE_OBJECT, $order)
-                ->setReplyChannel($replyChannel)
-                ->build()
-        );
+            ->withMessageHandler(
+                CallAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
+                    'getAmountWithQuery',
+                    true,
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
         $this->assertEquals(
             $orderAmount,
-            $replyChannel->receive()->getPayload()
+            $messaging->sendMessageDirectToChannel(
+                $inputChannel,
+                MessageBuilder::withPayload(GetOrderAmountQuery::createWith(1))
+                    ->setHeader(AggregateMessage::CALLED_AGGREGATE_OBJECT, $order)
+                    ->build()
+            )
         );
     }
 
@@ -104,28 +107,30 @@ class CallAggregateServiceBuilderTest extends TestCase
         $aggregateId = 1;
         $aggregate = Storage::create(new CreateStorage($aggregateId, [SmallBox::create(1)], []));
 
-        $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(Storage::class)),
-            'getSmallBoxes',
-            false,
-            InterfaceToCallRegistry::createEmpty()
-        );
-
-        $aggregateQueryHandler = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference(InMemoryStandardRepository::class, InMemoryStandardRepository::createEmpty())
-            ->build($aggregateCallingCommandHandler);
+            ->withMessageHandler(
+                CallAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(Storage::class)),
+                    'getSmallBoxes',
+                    false,
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $replyChannel = QueueChannel::create();
-        $aggregateQueryHandler->handle(
-            MessageBuilder::withPayload(['storageId' => $aggregateId])
-                ->setHeader(AggregateMessage::CALLED_AGGREGATE_OBJECT, $aggregate)
-                ->setReplyChannel($replyChannel)
-                ->build()
-        );
+        $message = $messaging
+            ->sendDirectToChannelWithMessageReply(
+                $inputChannel,
+                MessageBuilder::withPayload(['storageId' => $aggregateId])
+                    ->setHeader(AggregateMessage::CALLED_AGGREGATE_OBJECT, $aggregate)
+                    ->build()
+            );
 
         $this->assertEquals(
             TypeDescriptor::createCollection(SmallBox::class),
-            $replyChannel->receive()->getHeaders()->getContentType()->getTypeParameter()
+            $message->getHeaders()->getContentType()->getTypeParameter()
         );
     }
 
@@ -134,22 +139,23 @@ class CallAggregateServiceBuilderTest extends TestCase
         $aggregateId = 1;
         $aggregate = Storage::create(new CreateStorage($aggregateId, [SmallBox::create(1)], [BigBox::create(2)]));
 
-        $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(Storage::class)),
-            'getBigBoxes',
-            false,
-            InterfaceToCallRegistry::createEmpty()
-        );
-
-        $aggregateQueryHandler = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference(InMemoryStandardRepository::class, InMemoryStandardRepository::createEmpty())
-            ->build($aggregateCallingCommandHandler);
+            ->withMessageHandler(
+                CallAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(Storage::class)),
+                    'getBigBoxes',
+                    false,
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $replyChannel = QueueChannel::create();
-        $aggregateQueryHandler->handle(
+        $message = $messaging->sendMessageDirectToChannelWithMessageReply(
+            $inputChannel,
             MessageBuilder::withPayload(['storageId' => $aggregateId])
                 ->setHeader(AggregateMessage::CALLED_AGGREGATE_OBJECT, $aggregate)
-                ->setReplyChannel($replyChannel)
                 ->build()
         );
 
@@ -158,7 +164,7 @@ class CallAggregateServiceBuilderTest extends TestCase
                 TypeDescriptor::createCollection(Box::class),
                 TypeDescriptor::createCollection(BigBox::class),
             ]),
-            $replyChannel->receive()->getHeaders()->getContentType()->getTypeParameter()
+            $message->getHeaders()->getContentType()->getTypeParameter()
         );
     }
 
@@ -168,53 +174,55 @@ class CallAggregateServiceBuilderTest extends TestCase
         $order = Order::createWith(CreateOrderCommand::createWith(1, $orderAmount, 'Poland'));
         $order->increaseAggregateVersion();
 
-        $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
-            'getCustomerId',
-            false,
-            InterfaceToCallRegistry::createEmpty()
-        );
-
-        $aggregateQueryHandler = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('orderRepository', InMemoryStandardRepository::createEmpty())
-            ->build($aggregateCallingCommandHandler);
+            ->withMessageHandler(
+                CallAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
+                    'getCustomerId',
+                    false,
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $replyChannel = QueueChannel::create();
-        $aggregateQueryHandler->handle(
-            MessageBuilder::withPayload(['orderId' => 1])
-                ->setHeader(AggregateMessage::CALLED_AGGREGATE_OBJECT, $order)
-                ->setReplyChannel($replyChannel)
-                ->build()
+        $this->assertNull(
+            $messaging
+                ->sendMessageDirectToChannel(
+                    $inputChannel,
+                    MessageBuilder::withPayload(['orderId' => 1])
+                        ->setHeader(AggregateMessage::CALLED_AGGREGATE_OBJECT, $order)
+                        ->build()
+                )
         );
-
-        $this->assertNull($replyChannel->receive());
     }
 
     public function test_calling_aggregate_for_query_handler_with_no_query(): void
     {
         $aggregate = AggregateWithoutMessageClassesExample::create(['id' => 1]);
-        $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
-            'querySomething',
-            false,
-            InterfaceToCallRegistry::createEmpty()
-        );
 
-        $aggregateQueryHandler = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('repository', InMemoryStandardRepository::createWith([$aggregate]))
-            ->build($aggregateCallingCommandHandler);
-
-        $replyChannel = QueueChannel::create();
-        $aggregateQueryHandler->handle(
-            MessageBuilder::withPayload(['id' => 1])
-                ->setHeader(AggregateMessage::CALLED_AGGREGATE_OBJECT, $aggregate)
-                ->setReplyChannel($replyChannel)
-                ->build()
-        );
+            ->withMessageHandler(
+                CallAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
+                    'querySomething',
+                    false,
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
         $this->assertEquals(
             true,
-            $replyChannel->receive()->getPayload()
+            $messaging->sendDirectToChannel(
+                $inputChannel,
+                MessageBuilder::withPayload(['id' => 1])
+                    ->setHeader(AggregateMessage::CALLED_AGGREGATE_OBJECT, $aggregate)
+                    ->build()
+            )
         );
     }
 
@@ -222,24 +230,26 @@ class CallAggregateServiceBuilderTest extends TestCase
     {
         $commandToRun = new StartTicketCommand(1);
 
-        $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-            'start',
-            true,
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withInputChannelName('inputChannel');
-
-        $replyChannel = QueueChannel::create();
         $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createEmpty();
 
-        $aggregateCommandHandler = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('repository', $inMemoryEventSourcedRepository)
-            ->build($aggregateCallingCommandHandler);
+            ->withMessageHandler(
+                CallAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
+                    'start',
+                    true,
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $aggregateCommandHandler->handle(MessageBuilder::withPayload($commandToRun)->setReplyChannel($replyChannel)->build());
+        $replyMessage = $messaging->sendMessageDirectToChannelWithMessageReply(
+            $inputChannel,
+            MessageBuilder::withPayload($commandToRun)->build()
+        );
 
-        $replyMessage = $replyChannel->receive();
         $this->assertEquals([new TicketWasStartedEvent(1)], $replyMessage->getPayload());
         $this->assertFalse($replyMessage->getHeaders()->containsKey(AggregateMessage::CALLED_AGGREGATE_OBJECT));
         $this->assertFalse($replyMessage->getHeaders()->containsKey(AggregateMessage::RESULT_AGGREGATE_OBJECT));
@@ -249,23 +259,25 @@ class CallAggregateServiceBuilderTest extends TestCase
     {
         $commandToRun = new CreateAggregate(1);
 
-        $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(EventSourcingAggregateWithInternalRecorder::class)),
-            'create',
-            true,
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withInputChannelName('inputChannel');
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                CallAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(EventSourcingAggregateWithInternalRecorder::class)),
+                    'create',
+                    true,
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $replyChannel = QueueChannel::create();
-
-        $aggregateCommandHandler = ComponentTestBuilder::create()->build($aggregateCallingCommandHandler);
-        $aggregateCommandHandler->handle(MessageBuilder::withPayload($commandToRun)->setReplyChannel($replyChannel)->build());
+        $replyMessage = $messaging->sendDirectToChannelWithMessageReply(
+            $inputChannel,
+            MessageBuilder::withPayload($commandToRun)->build()
+        );
 
         $aggregate = new EventSourcingAggregateWithInternalRecorder();
         $aggregate->recordThat(new AggregateCreated(1));
-
-        $replyMessage = $replyChannel->receive();
 
         $this->assertEquals($aggregate, $replyMessage->getPayload());
         $this->assertFalse($replyMessage->getHeaders()->containsKey(AggregateMessage::CALLED_AGGREGATE_OBJECT));
@@ -278,32 +290,33 @@ class CallAggregateServiceBuilderTest extends TestCase
         $workerId = 100;
         $commandToRun = new AssignWorkerCommand($ticketId, $workerId);
 
-        $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-            'assignWorker',
-            true,
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withInputChannelName('inputChannel');
-
         $queueChannel = QueueChannel::create();
         $inMemoryEventSourcedRepository = InMemoryEventSourcedRepository::createWithExistingAggregate(['ticketId' => $ticketId], Ticket::class, [new TicketWasStartedEvent($ticketId)]);
 
-        $aggregateCommandHandler = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('repository', $inMemoryEventSourcedRepository)
-            ->build($aggregateCallingCommandHandler);
+            ->withMessageHandler(
+                CallAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
+                    'assignWorker',
+                    true,
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
         $ticket = new Ticket();
         $ticket->onTicketWasStarted(new TicketWasStartedEvent($ticketId));
 
-        $aggregateCommandHandler->handle(
+        $replyMessage = $messaging->sendDirectToChannelWithMessageReply(
+            $inputChannel,
             MessageBuilder::withPayload($commandToRun)
                 ->setHeader(AggregateMessage::CALLED_AGGREGATE_OBJECT, clone $ticket)
-                ->setReplyChannel($queueChannel)->build()
+                ->build()
         );
 
         $workerWasAssignedEvent = new WorkerWasAssignedEvent($ticketId, $workerId);
-        $replyMessage = $queueChannel->receive();
         $this->assertEquals([$workerWasAssignedEvent], $replyMessage->getPayload());
         $this->assertEquals($ticket, $replyMessage->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT));
     }
@@ -312,32 +325,30 @@ class CallAggregateServiceBuilderTest extends TestCase
     {
         $commandToRun = new DoSomething(1);
 
-        $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(EventSourcingAggregateWithInternalRecorder::class)),
-            'doSomething',
-            true,
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withInputChannelName('inputChannel');
-
-        $replyChannel = QueueChannel::create();
-
-        $aggregateCommandHandler = ComponentTestBuilder::create()
-            ->build($aggregateCallingCommandHandler);
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                CallAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(EventSourcingAggregateWithInternalRecorder::class)),
+                    'doSomething',
+                    true,
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
         $calledAggregate = new EventSourcingAggregateWithInternalRecorder();
         $calledAggregate->applyAggregateCreated(new AggregateCreated(1));
 
-        $aggregateCommandHandler->handle(
+        $replyMessage = $messaging->sendDirectToChannelWithMessageReply(
+            $inputChannel,
             MessageBuilder::withPayload($commandToRun)
                 ->setHeader(AggregateMessage::CALLED_AGGREGATE_OBJECT, $calledAggregate)
-                ->setReplyChannel($replyChannel)
                 ->build()
         );
 
         $calledAggregate->recordThat(new SomethingWasDone(1));
 
-        $replyMessage = $replyChannel->receive();
         $this->assertEquals($commandToRun, $replyMessage->getPayload());
         $this->assertEquals($calledAggregate, $replyMessage->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT));
     }
@@ -346,31 +357,29 @@ class CallAggregateServiceBuilderTest extends TestCase
     {
         $commandToRun = new DoSomething(1);
 
-        $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(StateBasedAggregateWithInternalRecorder::class)),
-            'doSomething',
-            true,
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withInputChannelName('inputChannel');
-
-        $replyChannel = QueueChannel::create();
-
-        $aggregateCommandHandler = ComponentTestBuilder::create()
-            ->build($aggregateCallingCommandHandler);
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                CallAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(StateBasedAggregateWithInternalRecorder::class)),
+                    'doSomething',
+                    true,
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
         $calledAggregate = new StateBasedAggregateWithInternalRecorder(1);
 
-        $aggregateCommandHandler->handle(
+        $replyMessage = $messaging->sendDirectToChannelWithMessageReply(
+            $inputChannel,
             MessageBuilder::withPayload($commandToRun)
                 ->setHeader(AggregateMessage::CALLED_AGGREGATE_OBJECT, $calledAggregate)
-                ->setReplyChannel($replyChannel)
                 ->build()
         );
 
         $calledAggregate->recordThat(new SomethingWasDone(1));
 
-        $replyMessage = $replyChannel->receive();
         $this->assertEquals($commandToRun, $replyMessage->getPayload());
         $this->assertEquals($calledAggregate, $replyMessage->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT));
     }
@@ -379,32 +388,29 @@ class CallAggregateServiceBuilderTest extends TestCase
     {
         $commandToRun = new CreateSomething(1, 1);
 
-        $aggregateCallingCommandHandler = CallAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(EventSourcingAggregateWithInternalRecorder::class)),
-            'createSomething',
-            true,
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withInputChannelName('inputChannel');
-
-        $replyChannel = QueueChannel::create();
-
-        $aggregateCommandHandler = ComponentTestBuilder::create()
-            ->build($aggregateCallingCommandHandler);
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                CallAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(EventSourcingAggregateWithInternalRecorder::class)),
+                    'createSomething',
+                    true,
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
         $calledAggregate = new EventSourcingAggregateWithInternalRecorder();
         $calledAggregate->applyAggregateCreated(new AggregateCreated(1));
 
-        $aggregateCommandHandler->handle(
+        $replyMessage = $messaging->sendDirectToChannelWithMessageReply(
+            $inputChannel,
             MessageBuilder::withPayload($commandToRun)
                 ->setHeader(AggregateMessage::CALLED_AGGREGATE_OBJECT, $calledAggregate)
-                ->setReplyChannel($replyChannel)
                 ->build()
         );
 
         $calledAggregate->recordThat(new SomethingWasCreated(1, 1));
-
-        $replyMessage = $replyChannel->receive();
 
         $this->assertEquals(new Something(1), $replyMessage->getPayload());
         $this->assertEquals($calledAggregate, $replyMessage->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT));

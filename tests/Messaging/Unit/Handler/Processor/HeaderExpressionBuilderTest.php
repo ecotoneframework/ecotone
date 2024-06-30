@@ -4,18 +4,14 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
-use Ecotone\Messaging\Config\Container\BoundParameterConverter;
-use Ecotone\Messaging\Handler\InterfaceParameter;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Test\ComponentTestBuilder;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
-use Test\Ecotone\Messaging\Fixture\Service\CallableService;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 
 /**
  * Class ExpressionBuilderTest
@@ -35,21 +31,19 @@ class HeaderExpressionBuilderTest extends TestCase
      */
     public function test_creating_payload_expression()
     {
-        $converter = HeaderExpressionBuilder::create('x', 'token', 'value ~ 1', true);
-        $converter = ComponentTestBuilder::create()
-            ->build(new BoundParameterConverter(
-                $converter,
-                InterfaceToCall::create(CallableService::class, 'wasCalled'),
-                InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', ''))
-            ));
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withReturnMixed')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+                    ->withMethodParameterConverters([
+                        HeaderExpressionBuilder::create('value', 'token', 'value ~ 1', true),
+                    ])
+            )
+            ->build();
 
         $this->assertEquals(
             '1001',
-            $converter->getArgumentFrom(
-                MessageBuilder::withPayload('some')
-                    ->setHeader('token', '100')
-                    ->build(),
-            )
+            $messaging->sendDirectToChannel($inputChannel, metadata: ['token' => 100])
         );
     }
 
@@ -59,60 +53,57 @@ class HeaderExpressionBuilderTest extends TestCase
      */
     public function test_using_reference_service_in_expression()
     {
-        $converter = HeaderExpressionBuilder::create('x', 'number', "reference('calculatingService').sum(value)", true);
-
-        $converter = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('calculatingService', CalculatingService::create(1))
-            ->build(
-                new BoundParameterConverter(
-                    $converter,
-                    InterfaceToCall::create(CallableService::class, 'wasCalled'),
-                    InterfaceParameter::createNullable('x', TypeDescriptor::create('string'))
-                )
-            );
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withReturnMixed')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+                    ->withMethodParameterConverters([
+                        HeaderExpressionBuilder::create('value', 'number', "reference('calculatingService').sum(value)", true),
+                    ])
+            )
+            ->build();
 
         $this->assertEquals(
             101,
-            $converter->getArgumentFrom(
-                MessageBuilder::withPayload('x')
-                    ->setHeader('number', 100)
-                    ->build(),
-            )
+            $messaging->sendDirectToChannel($inputChannel, metadata: ['number' => 100])
         );
     }
 
     public function test_throwing_exception_if_header_does_not_exists()
     {
-        $converter = HeaderExpressionBuilder::create('x', 'token', 'value ~ 1', true);
-        $converter = ComponentTestBuilder::create()
-            ->build(new BoundParameterConverter(
-                $converter,
-                InterfaceToCall::create(CallableService::class, 'wasCalled'),
-                InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', ''))
-            ));
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withReturnMixed')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+                    ->withMethodParameterConverters([
+                        HeaderExpressionBuilder::create('value', 'token', 'value ~ 1', true),
+                    ])
+            )
+            ->build();
 
         $this->expectException(InvalidArgumentException::class);
 
-        $converter->getArgumentFrom(
-            MessageBuilder::withPayload('some')->build(),
+        $this->assertEquals(
+            '1001',
+            $messaging->sendDirectToChannel($inputChannel, metadata: [])
         );
     }
 
     public function test_not_throwing_exception_if_header_does_not_exists_and_is_no_required()
     {
-        $converter = HeaderExpressionBuilder::create('x', 'token', 'value ~ 1', false);
-        $converter = ComponentTestBuilder::create()
-            ->build(new BoundParameterConverter(
-                $converter,
-                InterfaceToCall::create(CallableService::class, 'wasCalled'),
-                InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', ''))
-            ));
-
-        $this->assertEquals(
-            '1',
-            $converter->getArgumentFrom(
-                MessageBuilder::withPayload('some')->build(),
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withReturnMixed')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+                    ->withMethodParameterConverters([
+                        HeaderExpressionBuilder::create('value', 'token', 'value', false),
+                    ])
             )
+            ->build();
+
+        $this->assertNull(
+            $messaging->sendDirectToChannel($inputChannel, metadata: [])
         );
     }
 }

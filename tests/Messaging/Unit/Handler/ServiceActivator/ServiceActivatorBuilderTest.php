@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\ServiceActivator;
 
-use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -34,9 +34,9 @@ class ServiceActivatorBuilderTest extends MessagingTest
     public function test_building_service_activator()
     {
         $objectToInvoke = ServiceExpectingOneArgument::create();
-        $serviceActivator = ComponentTestBuilder::create()->build(ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'withoutReturnValue'));
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([ServiceExpectingOneArgument::class], [ServiceExpectingOneArgument::class => $objectToInvoke]);
 
-        $serviceActivator->handle(MessageBuilder::withPayload('some')->build());
+        $ecotoneLite->sendDirectToChannel('withoutReturnValue', 'some');
 
         $this->assertTrue($objectToInvoke->wasCalled());
     }
@@ -47,16 +47,15 @@ class ServiceActivatorBuilderTest extends MessagingTest
      */
     public function test_handler_returns_message_with_no_reply_channel_and_making_use_of_requested_reply_channel()
     {
-        $replyChannel = QueueChannel::create();
         $message = MessageBuilder::withPayload('some')
                     ->build();
+
         $objectToInvoke = ServiceReturningMessage::createWith($message);
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([ServiceReturningMessage::class], [ServiceReturningMessage::class => $objectToInvoke]);
 
-        $serviceActivator = ComponentTestBuilder::create()->build(ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'get'));
-
-        $serviceActivator->handle(MessageBuilder::withPayload('someOther')->setReplyChannel($replyChannel)->build());
-
-        $this->assertNotNull($replyChannel->receive());
+        $this->assertNotNull(
+            $ecotoneLite->sendDirectToChannel('get', 'someOther')
+        );
     }
 
     /**
@@ -65,21 +64,10 @@ class ServiceActivatorBuilderTest extends MessagingTest
      */
     public function test_activating_statically_called_service()
     {
-        $reference = StaticallyCalledService::class;
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([StaticallyCalledService::class]);
 
-        $serviceActivator = ComponentTestBuilder::create()->build(ServiceActivatorBuilder::create($reference, InterfaceToCall::create($reference, 'run')));
-
-        $payload = 'Hello World';
-        $replyChannel = QueueChannel::create();
-        $serviceActivator->handle(
-            MessageBuilder::withPayload($payload)
-                ->setReplyChannel($replyChannel)
-                ->build()
-        );
-
-        $this->assertEquals(
-            $payload,
-            $replyChannel->receive()->getPayload()
+        $this->assertNotNull(
+            $ecotoneLite->sendDirectToChannel('run', 'someOther')
         );
     }
 
@@ -90,10 +78,9 @@ class ServiceActivatorBuilderTest extends MessagingTest
     public function test_calling_direct_object_reference()
     {
         $objectToInvoke = ServiceExpectingOneArgument::create();
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([ServiceExpectingOneArgument::class], [ServiceExpectingOneArgument::class => $objectToInvoke]);
 
-        $serviceActivator = ComponentTestBuilder::create()->build(ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'withoutReturnValue'));
-
-        $serviceActivator->handle(MessageBuilder::withPayload('some')->build());
+        $ecotoneLite->sendDirectToChannel('withoutReturnValue', 'some');
 
         $this->assertTrue($objectToInvoke->wasCalled());
     }
@@ -104,21 +91,20 @@ class ServiceActivatorBuilderTest extends MessagingTest
      */
     public function test_passing_through_on_void()
     {
-        $objectToInvoke = ServiceExpectingOneArgument::create();
-
-        $serviceActivator = ComponentTestBuilder::create()->build(ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'withoutReturnValue')
-            ->withPassThroughMessageOnVoidInterface(true));
-
-        $replyChannel = QueueChannel::create();
-        $message = MessageBuilder::withPayload('test')
-            ->setReplyChannel($replyChannel)
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withoutReturnValue')
+                    ->withInputChannelName('inputChannel')
+                    ->withPassThroughMessageOnVoidInterface(true)
+            )
             ->build();
-        $serviceActivator->handle($message);
 
-        $this->assertMessages(
-            $message,
-            $replyChannel->receive()
+        // value is returned even so service is void
+        $this->assertEquals(
+            'test',
+            $messaging->sendDirectToChannel('inputChannel', 'test')
         );
+        ;
     }
 
     /**
@@ -127,21 +113,20 @@ class ServiceActivatorBuilderTest extends MessagingTest
      */
     public function test_ignoring_passing_through_when_service_not_void()
     {
-        $objectToInvoke = ServiceExpectingOneArgument::create();
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withReturnValue')
+                    ->withInputChannelName('inputChannel')
+                    ->withPassThroughMessageOnVoidInterface(true)
+            )
+            ->build(
+            );
 
-        $serviceActivator = ComponentTestBuilder::create()->build(ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'withReturnValue')
-            ->withPassThroughMessageOnVoidInterface(true));
-
-        $replyChannel = QueueChannel::create();
-        $message = MessageBuilder::withPayload('test')
-            ->setReplyChannel($replyChannel)
-            ->build();
-        $serviceActivator->handle($message);
-
-        $receivedMessage = $replyChannel->receive();
-
-        $this->assertNotNull($receivedMessage);
-        $this->assertNotEquals($message, $receivedMessage);
+        $this->assertEquals(
+            'test_called',
+            $messaging->sendDirectToChannel('inputChannel', 'test')
+        );
+        ;
     }
 
     /**
@@ -150,64 +135,57 @@ class ServiceActivatorBuilderTest extends MessagingTest
     public function test_creating_with_interceptors()
     {
         $objectToInvoke = CalculatingService::create(0);
-
         $firstInterceptor = AroundInterceptorBuilder::create('calculator', InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'sum'), 1, '', []);
         $secondInterceptor = AroundInterceptorBuilder::create('calculator', InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'multiply'), 2, '', []);
         $thirdInterceptor = AroundInterceptorBuilder::create('calculator', InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'sum'), 3, '', []);
-        $replyChannel = QueueChannel::create();
 
-        $serviceActivator = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('calculator', CalculatingServiceInterceptorExample::create(2))
-            ->build(ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'result')
-                            ->withInputChannelName('someName')
-                            ->withEndpointId('someEndpoint')
-                            ->addAroundInterceptor($secondInterceptor)
-                            ->addAroundInterceptor($thirdInterceptor)
-                            ->addAroundInterceptor($firstInterceptor));
-
-        $serviceActivator->handle(MessageBuilder::withPayload(1)->setReplyChannel($replyChannel)->build());
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'result')
+                    ->withInputChannelName('someName')
+                    ->withEndpointId('someEndpoint')
+                    ->addAroundInterceptor($secondInterceptor)
+                    ->addAroundInterceptor($thirdInterceptor)
+                    ->addAroundInterceptor($firstInterceptor)
+            )
+            ->build();
 
         $this->assertEquals(
             8,
-            $replyChannel->receive()->getPayload()
+            $messaging->sendDirectToChannel('someName', 1)
         );
+        ;
     }
 
     public function test_returning_array_from_service_activator()
     {
-        $objectToInvoke = ServiceExpectingOneArgument::create();
-
-        $serviceActivator = ComponentTestBuilder::create()->build(ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'withArrayReturnValue'));
-
-        $replyChannel = QueueChannel::create();
-        $message = MessageBuilder::withPayload('test')
-            ->setReplyChannel($replyChannel)
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withArrayReturnValue')
+                    ->withInputChannelName('inputChannel')
+                    ->withPassThroughMessageOnVoidInterface(true)
+            )
             ->build();
-        $serviceActivator->handle($message);
 
-        $receivedMessage = $replyChannel->receive();
-
-        $this->assertNotNull($receivedMessage);
-        $this->assertEquals(['some' => 'test'], $receivedMessage->getPayload());
-        $this->assertArrayNotHasKey('some', $receivedMessage->getHeaders()->headers());
+        $this->assertEquals(
+            ['some' => 'test'],
+            $messaging->sendDirectToChannel('inputChannel', 'test')
+        );
+        ;
     }
 
     public function test_returning_array_and_changing_headers_from_service_activator()
     {
-        $objectToInvoke = ServiceExpectingOneArgument::create();
-
-        $serviceActivator = ComponentTestBuilder::create()->build(
-            ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'withArrayReturnValue')
-                ->withChangingHeaders(true)
-        );
-
-        $replyChannel = QueueChannel::create();
-        $message = MessageBuilder::withPayload('test')
-            ->setReplyChannel($replyChannel)
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withArrayReturnValue')
+                    ->withInputChannelName('inputChannel')
+                    ->withChangingHeaders(true)
+            )
             ->build();
-        $serviceActivator->handle($message);
 
-        $receivedMessage = $replyChannel->receive();
+        $receivedMessage = $messaging->sendDirectToChannelWithMessageReply('inputChannel', 'test');
 
         $this->assertNotNull($receivedMessage);
         $this->assertEquals('test', $receivedMessage->getPayload());

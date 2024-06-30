@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Service;
 
+use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\Message;
 
 /**
@@ -27,16 +28,12 @@ class ServiceReturningMessage
         $this->messageToReturn = $messageToReturn;
     }
 
-    /**
-     * @param Message $messageToReturn
-     * @return ServiceReturningMessage
-     */
     public static function createWith(Message $messageToReturn): self
     {
         return new self($messageToReturn);
     }
 
-
+    #[ServiceActivator('get')]
     public function get()
     {
         return $this->messageToReturn;

@@ -22,6 +22,9 @@ use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
 use Psr\Container\ContainerInterface;
 
+/**
+ * @TODO wrap with nice exceptions on not found
+ */
 class MessagingSystemContainer implements ConfiguredMessagingSystem
 {
     /**

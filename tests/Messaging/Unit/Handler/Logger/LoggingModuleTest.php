@@ -9,6 +9,7 @@ use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
+use Ecotone\Test\LoggerExample;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\Handler\FailureHandler\ExampleFailureCommandHandler;
 

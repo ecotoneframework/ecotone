@@ -32,4 +32,9 @@ class StorageMessagingEntrypoint implements MessagingEntrypoint
     {
         return null;
     }
+
+    public function sendWithHeadersWithMessageReply(#[Payload] $payload, #[Headers] array $headers, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel): ?Message
+    {
+        return null;
+    }
 }

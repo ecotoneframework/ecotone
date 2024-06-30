@@ -6,9 +6,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Chain;
 
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
-use Ecotone\Messaging\Conversion\ConversionService;
-use Ecotone\Messaging\Conversion\ReferenceServiceConverter;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
 use Ecotone\Messaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
@@ -18,7 +16,6 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -217,69 +214,33 @@ class ChainMessageHandlerBuilderTest extends TestCase
     public function test_passing_through_internal_output_channel_at_the_end_of_the_stack()
     {
         $internalOutputChannelName = 'internalOutputChannelName';
-        $externalOutputChannelName = 'externalOutputChannelName';
+        $triggerChannelName = 'externalOutputChannelName';
         $internalOutputChannel = DirectChannel::create();
-        $componentTest = ComponentTestBuilder::create();
-        $internalOutputChannel->subscribe(
-            $componentTest->build(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
-        );
-        $externalOutputChannel = QueueChannel::create();
 
-        $chainHandler = ChainMessageHandlerBuilder::create()
-            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
-            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
-            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
-            ->withOutputMessageChannel($internalOutputChannelName);
-
-        $chainHandler = $componentTest
-            ->withChannel($internalOutputChannelName, $internalOutputChannel)
-            ->withChannel($externalOutputChannelName, $externalOutputChannel)
-            ->build(
+        $componentTest = ComponentTestBuilder::create()
+            ->withChannel(SimpleMessageChannelBuilder::create($internalOutputChannelName, $internalOutputChannel))
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum')
+                    ->withInputChannelName($internalOutputChannelName)
+            )
+            ->withMessageHandler(
                 ChainMessageHandlerBuilder::create()
-                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
-                ->chain($chainHandler)
-                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), 'multiply'))
-                ->withOutputMessageChannel($externalOutputChannelName)
+                    ->withInputChannelName($triggerChannelName)
+                    ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
+                    ->chain(
+                        ChainMessageHandlerBuilder::create()
+                            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
+                            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
+                            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
+                            ->withOutputMessageChannel($internalOutputChannelName)
+                    )
+                    ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), 'multiply'))
             );
 
-
-        $chainHandler->handle(MessageBuilder::withPayload(0)->build());
-
-        $this->assertEquals(10, $externalOutputChannel->receive()->getPayload());
-    }
-
-    public function test_having_chain_in_chain_with_default_around_interceptors_before_calling_any_chained_handler()
-    {
-        $aroundAddOneAfterCall = AroundInterceptorBuilder::createWithDirectObjectAndResolveConverters(
-            InterfaceToCallRegistry::createEmpty(),
-            CalculatingServiceInterceptorExample::create(1),
-            'resultAfterCalling',
-            1,
-            ConsumerContinuouslyWorkingService::class
+        $this->assertEquals(
+            10,
+            $componentTest->build()->sendDirectToChannel($triggerChannelName, 0)
         );
-
-        $chainHandler = ComponentTestBuilder::create()->build(
-            ChainMessageHandlerBuilder::create()
-                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
-                ->chain(
-                    ChainMessageHandlerBuilder::create()
-                        ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
-                        ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), 'multiply'))
-                        ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
-                        ->addAroundInterceptor($aroundAddOneAfterCall)
-                )
-                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), 'multiply'))
-                ->addAroundInterceptor($aroundAddOneAfterCall)
-        );
-
-        $replyChannel = QueueChannel::create();
-        $chainHandler->handle(
-            MessageBuilder::withPayload(0)
-                ->setReplyChannel($replyChannel)
-                ->build()
-        );
-
-        $this->assertEquals(10, $replyChannel->receive()->getPayload());
     }
 
     public function test_having_chain_in_chain_with_around_interceptors()
@@ -292,38 +253,31 @@ class ChainMessageHandlerBuilderTest extends TestCase
             ConsumerContinuouslyWorkingService::class
         );
 
-        $chainHandler               = ComponentTestBuilder::create()->build(ChainMessageHandlerBuilder::create()
-            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
-            ->chain(
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
                 ChainMessageHandlerBuilder::create()
+                    ->withInputChannelName($inputChannel = 'inputChannel')
                     ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
+                    ->chain(
+                        ChainMessageHandlerBuilder::create()
+                            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
+                            ->chainInterceptedHandler(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), 'multiply'))
+                            ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
+                            ->addAroundInterceptor($aroundAddOneAfterCall)
+                    )
                     ->chainInterceptedHandler(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), 'multiply'))
-                    ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
                     ->addAroundInterceptor($aroundAddOneAfterCall)
             )
-            ->chainInterceptedHandler(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), 'multiply'))
-            ->addAroundInterceptor($aroundAddOneAfterCall));
+            ->build();
 
-        $replyChannel = QueueChannel::create();
-        $chainHandler->handle(
-            MessageBuilder::withPayload(0)
-                ->setReplyChannel($replyChannel)
-                ->build()
+        $this->assertEquals(
+            13,
+            $messaging->sendDirectToChannel($inputChannel, 0)
         );
-
-        $this->assertEquals(13, $replyChannel->receive()->getPayload());
     }
 
     public function test_having_chain_with_output_channel_and_around_interceptor()
     {
-        $internalOutputChannelName = 'internalOutputChannelName';
-        $internalOutputChannel = DirectChannel::create();
-        $internalOutputChannel->subscribe(
-            ComponentTestBuilder::create()->build(
-                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum')
-            )
-        );
-
         $aroundAddOneAfterCall = AroundInterceptorBuilder::createWithDirectObjectAndResolveConverters(
             InterfaceToCallRegistry::createEmpty(),
             CalculatingServiceInterceptorExample::create(10),
@@ -332,49 +286,27 @@ class ChainMessageHandlerBuilderTest extends TestCase
             ConsumerContinuouslyWorkingService::class
         );
 
-        $chainHandler = ComponentTestBuilder::create()
-            ->withChannel($internalOutputChannelName, $internalOutputChannel)
-            ->build(ChainMessageHandlerBuilder::create()
-                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), 'sum'))
-                ->chainInterceptedHandler(
-                    ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), 'multiply')
-                        ->withOutputMessageChannel($internalOutputChannelName)
-                )
-                ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
-                ->addAroundInterceptor($aroundAddOneAfterCall));
-
-        $replyChannel = QueueChannel::create();
-        $chainHandler->handle(
-            MessageBuilder::withPayload(0)
-                ->setReplyChannel($replyChannel)
-                ->build()
-        );
-
-        $this->assertEquals(16, $replyChannel->receive()->getPayload());
-    }
-
-    public function test_chaining_multiple_handlers_with_output_channel()
-    {
-        $outputChannelName = 'outputChannelName';
-        $outputChannel = QueueChannel::create();
-        $requestPayload = 'some';
-
-        $chainHandler = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
-            ->build(ChainMessageHandlerBuilder::create()
-                ->chain(TransformerBuilder::createHeaderEnricher([
-                    'token' => '123',
-                ]))
-                ->withOutputMessageChannel($outputChannelName));
-
-        $chainHandler->handle(
-            MessageBuilder::withPayload($requestPayload)
-                ->build()
-        );
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum')
+                    ->withInputChannelName($internalOutputChannelName = 'internalOutputChannelName')
+            )
+            ->withMessageHandler(
+                ChainMessageHandlerBuilder::create()
+                    ->withInputChannelName($requestChannel = 'requestChannel')
+                    ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), 'sum'))
+                    ->chainInterceptedHandler(
+                        ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), 'multiply')
+                            ->withOutputMessageChannel($internalOutputChannelName)
+                    )
+                    ->chain(ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum'))
+                    ->addAroundInterceptor($aroundAddOneAfterCall)
+            )
+            ->build();
 
         $this->assertEquals(
-            '123',
-            $outputChannel->receive()->getHeaders()->get('token')
+            16,
+            $messaging->sendDirectToChannel($requestChannel, 0)
         );
     }
 
@@ -483,16 +415,18 @@ class ChainMessageHandlerBuilderTest extends TestCase
     {
         $outputChannelName = 'outputChannel';
         $outputChannel = QueueChannel::create();
-        $componentTest = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel);
-        $chainBuilder = $componentTest->build(
-            ChainMessageHandlerBuilder::create()
-            ->chain(TransformerBuilder::createWithExpression('1 + 1'))
-            ->chain(TransformerBuilder::createWithExpression('payload + 1'))
-            ->withOutputMessageHandler(RouterBuilder::createRecipientListRouter([$outputChannelName]))
-        );
+        $messaging = ComponentTestBuilder::create()
+            ->withChannel(SimpleMessageChannelBuilder::create($outputChannelName, $outputChannel))
+            ->withMessageHandler(
+                ChainMessageHandlerBuilder::create()
+                    ->withInputChannelName($requestChannel = 'requestChannel')
+                    ->chain(TransformerBuilder::createWithExpression('1 + 1'))
+                    ->chain(TransformerBuilder::createWithExpression('payload + 1'))
+                    ->withOutputMessageHandler(RouterBuilder::createRecipientListRouter([$outputChannelName]))
+            )
+            ->build();
 
-        $chainBuilder->handle(MessageBuilder::withPayload('some1')->build());
+        $messaging->sendDirectToChannel($requestChannel, 'some');
 
         $this->assertEquals(
             3,
@@ -502,29 +436,25 @@ class ChainMessageHandlerBuilderTest extends TestCase
 
     public function test_chaining_with_conversions_flow_using_x_type_to_keep_class_type_when_final_endpoint_is_not_compatible_with_payload()
     {
-        $outputChannelName = 'outputChannel';
-        $outputChannel = QueueChannel::create();
-        $chainBuilder = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
-            ->withReference(ConversionService::REFERENCE_NAME, AutoCollectionConversionService::createWith([
-                ReferenceServiceConverter::create(new OrderConverter(), 'convertFromArrayToObject', TypeDescriptor::createArrayType(), TypeDescriptor::create(Order::class)),
-                ReferenceServiceConverter::create(new OrderConverter(), 'fromObjectToArray', TypeDescriptor::create(Order::class), TypeDescriptor::createArrayType()),
-            ]))
-            ->build(ChainMessageHandlerBuilder::create()
-                ->chain(ServiceActivatorBuilder::createWithDirectReference(new OrderNamePrefixer('ecotone.'), 'transform'))
-                ->chain(ServiceActivatorBuilder::createWithDirectReference(new OrderIdIncreaser(), 'increase'))
-                ->chain(ServiceActivatorBuilder::createWithDirectReference(new OrderReceiver(), 'receive'))
-                ->withOutputMessageChannel($outputChannelName));
-
-        $chainBuilder->handle(
-            MessageBuilder::withPayload(new Order('1', 'shop'))
-                ->setHeader(MessageHeaders::TYPE_ID, Order::class)
-                ->build()
-        );
+        $messaging = ComponentTestBuilder::create([OrderConverter::class])
+            ->withReference(OrderConverter::class, new OrderConverter())
+            ->withMessageHandler(
+                ChainMessageHandlerBuilder::create()
+                    ->withInputChannelName($requestChannel = 'requestChannel')
+                    ->chain(ServiceActivatorBuilder::createWithDirectReference(new OrderNamePrefixer('ecotone.'), 'transform'))
+                    ->chain(ServiceActivatorBuilder::createWithDirectReference(new OrderIdIncreaser(), 'increase'))
+                    ->chain(ServiceActivatorBuilder::createWithDirectReference(new OrderReceiver(), 'receive'))
+            )
+            ->build();
 
         $this->assertEquals(
             new Order('2', 'ecotone.shop'),
-            $outputChannel->receive()->getPayload()
+            $messaging->sendMessageDirectToChannel(
+                $requestChannel,
+                MessageBuilder::withPayload(new Order('1', 'shop'))
+                    ->setHeader(MessageHeaders::TYPE_ID, Order::class)
+                    ->build()
+            )
         );
     }
 
@@ -535,10 +465,14 @@ class ChainMessageHandlerBuilderTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        ComponentTestBuilder::create()->build(ChainMessageHandlerBuilder::create()
-            ->chain(TransformerBuilder::createWithExpression('1 + 1'))
-            ->withOutputMessageHandler(RouterBuilder::createRecipientListRouter(['some']))
-            ->withOutputMessageChannel('some'));
+        ComponentTestBuilder::create()
+            ->withMessageHandler(
+                ChainMessageHandlerBuilder::create()
+                    ->chain(TransformerBuilder::createWithExpression('1 + 1'))
+                    ->withOutputMessageHandler(RouterBuilder::createRecipientListRouter(['some']))
+                    ->withOutputMessageChannel('some')
+            )
+            ->build();
     }
 
     /**
@@ -550,17 +484,21 @@ class ChainMessageHandlerBuilderTest extends TestCase
      */
     private function createChainHandlerAndHandle(array $messageHandlers, $requestPayload, $replyChannel): void
     {
-        $chainHandlerBuilder = ChainMessageHandlerBuilder::create();
+        $chainHandlerBuilder = ChainMessageHandlerBuilder::create()
+                                    ->withInputChannelName($inputChannel = 'inputChannel')
+                                    ->withOutputMessageChannel($outputChannel = 'outputChannel');
         foreach ($messageHandlers as $messageHandler) {
             $chainHandlerBuilder = $chainHandlerBuilder->chain($messageHandler);
         }
 
-        $chainHandler = ComponentTestBuilder::create()
-            ->build($chainHandlerBuilder);
+        $messaging = ComponentTestBuilder::create()
+                        ->withChannel(SimpleMessageChannelBuilder::create($outputChannel, $replyChannel))
+                        ->withMessageHandler($chainHandlerBuilder)
+                        ->build();
 
-        $chainHandler->handle(
+        $messaging->sendDirectToChannel(
+            $inputChannel,
             MessageBuilder::withPayload($requestPayload)
-                ->setReplyChannel($replyChannel)
                 ->build()
         );
     }

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\MessageConverter;
 
-use Ecotone\Messaging\Conversion\InMemoryConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
+use Ecotone\Test\InMemoryConversionService;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;

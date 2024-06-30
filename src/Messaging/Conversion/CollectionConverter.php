@@ -42,10 +42,10 @@ class CollectionConverter implements Converter
         foreach ($source as $element) {
             $collection[] = $this->converterForSingleType->convert(
                 $element,
-                $sourceType,
-                $sourceMediaType,
-                $targetType,
-                $targetMediaType
+                $sourceType->resolveGenericTypes()[0],
+                MediaType::createApplicationXPHP(),
+                $targetType->resolveGenericTypes()[0],
+                MediaType::createApplicationXPHP(),
             );
         }
 
@@ -61,9 +61,9 @@ class CollectionConverter implements Converter
             && $sourceType->isSingleTypeCollection() && $targetType->isSingleTypeCollection()
             && $this->converterForSingleType->matches(
                 $sourceType->resolveGenericTypes()[0],
-                $sourceMediaType,
+                MediaType::createApplicationXPHP(),
                 $targetType->resolveGenericTypes()[0],
-                $targetMediaType
+                MediaType::createApplicationXPHP(),
             );
     }
 }

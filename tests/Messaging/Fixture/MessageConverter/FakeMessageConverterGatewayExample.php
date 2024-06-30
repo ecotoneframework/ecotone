@@ -10,5 +10,5 @@ use stdClass;
 interface FakeMessageConverterGatewayExample
 {
     #[MessageGateway('requestChannel')]
-    public function execute(#[Header('some')] array $some, #[Payload] int $amount): stdClass;
+    public function execute(#[Header('some')] array $some, #[Payload] string $amount): stdClass;
 }

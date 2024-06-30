@@ -2,74 +2,77 @@
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Gateway\ParameterConverter;
 
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
-use Ecotone\Messaging\Handler\InterfaceParameter;
-use Ecotone\Messaging\Handler\MethodArgument;
-use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\Handler\UnionTypeDescriptor;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Test\ComponentTestBuilder;
 use PHPUnit\Framework\TestCase;
 use stdClass;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceWithMixed;
 
 /**
  * @internal
  */
 class GatewayPayloadBuilderTest extends TestCase
 {
-    public function test_resolving_class_type_when_parameter_is_non_array()
+    public function test_resolving_class_type()
     {
-        $gatewayPayload = ComponentTestBuilder::create()->build(
-            GatewayPayloadBuilder::create('some')
-        );
-
-        $this->assertEquals(
-            MessageBuilder::withPayload(new stdClass())
-                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(stdClass::class)),
-            $gatewayPayload->convertToMessage(
-                MethodArgument::createWith(
-                    InterfaceParameter::createNotNullable('some', TypeDescriptor::create(TypeDescriptor::OBJECT)),
-                    new stdClass()
-                ),
-                MessageBuilder::withPayload('x')
+        $messaging = ComponentTestBuilder::create()
+            ->withGateway(
+                GatewayProxyBuilder::create(
+                    ServiceWithMixed::class,
+                    ServiceWithMixed::class,
+                    'send',
+                    $inputChannel = 'inputChannel'
+                )
+                    ->withParameterConverters([
+                        GatewayPayloadBuilder::create('value'),
+                    ])
             )
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withMessage')
+                    ->withInputChannelName($inputChannel)
+            )
+            ->build();
+
+        $message = $messaging->getGateway(ServiceWithMixed::class)
+            ->send($payload = new stdClass());
+
+        $this->assertEquals($payload, $message->getPayload());
+        $this->assertEquals(
+            MediaType::createApplicationXPHPWithTypeParameter(stdClass::class),
+            $message->getHeaders()->getContentType()
         );
     }
 
-    public function test_resolving_class_type_when_parameter_is_union_type()
+    public function test_resolving_class_type_by_checking_directly_sent_message()
     {
-        $gatewayPayload = ComponentTestBuilder::create()->build(
-            GatewayPayloadBuilder::create('some')
-        );
-
-        $this->assertEquals(
-            MessageBuilder::withPayload(new stdClass())
-                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(stdClass::class)),
-            $gatewayPayload->convertToMessage(
-                MethodArgument::createWith(
-                    InterfaceParameter::createNotNullable('some', UnionTypeDescriptor::createWith([TypeDescriptor::create(stdClass::class), TypeDescriptor::createArrayType()])),
-                    new stdClass()
-                ),
-                MessageBuilder::withPayload('x')
+        $messaging = ComponentTestBuilder::create()
+            ->withGateway(
+                GatewayProxyBuilder::create(
+                    ServiceWithMixed::class,
+                    ServiceWithMixed::class,
+                    'sendWithoutReturnValue',
+                    $inputChannel = 'inputChannel'
+                )
+                    ->withParameterConverters([
+                        GatewayPayloadBuilder::create('value'),
+                    ])
             )
-        );
-    }
+            ->withChannel(SimpleMessageChannelBuilder::createQueueChannel($inputChannel))
+            ->build();
 
-    public function test_resolving_class_type_when_parameter_is_anything()
-    {
-        $gatewayPayload = ComponentTestBuilder::create()->build(GatewayPayloadBuilder::create('some'));
+        $messaging->getGateway(ServiceWithMixed::class)
+            ->sendWithoutReturnValue($payload = new stdClass());
 
+        $message = $messaging->receiveMessageFrom($inputChannel);
+        $this->assertEquals($payload, $message->getPayload());
         $this->assertEquals(
-            MessageBuilder::withPayload(new stdClass())
-                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(stdClass::class)),
-            $gatewayPayload->convertToMessage(
-                MethodArgument::createWith(
-                    InterfaceParameter::createNotNullable('some', TypeDescriptor::create(TypeDescriptor::ANYTHING)),
-                    new stdClass()
-                ),
-                MessageBuilder::withPayload('x')
-            )
+            MediaType::createApplicationXPHPWithTypeParameter(stdClass::class),
+            $message->getHeaders()->getContentType()
         );
     }
 }

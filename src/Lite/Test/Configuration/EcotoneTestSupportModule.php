@@ -126,9 +126,14 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
         foreach ($this->spiedChannels as $spiedChannel) {
             $messagingConfiguration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($spiedChannel));
         }
-        foreach (array_unique(array_merge($testConfiguration->getSpiedChannels(), $this->spiedChannels)) as $spiedChannel) {
+        $spiedChannels = array_unique(array_merge($testConfiguration->getSpiedChannels(), $this->spiedChannels));
+        foreach ($spiedChannels as $spiedChannel) {
             $messagingConfiguration
-                ->registerChannelInterceptor(new SpiedChannelAdapterBuilder($spiedChannel))
+                ->registerChannelInterceptor(new SpiedChannelAdapterBuilder($spiedChannel));
+        }
+
+        if ($spiedChannels) {
+            $messagingConfiguration
                 ->registerMessageHandler(ServiceActivatorBuilder::create(
                     MessageCollectorHandler::class,
                     self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS

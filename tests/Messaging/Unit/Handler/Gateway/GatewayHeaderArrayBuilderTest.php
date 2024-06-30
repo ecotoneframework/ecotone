@@ -2,12 +2,14 @@
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Gateway;
 
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
-use Ecotone\Messaging\Handler\InterfaceParameter;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Test\ComponentTestBuilder;
+use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceWithMixed;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
 
 /**
@@ -24,34 +26,62 @@ class GatewayHeaderArrayBuilderTest extends MessagingTest
      */
     public function test_evaluating_gateway_parameter()
     {
-        $converter = ComponentTestBuilder::create()->build(GatewayHeadersBuilder::create('test'));
-
-        $this->assertEquals(
-            MessageBuilder::withPayload('some')
-                ->setHeader('token', 123)
-                ->setHeader('password', 'some'),
-            $converter->convertToMessage(
-                \Ecotone\Messaging\Handler\MethodArgument::createWith(InterfaceParameter::createNullable('test', TypeDescriptor::createArrayType()), [
-                    'token' => 123,
-                    'password' => 'some',
-                    'rabbit' => null,
-                ]),
-                MessageBuilder::withPayload('some')
+        $messaging = ComponentTestBuilder::create()
+            ->withReference('calculatingService', CalculatingService::create(1))
+            ->withGateway(
+                GatewayProxyBuilder::create(
+                    ServiceWithMixed::class,
+                    ServiceWithMixed::class,
+                    'send',
+                    $inputChannel = 'inputChannel'
+                )
+                    ->withParameterConverters([
+                        GatewayHeadersBuilder::create('value'),
+                    ])
             )
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withMessage')
+                    ->withInputChannelName($inputChannel)
+            )
+            ->build();
+
+        $message = $messaging->getGateway(ServiceWithMixed::class)->send([
+            'token' => 'some',
+            'type' => 'someType',
+        ]);
+        $this->assertEquals(
+            'some',
+            $message->getHeaders()->get('token')
+        );
+        $this->assertEquals(
+            'someType',
+            $message->getHeaders()->get('type')
         );
     }
 
     public function test_throwing_exception_if_passed_argument_is_not_array()
     {
-        $converter = ComponentTestBuilder::create()->build(
-            GatewayHeadersBuilder::create('test')
-        );
+        $messaging = ComponentTestBuilder::create()
+            ->withReference('calculatingService', CalculatingService::create(1))
+            ->withGateway(
+                GatewayProxyBuilder::create(
+                    ServiceWithMixed::class,
+                    ServiceWithMixed::class,
+                    'send',
+                    $inputChannel = 'inputChannel'
+                )
+                    ->withParameterConverters([
+                        GatewayHeadersBuilder::create('value'),
+                    ])
+            )
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withMessage')
+                    ->withInputChannelName($inputChannel)
+            )
+            ->build();
 
         $this->expectException(InvalidArgumentException::class);
 
-        $converter->convertToMessage(
-            \Ecotone\Messaging\Handler\MethodArgument::createWith(InterfaceParameter::createNullable('test', TypeDescriptor::createStringType()), 'sine'),
-            MessageBuilder::withPayload('some')
-        );
+        $messaging->getGateway(ServiceWithMixed::class)->send(123);
     }
 }

@@ -2,149 +2,153 @@
 
 namespace Ecotone\Test;
 
+use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
 use Ecotone\Lite\InMemoryContainerImplementation;
 use Ecotone\Lite\InMemoryPSRContainer;
-use Ecotone\Messaging\Config\Container\ChannelReference;
+use Ecotone\Lite\Test\FlowTestSupport;
+use Ecotone\Lite\Test\MessagingTestSupport;
+use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
 use Ecotone\Messaging\Config\Container\Compiler\RegisterInterfaceToCallReferences;
-use Ecotone\Messaging\Config\Container\Compiler\RegisterSingletonMessagingServices;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
-use Ecotone\Messaging\Config\Container\DefinedObject;
-use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Config\Container\EndpointRunnerReference;
-use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
-use Ecotone\Messaging\Config\Container\ProxyBuilder;
-use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Config\MessagingSystemConfiguration;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\ConfigurationVariableService;
-use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
-use Ecotone\Messaging\Conversion\ConversionService;
-use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
-use Ecotone\Messaging\Endpoint\EndpointRunner;
-use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
-use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
+use Ecotone\Messaging\Endpoint\InterceptedChannelAdapterBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
-use Ecotone\Messaging\Gateway\StorageMessagingEntrypoint;
-use Ecotone\Messaging\Handler\Logger\LoggingGateway;
-use Ecotone\Messaging\Handler\Logger\StubLoggingGateway;
+use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 
-use function get_class;
-
-use Ramsey\Uuid\Uuid;
+use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\EventBus;
+use Ecotone\Modelling\QueryBus;
 
 class ComponentTestBuilder
 {
-    private MessagingContainerBuilder $messagingBuilder;
-
-    private function __construct(private InMemoryPSRContainer $container, private ContainerBuilder $builder)
-    {
-        $this->messagingBuilder = new MessagingContainerBuilder($builder);
+    private function __construct(
+        private InMemoryPSRContainer $container,
+        private MessagingSystemConfiguration $messagingSystemConfiguration
+    ) {
     }
 
-    public static function create(): self
-    {
-        $container = InMemoryPSRContainer::createFromAssociativeArray([
-            ServiceCacheConfiguration::class => ServiceCacheConfiguration::noCache(),
-            ConfigurationVariableService::REFERENCE_NAME => InMemoryConfigurationVariableService::createEmpty(),
-            LoggingGateway::class => StubLoggingGateway::create(),
-            MessagingEntrypoint::class => StorageMessagingEntrypoint::create(),
-        ]);
-        $containerBuilder = new ContainerBuilder();
-        $containerBuilder->addCompilerPass(new RegisterSingletonMessagingServices());
-        $containerBuilder->addCompilerPass(new RegisterInterfaceToCallReferences());
-        $containerBuilder->addCompilerPass(new InMemoryContainerImplementation($container));
-        return new self($container, $containerBuilder);
+    /**
+     * @param array<string, string> $configurationVariables
+     */
+    public static function create(
+        array $classesToResolve = [],
+        ?ServiceConfiguration $configuration = null,
+        array $configurationVariables = [],
+    ): self {
+        // This will be used when symlinks to Ecotone packages are used (e.g. Split Testing - Github Actions)
+        $debug = debug_backtrace();
+        $path = dirname(array_pop($debug)['file']);
+        $pathToRootCatalog = FileSystemAnnotationFinder::getRealRootCatalog($path, $path);
+
+        FileSystemAnnotationFinder::getRealRootCatalog($pathToRootCatalog, $pathToRootCatalog);
+
+        $configurationVariableService = InMemoryConfigurationVariableService::create($configurationVariables);
+        return new self(
+            InMemoryPSRContainer::createFromAssociativeArray([
+                ServiceCacheConfiguration::REFERENCE_NAME => ServiceCacheConfiguration::noCache(),
+                ConfigurationVariableService::REFERENCE_NAME => $configurationVariableService,
+            ]),
+            MessagingSystemConfiguration::prepare(
+                $pathToRootCatalog,
+                $configurationVariableService,
+                $configuration ?? ServiceConfiguration::createWithDefaults()->withSkippedModulePackageNames(ModulePackageList::allPackages()),
+                $classesToResolve,
+                true,
+            )
+        );
     }
 
-    public function withChannel(string $channelName, DefinedObject $channel): self
+    public function withChannel(MessageChannelBuilder $channelBuilder): self
     {
-        $this->messagingBuilder->register(new ChannelReference($channelName), $channel);
+        $this->messagingSystemConfiguration->registerMessageChannel($channelBuilder);
+
+        return $this;
+    }
+
+    public function withConverter(CompilableBuilder $converter): self
+    {
+        $this->messagingSystemConfiguration->registerConverter($converter);
+
+        return $this;
+    }
+
+    public function withConverters(array $converters): self
+    {
+        foreach ($converters as $converter) {
+            $this->withConverter($converter);
+        }
 
         return $this;
     }
 
     public function withPollingMetadata(PollingMetadata $pollingMetadata): self
     {
-        $this->messagingBuilder->registerPollingMetadata($pollingMetadata);
+        $this->messagingSystemConfiguration->registerPollingMetadata($pollingMetadata);
 
         return $this;
     }
 
     public function withReference(string $referenceName, object $object): self
     {
-        $this->messagingBuilder->register($referenceName, new Definition(get_class($object)));
         $this->container->set($referenceName, $object);
 
         return $this;
     }
 
-    public function build(CompilableBuilder $compilableBuilder): mixed
+    public function withMessageHandler(MessageHandlerBuilder $messageHandlerBuilder): self
     {
-        $reference = $compilableBuilder->compile($this->messagingBuilder);
-        if ($reference instanceof Definition) {
-            $id = Uuid::uuid4();
-            $this->builder->register($id, $reference);
-            $referenceToReturn = new Reference($id);
-        } else {
-            $referenceToReturn = $reference;
-        }
-
-        $this->compile();
-        return $this->container->get($referenceToReturn->getId());
-    }
-
-    public function buildWithProxy(ProxyBuilder $compilableBuilder): mixed
-    {
-        $referenceToReturn = $compilableBuilder->registerProxy($this->messagingBuilder);
-
-        $this->compile();
-        return $this->container->get($referenceToReturn->getId());
-    }
-
-    public function withRegisteredMessageHandlerConsumer(MessageHandlerConsumerBuilder $messageHandlerConsumerBuilder, MessageHandlerBuilder $messageHandlerBuilder): self
-    {
-        $messageHandlerConsumerBuilder->registerConsumer($this->messagingBuilder, $messageHandlerBuilder);
+        $this->messagingSystemConfiguration->registerMessageHandler($messageHandlerBuilder);
 
         return $this;
     }
 
-    public function withRegisteredChannelAdapter(ChannelAdapterConsumerBuilder $channelAdapterConsumerBuilder): self
+    public function withInboundChannelAdapter(InterceptedChannelAdapterBuilder $inboundChannelAdapterBuilder): self
     {
-        $channelAdapterConsumerBuilder->registerConsumer($this->messagingBuilder);
+        $this->messagingSystemConfiguration->registerConsumer($inboundChannelAdapterBuilder);
 
         return $this;
     }
 
-    public function getEndpointRunner(string $endpointId): EndpointRunner
+    public function withGateway(GatewayProxyBuilder $gatewayProxyBuilder): self
     {
-        $this->compile();
-        return $this->container->get(new EndpointRunnerReference($endpointId));
+        $this->messagingSystemConfiguration->registerGatewayBuilder($gatewayProxyBuilder);
+
+        return $this;
     }
 
-    public function runEndpoint(string $endpointId, ?ExecutionPollingMetadata $executionPollingMetadata = null): void
+    public function build(): FlowTestSupport
     {
-        $this->getEndpointRunner($endpointId)->runEndpointWithExecutionPollingMetadata($executionPollingMetadata);
-    }
+        $containerBuilder = new ContainerBuilder();
+        $containerBuilder->addCompilerPass($this->messagingSystemConfiguration);
+        $containerBuilder->addCompilerPass(new RegisterInterfaceToCallReferences());
+        $containerBuilder->addCompilerPass(new InMemoryContainerImplementation($this->container));
+        $containerBuilder->compile();
 
-    private function compile(): void
-    {
-        if (! $this->builder->has(ConversionService::REFERENCE_NAME)) {
-            $this->builder->register(ConversionService::REFERENCE_NAME, new Definition(AutoCollectionConversionService::class, ['converters' => []], 'createWith'));
-        }
-        $this->builder->compile();
+        /** @var ConfiguredMessagingSystem $configuredMessagingSystem */
+        $configuredMessagingSystem = $this->container->get(ConfiguredMessagingSystem::class);
+
+        return new FlowTestSupport(
+            $configuredMessagingSystem->getGatewayByName(CommandBus::class),
+            $configuredMessagingSystem->getGatewayByName(EventBus::class),
+            $configuredMessagingSystem->getGatewayByName(QueryBus::class),
+            $configuredMessagingSystem->getGatewayByName(MessagingTestSupport::class),
+            $configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class),
+            $configuredMessagingSystem
+        );
     }
 
     public function getGatewayByName(string $name)
     {
         return $this->container->get($name);
-    }
-
-    public function getBuilder(): MessagingContainerBuilder
-    {
-        return $this->messagingBuilder;
     }
 }

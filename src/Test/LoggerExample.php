@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\Ecotone\Messaging\Unit\Handler\Logger;
+namespace Ecotone\Test;
 
 use Psr\Log\LoggerInterface;
 use Stringable;
@@ -173,5 +173,18 @@ class LoggerExample implements LoggerInterface
     public function log($level, string|Stringable $message, array $context = []): void
     {
         $this->log[] = $level;
+    }
+
+    public function clear(): void
+    {
+        $this->emergency = [];
+        $this->alert = [];
+        $this->critical = [];
+        $this->error = [];
+        $this->warning = [];
+        $this->notice = [];
+        $this->info = [];
+        $this->debug = [];
+        $this->log = [];
     }
 }

@@ -16,6 +16,11 @@ class InterfaceToCallReference extends Reference
         return new self($interfaceToCall->getInterfaceName(), $interfaceToCall->getMethodName());
     }
 
+    public static function create(string $className, string $methodName): self
+    {
+        return new self($className, $methodName);
+    }
+
     public function getClassName(): string
     {
         return $this->className;

@@ -4,17 +4,13 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
-use Ecotone\Messaging\Config\Container\BoundParameterConverter;
-use Ecotone\Messaging\Handler\InterfaceParameter;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressionBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Test\ComponentTestBuilder;
 use PHPUnit\Framework\TestCase;
 use ReflectionException;
 use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
-use Test\Ecotone\Messaging\Fixture\Service\CallableService;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 
 /**
  * Class ExpressionBuilderTest
@@ -34,20 +30,19 @@ class PayloadExpressionBuilderTest extends TestCase
      */
     public function test_creating_payload_expression()
     {
-        $converter = PayloadExpressionBuilder::create('x', 'value ~ 1');
-        $converter = ComponentTestBuilder::create()
-            ->build(new BoundParameterConverter(
-                $converter,
-                InterfaceToCall::create(CallableService::class, 'wasCalled'),
-                InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', ''))
-            ));
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withReturnMixed')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+                    ->withMethodParameterConverters([
+                        PayloadExpressionBuilder::create('value', 'value ~ 1'),
+                    ])
+            )
+            ->build();
 
         $this->assertEquals(
             '1001',
-            $converter->getArgumentFrom(
-                MessageBuilder::withPayload('100')
-                    ->build(),
-            )
+            $messaging->sendDirectToChannel($inputChannel, 100)
         );
     }
 
@@ -57,23 +52,20 @@ class PayloadExpressionBuilderTest extends TestCase
      */
     public function test_using_reference_service_in_expression()
     {
-        $converter = PayloadExpressionBuilder::create('x', "reference('calculatingService').sum(value)");
-
-        $converter = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('calculatingService', CalculatingService::create(1))
-            ->build(new BoundParameterConverter(
-                $converter,
-                InterfaceToCall::create(CallableService::class, 'wasCalled'),
-                InterfaceParameter::createNullable('x', TypeDescriptor::createWithDocBlock('string', ''))
-            ));
-
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withReturnMixed')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+                    ->withMethodParameterConverters([
+                        PayloadExpressionBuilder::create('value', "reference('calculatingService').sum(value)"),
+                    ])
+            )
+            ->build();
 
         $this->assertEquals(
             101,
-            $converter->getArgumentFrom(
-                MessageBuilder::withPayload(100)
-                    ->build(),
-            )
+            $messaging->sendDirectToChannel($inputChannel, 100)
         );
     }
 }

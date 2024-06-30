@@ -2,7 +2,6 @@
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -39,57 +38,59 @@ class LoadAggregateServiceBuilderTest extends TestCase
 {
     public function test_enriching_command_with_aggregate_if_found()
     {
-        $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
-            'getAppointmentId',
-            null,
-            LoadAggregateMode::createThrowOnNotFound(),
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withAggregateRepositoryFactories(['repository']);
-
         $appointment = Appointment::create(new CreateAppointmentCommand(123, 1000));
-        $aggregateCommandHandler = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('repository', AppointmentRepositoryBuilder::createWith([
                 $appointment,
             ]))
-            ->build($aggregateCallingCommandHandler);
+            ->withMessageHandler(
+                LoadAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
+                    'getAppointmentId',
+                    null,
+                    LoadAggregateMode::createThrowOnNotFound(),
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withAggregateRepositoryFactories(['repository'])
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $replyChannel = QueueChannel::create();
-        $aggregateCommandHandler->handle(
+        $replyMessage = $messaging->sendDirectToChannelWithMessageReply(
+            $inputChannel,
             MessageBuilder::withPayload([])
                 ->setHeader(AggregateMessage::AGGREGATE_ID, ['appointmentId' => 123])
-                ->setReplyChannel($replyChannel)
                 ->build()
         );
 
         $this->assertEquals(
             $appointment,
-            $replyChannel->receive()->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT)
+            $replyMessage->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT)
         );
     }
 
     public function test_setting_correct_aggregate_version_when_loading_via_event_sourcing_repository()
     {
-        $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-            'assignWorker',
-            ClassDefinition::createFor(TypeDescriptor::create(AssignWorkerCommand::class)),
-            LoadAggregateMode::createThrowOnNotFound(),
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withAggregateRepositoryFactories(['repository']);
-
         $ticketWasStartedEvent = new TicketWasStartedEvent(1);
-        $aggregateCommandHandler = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('repository', InMemoryEventSourcedRepository::createWithExistingAggregate(['ticketId' => 1], Ticket::class, [$ticketWasStartedEvent]))
-            ->build($aggregateCallingCommandHandler);
+            ->withMessageHandler(
+                LoadAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
+                    'assignWorker',
+                    ClassDefinition::createFor(TypeDescriptor::create(AssignWorkerCommand::class)),
+                    LoadAggregateMode::createThrowOnNotFound(),
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withAggregateRepositoryFactories(['repository'])
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $replyChannel = QueueChannel::create();
-        $aggregateCommandHandler->handle(
+        $replyMessage = $messaging->sendDirectToChannelWithMessageReply(
+            $inputChannel,
             MessageBuilder::withPayload(new AssignWorkerCommand(1, 2))
                 ->setHeader(AggregateMessage::AGGREGATE_ID, ['ticketId' => 1])
-                ->setReplyChannel($replyChannel)
                 ->build()
         );
 
@@ -98,7 +99,7 @@ class LoadAggregateServiceBuilderTest extends TestCase
         $ticket->setVersion(1);
 
         /** @var Ticket $reconstructedTicket */
-        $reconstructedTicket = $replyChannel->receive()->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT);
+        $reconstructedTicket = $replyMessage->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT);
         $this->assertEquals(
             $ticket,
             $reconstructedTicket
@@ -107,28 +108,29 @@ class LoadAggregateServiceBuilderTest extends TestCase
 
     public function test_setting_correct_aggregate_when_snapshot_is_used()
     {
-        $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-            'assignWorker',
-            ClassDefinition::createFor(TypeDescriptor::create(AssignWorkerCommand::class)),
-            LoadAggregateMode::createThrowOnNotFound(),
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withAggregateRepositoryFactories(['repository']);
-
         $ticket = new Ticket();
         $ticket->onTicketWasStarted(new TicketWasStartedEvent(1));
         $extraEvent = new WorkerWasAssignedEvent(1, 100);
 
-        $aggregateCommandHandler = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('repository', InMemoryEventSourcedRepository::createWithExistingAggregate(['ticketId' => 1], Ticket::class, [new SnapshotEvent(clone $ticket), $extraEvent]))
-            ->build($aggregateCallingCommandHandler);
+            ->withMessageHandler(
+                LoadAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
+                    'assignWorker',
+                    ClassDefinition::createFor(TypeDescriptor::create(AssignWorkerCommand::class)),
+                    LoadAggregateMode::createThrowOnNotFound(),
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withAggregateRepositoryFactories(['repository'])
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $replyChannel = QueueChannel::create();
-        $aggregateCommandHandler->handle(
+        $replyMessage = $messaging->sendDirectToChannelWithMessageReply(
+            $inputChannel,
             MessageBuilder::withPayload(new AssignWorkerCommand(1, 2))
                 ->setHeader(AggregateMessage::AGGREGATE_ID, ['ticketId' => 1])
-                ->setReplyChannel($replyChannel)
                 ->build()
         );
 
@@ -136,7 +138,7 @@ class LoadAggregateServiceBuilderTest extends TestCase
         $ticket->setVersion(2);
 
         /** @var Ticket $ticket */
-        $reconstructedTicket = $replyChannel->receive()->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT);
+        $reconstructedTicket = $replyMessage->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT);
         $this->assertEquals(
             $ticket,
             $reconstructedTicket
@@ -145,54 +147,58 @@ class LoadAggregateServiceBuilderTest extends TestCase
 
     public function test_enriching_command_with_aggregate_if_found_using_repository_builder()
     {
-        $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
-            'getAppointmentId',
-            null,
-            LoadAggregateMode::createThrowOnNotFound(),
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withAggregateRepositoryFactories(['repository']);
-
         $appointment = Appointment::create(new CreateAppointmentCommand(123, 1000));
         $aggregateCommandHandler = ComponentTestBuilder::create()
             ->withReference('repository', AppointmentRepositoryBuilder::createWith([
                 $appointment,
             ]))
-            ->build($aggregateCallingCommandHandler);
+            ->withMessageHandler(
+                LoadAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
+                    'getAppointmentId',
+                    null,
+                    LoadAggregateMode::createThrowOnNotFound(),
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withAggregateRepositoryFactories(['repository'])
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $replyChannel = QueueChannel::create();
-        $aggregateCommandHandler->handle(
+        $replyMessage = $aggregateCommandHandler->sendDirectToChannelWithMessageReply(
+            $inputChannel,
             MessageBuilder::withPayload([])
                 ->setHeader(AggregateMessage::AGGREGATE_ID, ['appointmentId' => 123])
-                ->setReplyChannel($replyChannel)
                 ->build()
         );
 
         $this->assertEquals(
             $appointment,
-            $replyChannel->receive()->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT)
+            $replyMessage->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT)
         );
     }
 
     public function test_throwing_exception_if_no_id_found_in_command()
     {
-        $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
-            'doSomething',
-            null,
-            LoadAggregateMode::createThrowOnNotFound(),
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withAggregateRepositoryFactories(['repository']);
-
-        $aggregateCommandHandler = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference('repository', AppointmentStandardRepository::createEmpty())
-            ->build($aggregateCallingCommandHandler);
+            ->withMessageHandler(
+                LoadAggregateServiceBuilder::create(
+                    ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
+                    'doSomething',
+                    null,
+                    LoadAggregateMode::createThrowOnNotFound(),
+                    InterfaceToCallRegistry::createEmpty()
+                )
+                    ->withAggregateRepositoryFactories(['repository'])
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
         $this->expectException(AggregateNotFoundException::class);
 
-        $aggregateCommandHandler->handle(
+        $messaging->sendMessageDirectToChannel(
+            $inputChannel,
             MessageBuilder::withPayload([])
                 ->setHeader(AggregateMessage::AGGREGATE_ID, [])
                 ->build()
@@ -215,7 +221,10 @@ class LoadAggregateServiceBuilderTest extends TestCase
 
         ComponentTestBuilder::create()
             ->withReference('repository', InMemoryEventSourcedRepository::createEmpty())
-            ->build($aggregateCallingCommandHandler);
+            ->withMessageHandler(
+                $aggregateCallingCommandHandler
+            )
+            ->build();
     }
 
     public function test_throwing_exception_if_factory_method_for_event_sourced_aggregate_has_no_parameters()

@@ -214,7 +214,7 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
      */
     public function withMessageConverters(array $messageConverterReferenceNames): self
     {
-        $this->messageConverterReferenceNames = $messageConverterReferenceNames;
+        $this->messageConverterReferenceNames = array_unique(array_merge($this->messageConverterReferenceNames, $messageConverterReferenceNames));
 
         return $this;
     }

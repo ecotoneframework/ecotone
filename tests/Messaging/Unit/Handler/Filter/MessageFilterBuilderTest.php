@@ -2,18 +2,14 @@
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Filter;
 
-use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Handler\Filter\MessageFilterBuilder;
-use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Test\ComponentTestBuilder;
 use Exception;
-use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithEndingChainAndReturningInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Selector\MessageSelectorExample;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
 
@@ -33,22 +29,16 @@ class MessageFilterBuilderTest extends MessagingTest
      */
     public function test_forwarding_message_if_selector_returns_false()
     {
-        $outputChannelName = 'outputChannel';
-        $outputChannel = QueueChannel::create();
-
-        $messageFilter = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
+        $messaging = ComponentTestBuilder::create()
             ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
-            ->build(MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCall::create(MessageSelectorExample::class, 'accept'))
-                ->withOutputMessageChannel($outputChannelName));
+            ->withMessageHandler(
+                MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCallReference::create(MessageSelectorExample::class, 'accept'))
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $message = MessageBuilder::withPayload('some')->build();
-
-        $messageFilter->handle($message);
-
-        $this->assertMessages(
-            $message,
-            $outputChannel->receive()
+        $this->assertNotNull(
+            $messaging->sendDirectToChannel($inputChannel)
         );
     }
 
@@ -59,121 +49,91 @@ class MessageFilterBuilderTest extends MessagingTest
      */
     public function test_discard_message_if_selector_returns_true()
     {
-        $outputChannelName = 'outputChannel';
-        $outputChannel = QueueChannel::create();
-
-        $messageFilter = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
+        $messaging = ComponentTestBuilder::create()
             ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
-            ->build(MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCall::create(MessageSelectorExample::class, 'refuse'))
-                ->withOutputMessageChannel($outputChannelName));
+            ->withMessageHandler(
+                MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCallReference::create(MessageSelectorExample::class, 'refuse'))
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $message = MessageBuilder::withPayload('some')->build();
-
-        $messageFilter->handle($message);
-
-        $this->assertNull($outputChannel->receive());
+        $this->assertNull(
+            $messaging->sendDirectToChannel($inputChannel)
+        );
     }
 
     public function test_forwarding_message_by_bool_header_filter()
     {
-        $outputChannelName = 'outputChannel';
-        $outputChannel = QueueChannel::create();
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                MessageFilterBuilder::createBoolHeaderFilter('filterOut')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $messageFilter = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
-            ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
-            ->build(MessageFilterBuilder::createBoolHeaderFilter('filterOut')
-                ->withOutputMessageChannel($outputChannelName));
-
-        $message = MessageBuilder::withPayload('some')
-                    ->setHeader('filterOut', false)
-                    ->build();
-
-        $messageFilter->handle($message);
-
-        $this->assertMessages(
-            $message,
-            $outputChannel->receive()
+        $this->assertNotNull(
+            $messaging->sendDirectToChannel($inputChannel, metadata: [
+                'filterOut' => false,
+            ])
         );
     }
 
     public function test_discarding_message_by_bool_header_filter()
     {
-        $outputChannelName = 'outputChannel';
-        $outputChannel = QueueChannel::create();
-
-        $messageFilter = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
-            ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
-            ->build(MessageFilterBuilder::createBoolHeaderFilter('filterOut')
-                ->withOutputMessageChannel($outputChannelName));
-
-        $message = MessageBuilder::withPayload('some')
-            ->setHeader('filterOut', true)
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                MessageFilterBuilder::createBoolHeaderFilter('filterOut')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
             ->build();
 
-        $messageFilter->handle($message);
-
-        $this->assertNull($outputChannel->receive());
+        $this->assertNull(
+            $messaging->sendDirectToChannel($inputChannel, metadata: [
+                'filterOut' => true,
+            ])
+        );
     }
 
     public function test_throwing_exception_when_bool_header_filter_and_no_header_presented()
     {
-        $outputChannelName = 'outputChannel';
-        $outputChannel = QueueChannel::create();
-
-        $messageFilter = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
-            ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
-            ->build(MessageFilterBuilder::createBoolHeaderFilter('filterOut')
-                ->withOutputMessageChannel($outputChannelName));
-
-        $message = MessageBuilder::withPayload('some')->build();
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                MessageFilterBuilder::createBoolHeaderFilter('filterOut')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
         $this->expectException(MessageHeaderDoesNotExistsException::class);
 
-        $messageFilter->handle($message);
+        $messaging->sendDirectToChannel($inputChannel);
     }
 
     public function test_forwarding_message_by_bool_header_filter_when_no_header_presented()
     {
-        $outputChannelName = 'outputChannel';
-        $outputChannel = QueueChannel::create();
-
-        $messageFilter = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
-            ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
-            ->build(MessageFilterBuilder::createBoolHeaderFilter('filterOut', false)
-                ->withOutputMessageChannel($outputChannelName));
-
-        $message = MessageBuilder::withPayload('some')
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                MessageFilterBuilder::createBoolHeaderFilter('filterOut', defaultResultWhenHeaderIsMissing: false)
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
             ->build();
 
-        $messageFilter->handle($message);
-
-        $this->assertMessages(
-            $message,
-            $outputChannel->receive()
+        $this->assertNotNull(
+            $messaging->sendDirectToChannel($inputChannel)
         );
     }
 
     public function test_discarding_message_by_bool_header_filter_when_no_header_presented()
     {
-        $outputChannelName = 'outputChannel';
-        $outputChannel = QueueChannel::create();
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                MessageFilterBuilder::createBoolHeaderFilter('filterOut', defaultResultWhenHeaderIsMissing: true)
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $messageFilter = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
-            ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
-            ->build(MessageFilterBuilder::createBoolHeaderFilter('filterOut', true)
-                ->withOutputMessageChannel($outputChannelName));
-
-        $message = MessageBuilder::withPayload('some')->build();
-
-        $messageFilter->handle($message);
-
-        $this->assertNull($outputChannel->receive());
+        $this->assertNull(
+            $messaging->sendDirectToChannel($inputChannel)
+        );
     }
 
     /**
@@ -181,16 +141,15 @@ class MessageFilterBuilderTest extends MessagingTest
      */
     public function test_throwing_exception_if_selector_return_type_is_different_than_boolean()
     {
-        $outputChannelName = 'outputChannel';
-        $outputChannel = QueueChannel::create();
-
         $this->expectException(InvalidArgumentException::class);
 
         ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
             ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
-            ->build(MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCall::create(MessageSelectorExample::class, 'wrongReturnType'))
-            ->withOutputMessageChannel($outputChannelName));
+            ->withMessageHandler(
+                MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCallReference::create(MessageSelectorExample::class, 'wrongReturnType'))
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
     }
 
     /**
@@ -198,25 +157,22 @@ class MessageFilterBuilderTest extends MessagingTest
      */
     public function test_publishing_message_to_discard_channel_if_defined()
     {
-        $outputChannelName = 'outputChannel';
-        $outputChannel = QueueChannel::create();
-        $discardChannelName = 'discardChannel';
-        $discardChannel = QueueChannel::create();
-
-        $messageFilter = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
-            ->withChannel($discardChannelName, $discardChannel)
+        $messaging = ComponentTestBuilder::create()
+            ->withChannel(SimpleMessageChannelBuilder::createQueueChannel($discardChannelName = 'discardChannel'))
             ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
-            ->build(MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCall::create(MessageSelectorExample::class, 'refuse'))
-                ->withOutputMessageChannel($outputChannelName)
-                ->withDiscardChannelName($discardChannelName));
+            ->withMessageHandler(
+                MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCallReference::create(MessageSelectorExample::class, 'refuse'))
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+                    ->withDiscardChannelName($discardChannelName)
+            )
+            ->build();
 
-        $message = MessageBuilder::withPayload('some')->build();
-
-        $messageFilter->handle($message);
-
-        $this->assertNull($outputChannel->receive());
-        $this->assertEquals($message, $discardChannel->receive());
+        $this->assertNull(
+            $messaging->sendDirectToChannel($inputChannel)
+        );
+        $this->assertNotNull(
+            $messaging->receiveMessageFrom($discardChannelName)
+        );
     }
 
     /**
@@ -224,21 +180,18 @@ class MessageFilterBuilderTest extends MessagingTest
      */
     public function test_throwing_exception_on_discard_if_defined()
     {
-        $outputChannelName = 'outputChannel';
-        $outputChannel = QueueChannel::create();
-
-        $messageFilter = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
+        $messaging = ComponentTestBuilder::create()
             ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
-            ->build(MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCall::create(MessageSelectorExample::class, 'refuse'))
-                ->withOutputMessageChannel($outputChannelName)
-                ->withThrowingExceptionOnDiscard(true));
-
-        $message = MessageBuilder::withPayload('some')->build();
+            ->withMessageHandler(
+                MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCallReference::create(MessageSelectorExample::class, 'refuse'))
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+                    ->withThrowingExceptionOnDiscard(true)
+            )
+            ->build();
 
         $this->expectException(MessagingException::class);
 
-        $messageFilter->handle($message);
+        $messaging->sendDirectToChannel($inputChannel);
     }
 
     public function test_converting_to_string()
@@ -246,43 +199,10 @@ class MessageFilterBuilderTest extends MessagingTest
         $inputChannelName = 'inputChannel';
         $endpointName = 'someName';
 
-        $this->assertEquals(
-            MessageFilterBuilder::createWithReferenceName('ref-name', InterfaceToCall::create(MessageSelectorExample::class, 'refuse'))
+        $this->assertIsString(
+            (string)MessageFilterBuilder::createWithReferenceName('ref-name', InterfaceToCallReference::create(MessageSelectorExample::class, 'refuse'))
                 ->withInputChannelName($inputChannelName)
                 ->withEndpointId($endpointName),
-            sprintf('Message filter - %s:%s with name `%s` for input channel `%s`', 'ref-name', 'refuse', $endpointName, $inputChannelName)
         );
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws Exception
-     */
-    public function test_intercepting_message_with_discard()
-    {
-        $outputChannelName = 'outputChannel';
-        $outputChannel = QueueChannel::create();
-
-        $messageFilter = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
-            ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
-            ->build(
-                MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCall::create(MessageSelectorExample::class, 'refuse'))
-                    ->withOutputMessageChannel($outputChannelName)
-                    ->addAroundInterceptor(AroundInterceptorBuilder::createWithDirectObjectAndResolveConverters(
-                        InterfaceToCallRegistry::createEmpty(),
-                        CallWithEndingChainAndReturningInterceptorExample::createWithReturnType(false),
-                        'callWithEndingChainAndReturning',
-                        1,
-                        MessageSelectorExample::class
-                    ))
-            );
-
-        $message = MessageBuilder::withPayload('some')->build();
-
-        $messageFilter->handle($message);
-
-        $this->assertNull($outputChannel->receive());
     }
 }

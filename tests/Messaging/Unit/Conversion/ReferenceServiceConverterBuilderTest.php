@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Conversion;
 
-use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Conversion\ReferenceServiceConverterBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Test\ComponentTestBuilder;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleConverterService;
-use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
+use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleIncorrectConverterService;
+use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleIncorrectUnionReturnTypeConverterService;
+use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleIncorrectUnionSourceTypeConverterService;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 
 /**
  * Class ReferenceServiceConverterBuilderTest
@@ -29,25 +30,20 @@ class ReferenceServiceConverterBuilderTest extends TestCase
      */
     public function test_converting_using_reference_service()
     {
-        $sourceType = TypeDescriptor::create('array<string>');
-        $targetType = TypeDescriptor::create("array<\stdClass>");
-        $referenceService = ComponentTestBuilder::create()
-            ->withReference(ExampleConverterService::class, new ExampleConverterService())
-            ->build(ReferenceServiceConverterBuilder::create(
-                ExampleConverterService::class,
-                'convert',
-                $sourceType,
-                $targetType
-            ));
+        $messaging = ComponentTestBuilder::create([ExampleConverterService::class])
+            ->withReference('exampleConverterService', new ExampleConverterService())
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withArrayStdClasses')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+                    ->withPassThroughMessageOnVoidInterface(true)
+            )
+            ->build();
 
         $this->assertEquals(
             [new stdClass()],
-            $referenceService->convert(
-                ['some'],
-                $sourceType,
-                MediaType::createApplicationXPHP(),
-                $targetType,
-                MediaType::createApplicationXPHP()
+            $messaging->sendDirectToChannel(
+                $inputChannel,
+                ['some']
             )
         );
     }
@@ -60,37 +56,41 @@ class ReferenceServiceConverterBuilderTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        ComponentTestBuilder::create()
-            ->withReference(ServiceExpectingTwoArguments::class, ServiceExpectingTwoArguments::create())
-            ->build(ReferenceServiceConverterBuilder::create(
-                ServiceExpectingTwoArguments::class,
-                'withReturnValue',
-                TypeDescriptor::create('array<string>'),
-                TypeDescriptor::create("array<\stdClass>")
-            ));
+        ComponentTestBuilder::create([ExampleIncorrectConverterService::class])
+            ->withReference(ExampleIncorrectConverterService::class, new ExampleIncorrectConverterService())
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withArrayStdClasses')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+                    ->withPassThroughMessageOnVoidInterface(true)
+            )
+            ->build();
     }
 
     public function test_throwing_exception_if_converter_containing_union_source_type()
     {
         $this->expectException(InvalidArgumentException::class);
 
-        ReferenceServiceConverterBuilder::create(
-            ServiceExpectingTwoArguments::class,
-            'withReturnValue',
-            TypeDescriptor::create('array|array<string>'),
-            TypeDescriptor::create("array<\stdClass>")
-        );
+        ComponentTestBuilder::create([ExampleIncorrectUnionSourceTypeConverterService::class])
+            ->withReference(ExampleIncorrectUnionSourceTypeConverterService::class, new ExampleIncorrectUnionSourceTypeConverterService())
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withArrayStdClasses')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+                    ->withPassThroughMessageOnVoidInterface(true)
+            )
+            ->build();
     }
 
     public function test_throwing_exception_if_converter_containing_union_target_type()
     {
         $this->expectException(InvalidArgumentException::class);
 
-        ReferenceServiceConverterBuilder::create(
-            ServiceExpectingTwoArguments::class,
-            'withReturnValue',
-            TypeDescriptor::create('array<string>'),
-            TypeDescriptor::create("array|array<\stdClass>")
-        );
+        ComponentTestBuilder::create([ExampleIncorrectUnionReturnTypeConverterService::class])
+            ->withReference(ExampleIncorrectUnionReturnTypeConverterService::class, new ExampleIncorrectUnionReturnTypeConverterService())
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withArrayStdClasses')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+                    ->withPassThroughMessageOnVoidInterface(true)
+            )
+            ->build();
     }
 }

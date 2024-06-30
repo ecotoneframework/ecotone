@@ -6,8 +6,8 @@ use Ecotone\Lite\InMemoryContainerImplementation;
 use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Test\LoggerExample;
 use Psr\Container\ContainerInterface;
-use Test\Ecotone\Messaging\Unit\Handler\Logger\LoggerExample;
 
 /**
  * @internal

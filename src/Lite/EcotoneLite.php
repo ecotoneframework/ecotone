@@ -102,13 +102,13 @@ final class EcotoneLite
         ?string                  $pathToRootCatalog = null,
         bool                     $allowGatewaysToBeRegisteredInContainer = false,
         bool                     $addInMemoryStateStoredRepository = true,
-        bool                     $addEventSourcedRepository = true,
+        bool                     $addInMemoryEventSourcedRepository = true,
         ?array                   $enableAsynchronousProcessing = null,
         TestConfiguration        $testConfiguration = null,
     ): FlowTestSupport {
         $configuration = self::prepareForFlowTesting($configuration, ModulePackageList::allPackages(), $classesToResolve, $addInMemoryStateStoredRepository, $enableAsynchronousProcessing, $testConfiguration);
 
-        if ($addEventSourcedRepository) {
+        if ($addInMemoryEventSourcedRepository) {
             $configuration = $configuration->addExtensionObject(InMemoryRepositoryBuilder::createDefaultEventSourcedRepository());
         }
 

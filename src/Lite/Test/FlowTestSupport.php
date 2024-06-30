@@ -17,6 +17,7 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Scheduling\TimeSpan;
 use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\BusModule;
@@ -115,6 +116,14 @@ final class FlowTestSupport
     public function getMessageChannel(string $channelName): MessageChannel|PollableChannel
     {
         return $this->configuredMessagingSystem->getMessageChannelByName($channelName);
+    }
+
+    public function receiveMessageFrom(string $channelName): ?Message
+    {
+        $messageChannel = $this->getMessageChannel($channelName);
+        Assert::isTrue($messageChannel instanceof PollableChannel, "Channel {$channelName} is not pollable");
+
+        return $messageChannel->receive();
     }
 
     public function run(string $name, ?ExecutionPollingMetadata $executionPollingMetadata = null): self
@@ -334,13 +343,38 @@ final class FlowTestSupport
         return $messagingEntrypoint->sendWithHeaders($payload, $metadata, $targetChannel);
     }
 
-    public function sendMessageDirectToChannel(Message $message): mixed
+    public function sendDirectToChannelWithMessageReply(string $targetChannel, mixed $payload = '', array $metadata = []): Message
     {
-        Assert::isTrue($message->getHeaders()->containsKey(MessagingEntrypoint::ENTRYPOINT), "Message must be sent directly to channel, so it must contains `ecotone.messaging.entrypoint` header. Use `sendDirectToChannel` method instead, if you don't want to add it manually.");
         /** @var MessagingEntrypoint $messagingEntrypoint */
         $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
 
-        return $messagingEntrypoint->sendMessage($message);
+        return $messagingEntrypoint->sendWithHeadersWithMessageReply($payload, $metadata, $targetChannel);
+    }
+
+    public function sendMessageDirectToChannel(string $targetChannel, Message $message): mixed
+    {
+        Assert::isFalse($message->getHeaders()->containsKey(MessagingEntrypoint::ENTRYPOINT), 'Message must not contain entrypoint header. Make use of first argument in sendDirectToChannel method');
+        /** @var MessagingEntrypoint $messagingEntrypoint */
+        $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
+
+        return $messagingEntrypoint->sendMessage(
+            MessageBuilder::fromMessage($message)
+                ->setHeader(MessagingEntrypoint::ENTRYPOINT, $targetChannel)
+                ->build()
+        );
+    }
+
+    public function sendMessageDirectToChannelWithMessageReply(string $targetChannel, Message $message): Message
+    {
+        Assert::isFalse($message->getHeaders()->containsKey(MessagingEntrypoint::ENTRYPOINT), 'Message must not contain entrypoint header. Make use of first argument in sendDirectToChannel method');
+        /** @var MessagingEntrypoint $messagingEntrypoint */
+        $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
+
+        return $messagingEntrypoint->sendWithHeadersWithMessageReply(
+            $message->getPayload(),
+            $message->getHeaders()->headers(),
+            $targetChannel,
+        );
     }
 
     /**
@@ -360,5 +394,10 @@ final class FlowTestSupport
         $this->configuredMessagingSystem->runConsoleCommand($name, $parameters);
 
         return $this;
+    }
+
+    public function getServiceFromContainer(string $serviceName): object
+    {
+        return $this->configuredMessagingSystem->getServiceFromContainer($serviceName);
     }
 }

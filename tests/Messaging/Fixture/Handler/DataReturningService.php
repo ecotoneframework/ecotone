@@ -7,9 +7,7 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Endpoint\PollingConsumer\RejectMessageException;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Test\ComponentTestBuilder;
 use InvalidArgumentException;
 
 class DataReturningService implements DefinedObject
@@ -34,23 +32,6 @@ class DataReturningService implements DefinedObject
         $this->headers = $headers;
         $this->exception = $exception;
         $this->rejectException = $rejectException;
-    }
-
-    public static function createServiceActivator($dataToReturn): MessageHandler
-    {
-        return ComponentTestBuilder::create()->build(self::createServiceActivatorBuilder($dataToReturn));
-    }
-
-    public static function createServiceActivatorWithReturnMessage($payload, array $headers): MessageHandler
-    {
-        return ComponentTestBuilder::create()->build(self::createServiceActivatorBuilderWithReturnMessage($payload, $headers));
-    }
-
-    public static function createServiceActivatorWithGenerator(array $payload): MessageHandler
-    {
-        return ComponentTestBuilder::create()->build(
-            ServiceActivatorBuilder::createWithDirectReference(new self($payload, false, [], false), 'iterate')
-        );
     }
 
     public static function createServiceActivatorBuilder($dataToReturn): ServiceActivatorBuilder

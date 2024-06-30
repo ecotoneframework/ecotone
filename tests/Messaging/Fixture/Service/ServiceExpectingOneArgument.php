@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Service;
 
+use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Message;
 use Ramsey\Uuid\UuidInterface;
 use stdClass;
 
@@ -26,9 +28,15 @@ class ServiceExpectingOneArgument implements DefinedObject
     public function withReturnValue(string $name): string
     {
         $this->wasCalled = true;
-        return $name;
+        return $name . '_called';
     }
 
+    public function withReturnMixed(mixed $value): mixed
+    {
+        return $value;
+    }
+
+    #[ServiceActivator('withoutReturnValue')]
     public function withoutReturnValue(string $name): void
     {
         $this->wasCalled = true;
@@ -42,6 +50,15 @@ class ServiceExpectingOneArgument implements DefinedObject
     public function withArrayReturnValue(string $name): array
     {
         return ['some' => $name];
+    }
+
+    /**
+     * @param stdClass[] $value
+     * @return stdClass[]
+     */
+    public function withArrayStdClasses(array $value): array
+    {
+        return $value;
     }
 
     public function withArrayTypeHintAndArrayReturnValue(array $values): array
@@ -81,6 +98,11 @@ class ServiceExpectingOneArgument implements DefinedObject
     public function withInterface(UuidInterface $value)
     {
         return $value;
+    }
+
+    public function withMessage(Message $message): Message
+    {
+        return $message;
     }
 
     /**

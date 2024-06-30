@@ -1,13 +1,20 @@
 <?php
 
-namespace Ecotone\Messaging\Conversion;
+namespace Ecotone\Test;
 
+use Ecotone\Messaging\Config\Container\CompilableBuilder;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\Converter;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use InvalidArgumentException;
 use RuntimeException;
 
-class InMemoryConversionService implements ConversionService
+class InMemoryConversionService implements ConversionService, Converter, CompilableBuilder
 {
     private array $convertTo;
 
@@ -16,22 +23,22 @@ class InMemoryConversionService implements ConversionService
         $this->convertTo = $convertTo;
     }
 
-    public static function createWithConversion(mixed $dataToConvert, string $sourceMediaType, string $sourceType, string $targetMediaType, string $targetType, $conversionResult): self
+    public static function createWithConversion(mixed $dataToConvert, string|MediaType $sourceMediaType, string $sourceType, string|MediaType $targetMediaType, string $targetType, $conversionResult): self
     {
         return new self([
             [
                 'dataToConvert' => $dataToConvert,
-                'sourceMediaType' => MediaType::parseMediaType($sourceMediaType),
+                'sourceMediaType' => MediaType::parseMediaType((string)$sourceMediaType),
                 'sourceType' => TypeDescriptor::create($sourceType),
-                'targetMediaType' => MediaType::parseMediaType($targetMediaType),
+                'targetMediaType' => MediaType::parseMediaType((string)$targetMediaType),
                 'targetType' => TypeDescriptor::create($targetType),
                 'result' => $conversionResult,
             ],
             [
                 'dataToConvert' => $conversionResult,
-                'sourceMediaType' => MediaType::parseMediaType($targetMediaType),
+                'sourceMediaType' => MediaType::parseMediaType((string)$targetMediaType),
                 'sourceType' => TypeDescriptor::create($targetType),
-                'targetMediaType' => MediaType::parseMediaType($sourceMediaType),
+                'targetMediaType' => MediaType::parseMediaType((string)$sourceMediaType),
                 'targetType' => TypeDescriptor::create($sourceType),
                 'result' => $dataToConvert,
             ],
@@ -91,6 +98,27 @@ class InMemoryConversionService implements ConversionService
         }
 
         return false;
+    }
+
+    public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
+    {
+        return $this->canConvert($sourceType, $sourceMediaType, $targetType, $targetMediaType);
+    }
+
+    public static function fromSerialized(string $serialized): self
+    {
+        return unserialize($serialized);
+    }
+
+    public function compile(MessagingContainerBuilder $builder): Definition|Reference
+    {
+        return new Definition(
+            self::class,
+            [
+                serialize($this),
+            ],
+            'fromSerialized'
+        );
     }
 
     private function getConversionResult(mixed $dataToConvert, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType)

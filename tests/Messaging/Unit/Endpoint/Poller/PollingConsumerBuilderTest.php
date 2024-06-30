@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Endpoint\Poller;
 
 use Ecotone\Lite\EcotoneLite;
+use Ecotone\Lite\Test\FlowTestSupport;
 use Ecotone\Messaging\Channel\ExceptionalQueueChannel;
 use Ecotone\Messaging\Channel\PollableChannel\InMemory\InMemoryAcknowledgeCallback;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
-use Ecotone\Messaging\Endpoint\PollingConsumer\InterceptedConsumerRunner;
-use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
+use Ecotone\Messaging\Endpoint\PollingConsumer\RejectMessageException;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
@@ -43,26 +43,23 @@ class PollingConsumerBuilderTest extends MessagingTest
      */
     public function test_creating_consumer_with_default_period_trigger()
     {
-        $pollingConsumerBuilder = new PollingConsumerBuilder();
         $inputChannelName = 'inputChannelName';
         $inputChannel = QueueChannel::create();
 
         $directObjectReference = ConsumerStoppingService::create(null);
-        $replyViaHeadersMessageHandlerBuilder = ServiceActivatorBuilder::createWithDirectReference($directObjectReference, 'executeNoReturn')
-            ->withEndpointId('test')
-            ->withInputChannelName($inputChannelName);
-        /** @var InterceptedConsumerRunner $pollingConsumerRunner */
-        $pollingConsumerRunner = ComponentTestBuilder::create()
-            ->withChannel($inputChannelName, $inputChannel)
-            ->withPollingMetadata(PollingMetadata::create('test'))
-            ->withRegisteredMessageHandlerConsumer($pollingConsumerBuilder, $replyViaHeadersMessageHandlerBuilder)
-            ->getEndpointRunner('test')
+        $messaging = ComponentTestBuilder::create()
+            ->withChannel(SimpleMessageChannelBuilder::create($inputChannelName, $inputChannel))
+            ->withPollingMetadata(PollingMetadata::create('test')->withTestingSetup())
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference($directObjectReference, 'executeNoReturn')
+                    ->withEndpointId('test')
+                    ->withInputChannelName($inputChannelName)
+            )
+            ->build()
         ;
 
-        $pollingConsumer = $pollingConsumerRunner->createConsumer(null);
-        $directObjectReference->setConsumerLifecycle($pollingConsumer);
         $inputChannel->send(MessageBuilder::withPayload('somePayload')->build());
-        $pollingConsumer->run();
+        $messaging->run('test');
 
         $this->assertEquals(
             'somePayload',
@@ -75,65 +72,60 @@ class PollingConsumerBuilderTest extends MessagingTest
      */
     public function test_passing_message_to_error_channel_on_failure()
     {
-        $pollingConsumerBuilder = new PollingConsumerBuilder();
         $inputChannelName = 'inputChannelName';
-        $errorChannelName = 'errorChannel';
+        $errorChannelName = 'errorChannelName';
         $inputChannel = QueueChannel::create();
         $errorChannel = QueueChannel::create();
 
         $directObjectReference = ConsumerThrowingExceptionService::create();
-        $replyViaHeadersMessageHandlerBuilder = ServiceActivatorBuilder::createWithDirectReference($directObjectReference, 'execute')
-            ->withEndpointId('test')
-            ->withInputChannelName($inputChannelName);
 
-        /** @var InterceptedConsumerRunner $pollingConsumerRunner */
-        $pollingConsumerRunner = ComponentTestBuilder::create()
-            ->withChannel($inputChannelName, $inputChannel)
-            ->withChannel($errorChannelName, $errorChannel)
-            ->withPollingMetadata(PollingMetadata::create('test')
-                ->setErrorChannelName($errorChannelName))
-            ->withRegisteredMessageHandlerConsumer($pollingConsumerBuilder, $replyViaHeadersMessageHandlerBuilder)
-            ->getEndpointRunner('test')
+        $messaging = ComponentTestBuilder::create()
+            ->withChannel(SimpleMessageChannelBuilder::create($inputChannelName, $inputChannel))
+            ->withChannel(SimpleMessageChannelBuilder::create($errorChannelName, $errorChannel))
+            ->withPollingMetadata(
+                PollingMetadata::create('test')
+                    ->withTestingSetup(failAtError: false)
+                    ->setErrorChannelName($errorChannelName)
+            )
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference($directObjectReference, 'execute')
+                    ->withEndpointId('test')
+                    ->withInputChannelName($inputChannelName)
+            )
+            ->build()
         ;
 
-        $pollingConsumer = $pollingConsumerRunner->createConsumer(null);
-
-        $directObjectReference->setConsumerLifecycle($pollingConsumer);
-        $inputChannel->send(MessageBuilder::withPayload('somePayload')->build());
-
-        $pollingConsumer->run();
+        $messaging->sendDirectToChannel($inputChannelName, 'somePayload');
+        $messaging->run('test');
 
         $this->assertNotNull($errorChannel->receive());
     }
 
     public function test_retrying_template_should_not_handle_exception_thrown_during_handling_of_message()
     {
-        $pollingConsumerBuilder = new PollingConsumerBuilder();
         $inputChannelName = 'inputChannelName';
         $inputChannel = QueueChannel::create();
 
         $directObjectReference = ConsumerThrowingExceptionService::create();
-        $replyViaHeadersMessageHandlerBuilder = ServiceActivatorBuilder::createWithDirectReference($directObjectReference, 'execute')
-            ->withEndpointId('test')
-            ->withInputChannelName($inputChannelName);
+        $messaging = ComponentTestBuilder::create()
+            ->withChannel(SimpleMessageChannelBuilder::create($inputChannelName, $inputChannel))
+            ->withPollingMetadata(
+                PollingMetadata::create('test')
+                    ->withTestingSetup(failAtError: true)
+                    ->setConnectionRetryTemplate(RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(1))
+            )
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference($directObjectReference, 'execute')
+                    ->withEndpointId('test')
+                    ->withInputChannelName($inputChannelName)
+            )
+            ->build();
 
-        /** @var InterceptedConsumerRunner $pollingConsumerRunner */
-        $pollingConsumerRunner = ComponentTestBuilder::create()
-            ->withChannel($inputChannelName, $inputChannel)
-            ->withPollingMetadata(PollingMetadata::create('test')
-                ->setConnectionRetryTemplate(RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(1)))
-            ->withRegisteredMessageHandlerConsumer($pollingConsumerBuilder, $replyViaHeadersMessageHandlerBuilder)
-            ->getEndpointRunner('test')
-        ;
-
-        $pollingConsumer = $pollingConsumerRunner->createConsumer(null);
-
-        $inputChannel->send(MessageBuilder::withPayload('somePayload')->build());
-        $inputChannel->send(MessageBuilder::withPayload('somePayload')->build());
-
+        $messaging->sendDirectToChannel($inputChannelName, 'somePayload');
         $exceptionThrown = false;
+
         try {
-            $pollingConsumer->run();
+            $messaging->run('test');
         } catch (RuntimeException $e) {
             $exceptionThrown = true;
         }
@@ -144,27 +136,28 @@ class PollingConsumerBuilderTest extends MessagingTest
 
     public function test_retrying_template_should_handle_exceptions_thrown_before_handling_of_message()
     {
-        $pollingConsumerBuilder = new PollingConsumerBuilder();
         $inputChannelName = 'inputChannelName';
         $inputChannel = ExceptionalQueueChannel::createWithExceptionOnReceive();
 
-        $serviceHandler = DataReturningService::createServiceActivatorBuilder('some')
-            ->withEndpointId('test')
-            ->withInputChannelName($inputChannelName);
+        $directObjectReference = ConsumerThrowingExceptionService::create();
+        $messaging = ComponentTestBuilder::create()
+            ->withChannel(SimpleMessageChannelBuilder::create($inputChannelName, $inputChannel))
+            ->withPollingMetadata(
+                PollingMetadata::create('test')
+                    ->withTestingSetup(failAtError: false)
+                    ->setConnectionRetryTemplate(RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(2))
+            )
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference($directObjectReference, 'execute')
+                    ->withEndpointId('test')
+                    ->withInputChannelName($inputChannelName)
+            )
+            ->build();
 
-        /** @var InterceptedConsumerRunner $pollingConsumerRunner */
-        $pollingConsumerRunner = ComponentTestBuilder::create()
-            ->withChannel($inputChannelName, $inputChannel)
-            ->withPollingMetadata(PollingMetadata::create('test')
-                ->setConnectionRetryTemplate(RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(2)))
-            ->withRegisteredMessageHandlerConsumer($pollingConsumerBuilder, $serviceHandler)
-            ->getEndpointRunner('test')
-        ;
-
-        $pollingConsumer = $pollingConsumerRunner->createConsumer(null);
+        $messaging->sendDirectToChannel($inputChannelName, 'somePayload');
 
         try {
-            $pollingConsumer->run();
+            $messaging->run('test');
         } catch (RuntimeException $e) {
         }
 
@@ -184,11 +177,11 @@ class PollingConsumerBuilderTest extends MessagingTest
                             ->withEndpointId('some-id')
                             ->withInputChannelName($inputChannelName);
 
-        $pollingConsumer = $this->createPollingConsumer($inputChannelName, $inputChannel, $messageHandler);
+        $messaging = $this->createPollingConsumer($inputChannelName, $inputChannel, $messageHandler);
 
-        $inputChannel->send($message);
+        $messaging->sendMessageDirectToChannel($inputChannelName, $message);
 
-        $pollingConsumer->run();
+        $messaging->run('some-id');
 
         $this->assertTrue($acknowledgementCallback->isAcked());
     }
@@ -207,11 +200,10 @@ class PollingConsumerBuilderTest extends MessagingTest
             ->withEndpointId('some-id')
             ->withInputChannelName($inputChannelName);
 
-        $pollingConsumer = $this->createPollingConsumer($inputChannelName, $inputChannel, $messageHandler);
+        $messaging = $this->createPollingConsumer($inputChannelName, $inputChannel, $messageHandler);
 
-        $inputChannel->send($message);
-
-        $pollingConsumer->run();
+        $messaging->sendMessageDirectToChannel($inputChannelName, $message);
+        $messaging->run('some-id');
 
         $this->assertTrue($acknowledgementCallback->isRequeued());
     }
@@ -230,11 +222,12 @@ class PollingConsumerBuilderTest extends MessagingTest
             ->withEndpointId('some-id')
             ->withInputChannelName($inputChannelName);
 
-        $pollingConsumer = $this->createPollingConsumer($inputChannelName, $inputChannel, $messageHandler);
+        $messaging = $this->createPollingConsumer($inputChannelName, $inputChannel, $messageHandler, true);
 
-        $inputChannel->send($message);
+        $this->expectException(InvalidArgumentException::class);
 
-        $pollingConsumer->run();
+        $messaging->sendMessageDirectToChannel($inputChannelName, $message);
+        $messaging->run('some-id');
 
         $this->assertTrue($acknowledgementCallback->isRequeued());
     }
@@ -253,11 +246,12 @@ class PollingConsumerBuilderTest extends MessagingTest
             ->withEndpointId('some-id')
             ->withInputChannelName($inputChannelName);
 
-        $pollingConsumer = $this->createPollingConsumer($inputChannelName, $inputChannel, $messageHandler);
+        $messaging = $this->createPollingConsumer($inputChannelName, $inputChannel, $messageHandler, true);
 
-        $inputChannel->send($message);
+        $this->expectException(RejectMessageException::class);
 
-        $pollingConsumer->run();
+        $messaging->sendMessageDirectToChannel($inputChannelName, $message);
+        $messaging->run('some-id');
 
         $this->assertTrue($acknowledgementCallback->isRejected());
         $this->assertFalse($acknowledgementCallback->isRequeued());
@@ -294,61 +288,29 @@ class PollingConsumerBuilderTest extends MessagingTest
             ->build();
 
         $inputChannelName = 'inputChannel';
+        $errorChannelName = 'errorChannelName';
         $inputChannel = QueueChannel::create();
         $errorChannel = QueueChannel::create();
         $messageHandler = DataReturningService::createExceptionalServiceActivatorBuilder()
             ->withEndpointId('some-id')
             ->withInputChannelName($inputChannelName);
 
-        $pollingConsumer = $this->createPollingConsumerWithCustomConfiguration(
+        $messaging = $this->createPollingConsumerWithCustomConfiguration(
             [
                 $inputChannelName => $inputChannel,
-                'errorChannel' => $errorChannel,
+                $errorChannelName => $errorChannel,
             ],
             $messageHandler,
             PollingMetadata::create('some-id')
                 ->setExecutionAmountLimit(1)
-                ->setErrorChannelName('errorChannel')
+                ->setErrorChannelName($errorChannelName)
         );
 
-        $inputChannel->send($message);
-
-        $pollingConsumer->run();
+        $messaging->sendMessageDirectToChannel($inputChannelName, $message);
+        $messaging->run('some-id');
 
         $this->assertNotNull($errorChannel);
         $this->assertTrue($acknowledgementCallback->isAcked());
-    }
-
-    public function test_throwing_exception_and_requeing_when_stop_on_failure_defined()
-    {
-        $acknowledgementCallback = NullAcknowledgementCallback::create();
-        $message = MessageBuilder::withPayload('some')
-            ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, 'amqpAcker')
-            ->setHeader('amqpAcker', $acknowledgementCallback)
-            ->build();
-
-        $inputChannelName = 'inputChannel';
-        $inputChannel = QueueChannel::create();
-        $messageHandler = DataReturningService::createExceptionalServiceActivatorBuilder()
-            ->withEndpointId('some-id')
-            ->withInputChannelName($inputChannelName);
-
-        $pollingConsumer = $this->createPollingConsumerWithCustomConfiguration(
-            [
-                $inputChannelName => $inputChannel,
-            ],
-            $messageHandler,
-            PollingMetadata::create('some-id')
-                ->setStopOnError(true)
-                ->setExecutionAmountLimit(1)
-        );
-
-        $this->expectException(InvalidArgumentException::class);
-
-        $inputChannel->send($message);
-        $pollingConsumer->run();
-
-        $this->assertTrue($acknowledgementCallback->isRequeued());
     }
 
     public function test_throwing_exception_and_requeing_when_stop_on_failure_defined_and_error_channel()
@@ -360,28 +322,29 @@ class PollingConsumerBuilderTest extends MessagingTest
             ->build();
 
         $inputChannelName = 'inputChannel';
+        $errorChannelName = 'errorChannelName';
         $inputChannel = QueueChannel::create();
         $errorChannel = QueueChannel::create();
         $messageHandler = DataReturningService::createExceptionalServiceActivatorBuilder()
             ->withEndpointId('some-id')
             ->withInputChannelName($inputChannelName);
 
-        $pollingConsumer = $this->createPollingConsumerWithCustomConfiguration(
+        $messaging = $this->createPollingConsumerWithCustomConfiguration(
             [
                 $inputChannelName => $inputChannel,
-                'errorChannel' => $errorChannel,
+                $errorChannelName => $errorChannel,
             ],
             $messageHandler,
             PollingMetadata::create('some-id')
                 ->setStopOnError(true)
                 ->setExecutionAmountLimit(1)
-                ->setErrorChannelName('errorChannel')
+                ->setErrorChannelName($errorChannelName)
         );
 
         $this->expectException(InvalidArgumentException::class);
 
-        $inputChannel->send($message);
-        $pollingConsumer->run();
+        $messaging->sendMessageDirectToChannel($inputChannelName, $message);
+        $messaging->run('some-id');
 
         $this->assertTrue($acknowledgementCallback->isRequeued());
         $this->assertNull($errorChannel->receive());
@@ -437,32 +400,35 @@ class PollingConsumerBuilderTest extends MessagingTest
         );
     }
 
-    private function createPollingConsumer(string $inputChannelName, QueueChannel $inputChannel, MessageHandlerBuilder $messageHandler): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
-    {
-        $endpointId = $messageHandler->getEndpointId();
-        /** @var InterceptedConsumerRunner $pollingConsumerRunner */
-        $pollingConsumerRunner = ComponentTestBuilder::create()
-            ->withChannel($inputChannelName, $inputChannel)
-            ->withPollingMetadata(PollingMetadata::create($endpointId)
-                ->setExecutionAmountLimit(1))
-            ->withRegisteredMessageHandlerConsumer(new PollingConsumerBuilder(), $messageHandler)
-            ->getEndpointRunner($endpointId)
-        ;
-
-        return $pollingConsumerRunner->createConsumer(null);
+    private function createPollingConsumer(
+        string $inputChannelName,
+        QueueChannel $inputChannel,
+        MessageHandlerBuilder $messageHandler,
+        bool $stopOnFailure = false
+    ): FlowTestSupport {
+        return ComponentTestBuilder::create()
+            ->withChannel(SimpleMessageChannelBuilder::create($inputChannelName, $inputChannel))
+            ->withPollingMetadata(
+                PollingMetadata::create($messageHandler->getEndpointId())
+                    ->withTestingSetup(failAtError: $stopOnFailure)
+            )
+            ->withMessageHandler(
+                $messageHandler
+                    ->withInputChannelName($inputChannelName)
+            )
+            ->build();
     }
 
-    private function createPollingConsumerWithCustomConfiguration(array $channels, MessageHandlerBuilder $messageHandler, PollingMetadata  $pollingMetadata): \Ecotone\Messaging\Endpoint\ConsumerLifecycle
+    private function createPollingConsumerWithCustomConfiguration(array $channels, MessageHandlerBuilder $messageHandler, PollingMetadata  $pollingMetadata): FlowTestSupport
     {
         $componentTest = ComponentTestBuilder::create()
-            ->withPollingMetadata($pollingMetadata)
-            ->withRegisteredMessageHandlerConsumer(new PollingConsumerBuilder(), $messageHandler);
+            ->withPollingMetadata($pollingMetadata);
         foreach ($channels as $channelName => $channel) {
-            $componentTest = $componentTest->withChannel($channelName, $channel);
+            $componentTest = $componentTest->withChannel(SimpleMessageChannelBuilder::create($channelName, $channel));
         }
-        /** @var InterceptedConsumerRunner $pollingConsumerRunner */
-        $pollingConsumerRunner = $componentTest->getEndpointRunner($messageHandler->getEndpointId());
 
-        return $pollingConsumerRunner->createConsumer(null);
+        return $componentTest
+            ->withMessageHandler($messageHandler)
+            ->build();
     }
 }

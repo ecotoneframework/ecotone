@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Handler;
 
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use ReflectionClass;
 use ReflectionMethod;
 
@@ -77,6 +78,11 @@ class InterfaceToCallRegistry
         }
 
         return $interfaceName . $methodName;
+    }
+
+    public function getForReference(InterfaceToCallReference $interfaceToCallReference): InterfaceToCall
+    {
+        return $this->getFor($interfaceToCallReference->getClassName(), $interfaceToCallReference->getMethodName());
     }
 
     public function getFor(string|object $interfaceName, string $methodName): InterfaceToCall

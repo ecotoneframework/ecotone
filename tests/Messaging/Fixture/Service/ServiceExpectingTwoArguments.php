@@ -4,6 +4,7 @@ namespace Test\Ecotone\Messaging\Fixture\Service;
 
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\MessageHeaders;
 
 /**
  * Class ServiceExpectingTwoArguments
@@ -32,7 +33,10 @@ class ServiceExpectingTwoArguments implements DefinedObject
 
     public function payloadAndHeaders($payload, array $headers)
     {
-        return $payload;
+        return [
+            'payload' => $payload,
+            'message_id' => $headers[MessageHeaders::MESSAGE_ID],
+        ];
     }
 
     /**

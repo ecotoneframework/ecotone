@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Transformer;
 
-use Ecotone\Messaging\Channel\DirectChannel;
-use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
@@ -14,8 +13,8 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Test\ComponentTestBuilder;
+use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingMessageAndReturningMessage;
@@ -34,50 +33,35 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  */
 class TransformerBuilderTest extends MessagingTest
 {
-    public function test_passing_message_to_transforming_class_if_there_is_type_hint_for_it()
+    public function test_modifying_payload()
     {
-        $payload = 'some';
-        $outputChannel = QueueChannel::create();
-        $outputChannelName = 'output';
-        $objectToInvoke = 'objecToInvoke';
-        $transformer = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
-            ->withReference($objectToInvoke, ServiceExpectingMessageAndReturningMessage::create($payload))
-            ->build(TransformerBuilder::create($objectToInvoke, InterfaceToCall::create(ServiceExpectingMessageAndReturningMessage::class, 'send'))
-                ->withOutputMessageChannel($outputChannelName));
+        $messaging = ComponentTestBuilder::create()
+            ->withReference($referenceName = 'reference', ServiceExpectingMessageAndReturningMessage::create($payload = 'some'))
+            ->withMessageHandler(
+                TransformerBuilder::create($referenceName, InterfaceToCall::create(ServiceExpectingMessageAndReturningMessage::class, 'send'))
+                    ->withInputChannelName('inputChannel')
+            )
+            ->build();
 
-        $message = MessageBuilder::withPayload('some123')->build();
-        $transformer->handle($message);
-
-        $this->assertMessages(
-            MessageBuilder::fromMessage($message)
-                ->setPayload($payload)
-                ->build(),
-            $outputChannel->receive()
+        $this->assertEquals(
+            $payload,
+            $messaging->sendDirectToChannel('inputChannel', 'some123')
         );
     }
 
-    public function test_passing_message_payload_as_default()
+    public function test_transforming_message_payload_as_default()
     {
-        $payload = 'someBigPayload';
-        $outputChannel = QueueChannel::create();
-        $outputChannelName = 'output';
-        $objectToInvokeReference = 'service-a';
-        $transformer = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
-            ->withReference($objectToInvokeReference, ServiceExpectingOneArgument::create())
-            ->build(TransformerBuilder::create($objectToInvokeReference, InterfaceToCall::create(ServiceExpectingOneArgument::class, 'withReturnValue'))
-                ->withOutputMessageChannel($outputChannelName));
+        $messaging = ComponentTestBuilder::create()
+            ->withReference($referenceName = 'reference', ServiceExpectingOneArgument::create())
+            ->withMessageHandler(
+                TransformerBuilder::create($referenceName, InterfaceToCall::create(ServiceExpectingOneArgument::class, 'withReturnMixed'))
+                    ->withInputChannelName('inputChannel')
+            )
+            ->build();
 
-        $message = MessageBuilder::withPayload($payload)->build();
-        $transformer->handle($message);
-
-        $this->assertMessages(
-            MessageBuilder::fromMessage($message)
-                ->setPayload($payload)
-                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::STRING))
-                ->build(),
-            $outputChannel->receive()
+        $this->assertEquals(
+            new stdClass(),
+            $messaging->sendDirectToChannelWithMessageReply('inputChannel', new stdClass())->getPayload()
         );
     }
 
@@ -85,75 +69,63 @@ class TransformerBuilderTest extends MessagingTest
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $outputChannelName = 'outputChannelName';
         ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, QueueChannel::create())
-            ->build(TransformerBuilder::createWithDirectObject(ServiceWithoutReturnValue::create(), 'setName')
-                ->withOutputMessageChannel($outputChannelName));
+            ->withMessageHandler(
+                TransformerBuilder::createWithDirectObject(ServiceWithoutReturnValue::create(), 'setName')
+                    ->withInputChannelName('inputChannel')
+            )
+            ->build();
     }
 
     public function test_not_sending_message_to_output_channel_if_transforming_method_returns_null()
     {
-        $outputChannel = QueueChannel::create();
-        $outputChannelName = 'output';
-        $objectToInvokeReference = 'service-a';
-        $transformer = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
-            ->withReference($objectToInvokeReference, ServiceExpectingOneArgument::create())
-            ->build(TransformerBuilder::create($objectToInvokeReference, InterfaceToCall::create(ServiceExpectingOneArgument::class, 'withNullReturnValue'))
-                ->withOutputMessageChannel($outputChannelName));
+        $messaging = ComponentTestBuilder::create()
+            ->withChannel(SimpleMessageChannelBuilder::createQueueChannel($outputChannel = 'outputChannel'))
+            ->withReference($referenceName = 'reference', ServiceExpectingOneArgument::create())
+            ->withMessageHandler(
+                TransformerBuilder::create($referenceName, InterfaceToCall::create(ServiceExpectingOneArgument::class, 'withNullReturnValue'))
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+                    ->withOutputMessageChannel($outputChannel)
+            )
+            ->build();
 
-        $transformer->handle(MessageBuilder::withPayload('some')->build());
+        $messaging->sendDirectToChannel($inputChannel, 'test');
 
-        $this->assertNull($outputChannel->receive());
+        $this->assertNull($messaging->receiveMessageFrom($outputChannel));
     }
 
     public function test_transforming_headers_if_array_returned_by_transforming_method()
     {
-        $payload = 'someBigPayload';
-        $outputChannel = QueueChannel::create();
-        $inputChannelName = 'input';
-        $outputChannelName = 'output';
-        $transformer = ComponentTestBuilder::create()
-            ->withChannel($inputChannelName, DirectChannel::create())
-            ->withChannel($outputChannelName, $outputChannel)
-            ->build(TransformerBuilder::createWithDirectObject(ServiceExpectingOneArgument::create(), 'withArrayReturnValue')
-                ->withOutputMessageChannel($outputChannelName));
-
-        $message = MessageBuilder::withPayload($payload)
-            ->setContentType(MediaType::createApplicationXPHP())
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                TransformerBuilder::createWithDirectObject(ServiceExpectingOneArgument::create(), 'withArrayReturnValue')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
             ->build();
-        $transformer->handle($message);
 
-        $this->assertMessages(
-            MessageBuilder::fromMessage($message)
-                ->setPayload($payload)
-                ->setHeader('some', $payload)
-                ->setContentType(MediaType::createApplicationXPHP())
-                ->build(),
-            $outputChannel->receive()
+        $message = $messaging->sendDirectToChannelWithMessageReply($inputChannel, 'test');
+
+        $this->assertEquals(
+            'test',
+            $message->getHeaders()->get('some')
         );
     }
 
     public function test_transforming_headers_if_array_returned_and_message_payload_is_also_array()
     {
         $payload = ['some' => 'some payload'];
-        $outputChannel = QueueChannel::create();
-        $outputChannelName = 'output';
-        $transformer = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
-            ->build(TransformerBuilder::createWithDirectObject(ServiceExpectingOneArgument::create(), 'withArrayTypeHintAndArrayReturnValue')
-                ->withOutputMessageChannel($outputChannelName));
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                TransformerBuilder::createWithDirectObject(ServiceExpectingOneArgument::create(), 'withArrayTypeHintAndArrayReturnValue')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $message = MessageBuilder::withPayload($payload)->build();
-        $transformer->handle($message);
+        $message = $messaging->sendDirectToChannelWithMessageReply($inputChannel, $payload);
 
-        $this->assertMessages(
-            MessageBuilder::fromMessage($message)
-                ->setPayload($payload)
-                ->setHeader('some', 'some payload')
-                ->build(),
-            $outputChannel->receive()
+        $this->assertEquals(
+            'some payload',
+            $message->getHeaders()->get('some')
         );
     }
 
@@ -161,30 +133,27 @@ class TransformerBuilderTest extends MessagingTest
     {
         $payload = 'someBigPayload';
         $headerValue = 'abc';
-        $outputChannel = QueueChannel::create();
-        $outputChannelName = 'output';
-        $transformerBuilder = TransformerBuilder::createWithDirectObject(ServiceExpectingTwoArguments::create(), 'withReturnValue')
-                                ->withOutputMessageChannel($outputChannelName);
-        $transformerBuilder->withMethodParameterConverters([
-            PayloadBuilder::create('name'),
-            HeaderBuilder::create('surname', 'token'),
-        ]);
-        $transformer = ComponentTestBuilder::create()
-            ->withChannel($outputChannelName, $outputChannel)
-            ->build($transformerBuilder);
-
-        $message = MessageBuilder::withPayload($payload)
-            ->setHeader('token', $headerValue)
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                TransformerBuilder::createWithDirectObject(ServiceExpectingTwoArguments::create(), 'withReturnValue')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+                    ->withMethodParameterConverters([
+                        PayloadBuilder::create('name'),
+                        HeaderBuilder::create('surname', 'token'),
+                    ])
+            )
             ->build();
-        $transformer->handle($message);
 
-        $this->assertMessages(
-            MessageBuilder::fromMessage($message)
-                ->setPayload($payload . $headerValue)
-                ->setHeader('token', $headerValue)
-                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::STRING))
-                ->build(),
-            $outputChannel->receive()
+        $message = $messaging->sendDirectToChannelWithMessageReply($inputChannel, $payload, metadata:  ['token' => $headerValue]);
+
+        $this->assertEquals(
+            $payload . $headerValue,
+            $message->getPayload()
+        );
+
+        $this->assertEquals(
+            $headerValue,
+            $message->getHeaders()->get('token')
         );
     }
 
@@ -192,104 +161,71 @@ class TransformerBuilderTest extends MessagingTest
     {
         $payload = 'someBigPayload';
         $headerValue = 'abc';
-        $outputChannel = QueueChannel::create();
-        $inputChannelName = 'input';
-        $outputChannelName = 'output';
-
-        $transformer = ComponentTestBuilder::create()
-            ->withChannel($inputChannelName, DirectChannel::create())
-            ->withChannel($outputChannelName, $outputChannel)
-            ->build(
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
                 TransformerBuilder::createHeaderEnricher([
                     'token' => $headerValue,
                     'correlation-id' => 1,
                 ])
-                ->withOutputMessageChannel($outputChannelName)
-            );
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $message = MessageBuilder::withPayload($payload)->build();
-        $transformer->handle($message);
+        $message = $messaging->sendDirectToChannelWithMessageReply($inputChannel, $payload);
 
-        $this->assertMessages(
-            MessageBuilder::fromMessage($message)
-                ->setPayload($payload)
-                ->setHeader('token', $headerValue)
-                ->setHeader('correlation-id', 1)
-                ->build(),
-            $outputChannel->receive()
-        );
+        $this->assertEquals($payload, $message->getPayload());
+        $this->assertEquals($headerValue, $message->getHeaders()->get('token'));
+        $this->assertEquals(1, $message->getHeaders()->get('correlation-id'));
     }
 
     public function test_transforming_with_header_mapper()
     {
         $payload = 'someBigPayload';
         $headerValue = 'abc';
-        $outputChannel = QueueChannel::create();
-        $inputChannelName = 'input';
-        $outputChannelName = 'output';
-        $transformer = ComponentTestBuilder::create()
-            ->withChannel($inputChannelName, DirectChannel::create())
-            ->withChannel($outputChannelName, $outputChannel)
-            ->build(
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
                 TransformerBuilder::createHeaderMapper([
                     'token' => 'secret',
                 ])
-                ->withOutputMessageChannel($outputChannelName)
-            );
-
-        $message = MessageBuilder::withPayload($payload)
-            ->setHeader('token', $headerValue)
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
             ->build();
-        $transformer->handle($message);
 
-        $this->assertMessages(
-            MessageBuilder::fromMessage($message)
-                ->setPayload($payload)
-                ->setHeader('token', $headerValue)
-                ->setHeader('secret', $headerValue)
-                ->build(),
-            $outputChannel->receive()
-        );
+        $message = $messaging->sendDirectToChannelWithMessageReply($inputChannel, $payload, metadata: ['token' => $headerValue]);
+
+        $this->assertEquals($payload, $message->getPayload());
+        $this->assertEquals($headerValue, $message->getHeaders()->get('token'));
+        $this->assertEquals($headerValue, $message->getHeaders()->get('secret'));
     }
 
     public function test_transforming_with_transformer_instance_of_object()
     {
-        $referenceObject = ServiceWithReturnValue::create();
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                TransformerBuilder::createWithDirectObject(ServiceWithReturnValue::create(), 'getName')
+                    ->withInputChannelName('input')
+            )
+            ->build();
 
-        $transformer = ComponentTestBuilder::create()
-            ->build(TransformerBuilder::createWithDirectObject($referenceObject, 'getName'));
-
-        $replyChannel = QueueChannel::create();
-        $message = MessageBuilder::withPayload('some')->setReplyChannel($replyChannel)->build();
-        $transformer->handle($message);
-
-        $this->assertMessages(
-            MessageBuilder::fromMessage($message)
-                ->setPayload('johny')
-                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::STRING))
-                ->setReplyChannel($replyChannel)
-                ->build(),
-            $replyChannel->receive()
+        $this->assertEquals(
+            MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::STRING),
+            $messaging->sendDirectToChannelWithMessageReply('input', 'johny')->getHeaders()->getContentType()
         );
     }
 
     public function test_transforming_payload_using_expression()
     {
-        $payload = 13;
-        $outputChannel = QueueChannel::create();
+        $payload = 1;
+        $messaging = ComponentTestBuilder::create()
+            ->withMessageHandler(
+                TransformerBuilder::createWithExpression('payload + 3')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
-        $transformer = ComponentTestBuilder::create()->build(TransformerBuilder::createWithExpression('payload + 3'));
+        $message = $messaging->sendDirectToChannelWithMessageReply($inputChannel, $payload);
 
-        $transformer->handle(
-            MessageBuilder::withPayload($payload)
-                ->setReplyChannel($outputChannel)
-                ->build()
-        );
-
-        $this->assertEquals(
-            16,
-            $outputChannel->receive()->getPayload()
-        );
+        $this->assertEquals($payload + 3, $message->getPayload());
     }
 
     public function test_converting_to_string()
@@ -309,24 +245,20 @@ class TransformerBuilderTest extends MessagingTest
      */
     public function test_creating_with_interceptors()
     {
-        $objectToInvoke = CalculatingService::create(0);
-        $replyChannel = QueueChannel::create();
-
-        $serviceActivator = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create()
             ->withReference(CalculatingServiceInterceptorExample::class, CalculatingServiceInterceptorExample::create(4))
-            ->build(
-                TransformerBuilder::createWithDirectObject($objectToInvoke, 'result')
-                    ->withInputChannelName('someName')
+            ->withMessageHandler(
+                TransformerBuilder::createWithDirectObject(CalculatingService::create(0), 'result')
                     ->withEndpointId('someEndpoint')
                     ->addAroundInterceptor(AroundInterceptorBuilder::create(CalculatingServiceInterceptorExample::class, InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'sum'), 2, '', []))
                     ->addAroundInterceptor(AroundInterceptorBuilder::create(CalculatingServiceInterceptorExample::class, InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'multiply'), 1, '', []))
-            );
-
-        $serviceActivator->handle(MessageBuilder::withPayload(2)->setReplyChannel($replyChannel)->build());
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
 
         $this->assertEquals(
-            24,
-            $replyChannel->receive()->getPayload()
+            20,
+            $messaging->sendDirectToChannel($inputChannel, 1)
         );
     }
 }

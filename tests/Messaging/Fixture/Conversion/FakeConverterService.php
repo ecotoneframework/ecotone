@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Conversion;
 
+use Ecotone\Messaging\Config\Container\CompilableBuilder;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Type;
@@ -14,7 +18,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
  * @package Test\Ecotone\Messaging\Fixture\Conversion
  * @author Dariusz Gafka <dgafka.mail@gmail.com>
  */
-class FakeConverterService implements Converter
+class FakeConverterService implements Converter, CompilableBuilder
 {
     /**
      * @var mixed
@@ -35,7 +39,7 @@ class FakeConverterService implements Converter
      * @param Type $typeDescriptor
      * @param MediaType $mediaType
      */
-    private function __construct($data, Type $typeDescriptor, MediaType $mediaType)
+    public function __construct($data, Type $typeDescriptor, MediaType $mediaType)
     {
         $this->data = $data;
         $this->typeDescriptor = $typeDescriptor;
@@ -70,5 +74,14 @@ class FakeConverterService implements Converter
     public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
     {
         return $sourceType->equals($this->typeDescriptor) && $sourceMediaType->isCompatibleWith($this->mediaType);
+    }
+
+    public function compile(MessagingContainerBuilder $builder): Definition|Reference
+    {
+        return new Definition(self::class, [
+            $this->data,
+            $this->typeDescriptor,
+            $this->mediaType,
+        ]);
     }
 }

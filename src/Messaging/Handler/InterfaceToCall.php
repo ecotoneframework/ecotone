@@ -131,6 +131,31 @@ class InterfaceToCall
         return false;
     }
 
+    public function hasAnnotation(Type $className): bool
+    {
+        return $this->hasMethodAnnotation($className) || $this->hasClassAnnotation($className);
+    }
+
+    /**
+     * @return object[]
+     */
+    public function getAnnotationsByImportanceOrder(Type $className): array
+    {
+        $annotations = [];
+        foreach ($this->methodAnnotations as $methodAnnotation) {
+            if (TypeDescriptor::createFromVariable($methodAnnotation)->isCompatibleWith($className)) {
+                $annotations[] = $methodAnnotation;
+            }
+        }
+        foreach ($this->getClassAnnotations() as $classAnnotation) {
+            if (TypeDescriptor::createFromVariable($classAnnotation)->isCompatibleWith($className)) {
+                $annotations[] = $classAnnotation;
+            }
+        }
+
+        return $annotations;
+    }
+
     public function getSingleClassAnnotationOf(Type $className): object
     {
         foreach ($this->getClassAnnotations() as $classAnnotation) {

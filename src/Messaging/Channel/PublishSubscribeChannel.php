@@ -34,6 +34,9 @@ class PublishSubscribeChannel implements SubscribableChannel, DefinedObject
      */
     public function send(Message $message): void
     {
+        if (count($this->messageHandlers) === 2) {
+            $tmp = 't';
+        }
         foreach ($this->messageHandlers as $messageHandler) {
             $messageHandler->handle($message);
         }

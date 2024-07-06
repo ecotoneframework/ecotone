@@ -10,7 +10,9 @@ use Ecotone\Messaging\MessageHeaders;
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 class Priority extends AddHeader
 {
-    public function __construct(int $number)
+    public const DEFAULT_PRIORITY = 1;
+
+    public function __construct(int $number = self::DEFAULT_PRIORITY)
     {
         parent::__construct(MessageHeaders::PRIORITY, $number);
     }

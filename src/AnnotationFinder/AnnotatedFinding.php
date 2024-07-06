@@ -28,6 +28,13 @@ interface AnnotatedFinding
     public function getMethodAnnotationsWithType(string $type): array;
 
     /**
+     * Priority is method annotations over class annotations
+     *
+     * @return object[]
+     */
+    public function getAnnotationsByImportanceOrder(string $type): array;
+
+    /**
      * @return object[]
      */
     public function getClassAnnotationsWithType(string $type): array;
@@ -35,4 +42,6 @@ interface AnnotatedFinding
     public function hasMethodAnnotation(string $type): bool;
 
     public function hasClassAnnotation(string $type): bool;
+
+    public function hasAnnotation(string $type): bool;
 }

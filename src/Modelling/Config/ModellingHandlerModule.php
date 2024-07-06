@@ -23,6 +23,7 @@ use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Config\PriorityBasedOnType;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\ClassDefinition;
@@ -355,7 +356,7 @@ class ModellingHandlerModule implements AnnotationModule
             $inputChannelName = self::getAggregateRepositoryInputChannel($repositoryGateway->getClassName(), $repositoryGateway->getMethodName(), $interface->getReturnType()->isVoid(), $interface->canItReturnNull());
 
             $chainMessageHandlerBuilder = ChainMessageHandlerBuilder::create()
-                                            ->withInputChannelName($inputChannelName);
+                ->withInputChannelName($inputChannelName);
             if ($interface->getReturnType()->isVoid()) {
                 Assert::isTrue($interface->hasFirstParameter(), 'Saving repository should have at least one parameter for aggregate: ' . $repositoryGateway);
 
@@ -547,6 +548,7 @@ class ModellingHandlerModule implements AnnotationModule
                     BridgeBuilder::create()
                         ->withInputChannelName($messageChannelName)
                         ->withOutputMessageChannel($connectionChannel)
+                        ->withEndpointAnnotations([PriorityBasedOnType::fromAnnotatedFinding($registration)->toAttributeDefinition()])
                 );
             }
 
@@ -595,9 +597,9 @@ class ModellingHandlerModule implements AnnotationModule
                     $interfaceToCallRegistry,
                     $baseEventSourcingConfiguration
                 )
-                ->withInputChannelName($saveChannel)
-                ->withOutputMessageChannel($publishChannel)
-                ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
+                    ->withInputChannelName($saveChannel)
+                    ->withOutputMessageChannel($publishChannel)
+                    ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
             );
             $configuration->registerMessageHandler(
                 PublishAggregateEventsServiceBuilder::create(
@@ -605,8 +607,8 @@ class ModellingHandlerModule implements AnnotationModule
                     $registration->getMethodName(),
                     $interfaceToCallRegistry
                 )
-                ->withInputChannelName($publishChannel)
-                ->withOutputMessageChannel($annotation->getOutputChannelName())
+                    ->withInputChannelName($publishChannel)
+                    ->withOutputMessageChannel($annotation->getOutputChannelName())
             );
         }
     }
@@ -670,6 +672,7 @@ class ModellingHandlerModule implements AnnotationModule
                 BridgeBuilder::create()
                     ->withInputChannelName($inputChannelName)
                     ->withOutputMessageChannel($endpointInputChannel)
+                    ->withEndpointAnnotations([PriorityBasedOnType::fromAnnotatedFinding($registration)->toAttributeDefinition()])
             );
         }
 
@@ -744,9 +747,9 @@ class ModellingHandlerModule implements AnnotationModule
                         $interfaceToCallRegistry,
                         $baseEventSourcingConfiguration
                     )
-                    ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
+                        ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
                 )
-            ->chain(PublishAggregateEventsServiceBuilder::create($aggregateClassDefinition, $methodName, $interfaceToCallRegistry))
+                ->chain(PublishAggregateEventsServiceBuilder::create($aggregateClassDefinition, $methodName, $interfaceToCallRegistry))
         );
     }
 }

@@ -5,6 +5,9 @@ namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 
+/**
+ * licence Apache-2.0
+ */
 class InterceptedGateway implements NonProxyGateway
 {
     /**

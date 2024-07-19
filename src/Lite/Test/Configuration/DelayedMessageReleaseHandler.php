@@ -9,6 +9,9 @@ use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Support\Assert;
 
+/**
+ * licence Apache-2.0
+ */
 final class DelayedMessageReleaseHandler
 {
     public function releaseMessagesAwaitingFor(string $channelName, int $timeInMilliseconds, ChannelResolver $channelResolver): void

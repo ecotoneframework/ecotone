@@ -10,6 +10,9 @@ use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 
+/**
+ * licence Apache-2.0
+ */
 final class UninterruptibleServiceActivator implements MessageHandlerBuilderWithParameterConverters
 {
     private function __construct(private ServiceActivatorBuilder $serviceActivatorBuilder)

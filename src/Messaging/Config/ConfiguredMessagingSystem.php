@@ -17,8 +17,11 @@ use InvalidArgumentException;
 /**
  * Interface ConfiguredMessagingSystem
  * @package Ecotone\Messaging\Config
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
  * @template T
+ */
+/**
+ * licence Apache-2.0
  */
 interface ConfiguredMessagingSystem
 {

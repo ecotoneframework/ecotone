@@ -8,6 +8,9 @@ use Ecotone\Messaging\Message;
 
 use function is_string;
 
+/**
+ * licence Apache-2.0
+ */
 class MethodInvocationObjectConverter implements ParameterConverter
 {
     public function getArgumentFrom(Message $message, ?MethodInvocation $methodInvocation = null)

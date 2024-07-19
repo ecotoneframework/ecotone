@@ -11,6 +11,9 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 
+/**
+ * licence Apache-2.0
+ */
 class InterceptorExample
 {
     #[Before(pointcut: SomeQueryHandler::class . '::sum')]

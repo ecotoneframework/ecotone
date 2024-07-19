@@ -7,6 +7,9 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class StubCallSavingService
 {
     /**

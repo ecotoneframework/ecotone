@@ -7,6 +7,9 @@ namespace Ecotone\Messaging\Attribute;
 use Attribute;
 
 #[Attribute]
+/**
+ * licence Apache-2.0
+ */
 class AsynchronousRunningEndpoint
 {
     public function __construct(private string $endpointId)

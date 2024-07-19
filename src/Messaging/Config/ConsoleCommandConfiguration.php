@@ -6,6 +6,9 @@ use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
+/**
+ * licence Apache-2.0
+ */
 class ConsoleCommandConfiguration implements DefinedObject
 {
     public const HEADER_PARAMETER_NAME = 'header';

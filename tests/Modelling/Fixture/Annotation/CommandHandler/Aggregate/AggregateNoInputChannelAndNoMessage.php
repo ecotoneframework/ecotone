@@ -8,6 +8,9 @@ use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\Attribute\IgnorePayload;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class AggregateNoInputChannelAndNoMessage
 {
     #[Identifier]

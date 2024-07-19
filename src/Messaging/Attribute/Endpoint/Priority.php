@@ -8,6 +8,9 @@ use Attribute;
 use Ecotone\Messaging\MessageHeaders;
 
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
+/**
+ * licence Apache-2.0
+ */
 class Priority extends AddHeader
 {
     public const DEFAULT_PRIORITY = 1;

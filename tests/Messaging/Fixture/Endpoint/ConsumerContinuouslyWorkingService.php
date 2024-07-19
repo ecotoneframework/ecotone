@@ -7,6 +7,9 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Transaction\Transactional;
 
 #[Transactional(['transactionFactory1'])]
+/**
+ * licence Apache-2.0
+ */
 class ConsumerContinuouslyWorkingService implements DefinedObject
 {
     private $receivedPayload;

@@ -5,6 +5,9 @@ namespace Test\Ecotone\Modelling\Fixture\CommandHandler\MultiMethod;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\NotUniqueHandler;
 
+/**
+ * licence Apache-2.0
+ */
 class MultiMethodServiceCommandHandlerExample
 {
     #[CommandHandler('register', '1')]

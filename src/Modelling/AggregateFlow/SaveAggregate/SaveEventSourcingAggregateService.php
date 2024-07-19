@@ -21,6 +21,9 @@ use Ecotone\Modelling\EventSourcedRepository;
 use Ecotone\Modelling\SaveAggregateService;
 use Ramsey\Uuid\Uuid;
 
+/**
+ * licence Apache-2.0
+ */
 final class SaveEventSourcingAggregateService implements SaveAggregateService
 {
     public const NO_SNAPSHOT_THRESHOLD = 0;

@@ -9,7 +9,10 @@ use Ecotone\Messaging\MessagingException;
 /**
  * Class ErrorMessage where payload is thrown exception
  * @package Ecotone\Messaging\Support
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 final class ErrorMessage implements Message
 {

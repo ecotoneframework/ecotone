@@ -32,7 +32,10 @@ use ReflectionMethod;
 /**
  * Class ServiceActivatorFactory
  * @package Ecotone\Messaging\Handler\ServiceActivator
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 final class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters
 {

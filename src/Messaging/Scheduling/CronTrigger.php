@@ -12,7 +12,10 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 /**
  * Class CronTrigger
  * @package Ecotone\Messaging\Scheduling
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class CronTrigger implements Trigger
 {

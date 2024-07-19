@@ -12,6 +12,9 @@ use Ecotone\Messaging\Message;
  * This is useful in scenario where we given publisher is not transactional (e.g. SQS, Redis)
  * and we want to delay sending messages so it's done just before transaction is committed
  */
+/**
+ * licence Apache-2.0
+ */
 final class CollectorStorage
 {
     /**

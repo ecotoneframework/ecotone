@@ -15,6 +15,9 @@ use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\PollableChannel;
 use RuntimeException;
 
+/**
+ * licence Apache-2.0
+ */
 class ExceptionalQueueChannel implements PollableChannel, MessageChannelWithSerializationBuilder, DefinedObject
 {
     private int $exceptionCount = 0;

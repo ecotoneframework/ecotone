@@ -10,6 +10,9 @@ use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\WithEvents;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 final class StateBasedAggregateWithInternalRecorder
 {
     use WithEvents;

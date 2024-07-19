@@ -17,6 +17,9 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Support\Assert;
 use ReflectionClass;
 
+/**
+ * licence Apache-2.0
+ */
 class AnnotationModuleRetrievingService implements ModuleRetrievingService
 {
     private AnnotationFinder $annotationRegistrationService;

@@ -9,6 +9,9 @@ use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\WithAggregateVersioning;
 
 #[EventSourcingAggregate]
+/**
+ * licence Apache-2.0
+ */
 class Ticket
 {
     use WithAggregateVersioning;

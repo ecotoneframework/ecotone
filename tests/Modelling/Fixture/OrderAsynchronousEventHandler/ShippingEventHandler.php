@@ -9,6 +9,9 @@ use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Test\Ecotone\Modelling\Fixture\Order\OrderWasPlaced;
 
+/**
+ * licence Apache-2.0
+ */
 final class ShippingEventHandler
 {
     /**

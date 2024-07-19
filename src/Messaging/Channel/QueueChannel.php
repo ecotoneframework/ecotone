@@ -7,6 +7,9 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\PollableChannel;
 
+/**
+ * licence Apache-2.0
+ */
 class QueueChannel implements PollableChannel, DefinedObject
 {
     /**

@@ -18,6 +18,10 @@ use Test\Ecotone\Modelling\Fixture\Retry\RetriedCommandHandler;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 final class InstantRetryModuleTest extends TestCase
 {
     public function test_retrying_with_command_bus()

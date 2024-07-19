@@ -5,6 +5,9 @@ namespace Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes;
 use Attribute;
 
 #[Attribute]
+/**
+ * licence Apache-2.0
+ */
 class AddMetadata
 {
     private string $name;

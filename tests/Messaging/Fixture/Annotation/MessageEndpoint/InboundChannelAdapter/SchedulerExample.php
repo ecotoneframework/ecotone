@@ -6,6 +6,9 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChann
 
 use Ecotone\Messaging\Attribute\Scheduled;
 
+/**
+ * licence Apache-2.0
+ */
 class SchedulerExample
 {
     #[Scheduled('requestChannel', 'run', ['some'])]

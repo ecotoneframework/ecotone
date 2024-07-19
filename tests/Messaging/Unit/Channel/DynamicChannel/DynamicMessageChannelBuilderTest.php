@@ -17,6 +17,10 @@ use Test\Ecotone\Messaging\Fixture\Handler\SuccessServiceActivator;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 final class DynamicMessageChannelBuilderTest extends TestCase
 {
     public function test_sending_and_receiving_from_single_channel(): void

@@ -10,6 +10,9 @@ use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Precedence;
 
+/**
+ * licence Apache-2.0
+ */
 final class SpiedChannelAdapterBuilder implements ChannelInterceptorBuilder
 {
     public function __construct(private string $relatedChannel)

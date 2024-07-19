@@ -8,6 +8,9 @@ use Ecotone\Messaging\Attribute\Endpoint\Priority;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
+/**
+ * licence Apache-2.0
+ */
 final class SynchronousPriorityHandler
 {
     public array $triggers = [];

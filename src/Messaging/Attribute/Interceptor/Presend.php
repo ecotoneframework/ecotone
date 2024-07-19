@@ -6,6 +6,9 @@ use Attribute;
 use Ecotone\Messaging\Precedence;
 
 #[Attribute(Attribute::TARGET_METHOD)]
+/**
+ * licence Apache-2.0
+ */
 class Presend
 {
     public int $precedence;

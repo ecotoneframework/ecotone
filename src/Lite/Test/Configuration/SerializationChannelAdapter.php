@@ -13,6 +13,9 @@ use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Throwable;
 
+/**
+ * licence Apache-2.0
+ */
 final class SerializationChannelAdapter implements ChannelInterceptor
 {
     public function __construct(private MediaType $targetMediaType, private ConversionService $conversionService)

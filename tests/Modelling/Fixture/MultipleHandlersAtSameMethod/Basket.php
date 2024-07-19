@@ -5,6 +5,9 @@ namespace Test\Ecotone\Modelling\Fixture\MultipleHandlersAtSameMethod;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
+/**
+ * licence Apache-2.0
+ */
 class Basket
 {
     private array $items;

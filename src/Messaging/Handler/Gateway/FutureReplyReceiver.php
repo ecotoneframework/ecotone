@@ -8,8 +8,11 @@ use Ecotone\Messaging\Message;
 /**
  * Class FutureReplySender
  * @package Ecotone\Messaging\Handler\Gateway
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
  * @internal
+ */
+/**
+ * licence Apache-2.0
  */
 class FutureReplyReceiver implements Future
 {

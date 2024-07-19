@@ -13,6 +13,9 @@ use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ramsey\Uuid\Uuid;
 
+/**
+ * licence Apache-2.0
+ */
 class BeforeSendChannelInterceptorBuilder implements ChannelInterceptorBuilder
 {
     private string $inputChannelName;

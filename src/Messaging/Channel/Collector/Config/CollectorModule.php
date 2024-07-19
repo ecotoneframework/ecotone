@@ -28,6 +28,9 @@ use Ecotone\Messaging\Precedence;
 use Ecotone\Modelling\CommandBus;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 final class CollectorModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public const ECOTONE_COLLECTOR_DEFAULT_PROXY = 'ecotone.collector.default_proxy';

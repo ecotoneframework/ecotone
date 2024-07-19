@@ -5,6 +5,9 @@ namespace Ecotone\Messaging\Handler\Logger;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Message;
 
+/**
+ * licence Apache-2.0
+ */
 class QuickLogger
 {
     public static function createAsServiceActivator(): ServiceActivatorBuilder

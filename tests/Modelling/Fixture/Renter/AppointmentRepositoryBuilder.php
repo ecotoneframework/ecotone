@@ -8,6 +8,9 @@ use Ecotone\Modelling\EventSourcedRepository;
 use Ecotone\Modelling\LazyRepositoryBuilder;
 use Ecotone\Modelling\StandardRepository;
 
+/**
+ * licence Apache-2.0
+ */
 class AppointmentRepositoryBuilder implements LazyRepositoryBuilder
 {
     /**

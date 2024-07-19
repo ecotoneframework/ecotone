@@ -11,6 +11,9 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\ErrorMessage;
 use Throwable;
 
+/**
+ * licence Apache-2.0
+ */
 class PollingConsumerErrorChannelInterceptor
 {
     public function __construct(private ChannelResolver $channelResolver)

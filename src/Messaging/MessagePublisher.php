@@ -6,6 +6,9 @@ namespace Ecotone\Messaging;
 
 use Ecotone\Messaging\Conversion\MediaType;
 
+/**
+ * licence Apache-2.0
+ */
 interface MessagePublisher
 {
     public function send(string $data, string $sourceMediaType = MediaType::TEXT_PLAIN): void;

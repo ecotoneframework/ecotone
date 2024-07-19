@@ -12,6 +12,10 @@ use Psr\Container\ContainerInterface;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 class LiteContainerImplementationTest extends ContainerImplementationTestCase
 {
     protected static function getContainerFrom(ContainerBuilder $builder, ?ContainerInterface $externalContainer = null): ContainerInterface

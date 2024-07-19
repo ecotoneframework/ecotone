@@ -9,6 +9,9 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
+/**
+ * licence Apache-2.0
+ */
 class SomeQueryHandler
 {
     public const SUM = 'sum';

@@ -9,6 +9,9 @@ use Ecotone\Messaging\Config\Container\Definition;
  * This wrapper is used to add method calls
  * on top of defined object
  */
+/**
+ * licence Apache-2.0
+ */
 class DefinedObjectWrapper extends Definition
 {
     public function __construct(private DefinedObject $instance)

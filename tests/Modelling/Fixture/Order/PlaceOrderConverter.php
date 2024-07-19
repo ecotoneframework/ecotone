@@ -6,6 +6,9 @@ namespace Test\Ecotone\Modelling\Fixture\Order;
 
 use Ecotone\Messaging\Attribute\Converter;
 
+/**
+ * licence Apache-2.0
+ */
 final class PlaceOrderConverter
 {
     #[Converter]

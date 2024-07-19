@@ -18,6 +18,9 @@ use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Support\Assert;
 
+/**
+ * licence Enterprise
+ */
 final class DynamicMessageChannelBuilder implements MessageChannelBuilder
 {
     /**

@@ -7,6 +7,9 @@ namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 use Ecotone\Messaging\Attribute\ServiceContext;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 
+/**
+ * licence Apache-2.0
+ */
 class CalculatingConfiguration
 {
     #[ServiceContext]

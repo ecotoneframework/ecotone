@@ -7,6 +7,9 @@ use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
 use Ecotone\Modelling\Attribute\CommandHandler;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class User
 {
     public $internalId;

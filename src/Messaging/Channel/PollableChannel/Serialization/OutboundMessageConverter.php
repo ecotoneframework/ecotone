@@ -11,6 +11,9 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\MessageHeaders;
 
+/**
+ * licence Apache-2.0
+ */
 class OutboundMessageConverter
 {
     public function __construct(

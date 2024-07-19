@@ -9,6 +9,9 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use stdClass;
 
 #[MediaTypeConverter]
+/**
+ * licence Apache-2.0
+ */
 class ExampleStdClassConverter implements Converter
 {
     /**

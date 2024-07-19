@@ -8,6 +8,9 @@ use Ecotone\Messaging\Attribute\MessageGateway;
 use Ecotone\Messaging\Attribute\Parameter\Headers;
 use Ecotone\Messaging\Attribute\PropagateHeaders;
 
+/**
+ * licence Apache-2.0
+ */
 interface PropagatingGateway
 {
     #[MessageGateway('placeOrder')]

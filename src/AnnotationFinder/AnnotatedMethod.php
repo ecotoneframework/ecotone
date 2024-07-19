@@ -5,6 +5,9 @@ namespace Ecotone\AnnotationFinder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use InvalidArgumentException;
 
+/**
+ * licence Apache-2.0
+ */
 class AnnotatedMethod implements AnnotatedFinding
 {
     private string $className;

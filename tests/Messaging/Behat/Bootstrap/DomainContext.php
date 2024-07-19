@@ -36,6 +36,9 @@ use Test\Ecotone\Messaging\Fixture\Behat\Shopping\ShoppingService;
 /**
  * Defines application features from the specific context.
  */
+/**
+ * licence Apache-2.0
+ */
 class DomainContext implements Context
 {
     private MessagingSystemConfiguration $messagingSystemConfiguration;

@@ -4,6 +4,9 @@ namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Conversion\MediaType;
 
+/**
+ * licence Apache-2.0
+ */
 class StorageEventBus implements EventBus
 {
     private array $calls = [];

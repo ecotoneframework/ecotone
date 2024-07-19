@@ -2,6 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate;
 
+/**
+ * licence Apache-2.0
+ */
 class EventWasLogged
 {
     private string $loggerId;

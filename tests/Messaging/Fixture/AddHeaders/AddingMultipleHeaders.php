@@ -12,6 +12,9 @@ use Ecotone\Messaging\Attribute\Endpoint\RemoveHeader;
 use Ecotone\Messaging\Attribute\Endpoint\TimeToLive;
 use Ecotone\Modelling\Attribute\CommandHandler;
 
+/**
+ * licence Apache-2.0
+ */
 final class AddingMultipleHeaders
 {
     #[Delayed(1000)]

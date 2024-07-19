@@ -6,6 +6,9 @@ use Ecotone\Messaging\Attribute\Interceptor\Before;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\Logger;
 
+/**
+ * licence Apache-2.0
+ */
 class AddExecutorId
 {
     private string $executorId = '';

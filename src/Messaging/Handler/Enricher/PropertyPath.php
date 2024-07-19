@@ -7,7 +7,10 @@ use Ecotone\Messaging\Support\Assert;
 /**
  * Class PropertyPath
  * @package Ecotone\Messaging\Handler\Enricher
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class PropertyPath
 {

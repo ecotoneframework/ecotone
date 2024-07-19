@@ -8,6 +8,9 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Config\RegisterAggregateRepositoryChannels;
 
+/**
+ * licence Apache-2.0
+ */
 final class TestConfiguration
 {
     /**

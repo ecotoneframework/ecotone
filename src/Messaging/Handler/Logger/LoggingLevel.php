@@ -11,7 +11,10 @@ use Psr\Log\LogLevel;
 /**
  * Class LogLevel
  * @package Ecotone\Messaging\Handler\Logger
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class LoggingLevel extends LogLevel
 {

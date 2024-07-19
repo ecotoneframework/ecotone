@@ -14,6 +14,9 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use InvalidArgumentException;
 use RuntimeException;
 
+/**
+ * licence Apache-2.0
+ */
 class InMemoryConversionService implements ConversionService, Converter, CompilableBuilder
 {
     private array $convertTo;

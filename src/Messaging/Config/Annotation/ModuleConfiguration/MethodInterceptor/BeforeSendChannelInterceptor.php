@@ -10,6 +10,9 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Throwable;
 
+/**
+ * licence Apache-2.0
+ */
 class BeforeSendChannelInterceptor implements ChannelInterceptor
 {
     private NonProxyGateway $beforeSendGateway;

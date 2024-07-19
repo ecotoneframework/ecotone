@@ -17,6 +17,9 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilder;
  * This class is stateless Service which creates Message Consumers for Message Handlers.
  * It should not hold any state, as it will be reused for different endpoints.
  */
+/**
+ * licence Apache-2.0
+ */
 class PollingConsumerBuilder extends InterceptedPollingConsumerBuilder
 {
     /**

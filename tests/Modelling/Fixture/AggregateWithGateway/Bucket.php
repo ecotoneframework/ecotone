@@ -11,6 +11,9 @@ use Ecotone\Modelling\Attribute\QueryHandler;
 use Ramsey\Uuid\UuidInterface;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 final class Bucket
 {
     public const ADD = 'bucket.add';

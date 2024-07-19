@@ -2,6 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod;
 
+/**
+ * licence Apache-2.0
+ */
 class CreateUser
 {
     private string $name;

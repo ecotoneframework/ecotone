@@ -11,6 +11,9 @@ use Ecotone\Messaging\Scheduling\TaskExecutor;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 
+/**
+ * licence Apache-2.0
+ */
 class PollToGatewayTaskExecutor implements TaskExecutor
 {
     public function __construct(

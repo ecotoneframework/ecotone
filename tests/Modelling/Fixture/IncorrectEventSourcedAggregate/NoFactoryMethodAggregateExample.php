@@ -7,6 +7,9 @@ use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\Identifier;
 
 #[EventSourcingAggregate]
+/**
+ * licence Apache-2.0
+ */
 class NoFactoryMethodAggregateExample
 {
     #[Identifier]

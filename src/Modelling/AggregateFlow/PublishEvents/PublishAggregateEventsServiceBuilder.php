@@ -14,6 +14,9 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Modelling\EventBus;
 
+/**
+ * licence Apache-2.0
+ */
 final class PublishAggregateEventsServiceBuilder extends InputOutputMessageHandlerBuilder
 {
     private InterfaceToCall $interfaceToCall;

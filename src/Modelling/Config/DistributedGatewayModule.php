@@ -28,6 +28,9 @@ use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributedMessageHandler;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class DistributedGatewayModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     private array $distributedEventHandlerRoutingKeys;

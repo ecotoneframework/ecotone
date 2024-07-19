@@ -2,6 +2,9 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\CombinedConversion;
 
+/**
+ * licence Apache-2.0
+ */
 interface OrderInterface
 {
     /**

@@ -4,6 +4,9 @@ namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Store\Document\DocumentStore;
 
+/**
+ * licence Apache-2.0
+ */
 class BaseEventSourcingConfiguration
 {
     public const DEFAULT_SNAPSHOT_TRIGGER_THRESHOLD = 100;

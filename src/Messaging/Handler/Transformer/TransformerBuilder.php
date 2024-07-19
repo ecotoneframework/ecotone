@@ -31,7 +31,10 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 /**
  * Class TransformerBuilder
  * @package Messaging\Handler\Transformer
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class TransformerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters
 {

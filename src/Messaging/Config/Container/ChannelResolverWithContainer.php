@@ -6,6 +6,9 @@ use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\MessageChannel;
 use Psr\Container\ContainerInterface;
 
+/**
+ * licence Apache-2.0
+ */
 class ChannelResolverWithContainer implements ChannelResolver
 {
     public function __construct(private ContainerInterface $container)

@@ -12,6 +12,9 @@ use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavin
 
 #[EventSourcingAggregate]
 #[ValidateExecutor]
+/**
+ * licence Apache-2.0
+ */
 class Logger
 {
     use WithAggregateVersioning;

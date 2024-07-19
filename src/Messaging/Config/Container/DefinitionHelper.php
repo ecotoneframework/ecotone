@@ -13,6 +13,9 @@ use function serialize;
  *
  * @internal
  */
+/**
+ * licence Apache-2.0
+ */
 class DefinitionHelper
 {
     public static function buildDefinitionFromInstance(object $object): Definition

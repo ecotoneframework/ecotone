@@ -41,6 +41,9 @@ use Ecotone\Modelling\QueryBus;
 use ReflectionMethod;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class BusRoutingModule implements AnnotationModule
 {
     private BusRouterBuilder $commandBusByObject;

@@ -14,6 +14,10 @@ use Test\Ecotone\Modelling\Fixture\Order\OrderService;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 class EcotoneLiteTest extends TestCase
 {
     public function test_it_can_run_console_command(): void

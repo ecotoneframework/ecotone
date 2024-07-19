@@ -14,6 +14,10 @@ use stdClass;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 class UnionTypeDescriptorTest extends TestCase
 {
     public function test_union_type_compatibility_between_scalars()

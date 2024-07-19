@@ -5,6 +5,9 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\Processor;
 use Ramsey\Uuid\UuidInterface;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class HeadersConversionServiceConcrete
 {
     public static function create()

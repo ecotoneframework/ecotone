@@ -10,6 +10,9 @@ use Ecotone\Messaging\Config\Container\InterfaceParameterReference;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Handler\TypeResolver;
 
+/**
+ * licence Apache-2.0
+ */
 class RegisterInterfaceToCallReferences implements CompilerPass
 {
     private TypeResolver $typeResolver;

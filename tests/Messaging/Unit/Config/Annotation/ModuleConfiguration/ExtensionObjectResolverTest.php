@@ -12,6 +12,10 @@ use Test\Ecotone\Messaging\Fixture\Dto\WithCustomer\Customer;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 final class ExtensionObjectResolverTest extends TestCase
 {
     public function test_should_resolve_config_class()

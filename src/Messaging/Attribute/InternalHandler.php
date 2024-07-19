@@ -7,6 +7,9 @@ namespace Ecotone\Messaging\Attribute;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
+/**
+ * licence Apache-2.0
+ */
 final class InternalHandler extends ServiceActivator
 {
     public function __construct(

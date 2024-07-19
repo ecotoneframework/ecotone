@@ -7,6 +7,9 @@ use Ecotone\Messaging\Attribute\IdentifiedAnnotation;
 use InvalidArgumentException;
 
 #[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
+/**
+ * licence Apache-2.0
+ */
 class EventHandler extends IdentifiedAnnotation
 {
     public string $listenTo;

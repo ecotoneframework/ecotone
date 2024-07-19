@@ -11,6 +11,9 @@ use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\WithAggregateVersioning;
 
 #[EventSourcingAggregate]
+/**
+ * licence Apache-2.0
+ */
 final class EventSourcingAggregateExample
 {
     use WithAggregateVersioning;

@@ -8,6 +8,9 @@ use Ecotone\Modelling\Attribute\IgnorePayload;
 use stdClass;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class ServiceCommandHandlerWithInputChannelNameAndIgnoreMessage
 {
     #[CommandHandler('execute', 'commandHandler')]

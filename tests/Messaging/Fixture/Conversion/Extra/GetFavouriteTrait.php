@@ -5,7 +5,7 @@ namespace Test\Ecotone\Messaging\Fixture\Conversion\Extra;
 /**
  * Class GetFavouriteTrait
  * @package Fixture\Conversion\Extra
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
  */
 trait GetFavouriteTrait
 {

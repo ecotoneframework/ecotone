@@ -10,6 +10,9 @@ use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 
+/**
+ * licence Apache-2.0
+ */
 class ConfigurationVariableBuilder implements ParameterConverterBuilder
 {
     private function __construct(private string $parameterName, private string $variableName, private bool $isRequired, private mixed $defaultValue)

@@ -22,7 +22,10 @@ use Ramsey\Uuid\Uuid;
 /**
  * Class PayloadEnricherBuilder
  * @package Ecotone\Messaging\Handler\Transformer
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class EnricherBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithOutputChannel
 {

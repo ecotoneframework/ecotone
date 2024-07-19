@@ -11,6 +11,9 @@ use Ecotone\Modelling\Config\EventBusRouter;
 use Ecotone\Modelling\DistributionEntrypoint;
 use Ecotone\Modelling\EventBus;
 
+/**
+ * licence Apache-2.0
+ */
 class DistributedMessageHandler
 {
     private array $distributedEventHandlerRoutingKeys;

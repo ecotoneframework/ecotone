@@ -11,6 +11,9 @@ use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 
 use function get_class;
 
+/**
+ * licence Apache-2.0
+ */
 class AttributeBuilder implements ParameterConverterBuilder
 {
     public function __construct(private string $parameterName, private object $attributeInstance, private string $className, private ?string $methodName = null)

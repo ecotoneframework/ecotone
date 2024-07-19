@@ -7,6 +7,9 @@ use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\Attribute\Saga;
 
 #[Saga]
+/**
+ * licence Apache-2.0
+ */
 class OrderFulfilment
 {
     #[Identifier]

@@ -10,6 +10,9 @@ namespace Ecotone\Messaging\Channel;
 
 use Ecotone\Messaging\MessagingException;
 
+/**
+ * licence Apache-2.0
+ */
 class MessageDispatchingException extends MessagingException
 {
     /**

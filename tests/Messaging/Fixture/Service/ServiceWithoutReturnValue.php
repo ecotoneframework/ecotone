@@ -10,7 +10,10 @@ use Ecotone\Messaging\Transaction\Transactional;
 /**
  * Class ServiceWithoutReturnValue
  * @package Test\Ecotone\Messaging\Fixture\Service
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class ServiceWithoutReturnValue implements CallableService, DefinedObject
 {

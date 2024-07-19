@@ -6,6 +6,9 @@ use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\Application
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\Extension;
 
 #[ApplicationContext]
+/**
+ * licence Apache-2.0
+ */
 class CorrectClass
 {
     #[Extension]

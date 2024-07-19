@@ -9,6 +9,9 @@ use Ecotone\Modelling\Attribute\Saga;
 use InvalidArgumentException;
 
 #[Saga]
+/**
+ * licence Apache-2.0
+ */
 class Shipment
 {
     public const GET_SHIPMENT_STATUS = 'getShipmentStatus';

@@ -23,6 +23,9 @@ use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\MessageHeaders;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class ErrorHandlerModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     private function __construct()

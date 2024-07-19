@@ -9,6 +9,9 @@ use Ecotone\Messaging\Attribute\Parameter\Payload;
 use Ecotone\Modelling\Attribute\Identifier;
 use Ramsey\Uuid\UuidInterface;
 
+/**
+ * licence Apache-2.0
+ */
 interface BucketGateway
 {
     #[MessageGateway(Bucket::ADD)]

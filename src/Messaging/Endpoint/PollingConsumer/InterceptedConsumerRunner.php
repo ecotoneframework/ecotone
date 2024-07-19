@@ -15,6 +15,9 @@ use Ecotone\Messaging\Scheduling\PeriodicTrigger;
 use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
 use Psr\Log\LoggerInterface;
 
+/**
+ * licence Apache-2.0
+ */
 class InterceptedConsumerRunner implements EndpointRunner
 {
     public function __construct(

@@ -8,6 +8,9 @@ use Ecotone\Modelling\Attribute\EventSourcingHandler;
 use Ecotone\Modelling\Attribute\Identifier;
 
 #[EventSourcingAggregate]
+/**
+ * licence Apache-2.0
+ */
 class EventSourcingHandlerMethodWithWrongParameterCountExample
 {
     #[Identifier]

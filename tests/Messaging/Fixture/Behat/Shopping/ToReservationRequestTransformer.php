@@ -5,7 +5,10 @@ namespace Test\Ecotone\Messaging\Fixture\Behat\Shopping;
 /**
  * Class ToOrderRequestTransformer
  * @package Test\Ecotone\Messaging\Fixture\Behat\Shopping
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class ToReservationRequestTransformer
 {

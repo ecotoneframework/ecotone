@@ -11,6 +11,9 @@ use Ecotone\Modelling\Attribute\Version;
 use Ecotone\Modelling\WithAggregateEvents;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class Order implements VersionAggregate
 {
     use WithAggregateEvents;

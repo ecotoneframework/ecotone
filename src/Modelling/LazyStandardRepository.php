@@ -2,6 +2,9 @@
 
 namespace Ecotone\Modelling;
 
+/**
+ * licence Apache-2.0
+ */
 class LazyStandardRepository implements StandardRepository
 {
     private RepositoryStorage $repositoryStorage;

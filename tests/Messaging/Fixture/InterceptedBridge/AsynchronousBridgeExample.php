@@ -12,6 +12,9 @@ use Ecotone\Messaging\Attribute\ServiceContext;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
+/**
+ * licence Apache-2.0
+ */
 final class AsynchronousBridgeExample
 {
     public int $result = 2;

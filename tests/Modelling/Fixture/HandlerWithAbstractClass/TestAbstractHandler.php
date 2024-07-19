@@ -6,6 +6,9 @@ namespace Test\Ecotone\Modelling\Fixture\HandlerWithAbstractClass;
 
 use Ecotone\Modelling\Attribute\CommandHandler;
 
+/**
+ * licence Apache-2.0
+ */
 abstract class TestAbstractHandler
 {
     #[CommandHandler]

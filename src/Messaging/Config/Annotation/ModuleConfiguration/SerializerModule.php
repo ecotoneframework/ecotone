@@ -19,6 +19,9 @@ use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayload
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class SerializerModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public const MODULE_NAME = 'gatewaySerializerModule';

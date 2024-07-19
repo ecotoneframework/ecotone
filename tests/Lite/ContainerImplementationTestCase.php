@@ -15,6 +15,9 @@ use Test\Ecotone\Lite\Fixtures\AnInterfaceWithComplexAttribute;
 use Test\Ecotone\Lite\Fixtures\AroundCalculation;
 use Test\Ecotone\Lite\Fixtures\Sum;
 
+/**
+ * licence Apache-2.0
+ */
 abstract class ContainerImplementationTestCase extends TestCase
 {
     public function test_it_resolves_simple_definitions_and_references(): void
@@ -92,6 +95,9 @@ abstract class ContainerImplementationTestCase extends TestCase
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ */
 class WithNoDependencies
 {
     public mixed $methodCalls = [];
@@ -104,6 +110,9 @@ class WithNoDependencies
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ */
 class WithAStringDependency
 {
     public function __construct(public string $name)
@@ -113,6 +122,9 @@ class WithAStringDependency
 
 /**
  * @internal
+ */
+/**
+ * licence Apache-2.0
  */
 class WithAReferenceDependency
 {
@@ -126,6 +138,9 @@ class WithAReferenceDependency
     }
 }
 
+/**
+ * licence Apache-2.0
+ */
 class ADefinedObject implements DefinedObject
 {
     public function __construct(public string $name, public ?ADefinedObject $anOtherDefinedObject)

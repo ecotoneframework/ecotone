@@ -7,6 +7,9 @@ use Ecotone\Messaging\Attribute\Parameter\Headers;
 use Ecotone\Messaging\Attribute\Parameter\Payload;
 use Ecotone\Messaging\Message;
 
+/**
+ * licence Apache-2.0
+ */
 interface MessagingEntrypoint
 {
     public const ENTRYPOINT = 'ecotone.messaging.entrypoint';

@@ -20,8 +20,12 @@ use Test\Ecotone\Messaging\Fixture\Behat\Calculating\PowerCalculation;
 /**
  * Class MethodInterceptorTest
  * @package Test\Ecotone\Messaging\Unit\Handler\Processor
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <support@simplycodedsoftware.com>
  *
+ * @internal
+ */
+/**
+ * licence Apache-2.0
  * @internal
  */
 class MethodInterceptorTest extends TestCase

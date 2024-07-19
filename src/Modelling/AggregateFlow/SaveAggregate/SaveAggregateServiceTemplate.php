@@ -14,6 +14,9 @@ use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\NoAggregateFoundToBeSaved;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
 
+/**
+ * licence Apache-2.0
+ */
 class SaveAggregateServiceTemplate
 {
     public static function resolveAggregate(

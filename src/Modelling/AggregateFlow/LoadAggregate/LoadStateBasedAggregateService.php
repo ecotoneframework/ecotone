@@ -17,6 +17,9 @@ use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\LoadAggregateService;
 use Ecotone\Modelling\StandardRepository;
 
+/**
+ * licence Apache-2.0
+ */
 final class LoadStateBasedAggregateService implements LoadAggregateService
 {
     public function __construct(

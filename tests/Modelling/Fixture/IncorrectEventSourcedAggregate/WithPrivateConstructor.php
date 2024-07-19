@@ -9,6 +9,9 @@ use Ecotone\Modelling\Attribute\Identifier;
 use stdClass;
 
 #[EventSourcingAggregate]
+/**
+ * licence Apache-2.0
+ */
 class WithPrivateConstructor
 {
     #[Identifier]

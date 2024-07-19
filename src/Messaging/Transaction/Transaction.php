@@ -5,7 +5,10 @@ namespace Ecotone\Messaging\Transaction;
 /**
  * Interface Transaction
  * @package Ecotone\Messaging\Transaction
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 interface Transaction
 {

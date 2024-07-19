@@ -8,6 +8,9 @@ use Ecotone\Messaging\Channel\DynamicChannel\ChannelReceivingStrategy;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Support\Assert;
 
+/**
+ * licence Enterprise
+ */
 final class CustomReceivingStrategy implements ChannelReceivingStrategy
 {
     public function __construct(

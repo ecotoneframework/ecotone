@@ -17,6 +17,9 @@ use Ecotone\Modelling\Attribute\AggregateEvents;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\ResolveAggregateEventsService;
 
+/**
+ * licence Apache-2.0
+ */
 final class ResolveAggregateEventsServiceBuilder extends InputOutputMessageHandlerBuilder
 {
     private InterfaceToCall $interfaceToCall;

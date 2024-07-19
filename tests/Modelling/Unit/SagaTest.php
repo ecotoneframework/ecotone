@@ -14,6 +14,10 @@ use Test\Ecotone\Modelling\Fixture\SagaWithMultipleActions\SagaWithMultipleEvent
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 final class SagaTest extends TestCase
 {
     public function test_throwing_exception_if_registering_multiple_actions_with_factory_method(): void

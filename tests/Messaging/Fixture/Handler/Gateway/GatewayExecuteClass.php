@@ -4,6 +4,9 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\Gateway;
 
 use Ecotone\Messaging\Handler\NonProxyGateway;
 
+/**
+ * licence Apache-2.0
+ */
 class GatewayExecuteClass implements NonProxyGateway
 {
     private $returnData;

@@ -10,7 +10,10 @@ use InvalidArgumentException;
 /**
  * Class ExampleMediaTypeConverter
  * @package Test\Ecotone\Messaging\Fixture\Annotation\Converter
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class ExceptionalConverter implements Converter
 {

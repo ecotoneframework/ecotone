@@ -15,6 +15,10 @@ use stdClass;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 final class EventTest extends TestCase
 {
     public function test_constructor_wont_overwrite_already_set_metadata(): void

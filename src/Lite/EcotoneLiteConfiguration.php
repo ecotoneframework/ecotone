@@ -18,6 +18,9 @@ use Psr\Container\ContainerInterface;
  * Symfony
  * Laravel
  */
+/**
+ * licence Apache-2.0
+ */
 class EcotoneLiteConfiguration
 {
     /**

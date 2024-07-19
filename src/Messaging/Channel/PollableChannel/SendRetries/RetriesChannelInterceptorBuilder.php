@@ -13,6 +13,9 @@ use Ecotone\Messaging\Handler\Recoverability\RetryTemplate;
 use Ecotone\Messaging\PrecedenceChannelInterceptor;
 use Psr\Log\LoggerInterface;
 
+/**
+ * licence Apache-2.0
+ */
 final class RetriesChannelInterceptorBuilder implements ChannelInterceptorBuilder
 {
     public function __construct(

@@ -6,6 +6,9 @@ use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
+/**
+ * licence Apache-2.0
+ */
 class NotificationService
 {
     private ?object $lastLog = null;

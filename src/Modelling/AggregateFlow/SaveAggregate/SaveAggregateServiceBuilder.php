@@ -31,7 +31,10 @@ use Ecotone\Modelling\SaveAggregateService;
 /**
  * Class AggregateCallingCommandHandlerBuilder
  * @package Ecotone\Modelling
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters
 {

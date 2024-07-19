@@ -7,7 +7,10 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 /**
  * Class BaseInterceptorExample
  * @package Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 abstract class BaseInterceptorExample
 {

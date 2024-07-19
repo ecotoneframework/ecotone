@@ -9,8 +9,11 @@ use Ecotone\Messaging\Message;
 /**
  * Class LoadAggregateService
  * @package Ecotone\Modelling
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <support@simplycodedsoftware.com>
  * @internal
+ */
+/**
+ * licence Apache-2.0
  */
 interface LoadAggregateService
 {

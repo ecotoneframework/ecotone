@@ -25,6 +25,9 @@ use Psr\Container\ContainerInterface;
 /**
  * @TODO wrap with nice exceptions on not found
  */
+/**
+ * licence Apache-2.0
+ */
 class MessagingSystemContainer implements ConfiguredMessagingSystem
 {
     /**

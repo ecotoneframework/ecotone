@@ -9,6 +9,9 @@ use Ecotone\Messaging\Handler\Logger\Logger;
 use Ecotone\Messaging\Handler\Logger\LoggingLevel;
 
 #[Attribute(Attribute::TARGET_METHOD)]
+/**
+ * licence Apache-2.0
+ */
 class LogError extends Logger
 {
     public string $logLevel = LoggingLevel::CRITICAL;

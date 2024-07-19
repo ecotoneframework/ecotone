@@ -6,6 +6,9 @@ namespace Ecotone\Lite\Test\Configuration;
 
 use Ecotone\Messaging\Message;
 
+/**
+ * licence Apache-2.0
+ */
 final class MessageCollectorHandler
 {
     /** @var Message[] */

@@ -11,6 +11,9 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Modelling\SaveAggregateService;
 use Ecotone\Modelling\StandardRepository;
 
+/**
+ * licence Apache-2.0
+ */
 final class SaveStateBasedAggregateService implements SaveAggregateService
 {
     public function __construct(

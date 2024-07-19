@@ -8,7 +8,10 @@ use Ecotone\Messaging\Config\Container\Definition;
 /**
  * Class NullableMessageChannel
  * @package Ecotone\Messaging
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 final class NullableMessageChannel implements SubscribableChannel, PollableChannel, DefinedObject
 {

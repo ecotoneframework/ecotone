@@ -10,6 +10,9 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use InvalidArgumentException;
 
+/**
+ * licence Apache-2.0
+ */
 class MessagingContainerBuilder
 {
     private InterfaceToCallRegistry $interfaceToCallRegistry;

@@ -4,6 +4,9 @@ namespace Ecotone\Messaging\Config\Container;
 
 use Ecotone\Messaging\Handler\InterfaceToCall;
 
+/**
+ * licence Apache-2.0
+ */
 class BoundParameterConverter implements CompilableBuilder
 {
     public function __construct(

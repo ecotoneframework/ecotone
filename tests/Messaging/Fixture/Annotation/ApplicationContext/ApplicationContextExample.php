@@ -13,6 +13,9 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class ApplicationContextExample
 {
     public const HTTP_INPUT_CHANNEL  = 'httpEntry';

@@ -4,6 +4,9 @@ namespace Ecotone\Messaging;
 
 use InvalidArgumentException;
 
+/**
+ * licence Apache-2.0
+ */
 class InMemoryConfigurationVariableService implements ConfigurationVariableService
 {
     private array $variables;

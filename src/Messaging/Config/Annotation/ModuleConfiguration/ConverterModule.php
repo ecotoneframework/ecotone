@@ -19,6 +19,9 @@ use Ecotone\Messaging\Conversion\ReferenceServiceConverterBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class ConverterModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**

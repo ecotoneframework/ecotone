@@ -10,6 +10,9 @@ use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\WithAggregateVersioning;
 
 #[EventSourcingAggregate]
+/**
+ * licence Apache-2.0
+ */
 class Twitter
 {
     use WithAggregateVersioning;

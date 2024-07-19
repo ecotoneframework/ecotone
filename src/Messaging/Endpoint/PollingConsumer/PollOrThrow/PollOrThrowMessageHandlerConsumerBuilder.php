@@ -16,7 +16,10 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 /**
  * Class PollOrThrowPollableFactory
  * @package Ecotone\Messaging\Endpoint
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class PollOrThrowMessageHandlerConsumerBuilder implements MessageHandlerConsumerBuilder
 {

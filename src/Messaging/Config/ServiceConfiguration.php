@@ -9,6 +9,9 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Messaging\Support\Assert;
 
+/**
+ * licence Apache-2.0
+ */
 class ServiceConfiguration
 {
     public const DEFAULT_SERVICE_NAME = 'ecotoneService';

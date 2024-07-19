@@ -5,6 +5,9 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 use Ecotone\Messaging\Attribute\Interceptor\Around;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class CallWithStdClassInterceptorExample extends BaseInterceptorExample
 {
     private $calledHeaders;

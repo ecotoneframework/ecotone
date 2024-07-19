@@ -2,6 +2,9 @@
 
 namespace Ecotone\Modelling;
 
+/**
+ * licence Apache-2.0
+ */
 interface DistributionEntrypoint
 {
     public const DISTRIBUTED_CHANNEL              = 'ecotone.distributed.invoke';

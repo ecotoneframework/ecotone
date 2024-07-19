@@ -9,6 +9,9 @@ use Ecotone\Messaging\Attribute\Parameter\Header;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ramsey\Uuid\UuidInterface;
 
+/**
+ * licence Apache-2.0
+ */
 final class ConvertedHeaderEndpoint
 {
     private mixed $result;

@@ -8,7 +8,10 @@ use Ramsey\Uuid\UuidInterface;
 /**
  * Interface PollableMessageGroupStore
  * @package Ecotone\Messaging\Store
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 interface MessageGroupStore
 {

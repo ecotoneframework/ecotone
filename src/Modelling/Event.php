@@ -4,6 +4,9 @@ namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Support\Assert;
 
+/**
+ * licence Apache-2.0
+ */
 class Event
 {
     private string $eventType;

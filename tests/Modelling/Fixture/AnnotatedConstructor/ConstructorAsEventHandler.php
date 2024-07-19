@@ -9,6 +9,9 @@ use Ecotone\Modelling\Attribute\EventHandler;
 use stdClass;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 final class ConstructorAsEventHandler
 {
     #[EventHandler(endpointId: 'commandHandler')]

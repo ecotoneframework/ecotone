@@ -13,8 +13,11 @@ use Ecotone\Messaging\Message;
 /**
  * Class ExpressionHeaderSetter
  * @package Ecotone\Messaging\Handler\Enricher\Converter
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <support@simplycodedsoftware.com>
  * @internal
+ */
+/**
+ * licence Apache-2.0
  */
 class EnrichHeaderWithExpressionPropertyEditor implements PropertyEditor
 {

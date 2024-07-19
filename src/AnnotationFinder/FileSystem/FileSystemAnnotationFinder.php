@@ -18,7 +18,10 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 /**
  * Class FileSystemAnnotationRegistrationService
  * @package Ecotone\Messaging\Config\Annotation
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class FileSystemAnnotationFinder implements AnnotationFinder
 {

@@ -29,6 +29,9 @@ use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 final class ConsoleCommandModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public const ECOTONE_COMMAND_PARAMETER_PREFIX = 'ecotone.oneTimeCommand.';

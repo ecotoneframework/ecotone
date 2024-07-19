@@ -10,6 +10,9 @@ use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\EventBus;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class AroundInterceptorExample
 {
     #[Around]

@@ -18,6 +18,9 @@ use Ecotone\Modelling\EventSourcedRepository;
 use Ecotone\Modelling\EventSourcingHandlerExecutor;
 use Ecotone\Modelling\LoadAggregateService;
 
+/**
+ * licence Apache-2.0
+ */
 final class LoadEventSourcingAggregateService implements LoadAggregateService
 {
     public function __construct(

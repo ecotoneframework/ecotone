@@ -7,6 +7,9 @@ use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 
+/**
+ * licence Apache-2.0
+ */
 class PollingMetadataConverter implements ParameterConverter
 {
     public function getArgumentFrom(Message $message): ?PollingMetadata

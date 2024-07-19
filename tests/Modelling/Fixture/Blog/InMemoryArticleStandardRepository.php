@@ -8,7 +8,10 @@ use Ecotone\Modelling\StandardRepository;
 /**
  * Class InMemoryArticleRepository
  * @package Test\Ecotone\Modelling\Fixture\Blog
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class InMemoryArticleStandardRepository implements StandardRepository
 {

@@ -11,6 +11,9 @@ use InvalidArgumentException;
 
 #[Asynchronous(MessagingConfiguration::ASYNCHRONOUS_CHANNEL)]
 #[Saga]
+/**
+ * licence Apache-2.0
+ */
 class Bookkeeping
 {
     public const GET_BOOKING_STATUS = 'getBookingStatus';

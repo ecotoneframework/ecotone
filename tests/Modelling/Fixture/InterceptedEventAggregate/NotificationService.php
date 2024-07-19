@@ -7,6 +7,9 @@ use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
 
+/**
+ * licence Apache-2.0
+ */
 class NotificationService
 {
     private ?object $lastLog = null;

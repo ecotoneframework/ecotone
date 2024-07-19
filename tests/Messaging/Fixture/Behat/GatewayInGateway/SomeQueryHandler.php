@@ -7,6 +7,9 @@ namespace Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\QueryBus;
 
+/**
+ * licence Apache-2.0
+ */
 class SomeQueryHandler
 {
     public const SUM = 'sum';

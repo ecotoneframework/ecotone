@@ -26,6 +26,9 @@ use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class GatewayModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public const MODULE_NAME = 'gatewayModule';

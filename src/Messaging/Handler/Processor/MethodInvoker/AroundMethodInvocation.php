@@ -14,7 +14,10 @@ use Ecotone\Messaging\Message;
  *
  * Class MethodInvokerProcessor
  * @package Ecotone\Messaging\Handler\Processor\MethodInvoker
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class AroundMethodInvocation implements MethodInvocation
 {

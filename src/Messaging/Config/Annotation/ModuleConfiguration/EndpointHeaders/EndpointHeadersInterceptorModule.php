@@ -17,6 +17,9 @@ use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Precedence;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class EndpointHeadersInterceptorModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**

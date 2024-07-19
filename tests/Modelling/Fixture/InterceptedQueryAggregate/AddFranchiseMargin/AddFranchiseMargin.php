@@ -4,6 +4,9 @@ namespace Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseM
 
 use Ecotone\Messaging\Attribute\Interceptor\After;
 
+/**
+ * licence Apache-2.0
+ */
 class AddFranchiseMargin
 {
     #[After(pointcut: AddFranchise::class)]

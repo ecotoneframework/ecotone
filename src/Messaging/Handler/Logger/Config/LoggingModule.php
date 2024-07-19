@@ -28,6 +28,9 @@ use Ecotone\Messaging\Precedence;
 use Psr\Log\LoggerInterface;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class LoggingModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**

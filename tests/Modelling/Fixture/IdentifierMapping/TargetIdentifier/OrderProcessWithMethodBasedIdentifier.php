@@ -10,6 +10,9 @@ use Ecotone\Modelling\Attribute\IdentifierMethod;
 use Ecotone\Modelling\Attribute\Saga;
 
 #[Saga]
+/**
+ * licence Apache-2.0
+ */
 final class OrderProcessWithMethodBasedIdentifier
 {
     private string $id;

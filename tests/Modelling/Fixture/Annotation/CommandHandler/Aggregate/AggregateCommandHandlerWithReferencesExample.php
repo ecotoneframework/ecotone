@@ -8,6 +8,9 @@ use Ecotone\Modelling\Attribute\Identifier;
 use stdClass;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class AggregateCommandHandlerWithReferencesExample
 {
     #[Identifier]

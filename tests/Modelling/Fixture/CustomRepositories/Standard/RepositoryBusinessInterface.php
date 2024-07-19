@@ -6,6 +6,9 @@ namespace Test\Ecotone\Modelling\Fixture\CustomRepositories\Standard;
 
 use Ecotone\Modelling\Attribute\Repository;
 
+/**
+ * licence Apache-2.0
+ */
 interface RepositoryBusinessInterface
 {
     #[Repository]

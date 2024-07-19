@@ -9,6 +9,9 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ramsey\Uuid\Uuid;
 
+/**
+ * licence Apache-2.0
+ */
 class StringToUuidClassConverter implements Converter
 {
     /**

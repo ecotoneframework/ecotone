@@ -11,7 +11,10 @@ use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 /**
  * Class UuidToStringConverterBuilder
  * @package Ecotone\Messaging\Conversion
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class UuidToStringConverterBuilder implements CompilableBuilder
 {

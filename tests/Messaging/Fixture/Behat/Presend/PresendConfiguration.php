@@ -7,6 +7,9 @@ use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 
+/**
+ * licence Apache-2.0
+ */
 class PresendConfiguration
 {
     #[ServiceContext]

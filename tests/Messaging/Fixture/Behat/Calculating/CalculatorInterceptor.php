@@ -7,6 +7,9 @@ use Ecotone\Messaging\Attribute\Interceptor\Around;
 use Ecotone\Messaging\Attribute\Interceptor\Before;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
+/**
+ * licence Apache-2.0
+ */
 class CalculatorInterceptor
 {
     #[Before(pointcut: BeforeMultiplyCalculation::class)]

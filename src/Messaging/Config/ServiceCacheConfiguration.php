@@ -12,6 +12,9 @@ use Ecotone\Messaging\Config\Container\Definition;
  * So cache directory have to be split from dumped configuration.
  * This class can be resolved from DI and promotes design to resolve the cache path during execution phase.
  */
+/**
+ * licence Apache-2.0
+ */
 final class ServiceCacheConfiguration implements DefinedObject
 {
     public const REFERENCE_NAME = self::class;

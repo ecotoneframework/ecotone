@@ -6,6 +6,9 @@ use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\IgnorePayload;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class AggregateCommandHandlerWithInputChannelNameAndIgnoreMessage
 {
     #[CommandHandler('execute', 'commandHandler')]

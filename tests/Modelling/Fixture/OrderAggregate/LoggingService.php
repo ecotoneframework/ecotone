@@ -8,6 +8,9 @@ use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
+/**
+ * licence Apache-2.0
+ */
 class LoggingService
 {
     private $logging = [];

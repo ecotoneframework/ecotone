@@ -7,6 +7,9 @@ use Ecotone\Messaging\Attribute\InputOutputEndpointAnnotation;
 use InvalidArgumentException;
 
 #[Attribute(Attribute::TARGET_METHOD | Attribute::IS_REPEATABLE)]
+/**
+ * licence Apache-2.0
+ */
 class CommandHandler extends InputOutputEndpointAnnotation
 {
     /**

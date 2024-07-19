@@ -7,6 +7,9 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeComma
 use Ecotone\Messaging\Attribute\Converter;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 final class StdClassConverter
 {
     #[Converter]

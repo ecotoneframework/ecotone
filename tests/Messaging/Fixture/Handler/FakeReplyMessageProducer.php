@@ -9,7 +9,10 @@ use Ecotone\Messaging\Message;
 /**
  * Class ReplyMessageProducer
  * @package Test\Ecotone\Messaging\Fixture\Handler
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class FakeReplyMessageProducer implements \Ecotone\Messaging\Handler\MessageProcessor
 {

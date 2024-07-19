@@ -5,7 +5,10 @@ namespace Ecotone\Messaging\Support;
 /**
  * Class Assert
  * @package Ecotone\Messaging\Support
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class Assert
 {

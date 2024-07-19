@@ -34,8 +34,12 @@ use Test\Ecotone\Modelling\Fixture\Retry\RetriedCommandHandler;
 /**
  * Class ConverterModuleTest
  * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
  *
+ * @internal
+ */
+/**
+ * licence Apache-2.0
  * @internal
  */
 class AsynchronousModuleTest extends AnnotationConfigurationTest

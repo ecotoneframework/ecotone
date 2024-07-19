@@ -8,6 +8,9 @@ use Ecotone\Messaging\Attribute\Parameter\ConfigurationVariable;
 use Ecotone\Messaging\Attribute\ServiceContext;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class ExampleModuleExtensionWithVariableConfiguration
 {
     #[ServiceContext]

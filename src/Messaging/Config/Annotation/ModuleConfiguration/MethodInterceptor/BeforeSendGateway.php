@@ -6,6 +6,9 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodIntercep
 
 use Ecotone\Messaging\Message;
 
+/**
+ * licence Apache-2.0
+ */
 interface BeforeSendGateway
 {
     public function execute(Message $message): ?Message;

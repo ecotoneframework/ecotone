@@ -7,7 +7,10 @@ use Ecotone\Messaging\MessagingException;
 /**
  * Class ReferenceNotFoundException
  * @package Ecotone\Messaging\Handler
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class ReferenceNotFoundException extends MessagingException
 {

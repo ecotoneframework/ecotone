@@ -66,6 +66,9 @@ use ReflectionMethod;
 use ReflectionParameter;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class ModellingHandlerModule implements AnnotationModule
 {
     private ParameterConverterAnnotationFactory $parameterConverterAnnotationFactory;

@@ -14,6 +14,9 @@ use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\EventBus;
 use RuntimeException;
 
+/**
+ * licence Apache-2.0
+ */
 final class BetService
 {
     private array $betHeaders = [];

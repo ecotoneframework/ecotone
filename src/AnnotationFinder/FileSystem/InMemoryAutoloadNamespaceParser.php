@@ -2,6 +2,9 @@
 
 namespace Ecotone\AnnotationFinder\FileSystem;
 
+/**
+ * licence Apache-2.0
+ */
 class InMemoryAutoloadNamespaceParser implements AutoloadNamespaceParser
 {
     /**

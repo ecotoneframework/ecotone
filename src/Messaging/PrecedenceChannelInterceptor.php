@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging;
 
+/**
+ * licence Apache-2.0
+ */
 interface PrecedenceChannelInterceptor
 {
     public const DEFAULT_PRECEDENCE = 0;

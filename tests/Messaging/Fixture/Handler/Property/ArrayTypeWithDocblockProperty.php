@@ -4,6 +4,9 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\Property;
 
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class ArrayTypeWithDocblockProperty
 {
     /**

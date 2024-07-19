@@ -10,6 +10,9 @@ use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Ecotone\Modelling\InMemoryStandardRepository;
 use Ecotone\Modelling\RepositoryBuilder;
 
+/**
+ * licence Apache-2.0
+ */
 final class InMemoryRepositoryBuilder implements RepositoryBuilder
 {
     public function __construct(private ?array $aggregateClassNames, private bool $isEventSourced)

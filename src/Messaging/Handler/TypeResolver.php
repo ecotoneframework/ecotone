@@ -25,8 +25,11 @@ use ReflectionUnionType;
 /**
  * Class TypeResolver
  * @package Ecotone\Messaging\Handler
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
  * @internal
+ */
+/**
+ * licence Apache-2.0
  */
 class TypeResolver
 {
@@ -81,7 +84,11 @@ class TypeResolver
                 try {
                     $parameterAttributes[] = $attribute->newInstance();
                 } catch (Error $e) {
-                    // ignore errors (e.g. when attribute target property and we are retrieving constructor parameters)
+                    if (\preg_match('/Attribute "(.*)" cannot target parameter/', $e->getMessage())) {
+                        // Do nothing: it is an attribute targeting a property promoted from a parameter
+                    } else {
+                        throw $e;
+                    }
                 }
             }
 

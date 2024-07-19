@@ -10,6 +10,9 @@ use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 
+/**
+ * licence Apache-2.0
+ */
 final class MessageCollectorChannelInterceptor extends AbstractChannelInterceptor implements ChannelInterceptor
 {
     public function __construct(

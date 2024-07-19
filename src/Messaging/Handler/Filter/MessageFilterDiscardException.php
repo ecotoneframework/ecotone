@@ -7,7 +7,10 @@ use Ecotone\Messaging\MessagingException;
 /**
  * Class MessageFilterDiscardException
  * @package Ecotone\Messaging\Handler\Filter
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class MessageFilterDiscardException extends MessagingException
 {

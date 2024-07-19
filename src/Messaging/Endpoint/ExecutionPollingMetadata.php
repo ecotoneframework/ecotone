@@ -2,6 +2,9 @@
 
 namespace Ecotone\Messaging\Endpoint;
 
+/**
+ * licence Apache-2.0
+ */
 final class ExecutionPollingMetadata
 {
     private ?int $handledMessageLimit = null;

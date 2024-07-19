@@ -6,6 +6,9 @@ use Ecotone\Messaging\Attribute\Interceptor\Around;
 use Ecotone\Messaging\Attribute\Interceptor\Before;
 use Ecotone\Modelling\Attribute\CommandHandler;
 
+/**
+ * licence Apache-2.0
+ */
 class AddCurrentUserId
 {
     private ?string $userId = null;

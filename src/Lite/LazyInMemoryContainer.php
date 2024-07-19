@@ -12,6 +12,9 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use ReflectionMethod;
 
+/**
+ * licence Apache-2.0
+ */
 class LazyInMemoryContainer implements ContainerInterface
 {
     private array $resolvedObjects = [];

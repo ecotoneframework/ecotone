@@ -7,7 +7,7 @@ use Ecotone\Modelling\Attribute\AggregateEvents;
 /**
  * Class WithAggregateEvents
  * @package Ecotone\Modelling
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
  */
 trait WithEvents
 {

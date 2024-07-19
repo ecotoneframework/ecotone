@@ -9,6 +9,9 @@ use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\Extension;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\System;
 
 #[System]
+/**
+ * licence Apache-2.0
+ */
 class SystemContextWithMethodMultipleEnvironmentsExample
 {
     #[Extension]

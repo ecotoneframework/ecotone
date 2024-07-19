@@ -11,6 +11,10 @@ use stdClass;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 class AggregateIdResolverTest extends TestCase
 {
     public function test_resolving_scalar_type()

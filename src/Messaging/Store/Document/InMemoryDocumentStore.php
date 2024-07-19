@@ -6,6 +6,9 @@ use function json_decode;
 
 use JsonException;
 
+/**
+ * licence Apache-2.0
+ */
 final class InMemoryDocumentStore implements DocumentStore
 {
     /**

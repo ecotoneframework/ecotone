@@ -6,6 +6,9 @@ namespace Ecotone\Lite\Test;
 
 use Ecotone\Messaging\Message;
 
+/**
+ * licence Apache-2.0
+ */
 interface MessagingTestSupport
 {
     /**

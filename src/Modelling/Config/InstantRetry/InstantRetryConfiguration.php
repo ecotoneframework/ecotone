@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\Config\InstantRetry;
 
+/**
+ * licence Apache-2.0
+ */
 final class InstantRetryConfiguration
 {
     private function __construct(private bool $isEnabledForCommandBus, private int $commandBusRetryTimes, private array $commandBuExceptions, private bool $isEnabledForAsynchronousEndpoints, private int $asynchronousRetryTimes, private array $asynchronousExceptions)

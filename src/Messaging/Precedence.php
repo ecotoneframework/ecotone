@@ -7,6 +7,9 @@ namespace Ecotone\Messaging;
 /**
  * The lower value, the quicker interceptor will be run
  */
+/**
+ * licence Apache-2.0
+ */
 interface Precedence
 {
     /**

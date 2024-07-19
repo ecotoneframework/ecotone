@@ -17,6 +17,10 @@ use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\Attri
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 class AroundInterceptorReferenceTest extends TestCase
 {
     public function test_resolve_no_pointcut()

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\OrderAggregate;
 
+/**
+ * licence Apache-2.0
+ */
 class OrderWasNotified
 {
     /**

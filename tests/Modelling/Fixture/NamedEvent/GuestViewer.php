@@ -5,6 +5,9 @@ namespace Test\Ecotone\Modelling\Fixture\NamedEvent;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
+/**
+ * licence Apache-2.0
+ */
 class GuestViewer
 {
     public const BOOK_GET_GUESTS = 'book.getGuests';

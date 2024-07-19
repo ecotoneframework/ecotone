@@ -7,6 +7,9 @@ namespace Test\Ecotone\Modelling\Fixture\Renter;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
+/**
+ * licence Apache-2.0
+ */
 class RentCalendar
 {
     private $calendarEvents = [];

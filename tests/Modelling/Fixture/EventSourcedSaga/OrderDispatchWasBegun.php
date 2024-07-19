@@ -2,6 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\EventSourcedSaga;
 
+/**
+ * licence Apache-2.0
+ */
 class OrderDispatchWasBegun
 {
     public function __construct(private string $orderId)

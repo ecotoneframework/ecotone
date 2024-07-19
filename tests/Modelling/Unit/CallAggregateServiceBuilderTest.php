@@ -41,6 +41,10 @@ use Test\Ecotone\Modelling\Fixture\Ticket\WorkerWasAssignedEvent;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 class CallAggregateServiceBuilderTest extends TestCase
 {
     public function test_calling_existing_aggregate_method_with_command_class(): void

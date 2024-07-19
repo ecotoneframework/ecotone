@@ -11,6 +11,9 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 
+/**
+ * licence Apache-2.0
+ */
 final class CollectorSenderInterceptor
 {
     public function __construct(private CollectorStorage $collectorStorage, private string $targetChannel)

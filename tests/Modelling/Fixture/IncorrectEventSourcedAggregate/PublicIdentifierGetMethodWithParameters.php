@@ -9,6 +9,9 @@ use stdClass;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory\CreateNoIdDefinedAggregate;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class PublicIdentifierGetMethodWithParameters
 {
     private $internalId;

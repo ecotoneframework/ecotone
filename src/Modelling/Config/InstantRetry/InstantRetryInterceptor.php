@@ -11,6 +11,9 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Exception;
 
+/**
+ * licence Apache-2.0
+ */
 class InstantRetryInterceptor implements DefinedObject
 {
     public function __construct(private int $maxRetryAttempts, private array $exceptions = [])

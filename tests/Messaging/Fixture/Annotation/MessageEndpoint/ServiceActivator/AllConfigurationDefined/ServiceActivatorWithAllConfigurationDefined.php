@@ -10,6 +10,9 @@ use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\Message;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class ServiceActivatorWithAllConfigurationDefined
 {
     #[ServiceActivator(

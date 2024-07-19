@@ -4,6 +4,9 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\Gateway;
 
 use Ecotone\Messaging\Message;
 
+/**
+ * licence Apache-2.0
+ */
 interface MessageReturningGateway
 {
     public function execute(string $replyMediaType): Message;

@@ -6,6 +6,9 @@ use Attribute;
 use Ecotone\Messaging\Support\Assert;
 
 #[Attribute(Attribute::TARGET_CLASS)]
+/**
+ * licence Apache-2.0
+ */
 class ClassReference
 {
     private string $referenceName;

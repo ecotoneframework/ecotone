@@ -11,6 +11,9 @@ use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\AddFranchiseMargin\
 use Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ProductToPriceExchange\ExchangeProductForPrice;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class ShopCalculator
 {
     use WithAggregateEvents;

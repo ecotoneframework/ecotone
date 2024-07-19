@@ -34,6 +34,9 @@ use function json_decode;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
 
+/**
+ * licence Apache-2.0
+ */
 final class EcotoneLite
 {
     /**

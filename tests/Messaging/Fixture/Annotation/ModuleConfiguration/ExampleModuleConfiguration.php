@@ -14,6 +14,9 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use stdClass;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class ExampleModuleConfiguration implements AnnotationModule
 {
     /**

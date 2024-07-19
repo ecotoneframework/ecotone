@@ -2,6 +2,9 @@
 
 namespace Ecotone\Messaging\Store\Document;
 
+/**
+ * licence Apache-2.0
+ */
 final class DocumentStoreMessageChannel
 {
     public static function dropCollection(string $referenceName): string

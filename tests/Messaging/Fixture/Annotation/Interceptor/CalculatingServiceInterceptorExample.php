@@ -10,6 +10,9 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
 
 #[ClassReference('calculatingService')]
+/**
+ * licence Apache-2.0
+ */
 class CalculatingServiceInterceptorExample
 {
     /**

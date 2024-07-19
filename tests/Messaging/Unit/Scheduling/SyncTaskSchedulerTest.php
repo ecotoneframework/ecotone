@@ -14,8 +14,12 @@ use Test\Ecotone\Messaging\Fixture\Scheduling\StubTaskExecutor;
 /**
  * Class SyncTaskSchedulerTest
  * @package Test\Ecotone\Messaging\Unit\Scheduling
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
  *
+ * @internal
+ */
+/**
+ * licence Apache-2.0
  * @internal
  */
 class SyncTaskSchedulerTest extends TestCase

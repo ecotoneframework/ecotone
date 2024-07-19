@@ -8,6 +8,9 @@ use Ecotone\Messaging\Config\Container\GatewayProxyReference;
 use Ecotone\Messaging\Handler\Gateway\Gateway;
 use ProxyManager\Factory\RemoteObject\AdapterInterface;
 
+/**
+ * licence Apache-2.0
+ */
 class EcotoneRemoteAdapter implements AdapterInterface
 {
     public function __construct(private ConfiguredMessagingSystem $messagingSystem, private GatewayProxyReference $gatewayProxyReference)

@@ -8,6 +8,9 @@ use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
+/**
+ * licence Apache-2.0
+ */
 final class PollingMetadata implements DefinedObject
 {
     public const DEFAULT_MAX_MESSAGES_PER_POLL = 1;

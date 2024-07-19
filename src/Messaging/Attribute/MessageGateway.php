@@ -8,6 +8,9 @@ use Attribute;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 
 #[Attribute(Attribute::TARGET_METHOD)]
+/**
+ * licence Apache-2.0
+ */
 class MessageGateway
 {
     private string $requestChannel;

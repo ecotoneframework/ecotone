@@ -9,6 +9,9 @@ use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class SimplifiedAggregate
 {
     public function __construct(#[Identifier] private string $id, private bool $isEnabled = false)

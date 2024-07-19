@@ -4,6 +4,9 @@ namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
 
 use DateTimeImmutable;
 
+/**
+ * licence Apache-2.0
+ */
 class PassThroughService
 {
     private object $serviceToCall;

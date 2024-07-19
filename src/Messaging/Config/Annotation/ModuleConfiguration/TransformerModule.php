@@ -14,6 +14,9 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class TransformerModule extends MessageHandlerRegisterConfiguration
 {
     /**

@@ -6,6 +6,9 @@ namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Conversion\MediaType;
 
+/**
+ * licence Apache-2.0
+ */
 interface CommandBus
 {
     public function send(object $command, array $metadata = []): mixed;

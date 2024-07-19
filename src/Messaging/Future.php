@@ -5,7 +5,10 @@ namespace Ecotone\Messaging;
 /**
  * Class Future
  * @package Ecotone\Messaging\Handler\Gateway
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 interface Future
 {

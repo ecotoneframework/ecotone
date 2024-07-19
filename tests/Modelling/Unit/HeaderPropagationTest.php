@@ -18,6 +18,10 @@ use Test\Ecotone\Modelling\Fixture\MetadataPropagating\PropagatingOrderService;
  * @covers \Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 final class HeaderPropagationTest extends TestCase
 {
     public function test_will_provide_propagate_correlation_id_header()

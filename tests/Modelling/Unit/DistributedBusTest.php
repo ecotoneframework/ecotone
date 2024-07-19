@@ -15,6 +15,10 @@ use Test\Ecotone\Modelling\Fixture\DistributedCommandHandler\ShoppingCenter;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 final class DistributedBusTest extends TestCase
 {
     public function test_trying_distributed_bus_as_message()

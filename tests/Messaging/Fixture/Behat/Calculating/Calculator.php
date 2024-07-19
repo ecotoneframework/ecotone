@@ -6,6 +6,9 @@ namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 
 use Ecotone\Messaging\Attribute\MessageGateway;
 
+/**
+ * licence Apache-2.0
+ */
 interface Calculator
 {
     #[MessageGateway('calculateChannel')]

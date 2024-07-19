@@ -2,6 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder;
 
+/**
+ * licence Apache-2.0
+ */
 class FinishJob
 {
     private string $id;

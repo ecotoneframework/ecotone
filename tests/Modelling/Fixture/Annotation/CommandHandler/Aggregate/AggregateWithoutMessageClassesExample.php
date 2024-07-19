@@ -9,6 +9,9 @@ use Ecotone\Modelling\Attribute\QueryHandler;
 use stdClass;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class AggregateWithoutMessageClassesExample
 {
     #[Identifier]

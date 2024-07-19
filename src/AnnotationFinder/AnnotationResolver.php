@@ -2,6 +2,9 @@
 
 namespace Ecotone\AnnotationFinder;
 
+/**
+ * licence Apache-2.0
+ */
 interface AnnotationResolver
 {
     /**

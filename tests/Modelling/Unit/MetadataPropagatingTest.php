@@ -19,6 +19,10 @@ use Test\Ecotone\Modelling\Fixture\OrderAggregate\Order;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 final class MetadataPropagatingTest extends TestCase
 {
     public function test_propagating_headers_to_all_published_synchronous_event_handlers(): void

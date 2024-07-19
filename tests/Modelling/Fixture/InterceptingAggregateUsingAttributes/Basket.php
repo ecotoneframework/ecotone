@@ -9,6 +9,9 @@ use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class Basket
 {
     public const IS_REGISTRATION = 'isRegistration';

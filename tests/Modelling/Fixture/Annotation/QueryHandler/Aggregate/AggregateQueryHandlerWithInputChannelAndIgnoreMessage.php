@@ -8,6 +8,9 @@ use Ecotone\Modelling\Attribute\QueryHandler;
 use stdClass;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class AggregateQueryHandlerWithInputChannelAndIgnoreMessage
 {
     #[QueryHandler('execute', 'queryHandler')]

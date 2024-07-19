@@ -9,6 +9,9 @@ use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Test\Ecotone\Modelling\Fixture\Workflow\Saga\Command\TakePayment;
 
+/**
+ * licence Apache-2.0
+ */
 final class AsynchronousPaymentHandler
 {
     public function __construct(private bool $isPaymentTaken = false)

@@ -20,6 +20,9 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
+/**
+ * licence Apache-2.0
+ */
 class MethodArgumentsFactory
 {
     /**

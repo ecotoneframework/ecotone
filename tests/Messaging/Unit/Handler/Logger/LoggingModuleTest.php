@@ -16,6 +16,10 @@ use Test\Ecotone\Messaging\Fixture\Handler\FailureHandler\ExampleFailureCommandH
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 final class LoggingModuleTest extends TestCase
 {
     public const CHANNEL_NAME = 'async';

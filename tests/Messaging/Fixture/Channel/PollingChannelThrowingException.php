@@ -5,6 +5,9 @@ namespace Test\Ecotone\Messaging\Fixture\Channel;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Message;
 
+/**
+ * licence Apache-2.0
+ */
 class PollingChannelThrowingException extends QueueChannel
 {
     private mixed $exception;

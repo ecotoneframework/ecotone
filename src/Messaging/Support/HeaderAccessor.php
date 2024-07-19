@@ -11,8 +11,11 @@ use Ecotone\Messaging\MessagingException;
 /**
  * Class HeaderAccessor
  * @package Ecotone\Messaging\Support
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
  * @internal class intent to be used with {@link Message}
+ */
+/**
+ * licence Apache-2.0
  */
 final class HeaderAccessor
 {

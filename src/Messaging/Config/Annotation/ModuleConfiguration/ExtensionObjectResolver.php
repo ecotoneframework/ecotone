@@ -4,6 +4,9 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\Messaging\Support\Assert;
 
+/**
+ * licence Apache-2.0
+ */
 final class ExtensionObjectResolver
 {
     private function __construct()

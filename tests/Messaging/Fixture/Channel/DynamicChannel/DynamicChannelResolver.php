@@ -9,6 +9,9 @@ use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\NullableMessageChannel;
 use InvalidArgumentException;
 
+/**
+ * licence Apache-2.0
+ */
 final class DynamicChannelResolver
 {
     /**

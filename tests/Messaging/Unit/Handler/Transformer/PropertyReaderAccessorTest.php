@@ -12,8 +12,12 @@ use Test\Ecotone\Messaging\Fixture\Dto\OrderExample;
 /**
  * Class PropertyEditorAccessorTest
  * @package Test\Ecotone\Messaging\Unit\Handler\Transformer
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
  *
+ * @internal
+ */
+/**
+ * licence Apache-2.0
  * @internal
  */
 class PropertyReaderAccessorTest extends TestCase

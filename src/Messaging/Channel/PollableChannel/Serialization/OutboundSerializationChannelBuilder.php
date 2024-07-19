@@ -13,6 +13,9 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\PrecedenceChannelInterceptor;
 
+/**
+ * licence Apache-2.0
+ */
 final class OutboundSerializationChannelBuilder implements ChannelInterceptorBuilder
 {
     public function __construct(

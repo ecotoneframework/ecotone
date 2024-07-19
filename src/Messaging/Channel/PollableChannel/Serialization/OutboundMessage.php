@@ -4,6 +4,9 @@ namespace Ecotone\Messaging\Channel\PollableChannel\Serialization;
 
 use Ecotone\Messaging\Scheduling\TimeSpan;
 
+/**
+ * licence Apache-2.0
+ */
 class OutboundMessage
 {
     /** @var mixed */

@@ -8,6 +8,9 @@ use Attribute;
 use Ramsey\Uuid\Uuid;
 
 #[Attribute()]
+/**
+ * licence Apache-2.0
+ */
 class IdentifiedAnnotation
 {
     private string $endpointId = '';

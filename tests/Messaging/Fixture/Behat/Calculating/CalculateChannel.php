@@ -6,6 +6,9 @@ use Ecotone\Messaging\Attribute\ServiceContext;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Conversion\MediaType;
 
+/**
+ * licence Apache-2.0
+ */
 class CalculateChannel
 {
     #[ServiceContext]

@@ -19,6 +19,9 @@ use Ecotone\Modelling\Event;
 use Ecotone\Modelling\EventBus;
 use Ramsey\Uuid\Uuid;
 
+/**
+ * licence Apache-2.0
+ */
 final class PublishAggregateEventsService
 {
     public function __construct(private string $calledInterface, private EventBus $eventBus)

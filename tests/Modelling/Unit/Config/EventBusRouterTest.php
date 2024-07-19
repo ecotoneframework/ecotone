@@ -16,8 +16,12 @@ use Test\Ecotone\Messaging\Fixture\Conversion\SuperAdmin;
 /**
  * Class EventBusRouterTest
  * @package Test\Ecotone\Modelling\Unit\Config
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <support@simplycodedsoftware.com>
  *
+ * @internal
+ */
+/**
+ * licence Apache-2.0
  * @internal
  */
 class EventBusRouterTest extends TestCase

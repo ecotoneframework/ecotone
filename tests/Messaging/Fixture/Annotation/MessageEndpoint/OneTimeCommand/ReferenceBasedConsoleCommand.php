@@ -7,6 +7,9 @@ use Ecotone\Messaging\Attribute\ConsoleCommand;
 use stdClass;
 
 #[ClassReference('consoleCommand')]
+/**
+ * licence Apache-2.0
+ */
 class ReferenceBasedConsoleCommand
 {
     public function __construct(stdClass $class)

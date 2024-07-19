@@ -13,6 +13,9 @@ use InvalidArgumentException;
 use Test\Ecotone\Modelling\Fixture\Order\OrderWasPlaced;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 
+/**
+ * licence Apache-2.0
+ */
 final class FailureOrderService
 {
     /**

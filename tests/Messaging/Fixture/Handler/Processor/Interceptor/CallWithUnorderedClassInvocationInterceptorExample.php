@@ -8,6 +8,9 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use stdClass;
 
 #[ClassReference('callWithUnordered')]
+/**
+ * licence Apache-2.0
+ */
 class CallWithUnorderedClassInvocationInterceptorExample extends BaseInterceptorExample
 {
     #[Around]

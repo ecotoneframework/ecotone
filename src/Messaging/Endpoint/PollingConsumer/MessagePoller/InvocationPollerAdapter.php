@@ -6,6 +6,9 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagePoller;
 use Ecotone\Messaging\Support\MessageBuilder;
 
+/**
+ * licence Apache-2.0
+ */
 class InvocationPollerAdapter implements MessagePoller
 {
     public function __construct(private object $serviceToCall, private string $methodName)

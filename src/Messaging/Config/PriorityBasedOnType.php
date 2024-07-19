@@ -13,6 +13,9 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\Aggregate;
 
+/**
+ * licence Apache-2.0
+ */
 final class PriorityBasedOnType
 {
     public const STANDARD_TYPE = 'standard';

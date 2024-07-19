@@ -6,6 +6,9 @@ namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\MessagingException;
 
+/**
+ * licence Apache-2.0
+ */
 final class NoAggregateFoundToBeSaved extends MessagingException
 {
     public const ERROR_CODE = 1003;

@@ -2,6 +2,9 @@
 
 namespace Ecotone\Messaging\Config\Container;
 
+/**
+ * licence Apache-2.0
+ */
 class ConfigurationVariableReference extends Reference
 {
     public function __construct(private string $variableName, private bool $isRequired = true, private mixed $defaultValue = null)

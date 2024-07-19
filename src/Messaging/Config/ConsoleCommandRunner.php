@@ -6,6 +6,9 @@ use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
+/**
+ * licence Apache-2.0
+ */
 class ConsoleCommandRunner
 {
     public function __construct(private MessagingEntrypointWithHeadersPropagation $entrypoint, private ConsoleCommandConfiguration $commandConfiguration)

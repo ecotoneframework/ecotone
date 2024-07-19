@@ -21,6 +21,10 @@ use Throwable;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 class ErrorHandlerTest extends TestCase
 {
     public function test_retrying_message_according_to_retry_template()

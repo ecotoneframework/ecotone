@@ -5,6 +5,9 @@ namespace Ecotone\Messaging\Attribute\Parameter;
 use Attribute;
 
 #[Attribute]
+/**
+ * licence Apache-2.0
+ */
 class ConfigurationVariable
 {
     private string $name;

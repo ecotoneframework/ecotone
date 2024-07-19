@@ -8,6 +8,9 @@ use Ecotone\Messaging\Channel\DynamicChannel\ChannelSendingStrategy;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
+/**
+ * licence Enterprise
+ */
 final class HeaderSendingStrategy implements ChannelSendingStrategy
 {
     public function __construct(

@@ -8,6 +8,9 @@ use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Support\Assert;
 
+/**
+ * licence Apache-2.0
+ */
 final class RetryTemplateBuilder implements DefinedObject
 {
     /**

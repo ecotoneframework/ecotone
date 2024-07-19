@@ -31,8 +31,12 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
 /**
  * Class InboundChannelAdapterBuilderTest
  * @package Test\Ecotone\Messaging\Unit\Endpoint
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
  *
+ * @internal
+ */
+/**
+ * licence Apache-2.0
  * @internal
  */
 class InboundChannelAdapterBuilderTest extends MessagingTest

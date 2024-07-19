@@ -7,6 +7,9 @@ namespace Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\AbstractClass;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeHandlerAnnotation;
 use Test\Ecotone\Modelling\Fixture\HandlerWithAbstractClass\TestCommand;
 
+/**
+ * licence Apache-2.0
+ */
 abstract class TestAbstractHandler
 {
     #[SomeHandlerAnnotation]

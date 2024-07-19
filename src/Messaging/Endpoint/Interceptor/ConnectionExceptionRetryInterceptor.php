@@ -10,6 +10,9 @@ use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
+/**
+ * licence Apache-2.0
+ */
 class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
 {
     private int $currentNumberOfRetries = 0;

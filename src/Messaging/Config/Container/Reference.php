@@ -4,6 +4,9 @@ namespace Ecotone\Messaging\Config\Container;
 
 use Ecotone\Messaging\Config\Container\Compiler\ContainerImplementation;
 
+/**
+ * licence Apache-2.0
+ */
 class Reference
 {
     public function __construct(protected string $id, protected int $invalidBehavior = ContainerImplementation::EXCEPTION_ON_INVALID_REFERENCE)

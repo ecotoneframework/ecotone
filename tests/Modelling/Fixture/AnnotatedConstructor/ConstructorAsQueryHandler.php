@@ -8,6 +8,9 @@ use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 final class ConstructorAsQueryHandler
 {
     #[QueryHandler(routingKey: 'test')]

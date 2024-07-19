@@ -12,6 +12,9 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\PrecedenceChannelInterceptor;
 
+/**
+ * licence Apache-2.0
+ */
 final class CollectorChannelInterceptorBuilder implements ChannelInterceptorBuilder
 {
     public function __construct(private string $collectedChannel, private Reference $collectorStorageReference)

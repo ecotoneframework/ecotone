@@ -12,6 +12,9 @@ use Ecotone\AnnotationFinder\TypeResolver;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use ReflectionClass;
 
+/**
+ * licence Apache-2.0
+ */
 class InMemoryAnnotationFinder implements AnnotationFinder
 {
     private const CLASS_ANNOTATIONS = 'classAnnotations';

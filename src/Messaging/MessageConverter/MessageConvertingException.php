@@ -9,7 +9,10 @@ use Ecotone\Messaging\MessagingException;
 /**
  * Class MessageConvertingException
  * @package Ecotone\Messaging\MessageConverter
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class MessageConvertingException extends MessagingException
 {

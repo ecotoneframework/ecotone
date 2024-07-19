@@ -11,7 +11,10 @@ use Throwable;
 /**
  * Class LimitConsumedMessagesExtension
  * @package Ecotone\Messaging\Endpoint\Extension
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class TimeLimitInterceptor implements ConsumerInterceptor
 {

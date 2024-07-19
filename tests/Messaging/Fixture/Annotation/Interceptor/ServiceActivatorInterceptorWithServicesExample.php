@@ -6,6 +6,9 @@ use Ecotone\Messaging\Attribute\Interceptor\After;
 use Ecotone\Messaging\Attribute\Interceptor\Before;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class ServiceActivatorInterceptorWithServicesExample
 {
     #[Before(2)]

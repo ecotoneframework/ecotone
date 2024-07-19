@@ -6,6 +6,9 @@ namespace Test\Ecotone\Messaging\Fixture\Behat\Presend;
 
 use Ecotone\Messaging\Attribute\Interceptor\Presend;
 
+/**
+ * licence Apache-2.0
+ */
 class MultiplyCoins
 {
     #[Presend(pointcut: "Test\Ecotone\Messaging\Fixture\Behat\Presend\*")]

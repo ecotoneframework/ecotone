@@ -8,6 +8,9 @@ use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\MessageEndp
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeGatewayExample;
 
 #[MessageEndpoint]
+/**
+ * licence Apache-2.0
+ */
 interface GatewayWithReplyChannelExample
 {
     #[SomeGatewayExample]

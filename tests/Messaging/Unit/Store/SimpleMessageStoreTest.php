@@ -11,8 +11,12 @@ use Ramsey\Uuid\Uuid;
 /**
  * Class SimpleMessageStoreTest
  * @package Ecotone\Messaging\Store
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
  *
+ * @internal
+ */
+/**
+ * licence Apache-2.0
  * @internal
  */
 class SimpleMessageStoreTest extends TestCase

@@ -10,6 +10,9 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 use InvalidArgumentException;
 
+/**
+ * licence Apache-2.0
+ */
 class DataReturningService implements DefinedObject
 {
     private $data;

@@ -7,6 +7,9 @@ use Ecotone\Modelling\Attribute\CommandHandler;
 use stdClass;
 
 #[Asynchronous('asyncChannel')]
+/**
+ * licence Apache-2.0
+ */
 class AsyncCommandHandlerWithoutIdExample
 {
     #[Asynchronous('asyncChannel')]

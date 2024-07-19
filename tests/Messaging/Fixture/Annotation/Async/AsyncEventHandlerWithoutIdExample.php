@@ -7,6 +7,9 @@ use Ecotone\Modelling\Attribute\EventHandler;
 use stdClass;
 
 #[Asynchronous('asyncChannel')]
+/**
+ * licence Apache-2.0
+ */
 class AsyncEventHandlerWithoutIdExample
 {
     #[Asynchronous('asyncChannel')]

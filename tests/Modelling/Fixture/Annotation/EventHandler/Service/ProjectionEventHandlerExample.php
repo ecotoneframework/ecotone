@@ -7,6 +7,9 @@ use Ecotone\Modelling\Attribute\EventHandler;
 use stdClass;
 
 #[Projection('some', 'some')]
+/**
+ * licence Apache-2.0
+ */
 class ProjectionEventHandlerExample
 {
     #[EventHandler(endpointId: 'eventHandler')]

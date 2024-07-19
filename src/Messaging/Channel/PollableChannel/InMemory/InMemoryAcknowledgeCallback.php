@@ -10,6 +10,9 @@ use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\Assert;
 use RuntimeException;
 
+/**
+ * licence Apache-2.0
+ */
 final class InMemoryAcknowledgeCallback implements AcknowledgementCallback
 {
     public function __construct(

@@ -8,8 +8,12 @@ use PHPUnit\Framework\TestCase;
 /**
  * Class GetUsedPathsFromAutoloadTest
  * @package Test\Ecotone\AnnotationFinder\Unit\Unit\Config\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
  *
+ * @internal
+ */
+/**
+ * licence Apache-2.0
  * @internal
  */
 class AutoloadFileNamespaceParserTest extends TestCase

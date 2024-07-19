@@ -19,6 +19,9 @@ use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\CallAggregateService;
 
+/**
+ * licence Apache-2.0
+ */
 final class CallEventSourcingAggregateService implements CallAggregateService
 {
     private bool $isFactoryMethod;

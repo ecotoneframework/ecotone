@@ -12,6 +12,9 @@ use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class StdClassTransformer implements DefinedObject
 {
     public function transform(): stdClass

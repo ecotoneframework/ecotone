@@ -14,6 +14,9 @@ use Test\Ecotone\Modelling\Fixture\Workflow\Saga\Event\OrderProcessSagaStarted;
 use Test\Ecotone\Modelling\Fixture\Workflow\Saga\Event\OrderWasPlaced;
 
 #[Saga]
+/**
+ * licence Apache-2.0
+ */
 final class OrderProcessSaga
 {
     use WithEvents;

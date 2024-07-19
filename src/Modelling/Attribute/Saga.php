@@ -7,6 +7,9 @@ namespace Ecotone\Modelling\Attribute;
 use Attribute;
 
 #[Attribute(Attribute::TARGET_CLASS)]
+/**
+ * licence Apache-2.0
+ */
 final class Saga extends Aggregate
 {
 }

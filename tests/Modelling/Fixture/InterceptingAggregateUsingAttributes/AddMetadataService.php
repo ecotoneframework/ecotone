@@ -5,6 +5,9 @@ namespace Test\Ecotone\Modelling\Fixture\InterceptingAggregateUsingAttributes;
 use Ecotone\Messaging\Attribute\Interceptor\Before;
 use Ecotone\Modelling\Attribute\CommandHandler;
 
+/**
+ * licence Apache-2.0
+ */
 class AddMetadataService
 {
     #[Before(changeHeaders: true)]

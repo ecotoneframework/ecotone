@@ -4,6 +4,9 @@ namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Conversion\MediaType;
 
+/**
+ * licence Apache-2.0
+ */
 interface DistributedBus
 {
     public function sendCommand(string $destination, string $routingKey, string $command, string $sourceMediaType = MediaType::TEXT_PLAIN, array $metadata = []): void;

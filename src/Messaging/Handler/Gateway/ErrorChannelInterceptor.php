@@ -11,6 +11,9 @@ use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\Support\ErrorMessage;
 use Throwable;
 
+/**
+ * licence Apache-2.0
+ */
 class ErrorChannelInterceptor
 {
     public function __construct(private MessageChannel $errorChannel)

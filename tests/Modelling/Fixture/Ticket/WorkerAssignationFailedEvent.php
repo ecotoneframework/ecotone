@@ -2,6 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Ticket;
 
+/**
+ * licence Apache-2.0
+ */
 class WorkerAssignationFailedEvent
 {
     /**

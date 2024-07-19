@@ -11,6 +11,9 @@ use Ecotone\Messaging\Attribute\PropagateHeaders;
 use Ecotone\Messaging\Message;
 use Throwable;
 
+/**
+ * licence Apache-2.0
+ */
 interface LoggingGateway
 {
     #[MessageGateway(LoggingService::INFO_LOGGING_CHANNEL)]

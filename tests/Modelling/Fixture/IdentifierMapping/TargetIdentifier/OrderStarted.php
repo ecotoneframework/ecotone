@@ -6,6 +6,9 @@ namespace Test\Ecotone\Modelling\Fixture\IdentifierMapping\TargetIdentifier;
 
 use Ecotone\Modelling\Attribute\TargetIdentifier;
 
+/**
+ * licence Apache-2.0
+ */
 final class OrderStarted
 {
     public function __construct(

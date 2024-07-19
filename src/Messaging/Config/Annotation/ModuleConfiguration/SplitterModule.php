@@ -12,6 +12,9 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Splitter\SplitterBuilder;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class SplitterModule extends MessageHandlerRegisterConfiguration
 {
     /**

@@ -20,6 +20,9 @@ use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class BusModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public const MODULE_NAME                    = 'busModule';

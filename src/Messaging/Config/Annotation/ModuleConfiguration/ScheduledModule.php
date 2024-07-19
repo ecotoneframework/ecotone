@@ -14,6 +14,9 @@ use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilde
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class ScheduledModule extends ConsumerRegisterConfiguration
 {
     /**

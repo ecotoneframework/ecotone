@@ -11,6 +11,9 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 
 #[MediaTypeConverter]
+/**
+ * licence Apache-2.0
+ */
 final class JsonConverter implements Converter
 {
     public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)

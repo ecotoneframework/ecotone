@@ -6,6 +6,9 @@ use Ecotone\Messaging\Attribute\ServiceContext;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 
+/**
+ * licence Apache-2.0
+ */
 class ChannelConfiguration
 {
     public const ERROR_CHANNEL = 'errorChannel';

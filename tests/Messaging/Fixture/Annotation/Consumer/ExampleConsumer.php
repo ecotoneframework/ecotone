@@ -6,6 +6,9 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\Consumer;
 
 use Ecotone\Messaging\Attribute\MessageConsumer;
 
+/**
+ * licence Apache-2.0
+ */
 class ExampleConsumer
 {
     #[MessageConsumer('someId')]

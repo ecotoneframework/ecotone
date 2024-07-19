@@ -9,6 +9,9 @@ use Ecotone\Modelling\Attribute\Revision;
 use ReflectionAttribute;
 use ReflectionObject;
 
+/**
+ * licence Apache-2.0
+ */
 final class RevisionMetadataEnricher
 {
     public static function enrich(array $metadata, object $message): array

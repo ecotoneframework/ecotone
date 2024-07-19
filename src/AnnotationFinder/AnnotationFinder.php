@@ -4,6 +4,9 @@ namespace Ecotone\AnnotationFinder;
 
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
+/**
+ * licence Apache-2.0
+ */
 interface AnnotationFinder extends AnnotationResolver
 {
     /**

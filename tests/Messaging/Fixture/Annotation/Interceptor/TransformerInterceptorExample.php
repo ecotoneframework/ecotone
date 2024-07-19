@@ -10,6 +10,9 @@ use Ecotone\Messaging\Attribute\Parameter\Header;
 use Ecotone\Messaging\Attribute\Parameter\Payload;
 
 #[ClassReference('someMethodInterceptor')]
+/**
+ * licence Apache-2.0
+ */
 class TransformerInterceptorExample
 {
     #[Before(2, ServiceActivatorInterceptorExample::class, true)]

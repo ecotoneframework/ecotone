@@ -4,6 +4,9 @@ namespace Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate\ProductToPric
 
 use Ecotone\Messaging\Attribute\Interceptor\Before;
 
+/**
+ * licence Apache-2.0
+ */
 class ProductExchanger
 {
     public const MILK = 'milk';

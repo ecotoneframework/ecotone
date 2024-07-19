@@ -5,6 +5,9 @@ namespace Test\Ecotone\Modelling\Fixture\NamedEvent;
 use Ecotone\Modelling\Attribute\NamedEvent;
 
 #[NamedEvent(self::EVENT_NAME)]
+/**
+ * licence Apache-2.0
+ */
 class GuestWasAddedToBook
 {
     public const EVENT_NAME = 'book.guest_was_added';

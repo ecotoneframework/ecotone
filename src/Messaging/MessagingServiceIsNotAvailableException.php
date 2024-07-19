@@ -5,7 +5,10 @@ namespace Ecotone\Messaging;
 /**
  * Class MessagingServiceIsNotAvailable
  * @package Ecotone\Messaging
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class MessagingServiceIsNotAvailableException extends MessagingException
 {

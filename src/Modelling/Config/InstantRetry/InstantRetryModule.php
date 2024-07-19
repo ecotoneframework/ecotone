@@ -16,6 +16,9 @@ use Ecotone\Messaging\Precedence;
 use Ecotone\Modelling\CommandBus;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 final class InstantRetryModule implements AnnotationModule
 {
     private function __construct()

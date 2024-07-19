@@ -5,7 +5,10 @@ namespace Test\Ecotone\Messaging\Fixture\Behat\Ordering;
 /**
  * Class Order
  * @package Test\Ecotone\Messaging\Fixture\Behat\Ordering
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class Order
 {

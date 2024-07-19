@@ -6,6 +6,9 @@ namespace Ecotone\Messaging\Channel;
 
 use Ecotone\Messaging\Support\Assert;
 
+/**
+ * licence Apache-2.0
+ */
 final class CombinedMessageChannel
 {
     private function __construct(private string $referenceName, private array $combinedChannels)

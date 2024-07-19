@@ -4,6 +4,9 @@ namespace Test\Ecotone\Messaging\Fixture\Conversion;
 
 use Test\Ecotone\Messaging\Fixture\Conversion\TwoStepPassword as AdminPassword;
 
+/**
+ * licence Apache-2.0
+ */
 interface Admin
 {
     /**

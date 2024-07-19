@@ -6,6 +6,9 @@ use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\WithAggregateEvents;
 
+/**
+ * licence Apache-2.0
+ */
 class OrderWithManualVersioning implements VersionAggregate
 {
     use WithAggregateEvents;

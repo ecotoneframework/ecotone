@@ -14,6 +14,9 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\ErrorMessage;
 use Ecotone\Messaging\Support\MessageBuilder;
 
+/**
+ * licence Apache-2.0
+ */
 class ErrorHandler
 {
     public const ECOTONE_RETRY_HEADER = 'ecotone_retry_number';

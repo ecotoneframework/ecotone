@@ -15,6 +15,10 @@ use Test\Ecotone\Messaging\Fixture\InterceptedBridge\BridgeExample;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 final class BridgeTest extends TestCase
 {
     public function test_intercepting_message_handler_should_happen_only_for_given_endpoint()

@@ -8,6 +8,9 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
+/**
+ * licence Apache-2.0
+ */
 class SerializerHandler
 {
     public const MEDIA_TYPE = 'ecotone.serializer.media_type';

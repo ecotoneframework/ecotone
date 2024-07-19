@@ -7,6 +7,9 @@ use Ecotone\Modelling\Attribute\EventHandler;
 use stdClass;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class AggregateEventHandlerWithListenToRegex
 {
     #[EventHandler('order.*')]

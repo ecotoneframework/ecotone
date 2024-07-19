@@ -10,6 +10,9 @@ use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\Assert;
 
+/**
+ * licence Enterprise
+ */
 final class DynamicMessageChannel implements PollableChannel
 {
     /**

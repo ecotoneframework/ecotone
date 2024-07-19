@@ -15,6 +15,9 @@ use Throwable;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ */
 final class RetryTemplate implements DefinedObject
 {
     public const FIRST_RETRY = 1;

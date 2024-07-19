@@ -7,6 +7,9 @@ namespace Test\Ecotone\Messaging\Fixture\SameChannelAndRouting;
 use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Modelling\Attribute\EventHandler;
 
+/**
+ * licence Apache-2.0
+ */
 final class SomeTestEventHandler
 {
     #[Asynchronous('input')]

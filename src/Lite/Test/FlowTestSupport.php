@@ -29,6 +29,9 @@ use Ecotone\Modelling\QueryBus;
 /**
  * @template T
  */
+/**
+ * licence Apache-2.0
+ */
 final class FlowTestSupport
 {
     public function __construct(

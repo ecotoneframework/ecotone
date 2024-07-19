@@ -13,7 +13,10 @@ use Ramsey\Uuid\UuidInterface;
 /**
  * Class UuidToStringConverter
  * @package Ecotone\Messaging\Conversion
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class UuidToStringConverter implements Converter
 {

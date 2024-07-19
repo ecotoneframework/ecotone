@@ -12,6 +12,9 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHandler;
 
+/**
+ * licence Apache-2.0
+ */
 class ForwardMessageHandler implements MessageHandler
 {
     /**

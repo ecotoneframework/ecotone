@@ -7,7 +7,10 @@ use Ecotone\Messaging\Future;
 /**
  * Interface ServiceInterfaceWithFutureReceive
  * @package Test\Ecotone\Messaging\Fixture\Service\ServiceInterface
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 interface ServiceInterfaceWithFutureReceive
 {

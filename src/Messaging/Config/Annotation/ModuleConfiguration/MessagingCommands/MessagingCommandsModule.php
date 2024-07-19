@@ -19,6 +19,9 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class MessagingCommandsModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public const ECOTONE_EXECUTE_CONSOLE_COMMAND_EXECUTOR = 'ecotone.consoleCommand.execute';

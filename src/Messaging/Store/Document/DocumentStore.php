@@ -2,6 +2,9 @@
 
 namespace Ecotone\Messaging\Store\Document;
 
+/**
+ * licence Apache-2.0
+ */
 interface DocumentStore
 {
     public function dropCollection(string $collectionName): void;

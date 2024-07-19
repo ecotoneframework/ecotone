@@ -10,6 +10,9 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
+/**
+ * licence Apache-2.0
+ */
 class OutputChannelKeeperBuilder extends InputOutputMessageHandlerBuilder
 {
     private GatewayProxyBuilder $keeperGateway;

@@ -6,6 +6,9 @@ use Attribute;
 use Ecotone\Messaging\Support\Assert;
 
 #[Attribute(Attribute::TARGET_METHOD)]
+/**
+ * licence Apache-2.0
+ */
 class RelatedAggregate
 {
     private string $className;

@@ -9,6 +9,9 @@ use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\Identifier;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 final class Author
 {
     private function __construct(

@@ -29,6 +29,9 @@ use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
 
+/**
+ * licence Apache-2.0
+ */
 class ComponentTestBuilder
 {
     private function __construct(

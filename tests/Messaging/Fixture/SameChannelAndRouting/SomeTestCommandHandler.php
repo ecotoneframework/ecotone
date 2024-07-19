@@ -10,6 +10,9 @@ use Ecotone\Modelling\Attribute\CommandHandler;
 /**
  * @TODO Ecotone 2.0 routing keys are not message channels, so asynchronous channel can be equal to routing key
  */
+/**
+ * licence Apache-2.0
+ */
 final class SomeTestCommandHandler
 {
     #[Asynchronous('input')]

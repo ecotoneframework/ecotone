@@ -17,7 +17,10 @@ use ReflectionException;
 /**
  * Class InterfaceToCall
  * @package Ecotone\Messaging\Handler\Gateway\Gateway
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class InterfaceToCall
 {

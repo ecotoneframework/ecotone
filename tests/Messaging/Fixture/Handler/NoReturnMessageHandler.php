@@ -11,7 +11,10 @@ use Ecotone\Messaging\MessageHandler;
 /**
  * Class DumbMessageHandler
  * @package Test\Ecotone\Messaging\Fixture\Handler
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class NoReturnMessageHandler implements MessageHandler, DefinedObject
 {

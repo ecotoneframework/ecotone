@@ -2,6 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 
+/**
+ * licence Apache-2.0
+ */
 class IncreaseAmountCommand
 {
     /**

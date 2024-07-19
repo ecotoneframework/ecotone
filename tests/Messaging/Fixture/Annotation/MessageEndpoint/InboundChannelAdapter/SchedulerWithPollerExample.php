@@ -7,6 +7,9 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChann
 use Ecotone\Messaging\Attribute\Poller;
 use Ecotone\Messaging\Attribute\Scheduled;
 
+/**
+ * licence Apache-2.0
+ */
 class SchedulerWithPollerExample
 {
     #[Scheduled('requestChannel', 'run')]

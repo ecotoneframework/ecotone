@@ -6,6 +6,9 @@ use Ecotone\Messaging\Config\Container\Compiler\CompilerPass;
 use Ecotone\Messaging\Config\DefinedObjectWrapper;
 use InvalidArgumentException;
 
+/**
+ * licence Apache-2.0
+ */
 class ContainerBuilder
 {
     /**

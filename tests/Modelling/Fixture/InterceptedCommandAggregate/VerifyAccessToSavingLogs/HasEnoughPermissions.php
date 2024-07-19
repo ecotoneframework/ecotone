@@ -7,6 +7,9 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use InvalidArgumentException;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\Logger;
 
+/**
+ * licence Apache-2.0
+ */
 class HasEnoughPermissions
 {
     #[Around(pointcut: ValidateExecutor::class)]

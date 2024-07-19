@@ -15,6 +15,9 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Generator;
 
+/**
+ * licence Apache-2.0
+ */
 class GatewayReplyConverter
 {
     /**

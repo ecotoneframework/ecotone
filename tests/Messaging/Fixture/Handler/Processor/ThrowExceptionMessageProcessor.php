@@ -10,7 +10,10 @@ use Throwable;
 /**
  * Class ThrowExceptionMessageProcessor
  * @package Test\Ecotone\Messaging\Fixture\Handler\Processor
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class ThrowExceptionMessageProcessor implements MessageProcessor
 {

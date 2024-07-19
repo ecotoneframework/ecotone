@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config;
 
+/**
+ * licence Apache-2.0
+ */
 final class ModulePackageList
 {
     public const CORE_PACKAGE = 'core';

@@ -9,6 +9,9 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Throwable;
 
+/**
+ * licence Apache-2.0
+ */
 final class SpiecChannelAdapter implements ChannelInterceptor
 {
     public function __construct(private string $channelName, private MessageCollectorHandler $messageCollectorHandler)

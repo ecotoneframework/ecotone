@@ -17,6 +17,9 @@ use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\Saga;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
 {
     /**

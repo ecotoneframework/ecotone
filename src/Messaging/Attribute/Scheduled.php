@@ -9,6 +9,9 @@ use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\Assert;
 
 #[Attribute(Attribute::TARGET_METHOD)]
+/**
+ * licence Apache-2.0
+ */
 class Scheduled extends ChannelAdapter
 {
     private string $requestChannelName;

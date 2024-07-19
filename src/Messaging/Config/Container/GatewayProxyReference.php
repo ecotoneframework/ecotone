@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Container;
 
+/**
+ * licence Apache-2.0
+ */
 final class GatewayProxyReference extends Reference
 {
     public function __construct(

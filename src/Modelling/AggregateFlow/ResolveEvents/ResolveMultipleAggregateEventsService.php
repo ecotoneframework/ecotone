@@ -8,6 +8,9 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\ResolveAggregateEventsService;
 
+/**
+ * licence Apache-2.0
+ */
 final class ResolveMultipleAggregateEventsService implements ResolveAggregateEventsService
 {
     public function __construct(

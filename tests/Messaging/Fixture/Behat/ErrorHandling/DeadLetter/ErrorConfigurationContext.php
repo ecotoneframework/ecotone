@@ -10,6 +10,9 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Recoverability\ErrorHandlerConfiguration;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
+/**
+ * licence Apache-2.0
+ */
 class ErrorConfigurationContext
 {
     public const INPUT_CHANNEL       = 'inputChannel';

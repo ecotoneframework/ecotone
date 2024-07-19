@@ -10,6 +10,9 @@ use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\SaveAggregateService;
 
+/**
+ * licence Apache-2.0
+ */
 final class SaveMultipleAggregateService implements SaveAggregateService
 {
     public function __construct(

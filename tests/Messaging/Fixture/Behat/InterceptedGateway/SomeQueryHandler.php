@@ -6,6 +6,9 @@ namespace Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway;
 
 use Ecotone\Modelling\Attribute\QueryHandler;
 
+/**
+ * licence Apache-2.0
+ */
 class SomeQueryHandler
 {
     public const CALCULATE = 'calculate';

@@ -2,6 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\AggregateIdFromMethod;
 
+/**
+ * licence Apache-2.0
+ */
 class CreateUser
 {
     public string $id;

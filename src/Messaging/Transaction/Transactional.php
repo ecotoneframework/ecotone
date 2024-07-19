@@ -8,6 +8,9 @@ use Attribute;
 use Ecotone\Messaging\Attribute\WithRequiredReferenceNameList;
 
 #[Attribute]
+/**
+ * licence Apache-2.0
+ */
 class Transactional implements WithRequiredReferenceNameList
 {
     private const FACTORY_REFERENCE_NAME_LIST = 'factoryReferenceNameList';

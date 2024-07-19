@@ -14,7 +14,10 @@ use Throwable;
 /**
  * Class TransactionInterceptor
  * @package Ecotone\Messaging\Transaction
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class TransactionInterceptor implements DefinedObject
 {

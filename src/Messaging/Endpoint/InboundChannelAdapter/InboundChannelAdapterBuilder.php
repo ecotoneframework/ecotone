@@ -22,7 +22,10 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 /**
  * Class InboundChannelAdapterBuilder
  * @package Ecotone\Messaging\Endpoint
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
 {

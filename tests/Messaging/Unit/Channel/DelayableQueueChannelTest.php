@@ -10,6 +10,10 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 class DelayableQueueChannelTest extends TestCase
 {
     public function test_sending_and_receiving_message_in_last_in_first_out_order()

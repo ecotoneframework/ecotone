@@ -9,6 +9,9 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Modelling\Config\BusModule;
 
+/**
+ * licence Apache-2.0
+ */
 interface MessageBasedQueryBusExample
 {
     #[MessageGateway(BusModule::QUERY_CHANNEL_NAME_BY_NAME)]

@@ -7,6 +7,9 @@ use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\ConsoleCommandResultSet;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 
+/**
+ * licence Apache-2.0
+ */
 class MessagingBaseCommand
 {
     public function executeConsoleCommand(string $commandName, array $parameters, ConfiguredMessagingSystem $configuredMessagingSystem): mixed

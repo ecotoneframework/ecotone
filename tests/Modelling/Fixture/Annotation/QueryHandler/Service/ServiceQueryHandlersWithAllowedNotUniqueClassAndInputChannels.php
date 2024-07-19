@@ -6,6 +6,9 @@ use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\NotUniqueHandler;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class ServiceQueryHandlersWithAllowedNotUniqueClassAndInputChannels
 {
     #[CommandHandler('some1')]

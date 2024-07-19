@@ -6,6 +6,9 @@ use Ecotone\Messaging\Attribute\Interceptor\After;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\Logger;
 
+/**
+ * licence Apache-2.0
+ */
 class AddNotificationTimestamp
 {
     private $currentTime;

@@ -11,6 +11,9 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 
+/**
+ * licence Enterprise
+ */
 final class CustomSendingStrategy implements ChannelSendingStrategy
 {
     public function __construct(

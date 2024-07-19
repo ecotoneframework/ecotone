@@ -5,6 +5,9 @@ namespace Ecotone\Messaging\Config\Container;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ */
 class MethodCall
 {
     public function __construct(private string $methodName, private array $arguments)

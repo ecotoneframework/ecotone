@@ -14,6 +14,9 @@ use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 
 #[Asynchronous('orders')]
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class Order
 {
     use WithEvents;

@@ -17,7 +17,10 @@ use Ecotone\Messaging\PollableChannel;
 /**
  * Class SimpleMessageChannelBuilder
  * @package Ecotone\Messaging\Channel
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuilder
 {

@@ -8,6 +8,9 @@ use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\MessageEndp
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeHandlerAnnotation;
 
 #[MessageEndpoint]
+/**
+ * licence Apache-2.0
+ */
 class SplitterExample
 {
     #[SomeHandlerAnnotation]

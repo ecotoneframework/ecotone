@@ -5,6 +5,9 @@ namespace Ecotone\Messaging\Config;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 
+/**
+ * licence Apache-2.0
+ */
 class ConsoleCommandParameter implements DefinedObject
 {
     public function __construct(private string $name, private string $messageHeaderName, private bool $isOption, private bool $isArray, private mixed $defaultValue, private bool $hasDefaultValue)

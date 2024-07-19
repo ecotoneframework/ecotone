@@ -7,6 +7,9 @@ use Ecotone\Modelling\StandardRepository;
 use Ramsey\Uuid\Uuid;
 
 #[Repository]
+/**
+ * licence Apache-2.0
+ */
 class UserRepository implements StandardRepository
 {
     private array $users;

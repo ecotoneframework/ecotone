@@ -2,6 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\QueryHandlerAggregate;
 
+/**
+ * licence Apache-2.0
+ */
 class BigBox implements Box
 {
     private string $boxId;

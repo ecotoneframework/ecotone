@@ -9,6 +9,9 @@ use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\Message;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
+/**
+ * licence Apache-2.0
+ */
 final class SuccessServiceActivator
 {
     private int $calls = 0;

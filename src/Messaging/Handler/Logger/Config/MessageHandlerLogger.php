@@ -18,6 +18,9 @@ use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
+/**
+ * licence Apache-2.0
+ */
 final class MessageHandlerLogger
 {
     #[Presend(precedence: 1000, pointcut: Asynchronous::class)]

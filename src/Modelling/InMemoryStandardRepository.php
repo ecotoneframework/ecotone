@@ -9,6 +9,9 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\Saga;
 
+/**
+ * licence Apache-2.0
+ */
 class InMemoryStandardRepository implements StandardRepository
 {
     /**

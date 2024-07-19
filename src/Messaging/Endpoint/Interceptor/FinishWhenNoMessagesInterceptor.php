@@ -7,6 +7,9 @@ namespace Ecotone\Messaging\Endpoint\Interceptor;
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
 use Throwable;
 
+/**
+ * licence Apache-2.0
+ */
 class FinishWhenNoMessagesInterceptor implements ConsumerInterceptor
 {
     private bool $shouldBeStopped = false;

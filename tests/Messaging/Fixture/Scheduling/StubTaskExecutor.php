@@ -10,7 +10,10 @@ use Ecotone\Messaging\Scheduling\TaskExecutor;
 /**
  * Class StubTaskExecutor
  * @package Test\Ecotone\Messaging\Fixture\Scheduling
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class StubTaskExecutor implements TaskExecutor
 {

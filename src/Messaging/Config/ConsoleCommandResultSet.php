@@ -2,6 +2,9 @@
 
 namespace Ecotone\Messaging\Config;
 
+/**
+ * licence Apache-2.0
+ */
 class ConsoleCommandResultSet
 {
     private array $columnHeaders;

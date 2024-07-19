@@ -33,6 +33,9 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Precedence;
 use InvalidArgumentException;
 
+/**
+ * licence Apache-2.0
+ */
 final class AroundInterceptorBuilder implements InterceptorWithPointCut
 {
     private int $precedence;

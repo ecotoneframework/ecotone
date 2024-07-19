@@ -16,6 +16,9 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 final class MessageConsumerModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     private function __construct(private array $serviceActivators)

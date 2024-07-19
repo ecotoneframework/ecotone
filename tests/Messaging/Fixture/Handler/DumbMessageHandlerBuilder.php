@@ -14,7 +14,10 @@ use Ecotone\Messaging\MessageHandler;
 /**
  * Class DumbMessageHandlerBuilder
  * @package Test\Ecotone\Messaging\Fixture\Handler
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class DumbMessageHandlerBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters
 {

@@ -7,7 +7,10 @@ namespace Ecotone\Messaging;
 /**
  * Interface MessageHandler
  * @package Ecotone\Messaging
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 interface MessageHandler
 {

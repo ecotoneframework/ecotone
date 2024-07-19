@@ -12,6 +12,9 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Precedence;
 
+/**
+ * licence Apache-2.0
+ */
 final class SerializationChannelAdapterBuilder implements ChannelInterceptorBuilder
 {
     public function __construct(private string $relatedChannel, private MediaType $targetMediaType)

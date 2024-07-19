@@ -11,6 +11,9 @@ use Ecotone\Messaging\Attribute\Scheduled;
 use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 
+/**
+ * licence Apache-2.0
+ */
 class InterceptedScheduledExample
 {
     private int $requestData = 0;

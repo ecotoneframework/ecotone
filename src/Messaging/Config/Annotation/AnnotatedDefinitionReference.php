@@ -6,6 +6,9 @@ use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\ClassReference;
 
+/**
+ * licence Apache-2.0
+ */
 class AnnotatedDefinitionReference
 {
     public static function getReferenceFor(AnnotatedFinding $annotatedDefinition): string

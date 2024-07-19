@@ -5,6 +5,9 @@ namespace Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut;
 use Ecotone\Modelling\Attribute\RelatedAggregate;
 use Ecotone\Modelling\Attribute\Repository;
 
+/**
+ * licence Apache-2.0
+ */
 interface TwitterRepository
 {
     #[Repository]

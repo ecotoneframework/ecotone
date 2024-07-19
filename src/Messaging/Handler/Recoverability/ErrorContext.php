@@ -4,6 +4,9 @@ namespace Ecotone\Messaging\Handler\Recoverability;
 
 use Ecotone\Messaging\MessageHeaders;
 
+/**
+ * licence Apache-2.0
+ */
 class ErrorContext
 {
     public const EXCEPTION_STACKTRACE = 'exception-stacktrace';

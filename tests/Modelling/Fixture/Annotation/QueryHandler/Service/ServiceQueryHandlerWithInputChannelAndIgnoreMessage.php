@@ -6,6 +6,9 @@ use Ecotone\Modelling\Attribute\IgnorePayload;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class ServiceQueryHandlerWithInputChannelAndIgnoreMessage
 {
     #[QueryHandler('execute', 'queryHandler')]

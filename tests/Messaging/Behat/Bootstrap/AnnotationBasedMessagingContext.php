@@ -76,6 +76,10 @@ use Test\Ecotone\Modelling\Fixture\TwoSagas\TwoSagasRepository;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 class AnnotationBasedMessagingContext extends TestCase implements Context
 {
     private static ?\Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem = null;

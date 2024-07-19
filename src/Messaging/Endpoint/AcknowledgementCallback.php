@@ -9,7 +9,10 @@ namespace Ecotone\Messaging\Endpoint;
  *
  * Interface Acknowledge
  * @package Ecotone\Messaging\Amqp
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 interface AcknowledgementCallback
 {

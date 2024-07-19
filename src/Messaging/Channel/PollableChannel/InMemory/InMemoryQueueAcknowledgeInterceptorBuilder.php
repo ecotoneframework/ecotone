@@ -9,6 +9,9 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\PrecedenceChannelInterceptor;
 
+/**
+ * licence Apache-2.0
+ */
 final class InMemoryQueueAcknowledgeInterceptorBuilder implements ChannelInterceptorBuilder
 {
     public function __construct(private string $relatedChannel)

@@ -6,6 +6,9 @@ use Attribute;
 use Ecotone\Messaging\Support\Assert;
 
 #[Attribute]
+/**
+ * licence Apache-2.0
+ */
 class NamedEvent
 {
     private string $name;

@@ -2,6 +2,9 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Gateway;
 
+/**
+ * licence Apache-2.0
+ */
 interface StringReturningGateway
 {
     public function execute(string $replyMediaType): string;

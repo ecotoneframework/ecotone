@@ -11,6 +11,9 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
 
+/**
+ * licence Apache-2.0
+ */
 final class DelayableQueueChannel implements PollableChannel, DefinedObject
 {
     /**

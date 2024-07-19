@@ -8,6 +8,9 @@ use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\PollableChannel;
 
+/**
+ * licence Apache-2.0
+ */
 final class InternalChannelResolver implements ChannelResolver
 {
     /**

@@ -7,6 +7,9 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 
+/**
+ * licence Apache-2.0
+ */
 final class HeaderMapperTransformer implements DefinedObject
 {
     private function __construct(private array $mappedHeaders)

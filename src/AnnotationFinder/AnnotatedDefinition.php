@@ -6,6 +6,9 @@ namespace Ecotone\AnnotationFinder;
 
 use InvalidArgumentException;
 
+/**
+ * licence Apache-2.0
+ */
 class AnnotatedDefinition implements AnnotatedFinding
 {
     private string $className;

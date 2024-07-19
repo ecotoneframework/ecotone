@@ -13,6 +13,9 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
 use ReflectionClass;
 
+/**
+ * licence Apache-2.0
+ */
 final class EventSourcingHandlerExecutor implements DefinedObject
 {
     /**

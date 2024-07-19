@@ -7,6 +7,9 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\File
 use Ecotone\Messaging\Attribute\MessageGateway;
 use Ecotone\Messaging\Attribute\Parameter\Payload;
 
+/**
+ * licence Apache-2.0
+ */
 interface GatewayWithReplyChannelExample
 {
     #[MessageGateway('requestChannel', requiredInterceptorNames: ['dbalTransaction'])]

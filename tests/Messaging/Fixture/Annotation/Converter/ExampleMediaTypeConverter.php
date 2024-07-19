@@ -8,6 +8,9 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
 #[MediaTypeConverter]
+/**
+ * licence Apache-2.0
+ */
 class ExampleMediaTypeConverter implements Converter
 {
     /**

@@ -27,6 +27,9 @@ use Ecotone\Messaging\Scheduling\Clock;
 use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 
+/**
+ * licence Apache-2.0
+ */
 abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsumerBuilder, InterceptedEndpoint
 {
     private array $aroundInterceptorReferences = [];

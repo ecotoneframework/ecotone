@@ -9,6 +9,9 @@ use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\EventBus;
 use InvalidArgumentException;
 
+/**
+ * licence Apache-2.0
+ */
 class OrderService
 {
     private array $notificationHeaders = [];

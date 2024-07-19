@@ -10,6 +10,9 @@ use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\System;
 
 #[System]
 #[Environment(['prod', 'dev'])]
+/**
+ * licence Apache-2.0
+ */
 class SystemContextWithMethodEnvironmentExample
 {
     #[Extension]

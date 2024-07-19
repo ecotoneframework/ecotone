@@ -4,6 +4,9 @@ namespace Ecotone\Messaging\Handler\Router;
 
 use Ecotone\Messaging\Message;
 
+/**
+ * licence Apache-2.0
+ */
 class HeaderRouter
 {
     private string $headerName;

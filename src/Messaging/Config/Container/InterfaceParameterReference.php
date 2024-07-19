@@ -4,6 +4,9 @@ namespace Ecotone\Messaging\Config\Container;
 
 use Ecotone\Messaging\Handler\InterfaceToCall;
 
+/**
+ * licence Apache-2.0
+ */
 class InterfaceParameterReference extends Reference
 {
     public function __construct(private string $className, private string $methodName, private string $parameterName)

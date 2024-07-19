@@ -10,6 +10,10 @@ use stdClass;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 class InMemoryDocumentStoreTest extends TestCase
 {
     public function test_adding_document_to_collection()

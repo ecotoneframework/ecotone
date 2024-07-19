@@ -13,6 +13,10 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 class DistributedMessageHandlerTest extends TestCase
 {
     public function test_distribute_event()

@@ -7,6 +7,9 @@ namespace Ecotone\Modelling\Attribute;
 use Attribute;
 
 #[Attribute]
+/**
+ * licence Apache-2.0
+ */
 class Revision
 {
     private int $revision;

@@ -5,6 +5,9 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeComma
 use Ecotone\Messaging\Attribute\ConsoleCommand;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class ParametersWithReferenceOneTimeCommandExample
 {
     #[ConsoleCommand('doSomething')]

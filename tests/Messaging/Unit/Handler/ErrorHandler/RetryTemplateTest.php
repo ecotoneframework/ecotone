@@ -10,6 +10,10 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 class RetryTemplateTest extends TestCase
 {
     public function test_calculating_fixed_back_off_with_max_attempts()

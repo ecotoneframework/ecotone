@@ -8,7 +8,10 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 /**
  * Class CallWithAnnotationFromMethodInterceptorExample
  * @package Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class CallWithReferenceSearchServiceExample extends BaseInterceptorExample
 {

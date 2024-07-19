@@ -2,6 +2,9 @@
 
 namespace Ecotone\Messaging\Handler\Logger;
 
+/**
+ * licence Apache-2.0
+ */
 abstract class Logger
 {
     public string $logLevel;

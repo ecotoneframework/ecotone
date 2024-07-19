@@ -11,7 +11,10 @@ use Ecotone\Messaging\Transaction\TransactionFactory;
 /**
  * Class NullTransactionFactory
  * @package Ecotone\Messaging\Transaction\Null
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class NullTransactionFactory implements TransactionFactory
 {

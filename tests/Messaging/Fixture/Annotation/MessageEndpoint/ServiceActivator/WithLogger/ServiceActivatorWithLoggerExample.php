@@ -10,6 +10,9 @@ use Ecotone\Messaging\Handler\Logger\Annotation\LogBefore;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
 use Ecotone\Messaging\Handler\Logger\LoggingLevel;
 
+/**
+ * licence Apache-2.0
+ */
 class ServiceActivatorWithLoggerExample
 {
     #[ServiceActivator('inputChannel', 'test-name')]

@@ -11,6 +11,9 @@ use Ecotone\Modelling\WithAggregateEvents;
 use Ecotone\Modelling\WithAggregateVersioning;
 
 #[EventSourcingAggregate(true)]
+/**
+ * licence Apache-2.0
+ */
 class Job
 {
     use WithAggregateEvents;

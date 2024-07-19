@@ -10,6 +10,9 @@ use Ecotone\Modelling\Attribute\Saga;
 use Ecotone\Modelling\WithEvents;
 
 #[Saga]
+/**
+ * licence Apache-2.0
+ */
 final class SagaWithMultipleEventHandlers
 {
     use WithEvents;

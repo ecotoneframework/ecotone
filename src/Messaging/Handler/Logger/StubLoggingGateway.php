@@ -7,6 +7,9 @@ namespace Ecotone\Messaging\Handler\Logger;
 use Ecotone\Messaging\Message;
 use Throwable;
 
+/**
+ * licence Apache-2.0
+ */
 final class StubLoggingGateway implements LoggingGateway
 {
     private array $info = [];

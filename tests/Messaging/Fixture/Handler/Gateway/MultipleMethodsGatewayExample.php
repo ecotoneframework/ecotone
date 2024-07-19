@@ -6,6 +6,9 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\Gateway;
 
 use Ecotone\Messaging\Attribute\MessageGateway;
 
+/**
+ * licence Apache-2.0
+ */
 interface MultipleMethodsGatewayExample
 {
     #[MessageGateway('channel1')]

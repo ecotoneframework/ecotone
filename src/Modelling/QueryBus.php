@@ -4,6 +4,9 @@ namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Conversion\MediaType;
 
+/**
+ * licence Apache-2.0
+ */
 interface QueryBus
 {
     public function send(object $query, array $metadata = [], ?string $expectedReturnedMediaType = null): mixed;

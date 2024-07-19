@@ -6,6 +6,9 @@ use Attribute;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 #[Attribute]
+/**
+ * licence Apache-2.0
+ */
 class Poller
 {
     private string $cron;

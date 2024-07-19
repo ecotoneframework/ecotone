@@ -7,6 +7,9 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeComma
 use Ecotone\Messaging\Attribute\ConsoleCommand;
 use Ecotone\Messaging\Attribute\Parameter\Header;
 
+/**
+ * licence Apache-2.0
+ */
 final class ConsoleCommandWithMessageHeaders
 {
     private array $parameters = [];

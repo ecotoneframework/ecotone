@@ -12,6 +12,9 @@ use Ecotone\Modelling\WithAggregateVersioning;
 use Test\Ecotone\Modelling\Fixture\CustomRepositories\EventSourcing\Event\CommentCreated;
 
 #[EventSourcingAggregate]
+/**
+ * licence Apache-2.0
+ */
 final class Comment
 {
     use WithAggregateVersioning;

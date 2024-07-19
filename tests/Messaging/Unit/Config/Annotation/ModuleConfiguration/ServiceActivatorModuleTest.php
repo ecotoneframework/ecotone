@@ -20,8 +20,12 @@ use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\A
 /**
  * Class AnnotationServiceActivatorConfigurationTest
  * @package Test\Ecotone\Messaging\Unit\Config\Annotation\Annotation
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
  *
+ * @internal
+ */
+/**
+ * licence Apache-2.0
  * @internal
  */
 class ServiceActivatorModuleTest extends AnnotationConfigurationTest

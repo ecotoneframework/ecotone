@@ -10,6 +10,10 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 class MessageHeadersPropagatorTest extends TestCase
 {
     public function test_after_calling_dropping_last_headers()

@@ -6,6 +6,9 @@ namespace Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\MessageEndpoint\
 
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\SomeHandlerAnnotation;
 
+/**
+ * licence Apache-2.0
+ */
 class SplitterOnMethodExample
 {
     #[SomeHandlerAnnotation]

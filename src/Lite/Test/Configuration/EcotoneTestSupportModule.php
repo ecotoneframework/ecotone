@@ -37,6 +37,9 @@ use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 final class EcotoneTestSupportModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public const RECORD_COMMAND = 'recordCommand';

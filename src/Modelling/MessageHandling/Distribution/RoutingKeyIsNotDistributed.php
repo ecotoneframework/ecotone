@@ -4,6 +4,9 @@ namespace Ecotone\Modelling\MessageHandling\Distribution;
 
 use Ecotone\Messaging\MessagingException;
 
+/**
+ * licence Apache-2.0
+ */
 class RoutingKeyIsNotDistributed extends MessagingException
 {
     /**

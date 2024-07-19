@@ -28,6 +28,10 @@ use Test\Ecotone\Modelling\Fixture\PriorityEventHandler\SynchronousPriorityHandl
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 final class ModellingEcotoneLiteTest extends TestCase
 {
     public function test_command_event_command_flow()

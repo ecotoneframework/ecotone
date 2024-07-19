@@ -4,6 +4,9 @@ namespace Ecotone\Messaging;
 
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
+/**
+ * licence Apache-2.0
+ */
 interface ConfigurationVariableService
 {
     public const REFERENCE_NAME = ConfigurationVariableService::class;

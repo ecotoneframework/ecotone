@@ -8,6 +8,9 @@ use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class User
 {
     private string $internalId;

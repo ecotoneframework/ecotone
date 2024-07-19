@@ -15,7 +15,10 @@ use Ecotone\Messaging\Support\MessageBuilder;
 /**
  * Class PayloadMessageParameter
  * @package Ecotone\Messaging\Handler\Gateway\Gateway\MethodParameterConverter
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class GatewayPayloadConverter implements GatewayParameterConverter
 {

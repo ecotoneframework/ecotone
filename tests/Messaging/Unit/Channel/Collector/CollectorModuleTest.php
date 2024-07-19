@@ -37,6 +37,10 @@ use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 final class CollectorModuleTest extends TestCase
 {
     public function test_receiving_collected_message_from_command_handler_without_exception()

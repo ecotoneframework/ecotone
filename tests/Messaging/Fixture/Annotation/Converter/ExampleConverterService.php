@@ -7,6 +7,9 @@ use Ecotone\Messaging\Attribute\Converter;
 use stdClass;
 
 #[ClassReference('exampleConverterService')]
+/**
+ * licence Apache-2.0
+ */
 class ExampleConverterService
 {
     /**

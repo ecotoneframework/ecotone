@@ -11,6 +11,9 @@ use Ecotone\Messaging\Attribute\Parameter\Payload;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class AroundInterceptorWithCustomParameterConverters
 {
     private bool $wasCalled = false;

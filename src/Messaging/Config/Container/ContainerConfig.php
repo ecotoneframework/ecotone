@@ -16,6 +16,9 @@ use Ecotone\Messaging\Handler\Logger\StubLoggingGateway;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Psr\Container\ContainerInterface;
 
+/**
+ * licence Apache-2.0
+ */
 class ContainerConfig
 {
     public static function buildMessagingSystemInMemoryContainer(

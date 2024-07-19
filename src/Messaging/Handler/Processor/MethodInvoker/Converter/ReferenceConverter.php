@@ -11,6 +11,9 @@ use Ecotone\Messaging\Message;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ */
 class ReferenceConverter implements ParameterConverter
 {
     public function __construct(

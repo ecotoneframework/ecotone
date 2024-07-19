@@ -6,6 +6,9 @@ use Ecotone\Messaging\Attribute\Interceptor\Around;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use stdClass;
 
+/**
+ * licence Apache-2.0
+ */
 class CallMultipleUnorderedArgumentsInvocationInterceptorExample extends BaseInterceptorExample
 {
     /**

@@ -11,7 +11,10 @@ use Ecotone\Messaging\Support\Assert;
 /**
  * Class CommandBusRouter
  * @package Ecotone\Modelling\Config
- * @author  Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author  Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 class CommandBusRouter
 {

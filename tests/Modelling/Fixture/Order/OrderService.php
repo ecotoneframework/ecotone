@@ -9,6 +9,9 @@ use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\EventBus;
 
 #[Asynchronous('orders')]
+/**
+ * licence Apache-2.0
+ */
 class OrderService
 {
     /**

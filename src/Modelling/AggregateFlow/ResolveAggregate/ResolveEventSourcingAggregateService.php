@@ -10,6 +10,9 @@ use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\EventSourcingHandlerExecutor;
 use Ecotone\Modelling\ResolveAggregateService;
 
+/**
+ * licence Apache-2.0
+ */
 final class ResolveEventSourcingAggregateService implements ResolveAggregateService
 {
     public function __construct(

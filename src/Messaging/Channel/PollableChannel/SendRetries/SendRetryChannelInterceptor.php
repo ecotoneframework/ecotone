@@ -18,6 +18,9 @@ use Exception;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
+/**
+ * licence Apache-2.0
+ */
 final class SendRetryChannelInterceptor extends AbstractChannelInterceptor implements ChannelInterceptor
 {
     public function __construct(

@@ -6,6 +6,9 @@ use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Message;
 
+/**
+ * licence Apache-2.0
+ */
 final class BoolHeaderBasedFilter implements DefinedObject
 {
     public function __construct(private string $headerName, private ?bool $defaultResultWhenHeaderIsMissing)

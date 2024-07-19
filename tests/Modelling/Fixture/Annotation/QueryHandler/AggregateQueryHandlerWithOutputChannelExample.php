@@ -7,6 +7,9 @@ use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class AggregateQueryHandlerWithOutputChannelExample
 {
     #[Identifier]

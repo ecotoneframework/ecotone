@@ -8,6 +8,9 @@ use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\StandardRepository;
 
 #[Repository]
+/**
+ * licence Apache-2.0
+ */
 class AppointmentStandardRepository implements StandardRepository
 {
     /**

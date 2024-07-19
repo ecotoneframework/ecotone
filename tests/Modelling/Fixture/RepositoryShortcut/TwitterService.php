@@ -6,6 +6,9 @@ use Ecotone\Messaging\Attribute\MessageGateway;
 use Ecotone\Messaging\Attribute\Parameter\Payload;
 use Ecotone\Modelling\Attribute\Identifier;
 
+/**
+ * licence Apache-2.0
+ */
 interface TwitterService
 {
     #[MessageGateway('getContent')]

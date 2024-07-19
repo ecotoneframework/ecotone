@@ -5,6 +5,9 @@ namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 use Ecotone\Messaging\Attribute\Scheduled;
 use Ecotone\Messaging\Attribute\ServiceActivator;
 
+/**
+ * licence Apache-2.0
+ */
 class InboundCalculation
 {
     #[Scheduled('calculateForInbound', 'inboundCalculator')]

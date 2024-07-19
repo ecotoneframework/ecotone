@@ -5,6 +5,9 @@ namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
+/**
+ * licence Apache-2.0
+ */
 class OrderNotificator
 {
     /** @var Notification[] */

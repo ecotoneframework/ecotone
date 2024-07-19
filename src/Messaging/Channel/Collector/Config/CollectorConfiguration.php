@@ -6,6 +6,9 @@ namespace Ecotone\Messaging\Channel\Collector\Config;
 
 use Ecotone\Messaging\Support\Assert;
 
+/**
+ * licence Apache-2.0
+ */
 final class CollectorConfiguration
 {
     /**

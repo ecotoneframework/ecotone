@@ -10,6 +10,9 @@ use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\WithAggregateVersioning;
 
 #[EventSourcingSaga]
+/**
+ * licence Apache-2.0
+ */
 class OrderDispatch
 {
     use WithAggregateVersioning;

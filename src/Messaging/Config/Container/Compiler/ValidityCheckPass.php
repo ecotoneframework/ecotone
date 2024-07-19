@@ -10,6 +10,9 @@ use InvalidArgumentException;
 
 use function str_starts_with;
 
+/**
+ * licence Apache-2.0
+ */
 class ValidityCheckPass implements CompilerPass
 {
     /**

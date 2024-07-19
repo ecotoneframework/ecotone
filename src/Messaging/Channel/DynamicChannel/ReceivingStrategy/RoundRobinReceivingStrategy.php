@@ -6,6 +6,9 @@ namespace Ecotone\Messaging\Channel\DynamicChannel\ReceivingStrategy;
 
 use Ecotone\Messaging\Channel\DynamicChannel\ChannelReceivingStrategy;
 
+/**
+ * licence Enterprise
+ */
 final class RoundRobinReceivingStrategy implements ChannelReceivingStrategy
 {
     public function __construct(

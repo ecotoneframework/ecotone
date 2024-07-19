@@ -25,6 +25,9 @@ use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
 #[ModuleAnnotation]
+/**
+ * licence Apache-2.0
+ */
 class AsynchronousModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**

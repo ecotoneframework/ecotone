@@ -34,6 +34,10 @@ use Test\Ecotone\Modelling\Fixture\Ticket\WorkerWasAssignedEvent;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 class LoadAggregateServiceBuilderTest extends TestCase
 {
     public function test_enriching_command_with_aggregate_if_found()

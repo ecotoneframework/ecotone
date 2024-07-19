@@ -2,6 +2,9 @@
 
 namespace Ecotone\Modelling\AggregateFlow\LoadAggregate;
 
+/**
+ * licence Apache-2.0
+ */
 class LoadAggregateMode
 {
     private const THROW_ON_NOT_FOUND = 1;

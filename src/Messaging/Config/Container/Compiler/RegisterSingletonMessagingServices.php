@@ -23,6 +23,9 @@ use Ecotone\Messaging\Scheduling\Clock;
 use Ecotone\Messaging\Scheduling\EpochBasedClock;
 use Psr\Container\ContainerInterface;
 
+/**
+ * licence Apache-2.0
+ */
 class RegisterSingletonMessagingServices implements CompilerPass
 {
     public function process(ContainerBuilder $builder): void

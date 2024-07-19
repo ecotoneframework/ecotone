@@ -7,7 +7,10 @@ use Ecotone\Messaging\MessageChannel;
 /**
  * Interface ChannelInterceptorAdapter
  * @package Ecotone\Messaging\Config
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
+/**
+ * licence Apache-2.0
  */
 interface MessageChannelInterceptorAdapter extends MessageChannel
 {

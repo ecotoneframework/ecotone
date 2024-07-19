@@ -17,8 +17,12 @@ use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleMediaTypeConverte
 /**
  * Class ConverterModuleTest
  * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
- * @author Dariusz Gafka <dgafka.mail@gmail.com>
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
  *
+ * @internal
+ */
+/**
+ * licence Apache-2.0
  * @internal
  */
 class ConverterModuleTest extends AnnotationConfigurationTest

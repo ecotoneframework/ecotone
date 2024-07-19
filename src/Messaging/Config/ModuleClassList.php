@@ -58,6 +58,9 @@ use Ecotone\Sqs\Configuration\SqsMessageConsumerModule;
 use Ecotone\Sqs\Configuration\SqsMessagePublisherModule;
 use Ecotone\SymfonyBundle\Config\SymfonyConnectionModule;
 
+/**
+ * licence Apache-2.0
+ */
 class ModuleClassList
 {
     public const CORE_MODULES = [

@@ -7,6 +7,9 @@ use Ecotone\Modelling\Attribute\CommandHandler;
 use stdClass;
 
 #[Aggregate]
+/**
+ * licence Apache-2.0
+ */
 class ServiceCommandHandlerWithClass
 {
     #[CommandHandler(endpointId: 'commandHandler')]

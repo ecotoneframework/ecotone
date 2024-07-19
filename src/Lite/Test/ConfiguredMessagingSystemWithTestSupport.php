@@ -16,6 +16,9 @@ use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
 
+/**
+ * licence Apache-2.0
+ */
 final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessagingSystem
 {
     public function __construct(private ConfiguredMessagingSystem $configuredMessagingSystem)

@@ -11,6 +11,9 @@ use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
 
+/**
+ * licence Apache-2.0
+ */
 final class InMemoryQueueAcknowledgeInterceptor extends AbstractChannelInterceptor implements ChannelInterceptor
 {
     public const ECOTONE_IN_MEMORY_QUEUE_ACK = 'ecotone.in_memory_queue.ack';

@@ -6,6 +6,9 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActiv
 
 use Ecotone\Messaging\Attribute\ServiceActivator;
 
+/**
+ * licence Apache-2.0
+ */
 class ServiceActivatorWithPollerExample
 {
     #[ServiceActivator('inputChannel', 'test-name')]

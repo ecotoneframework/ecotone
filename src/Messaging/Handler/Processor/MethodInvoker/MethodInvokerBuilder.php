@@ -10,6 +10,9 @@ use Ecotone\Messaging\Config\Container\Reference;
 
 use function is_string;
 
+/**
+ * licence Apache-2.0
+ */
 class MethodInvokerBuilder implements CompilableBuilder
 {
     private function __construct(

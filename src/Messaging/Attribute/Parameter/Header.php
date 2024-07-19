@@ -8,6 +8,9 @@ use Attribute;
 use Ecotone\Messaging\Support\Assert;
 
 #[Attribute(Attribute::TARGET_PARAMETER)]
+/**
+ * licence Apache-2.0
+ */
 class Header
 {
     public string $headerName;

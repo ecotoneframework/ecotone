@@ -9,6 +9,9 @@ use Ecotone\Messaging\Support\Assert;
  * @deprecated Ecotone 2.0 will drop this attribute. Use #[IdentifierMethod] instead
  */
 #[Attribute(Attribute::TARGET_METHOD)]
+/**
+ * licence Apache-2.0
+ */
 class AggregateIdentifierMethod
 {
     private string $identifierPropertyName;

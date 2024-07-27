@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
+use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
@@ -22,24 +23,28 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class GatewayPayloadConverter implements GatewayParameterConverter
 {
-    private string $parameterName;
-
-    /**
-     * PayloadMessageParameter constructor.
-     * @param string $parameterName
-     */
-    public function __construct(string $parameterName)
+    public function __construct(private string $parameterName, private ?TypeDescriptor $parameterType)
     {
-        $this->parameterName = $parameterName;
     }
 
     /**
      * @param string $parameterName
      * @return GatewayPayloadConverter
      */
-    public static function create(string $parameterName): self
+    public static function create(InterfaceParameter $parameter): self
     {
-        return new self($parameterName);
+        return new self($parameter->getName(), self::getParameterTypeDescriptor($parameter));
+    }
+
+    public static function getParameterTypeDescriptor(InterfaceParameter $parameter): ?TypeDescriptor
+    {
+        $type = $parameter->getTypeDescriptor();
+        if ($type->isUnionType() || $type->isCompoundObjectType() || $type->isAnything()) {
+            return null;
+        } else {
+            /** @var TypeDescriptor $type */
+            return $type;
+        }
     }
 
     /**
@@ -57,11 +62,9 @@ class GatewayPayloadConverter implements GatewayParameterConverter
     {
         Assert::notNull($methodArgument, 'Gateway header converter can only be called with method argument');
 
-        if ($methodArgument->getInterfaceParameter()->getTypeDescriptor()->isUnionType() || $methodArgument->getInterfaceParameter()->getTypeDescriptor()->isCompoundObjectType() || $methodArgument->getInterfaceParameter()->getTypeDescriptor()->isAnything()) {
-            $type = TypeDescriptor::createFromVariable($methodArgument->value())->getTypeHint();
-        } else {
-            $type = $methodArgument->getInterfaceParameter()->getTypeHint();
-        }
+        $type = $this->parameterType
+            ? $this->parameterType->getTypeHint()
+            : TypeDescriptor::createFromVariable($methodArgument->value())->getTypeHint();
 
         $messageBuilder->setContentTypeIfAbsent(MediaType::createApplicationXPHPWithTypeParameter($type));
 

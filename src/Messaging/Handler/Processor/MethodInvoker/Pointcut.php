@@ -6,11 +6,12 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut\PointcutParser;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Handler\UnionTypeDescriptor;
-use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+
+use function is_null;
 
 /**
  * Class Pointcut
@@ -22,17 +23,8 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class Pointcut
 {
-    private ?string $expression;
-
-    private function __construct(?string $expression)
+    private function __construct(private ?PointcutExpression $parsedExpression)
     {
-        $results = $this->getExpressionsDivinedByBrackets($expression);
-
-        if ($results) {
-            Assert::isTrue(count($results) === count($this->getInBetweenBracketsExpressions($expression)) + 1, "Expression {$expression} is missing `||` or `&&` between brackets or `{}&&{}` bracket is missing on one of the expressions");
-        }
-
-        $this->expression = $expression;
     }
 
     /**
@@ -42,7 +34,12 @@ class Pointcut
      */
     public static function createWith(string $expression): self
     {
-        return new self($expression);
+        if (is_null($expression) || $expression === '') {
+            return new self(null);
+        } else {
+            $parser = new PointcutParser($expression);
+            return new self($parser->parse());
+        }
     }
 
     public static function initializeFrom(InterfaceToCall $interfaceToCall, array $parameterConverters): self
@@ -109,147 +106,16 @@ class Pointcut
 
     public function isEmpty(): bool
     {
-        return $this->expression === '' || is_null($this->expression);
+        return is_null($this->parsedExpression);
     }
 
-    public function doesItCut(InterfaceToCall $interfaceToCall, array $endpointAnnotations, InterfaceToCallRegistry $interfaceToCallRegistry): bool
+    public function doesItCut(InterfaceToCall $interfaceToCall, array $endpointAnnotations): bool
     {
-        return $this->doesItCutWithPossibleBrackets($this->expression, $endpointAnnotations, $interfaceToCall, $interfaceToCallRegistry);
-    }
-
-    private function getInBetweenBracketsExpressions(string $expression): array
-    {
-        preg_match_all("#(\([^\(\)]*\)(\|\||\&\&))#", $expression, $results);
-
-        return $results[2];
-    }
-
-    private function doesItCutWithPossibleBrackets(?string $expression, array $endpointAnnotations, InterfaceToCall $interfaceToCall, InterfaceToCallRegistry $interfaceToCallRegistry): bool
-    {
-        if (is_null($expression)) {
+        if ($this->isEmpty()) {
             return false;
         }
 
-        $results = $this->getExpressionsDivinedByBrackets($expression);
-
-        if (empty($results)) {
-            return $this->doesItCutWithPossibleORs($expression, $endpointAnnotations, $interfaceToCall, $interfaceToCallRegistry);
-        }
-
-        $expressionsEvaluations = [];
-        foreach ($results as $expressionToVerify) {
-            $expressionsEvaluations[] = $this->doesItCutWithPossibleORs($expressionToVerify, $endpointAnnotations, $interfaceToCall, $interfaceToCallRegistry);
-        }
-
-        $inBetweenBracketsExpressions = $this->getInBetweenBracketsExpressions($expression);
-        $newExpression                = '';
-        for ($index = 0; $index < count($expressionsEvaluations); $index++) {
-            if ($index > 0) {
-                $newExpression .= $inBetweenBracketsExpressions[$index - 1];
-            }
-
-            $newExpression .= $expressionsEvaluations[$index] ? 'true' : 'false';
-        }
-
-        return $this->doesItCutWithPossibleBrackets($newExpression, $endpointAnnotations, $interfaceToCall, $interfaceToCallRegistry);
-    }
-
-    private function doesItCutWithPossibleORs(string $expressionToVerify, array $endpointAnnotations, InterfaceToCall $interfaceToCall, InterfaceToCallRegistry $interfaceToCallRegistry): bool
-    {
-        $multipleExpression = explode('||', $expressionToVerify);
-
-        foreach ($multipleExpression as $possibleEndExpressions) {
-            if ($this->doesItCutPossibleANDs($possibleEndExpressions, $endpointAnnotations, $interfaceToCall, $interfaceToCallRegistry)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function doesItCutPossibleANDs(string $expressionToVerify, array $endpointAnnotations, InterfaceToCall $interfaceToCall, InterfaceToCallRegistry $interfaceToCallRegistry): bool
-    {
-        $expressions = explode('&&', $expressionToVerify);
-        foreach ($expressions as $expression) {
-            if (! $this->doesItCutThisExpression($expression, $endpointAnnotations, $interfaceToCall, $interfaceToCallRegistry)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    private function doesItCutThisExpression(mixed $expression, array $endpointAnnotations, InterfaceToCall $interfaceToCall, InterfaceToCallRegistry $interfaceToCallRegistry): bool
-    {
-        if ($expression === 'true') {
-            return true;
-        }
-        if ($expression === 'false') {
-            return false;
-        }
-
-        if (TypeDescriptor::isItTypeOfExistingClassOrInterface($expression)) {
-            $classDefinition = $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($expression));
-            if ($classDefinition->isAnnotation()) {
-                $annotationToCheck = $classDefinition->getClassType();
-
-                foreach ($endpointAnnotations as $endpointAnnotation) {
-                    $endpointType = TypeDescriptor::createFromVariable($endpointAnnotation);
-
-                    if ($endpointType->equals($annotationToCheck)) {
-                        return true;
-                    }
-                }
-
-                if ($interfaceToCall->hasMethodAnnotation($annotationToCheck)
-                    || $interfaceToCall->hasClassAnnotation($annotationToCheck)) {
-                    return true;
-                }
-            }
-
-            if ($interfaceToCall->getInterfaceType()->isCompatibleWith($classDefinition->getClassType())) {
-                return true;
-            }
-        }
-
-        if (strpos($expression, '::') !== false) {
-            [$class, $method] = explode('::', $expression);
-
-            if ($this->isRelatedClass($class, $interfaceToCall)) {
-                if ($interfaceToCall->hasMethodName($method)) {
-                    return true;
-                }
-            }
-        }
-
-        if (strpos($expression, '*') !== false) {
-            $expression = '#' . str_replace('*', '.*', $expression) . '#';
-            $expression = str_replace('\\', '\\\\', $expression);
-
-            return preg_match($expression, $interfaceToCall->getInterfaceName()) === 1;
-        }
-
-        return false;
-    }
-
-    private function isRelatedClass(string $expression, InterfaceToCall $interfaceToCall): bool
-    {
-        if (TypeDescriptor::isItTypeOfExistingClassOrInterface($expression)) {
-            return $interfaceToCall->getInterfaceType()->isCompatibleWith(TypeDescriptor::create($expression));
-        }
-
-        return false;
-    }
-
-    private function getExpressionsDivinedByBrackets(?string $expression): array
-    {
-        if (is_null($expression)) {
-            return [];
-        }
-
-        preg_match_all('#\(([^\(\)]*)\)#', $expression, $results);
-
-        return $results[1];
+        return $this->parsedExpression->doesItCutWith($endpointAnnotations, $interfaceToCall);
     }
 
     private static function hasConverter(array $parameterConverters, mixed $interfaceParameter): bool

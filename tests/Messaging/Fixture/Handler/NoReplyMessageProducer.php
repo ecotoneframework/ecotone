@@ -2,7 +2,6 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodCall;
 use Ecotone\Messaging\Message;
@@ -42,11 +41,6 @@ class NoReplyMessageProducer implements MessageProcessor
         return MethodCall::createWith([], false);
     }
 
-    public function getAroundMethodInterceptors(): array
-    {
-        return [];
-    }
-
     public function getObjectToInvokeOn(): string|object
     {
         return self::class;
@@ -57,17 +51,12 @@ class NoReplyMessageProducer implements MessageProcessor
         return 'executeEndpoint';
     }
 
-    public function getInterfaceToCall(): InterfaceToCall
-    {
-        return InterfaceToCall::create(self::class, 'executeEndpoint');
-    }
-
     public function getEndpointAnnotations(): array
     {
         return [];
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return self::class;
     }

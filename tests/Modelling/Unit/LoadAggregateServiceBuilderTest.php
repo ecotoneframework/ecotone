@@ -14,7 +14,7 @@ use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Ecotone\Modelling\SnapshotEvent;
 use Ecotone\Test\ComponentTestBuilder;
-use PHPUnit\Framework\TestCase;
+use Test\Ecotone\Messaging\BaseEcotoneTest;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateWithoutMessageClassesExample;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\EventSourcingHandlerMethodWithReturnType;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\EventSourcingHandlerMethodWithWrongParameterCountExample;
@@ -38,7 +38,7 @@ use Test\Ecotone\Modelling\Fixture\Ticket\WorkerWasAssignedEvent;
  * licence Apache-2.0
  * @internal
  */
-class LoadAggregateServiceBuilderTest extends TestCase
+class LoadAggregateServiceBuilderTest extends BaseEcotoneTest
 {
     public function test_enriching_command_with_aggregate_if_found()
     {
@@ -110,13 +110,16 @@ class LoadAggregateServiceBuilderTest extends TestCase
         );
     }
 
-    public function test_setting_correct_aggregate_when_snapshot_is_used()
+    /**
+     * @dataProvider enterpriseMode
+     */
+    public function test_setting_correct_aggregate_when_snapshot_is_used(bool $isEnterpriseMode)
     {
         $ticket = new Ticket();
         $ticket->onTicketWasStarted(new TicketWasStartedEvent(1));
         $extraEvent = new WorkerWasAssignedEvent(1, 100);
 
-        $messaging = ComponentTestBuilder::create()
+        $messaging = ComponentTestBuilder::create(defaultEnterpriseMode: $isEnterpriseMode)
             ->withReference('repository', InMemoryEventSourcedRepository::createWithExistingAggregate(['ticketId' => 1], Ticket::class, [new SnapshotEvent(clone $ticket), $extraEvent]))
             ->withMessageHandler(
                 LoadAggregateServiceBuilder::create(

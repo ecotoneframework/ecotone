@@ -314,6 +314,14 @@ class InterfaceToCall
     }
 
     /**
+     * @return string[]
+     */
+    public function getInterfaceParametersNames(): iterable
+    {
+        return array_map(fn ($param) => $param->getName(), $this->parameters);
+    }
+
+    /**
      * @return int
      */
     public function getInterfaceParameterAmount(): int

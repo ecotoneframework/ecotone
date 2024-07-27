@@ -25,7 +25,13 @@ interface MethodInvocation
 
     public function getMethodName(): string;
 
+    /**
+     * @TODO remove in Ecotone 2.0
+     * @deprecated Do not use. Will be removed in Ecotone 2.0
+     */
     public function getInterfaceToCall(): InterfaceToCall;
+
+    public function getName(): string;
 
     /**
      * @return mixed[]

@@ -164,9 +164,10 @@ final class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder imp
 
         if ($this->shouldWrapResultInMessage || $this->changeHeaders) {
             $methodInvokerDefinition = new Definition(WrapWithMessageBuildProcessor::class, [
-                $this->interfaceToCallReference,
                 $methodInvokerDefinition,
                 $this->changeHeaders,
+                $interfaceToCall->toString(),
+                $interfaceToCall->getReturnType(),
             ]);
         }
         $handlerDefinition = new Definition(RequestReplyProducer::class, [

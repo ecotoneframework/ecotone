@@ -2,7 +2,6 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\ParameterConverter;
@@ -21,34 +20,15 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 final class MethodInvoker implements MessageProcessor
 {
-    private string|object $objectToInvokeOn;
-    private string $objectMethodName;
     /**
-     * @var ParameterConverter[]
-     */
-    private array $orderedMethodArguments;
-    private InterfaceToCall $interfaceToCall;
-    private bool $canInterceptorReplaceArguments;
-
-    /**
-     * MethodInvocation constructor.
-     * @param $objectToInvokeOn
-     * @param string $objectMethodName
      * @param array|ParameterConverter[] $methodParameterConverters
-     * @param InterfaceToCall $interfaceToCall
-     * @param bool $canInterceptorReplaceArguments
+     * @param string[] $methodParameterNames
      * @throws InvalidArgumentException
      * @throws MessagingException
      */
-    public function __construct($objectToInvokeOn, string $objectMethodName, array $methodParameterConverters, InterfaceToCall $interfaceToCall, bool $canInterceptorReplaceArguments)
+    public function __construct(private object|string $objectToInvokeOn, private string $objectMethodName, private array $methodParameterConverters, private array $methodParameterNames, private bool $canInterceptorReplaceArguments = false)
     {
         Assert::allInstanceOfType($methodParameterConverters, ParameterConverter::class);
-
-        $this->orderedMethodArguments = $methodParameterConverters;
-        $this->objectToInvokeOn = $objectToInvokeOn;
-        $this->objectMethodName = $objectMethodName;
-        $this->interfaceToCall = $interfaceToCall;
-        $this->canInterceptorReplaceArguments = $canInterceptorReplaceArguments;
     }
 
     /**
@@ -69,13 +49,13 @@ final class MethodInvoker implements MessageProcessor
     public function getMethodCall(Message $message): MethodCall
     {
         $methodArguments = [];
-        $count = count($this->orderedMethodArguments);
+        $count = count($this->methodParameterConverters);
 
         for ($index = 0; $index < $count; $index++) {
-            $interfaceParameter = $this->interfaceToCall->getParameterAtIndex($index);
-            $data = $this->orderedMethodArguments[$index]->getArgumentFrom($message);
+            $parameterName = $this->methodParameterNames[$index];
+            $data = $this->methodParameterConverters[$index]->getArgumentFrom($message);
 
-            $methodArguments[] = MethodArgument::createWith($interfaceParameter, $data);
+            $methodArguments[] = MethodArgument::createWith($parameterName, $data);
         }
 
         return MethodCall::createWith($methodArguments, $this->canInterceptorReplaceArguments);
@@ -86,7 +66,8 @@ final class MethodInvoker implements MessageProcessor
      */
     public function __toString()
     {
-        return (string)$this->interfaceToCall;
+        $classname = is_object($this->objectToInvokeOn) ? get_class($this->objectToInvokeOn) : $this->objectToInvokeOn;
+        return "{$classname}::{$this->objectMethodName}";
     }
 
     public function getObjectToInvokeOn(): string|object
@@ -97,10 +78,5 @@ final class MethodInvoker implements MessageProcessor
     public function getMethodName(): string
     {
         return $this->objectMethodName;
-    }
-
-    public function getInterfaceToCall(): InterfaceToCall
-    {
-        return $this->interfaceToCall;
     }
 }

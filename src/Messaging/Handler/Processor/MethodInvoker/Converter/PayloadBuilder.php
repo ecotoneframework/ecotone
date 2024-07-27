@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
@@ -35,7 +34,7 @@ class PayloadBuilder implements ParameterConverterBuilder
         return new self($parameterName);
     }
 
-    public function compile(MessagingContainerBuilder $builder, InterfaceToCall $interfaceToCall): Definition
+    public function compile(InterfaceToCall $interfaceToCall): Definition
     {
         $interfaceParameter = $interfaceToCall->getParameterWithName($this->parameterName);
         return new Definition(PayloadConverter::class, [

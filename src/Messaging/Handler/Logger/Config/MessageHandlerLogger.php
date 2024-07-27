@@ -36,7 +36,7 @@ final class MessageHandlerLogger
     public function aroundCommandHandler(MethodInvocation $methodInvocation, Message $message, #[Reference] LoggingGateway $loggingGateway): mixed
     {
         $loggingGateway->info(
-            'Executing Command Handler ' . $methodInvocation->getInterfaceToCall()->toString(),
+            'Executing Command Handler ' . $methodInvocation->getName(),
             $message
         );
 
@@ -47,7 +47,7 @@ final class MessageHandlerLogger
     public function aroundEventHandler(MethodInvocation $methodInvocation, Message $message, #[Reference] LoggingGateway $loggingGateway): mixed
     {
         $loggingGateway->info(
-            'Executing Event Handler ' . $methodInvocation->getInterfaceToCall()->toString(),
+            'Executing Event Handler ' . $methodInvocation->getName(),
             $message
         );
 
@@ -58,7 +58,7 @@ final class MessageHandlerLogger
     public function aroundQueryHandler(MethodInvocation $methodInvocation, Message $message, #[Reference] LoggingGateway $loggingGateway): mixed
     {
         $loggingGateway->info(
-            'Executing Query Handler ' . $methodInvocation->getInterfaceToCall()->toString(),
+            'Executing Query Handler ' . $methodInvocation->getName(),
             $message
         );
 
@@ -69,7 +69,7 @@ final class MessageHandlerLogger
     public function aroundMessageHandler(MethodInvocation $methodInvocation, Message $message, #[Reference] LoggingGateway $loggingGateway): mixed
     {
         $loggingGateway->info(
-            'Executing Message Handler ' . $methodInvocation->getInterfaceToCall()->toString(),
+            'Executing Message Handler ' . $methodInvocation->getName(),
             $message
         );
 
@@ -80,7 +80,7 @@ final class MessageHandlerLogger
     //    public function aroundServiceActivator(MethodInvocation $methodInvocation, Message $message, #[Reference] LoggingGateway $loggingGateway): mixed
     //    {
     //        $loggingGateway->info(
-    //            'Executing Service Activator ' . $methodInvocation->getInterfaceToCall()->toString(),
+    //            'Executing Service Activator ' . $methodInvocation->getName(),
     //            $message
     //        );
     //

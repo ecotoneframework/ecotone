@@ -12,33 +12,13 @@ namespace Ecotone\Messaging\Handler;
  */
 class MethodArgument
 {
-    private InterfaceParameter $parameter;
-    /**
-     * @var mixed
-     */
-    private $value;
-
-    /**
-     * MethodArgument constructor.
-     *
-     * @param InterfaceParameter $parameter
-     * @param mixed                $value
-     */
-    private function __construct(InterfaceParameter $parameter, $value)
+    private function __construct(private string $parameterName, private mixed $value)
     {
-        $this->parameter = $parameter;
-        $this->value     = $value;
     }
 
-    /**
-     * @param InterfaceParameter $parameter
-     * @param mixed                $value
-     *
-     * @return MethodArgument
-     */
-    public static function createWith(InterfaceParameter $parameter, $value): self
+    public static function createWith(string $parameterName, mixed $value): self
     {
-        return new self($parameter, $value);
+        return new self($parameterName, $value);
     }
 
     /**
@@ -46,39 +26,18 @@ class MethodArgument
      */
     public function getParameterName(): string
     {
-        return $this->parameter->getName();
+        return $this->parameterName;
     }
 
-    /**
-     * @param InterfaceParameter $interfaceParameterToCompare
-     * @return bool
-     */
-    public function hasEqualTypeAs(InterfaceParameter $interfaceParameterToCompare): bool
+    public function replaceValue(mixed $value): self
     {
-        return $this->getInterfaceParameter()->hasEqualTypeAs($interfaceParameterToCompare);
-    }
-
-    /**
-     * @return InterfaceParameter
-     */
-    public function getInterfaceParameter(): InterfaceParameter
-    {
-        return $this->parameter;
-    }
-
-    /**
-     * @param mixed $value
-     * @return MethodArgument
-     */
-    public function replaceValue($value): self
-    {
-        return self::createWith($this->getInterfaceParameter(), $value);
+        return self::createWith($this->parameterName, $value);
     }
 
     /**
      * @return mixed
      */
-    public function value()
+    public function value(): mixed
     {
         return $this->value;
     }

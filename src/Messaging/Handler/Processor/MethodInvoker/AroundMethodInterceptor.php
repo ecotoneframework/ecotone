@@ -2,12 +2,10 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * @author  Dariusz Gafka <support@simplycodedsoftware.com>
@@ -20,11 +18,8 @@ class AroundMethodInterceptor
     /**
      * @param ParameterConverter[] $parameterConverters
      */
-    public function __construct(private object $referenceToCall, private InterfaceToCall $interceptorInterfaceToCall, private array $parameterConverters, private bool $hasMethodInvocation)
+    public function __construct(private object $referenceToCall, private string $methodName, private array $parameterConverters, private bool $hasMethodInvocation)
     {
-        if ($interceptorInterfaceToCall->canReturnValue() && ! $this->hasMethodInvocation) {
-            throw InvalidArgumentException::create("Trying to register {$interceptorInterfaceToCall} as Around Advice which can return value, but doesn't control invocation using " . MethodInvocation::class . '. Have you wanted to register Before/After Advice or forgot to type hint MethodInvocation?');
-        }
     }
 
     /**
@@ -40,7 +35,7 @@ class AroundMethodInterceptor
         return new self($referenceToCall, $interfaceToCall, $parameterConverters, $hasMethodInvocation);
     }
 
-    public function invoke(MethodInvocation $methodInvocation, Message $requestMessage)
+    public function getArguments(MethodInvocation $methodInvocation, Message $requestMessage): array
     {
         $argumentsToCall           = [];
 
@@ -52,12 +47,21 @@ class AroundMethodInterceptor
             );
         }
 
-        $returnValue = $this->referenceToCall->{$this->interceptorInterfaceToCall->getMethodName()}(...$argumentsToCall);
+        return $argumentsToCall;
+    }
 
-        if (! $this->hasMethodInvocation) {
-            return $methodInvocation->proceed();
-        }
+    public function getReferenceToCall(): object
+    {
+        return $this->referenceToCall;
+    }
 
-        return $returnValue;
+    public function getMethodName(): string
+    {
+        return $this->methodName;
+    }
+
+    public function hasMethodInvocation(): bool
+    {
+        return $this->hasMethodInvocation;
     }
 }

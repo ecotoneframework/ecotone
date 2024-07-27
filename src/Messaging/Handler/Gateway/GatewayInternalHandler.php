@@ -3,7 +3,8 @@
 namespace Ecotone\Messaging\Handler\Gateway;
 
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Future;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
@@ -12,6 +13,7 @@ use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\ErrorMessage;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ramsey\Uuid\Uuid;
 
 /**
  * Class GatewayInternalHandler
@@ -23,24 +25,14 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class GatewayInternalHandler
 {
-    private MessageChannel $requestChannel;
-    private ?PollableChannel $replyChannel;
-    private InterfaceToCall $interfaceToCall;
-    private int $replyMilliSecondsTimeout;
-
-    /**
-     * GatewayInternalHandler constructor.
-     * @param InterfaceToCall $interfaceToCall
-     * @param MessageChannel $requestChannel
-     * @param PollableChannel|null $replyChannel
-     * @param int $replyMilliSecondsTimeout
-     */
-    public function __construct(InterfaceToCall $interfaceToCall, MessageChannel $requestChannel, ?PollableChannel $replyChannel, int $replyMilliSecondsTimeout)
-    {
-        $this->interfaceToCall = $interfaceToCall;
-        $this->requestChannel = $requestChannel;
-        $this->replyChannel = $replyChannel;
-        $this->replyMilliSecondsTimeout = $replyMilliSecondsTimeout;
+    public function __construct(
+        private string $interfaceToCallName,
+        private ?Type $returnType,
+        private bool $returnTypeAllowsNull,
+        private MessageChannel $requestChannel,
+        private ?PollableChannel $replyChannel,
+        private int $replyMilliSecondsTimeout
+    ) {
     }
 
     /**
@@ -53,9 +45,10 @@ class GatewayInternalHandler
     {
         //      Gateway can be called inside service activator. So it means, we need to preserve reply channel in order to reply with it
         $previousReplyChannel = $requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaders()->getReplyChannel() : null;
+        $canReturnValue = $this->returnType?->isVoid() === false;
 
         $requestMessage = MessageBuilder::fromMessage($requestMessage);
-        $replyChannel = $this->replyChannel ? $this->replyChannel : ($this->interfaceToCall->canReturnValue() ? QueueChannel::create($this->interfaceToCall->getInterfaceName() . '::' . $this->interfaceToCall->getMethodName() . '-replyChannel') : null);
+        $replyChannel = $this->replyChannel ?: ($canReturnValue ? QueueChannel::create(Uuid::uuid4() . '-replyChannel') : null);
         if ($replyChannel) {
             $requestMessage = $requestMessage
                 ->setReplyChannel($replyChannel);
@@ -68,10 +61,10 @@ class GatewayInternalHandler
         $this->requestChannel->send($requestMessage);
 
         $replyMessage = null;
-        if ($this->interfaceToCall->canReturnValue() && $requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
+        if ($canReturnValue && $requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
             $replyCallable = $this->getReply($requestMessage->getHeaders()->getReplyChannel());
 
-            if ($this->interfaceToCall->doesItReturnFuture()) {
+            if ($this->returnType?->isClassOfType(Future::class)) {
                 return FutureReplyReceiver::create($replyCallable);
             }
 
@@ -96,8 +89,8 @@ class GatewayInternalHandler
         return function () use ($replyChannel) {
             $replyMessage = $this->replyMilliSecondsTimeout > 0 ? $replyChannel->receiveWithTimeout($this->replyMilliSecondsTimeout) : $replyChannel->receive();
 
-            if (is_null($replyMessage) && ! $this->interfaceToCall->canItReturnNull()) {
-                throw InvalidArgumentException::create("{$this->interfaceToCall} expects value, but null was returned. Have you consider changing return value to nullable?");
+            if (is_null($replyMessage) && ! $this->returnTypeAllowsNull) {
+                throw InvalidArgumentException::create("{$this->interfaceToCallName} expects value, but null was returned. Have you consider changing return value to nullable?");
             }
             if ($replyMessage instanceof ErrorMessage) {
                 throw ($replyMessage->getPayload()->getCause() ?: $replyMessage->getPayload());

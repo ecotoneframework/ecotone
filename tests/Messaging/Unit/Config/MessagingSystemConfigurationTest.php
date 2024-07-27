@@ -15,6 +15,7 @@ use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ConsoleCommandConfiguration;
 use Ecotone\Messaging\Config\ConsoleCommandParameter;
+use Ecotone\Messaging\Config\Container\ContainerBuilder;
 use Ecotone\Messaging\Config\Container\GatewayProxyReference;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
@@ -1749,7 +1750,9 @@ class MessagingSystemConfigurationTest extends MessagingTest
                     ->withInputChannelName('some')
                     ->withEndpointId('order.register')
             )
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel('order.register'));
+            ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel('order.register'))
+            ->process(new ContainerBuilder())
+        ;
     }
 
     public function test_throwing_exception_if_registering_message_channel_name_with_same_name_as_endpoint_id()
@@ -1762,7 +1765,9 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 ServiceActivatorBuilder::createWithDirectReference(new OrderService(), 'order')
                     ->withInputChannelName('some')
                     ->withEndpointId('order.register')
-            );
+            )
+            ->process(new ContainerBuilder())
+        ;
     }
 
     public function test_throwing_exception_if_registering_endpoint_with_id_same_as_default_message_channel()
@@ -1775,7 +1780,9 @@ class MessagingSystemConfigurationTest extends MessagingTest
                 ServiceActivatorBuilder::createWithDirectReference(new OrderService(), 'order')
                     ->withInputChannelName('some')
                     ->withEndpointId('order.register')
-            );
+            )
+            ->process(new ContainerBuilder())
+        ;
     }
 
     public function test_throwing_exception_if_message_handler_having_same_channel_and_endpoint_id()

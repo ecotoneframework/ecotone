@@ -10,6 +10,7 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverterBuilder;
 use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 
 /**
  * Class GatewayExpressionBuilder
@@ -50,7 +51,7 @@ class GatewayPayloadExpressionBuilder implements GatewayParameterConverterBuilde
         return $this->parameterName === $parameter->getName();
     }
 
-    public function compile(MessagingContainerBuilder $builder): Definition
+    public function compile(MessagingContainerBuilder $builder, InterfaceToCall $interfaceToCall): Definition
     {
         return new Definition(
             GatewayPayloadExpressionConverter::class,

@@ -61,6 +61,11 @@ class StubMethodInvocation implements MethodInvocation
         return 'someMethod';
     }
 
+    public function getName(): string
+    {
+        return 'stdClass::someMethod';
+    }
+
     public function getInterfaceToCall(): InterfaceToCall
     {
         return InterfaceToCall::create(stdClass::class, 'someMethod');

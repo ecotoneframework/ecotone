@@ -8,6 +8,7 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverterBuilder;
 use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 
 /**
  * Class StaticHeaderToMessageConverterBuilder
@@ -51,7 +52,7 @@ class GatewayHeaderValueBuilder implements GatewayParameterConverterBuilder
         return false;
     }
 
-    public function compile(MessagingContainerBuilder $builder): Definition
+    public function compile(MessagingContainerBuilder $builder, InterfaceToCall $interfaceToCall): Definition
     {
         return new Definition(
             GatewayHeaderValueConverter::class,

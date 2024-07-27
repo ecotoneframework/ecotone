@@ -4,7 +4,7 @@ namespace Ecotone\Messaging\Config\Container;
 
 use Ecotone\Messaging\Config\Container\Compiler\CompilerPass;
 use Ecotone\Messaging\Config\DefinedObjectWrapper;
-use InvalidArgumentException;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * licence Apache-2.0
@@ -33,7 +33,7 @@ class ContainerBuilder
     public function register(string $id, DefinedObject|Definition|Reference $definition): Reference
     {
         if (isset($this->definitions[$id])) {
-            throw new InvalidArgumentException("Definition with id {$id} already exists");
+            throw InvalidArgumentException::create("Definition with id {$id} already exists");
         }
         return $this->replace($id, $definition);
     }
@@ -52,7 +52,7 @@ class ContainerBuilder
 
     public function getDefinition(string $id): Definition|Reference
     {
-        return $this->definitions[$id];
+        return $this->definitions[$id] ?? throw InvalidArgumentException::create("Definition with id {$id} not found");
     }
 
     /**

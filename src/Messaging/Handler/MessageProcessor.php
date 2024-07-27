@@ -28,6 +28,4 @@ interface MessageProcessor
     public function getObjectToInvokeOn(): string|object;
 
     public function getMethodName(): string;
-
-    public function getInterfaceToCall(): InterfaceToCall;
 }

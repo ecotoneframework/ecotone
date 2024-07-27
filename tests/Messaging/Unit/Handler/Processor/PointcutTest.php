@@ -57,7 +57,7 @@ class PointcutTest extends TestCase
     public function test_pointing_to_class_with_or()
     {
         $this->itShouldCut(
-            stdClass::class . '||' . CallMultipleUnorderedArgumentsInvocationInterceptorExample::class,
+            stdClass::class . '||' . CallMultipleUnorderedArgumentsInvocationInterceptorExample::class . '||' . stdClass::class,
             InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, 'callMultipleUnorderedArgumentsInvocation')
         );
     }

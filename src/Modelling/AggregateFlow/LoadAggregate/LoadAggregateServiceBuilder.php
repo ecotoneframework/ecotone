@@ -18,7 +18,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\TargetAggregateVersion;
-use Ecotone\Modelling\EventSourcingHandlerExecutor;
+use Ecotone\Modelling\EventSourcingExecutor\EventSourcingHandlerExecutorBuilder;
 use Ecotone\Modelling\LazyEventSourcedRepository;
 use Ecotone\Modelling\LazyStandardRepository;
 
@@ -32,7 +32,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     private ?string $messageVersionPropertyName;
     private ?string $aggregateVersionPropertyName = null;
     private array $aggregateRepositoryReferenceNames;
-    private EventSourcingHandlerExecutor $eventSourcingHandlerExecutor;
+    private Definition $eventSourcingHandlerExecutor;
     private LoadAggregateMode $loadAggregateMode;
     private bool $isEventSourced;
     private bool $isAggregateVersionAutomaticallyIncreased = true;
@@ -108,7 +108,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         }
 
         $this->messageVersionPropertyName = $aggregateMessageVersionPropertyName;
-        $this->eventSourcingHandlerExecutor = EventSourcingHandlerExecutor::createFor($aggregateClassDefinition, $this->isEventSourced, $interfaceToCallRegistry);
+        $this->eventSourcingHandlerExecutor = EventSourcingHandlerExecutorBuilder::createFor($aggregateClassDefinition, $this->isEventSourced, $interfaceToCallRegistry);
     }
 
     private function loadEventSourcingAggregateService(): Definition

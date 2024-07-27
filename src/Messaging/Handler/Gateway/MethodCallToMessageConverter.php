@@ -6,10 +6,8 @@ namespace Ecotone\Messaging\Handler\Gateway;
 
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadConverter;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionConverter;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -22,24 +20,29 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class MethodCallToMessageConverter
 {
-    private ?InterfaceToCall $interfaceToCall;
-    private ?array $methodArgumentConverters;
-
     /**
-     * MethodCallToMessageConverter constructor.
-     * @param InterfaceToCall $interfaceToCall
      * @param array|GatewayParameterConverter[] $methodArgumentConverters
-     * @throws \Ecotone\Messaging\MessagingException
+     * @param string[] $parameterNames
      */
-    public function __construct(InterfaceToCall $interfaceToCall, array $methodArgumentConverters)
+    public function __construct(private array $methodArgumentConverters, private array $parameterNames)
     {
-        $this->initialize($interfaceToCall, $methodArgumentConverters);
+        Assert::allInstanceOfType($methodArgumentConverters, GatewayParameterConverter::class);
+    }
+
+    public function convert(array $methodArgumentValues): MessageBuilder
+    {
+        $methodArguments = [];
+        for ($index = 0; $index < count($methodArgumentValues); $index++) {
+            $methodValue = $methodArgumentValues[$index];
+            $methodArguments[] = MethodArgument::createWith($this->parameterNames[$index], $methodValue);
+        }
+        return $this->convertFor($this->getMessageBuilderUsingPayloadConverter($methodArguments), $methodArguments);
     }
 
     /**
      * @param MethodArgument[] $methodArguments
      */
-    public function convertFor(MessageBuilder $messageBuilder, array $methodArguments): MessageBuilder
+    private function convertFor(MessageBuilder $messageBuilder, array $methodArguments): MessageBuilder
     {
         Assert::allInstanceOfType($methodArguments, MethodArgument::class);
 
@@ -78,33 +81,6 @@ class MethodCallToMessageConverter
         return $defaultBuilder;
     }
 
-    /**
-     * @param InterfaceToCall $interfaceToCall
-     * @param array|GatewayParameterConverter[] $methodArgumentConverters
-     * @throws InvalidArgumentException
-     * @throws \Ecotone\Messaging\MessagingException
-     */
-    private function initialize(InterfaceToCall $interfaceToCall, array $methodArgumentConverters): void
-    {
-        Assert::allInstanceOfType($methodArgumentConverters, GatewayParameterConverter::class);
-
-        $this->interfaceToCall = $interfaceToCall;
-
-        if (empty($methodArgumentConverters) && $this->interfaceToCall->hasMoreThanOneParameter()) {
-            throw InvalidArgumentException::create("You need to pass method argument converts for {$this->interfaceToCall}");
-        }
-
-        if (empty($methodArgumentConverters) && $this->interfaceToCall->hasSingleParameter()) {
-            $methodArgumentConverters = [GatewayPayloadConverter::create($this->interfaceToCall->getFirstParameterName())];
-        }
-
-        $this->methodArgumentConverters = $methodArgumentConverters;
-    }
-
-    /**
-     * @param GatewayParameterConverter $methodParameterConverter
-     * @return bool
-     */
     private function isPayloadConverter(GatewayParameterConverter $methodParameterConverter): bool
     {
         return ($methodParameterConverter instanceof GatewayPayloadConverter || $methodParameterConverter instanceof GatewayPayloadExpressionConverter);

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\ChannelReference;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
@@ -15,13 +14,13 @@ use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\ProxyBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadConverter;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterceptedEndpoint;
@@ -71,7 +70,7 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
      */
     private array $messageConverterReferenceNames = [];
     /**
-     * @var AroundInterceptorReference[]
+     * @var AroundInterceptorBuilder[]
      */
     private array $aroundInterceptors = [];
     /**
@@ -223,7 +222,6 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
     }
 
     /**
-     * @param AroundInterceptorReference $aroundInterceptorReference
      * @return $this
      */
     public function addAroundInterceptor(AroundInterceptorBuilder $aroundInterceptorReference): self
@@ -305,14 +303,12 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
     public function registerProxy(MessagingContainerBuilder $builder): Reference
     {
         $gateway = $this->compile($builder);
-        $builder->register('gateway.'.$this->getReferenceName().'::'.$this->getRelatedMethodName(), $gateway);
+        $builder->register($this->getProxyMethodReference(), $gateway);
         if (! $builder->has($this->getReferenceName())) {
-            $builder->register($this->getReferenceName(), new Definition($this->getInterfaceName(), [
+            $builder->register(
                 $this->getReferenceName(),
-                new Reference(ConfiguredMessagingSystem::class),
-                $this->getInterfaceName(),
-                new Reference(ServiceCacheConfiguration::REFERENCE_NAME),
-            ], [ProxyFactory::class, 'createFor']));
+                ProxyFactory::getGatewayProxyDefinitionFor(new GatewayProxyReference($this->referenceName, $this->interfaceName))
+            );
         }
 
         return new Reference($this->getReferenceName());
@@ -343,19 +339,19 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
 
         $methodArgumentConverters = [];
         if ($this->replyContentType) {
-            $methodArgumentConverters[] = GatewayHeaderValueBuilder::create(MessageHeaders::REPLY_CONTENT_TYPE, $this->replyContentType)->compile($builder);
+            $methodArgumentConverters[] = GatewayHeaderValueBuilder::create(MessageHeaders::REPLY_CONTENT_TYPE, $this->replyContentType)->compile($builder, $interfaceToCall);
         }
         if ($interfaceToCall->hasFirstParameter() && ! $this->hasConverterFor($interfaceToCall->getFirstParameter())) {
-            $methodArgumentConverters[] = GatewayPayloadBuilder::create($interfaceToCall->getFirstParameter()->getName())->compile($builder);
+            $methodArgumentConverters[] = GatewayPayloadBuilder::create($interfaceToCall->getFirstParameter()->getName())->compile($builder, $interfaceToCall);
         }
         if ($interfaceToCall->hasSecondParameter() && ! $this->hasConverterFor($interfaceToCall->getSecondParameter())) {
             if ($interfaceToCall->getSecondParameter()->getTypeDescriptor()->isArrayButNotClassBasedCollection()) {
-                $methodArgumentConverters[] = GatewayHeadersBuilder::create($interfaceToCall->getSecondParameter()->getName())->compile($builder);
+                $methodArgumentConverters[] = GatewayHeadersBuilder::create($interfaceToCall->getSecondParameter()->getName())->compile($builder, $interfaceToCall);
             }
         }
 
         foreach ($this->methodArgumentConverters as $messageConverterBuilder) {
-            $methodArgumentConverters[] = $messageConverterBuilder->compile($builder);
+            $methodArgumentConverters[] = $messageConverterBuilder->compile($builder, $interfaceToCall);
         }
 
         $messageConverters = [];
@@ -363,18 +359,27 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
             $messageConverters[] = new Reference($messageConverterReferenceName);
         }
 
+        if (empty($methodArgumentConverters) && $interfaceToCall->hasMoreThanOneParameter()) {
+            throw InvalidArgumentException::create("You need to pass method argument converts for {$interfaceToCall}");
+        }
+
+        if (empty($methodArgumentConverters) && $interfaceToCall->hasSingleParameter()) {
+            $methodArgumentConverters = [GatewayPayloadConverter::create($interfaceToCall->getFirstParameter())];
+        }
+
         $internalHandlerReference = $this->compileGatewayInternalHandler($builder);
 
         return new Definition(Gateway::class, [
-            $interfaceToCallReference,
             new Definition(MethodCallToMessageConverter::class, [
-                $interfaceToCallReference,
                 $methodArgumentConverters,
+                $interfaceToCall->getInterfaceParametersNames(),
             ]),
+            $interfaceToCall->getReturnType(),
             $messageConverters,
             new Definition(GatewayReplyConverter::class, [
                 new Reference(ConversionService::REFERENCE_NAME),
-                $interfaceToCallReference,
+                $interfaceToCall->toString(),
+                $interfaceToCall->getReturnType(),
                 $messageConverters,
             ]),
             $internalHandlerReference,
@@ -386,7 +391,9 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
         $interfaceToCallReference = new InterfaceToCallReference($this->interfaceName, $this->methodName);
         $interfaceToCall = $builder->getInterfaceToCall($interfaceToCallReference);
         $gatewayInternalHandlerReference = new Definition(GatewayInternalHandler::class, [
-            $interfaceToCallReference,
+            $interfaceToCall->toString(),
+            $interfaceToCall->getReturnType(),
+            $interfaceToCall->canItReturnNull(),
             new ChannelReference($this->requestChannelName),
             $this->replyChannelName ? new ChannelReference($this->replyChannelName) : null,
             $this->replyMilliSecondsTimeout,

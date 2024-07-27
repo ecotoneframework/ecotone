@@ -35,7 +35,7 @@ class MethodInvokerBuilder implements CompilableBuilder
 
         $compiledMethodParameterConverters = [];
         foreach ($methodParameterConverterBuilders as $index => $methodParameterConverterBuilder) {
-            $compiledMethodParameterConverters[] = $methodParameterConverterBuilder->compile($builder, $interfaceToCall, $interfaceToCall->getInterfaceParameters()[$index]);
+            $compiledMethodParameterConverters[] = $methodParameterConverterBuilder->compile($interfaceToCall);
         }
         if (is_string($this->reference)) {
             $reference = $interfaceToCall->isStaticallyCalled() ? $this->reference : new Reference($this->reference);
@@ -47,7 +47,7 @@ class MethodInvokerBuilder implements CompilableBuilder
             $reference,
             $interfaceToCall->getMethodName(),
             $compiledMethodParameterConverters,
-            $this->interfaceToCallReference,
+            $interfaceToCall->getInterfaceParametersNames(),
             true,
         ]);
     }

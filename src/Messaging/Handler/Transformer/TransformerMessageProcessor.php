@@ -3,10 +3,10 @@
 namespace Ecotone\Messaging\Handler\Transformer;
 
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -21,24 +21,8 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class TransformerMessageProcessor implements MessageProcessor
 {
-    private MethodInvoker $methodInvoker;
-
-    /**
-     * TransformerMessageProcessor constructor.
-     * @param MethodInvoker $methodInvoker
-     */
-    private function __construct(MethodInvoker $methodInvoker)
+    public function __construct(private MethodInvoker $methodInvoker, private Type $returnType)
     {
-        $this->methodInvoker = $methodInvoker;
-    }
-
-    /**
-     * @param MethodInvoker $methodInvoker
-     * @return TransformerMessageProcessor
-     */
-    public static function createFrom(MethodInvoker $methodInvoker): self
-    {
-        return new self($methodInvoker);
     }
 
     /**
@@ -60,7 +44,7 @@ class TransformerMessageProcessor implements MessageProcessor
         } elseif (! ($reply instanceof Message)) {
             $reply = $replyBuilder
                 ->setPayload($reply)
-                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter($this->methodInvoker->getInterfaceToCall()->getReturnType()->toString()))
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter($this->returnType->toString()))
                 ->build();
         }
 
@@ -80,11 +64,6 @@ class TransformerMessageProcessor implements MessageProcessor
     public function getMethodName(): string
     {
         return $this->methodInvoker->getMethodName();
-    }
-
-    public function getInterfaceToCall(): InterfaceToCall
-    {
-        return $this->methodInvoker->getInterfaceToCall();
     }
 
     /**

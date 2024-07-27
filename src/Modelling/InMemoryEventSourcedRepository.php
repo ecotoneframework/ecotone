@@ -19,6 +19,9 @@ use Ecotone\Modelling\Attribute\EventSourcingSaga;
  */
 class InMemoryEventSourcedRepository implements EventSourcedRepository
 {
+    /**
+     * @var array<string, array<string, Event[]>>
+     */
     private array $eventsPerAggregate;
     private ?array $aggregateTypes;
 
@@ -72,7 +75,7 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
         if (isset($this->eventsPerAggregate[$aggregateClassName][$key])) {
             $events = $this->eventsPerAggregate[$aggregateClassName][$key];
 
-            return EventStream::createWith(count($events), array_map(fn (object $event): Event => Event::create($event), $events));
+            return EventStream::createWith(count($events), $events);
         }
 
         return EventStream::createEmpty();
@@ -84,8 +87,6 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
     public function save(array $identifiers, string $aggregateClassName, array $events, array $metadata, int $versionBeforeHandling): void
     {
         $key = $this->getKey($identifiers);
-
-        $events = array_map(static fn (Event $event) => $event->getPayload(), $events);
 
         if (! isset($this->eventsPerAggregate[$aggregateClassName][$key])) {
             $this->eventsPerAggregate[$aggregateClassName][$key] = $events;

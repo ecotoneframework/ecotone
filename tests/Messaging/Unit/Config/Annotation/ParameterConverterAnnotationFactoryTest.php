@@ -47,8 +47,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
                 ConfigurationVariableBuilder::create('environment', 'env', true, null),
             ],
             $parameterConverterAnnotationFactory->createParameterWithDefaults(
-                InterfaceToCall::create(ServiceActivatorWithAllConfigurationDefined::class, 'sendMessage'),
-                false
+                InterfaceToCall::create(ServiceActivatorWithAllConfigurationDefined::class, 'sendMessage')
             )
         );
     }
@@ -65,8 +64,7 @@ class ParameterConverterAnnotationFactoryTest extends MessagingTest
                 ),
             ],
             $parameterConverterAnnotationFactory->createParameterWithDefaults(
-                InterfaceToCall::create(ServiceWithSingleArgumentDefinedByConverter::class, 'receive'),
-                false
+                InterfaceToCall::create(ServiceWithSingleArgumentDefinedByConverter::class, 'receive')
             )
         );
     }

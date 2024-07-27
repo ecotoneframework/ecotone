@@ -45,6 +45,8 @@ class ServiceConfiguration
      */
     private array $pollableEndpointAnnotations = [];
 
+    private bool $hasEnterpriseLicence = false;
+
     private function __construct()
     {
         $this->cacheDirectoryPath = sys_get_temp_dir();
@@ -220,6 +222,18 @@ class ServiceConfiguration
         $this->connectionRetryTemplate = $channelPollRetryTemplate;
 
         return $this;
+    }
+
+    public function withEnterpriseLicence(bool $enabled): self
+    {
+        $this->hasEnterpriseLicence = $enabled;
+
+        return $this;
+    }
+
+    public function hasEnterpriseLicence(): bool
+    {
+        return $this->hasEnterpriseLicence;
     }
 
     /**

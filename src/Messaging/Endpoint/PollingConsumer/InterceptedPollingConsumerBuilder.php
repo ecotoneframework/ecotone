@@ -126,11 +126,6 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
     public function registerConsumer(MessagingContainerBuilder $builder, MessageHandlerBuilder $messageHandlerBuilder): void
     {
         $endpointId = $messageHandlerBuilder->getEndpointId();
-        if ($this->withContinuesPolling()) {
-            $pollingMetadata = $builder->getPollingMetadata($endpointId);
-            $pollingMetadata = $pollingMetadata->setFixedRateInMilliseconds(1);
-            $builder->registerPollingMetadata($pollingMetadata);
-        }
         $requestChannelName = 'internal_inbound_gateway_channel.'.Uuid::uuid4()->toString();
         $connectionChannel = new Definition(DirectChannel::class, [
             $requestChannelName,
@@ -170,7 +165,7 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
             new Reference(LoggerInterface::class),
             new Reference(MessagingEntrypoint::class),
         ]);
-        $builder->registerPollingEndpoint($endpointId, $consumerRunner);
+        $builder->registerPollingEndpoint($endpointId, $consumerRunner, $this->withContinuesPolling());
     }
 
     private function getErrorInterceptorReference(MessagingContainerBuilder $builder): AroundInterceptorBuilder

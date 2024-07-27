@@ -59,7 +59,7 @@ class MethodInterceptorTest extends TestCase
             $interceptorInterface,
             ServiceActivatorBuilder::create(InterceptorWithMultipleOptionalAttributes::class, $interceptorInterface),
             1,
-            BeforeMultiplyCalculation::class . '|' . AfterMultiplyCalculation::class . '|' . PowerCalculation::class
+            BeforeMultiplyCalculation::class . '||' . AfterMultiplyCalculation::class . '||' . PowerCalculation::class
         );
 
         $this->assertEquals(

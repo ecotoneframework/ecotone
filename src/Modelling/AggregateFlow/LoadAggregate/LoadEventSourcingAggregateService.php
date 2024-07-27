@@ -15,7 +15,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\EventSourcedRepository;
-use Ecotone\Modelling\EventSourcingHandlerExecutor;
+use Ecotone\Modelling\EventSourcingExecutor\EventSourcingHandlerExecutor;
 use Ecotone\Modelling\LoadAggregateService;
 
 /**

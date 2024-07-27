@@ -45,18 +45,26 @@ class AroundMethodInvocation implements MethodInvocation
      */
     public function proceed(): mixed
     {
-        /** @var AroundMethodInterceptor $aroundMethodInterceptor */
-        $aroundMethodInterceptor = $this->aroundMethodInterceptors->current();
-        $this->aroundMethodInterceptors->next();
+        do {
+            /** @var AroundMethodInterceptor $aroundMethodInterceptor */
+            $aroundMethodInterceptor = $this->aroundMethodInterceptors->current();
+            $this->aroundMethodInterceptors->next();
 
-        if (! $aroundMethodInterceptor) {
-            return $this->interceptedMessageProcessor->executeEndpoint($this->requestMessage);
-        }
+            if (! $aroundMethodInterceptor) {
+                return $this->interceptedMessageProcessor->executeEndpoint($this->requestMessage);
+            }
 
-        return $aroundMethodInterceptor->invoke(
-            $this,
-            $this->requestMessage
-        );
+            $arguments = $aroundMethodInterceptor->getArguments(
+                $this,
+                $this->requestMessage
+            );
+            $referenceToCall = $aroundMethodInterceptor->getReferenceToCall();
+            $methodName = $aroundMethodInterceptor->getMethodName();
+
+            $returnValue = $referenceToCall->{$methodName}(...$arguments);
+        } while (! $aroundMethodInterceptor->hasMethodInvocation());
+
+        return $returnValue;
     }
 
     /**
@@ -79,7 +87,7 @@ class AroundMethodInvocation implements MethodInvocation
 
     public function getInterfaceToCall(): InterfaceToCall
     {
-        return $this->interceptedMessageProcessor->getInterfaceToCall();
+        return InterfaceToCall::create($this->getObjectToInvokeOn(), $this->getMethodName());
     }
 
     /**
@@ -90,5 +98,12 @@ class AroundMethodInvocation implements MethodInvocation
     public function replaceArgument(string $parameterName, $value): void
     {
         $this->methodCall->replaceArgument($parameterName, $value);
+    }
+
+    public function getName(): string
+    {
+        $object = $this->getObjectToInvokeOn();
+        $classname = is_string($object) ? $object : get_class($object);
+        return "{$classname}::{$this->getMethodName()}";
     }
 }

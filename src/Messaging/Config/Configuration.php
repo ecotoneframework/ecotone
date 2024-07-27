@@ -16,7 +16,6 @@ use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use Ecotone\Messaging\Handler\Type;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -123,12 +122,6 @@ interface Configuration extends CompilerPass
     public function getRegisteredConsoleCommands(): array;
 
     public function registerConsoleCommand(ConsoleCommandConfiguration $consoleCommandConfiguration): Configuration;
-
-    /**
-     * @param Type $interfaceName
-     * @return Configuration
-     */
-    public function registerInternalGateway(Type $interfaceName): Configuration;
 
     /**
      * @param CompilableBuilder $converterBuilder

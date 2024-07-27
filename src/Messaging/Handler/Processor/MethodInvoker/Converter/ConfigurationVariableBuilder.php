@@ -3,7 +3,6 @@
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
@@ -34,7 +33,7 @@ class ConfigurationVariableBuilder implements ParameterConverterBuilder
         return $this->parameterName === $parameter->getName();
     }
 
-    public function compile(MessagingContainerBuilder $builder, InterfaceToCall $interfaceToCall): Definition
+    public function compile(InterfaceToCall $interfaceToCall): Definition
     {
         return new Definition(ValueConverter::class, [
             Reference::to(ConfigurationVariableService::REFERENCE_NAME),

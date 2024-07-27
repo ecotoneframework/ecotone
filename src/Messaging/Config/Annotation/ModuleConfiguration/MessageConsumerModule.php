@@ -43,7 +43,6 @@ final class MessageConsumerModule extends NoExternalConfigurationModule implemen
                 ->withInputChannelName($endpointId)
                 ->withMethodParameterConverters($annotationParameterBuilder->createParameterWithDefaults(
                     $interfaceToCallRegistry->getFor($amqpConsumer->getClassName(), $amqpConsumer->getMethodName()),
-                    false
                 ));
         }
 

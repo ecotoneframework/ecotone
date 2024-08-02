@@ -9,6 +9,7 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
@@ -44,25 +45,26 @@ final class LicenceDecider
         return $interfaceToCall->hasAnnotation($type);
     }
 
-    public static function prepareDefinition(string $className, Reference|Definition $openCoreService, Reference|Definition $enterpriseService): Definition
+    public static function prepareDefinition(string $className, string $openCoreServiceReference, string $enterpriseServiceReference): Definition
     {
         return new Definition(
             $className,
             [
                 Reference::to(self::class),
-                $openCoreService,
-                $enterpriseService,
+                $openCoreServiceReference,
+                $enterpriseServiceReference,
+                Reference::to(ReferenceSearchService::class),
             ],
             factory: [self::class, 'decide']
         );
     }
 
-    public static function decide(self $enterpriseModeDecider, object $openCoreService, object $enterpriseService): object
+    public static function decide(self $enterpriseModeDecider, string $openCoreService, string $enterpriseService, ReferenceSearchService $referenceSearchService): object
     {
         if ($enterpriseModeDecider->hasEnterpriseLicence()) {
-            return $enterpriseService;
+            return $referenceSearchService->get($enterpriseService);
         }
 
-        return $openCoreService;
+        return $referenceSearchService->get($openCoreService);
     }
 }

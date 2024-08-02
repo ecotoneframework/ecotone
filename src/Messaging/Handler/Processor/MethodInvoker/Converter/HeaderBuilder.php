@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Config\Container\InterfaceParameterReference;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
@@ -51,8 +50,12 @@ class HeaderBuilder implements ParameterConverterBuilder
 
     public function compile(InterfaceToCall $interfaceToCall): Definition
     {
+        $parameter = $interfaceToCall->getParameterWithName($this->parameterName);
         return new Definition(HeaderConverter::class, [
-            InterfaceParameterReference::fromInstance($interfaceToCall, $this->parameterName),
+            $parameter->getTypeDescriptor(),
+            $parameter->hasDefaultValue()
+                ? new Definition(ParameterDefaultValue::class, [$parameter->getDefaultValue()])
+                : null,
             $this->headerName,
             $this->isRequired,
             new Reference(ConversionService::REFERENCE_NAME),

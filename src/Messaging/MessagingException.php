@@ -18,6 +18,7 @@ use Throwable;
  */
 abstract class MessagingException extends Exception
 {
+    public const LICENSE_EXCEPTION = 1;
     public const INVALID_MESSAGE_HEADER_EXCEPTION = 100;
     public const MESSAGE_HEADER_NOT_AVAILABLE_EXCEPTION = 101;
     public const INVALID_ARGUMENT_EXCEPTION = 102;

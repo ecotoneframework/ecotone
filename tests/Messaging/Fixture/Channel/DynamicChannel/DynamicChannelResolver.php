@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Channel\DynamicChannel;
 
+use Ecotone\Messaging\Attribute\InternalHandler;
 use Ecotone\Messaging\Attribute\Parameter\Header;
-use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\NullableMessageChannel;
 use InvalidArgumentException;
 
@@ -24,7 +24,10 @@ final class DynamicChannelResolver
     ) {
     }
 
-    #[ServiceActivator('dynamicChannel.receive')]
+    /**
+     * @return string channel name to consume from
+     */
+    #[InternalHandler('dynamicChannel.receive')]
     public function toReceive(#[Header('throwException')] bool $throwException = false): string
     {
         if ($throwException) {
@@ -36,7 +39,7 @@ final class DynamicChannelResolver
         return $channel === null ? NullableMessageChannel::CHANNEL_NAME : $channel;
     }
 
-    #[ServiceActivator('dynamicChannel.send')]
+    #[InternalHandler('dynamicChannel.send')]
     public function toSend(): string
     {
         $channel = array_shift($this->sendingChannelsInOrder);

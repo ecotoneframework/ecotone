@@ -20,6 +20,7 @@ use Ecotone\JMSConverter\Configuration\JMSDefaultSerialization;
 use Ecotone\Laravel\Config\LaravelConnectionModule;
 use Ecotone\Lite\Test\Configuration\EcotoneTestSupportModule;
 use Ecotone\Messaging\Channel\Collector\Config\CollectorModule;
+use Ecotone\Messaging\Channel\DynamicChannel\Config\DynamicMessageChannelModule;
 use Ecotone\Messaging\Channel\PollableChannel\InMemory\InMemoryQueueAcknowledgeModule;
 use Ecotone\Messaging\Channel\PollableChannel\SendRetries\PollableChannelSendRetriesModule;
 use Ecotone\Messaging\Channel\PollableChannel\Serialization\PollableChannelSerializationModule;
@@ -88,6 +89,7 @@ class ModuleClassList
         TransformerModule::class,
         MessageConsumerModule::class,
         InstantRetryModule::class,
+        DynamicMessageChannelModule::class,
 
         /** Attribute based configurations */
         LoggingGateway::class,

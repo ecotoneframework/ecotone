@@ -112,7 +112,8 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
             ],
             [
                 PollableChannelConfiguration::createWithDefaults('orders_priority')->withCollector(false),
-            ]
+            ],
+            true,
         );
 
         $exception = false;
@@ -144,7 +145,8 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
             ],
             [
                 PollableChannelConfiguration::createWithDefaults('orders_priority')->withCollector(false),
-            ]
+            ],
+            true
         );
 
         $ecotoneLite->sendCommand(new PlaceOrder('1'));
@@ -283,14 +285,15 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
      * @param MessageChannelBuilder[] $channelBuilders
      * @param object[] $extensionObjects
      */
-    private function bootstrapEcotone(array $classesToResolve, array $services, array $channelBuilders, array $extensionObjects = []): FlowTestSupport
+    private function bootstrapEcotone(array $classesToResolve, array $services, array $channelBuilders, array $extensionObjects = [], bool $withEnterpriseLicence = false): FlowTestSupport
     {
         return EcotoneLite::bootstrapFlowTesting(
             $classesToResolve,
             $services,
             ServiceConfiguration::createWithDefaults()
                 ->withExtensionObjects($extensionObjects),
-            enableAsynchronousProcessing: $channelBuilders
+            enableAsynchronousProcessing: $channelBuilders,
+            withEnterpriseLicence: $withEnterpriseLicence
         );
     }
 }

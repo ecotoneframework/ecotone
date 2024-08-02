@@ -7,7 +7,6 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 use Ecotone\Messaging\Conversion\ConversionException;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -25,7 +24,7 @@ use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
  */
 class HeaderConverter implements ParameterConverter
 {
-    public function __construct(private InterfaceParameter $parameter, private string $headerName, private bool $isRequired, private ConversionService $conversionService)
+    public function __construct(private ?Type $parameterType, private ?ParameterDefaultValue $defaultValue, private string $headerName, private bool $isRequired, private ConversionService $conversionService)
     {
     }
 
@@ -35,8 +34,8 @@ class HeaderConverter implements ParameterConverter
     public function getArgumentFrom(Message $message)
     {
         if (! $message->getHeaders()->containsKey($this->headerName)) {
-            if ($this->parameter->hasDefaultValue()) {
-                return $this->parameter->getDefaultValue();
+            if ($this->defaultValue) {
+                return $this->defaultValue->getValue();
             }
 
             if (! $this->isRequired) {
@@ -46,7 +45,7 @@ class HeaderConverter implements ParameterConverter
 
         $headerValue = $message->getHeaders()->get($this->headerName);
 
-        $targetType = $this->parameter->getTypeDescriptor();
+        $targetType = $this->parameterType;
 
         $sourceValueType = TypeDescriptor::createFromVariable($headerValue);
         if (! $sourceValueType->isCompatibleWith($targetType)) {

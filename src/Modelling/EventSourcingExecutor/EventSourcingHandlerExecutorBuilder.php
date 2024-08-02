@@ -22,7 +22,7 @@ final class EventSourcingHandlerExecutorBuilder
             return new Definition($classDefinition->getClassType()->toString(), [
                 $classDefinition->getClassType()->toString(),
                 [],
-                LicenceDecider::prepareDefinition(AggregateMethodInvoker::class, Reference::to(OpenCoreAggregateMethodInvoker::class), Reference::to(EnterpriseAggregateMethodInvoker::class)),
+                LicenceDecider::prepareDefinition(AggregateMethodInvoker::class, OpenCoreAggregateMethodInvoker::class, EnterpriseAggregateMethodInvoker::class),
             ]);
         }
 

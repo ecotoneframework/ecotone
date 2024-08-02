@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Channel\DynamicChannel;
 
 use Ecotone\Messaging\Channel\DynamicChannel\ReceivingStrategy\CustomReceivingStrategy;
 use Ecotone\Messaging\Channel\DynamicChannel\ReceivingStrategy\RoundRobinReceivingStrategy;
+use Ecotone\Messaging\Channel\DynamicChannel\ReceivingStrategy\SkippingReceivingStrategy;
 use Ecotone\Messaging\Channel\DynamicChannel\SendingStrategy\CustomSendingStrategy;
 use Ecotone\Messaging\Channel\DynamicChannel\SendingStrategy\HeaderSendingStrategy;
 use Ecotone\Messaging\Channel\DynamicChannel\SendingStrategy\RoundRobinSendingStrategy;
@@ -36,7 +37,7 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
     }
 
     /**
-     * Creates with default round robin strateg for sending and receiving
+     * Creates with default round robin strategy for sending and receiving
      *
      * @param string[] $receivingChannelNames
      * @param string[] $sendingChannelNames
@@ -55,7 +56,7 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
     }
 
     /**
-     * Creates with default round robin strateg for sending and receiving
+     * Creates with default round robin strategy for sending and receiving
      *
      * @param string[] $channelNames
      * @param MessageChannelBuilder[] $internalMessageChannels
@@ -72,6 +73,52 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
     }
 
     /**
+     * @param string $headerName Name of the header that will be used to decide on channel name
+     * @param string[] $headerMapping Mapping of header value to channel name. If null header value wil be taken as channel name
+     * @param string|null $defaultChannelName Name of the channel that will be used if no mapping is found. If null Exception will be thrown.
+     */
+    public static function createWithHeaderBasedStrategy(
+        string $thisMessageChannelName,
+        string $headerName,
+        array $headerMapping,
+        ?string $defaultChannelName = null,
+    ): self {
+        return new self(
+            $thisMessageChannelName,
+            new Definition(HeaderSendingStrategy::class, [
+                $headerName,
+                $headerMapping,
+                $defaultChannelName,
+            ]),
+            new Definition(RoundRobinReceivingStrategy::class, [array_unique(array_merge(array_values($headerMapping)))]),
+        );
+    }
+
+    /**
+     * This enriches default Rounb Robin strategy with ability to decide if consuming should be skipped
+     * from given channel
+     *
+     * @param string $requestChannelName Name of the inputChannel of Internal Message Handler that will decide on the consumption
+     * @param string[] $channelNames
+     */
+    public static function createRoundRobinWithSkippingStrategy(
+        string $thisMessageChannelName,
+        string $requestChannelName,
+        array $channelNames = [],
+    ): self {
+        return new self(
+            $thisMessageChannelName,
+            new Definition(RoundRobinSendingStrategy::class, [$channelNames]),
+            new Definition(SkippingReceivingStrategy::class, [
+                Reference::to(MessagingEntrypoint::class),
+                $thisMessageChannelName,
+                new Definition(RoundRobinReceivingStrategy::class, [$channelNames]),
+                $requestChannelName,
+            ]),
+        );
+    }
+
+    /**
      * @param MessageChannelBuilder[] $internalMessageChannels
      */
     public function withInternalChannels(array $internalMessageChannels): self
@@ -84,7 +131,7 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
     }
 
     /**
-     * @param string $requestChannelName Name of the inputChannel of Service Activator that will provide channel name to send message to
+     * @param string $requestChannelName Name of the inputChannel of Internal Message Handler that will provide channel name to send message to
      */
     public function withCustomSendingStrategy(string $requestChannelName): self
     {
@@ -113,7 +160,7 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
     }
 
     /**
-     * @param string $requestChannelName Name of the inputChannel of Service Activator that will provide channel name to poll message from
+     * @param string $requestChannelName Name of the inputChannel of Internal Message Handler that will provide channel name to poll message from
      */
     public function withCustomReceivingStrategy(string $requestChannelName): self
     {

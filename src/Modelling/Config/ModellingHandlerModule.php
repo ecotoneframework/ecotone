@@ -327,9 +327,11 @@ class ModellingHandlerModule implements AnnotationModule
      */
     public function prepare(Configuration $messagingConfiguration, array $moduleExtensions, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        /** @TODO Ecotone Enterprise register those based on licence */
-        $messagingConfiguration->registerServiceDefinition(\Ecotone\Messaging\Config\Container\Reference::to(OpenCoreAggregateMethodInvoker::class), new Definition(OpenCoreAggregateMethodInvoker::class));
-        $messagingConfiguration->registerServiceDefinition(\Ecotone\Messaging\Config\Container\Reference::to(EnterpriseAggregateMethodInvoker::class), new Definition(EnterpriseAggregateMethodInvoker::class));
+        if ($messagingConfiguration->isRunningForEnterpriseLicence()) {
+            $messagingConfiguration->registerServiceDefinition(\Ecotone\Messaging\Config\Container\Reference::to(EnterpriseAggregateMethodInvoker::class), new Definition(EnterpriseAggregateMethodInvoker::class));
+        } else {
+            $messagingConfiguration->registerServiceDefinition(\Ecotone\Messaging\Config\Container\Reference::to(OpenCoreAggregateMethodInvoker::class), new Definition(OpenCoreAggregateMethodInvoker::class));
+        }
 
         foreach ($this->aggregateCommandHandlers as $registration) {
             Assert::isFalse($registration->isMagicMethod(), sprintf('%s::%s cannot be annotated as command handler', $registration->getClassName(), $registration->getMethodName()));

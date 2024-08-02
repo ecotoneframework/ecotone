@@ -51,9 +51,8 @@ final class EventSourcingHandlerExecutor
                 ->setMultipleHeaders($metadata)
                 ->build();
             foreach ($this->eventSourcingHandlerMethods as $eventSourcingHandler) {
-                $eventSourcingHandlerInterface = $eventSourcingHandler->getInterfaceToCall();
-                if ($eventSourcingHandlerInterface->getFirstParameter()->canBePassedIn($eventType)) {
-                    $this->aggregateMethodInvoker->executeMethod($aggregate, $eventSourcingHandlerInterface, $eventSourcingHandler, $message);
+                if ($eventSourcingHandler->canHandle($eventType)) {
+                    $this->aggregateMethodInvoker->executeMethod($aggregate, $eventSourcingHandler, $message);
                 }
             }
         }

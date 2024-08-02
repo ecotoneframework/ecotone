@@ -73,7 +73,8 @@ final class CollectorModuleTest extends TestCase
             [
                 PollableChannelConfiguration::neverRetry('orders')->withCollector(true),
                 PollableChannelConfiguration::neverRetry('orders_priority')->withCollector(true),
-            ]
+            ],
+            true
         );
 
         $command = new PlaceOrder('1');
@@ -103,7 +104,8 @@ final class CollectorModuleTest extends TestCase
             [
                 PollableChannelConfiguration::neverRetry('orders')->withCollector(true),
                 PollableChannelConfiguration::neverRetry('orders_priority')->withCollector(true),
-            ]
+            ],
+            true
         );
 
         $command = new PlaceOrder('1');
@@ -347,14 +349,15 @@ final class CollectorModuleTest extends TestCase
      * @param MessageChannelBuilder[] $channelBuilders
      * @param CollectorConfiguration[] $collectorConfigurations
      */
-    private function bootstrapEcotone(array $classesToResolve, array $services, array $channelBuilders, array $collectorConfigurations): FlowTestSupport
+    private function bootstrapEcotone(array $classesToResolve, array $services, array $channelBuilders, array $collectorConfigurations, bool $withEnterpriseLicence = false): FlowTestSupport
     {
         return EcotoneLite::bootstrapFlowTesting(
             $classesToResolve,
             $services,
             ServiceConfiguration::createWithDefaults()
                 ->withExtensionObjects($collectorConfigurations),
-            enableAsynchronousProcessing: $channelBuilders
+            enableAsynchronousProcessing: $channelBuilders,
+            withEnterpriseLicence: $withEnterpriseLicence
         );
     }
 

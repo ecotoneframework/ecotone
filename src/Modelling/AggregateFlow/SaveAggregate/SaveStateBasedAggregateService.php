@@ -29,9 +29,10 @@ final class SaveStateBasedAggregateService implements SaveAggregateService
     ) {
     }
 
-    public function save(Message $message, array $metadata): Message
+    public function process(Message $message): Message
     {
         $aggregate = SaveAggregateServiceTemplate::resolveAggregate($this->calledClass, $message, $this->isFactoryMethod);
+        $metadata = $message->getHeaders()->headers();
         $versionBeforeHandling = SaveAggregateServiceTemplate::resolveVersionBeforeHandling($message);
         SaveAggregateServiceTemplate::enrichVersionIfNeeded(
             $this->propertyEditorAccessor,

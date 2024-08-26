@@ -7,6 +7,7 @@ use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\RequestReplyProducer;
+use Ecotone\Messaging\Handler\Splitter\SplitterHandler;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
@@ -52,10 +53,6 @@ class RequestReplyProducerTest extends MessagingTest
         );
     }
 
-    /**
-     * @param Message $message
-     * @param RequestReplyProducer $requestReplyProducer
-     */
     private function handleReplyWithMessage(Message $message, RequestReplyProducer $requestReplyProducer): void
     {
         $requestReplyProducer->handle($message);
@@ -215,9 +212,9 @@ class RequestReplyProducerTest extends MessagingTest
     public function test_splitting_payload_into_multiple_messages()
     {
         $replyData = [1, 2, 3, 4];
-        $requestReplyProducer = RequestReplyProducer::createRequestAndSplit(null, FakeReplyMessageProducer::create($replyData), InMemoryChannelResolver::createEmpty());
-
         $outputChannel = QueueChannel::create();
+        $requestReplyProducer = new SplitterHandler($outputChannel, FakeReplyMessageProducer::create($replyData));
+
         $requestMessage = MessageBuilder::withPayload('some')
             ->setHeader('token', 'abcd')
             ->setReplyChannel($outputChannel)
@@ -230,12 +227,11 @@ class RequestReplyProducerTest extends MessagingTest
     public function test_splitting_messages_when_multiple_messages_were_returned_from_service()
     {
         $replyData = [MessageBuilder::withPayload('some1')->build(), MessageBuilder::withPayload('some2')->build()];
-        $requestReplyProducer = RequestReplyProducer::createRequestAndSplit(null, FakeReplyMessageProducer::create($replyData), InMemoryChannelResolver::createEmpty());
-
         $outputChannel = QueueChannel::create();
+        $requestReplyProducer = new SplitterHandler($outputChannel, FakeReplyMessageProducer::create($replyData));
+
         $requestMessage = MessageBuilder::withPayload('some')
             ->setHeader('token', 'abcd')
-            ->setReplyChannel($outputChannel)
             ->build();
         $requestReplyProducer->handle($requestMessage);
 
@@ -267,23 +263,16 @@ class RequestReplyProducerTest extends MessagingTest
     public function test_throwing_exception_if_result_of_service_call_is_not_array()
     {
         $replyData = 'someString';
-        $requestReplyProducer = RequestReplyProducer::createRequestAndSplit(null, FakeReplyMessageProducer::create($replyData), InMemoryChannelResolver::createEmpty());
+        $requestReplyProducer = new SplitterHandler(QueueChannel::create(), FakeReplyMessageProducer::create($replyData));
 
         $this->expectException(MessageDeliveryException::class);
 
         $requestReplyProducer->handle(
             MessageBuilder::withPayload('some')
-                ->setReplyChannel(QueueChannel::create())
                 ->build()
         );
     }
 
-    /**
-     * @param MessageProcessor $replyMessageProducer
-     * @param MessageChannel|null $outputChannel
-     * @param bool $requireReply
-     * @return RequestReplyProducer
-     */
     private function createRequestReplyProducer(MessageProcessor $replyMessageProducer, MessageChannel $outputChannel = null, bool $requireReply = false): RequestReplyProducer
     {
         $outputChannelName = $outputChannel ? 'output-channel' : '';
@@ -291,20 +280,26 @@ class RequestReplyProducerTest extends MessagingTest
             $outputChannelName => $outputChannel,
         ]) : InMemoryChannelResolver::createEmpty();
 
-        return RequestReplyProducer::createRequestAndReply($outputChannelName, $replyMessageProducer, $channelResolver, $requireReply);
+        return new RequestReplyProducer(
+            $outputChannel,
+            $replyMessageProducer,
+            $channelResolver,
+            $requireReply
+        );
     }
 
     /**
-     * @param MessageProcessor $replyMessageProducer
-     * @param array $messageChannels
-     * @param string|null $outputChannelName
-     * @return RequestReplyProducer
-     * @throws MessagingException
-     * @throws \Ecotone\Messaging\Handler\DestinationResolutionException
+     * @param array<string, MessageChannel> $messageChannels
      */
     private function createRequestReplyProducerWithChannels(MessageProcessor $replyMessageProducer, array $messageChannels, ?string $outputChannelName): RequestReplyProducer
     {
-        return RequestReplyProducer::createRequestAndReply($outputChannelName, $replyMessageProducer, InMemoryChannelResolver::createFromAssociativeArray($messageChannels), false);
+        $outputChannel = $outputChannelName ? $messageChannels[$outputChannelName] : null;
+        return new RequestReplyProducer(
+            $outputChannel,
+            $replyMessageProducer,
+            InMemoryChannelResolver::createFromAssociativeArray($messageChannels),
+            false,
+        );
     }
 
     /**

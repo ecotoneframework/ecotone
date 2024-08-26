@@ -5,6 +5,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Filter;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Handler\Filter\MessageFilterBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -36,7 +37,10 @@ class MessageFilterBuilderTest extends MessagingTest
         $messaging = ComponentTestBuilder::create()
             ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
             ->withMessageHandler(
-                MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCallReference::create(MessageSelectorExample::class, 'accept'))
+                MessageProcessorActivatorBuilder::create()
+                    ->chainInterceptedProcessor(
+                        MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCallReference::create(MessageSelectorExample::class, 'accept'))
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -56,7 +60,10 @@ class MessageFilterBuilderTest extends MessagingTest
         $messaging = ComponentTestBuilder::create()
             ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
             ->withMessageHandler(
-                MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCallReference::create(MessageSelectorExample::class, 'refuse'))
+                MessageProcessorActivatorBuilder::create()
+                    ->chainInterceptedProcessor(
+                        MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCallReference::create(MessageSelectorExample::class, 'refuse'))
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -70,7 +77,10 @@ class MessageFilterBuilderTest extends MessagingTest
     {
         $messaging = ComponentTestBuilder::create()
             ->withMessageHandler(
-                MessageFilterBuilder::createBoolHeaderFilter('filterOut')
+                MessageProcessorActivatorBuilder::create()
+                    ->chainInterceptedProcessor(
+                        MessageFilterBuilder::createBoolHeaderFilter('filterOut')
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -86,7 +96,10 @@ class MessageFilterBuilderTest extends MessagingTest
     {
         $messaging = ComponentTestBuilder::create()
             ->withMessageHandler(
-                MessageFilterBuilder::createBoolHeaderFilter('filterOut')
+                MessageProcessorActivatorBuilder::create()
+                    ->chainInterceptedProcessor(
+                        MessageFilterBuilder::createBoolHeaderFilter('filterOut')
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -102,7 +115,10 @@ class MessageFilterBuilderTest extends MessagingTest
     {
         $messaging = ComponentTestBuilder::create()
             ->withMessageHandler(
-                MessageFilterBuilder::createBoolHeaderFilter('filterOut')
+                MessageProcessorActivatorBuilder::create()
+                    ->chainInterceptedProcessor(
+                        MessageFilterBuilder::createBoolHeaderFilter('filterOut')
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -116,7 +132,10 @@ class MessageFilterBuilderTest extends MessagingTest
     {
         $messaging = ComponentTestBuilder::create()
             ->withMessageHandler(
-                MessageFilterBuilder::createBoolHeaderFilter('filterOut', defaultResultWhenHeaderIsMissing: false)
+                MessageProcessorActivatorBuilder::create()
+                    ->chainInterceptedProcessor(
+                        MessageFilterBuilder::createBoolHeaderFilter('filterOut', defaultResultWhenHeaderIsMissing: false)
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -130,7 +149,10 @@ class MessageFilterBuilderTest extends MessagingTest
     {
         $messaging = ComponentTestBuilder::create()
             ->withMessageHandler(
-                MessageFilterBuilder::createBoolHeaderFilter('filterOut', defaultResultWhenHeaderIsMissing: true)
+                MessageProcessorActivatorBuilder::create()
+                    ->chainInterceptedProcessor(
+                        MessageFilterBuilder::createBoolHeaderFilter('filterOut', defaultResultWhenHeaderIsMissing: true)
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -150,7 +172,10 @@ class MessageFilterBuilderTest extends MessagingTest
         ComponentTestBuilder::create()
             ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
             ->withMessageHandler(
-                MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCallReference::create(MessageSelectorExample::class, 'wrongReturnType'))
+                MessageProcessorActivatorBuilder::create()
+                    ->chainInterceptedProcessor(
+                        MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCallReference::create(MessageSelectorExample::class, 'wrongReturnType'))
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -165,9 +190,12 @@ class MessageFilterBuilderTest extends MessagingTest
             ->withChannel(SimpleMessageChannelBuilder::createQueueChannel($discardChannelName = 'discardChannel'))
             ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
             ->withMessageHandler(
-                MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCallReference::create(MessageSelectorExample::class, 'refuse'))
+                MessageProcessorActivatorBuilder::create()
+                    ->chainInterceptedProcessor(
+                        MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCallReference::create(MessageSelectorExample::class, 'refuse'))
+                            ->withDiscardChannelName($discardChannelName)
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
-                    ->withDiscardChannelName($discardChannelName)
             )
             ->build();
 
@@ -187,26 +215,17 @@ class MessageFilterBuilderTest extends MessagingTest
         $messaging = ComponentTestBuilder::create()
             ->withReference(MessageSelectorExample::class, MessageSelectorExample::create())
             ->withMessageHandler(
-                MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCallReference::create(MessageSelectorExample::class, 'refuse'))
+                MessageProcessorActivatorBuilder::create()
+                    ->chainInterceptedProcessor(
+                        MessageFilterBuilder::createWithReferenceName(MessageSelectorExample::class, InterfaceToCallReference::create(MessageSelectorExample::class, 'refuse'))
+                            ->withThrowingExceptionOnDiscard(true)
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
-                    ->withThrowingExceptionOnDiscard(true)
             )
             ->build();
 
         $this->expectException(MessagingException::class);
 
         $messaging->sendDirectToChannel($inputChannel);
-    }
-
-    public function test_converting_to_string()
-    {
-        $inputChannelName = 'inputChannel';
-        $endpointName = 'someName';
-
-        $this->assertIsString(
-            (string)MessageFilterBuilder::createWithReferenceName('ref-name', InterfaceToCallReference::create(MessageSelectorExample::class, 'refuse'))
-                ->withInputChannelName($inputChannelName)
-                ->withEndpointId($endpointName),
-        );
     }
 }

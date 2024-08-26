@@ -28,6 +28,6 @@ final class BridgeExample
     #[Around(precedence: 0, pointcut: BridgeExample::class . '::result')]
     public function multiply(MethodInvocation $methodInvocation): int
     {
-        return $methodInvocation->proceed()->getPayload() * 3;
+        return $methodInvocation->proceed() * 3;
     }
 }

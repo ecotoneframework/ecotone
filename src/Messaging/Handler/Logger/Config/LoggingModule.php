@@ -19,11 +19,10 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogBefore;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
-use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
 use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
 use Ecotone\Messaging\Handler\Logger\LoggingService;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Precedence;
 use Psr\Log\LoggerInterface;
 
@@ -51,19 +50,17 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
         ]);
 
         $messagingConfiguration->registerBeforeMethodInterceptor(
-            MethodInterceptor::create(
-                'beforeLog',
+            MethodInterceptorBuilder::create(
+                Reference::to(LoggingInterceptor::class),
                 $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'logBefore'),
-                LoggingHandlerBuilder::createForBefore(),
                 Precedence::EXCEPTION_LOGGING_PRECEDENCE,
                 LogBefore::class
             )
         );
         $messagingConfiguration->registerAfterMethodInterceptor(
-            MethodInterceptor::create(
-                'afterLog',
+            MethodInterceptorBuilder::create(
+                Reference::to(LoggingInterceptor::class),
                 $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'logAfter'),
-                LoggingHandlerBuilder::createForAfter(),
                 Precedence::EXCEPTION_LOGGING_PRECEDENCE,
                 LogAfter::class
             )

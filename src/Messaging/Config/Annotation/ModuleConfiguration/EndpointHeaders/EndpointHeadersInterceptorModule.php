@@ -9,11 +9,11 @@ use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Precedence;
 
 #[ModuleAnnotation]
@@ -37,12 +37,12 @@ class EndpointHeadersInterceptorModule extends NoExternalConfigurationModule imp
     {
         $interfaceToCall = $interfaceToCallRegistry->getFor(EndpointHeadersInterceptor::class, 'addMetadata');
         $messagingConfiguration->registerBeforeSendInterceptor(
-            MethodInterceptor::create(
-                EndpointHeadersInterceptor::class,
+            MethodInterceptorBuilder::create(
+                new Definition(EndpointHeadersInterceptor::class),
                 $interfaceToCall,
-                TransformerBuilder::createWithDirectObject(new EndpointHeadersInterceptor(), 'addMetadata'),
                 Precedence::ENDPOINT_HEADERS_PRECEDENCE,
-                AddHeader::class . '||' . RemoveHeader::class
+                AddHeader::class . '||' . RemoveHeader::class,
+                true
             )
         );
     }

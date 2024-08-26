@@ -338,12 +338,52 @@ class DomainContext extends TestCase implements Context
     }
 
     /**
+     * @Then basket should NOT contains :item
+     */
+    public function basketShouldNotContains(string $item)
+    {
+        $this->assertNotContains(
+            $item,
+            AnnotationBasedMessagingContext::getQueryBus()->sendWithRouting(
+                'basket.get',
+                [
+                    'item' => $item,
+                ]
+            )
+        );
+    }
+
+    /**
+     * @When I create a basket
+     */
+    public function iCreateABasket()
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
+            'basket.create',
+        );
+    }
+
+    /**
      * @When I add to basket :arg1
      */
     public function iAddToBasket(string $item)
     {
         AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
             'basket.add',
+            [
+                'item' => $item,
+            ],
+            MediaType::APPLICATION_X_PHP_ARRAY
+        );
+    }
+
+    /**
+     * @When I delete from basket :arg1
+     */
+    public function iDeleteFromBasket(string $item)
+    {
+        AnnotationBasedMessagingContext::getCommandBus()->sendWithRouting(
+            'basket.delete',
             [
                 'item' => $item,
             ],

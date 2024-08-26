@@ -2,18 +2,16 @@
 
 namespace Ecotone\Modelling\AggregateFlow\LoadAggregate;
 
-use Ecotone\Messaging\Config\Container\CompilableBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
-use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\Processor\InterceptedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
@@ -25,7 +23,7 @@ use Ecotone\Modelling\LazyStandardRepository;
 /**
  * licence Apache-2.0
  */
-class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder implements CompilableBuilder
+class LoadAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
 {
     private string $aggregateClassName;
     private string $methodName;
@@ -51,12 +49,7 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         return new self($aggregateClassDefinition, $methodName, $handledMessageClass, $loadAggregateMode, $interfaceToCallRegistry);
     }
 
-    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
-    {
-        return $interfaceToCallRegistry->getFor($this->aggregateClassName, $this->methodName);
-    }
-
-    public function compile(MessagingContainerBuilder $builder): Definition
+    public function compile(MessagingContainerBuilder $builder, array $aroundInterceptors = []): Definition
     {
         if (! $builder->has(PropertyEditorAccessor::class)) {
             $builder->register(PropertyEditorAccessor::class, new Definition(PropertyEditorAccessor::class, [
@@ -65,14 +58,10 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         }
 
         if ($this->isEventSourced) {
-            $loadAggregateService = $this->loadEventSourcingAggregateService();
+            return $this->loadEventSourcingAggregateService();
         } else {
-            $loadAggregateService = $this->loadStateBasedAggregateService();
+            return $this->loadStateBasedAggregateService();
         }
-
-        return ServiceActivatorBuilder::createWithDefinition($loadAggregateService, 'load')
-            ->withOutputMessageChannel($this->getOutputMessageChannelName())
-            ->compile($builder);
     }
 
     /**
@@ -154,5 +143,10 @@ class LoadAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
             new Reference(PropertyEditorAccessor::class),
             new Definition(LoadAggregateMode::class, [$this->loadAggregateMode->getType()]),
         ]);
+    }
+
+    public function getInterceptedInterface(): InterfaceToCallReference
+    {
+        return InterfaceToCallReference::create($this->aggregateClassName, $this->methodName);
     }
 }

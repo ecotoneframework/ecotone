@@ -9,7 +9,6 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
 /**
@@ -27,16 +26,6 @@ class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
     private function __construct()
     {
         $this->bridgeBuilder = ServiceActivatorBuilder::create(Bridge::class, new InterfaceToCallReference(Bridge::class, 'handle'));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function addAroundInterceptor(AroundInterceptorBuilder $aroundInterceptorReference): ServiceActivatorBuilder
-    {
-        $self = clone $this;
-
-        return $self->bridgeBuilder->addAroundInterceptor($aroundInterceptorReference);
     }
 
     /**

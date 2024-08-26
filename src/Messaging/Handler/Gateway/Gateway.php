@@ -4,17 +4,15 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\MessageConverter;
-use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ramsey\Uuid\Uuid;
 use Throwable;
 
 /**
@@ -36,7 +34,7 @@ class Gateway implements NonProxyGateway
         private ?Type $returnType,
         private array $messageConverters,
         private GatewayReplyConverter $gatewayReplyConverter,
-        private MessageHandler $gatewayInternalHandler
+        private MessageProcessor $gatewayInternalProcessor
     ) {
     }
 
@@ -48,7 +46,6 @@ class Gateway implements NonProxyGateway
      */
     public function execute(array $methodArgumentValues)
     {
-        $internalReplyBridge = null;
         if (count($methodArgumentValues) === 1 && ($methodArgumentValues[0] instanceof Message)) {
             $requestMessage = MessageBuilder::fromMessage($methodArgumentValues[0]);
         } else {
@@ -70,11 +67,7 @@ class Gateway implements NonProxyGateway
 
         $previousReplyChannel = $requestMessage->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaderWithName(MessageHeaders::REPLY_CHANNEL) : null;
         $replyContentType = $requestMessage->containsKey(MessageHeaders::REPLY_CONTENT_TYPE) ? MediaType::parseMediaType($requestMessage->getHeaderWithName(MessageHeaders::REPLY_CONTENT_TYPE)) : null;
-        if ($canReturnValue) {
-            $internalReplyBridge = QueueChannel::create(Uuid::uuid4() . '-replyChannel');
-            $requestMessage = $requestMessage
-                ->setReplyChannel($internalReplyBridge);
-        } else {
+        if (! $canReturnValue) {
             $requestMessage = $requestMessage
                 ->removeHeader(MessageHeaders::REPLY_CHANNEL);
         }
@@ -82,8 +75,7 @@ class Gateway implements NonProxyGateway
             ->removeHeader(MessageHeaders::REPLY_CONTENT_TYPE)
             ->build();
 
-        $this->gatewayInternalHandler->handle($requestMessage);
-        $replyMessage = $internalReplyBridge ? $internalReplyBridge->receive() : null;
+        $replyMessage = $this->gatewayInternalProcessor->process($requestMessage);
         if (! is_null($replyMessage) && $canReturnValue) {
             if ($replyContentType !== null || ! ($this->returnType?->isAnything() || $this->returnType?->isMessage())) {
                 $reply = $this->gatewayReplyConverter->convert($replyMessage, $replyContentType);

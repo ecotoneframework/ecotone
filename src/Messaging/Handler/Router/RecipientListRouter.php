@@ -15,7 +15,7 @@ use Ecotone\Messaging\Message;
 /**
  * licence Apache-2.0
  */
-class RecipientListRouter implements DefinedObject
+class RecipientListRouter implements RouteSelector, DefinedObject
 {
     /**
      * @var string[]

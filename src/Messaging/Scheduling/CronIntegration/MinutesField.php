@@ -13,6 +13,9 @@ use DateTimeInterface;
 /**
  * @codeCoverageIgnore
  */
+/**
+ * licence Apache-2.0
+ */
 class MinutesField extends AbstractField
 {
     /**

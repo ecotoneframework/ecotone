@@ -19,7 +19,7 @@ final class ResolveStateBasedAggregateService implements ResolveAggregateService
     ) {
     }
 
-    public function resolve(Message $message, array $metadata): Message
+    public function process(Message $message): Message
     {
         $resultMessage = MessageBuilder::fromMessage($message);
         if ($this->isFactoryMethod) {

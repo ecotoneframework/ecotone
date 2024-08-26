@@ -11,7 +11,6 @@ use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 
 /**
  * Class PollOrThrowPollableFactory
@@ -23,13 +22,6 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
  */
 class PollOrThrowMessageHandlerConsumerBuilder implements MessageHandlerConsumerBuilder
 {
-    /**
-     * @inheritDoc
-     */
-    public function addAroundInterceptor(AroundInterceptorBuilder $aroundInterceptorReference): void
-    {
-    }
-
     /**
      * @inheritDoc
      */

@@ -10,6 +10,7 @@ use Ecotone\Messaging\Attribute\PropagateHeaders;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -19,8 +20,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\Config\MessageHandlerLogger;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\BusRouterBuilder;
@@ -111,15 +111,15 @@ class BusRoutingModuleTest extends MessagingTest
                 ->registerServiceDefinition(MessageHeadersPropagatorInterceptor::class)
                 ->registerServiceDefinition(MessageHandlerLogger::class)
                 ->registerBeforeMethodInterceptor(
-                    MethodInterceptor::create(
-                        MessageHeadersPropagatorInterceptor::class,
+                    MethodInterceptorBuilder::create(
+                        Reference::to(MessageHeadersPropagatorInterceptor::class),
                         $propagateHeadersInterfaceToCall,
-                        TransformerBuilder::create(MessageHeadersPropagatorInterceptor::class, $propagateHeadersInterfaceToCall)
-                            ->withMethodParameterConverters([
-                                AllHeadersBuilder::createWith('headers'),
-                            ]),
                         Precedence::ENDPOINT_HEADERS_PRECEDENCE - 2,
-                        CommandBus::class . '||' . EventBus::class . '||' . QueryBus::class . '||' . AsynchronousRunningEndpoint::class . '||' . PropagateHeaders::class . '||' . MessagingEntrypointWithHeadersPropagation::class . '||' . MessageGateway::class
+                        CommandBus::class . '||' . EventBus::class . '||' . QueryBus::class . '||' . AsynchronousRunningEndpoint::class . '||' . PropagateHeaders::class . '||' . MessagingEntrypointWithHeadersPropagation::class . '||' . MessageGateway::class,
+                        true,
+                        [
+                            AllHeadersBuilder::createWith('headers'),
+                        ]
                     )
                 )
                 ->registerAroundMethodInterceptor(

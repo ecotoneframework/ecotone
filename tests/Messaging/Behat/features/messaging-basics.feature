@@ -124,7 +124,7 @@ Feature: Service activator
     Calculations are combined with interceptors.
     This will focus on synchronous scenario using gateway
     Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\Calculating"
-    When I calculate for 3 using gateway then result should be 15
+    When I calculate for 3 using gateway then result should be 18
 
   Scenario: Application consist of calculator. It receives number and perform few calculations.
     Calculations are combined with interceptors.
@@ -145,15 +145,15 @@ Feature: Service activator
 
   Scenario: Application handling gateways inside gateways
     Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway"
-    When I call "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\CalculateGatewayExample" with 2 I should receive 75
+    When I call "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway\CalculateGatewayExample" with 2 I should receive 76
 
   Scenario: Application handling interceptors for gateway
     Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway"
-    When I call "Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\CalculateGatewayExample" with 2 I should receive 9
+    When I call "Test\Ecotone\Messaging\Fixture\Behat\InterceptedGateway\CalculateGatewayExample" with 2 I should receive 10
 
   Scenario: Application handling gateways inside gateways using only messages
     Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages"
-    When I call with 2 I should receive 75 with message
+    When I call with 2 I should receive 76 with message
 
   Scenario: Handle presend interceptor
     Given I active messaging for namespace "Test\Ecotone\Messaging\Fixture\Behat\Presend"

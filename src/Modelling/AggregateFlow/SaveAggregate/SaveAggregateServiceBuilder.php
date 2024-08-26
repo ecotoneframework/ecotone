@@ -2,20 +2,16 @@
 
 namespace Ecotone\Modelling\AggregateFlow\SaveAggregate;
 
+use Ecotone\Messaging\Config\Container\CompilableBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
-use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use Ecotone\Messaging\Handler\ParameterConverterBuilder;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
@@ -26,7 +22,6 @@ use Ecotone\Modelling\BaseEventSourcingConfiguration;
 use Ecotone\Modelling\LazyEventSourcedRepository;
 use Ecotone\Modelling\LazyStandardRepository;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
-use Ecotone\Modelling\SaveAggregateService;
 
 /**
  * Class AggregateCallingCommandHandlerBuilder
@@ -36,13 +31,9 @@ use Ecotone\Modelling\SaveAggregateService;
 /**
  * licence Apache-2.0
  */
-class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters
+class SaveAggregateServiceBuilder implements CompilableBuilder
 {
     private InterfaceToCall $interfaceToCall;
-    /**
-     * @var ParameterConverterBuilder[]
-     */
-    private array $methodParameterConverterBuilders = [];
     /**
      * @var string[]
      */
@@ -82,14 +73,6 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
     }
 
     /**
-     * @inheritDoc
-     */
-    public function getParameterConverters(): array
-    {
-        return $this->methodParameterConverterBuilders;
-    }
-
-    /**
      * @param string[] $aggregateRepositoryReferenceNames
      */
     public function withAggregateRepositoryFactories(array $aggregateRepositoryReferenceNames): self
@@ -99,24 +82,12 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function withMethodParameterConverters(array $methodParameterConverterBuilders): self
-    {
-        Assert::allInstanceOfType($methodParameterConverterBuilders, ParameterConverterBuilder::class);
-
-        $this->methodParameterConverterBuilders = $methodParameterConverterBuilders;
-
-        return $this;
-    }
-
     public function compile(MessagingContainerBuilder $builder): Definition
     {
         if ($this->isReturningAggregate) {
-            $saveAggregateService = $this->saveMultipleAggregatesService();
+            return $this->saveMultipleAggregatesService();
         } elseif ($this->isCalledAggregateEventSourced) {
-            $saveAggregateService = $this->saveEventSourcingAggregateService(
+            return $this->saveEventSourcingAggregateService(
                 $this->calledAggregateClassName,
                 $this->interfaceToCall->isFactoryMethod(),
                 $this->calledAggregateIdentifierMapping,
@@ -125,7 +96,7 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $this->isCalledAggregateVersionAutomaticallyIncreased
             );
         } else {
-            $saveAggregateService = $this->saveStateBasedAggregateService(
+            return $this->saveStateBasedAggregateService(
                 $this->calledAggregateClassName,
                 $this->interfaceToCall->isFactoryMethod(),
                 $this->calledAggregateIdentifierMapping,
@@ -134,23 +105,11 @@ class SaveAggregateServiceBuilder extends InputOutputMessageHandlerBuilder imple
                 $this->isCalledAggregateVersionAutomaticallyIncreased
             );
         }
-
-        return ServiceActivatorBuilder::createWithDefinition($saveAggregateService, 'save')
-            ->withOutputMessageChannel($this->outputMessageChannelName)
-            ->compile($builder);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
-    {
-        return $interfaceToCallRegistry->getFor(SaveAggregateService::class, 'save');
     }
 
     public function __toString()
     {
-        return sprintf('Aggregate Handler - %s with name `%s` for input channel `%s`', $this->calledAggregateClassName, $this->getEndpointId(), $this->getInputMessageChannelName());
+        return sprintf('Save Aggregate Processor - %s', $this->calledAggregateClassName);
     }
 
     private function initialize(ClassDefinition $aggregateClassDefinition, string $methodName, InterfaceToCallRegistry $interfaceToCallRegistry): void

@@ -138,9 +138,10 @@ class SaveAggregateServiceTemplate
     /**
      * @return Event[]
      */
-    public static function buildEcotoneEvents(mixed $events, string $calledInterface, Message $message, array $metadata): array
+    public static function buildEcotoneEvents(mixed $events, string $calledInterface, Message $message): array
     {
         Assert::isIterable($events, "Return value Event Sourced Aggregate {$calledInterface} must return array of events");
+        $metadata = $message->getHeaders()->headers();
 
         return array_map(static function ($event) use ($message, $metadata, $calledInterface): Event {
             if (! is_object($event)) {

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
+
 /**
  * Class BaseInterceptorExample
  * @package Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor
@@ -12,7 +15,7 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 /**
  * licence Apache-2.0
  */
-abstract class BaseInterceptorExample
+abstract class BaseInterceptorExample implements DefinedObject
 {
     /**
      * @var bool
@@ -74,5 +77,10 @@ abstract class BaseInterceptorExample
     protected function markAsCalled(): void
     {
         $this->wasCalled = true;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [$this->valueToReturn]);
     }
 }

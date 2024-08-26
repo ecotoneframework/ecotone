@@ -179,10 +179,10 @@ final class FlowTestSupport
                 AggregateMessage::RESULT_AGGREGATE_OBJECT => $aggregateClass,
                 AggregateMessage::RESULT_AGGREGATE_EVENTS => $events,
             ],
-            ModellingHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregateClass)
+            ModellingHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregateClass). '.test_setup_state'
         );
 
-        return $this->discardRecordedMessages();
+        return $this;
     }
 
     public function withStateFor(object $aggregate): self
@@ -192,7 +192,7 @@ final class FlowTestSupport
             [
                 AggregateMessage::RESULT_AGGREGATE_OBJECT => $aggregate,
             ],
-            ModellingHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregate::class)
+            ModellingHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregate::class). '.test_setup_state'
         );
 
         return $this;

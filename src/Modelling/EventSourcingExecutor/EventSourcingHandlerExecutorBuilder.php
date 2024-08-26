@@ -14,6 +14,9 @@ use Ecotone\Modelling\Attribute\EventSourcingHandler;
 use Ecotone\Modelling\EventSourcingHandlerMethod;
 use ReflectionClass;
 
+/**
+ * licence Apache-2.0
+ */
 final class EventSourcingHandlerExecutorBuilder
 {
     public static function createFor(ClassDefinition $classDefinition, bool $isEventSourced, InterfaceToCallRegistry $interfaceToCallRegistry): Definition

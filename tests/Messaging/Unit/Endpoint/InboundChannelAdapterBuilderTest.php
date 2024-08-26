@@ -164,9 +164,9 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
                     'someRef',
                     InterfaceToCall::create($inboundChannelAdapterStoppingService::class, 'executeReturnWithInterceptor')
                 )
-                    ->withEndpointId('test')
-                    ->addAroundInterceptor(AroundInterceptorBuilder::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(), new TransactionInterceptor(), 'transactional', 1, ''))
+                ->withEndpointId('test')
             )
+            ->withAroundInterceptor(AroundInterceptorBuilder::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(), new TransactionInterceptor(), 'transactional', 1, $inboundChannelAdapterStoppingService::class))
             ->build();
 
         $messaging->run('test');
@@ -200,8 +200,8 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
                     InterfaceToCall::create($inboundChannelAdapterStoppingService::class, 'executeReturn')
                 )
                     ->withEndpointId('test')
-                    ->addAroundInterceptor(AroundInterceptorBuilder::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(), new TransactionInterceptor(), 'transactional', 1, ''))
             )
+            ->withAroundInterceptor(AroundInterceptorBuilder::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(), new TransactionInterceptor(), 'transactional', 1, $inboundChannelAdapterStoppingService::class))
             ->build();
 
         $messaging->run('test');
@@ -235,9 +235,9 @@ class InboundChannelAdapterBuilderTest extends MessagingTest
                     InterfaceToCall::create($inboundChannelAdapterStoppingService::class, 'executeReturnWithInterceptor')
                 )
                 ->withEndpointId('test')
-                ->addAroundInterceptor(AroundInterceptorBuilder::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(), new TransactionInterceptor(), 'transactional', 1, ''))
                 ->withEndpointAnnotations([new AttributeDefinition(Transactional::class, [['transactionFactory0']])])
             )
+            ->withAroundInterceptor(AroundInterceptorBuilder::createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry::createEmpty(), new TransactionInterceptor(), 'transactional', 1, $inboundChannelAdapterStoppingService::class))
             ->build();
 
         $messaging->run('test');

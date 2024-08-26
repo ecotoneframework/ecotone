@@ -12,6 +12,9 @@ use OutOfRangeException;
 /**
  * @codeCoverageIgnore
  */
+/**
+ * licence Apache-2.0
+ */
 abstract class AbstractField implements FieldInterface
 {
     /**

@@ -4,57 +4,33 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\AggregateFlow\PublishEvents;
 
+use Ecotone\Messaging\Config\Container\CompilableBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ClassDefinition;
-use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
-use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Modelling\EventBus;
 
 /**
  * licence Apache-2.0
  */
-final class PublishAggregateEventsServiceBuilder extends InputOutputMessageHandlerBuilder
+final class PublishAggregateEventsServiceBuilder implements CompilableBuilder
 {
-    private InterfaceToCall $interfaceToCall;
-
-    private function __construct(ClassDefinition $aggregateClassDefinition, string $methodName, InterfaceToCallRegistry $interfaceToCallRegistry)
+    private function __construct(private InterfaceToCallReference $interfaceToCallReference)
     {
-        $this->initialize($aggregateClassDefinition, $methodName, $interfaceToCallRegistry);
     }
 
-    public static function create(ClassDefinition $aggregateClassDefinition, string $methodName, InterfaceToCallRegistry $interfaceToCallRegistry): self
+    public static function create(ClassDefinition $aggregateClassDefinition, string $methodName): self
     {
-        return new self($aggregateClassDefinition, $methodName, $interfaceToCallRegistry);
+        return new self(new InterfaceToCallReference($aggregateClassDefinition->getClassType()->toString(), $methodName));
     }
 
     public function compile(MessagingContainerBuilder $builder): Definition|Reference
     {
-        $publishAggregateEventsService = new Definition(PublishAggregateEventsService::class, [
-            $this->interfaceToCall->toString(),
+        return new Definition(PublishAggregateEventsService::class, [
+            $this->interfaceToCallReference->getName(),
             new Reference(EventBus::class),
         ]);
-
-        return ServiceActivatorBuilder::createWithDefinition($publishAggregateEventsService, 'publish')
-            ->withOutputMessageChannel($this->outputMessageChannelName)
-            ->compile($builder);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
-    {
-        return $interfaceToCallRegistry->getFor(PublishAggregateEventsService::class, 'publish');
-    }
-
-    private function initialize(ClassDefinition $aggregateClassDefinition, string $methodName, InterfaceToCallRegistry $interfaceToCallRegistry): void
-    {
-        $interfaceToCall = $interfaceToCallRegistry->getFor($aggregateClassDefinition->getClassType()->toString(), $methodName);
-
-        $this->interfaceToCall = $interfaceToCall;
     }
 }

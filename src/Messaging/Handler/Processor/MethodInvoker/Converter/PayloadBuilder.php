@@ -39,7 +39,7 @@ class PayloadBuilder implements ParameterConverterBuilder
         $interfaceParameter = $interfaceToCall->getParameterWithName($this->parameterName);
         return new Definition(PayloadConverter::class, [
             new Reference(ConversionService::REFERENCE_NAME),
-            $interfaceToCall->getInterfaceName(),
+            $interfaceToCall->toString(),
             $this->parameterName,
             $interfaceParameter->getTypeDescriptor(),
         ]);

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor;
 
 use Ecotone\Messaging\Channel\ChannelInterceptor;
-use Ecotone\Messaging\Handler\NonProxyGateway;
+use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Throwable;
@@ -15,11 +15,8 @@ use Throwable;
  */
 class BeforeSendChannelInterceptor implements ChannelInterceptor
 {
-    private NonProxyGateway $beforeSendGateway;
-
-    public function __construct(NonProxyGateway $beforeSendGateway)
+    public function __construct(private MessageProcessor $messageProcessor)
     {
-        $this->beforeSendGateway = $beforeSendGateway;
     }
 
     /**
@@ -27,7 +24,7 @@ class BeforeSendChannelInterceptor implements ChannelInterceptor
      */
     public function preSend(Message $message, MessageChannel $messageChannel): ?Message
     {
-        return $this->beforeSendGateway->execute([$message]);
+        return $this->messageProcessor->process($message);
     }
 
     /**

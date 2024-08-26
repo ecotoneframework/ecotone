@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler;
 
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Support\Assert;
 
 /**
@@ -25,10 +24,6 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      * @var string[]
      */
     protected iterable $requiredInterceptorReferenceNames = [];
-    /**
-     * @var AroundInterceptorBuilder[]
-     */
-    protected array $orderedAroundInterceptors = [];
     /**
      * @var object[]
      */
@@ -90,17 +85,6 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
     public function getEndpointAnnotations(): array
     {
         return $this->endpointAnnotations;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function addAroundInterceptor(AroundInterceptorBuilder $aroundInterceptorReference): self
-    {
-        $self = clone $this;
-        $self->orderedAroundInterceptors[] = $aroundInterceptorReference;
-
-        return $self;
     }
 
     /**

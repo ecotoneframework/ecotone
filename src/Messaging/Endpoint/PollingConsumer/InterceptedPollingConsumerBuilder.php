@@ -18,10 +18,8 @@ use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use Ecotone\Messaging\Handler\InterceptedEndpoint;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Scheduling\Clock;
 use Psr\Log\LoggerInterface;
@@ -30,49 +28,14 @@ use Ramsey\Uuid\Uuid;
 /**
  * licence Apache-2.0
  */
-abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsumerBuilder, InterceptedEndpoint
+abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsumerBuilder
 {
-    private array $aroundInterceptorReferences = [];
-    private array $beforeInterceptors = [];
-    private array $afterInterceptors = [];
     private array $endpointAnnotations = [];
 
     /**
      * @inheritDoc
      */
-    public function addAroundInterceptor(AroundInterceptorBuilder $aroundInterceptorReference): self
-    {
-        $this->aroundInterceptorReferences[] = $aroundInterceptorReference;
-
-        return $this;
-    }
-
-    /**
-     * @param MethodInterceptor $methodInterceptor
-     * @return $this
-     */
-    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor): self
-    {
-        $this->beforeInterceptors[] = $methodInterceptor;
-
-        return $this;
-    }
-
-    /**
-     * @param MethodInterceptor $methodInterceptor
-     * @return $this
-     */
-    public function addAfterInterceptor(MethodInterceptor $methodInterceptor): self
-    {
-        $this->afterInterceptors[] = $methodInterceptor;
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withEndpointAnnotations(iterable $endpointAnnotations): self
+    public function withEndpointAnnotations(array $endpointAnnotations): self
     {
         $this->endpointAnnotations = $endpointAnnotations;
 
@@ -85,22 +48,6 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
     public function getEndpointAnnotations(): array
     {
         return $this->endpointAnnotations;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function getRequiredInterceptorNames(): iterable
-    {
-        return [];
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function withRequiredInterceptorNames(iterable $interceptorNames): self
-    {
-        return $this;
     }
 
     /**
@@ -142,18 +89,9 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
             $this->endpointAnnotations,
             [new AttributeDefinition(AsynchronousRunningEndpoint::class, [$endpointId])]
         ));
-        foreach ($this->beforeInterceptors as $beforeInterceptor) {
-            $gatewayBuilder->addBeforeInterceptor($beforeInterceptor);
-        }
-        foreach ($this->aroundInterceptorReferences as $aroundInterceptorReference) {
-            $gatewayBuilder->addAroundInterceptor($aroundInterceptorReference);
-        }
         $gatewayBuilder
             ->addAroundInterceptor($this->getErrorInterceptorReference($builder))
             ->addAroundInterceptor(AcknowledgeConfirmationInterceptor::createAroundInterceptorBuilder($builder->getInterfaceToCallRegistry()));
-        foreach ($this->afterInterceptors as $afterInterceptor) {
-            $gatewayBuilder->addAfterInterceptor($afterInterceptor);
-        }
 
         $gateway = $gatewayBuilder->compile($builder);
 

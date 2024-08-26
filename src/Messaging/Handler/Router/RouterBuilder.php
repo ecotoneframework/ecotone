@@ -17,6 +17,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Support\Assert;
 
 use function get_class;
+use function is_string;
 
 /**
  * Class RouterBuilder
@@ -29,6 +30,9 @@ use function get_class;
 class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
 {
     private ?string $inputMessageChannelName = null;
+    /**
+     * @var array<ParameterConverterBuilder>
+     */
     private array $methodParameterConverters = [];
     private bool $resolutionRequired = true;
     /**
@@ -40,13 +44,16 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
     private ?string $endpointId = '';
     private ?DefinedObject $directObjectToInvoke = null;
 
-    private function __construct(private string|Reference|Definition $objectToInvokeReference, private string|InterfaceToCall $methodNameOrInterface)
+    private function __construct(private Reference|Definition $objectToInvokeReference, private string|InterfaceToCall $methodNameOrInterface)
     {
     }
 
     public static function create(string|Reference|Definition $objectToInvokeReference, InterfaceToCall $interfaceToCall): self
     {
-        return new self($objectToInvokeReference, $interfaceToCall);
+        return new self(
+            is_string($objectToInvokeReference) ? Reference::to($objectToInvokeReference) : $objectToInvokeReference,
+            $interfaceToCall
+        );
     }
 
     public static function createPayloadTypeRouter(array $typeToChannelMapping): self
@@ -65,16 +72,14 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
 
     public static function createRecipientListRouter(array $recipientLists): self
     {
-        $routerBuilder = new self('', 'route');
-        $routerBuilder->setObjectToInvoke(new RecipientListRouter($recipientLists));
+        $routerBuilder = new self(new Definition(RecipientListRouter::class, [$recipientLists]), 'route');
 
         return $routerBuilder;
     }
 
     public static function createHeaderMappingRouter(string $headerName, array $headerValueToChannelMapping): self
     {
-        $routerBuilder = new self('', 'route');
-        $routerBuilder->setObjectToInvoke(HeaderMappingRouter::create($headerName, $headerValueToChannelMapping));
+        $routerBuilder = new self(HeaderMappingRouter::create($headerName, $headerValueToChannelMapping)->getDefinition(), 'route');
 
         return $routerBuilder;
     }
@@ -135,11 +140,12 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
         $methodInvoker = MethodInvokerBuilder::create(
             $this->directObjectToInvoke ?: $this->objectToInvokeReference,
             $interfaceToCallReference,
-            $this->methodParameterConverters
-        )->compile($builder);
+            $this->methodParameterConverters,
+        )->compileWithoutProcessor($builder);
+
         return new Definition(Router::class, [
             new Reference(ChannelResolver::class),
-            $methodInvoker,
+            new Definition(InvocationRouter::class, [$methodInvoker]),
             $this->resolutionRequired,
             $this->defaultResolution,
             $this->applySequence,
@@ -193,11 +199,6 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
         $this->endpointId = $endpointId;
 
         return $this;
-    }
-
-    private function setObjectToInvoke(DefinedObject $objectToInvoke): void
-    {
-        $this->directObjectToInvoke = $objectToInvoke;
     }
 
     /**

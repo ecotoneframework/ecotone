@@ -4,6 +4,7 @@ namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -37,13 +38,16 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         $messaging = ComponentTestBuilder::create()
             ->withReference('repository', InMemoryStandardRepository::createEmpty())
             ->withMessageHandler(
-                AggregateIdentifierRetrevingServiceBuilder::createWith(
-                    ClassDefinition::createFor(TypeDescriptor::create(OrderFulfilment::class)),
-                    ['orderId' => $headerName],
-                    [],
-                    ClassDefinition::createFor(TypeDescriptor::create(PaymentWasDoneEvent::class)),
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        AggregateIdentifierRetrevingServiceBuilder::createWith(
+                            ClassDefinition::createFor(TypeDescriptor::create(OrderFulfilment::class)),
+                            ['orderId' => $headerName],
+                            [],
+                            ClassDefinition::createFor(TypeDescriptor::create(PaymentWasDoneEvent::class)),
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -65,13 +69,16 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         $messaging = ComponentTestBuilder::create()
             ->withReference('repository', InMemoryStandardRepository::createEmpty())
             ->withMessageHandler(
-                AggregateIdentifierRetrevingServiceBuilder::createWith(
-                    ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodForEventSourcedAggregate::class)),
-                    ['id' => 'orderId'],
-                    [],
-                    null,
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        AggregateIdentifierRetrevingServiceBuilder::createWith(
+                            ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodForEventSourcedAggregate::class)),
+                            ['id' => 'orderId'],
+                            [],
+                            null,
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -92,13 +99,16 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         $messaging = ComponentTestBuilder::create()
             ->withReference('repository', InMemoryStandardRepository::createEmpty())
             ->withMessageHandler(
-                AggregateIdentifierRetrevingServiceBuilder::createWith(
-                    ClassDefinition::createFor(TypeDescriptor::create(Basket::class)),
-                    [],
-                    [],
-                    null,
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        AggregateIdentifierRetrevingServiceBuilder::createWith(
+                            ClassDefinition::createFor(TypeDescriptor::create(Basket::class)),
+                            [],
+                            [],
+                            null,
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -119,13 +129,16 @@ class AggregateIdentifierRetrevingServiceBuilderTest extends TestCase
         $messaging = ComponentTestBuilder::create()
             ->withReference('repository', InMemoryStandardRepository::createEmpty())
             ->withMessageHandler(
-                AggregateIdentifierRetrevingServiceBuilder::createWith(
-                    ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
-                    [],
-                    [],
-                    ClassDefinition::createFor(TypeDescriptor::create(ChangeArticleContentCommand::class)),
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        AggregateIdentifierRetrevingServiceBuilder::createWith(
+                            ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
+                            [],
+                            [],
+                            ClassDefinition::createFor(TypeDescriptor::create(ChangeArticleContentCommand::class)),
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();

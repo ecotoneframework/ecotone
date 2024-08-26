@@ -153,7 +153,6 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
                 ->withEndpointId($this->getEndpointId())
                 ->withInputChannelName($this->getInputMessageChannelName())
                 ->withOutputMessageChannel($this->outputMessageChannelName)
-                ->withAroundInterceptors($this->orderedAroundInterceptors)
                 ->withEndpointAnnotations($this->getEndpointAnnotations())
                 ->compile($builder);
 

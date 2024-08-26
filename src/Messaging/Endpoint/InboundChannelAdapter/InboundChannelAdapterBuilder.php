@@ -13,8 +13,6 @@ use Ecotone\Messaging\Endpoint\PollingConsumer\MessagePoller\InvocationPollerAda
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -69,36 +67,6 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
     public function withEndpointId(string $endpointId): self
     {
         $this->endpointId = $endpointId;
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor): \Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder
-    {
-        $this->inboundGateway->addBeforeInterceptor($methodInterceptor);
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function addAfterInterceptor(MethodInterceptor $methodInterceptor): \Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder
-    {
-        $this->inboundGateway->addAfterInterceptor($methodInterceptor);
-
-        return $this;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function addAroundInterceptor(AroundInterceptorBuilder $aroundInterceptorReference): self
-    {
-        $this->inboundGateway->addAroundInterceptor($aroundInterceptorReference);
 
         return $this;
     }

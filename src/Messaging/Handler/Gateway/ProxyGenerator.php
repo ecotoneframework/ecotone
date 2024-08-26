@@ -13,6 +13,9 @@ use ReflectionException;
 use ReflectionNamedType;
 use ReflectionParameter;
 
+/**
+ * licence Apache-2.0
+ */
 class ProxyGenerator
 {
     public function __construct(private string $namespace)

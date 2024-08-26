@@ -42,9 +42,10 @@ final class SaveEventSourcingAggregateService implements SaveAggregateService
         $this->documentStore ??= InMemoryDocumentStore::createEmpty();
     }
 
-    public function save(Message $message, array $metadata): Message
+    public function process(Message $message): Message
     {
-        $events = $this->resolveEvents($message, $metadata, $this->calledClass);
+        $events = $this->resolveEvents($message, $this->calledClass);
+        $metadata = $message->getHeaders()->headers();
         if ($events === []) {
             return MessageBuilder::fromMessage($message)->build();
         }
@@ -87,7 +88,7 @@ final class SaveEventSourcingAggregateService implements SaveAggregateService
         return self::SNAPSHOT_COLLECTION . $aggregateClassname;
     }
 
-    public function resolveEvents(Message $message, array $metadata, string $calledInterface): array
+    public function resolveEvents(Message $message, string $calledInterface): array
     {
         if ($this->isFactoryMethod) {
             $events = $message->getHeaders()->containsKey(AggregateMessage::RESULT_AGGREGATE_EVENTS) ? $message->getHeaders()->get(AggregateMessage::RESULT_AGGREGATE_EVENTS) : [];
@@ -95,7 +96,7 @@ final class SaveEventSourcingAggregateService implements SaveAggregateService
             $events = $message->getHeaders()->containsKey(AggregateMessage::CALLED_AGGREGATE_EVENTS) ? $message->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_EVENTS) : [];
         }
 
-        return SaveAggregateServiceTemplate::buildEcotoneEvents($events, $calledInterface, $message, $metadata);
+        return SaveAggregateServiceTemplate::buildEcotoneEvents($events, $calledInterface, $message);
     }
 
     private function getAggregateIds(array $metadata, object|string $aggregate): array

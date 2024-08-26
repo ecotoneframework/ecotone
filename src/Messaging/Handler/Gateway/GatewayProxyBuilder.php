@@ -16,19 +16,16 @@ use Ecotone\Messaging\Config\Container\ProxyBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\Chain\ChainMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadConverter;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
-use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterceptedEndpoint;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Processor\ChainedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
@@ -73,14 +70,6 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
      * @var AroundInterceptorBuilder[]
      */
     private array $aroundInterceptors = [];
-    /**
-     * @var MethodInterceptor[]
-     */
-    private array $beforeInterceptors = [];
-    /**
-     * @var MethodInterceptor[]
-     */
-    private array $afterInterceptors = [];
     /**
      * @var AttributeDefinition[]
      */
@@ -175,9 +164,6 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
         return $this->referenceName;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function getInterfaceName(): string
     {
         return $this->interfaceName;
@@ -236,28 +222,6 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
     public function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall
     {
         return $interfaceToCallRegistry->getFor($this->interfaceName, $this->methodName);
-    }
-
-    /**
-     * @param MethodInterceptor $methodInterceptor
-     * @return $this
-     */
-    public function addBeforeInterceptor(MethodInterceptor $methodInterceptor): self
-    {
-        $this->beforeInterceptors[] = $methodInterceptor;
-
-        return $this;
-    }
-
-    /**
-     * @param MethodInterceptor $methodInterceptor
-     * @return $this
-     */
-    public function addAfterInterceptor(MethodInterceptor $methodInterceptor): self
-    {
-        $this->afterInterceptors[] = $methodInterceptor;
-
-        return $this;
     }
 
     /**
@@ -367,7 +331,7 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
             $methodArgumentConverters = [GatewayPayloadConverter::create($interfaceToCall->getFirstParameter())];
         }
 
-        $internalHandlerReference = $this->compileGatewayInternalHandler($builder);
+        $internalHandlerReference = $this->compileGatewayInternalProcessor($builder);
 
         return new Definition(Gateway::class, [
             new Definition(MethodCallToMessageConverter::class, [
@@ -386,18 +350,10 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
         ]);
     }
 
-    private function compileGatewayInternalHandler(MessagingContainerBuilder $builder): Definition
+    private function compileGatewayInternalProcessor(MessagingContainerBuilder $builder): Definition
     {
         $interfaceToCallReference = new InterfaceToCallReference($this->interfaceName, $this->methodName);
         $interfaceToCall = $builder->getInterfaceToCall($interfaceToCallReference);
-        $gatewayInternalHandlerReference = new Definition(GatewayInternalHandler::class, [
-            $interfaceToCall->toString(),
-            $interfaceToCall->getReturnType(),
-            $interfaceToCall->canItReturnNull(),
-            new ChannelReference($this->requestChannelName),
-            $this->replyChannelName ? new ChannelReference($this->replyChannelName) : null,
-            $this->replyMilliSecondsTimeout,
-        ]);
 
         $aroundInterceptors = $this->aroundInterceptors;
         if ($this->errorChannelName) {
@@ -415,59 +371,21 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
             );
         }
 
-        $chainHandler = ChainMessageHandlerBuilder::create();
-        foreach ($this->getSortedInterceptors($this->beforeInterceptors) as $beforeInterceptor) {
-            $chainHandler = $chainHandler->chain($beforeInterceptor);
-        }
-        $chainHandler = $chainHandler->chainInterceptedHandler(
-            ServiceActivatorBuilder::createWithDefinition($gatewayInternalHandlerReference, 'handle')
-                ->withWrappingResultInMessage(false)
-                ->withEndpointAnnotations($this->endpointAnnotations)
-                ->withAnnotatedInterface($this->annotatedInterfaceToCall ?? $interfaceToCall)
-        );
-        foreach ($this->getSortedInterceptors($this->afterInterceptors) as $afterInterceptor) {
-            $chainHandler = $chainHandler->chain($afterInterceptor);
-        }
-
-        foreach ($this->getSortedAroundInterceptors($aroundInterceptors) as $aroundInterceptorReference) {
-            $chainHandler = $chainHandler->addAroundInterceptor($aroundInterceptorReference);
-        }
-
-        return $chainHandler->compile($builder);
-    }
-
-    /**
-     * @return AroundInterceptorBuilder[]
-     */
-    private function getSortedAroundInterceptors(array $aroundInterceptors): array
-    {
-        usort(
+        $interceptorsConfig = $builder->getRelatedInterceptors(
+            InterfaceToCallReference::fromInstance($this->annotatedInterfaceToCall ?? $interfaceToCall),
+            $this->endpointAnnotations,
+            $this->requiredInterceptorNames,
             $aroundInterceptors,
-            function (AroundInterceptorBuilder $a, AroundInterceptorBuilder $b) {
-                return $a->getPrecedence() <=> $b->getPrecedence();
-            }
         );
 
-        return $aroundInterceptors;
-    }
-
-    /**
-     * @param MethodInterceptor[] $methodInterceptors
-     * @return InputOutputMessageHandlerBuilder[]
-     */
-    private function getSortedInterceptors(iterable $methodInterceptors): iterable
-    {
-        usort($methodInterceptors, function (MethodInterceptor $methodInterceptor, MethodInterceptor $toCompare) {
-            if ($methodInterceptor->getPrecedence() === $toCompare->getPrecedence()) {
-                return 0;
-            }
-
-            return $methodInterceptor->getPrecedence() > $toCompare->getPrecedence() ? 1 : -1;
-        });
-
-        return array_map(function (MethodInterceptor $methodInterceptor) {
-            return $methodInterceptor->getMessageHandler();
-        }, $methodInterceptors);
+        return ChainedMessageProcessorBuilder::create()
+            ->chainInterceptedProcessor(new GatewayInternalProcessorBuilder(
+                $interfaceToCallReference,
+                $this->requestChannelName,
+                $this->replyChannelName,
+                $this->replyMilliSecondsTimeout
+            ))
+            ->compileProcessor($builder, $interceptorsConfig);
     }
 
     public function getProxyMethodReference(): GatewayProxyMethodReference

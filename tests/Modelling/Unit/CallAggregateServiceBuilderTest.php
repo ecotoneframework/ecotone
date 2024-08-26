@@ -5,6 +5,7 @@ namespace Test\Ecotone\Modelling\Unit;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Handler\UnionTypeDescriptor;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -54,12 +55,15 @@ class CallAggregateServiceBuilderTest extends TestCase
         $messaging = ComponentTestBuilder::create()
             ->withReference('repository', InMemoryStandardRepository::createEmpty())
             ->withMessageHandler(
-                CallAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
-                    'doSomething',
-                    true,
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        CallAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
+                            'doSomething',
+                            true,
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -85,12 +89,15 @@ class CallAggregateServiceBuilderTest extends TestCase
         $messaging = ComponentTestBuilder::create()
             ->withReference('orderRepository', InMemoryStandardRepository::createEmpty())
             ->withMessageHandler(
-                CallAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
-                    'getAmountWithQuery',
-                    true,
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        CallAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
+                            'getAmountWithQuery',
+                            true,
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -114,12 +121,15 @@ class CallAggregateServiceBuilderTest extends TestCase
         $messaging = ComponentTestBuilder::create()
             ->withReference(InMemoryStandardRepository::class, InMemoryStandardRepository::createEmpty())
             ->withMessageHandler(
-                CallAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Storage::class)),
-                    'getSmallBoxes',
-                    false,
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        CallAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Storage::class)),
+                            'getSmallBoxes',
+                            false,
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -146,12 +156,15 @@ class CallAggregateServiceBuilderTest extends TestCase
         $messaging = ComponentTestBuilder::create()
             ->withReference(InMemoryStandardRepository::class, InMemoryStandardRepository::createEmpty())
             ->withMessageHandler(
-                CallAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Storage::class)),
-                    'getBigBoxes',
-                    false,
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        CallAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Storage::class)),
+                            'getBigBoxes',
+                            false,
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -181,12 +194,15 @@ class CallAggregateServiceBuilderTest extends TestCase
         $messaging = ComponentTestBuilder::create()
             ->withReference('orderRepository', InMemoryStandardRepository::createEmpty())
             ->withMessageHandler(
-                CallAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
-                    'getCustomerId',
-                    false,
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        CallAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
+                            'getCustomerId',
+                            false,
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -209,12 +225,15 @@ class CallAggregateServiceBuilderTest extends TestCase
         $messaging = ComponentTestBuilder::create()
             ->withReference('repository', InMemoryStandardRepository::createWith([$aggregate]))
             ->withMessageHandler(
-                CallAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
-                    'querySomething',
-                    false,
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        CallAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
+                            'querySomething',
+                            false,
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -239,12 +258,15 @@ class CallAggregateServiceBuilderTest extends TestCase
         $messaging = ComponentTestBuilder::create()
             ->withReference('repository', $inMemoryEventSourcedRepository)
             ->withMessageHandler(
-                CallAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-                    'start',
-                    true,
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        CallAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
+                            'start',
+                            true,
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -265,12 +287,15 @@ class CallAggregateServiceBuilderTest extends TestCase
 
         $messaging = ComponentTestBuilder::create()
             ->withMessageHandler(
-                CallAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(EventSourcingAggregateWithInternalRecorder::class)),
-                    'create',
-                    true,
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        CallAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(EventSourcingAggregateWithInternalRecorder::class)),
+                            'create',
+                            true,
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -300,12 +325,15 @@ class CallAggregateServiceBuilderTest extends TestCase
         $messaging = ComponentTestBuilder::create()
             ->withReference('repository', $inMemoryEventSourcedRepository)
             ->withMessageHandler(
-                CallAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-                    'assignWorker',
-                    true,
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        CallAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
+                            'assignWorker',
+                            true,
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -331,12 +359,15 @@ class CallAggregateServiceBuilderTest extends TestCase
 
         $messaging = ComponentTestBuilder::create()
             ->withMessageHandler(
-                CallAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(EventSourcingAggregateWithInternalRecorder::class)),
-                    'doSomething',
-                    true,
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        CallAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(EventSourcingAggregateWithInternalRecorder::class)),
+                            'doSomething',
+                            true,
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -363,12 +394,15 @@ class CallAggregateServiceBuilderTest extends TestCase
 
         $messaging = ComponentTestBuilder::create()
             ->withMessageHandler(
-                CallAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(StateBasedAggregateWithInternalRecorder::class)),
-                    'doSomething',
-                    true,
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        CallAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(StateBasedAggregateWithInternalRecorder::class)),
+                            'doSomething',
+                            true,
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -394,12 +428,15 @@ class CallAggregateServiceBuilderTest extends TestCase
 
         $messaging = ComponentTestBuilder::create()
             ->withMessageHandler(
-                CallAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(EventSourcingAggregateWithInternalRecorder::class)),
-                    'createSomething',
-                    true,
-                    InterfaceToCallRegistry::createEmpty()
-                )
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        CallAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(EventSourcingAggregateWithInternalRecorder::class)),
+                            'createSomething',
+                            true,
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();

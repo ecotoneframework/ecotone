@@ -20,7 +20,7 @@ final class ResolveEventSourcingAggregateEventsService implements ResolveAggrega
     ) {
     }
 
-    public function resolve(Message $message, array $metadata): Message
+    public function process(Message $message): Message
     {
         $resultMessage = MessageBuilder::fromMessage($message);
 

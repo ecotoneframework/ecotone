@@ -26,6 +26,7 @@ use InvalidArgumentException;
 interface ConfiguredMessagingSystem
 {
     /**
+     * @template T
      * @param class-string<T> $gatewayReferenceName
      * @return T
      * @throws InvalidArgumentException if trying to find not existing gateway reference

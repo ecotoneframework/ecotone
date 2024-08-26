@@ -9,7 +9,9 @@ use function array_merge;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
+
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
@@ -30,7 +32,6 @@ use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
@@ -42,14 +43,14 @@ final class AroundInterceptorBuilder implements InterceptorWithPointCut
     private string $interceptorName;
     private Pointcut $pointcut;
     private ?object $directObject = null;
-    private string $referenceName = '';
+    private string $referenceName;
     /**
      * @var ParameterConverterBuilder[]
      */
     private array $parameterConverters;
 
     /**
-     * @var ParameterConverterBuilder[] $parameterConverters
+     * @param ParameterConverterBuilder[] $parameterConverters
      */
     private function __construct(int $precedence, string $referenceName, private InterfaceToCall $interfaceToCall, Pointcut $pointcut, array $parameterConverters)
     {
@@ -61,7 +62,7 @@ final class AroundInterceptorBuilder implements InterceptorWithPointCut
     }
 
     /**
-     * @var ParameterConverterBuilder[] $parameterConverters
+     * @param ParameterConverterBuilder[] $parameterConverters
      */
     private function initializePointcut(InterfaceToCall $interfaceToCall, Pointcut $pointcut, array $parameterConverters): Pointcut
     {
@@ -72,22 +73,14 @@ final class AroundInterceptorBuilder implements InterceptorWithPointCut
         return Pointcut::initializeFrom($interfaceToCall, $parameterConverters);
     }
 
-    public static function createWithNoPointcut(string $referenceName, InterfaceToCall $interfaceToCall): self
-    {
-        return new self(Precedence::DEFAULT_PRECEDENCE, $referenceName, $interfaceToCall, Pointcut::createEmpty(), []);
-    }
-
     /**
-     * @var ParameterConverterBuilder[] $parameterConverters
+     * @param ParameterConverterBuilder[] $parameterConverters
      */
     public static function create(string $referenceName, InterfaceToCall $interfaceToCall, int $precedence, string $pointcut = '', array $parameterConverters = []): self
     {
         return new self($precedence, $referenceName, $interfaceToCall, $pointcut ? Pointcut::createWith($pointcut) : Pointcut::createEmpty(), $parameterConverters);
     }
 
-    /**
-     * @var ParameterConverterBuilder[] $parameterConverters
-     */
     public static function createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry $interfaceToCallRegistry, object $referenceObject, string $methodName, int $precedence, string $pointcut): self
     {
         $parameterAnnotationResolver = ParameterConverterAnnotationFactory::create();
@@ -98,26 +91,6 @@ final class AroundInterceptorBuilder implements InterceptorWithPointCut
         $aroundInterceptorReference->directObject = $referenceObject;
 
         return $aroundInterceptorReference;
-    }
-
-    /**
-     * @param self[] $interceptorsReferences
-     * @return self[]
-     */
-    public static function orderedInterceptors(array $interceptorsReferences): array
-    {
-        usort(
-            $interceptorsReferences,
-            function (AroundInterceptorBuilder $element, AroundInterceptorBuilder $elementToCompare) {
-                if ($element->getPrecedence() == $elementToCompare->getPrecedence()) {
-                    return 0;
-                }
-
-                return $element->getPrecedence() > $elementToCompare->getPrecedence() ? 1 : -1;
-            }
-        );
-
-        return $interceptorsReferences;
     }
 
     public function getInterceptingInterface(): InterfaceToCall
@@ -136,8 +109,12 @@ final class AroundInterceptorBuilder implements InterceptorWithPointCut
     /**
      * @param AttributeDefinition[] $endpointAnnotations
      */
-    public function compile(MessagingContainerBuilder $builder, array $endpointAnnotations, InterfaceToCall $interceptedInterface): Definition|null
-    {
+    public function compileForInterceptedInterface(
+        MessagingContainerBuilder $builder,
+        InterfaceToCallReference  $interceptedInterfaceToCallReference,
+        array                     $endpointAnnotations = []
+    ): Definition {
+        $interceptedInterface = $builder->getInterfaceToCall($interceptedInterfaceToCallReference);
         $parameterAnnotationResolver = ParameterConverterAnnotationFactory::create();
         $parameterConvertersFromAttributes = $parameterAnnotationResolver->createParameterConverters($this->interfaceToCall);
 
@@ -218,14 +195,6 @@ final class AroundInterceptorBuilder implements InterceptorWithPointCut
     }
 
     /**
-     * @inheritDoc
-     */
-    public function getInterceptingObject(): object
-    {
-        return $this;
-    }
-
-    /**
      * @param InterfaceToCall $interfaceToCall
      * @param object[]        $endpointAnnotations
      *
@@ -236,14 +205,6 @@ final class AroundInterceptorBuilder implements InterceptorWithPointCut
     public function doesItCutWith(InterfaceToCall $interfaceToCall, iterable $endpointAnnotations): bool
     {
         return $this->pointcut->doesItCut($interfaceToCall, $endpointAnnotations);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function addInterceptedInterfaceToCall(InterfaceToCall $interceptedInterface, array $endpointAnnotations): self
-    {
-        return $this;
     }
 
     /**

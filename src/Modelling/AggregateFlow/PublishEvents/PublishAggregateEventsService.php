@@ -6,6 +6,7 @@ namespace Ecotone\Modelling\AggregateFlow\PublishEvents;
 
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ClassDefinition;
+use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -17,19 +18,19 @@ use Ecotone\Modelling\EventBus;
 /**
  * licence Apache-2.0
  */
-final class PublishAggregateEventsService
+final class PublishAggregateEventsService implements MessageProcessor
 {
     public function __construct(private string $calledInterface, private EventBus $eventBus)
     {
     }
 
-    public function publish(Message $message, array $metadata): ?Message
+    public function process(Message $message): ?Message
     {
         $resultAggregateEvents = $message->getHeaders()->containsKey(AggregateMessage::RESULT_AGGREGATE_EVENTS) ? $message->getHeaders()->get(AggregateMessage::RESULT_AGGREGATE_EVENTS) : [];
         $calledAggregateEvents = $message->getHeaders()->containsKey(AggregateMessage::CALLED_AGGREGATE_EVENTS) ? $message->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_EVENTS) : [];
 
-        $this->publishEvents(SaveAggregateServiceTemplate::buildEcotoneEvents($resultAggregateEvents, $this->calledInterface, $message, $metadata));
-        $this->publishEvents(SaveAggregateServiceTemplate::buildEcotoneEvents($calledAggregateEvents, $this->calledInterface, $message, $metadata));
+        $this->publishEvents(SaveAggregateServiceTemplate::buildEcotoneEvents($resultAggregateEvents, $this->calledInterface, $message));
+        $this->publishEvents(SaveAggregateServiceTemplate::buildEcotoneEvents($calledAggregateEvents, $this->calledInterface, $message));
 
         $isExecutionResultNull = $message->getHeaders()->containsKey(AggregateMessage::NULL_EXECUTION_RESULT) ? $message->getHeaders()->get(AggregateMessage::NULL_EXECUTION_RESULT) : false;
         if ($isExecutionResultNull) {

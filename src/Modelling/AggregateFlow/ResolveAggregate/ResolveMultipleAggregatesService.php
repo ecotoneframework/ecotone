@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ecotone\Modelling\AggregateFlow\ResolveAggregate;
 
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\ResolveAggregateService;
 
 /**
@@ -19,11 +18,9 @@ final class ResolveMultipleAggregatesService implements ResolveAggregateService
     ) {
     }
 
-    public function resolve(Message $message, array $metadata): Message
+    public function process(Message $message): Message
     {
-        $message = $this->resolveCalledAggregateService->resolve($message, $metadata);
-        $message = $this->resolveResultAggregateService->resolve($message, $metadata);
-
-        return MessageBuilder::fromMessage($message)->build();
+        $message = $this->resolveCalledAggregateService->process($message);
+        return $this->resolveResultAggregateService->process($message);
     }
 }

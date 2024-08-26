@@ -3,6 +3,7 @@
 namespace Ecotone\Messaging\Config\Container;
 
 use Ecotone\Messaging\Config\Container\Compiler\ContainerImplementation;
+use Ecotone\Messaging\Support\Assert;
 
 /**
  * licence Apache-2.0
@@ -11,6 +12,7 @@ class Reference
 {
     public function __construct(protected string $id, protected int $invalidBehavior = ContainerImplementation::EXCEPTION_ON_INVALID_REFERENCE)
     {
+        Assert::notNullAndEmpty($id, "Id can't be empty");
     }
 
     public static function to(string $id): self

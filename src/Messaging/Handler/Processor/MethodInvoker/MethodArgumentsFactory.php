@@ -30,7 +30,7 @@ class MethodArgumentsFactory
      * @param AttributeDefinition[] $endpointAnnotations
      * @return ParameterConverterBuilder[]
      */
-    public static function createDefaultMethodParameters(InterfaceToCall $interfaceToCall, array $passedMethodParameterConverters, array $endpointAnnotations, ?InterfaceToCall $interceptedInterface, bool $ignorePayload): array
+    public static function createDefaultMethodParameters(InterfaceToCall $interfaceToCall, array $passedMethodParameterConverters, bool $ignorePayload = false): array
     {
         $passedArgumentsCount = count($passedMethodParameterConverters);
         $requiredArgumentsCount = count($interfaceToCall->getInterfaceParameters());
@@ -70,6 +70,11 @@ class MethodArgumentsFactory
         return $orderedMethodArguments;
     }
 
+    /**
+     * @param array<ParameterConverterBuilder> $passedMethodParameterConverters
+     * @param array $endpointAnnotations
+     * @return array<ParameterConverterBuilder>
+     */
     public static function createInterceptedInterfaceAnnotationMethodParameters(
         InterfaceToCall $interfaceToCall,
         array $passedMethodParameterConverters,

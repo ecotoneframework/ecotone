@@ -7,6 +7,9 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\PointcutExpression;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
+/**
+ * licence Apache-2.0
+ */
 class PointcutParser
 {
     private const AND = '&&';

@@ -4,6 +4,7 @@ namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -48,14 +49,17 @@ class LoadAggregateServiceBuilderTest extends BaseEcotoneTest
                 $appointment,
             ]))
             ->withMessageHandler(
-                LoadAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
-                    'getAppointmentId',
-                    null,
-                    LoadAggregateMode::createThrowOnNotFound(),
-                    InterfaceToCallRegistry::createEmpty()
-                )
-                    ->withAggregateRepositoryFactories(['repository'])
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        LoadAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
+                            'getAppointmentId',
+                            null,
+                            LoadAggregateMode::createThrowOnNotFound(),
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                            ->withAggregateRepositoryFactories(['repository'])
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -79,14 +83,17 @@ class LoadAggregateServiceBuilderTest extends BaseEcotoneTest
         $messaging = ComponentTestBuilder::create()
             ->withReference('repository', InMemoryEventSourcedRepository::createWithExistingAggregate(['ticketId' => 1], Ticket::class, [$ticketWasStartedEvent]))
             ->withMessageHandler(
-                LoadAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-                    'assignWorker',
-                    ClassDefinition::createFor(TypeDescriptor::create(AssignWorkerCommand::class)),
-                    LoadAggregateMode::createThrowOnNotFound(),
-                    InterfaceToCallRegistry::createEmpty()
-                )
-                    ->withAggregateRepositoryFactories(['repository'])
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        LoadAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
+                            'assignWorker',
+                            ClassDefinition::createFor(TypeDescriptor::create(AssignWorkerCommand::class)),
+                            LoadAggregateMode::createThrowOnNotFound(),
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                            ->withAggregateRepositoryFactories(['repository'])
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -122,14 +129,17 @@ class LoadAggregateServiceBuilderTest extends BaseEcotoneTest
         $messaging = ComponentTestBuilder::create(defaultEnterpriseMode: $isEnterpriseMode)
             ->withReference('repository', InMemoryEventSourcedRepository::createWithExistingAggregate(['ticketId' => 1], Ticket::class, [new SnapshotEvent(clone $ticket), $extraEvent]))
             ->withMessageHandler(
-                LoadAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-                    'assignWorker',
-                    ClassDefinition::createFor(TypeDescriptor::create(AssignWorkerCommand::class)),
-                    LoadAggregateMode::createThrowOnNotFound(),
-                    InterfaceToCallRegistry::createEmpty()
-                )
-                    ->withAggregateRepositoryFactories(['repository'])
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        LoadAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
+                            'assignWorker',
+                            ClassDefinition::createFor(TypeDescriptor::create(AssignWorkerCommand::class)),
+                            LoadAggregateMode::createThrowOnNotFound(),
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                            ->withAggregateRepositoryFactories(['repository'])
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -160,14 +170,17 @@ class LoadAggregateServiceBuilderTest extends BaseEcotoneTest
                 $appointment,
             ]))
             ->withMessageHandler(
-                LoadAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
-                    'getAppointmentId',
-                    null,
-                    LoadAggregateMode::createThrowOnNotFound(),
-                    InterfaceToCallRegistry::createEmpty()
-                )
-                    ->withAggregateRepositoryFactories(['repository'])
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        LoadAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
+                            'getAppointmentId',
+                            null,
+                            LoadAggregateMode::createThrowOnNotFound(),
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                            ->withAggregateRepositoryFactories(['repository'])
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -190,14 +203,17 @@ class LoadAggregateServiceBuilderTest extends BaseEcotoneTest
         $messaging = ComponentTestBuilder::create()
             ->withReference('repository', AppointmentStandardRepository::createEmpty())
             ->withMessageHandler(
-                LoadAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
-                    'doSomething',
-                    null,
-                    LoadAggregateMode::createThrowOnNotFound(),
-                    InterfaceToCallRegistry::createEmpty()
-                )
-                    ->withAggregateRepositoryFactories(['repository'])
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        LoadAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
+                            'doSomething',
+                            null,
+                            LoadAggregateMode::createThrowOnNotFound(),
+                            InterfaceToCallRegistry::createEmpty()
+                        )
+                            ->withAggregateRepositoryFactories(['repository'])
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -223,13 +239,14 @@ class LoadAggregateServiceBuilderTest extends BaseEcotoneTest
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(['repository'])
-            ->withInputChannelName('inputChannel');
+            ->withAggregateRepositoryFactories(['repository']);
 
         ComponentTestBuilder::create()
             ->withReference('repository', InMemoryEventSourcedRepository::createEmpty())
             ->withMessageHandler(
-                $aggregateCallingCommandHandler
+                MessageProcessorActivatorBuilder::create()
+                    ->chain($aggregateCallingCommandHandler)
+                    ->withInputChannelName('inputChannel')
             )
             ->build();
     }
@@ -245,8 +262,7 @@ class LoadAggregateServiceBuilderTest extends BaseEcotoneTest
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(['repository'])
-            ->withInputChannelName('inputChannel');
+            ->withAggregateRepositoryFactories(['repository']);
     }
 
     public function test_throwing_exception_if_construct_having_parameters()
@@ -260,8 +276,7 @@ class LoadAggregateServiceBuilderTest extends BaseEcotoneTest
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(['repository'])
-            ->withInputChannelName('inputChannel');
+            ->withAggregateRepositoryFactories(['repository']);
     }
 
     public function test_throwing_exception_if_construct_is_private()
@@ -275,8 +290,7 @@ class LoadAggregateServiceBuilderTest extends BaseEcotoneTest
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(['repository'])
-            ->withInputChannelName('inputChannel');
+            ->withAggregateRepositoryFactories(['repository']);
     }
 
     public function test_throwing_exception_if_event_sourcing_handler_is_non_void()
@@ -290,8 +304,7 @@ class LoadAggregateServiceBuilderTest extends BaseEcotoneTest
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(['repository'])
-            ->withInputChannelName('inputChannel');
+            ->withAggregateRepositoryFactories(['repository']);
     }
 
     public function test_throwing_exception_if_event_sourcing_handler_is_static()
@@ -305,7 +318,6 @@ class LoadAggregateServiceBuilderTest extends BaseEcotoneTest
             LoadAggregateMode::createThrowOnNotFound(),
             InterfaceToCallRegistry::createEmpty()
         )
-            ->withAggregateRepositoryFactories(['repository'])
-            ->withInputChannelName('inputChannel');
+            ->withAggregateRepositoryFactories(['repository']);
     }
 }

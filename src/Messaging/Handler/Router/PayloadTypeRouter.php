@@ -14,7 +14,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 /**
  * licence Apache-2.0
  */
-final class PayloadTypeRouter
+final class PayloadTypeRouter implements RouteSelector
 {
     private array $typeToChannelMapping;
     private bool $routeByClassName;

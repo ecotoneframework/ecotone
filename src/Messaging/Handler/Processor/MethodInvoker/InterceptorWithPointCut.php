@@ -3,6 +3,10 @@
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
+use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 
 /**
@@ -15,7 +19,14 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
  */
 interface InterceptorWithPointCut
 {
-    public function getInterceptingObject(): object;
+    /**
+     * @param array<AttributeDefinition> $endpointAnnotations
+     */
+    public function compileForInterceptedInterface(
+        MessagingContainerBuilder $builder,
+        InterfaceToCallReference  $interceptedInterfaceToCallReference,
+        array                     $endpointAnnotations = []
+    ): Definition|Reference;
 
     /**
      * @param string $name
@@ -24,11 +35,4 @@ interface InterceptorWithPointCut
     public function hasName(string $name): bool;
 
     public function doesItCutWith(InterfaceToCall $interfaceToCall, iterable $endpointAnnotations): bool;
-
-    /**
-     * @param InterfaceToCall $interceptedInterface
-     * @param AttributeDefinition[] $endpointAnnotations
-     * @return static
-     */
-    public function addInterceptedInterfaceToCall(InterfaceToCall $interceptedInterface, array $endpointAnnotations);
 }

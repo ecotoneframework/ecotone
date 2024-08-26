@@ -9,6 +9,9 @@ use InvalidArgumentException;
 /**
  * @codeCoverageIgnore
  */
+/**
+ * licence Apache-2.0
+ */
 class FieldFactory implements FieldFactoryInterface
 {
     /**

@@ -7,7 +7,7 @@ use Ecotone\Messaging\Message;
 /**
  * licence Apache-2.0
  */
-class HeaderRouter
+class HeaderRouter implements RouteSelector
 {
     private string $headerName;
 
@@ -21,8 +21,8 @@ class HeaderRouter
         return new self($headerName);
     }
 
-    public function route(Message $message): string
+    public function route(Message $message): array
     {
-        return $message->getHeaders()->get($this->headerName);
+        return [$message->getHeaders()->get($this->headerName)];
     }
 }

@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Transformer;
 
-use Ecotone\Messaging\Config\Container\ChannelReference;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Messaging\Handler\AroundInterceptorHandler;
-use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -19,12 +16,9 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
-use Ecotone\Messaging\Handler\Processor\HandlerReplyProcessor;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodArgumentsFactory;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\Handler\RequestReplyProducer;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
@@ -158,50 +152,24 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
         }
 
-        $methodParameterConverterBuilders = MethodArgumentsFactory::createDefaultMethodParameters($interfaceToCall, $this->methodParameterConverterBuilders, $this->getEndpointAnnotations(), null, false);
+        $newImplementation = MessageProcessorActivatorBuilder::create()
+            ->withEndpointId($this->getEndpointId())
+            ->withRequiredInterceptorNames($this->requiredReferenceNames)
+            ->withInputChannelName($this->getInputMessageChannelName())
+            ->withOutputMessageChannel($this->getOutputMessageChannelName())
+            ->withEndpointAnnotations($this->getEndpointAnnotations())
+            ->chainInterceptedProcessor(
+                MethodInvokerBuilder::create(
+                    $objectToInvokeOn,
+                    $interfaceToCallReference,
+                    $this->methodParameterConverterBuilders
+                )
+                ->withResultToMessageConverter(
+                    new Definition(TransformerResultToMessageConverter::class, [$interfaceToCall->getReturnType()]),
+                )
+            );
 
-        $compiledMethodParameterConverters = [];
-        foreach ($methodParameterConverterBuilders as $index => $methodParameterConverter) {
-            $compiledMethodParameterConverters[] = $methodParameterConverter->compile($interfaceToCall);
-        }
-
-        $methodInvokerDefinition = new Definition(TransformerMessageProcessor::class, [
-            'methodInvoker' => new Definition(MethodInvoker::class, [
-                $objectToInvokeOn,
-                $interfaceToCallReference->getMethodName(),
-                $compiledMethodParameterConverters,
-                $interfaceToCall->getInterfaceParametersNames(),
-                true,
-            ]),
-            'returnType' => $interfaceToCall->getReturnType(),
-        ]);
-
-        $handlerDefinition = new Definition(RequestReplyProducer::class, [
-            $this->outputMessageChannelName ? new ChannelReference($this->outputMessageChannelName) : null,
-            $methodInvokerDefinition,
-            new Reference(ChannelResolver::class),
-            false,
-            false,
-            1,
-        ]);
-
-        // TODO: duplication from ServiceActivatorBuilder
-        if ($this->orderedAroundInterceptors) {
-            $interceptors = [];
-            foreach (AroundInterceptorBuilder::orderedInterceptors($this->orderedAroundInterceptors) as $aroundInterceptorReference) {
-                $interceptors[] = $aroundInterceptorReference->compile($builder, $this->getEndpointAnnotations(), $interfaceToCall);
-            }
-
-            $handlerDefinition = new Definition(HandlerReplyProcessor::class, [
-                $handlerDefinition,
-            ]);
-            $handlerDefinition = new Definition(AroundInterceptorHandler::class, [
-                $interceptors,
-                $handlerDefinition,
-            ]);
-        }
-
-        return $handlerDefinition;
+        return $newImplementation->compile($builder);
     }
 
     private function setDirectObjectToInvoke(DefinedObject $objectToInvoke): void

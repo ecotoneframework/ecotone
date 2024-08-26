@@ -16,6 +16,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResol
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\ChannelResolver;
@@ -27,7 +28,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Modelling\Attribute\CommandHandler;
@@ -309,24 +310,21 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                 self::DISCARD_MESSAGES,
                 self::inputChannelName(self::DISCARD_MESSAGES)
             ))
-            ->registerBeforeMethodInterceptor(MethodInterceptor::create(
-                MessageCollectorHandler::class . self::RECORD_EVENT,
+            ->registerBeforeMethodInterceptor(MethodInterceptorBuilder::create(
+                Reference::to(MessageCollectorHandler::class),
                 $interfaceToCallRegistry->getFor(MessageCollectorHandler::class, self::RECORD_EVENT),
-                ServiceActivatorBuilder::create(MessageCollectorHandler::class, self::RECORD_EVENT),
                 Precedence::DEFAULT_PRECEDENCE,
-                EventBus::class
+                EventBus::class,
             ))
-            ->registerBeforeMethodInterceptor(MethodInterceptor::create(
-                MessageCollectorHandler::class . self::RECORD_COMMAND,
+            ->registerBeforeMethodInterceptor(MethodInterceptorBuilder::create(
+                Reference::to(MessageCollectorHandler::class),
                 $interfaceToCallRegistry->getFor(MessageCollectorHandler::class, self::RECORD_COMMAND),
-                ServiceActivatorBuilder::create(MessageCollectorHandler::class, self::RECORD_COMMAND),
                 Precedence::DEFAULT_PRECEDENCE,
                 CommandBus::class
             ))
-            ->registerBeforeMethodInterceptor(MethodInterceptor::create(
-                MessageCollectorHandler::class . self::RECORD_QUERY,
+            ->registerBeforeMethodInterceptor(MethodInterceptorBuilder::create(
+                Reference::to(MessageCollectorHandler::class),
                 $interfaceToCallRegistry->getFor(MessageCollectorHandler::class, self::RECORD_QUERY),
-                ServiceActivatorBuilder::create(MessageCollectorHandler::class, self::RECORD_QUERY),
                 Precedence::DEFAULT_PRECEDENCE,
                 QueryBus::class
             ));

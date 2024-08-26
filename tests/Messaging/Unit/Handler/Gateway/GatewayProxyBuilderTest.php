@@ -15,7 +15,7 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlingException;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
@@ -790,42 +790,38 @@ class GatewayProxyBuilderTest extends MessagingTest
                     'calculate',
                     $inputChannel = 'inputChannel'
                 )
-                    ->addBeforeInterceptor(
-                        MethodInterceptor::create(
-                            'interceptor0',
-                            InterfaceToCall::create(CalculatingService::class, 'multiply'),
-                            ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), 'multiply'),
-                            0,
-                            ''
-                        )
-                    )
-                    ->addBeforeInterceptor(
-                        MethodInterceptor::create(
-                            'interceptor1',
-                            InterfaceToCall::create(CalculatingService::class, 'sum'),
-                            ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(3), 'sum'),
-                            1,
-                            ''
-                        )
-                    )
-                    ->addAfterInterceptor(
-                        MethodInterceptor::create(
-                            'interceptor2',
-                            InterfaceToCall::create(CalculatingService::class, 'result'),
-                            ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), 'result'),
-                            1,
-                            ''
-                        )
-                    )
-                    ->addAfterInterceptor(
-                        MethodInterceptor::create(
-                            'interceptor3',
-                            InterfaceToCall::create(CalculatingService::class, 'multiply'),
-                            ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(2), 'multiply'),
-                            0,
-                            ''
-                        )
-                    )
+            )
+            ->withBeforeInterceptor(
+                MethodInterceptorBuilder::create(
+                    CalculatingService::create(3),
+                    InterfaceToCall::create(CalculatingService::class, 'multiply'),
+                    0,
+                    ServiceInterfaceCalculatingService::class
+                )
+            )
+            ->withBeforeInterceptor(
+                MethodInterceptorBuilder::create(
+                    CalculatingService::create(3),
+                    InterfaceToCall::create(CalculatingService::class, 'sum'),
+                    1,
+                    ServiceInterfaceCalculatingService::class
+                )
+            )
+            ->withAfterInterceptor(
+                MethodInterceptorBuilder::create(
+                    CalculatingService::create(0),
+                    InterfaceToCall::create(CalculatingService::class, 'result'),
+                    1,
+                    ServiceInterfaceCalculatingService::class
+                )
+            )
+            ->withAfterInterceptor(
+                MethodInterceptorBuilder::create(
+                    CalculatingService::create(2),
+                    InterfaceToCall::create(CalculatingService::class, 'multiply'),
+                    0,
+                    ServiceInterfaceCalculatingService::class
+                )
             )
             ->withMessageHandler(
                 ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum')

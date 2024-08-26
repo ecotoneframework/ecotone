@@ -7,6 +7,9 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\PointcutExpression;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
+/**
+ * licence Apache-2.0
+ */
 class PointcutMethodExpression implements PointcutExpression
 {
     private Type $classTypeDescriptor;

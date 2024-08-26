@@ -15,6 +15,9 @@ use InvalidArgumentException;
 /**
  * @codeCoverageIgnore
  */
+/**
+ * licence Apache-2.0
+ */
 class DayOfWeekField extends AbstractField
 {
     /**

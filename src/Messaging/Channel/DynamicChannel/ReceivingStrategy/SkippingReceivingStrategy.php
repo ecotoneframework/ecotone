@@ -9,6 +9,9 @@ use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\Assert;
 
+/**
+ * licence Enterprise
+ */
 final class SkippingReceivingStrategy implements ChannelReceivingStrategy
 {
     public function __construct(

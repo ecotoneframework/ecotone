@@ -15,6 +15,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAn
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
@@ -22,8 +23,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\Config\MessageHandlerLogger;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Precedence;
@@ -394,17 +394,15 @@ class BusRoutingModule implements AnnotationModule
 
         $messagingConfiguration
             ->registerBeforeMethodInterceptor(
-                MethodInterceptor::create(
-                    MessageHeadersPropagatorInterceptor::class,
+                MethodInterceptorBuilder::create(
+                    Reference::to(MessageHeadersPropagatorInterceptor::class),
                     $propagateHeadersInterfaceToCall,
-                    TransformerBuilder::create(MessageHeadersPropagatorInterceptor::class, $propagateHeadersInterfaceToCall)
-                        ->withMethodParameterConverters(
-                            [
-                                AllHeadersBuilder::createWith('headers'),
-                            ]
-                        ),
                     Precedence::ENDPOINT_HEADERS_PRECEDENCE - 2,
-                    $pointcut
+                    $pointcut,
+                    true,
+                    [
+                        AllHeadersBuilder::createWith('headers'),
+                    ]
                 )
             )
             ->registerAroundMethodInterceptor(

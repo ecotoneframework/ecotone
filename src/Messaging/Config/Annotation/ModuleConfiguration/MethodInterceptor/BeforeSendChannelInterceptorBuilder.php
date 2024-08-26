@@ -5,31 +5,22 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor;
 
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
-use Ecotone\Messaging\Channel\DirectChannel;
-use Ecotone\Messaging\Config\Container\ChannelReference;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
-use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use Ramsey\Uuid\Uuid;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 
 /**
  * licence Apache-2.0
  */
 class BeforeSendChannelInterceptorBuilder implements ChannelInterceptorBuilder
 {
-    private string $inputChannelName;
-    private MethodInterceptor $methodInterceptor;
-    private GatewayProxyBuilder $gateway;
-    private string $internalRequestChannelName;
-
-    public function __construct(string $inputChannelName, MethodInterceptor $methodInterceptor)
-    {
-        $this->inputChannelName  = $inputChannelName;
-        $this->methodInterceptor = $methodInterceptor;
-
-        $this->internalRequestChannelName = Uuid::uuid4()->toString();
-        $this->gateway                    = GatewayProxyBuilder::create(BeforeSendGateway::class . $this->internalRequestChannelName, BeforeSendGateway::class, 'execute', $this->internalRequestChannelName);
+    public function __construct(
+        private MethodInterceptorBuilder $methodInterceptor,
+        private string                   $inputChannelName,
+        private InterfaceToCallReference $interceptedInterface,
+        private array                    $endpointAnnotations,
+    ) {
     }
 
     /**
@@ -53,11 +44,12 @@ class BeforeSendChannelInterceptorBuilder implements ChannelInterceptorBuilder
      */
     public function compile(MessagingContainerBuilder $builder): Definition
     {
-        $messageHandler = $this->methodInterceptor->getInterceptingObject()->compile($builder);
-        $builder->register(new ChannelReference($this->internalRequestChannelName), new Definition(DirectChannel::class, [$this->internalRequestChannelName, $messageHandler]));
-        $gateway = $this->gateway->compile($builder);
-
-        return new Definition(BeforeSendChannelInterceptor::class, [$gateway]);
+        $messageProcessor = $this->methodInterceptor->compileForInterceptedInterface(
+            $builder,
+            $this->interceptedInterface,
+            $this->endpointAnnotations,
+        );
+        return new Definition(BeforeSendChannelInterceptor::class, [$messageProcessor]);
     }
 
     public function __toString()

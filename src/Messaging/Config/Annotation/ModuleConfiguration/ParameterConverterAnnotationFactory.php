@@ -55,8 +55,6 @@ class ParameterConverterAnnotationFactory
             MethodArgumentsFactory::createDefaultMethodParameters(
                 $relatedClassInterface,
                 $this->createParameterConverters($relatedClassInterface),
-                [],
-                null,
                 $relatedClassInterface->hasMethodAnnotation(TypeDescriptor::create(IgnorePayload::class))
             );
     }

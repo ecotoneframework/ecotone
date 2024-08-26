@@ -4,24 +4,21 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Splitter;
 
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\ChannelReference;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Messaging\Handler\AroundInterceptorHandler;
-use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
-use Ecotone\Messaging\Handler\Processor\HandlerReplyProcessor;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
+use Ecotone\Messaging\Handler\Processor\ChainedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
-use Ecotone\Messaging\Handler\RequestReplyProducer;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
@@ -100,35 +97,29 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
         }
 
-        $methodInvokerDefinition = MethodInvokerBuilder::create(
-            $interfaceToCall->isStaticallyCalled() ? $this->reference->getId() : $this->reference,
-            $this->interfaceToCallReference,
-            $this->methodParameterConverterBuilders,
-            $this->getEndpointAnnotations()
-        )->compile($builder);
-
-        $handlerDefinition = new Definition(RequestReplyProducer::class, [
-            $this->outputMessageChannelName ? new ChannelReference($this->outputMessageChannelName) : null,
-            $methodInvokerDefinition,
-            new Reference(ChannelResolver::class),
-            true,
-            false,
-            RequestReplyProducer::REQUEST_SPLIT_METHOD,
-        ]);
-
-        if ($this->orderedAroundInterceptors) {
-            $interceptors = [];
-            foreach (AroundInterceptorBuilder::orderedInterceptors($this->orderedAroundInterceptors) as $aroundInterceptorReference) {
-                $interceptors[] = $aroundInterceptorReference->compile($builder, $this->getEndpointAnnotations(), $this->annotatedInterfaceToCall ?? $interfaceToCall);
-            }
-
-            $handlerDefinition = new Definition(AroundInterceptorHandler::class, [
-                $interceptors,
-                new Definition(HandlerReplyProcessor::class, [$handlerDefinition]),
-            ]);
+        if (! $this->outputMessageChannelName) {
+            throw ConfigurationException::create('Output channel required for splitter handler');
         }
 
-        return $handlerDefinition;
+        $interceptorsConfiguration = $builder->getRelatedInterceptors(
+            $this->interfaceToCallReference,
+            $this->getEndpointAnnotations(),
+            $this->requiredInterceptorReferenceNames,
+        );
+
+        $processor = ChainedMessageProcessorBuilder::create()
+            ->chainInterceptedProcessor(MethodInvokerBuilder::create(
+                $interfaceToCall->isStaticallyCalled() ? $this->reference->getId() : $this->reference,
+                $this->interfaceToCallReference,
+                $this->methodParameterConverterBuilders,
+            ))
+            ->compileProcessor($builder, $interceptorsConfiguration);
+
+        return new Definition(SplitterHandler::class, [
+            new ChannelReference($this->outputMessageChannelName),
+            $processor,
+            $interfaceToCall->toString(),
+        ]);
     }
 
     public function __toString()

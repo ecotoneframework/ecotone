@@ -15,7 +15,7 @@ use Ecotone\Messaging\Message;
 /**
  * licence Apache-2.0
  */
-final class HeaderMappingRouter implements DefinedObject
+final class HeaderMappingRouter implements RouteSelector, DefinedObject
 {
     private string $headerName;
     private array $headerValueToChannelMapping;

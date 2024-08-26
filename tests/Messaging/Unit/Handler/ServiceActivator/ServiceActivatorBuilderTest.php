@@ -139,9 +139,9 @@ class ServiceActivatorBuilderTest extends MessagingTest
     public function test_creating_with_interceptors()
     {
         $objectToInvoke = CalculatingService::create(0);
-        $firstInterceptor = AroundInterceptorBuilder::create('calculator', InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'sum'), 1, '', []);
-        $secondInterceptor = AroundInterceptorBuilder::create('calculator', InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'multiply'), 2, '', []);
-        $thirdInterceptor = AroundInterceptorBuilder::create('calculator', InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'sum'), 3, '', []);
+        $firstInterceptor = AroundInterceptorBuilder::create('calculator', InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'sum'), 1, CalculatingService::class . '::result');
+        $secondInterceptor = AroundInterceptorBuilder::create('calculator', InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'multiply'), 2, CalculatingService::class . '::result');
+        $thirdInterceptor = AroundInterceptorBuilder::create('calculator', InterfaceToCall::create(CalculatingServiceInterceptorExample::class, 'sum'), 3, CalculatingService::class . '::result');
 
         $messaging = ComponentTestBuilder::create()
             ->withReference('calculator', CalculatingServiceInterceptorExample::create(2))
@@ -149,10 +149,10 @@ class ServiceActivatorBuilderTest extends MessagingTest
                 ServiceActivatorBuilder::createWithDirectReference($objectToInvoke, 'result')
                     ->withInputChannelName('someName')
                     ->withEndpointId('someEndpoint')
-                    ->addAroundInterceptor($secondInterceptor)
-                    ->addAroundInterceptor($thirdInterceptor)
-                    ->addAroundInterceptor($firstInterceptor)
             )
+            ->withAroundInterceptor($secondInterceptor)
+            ->withAroundInterceptor($thirdInterceptor)
+            ->withAroundInterceptor($firstInterceptor)
             ->build();
 
         $this->assertEquals(

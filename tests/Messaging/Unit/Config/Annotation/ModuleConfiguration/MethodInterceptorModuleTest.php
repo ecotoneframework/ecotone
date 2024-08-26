@@ -6,6 +6,7 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor\MethodInterceptorModule;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -13,9 +14,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\AroundInterceptorWithCustomParameterConverters;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ServiceActivatorInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\TransformerInterceptorExample;
@@ -61,31 +60,27 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerBeforeMethodInterceptor(
-                MethodInterceptor::create(
-                    'someMethodInterceptor',
+                MethodInterceptorBuilder::create(
+                    Reference::to('someMethodInterceptor'),
                     InterfaceToCall::create(ServiceActivatorInterceptorExample::class, 'doSomethingBefore'),
-                    ServiceActivatorBuilder::create('someMethodInterceptor', InterfaceToCall::create(ServiceActivatorInterceptorExample::class, 'doSomethingBefore'))
-                        ->withPassThroughMessageOnVoidInterface(true)
-                        ->withMethodParameterConverters([
-                            PayloadBuilder::create('name'),
-                            HeaderBuilder::create('surname', 'surname'),
-                        ]),
                     2,
-                    ServiceActivatorInterceptorExample::class
+                    ServiceActivatorInterceptorExample::class,
+                    defaultParameterConverters: [
+                        PayloadBuilder::create('name'),
+                        HeaderBuilder::create('surname', 'surname'),
+                    ]
                 )
             )
             ->registerAfterMethodInterceptor(
-                MethodInterceptor::create(
-                    'someMethodInterceptor',
+                MethodInterceptorBuilder::create(
+                    Reference::to('someMethodInterceptor'),
                     InterfaceToCall::create(ServiceActivatorInterceptorExample::class, 'doSomethingAfter'),
-                    ServiceActivatorBuilder::create('someMethodInterceptor', InterfaceToCall::create(ServiceActivatorInterceptorExample::class, 'doSomethingAfter'))
-                        ->withPassThroughMessageOnVoidInterface(true)
-                        ->withMethodParameterConverters([
-                            PayloadBuilder::create('name'),
-                            HeaderBuilder::create('surname', 'surname'),
-                        ]),
                     1,
-                    ''
+                    '',
+                    defaultParameterConverters: [
+                        PayloadBuilder::create('name'),
+                        HeaderBuilder::create('surname', 'surname'),
+                    ]
                 )
             );
 
@@ -106,42 +101,42 @@ class MethodInterceptorModuleTest extends AnnotationConfigurationTest
     {
         $expectedConfiguration = $this->createMessagingSystemConfiguration()
             ->registerBeforeSendInterceptor(
-                MethodInterceptor::create(
-                    'someMethodInterceptor',
+                MethodInterceptorBuilder::create(
+                    Reference::to('someMethodInterceptor'),
                     InterfaceToCall::create(TransformerInterceptorExample::class, 'beforeSend'),
-                    TransformerBuilder::create('someMethodInterceptor', InterfaceToCall::create(TransformerInterceptorExample::class, 'beforeSend'))
-                        ->withMethodParameterConverters([
-                            PayloadBuilder::create('name'),
-                            HeaderBuilder::create('surname', 'surname'),
-                        ]),
                     2,
-                    ServiceActivatorInterceptorExample::class
+                    ServiceActivatorInterceptorExample::class,
+                    true,
+                    [
+                        PayloadBuilder::create('name'),
+                        HeaderBuilder::create('surname', 'surname'),
+                    ]
                 )
             )
             ->registerBeforeMethodInterceptor(
-                MethodInterceptor::create(
-                    'someMethodInterceptor',
+                MethodInterceptorBuilder::create(
+                    Reference::to('someMethodInterceptor'),
                     InterfaceToCall::create(TransformerInterceptorExample::class, 'doSomethingBefore'),
-                    TransformerBuilder::create('someMethodInterceptor', InterfaceToCall::create(TransformerInterceptorExample::class, 'doSomethingBefore'))
-                        ->withMethodParameterConverters([
-                            PayloadBuilder::create('name'),
-                            HeaderBuilder::create('surname', 'surname'),
-                        ]),
                     2,
-                    ServiceActivatorInterceptorExample::class
+                    ServiceActivatorInterceptorExample::class,
+                    true,
+                    [
+                        PayloadBuilder::create('name'),
+                        HeaderBuilder::create('surname', 'surname'),
+                    ]
                 )
             )
             ->registerAfterMethodInterceptor(
-                MethodInterceptor::create(
-                    'someMethodInterceptor',
+                MethodInterceptorBuilder::create(
+                    Reference::to('someMethodInterceptor'),
                     InterfaceToCall::create(TransformerInterceptorExample::class, 'doSomethingAfter'),
-                    TransformerBuilder::create('someMethodInterceptor', InterfaceToCall::create(TransformerInterceptorExample::class, 'doSomethingAfter'))
-                        ->withMethodParameterConverters([
-                            PayloadBuilder::create('name'),
-                            HeaderBuilder::create('surname', 'surname'),
-                        ]),
                     1,
-                    ''
+                    '',
+                    true,
+                    [
+                        PayloadBuilder::create('name'),
+                        HeaderBuilder::create('surname', 'surname'),
+                    ]
                 )
             );
 

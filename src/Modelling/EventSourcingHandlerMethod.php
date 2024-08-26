@@ -11,6 +11,9 @@ use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 
+/**
+ * licence Apache-2.0
+ */
 final class EventSourcingHandlerMethod
 {
     /**

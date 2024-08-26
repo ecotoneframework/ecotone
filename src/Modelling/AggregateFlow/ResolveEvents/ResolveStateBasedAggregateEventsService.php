@@ -21,7 +21,7 @@ final class ResolveStateBasedAggregateEventsService implements ResolveAggregateE
     ) {
     }
 
-    public function resolve(Message $message, array $metadata): Message
+    public function process(Message $message): Message
     {
         $resultMessage = MessageBuilder::fromMessage($message);
 

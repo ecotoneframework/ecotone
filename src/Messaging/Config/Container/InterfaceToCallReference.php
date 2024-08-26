@@ -34,4 +34,9 @@ class InterfaceToCallReference extends Reference
         return $this->methodName;
     }
 
+    public function getName(): string
+    {
+        return $this->className . '::' . $this->methodName;
+    }
+
 }

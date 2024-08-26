@@ -22,6 +22,9 @@ use RuntimeException;
 /**
  * @codeCoverageIgnore
  */
+/**
+ * licence Apache-2.0
+ */
 class CronExpression
 {
     public const MINUTE = 0;

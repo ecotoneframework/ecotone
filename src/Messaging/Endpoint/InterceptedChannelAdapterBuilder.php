@@ -16,6 +16,8 @@ use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerErrorChannelInterc
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Scheduling\Clock;
@@ -39,11 +41,15 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
         return true;
     }
 
+    abstract protected function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall;
+
     protected function compileGateway(MessagingContainerBuilder $builder): Definition|Reference|DefinedObject
     {
         $gatewayBuilder = (clone $this->inboundGateway)
             ->addAroundInterceptor($this->getErrorInterceptorReference($builder))
-            ->addAroundInterceptor(AcknowledgeConfirmationInterceptor::createAroundInterceptorBuilder($builder->getInterfaceToCallRegistry()));
+            ->addAroundInterceptor(AcknowledgeConfirmationInterceptor::createAroundInterceptorBuilder($builder->getInterfaceToCallRegistry()))
+        ;
+
         return $gatewayBuilder
             ->compile($builder);
     }

@@ -15,7 +15,7 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptor;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -67,16 +67,16 @@ interface Configuration extends CompilerPass
     public function registerAsynchronousEndpoint(array|string $asynchronousChannelNames, string $targetEndpointId): Configuration;
 
     /**
-     * @param MethodInterceptor $methodInterceptor
+     * @param MethodInterceptorBuilder $methodInterceptor
      * @return Configuration
      */
-    public function registerBeforeSendInterceptor(MethodInterceptor $methodInterceptor): Configuration;
+    public function registerBeforeSendInterceptor(MethodInterceptorBuilder $methodInterceptor): Configuration;
 
     /**
-     * @param MethodInterceptor $methodInterceptor
+     * @param MethodInterceptorBuilder $methodInterceptor
      * @return Configuration
      */
-    public function registerBeforeMethodInterceptor(MethodInterceptor $methodInterceptor): Configuration;
+    public function registerBeforeMethodInterceptor(MethodInterceptorBuilder $methodInterceptor): Configuration;
 
     /**
      * @param AroundInterceptorBuilder $aroundInterceptorReference
@@ -85,10 +85,10 @@ interface Configuration extends CompilerPass
     public function registerAroundMethodInterceptor(AroundInterceptorBuilder $aroundInterceptorReference): Configuration;
 
     /**
-     * @param MethodInterceptor $methodInterceptor
+     * @param MethodInterceptorBuilder $methodInterceptor
      * @return Configuration
      */
-    public function registerAfterMethodInterceptor(MethodInterceptor $methodInterceptor): Configuration;
+    public function registerAfterMethodInterceptor(MethodInterceptorBuilder $methodInterceptor): Configuration;
 
     public function requireConsumer(string $endpointId): Configuration;
 
@@ -142,4 +142,6 @@ interface Configuration extends CompilerPass
     public function registerServiceAlias(string|Reference $id, Reference $aliasTo): Configuration;
 
     public function isRunningForEnterpriseLicence(): bool;
+
+    public function isRunningForTest(): bool;
 }

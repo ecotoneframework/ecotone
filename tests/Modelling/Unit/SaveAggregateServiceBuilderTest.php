@@ -5,6 +5,7 @@ namespace Test\Ecotone\Modelling\Unit;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Store\Document\DocumentStore;
@@ -53,13 +54,16 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $messaging    = ComponentTestBuilder::create()
             ->withReference('orderRepository', $inMemoryStandardRepository)
             ->withMessageHandler(
-                SaveAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
-                    'changeShippingAddress',
-                    InterfaceToCallRegistry::createEmpty(),
-                    (new BaseEventSourcingConfiguration())
-                )
-                    ->withAggregateRepositoryFactories(['orderRepository'])
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        SaveAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
+                            'changeShippingAddress',
+                            InterfaceToCallRegistry::createEmpty(),
+                            (new BaseEventSourcingConfiguration())
+                        )
+                            ->withAggregateRepositoryFactories(['orderRepository'])
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -84,13 +88,16 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->withReference('repository', InMemoryEventSourcedRepository::createEmpty())
             ->withReference(DocumentStore::class, $inMemoryDocumentStore)
             ->withMessageHandler(
-                SaveAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-                    'start',
-                    InterfaceToCallRegistry::createEmpty(),
-                    (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 1)
-                )
-                    ->withAggregateRepositoryFactories(['repository'])
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        SaveAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
+                            'start',
+                            InterfaceToCallRegistry::createEmpty(),
+                            (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 1)
+                        )
+                            ->withAggregateRepositoryFactories(['repository'])
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -121,13 +128,16 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->withReference('repository', InMemoryEventSourcedRepository::createEmpty())
             ->withReference(DocumentStore::class, $inMemoryDocumentStore)
             ->withMessageHandler(
-                SaveAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-                    'start',
-                    InterfaceToCallRegistry::createEmpty(),
-                    (new BaseEventSourcingConfiguration())
-                )
-                    ->withAggregateRepositoryFactories(['repository'])
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        SaveAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
+                            'start',
+                            InterfaceToCallRegistry::createEmpty(),
+                            (new BaseEventSourcingConfiguration())
+                        )
+                            ->withAggregateRepositoryFactories(['repository'])
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -155,13 +165,16 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->withReference('repository', InMemoryEventSourcedRepository::createEmpty())
             ->withReference(DocumentStore::class, $inMemoryDocumentStore)
             ->withMessageHandler(
-                SaveAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-                    'start',
-                    InterfaceToCallRegistry::createEmpty(),
-                    (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 2)
-                )
-                    ->withAggregateRepositoryFactories(['repository'])
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        SaveAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
+                            'start',
+                            InterfaceToCallRegistry::createEmpty(),
+                            (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 2)
+                        )
+                            ->withAggregateRepositoryFactories(['repository'])
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -190,13 +203,16 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $messaging = ComponentTestBuilder::create()
             ->withReference('repository', $inMemoryStandardRepository)
             ->withMessageHandler(
-                SaveAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
-                    'createWith',
-                    InterfaceToCallRegistry::createEmpty(),
-                    (new BaseEventSourcingConfiguration())
-                )
-                    ->withAggregateRepositoryFactories(['repository'])
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        SaveAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Article::class)),
+                            'createWith',
+                            InterfaceToCallRegistry::createEmpty(),
+                            (new BaseEventSourcingConfiguration())
+                        )
+                            ->withAggregateRepositoryFactories(['repository'])
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -247,13 +263,16 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $messaging = ComponentTestBuilder::create()
             ->withReference('orderRepository', $orderRepository)
             ->withMessageHandler(
-                SaveAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
-                    'multiplyOrder',
-                    InterfaceToCallRegistry::createEmpty(),
-                    (new BaseEventSourcingConfiguration())
-                )
-                    ->withAggregateRepositoryFactories(['orderRepository'])
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        SaveAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(Order::class)),
+                            'multiplyOrder',
+                            InterfaceToCallRegistry::createEmpty(),
+                            (new BaseEventSourcingConfiguration())
+                        )
+                            ->withAggregateRepositoryFactories(['orderRepository'])
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -301,13 +320,16 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $messaging = ComponentTestBuilder::create()
             ->withReference('orderRepository', $orderRepository)
             ->withMessageHandler(
-                SaveAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(OrderWithManualVersioning::class)),
-                    'multiplyOrder',
-                    InterfaceToCallRegistry::createEmpty(),
-                    (new BaseEventSourcingConfiguration())
-                )
-                    ->withAggregateRepositoryFactories(['orderRepository'])
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        SaveAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(OrderWithManualVersioning::class)),
+                            'multiplyOrder',
+                            InterfaceToCallRegistry::createEmpty(),
+                            (new BaseEventSourcingConfiguration())
+                        )
+                            ->withAggregateRepositoryFactories(['orderRepository'])
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -328,13 +350,16 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $aggregateCommandHandler = ComponentTestBuilder::create()
             ->withReference('repository', InMemoryEventSourcedRepository::createEmpty())
             ->withMessageHandler(
-                SaveAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(NoIdDefinedAfterRecordingEvents::class)),
-                    'create',
-                    InterfaceToCallRegistry::createEmpty(),
-                    (new BaseEventSourcingConfiguration())
-                )
-                    ->withAggregateRepositoryFactories(['repository'])
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        SaveAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(NoIdDefinedAfterRecordingEvents::class)),
+                            'create',
+                            InterfaceToCallRegistry::createEmpty(),
+                            (new BaseEventSourcingConfiguration())
+                        )
+                            ->withAggregateRepositoryFactories(['repository'])
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -358,13 +383,16 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $aggregateCommandHandler = ComponentTestBuilder::create()
             ->withReference('repository', $inMemoryEventSourcedRepository)
             ->withMessageHandler(
-                SaveAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodForEventSourcedAggregate::class)),
-                    'create',
-                    InterfaceToCallRegistry::createEmpty(),
-                    (new BaseEventSourcingConfiguration())
-                )
-                    ->withAggregateRepositoryFactories(['repository'])
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        SaveAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodForEventSourcedAggregate::class)),
+                            'create',
+                            InterfaceToCallRegistry::createEmpty(),
+                            (new BaseEventSourcingConfiguration())
+                        )
+                            ->withAggregateRepositoryFactories(['repository'])
+                    )
                     ->withInputChannelName($inputChannel = 'inputChannel')
             )
             ->build();
@@ -394,13 +422,16 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         ComponentTestBuilder::create()
             ->withMessageHandler(
-                SaveAggregateServiceBuilder::create(
-                    ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodWithParameters::class)),
-                    'create',
-                    InterfaceToCallRegistry::createEmpty(),
-                    (new BaseEventSourcingConfiguration())
-                )
-                    ->withAggregateRepositoryFactories(['repository'])
+                MessageProcessorActivatorBuilder::create()
+                    ->chain(
+                        SaveAggregateServiceBuilder::create(
+                            ClassDefinition::createFor(TypeDescriptor::create(PublicIdentifierGetMethodWithParameters::class)),
+                            'create',
+                            InterfaceToCallRegistry::createEmpty(),
+                            (new BaseEventSourcingConfiguration())
+                        )
+                            ->withAggregateRepositoryFactories(['repository'])
+                    )
                     ->withInputChannelName('inputChannel')
             )
             ->build()

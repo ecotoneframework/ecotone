@@ -62,23 +62,22 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
             $result = $methodInvocation->proceed();
 
             if ($amqpAcknowledgementCallback->isAutoAck()) {
-                $amqpAcknowledgementCallback->accept();
                 $logger->info(
                     sprintf('Message with id `%s` acknowledged in Message Channel', $message->getHeaders()->getMessageId()),
                     $message
                 );
+                $amqpAcknowledgementCallback->accept();
             }
         } catch (RejectMessageException $exception) {
             if ($amqpAcknowledgementCallback->isAutoAck()) {
-                $amqpAcknowledgementCallback->reject();
                 $logger->info(
                     sprintf('Message with id `%s` rejected in Message Channel', $message->getHeaders()->getMessageId()),
                     $message
                 );
+                $amqpAcknowledgementCallback->reject();
             }
         } catch (Throwable $exception) {
             if ($amqpAcknowledgementCallback->isAutoAck()) {
-                $amqpAcknowledgementCallback->requeue();
                 $logger->info(
                     sprintf(
                         'Message with id `%s` requeued in Message Channel. Due to %s',
@@ -87,6 +86,7 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
                     ),
                     $message
                 );
+                $amqpAcknowledgementCallback->requeue();
             }
         }
 

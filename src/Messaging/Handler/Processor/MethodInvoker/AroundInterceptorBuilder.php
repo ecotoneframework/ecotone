@@ -11,6 +11,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAn
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 
 use Ecotone\Messaging\Config\Container\Definition;
+
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
@@ -27,6 +28,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadConverter
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PollingMetadataConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueConverter;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut\IncorrectPointcutException;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -78,7 +80,13 @@ final class AroundInterceptorBuilder implements InterceptorWithPointCut
      */
     public static function create(string $referenceName, InterfaceToCall $interfaceToCall, int $precedence, string $pointcut = '', array $parameterConverters = []): self
     {
-        return new self($precedence, $referenceName, $interfaceToCall, $pointcut ? Pointcut::createWith($pointcut) : Pointcut::createEmpty(), $parameterConverters);
+        try {
+            $pointcut = $pointcut ? Pointcut::createWith($pointcut) : Pointcut::createEmpty();
+        } catch (IncorrectPointcutException $exception) {
+            throw IncorrectPointcutException::create("Incorrect pointcut for {$interfaceToCall}. {$exception->getMessage()}");
+        }
+
+        return new self($precedence, $referenceName, $interfaceToCall, $pointcut, $parameterConverters);
     }
 
     public static function createWithDirectObjectAndResolveConverters(InterfaceToCallRegistry $interfaceToCallRegistry, object $referenceObject, string $methodName, int $precedence, string $pointcut): self

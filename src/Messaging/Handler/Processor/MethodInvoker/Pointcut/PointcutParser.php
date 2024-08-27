@@ -5,7 +5,6 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\PointcutExpression;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 
 /**
  * licence Apache-2.0
@@ -31,7 +30,7 @@ class PointcutParser
         $parsed = $this->parseAnd();
 
         if ($this->nextToken()) {
-            throw InvalidArgumentException::create("Error while parsing '{$this->expression}'. Expected end of expression, got '{$this->tokens[$this->currentTokenIndex - 1]}'");
+            throw IncorrectPointcutException::create("Error while parsing '{$this->expression}'. Expected end of expression, got '{$this->tokens[$this->currentTokenIndex - 1]}'");
         }
 
         return $parsed;
@@ -122,14 +121,14 @@ class PointcutParser
             }
         }
 
-        throw InvalidArgumentException::create("Error while parsing '{$this->expression}'. '$token' is not a valid token");
+        throw IncorrectPointcutException::create("Error while parsing '{$this->expression}'. '$token' is not a valid token");
     }
 
     private function expect(?string $expectedToken): void
     {
         $token = $this->nextToken();
         if ($token !== $expectedToken) {
-            throw InvalidArgumentException::create("Error while parsing '{$this->expression}'. Expected '$expectedToken', got '$token'");
+            throw IncorrectPointcutException::create("Error while parsing '{$this->expression}'. Expected '$expectedToken', got '$token'");
         }
     }
 

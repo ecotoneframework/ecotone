@@ -10,7 +10,6 @@ use Ecotone\Messaging\Attribute\Interceptor\Around;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut\AttributeOne;
@@ -196,14 +195,14 @@ class PointcutTest extends TestCase
 
     public function TODOtest_throwing_exception_on_brackets_inside_brackets()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(Pointcut\IncorrectPointcutException::class);
 
         Pointcut::createWith("((\stdClass))");
     }
 
     public function test_throwing_exception_when_no_expression_given_between_brackets()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(Pointcut\IncorrectPointcutException::class);
 
         Pointcut::createWith("(\stdClass)(\stdClass)");
     }

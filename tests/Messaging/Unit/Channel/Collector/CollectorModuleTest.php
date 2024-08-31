@@ -21,13 +21,11 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\MessageHeaders;
 use PHPUnit\Framework\TestCase;
-
 use RuntimeException;
 
 use function str_contains;
 
 use Test\Ecotone\Messaging\Fixture\Channel\DynamicChannel\DynamicChannelResolver;
-
 use Test\Ecotone\Modelling\Fixture\Collector\BetNotificator;
 use Test\Ecotone\Modelling\Fixture\Collector\BetService;
 use Test\Ecotone\Modelling\Fixture\Collector\BetStatistics;

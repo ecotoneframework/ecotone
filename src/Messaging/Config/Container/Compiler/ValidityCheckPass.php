@@ -39,7 +39,7 @@ class ValidityCheckPass implements CompilerPass
             foreach ($argument as $value) {
                 $this->resolveArgument($value);
             }
-        } elseif($argument instanceof Definition) {
+        } elseif ($argument instanceof Definition) {
             $this->resolveArgument($argument->getArguments());
             foreach ($argument->getMethodCalls() as $methodCall) {
                 $this->resolveArgument($methodCall->getArguments());

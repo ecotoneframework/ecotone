@@ -5,7 +5,6 @@ namespace Ecotone\Messaging\Handler\Router;
 use function array_unique;
 
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
-
 use Ecotone\Messaging\Message;
 
 use function is_iterable;

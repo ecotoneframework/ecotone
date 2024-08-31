@@ -24,6 +24,7 @@ use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayload
 use Ecotone\Messaging\Handler\InterceptedEndpoint;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Processor\ChainedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\MessageHeaders;
@@ -361,6 +362,7 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
                 Uuid::uuid4()->toString(),
                 new Definition(ErrorChannelInterceptor::class, [
                     new ChannelReference($this->errorChannelName),
+                    Reference::to(LoggingGateway::class),
                 ])
             );
             $channelInterceptorInterface = $builder->getInterfaceToCall(new InterfaceToCallReference(ErrorChannelInterceptor::class, 'handle'));

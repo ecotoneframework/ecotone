@@ -6,14 +6,11 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Logger;
 
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
-
-
 use Ecotone\Test\LoggerExample;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\CreateMerchant;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\Merchant;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\MerchantSubscriber;
-
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\User;
 
 /**

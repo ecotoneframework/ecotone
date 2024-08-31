@@ -4,6 +4,7 @@ namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\MessageHandlingException;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
@@ -16,7 +17,7 @@ use Throwable;
  */
 class PollingConsumerErrorChannelInterceptor
 {
-    public function __construct(private ChannelResolver $channelResolver)
+    public function __construct(private ChannelResolver $channelResolver, private LoggingGateway $loggingGateway)
     {
     }
 
@@ -37,13 +38,27 @@ class PollingConsumerErrorChannelInterceptor
             /** @var PollingMetadata $pollingMetadata */
             $pollingMetadata = $requestMessage->getHeaders()->get(MessageHeaders::CONSUMER_POLLING_METADATA);
             $errorChannelName = $pollingMetadata->getErrorChannelName();
-            // TODO: what if error channel is not found?
+
             if ($errorChannelName && $this->channelResolver->hasChannelWithName($errorChannelName)) {
+                $this->loggingGateway->error(
+                    sprintf('Error occurred during handling message. Sending Message to handle it in predefined Error Channel: `%s`.', $errorChannelName),
+                    $requestMessage,
+                    $exception,
+                );
+
                 $errorChannel = $this->channelResolver->resolve($errorChannelName);
                 $errorChannel->send(ErrorMessage::create(MessageHandlingException::fromOtherException($exception, $requestMessage)));
+
+                $this->loggingGateway->info(
+                    sprintf('Message was sent to Error Channel: `%s` successfully.', $errorChannelName),
+                    $requestMessage,
+                    $exception,
+                );
+
                 return true;
             }
         }
+
         return false;
     }
 }

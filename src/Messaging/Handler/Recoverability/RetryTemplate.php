@@ -54,7 +54,7 @@ final class RetryTemplate implements DefinedObject
 
     public function runCallbackWithRetries(Closure $closure, Message $message, string $exceptionClass, LoggingGateway $logger, string $retryMessage): void
     {
-        $retryNumber = 0;
+        $retryNumber = 1;
         do {
             try {
                 $closure();
@@ -69,10 +69,14 @@ final class RetryTemplate implements DefinedObject
                 }
 
                 $logger->info($retryMessage, $message, $exception);
-                $retryNumber++;
                 usleep($this->calculateNextDelay($retryNumber) * 1000);
+                $retryNumber++;
+
+                if ($retryNumber > $this->maxAttempts) {
+                    throw $exception;
+                }
             }
-        } while (true);
+        } while ($retryNumber <= $this->maxAttempts);
     }
 
     public function canBeCalledNextTime(int $retryNumber): bool

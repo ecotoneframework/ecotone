@@ -51,7 +51,7 @@ class InMemoryContainerImplementation implements ContainerImplementation
     {
         if (is_array($argument)) {
             return array_map(fn ($argument) => $this->resolveArgument($argument, $builder), $argument);
-        } elseif($argument instanceof Definition) {
+        } elseif ($argument instanceof Definition) {
             $object = $this->instantiateDefinition($argument, $builder);
             foreach ($argument->getMethodCalls() as $methodCall) {
                 $object->{$methodCall->getMethodName()}(...$this->resolveArgument($methodCall->getArguments(), $builder));

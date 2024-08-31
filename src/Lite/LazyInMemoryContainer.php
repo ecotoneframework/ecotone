@@ -43,7 +43,7 @@ class LazyInMemoryContainer implements ContainerInterface
     {
         if (is_array($argument)) {
             return array_map(fn ($argument) => $this->resolveArgument($argument), $argument);
-        } elseif($argument instanceof Definition) {
+        } elseif ($argument instanceof Definition) {
             $object = $this->instantiateDefinition($argument);
             foreach ($argument->getMethodCalls() as $methodCall) {
                 $object->{$methodCall->getMethodName()}(...$this->resolveArgument($methodCall->getArguments()));

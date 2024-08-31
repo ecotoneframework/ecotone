@@ -7,7 +7,6 @@ namespace Ecotone\Messaging\Scheduling\CronIntegration;
 use function count;
 
 use DateTime;
-
 use DateTimeImmutable;
 use DateTimeInterface;
 use DateTimeZone;

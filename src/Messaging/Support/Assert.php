@@ -104,6 +104,18 @@ class Assert
     }
 
     /**
+     * @param array $arrayToCheck
+     * @param string $exceptionMessage
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public static function allStrings(array $arrayToCheck, string $exceptionMessage = ''): void
+    {
+        foreach ($arrayToCheck as $value) {
+            Assert::isTrue(is_string($value), $exceptionMessage);
+        }
+    }
+
+    /**
      * @param $objectToCheck
      * @param string $className
      * @param string $message

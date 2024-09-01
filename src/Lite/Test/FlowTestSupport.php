@@ -198,9 +198,17 @@ final class FlowTestSupport
         return $this;
     }
 
-    public function triggerProjection(string $projectionName): self
+    public function triggerProjection(string|array $projectionName): self
     {
-        $this->getGateway(ProjectionManager::class)->triggerProjection($projectionName);
+        if (is_string($projectionName)) {
+            $projectionName = [$projectionName];
+        }
+
+        Assert::allStrings($projectionName, '$projectionName must be single or collection of strings');
+
+        foreach ($projectionName as $name) {
+            $this->getGateway(ProjectionManager::class)->triggerProjection($name);
+        }
 
         return $this;
     }

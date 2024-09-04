@@ -9,9 +9,9 @@ use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplate;
 use Ecotone\Messaging\PrecedenceChannelInterceptor;
-use Psr\Log\LoggerInterface;
 
 /**
  * licence Apache-2.0
@@ -42,7 +42,7 @@ final class RetriesChannelInterceptorBuilder implements ChannelInterceptorBuilde
             $this->retryTemplate,
             $this->errorChannel,
             new Reference(ConfiguredMessagingSystem::class),
-            new Reference(LoggerInterface::class),
+            new Reference(LoggingGateway::class),
         ]);
     }
 }

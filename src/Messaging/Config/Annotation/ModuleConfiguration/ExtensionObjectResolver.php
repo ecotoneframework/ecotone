@@ -49,4 +49,15 @@ final class ExtensionObjectResolver
 
         return $resolvedObjects;
     }
+
+    public static function contains(string $extensionClassName, array $extensionObjects): bool
+    {
+        foreach ($extensionObjects as $extensionObject) {
+            if ($extensionObject instanceof $extensionClassName) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

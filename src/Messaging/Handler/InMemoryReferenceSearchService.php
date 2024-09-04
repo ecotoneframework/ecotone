@@ -8,11 +8,9 @@ use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Gateway\StorageMessagingEntrypoint;
-use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
 use Psr\Container\ContainerInterface;
-use Psr\Log\NullLogger;
 
 /**
  * Class InMemoryReferenceSearchService
@@ -49,9 +47,6 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
                 $serviceConfiguration->getCacheDirectoryPath(),
                 false
             );
-        }
-        if (! array_key_exists(LoggingHandlerBuilder::LOGGER_REFERENCE, $objectsToResolve) && ! self::hasInOriginalReferenceService(LoggingHandlerBuilder::LOGGER_REFERENCE, $referenceSearchService)) {
-            $objectsToResolve[LoggingHandlerBuilder::LOGGER_REFERENCE] = new NullLogger();
         }
         if (! self::hasInOriginalReferenceService(MessagingEntrypoint::class, $referenceSearchService)) {
             $objectsToResolve[MessagingEntrypoint::class] = StorageMessagingEntrypoint::create();

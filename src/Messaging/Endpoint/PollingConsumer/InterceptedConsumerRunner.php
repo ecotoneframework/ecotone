@@ -7,13 +7,13 @@ use Ecotone\Messaging\Endpoint\EndpointRunner;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\MessagePoller;
 use Ecotone\Messaging\Scheduling\Clock;
 use Ecotone\Messaging\Scheduling\CronTrigger;
 use Ecotone\Messaging\Scheduling\PeriodicTrigger;
 use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
-use Psr\Log\LoggerInterface;
 
 /**
  * licence Apache-2.0
@@ -25,7 +25,7 @@ class InterceptedConsumerRunner implements EndpointRunner
         private MessagePoller $messagePoller,
         private PollingMetadata $defaultPollingMetadata,
         private Clock $clock,
-        private LoggerInterface $logger,
+        private LoggingGateway $logger,
         private MessagingEntrypoint $messagingEntrypoint,
     ) {
     }

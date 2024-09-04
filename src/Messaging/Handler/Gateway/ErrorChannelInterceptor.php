@@ -29,7 +29,7 @@ class ErrorChannelInterceptor
             $this->loggingGateway->info(
                 'Error occurred during handling message. Sending Message to handle it in predefined Error Channel.',
                 $requestMessage,
-                $exception,
+                ['exception' => $exception],
             );
 
             $this->errorChannel->send(ErrorMessage::create(MessageHandlingException::fromOtherException($exception, $requestMessage)));
@@ -37,7 +37,7 @@ class ErrorChannelInterceptor
             $this->loggingGateway->info(
                 'Message was sent to Error Channel successfully.',
                 $requestMessage,
-                $exception,
+                ['exception' => $exception],
             );
         }
     }

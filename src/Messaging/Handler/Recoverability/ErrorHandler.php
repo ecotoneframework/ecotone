@@ -70,7 +70,7 @@ class ErrorHandler
                         $cause->getMessage()
                     ),
                     $failedMessage,
-                    $cause
+                    ['exception' => $cause],
                 );
 
                 return null;
@@ -84,7 +84,7 @@ class ErrorHandler
                     $cause->getMessage()
                 ),
                 $failedMessage,
-                $cause
+                ['exception' => $cause],
             );
             $messageBuilder->removeHeader(self::ECOTONE_RETRY_HEADER);
 
@@ -109,7 +109,7 @@ class ErrorHandler
                 $cause->getMessage()
             ),
             $failedMessage,
-            $cause
+            ['exception' => $cause],
         );
         $messageChannel->send(
             $messageBuilder

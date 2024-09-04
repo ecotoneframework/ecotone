@@ -34,7 +34,7 @@ final class DynamicMessageChannel implements PollableChannel
         Assert::notNullAndEmpty($channelName, "Channel name to send message to cannot be null. If you want to skip message sending, return 'nullChannel' instead.");
 
         $channel = $this->channelResolver->resolve($channelName);
-        $this->loggingGateway->info("Decided to send message to `{$channelName}` for `{$this->channelName}`", $message, contextData: ['channel_name' => $this->channelName, 'chosen_channel_name' => $channelName]);
+        $this->loggingGateway->info("Decided to send message to `{$channelName}` for `{$this->channelName}`", $message, ['channel_name' => $this->channelName, 'chosen_channel_name' => $channelName]);
 
         $channel->send($message);
     }
@@ -46,7 +46,7 @@ final class DynamicMessageChannel implements PollableChannel
 
         $channel = $this->resolveMessageChannel($channelName);
         $message = $channel->receiveWithTimeout($timeoutInMilliseconds);
-        $this->loggingGateway->info("Decided to received message from `{$channelName}` for `{$this->channelName}`", $message, contextData: ['channel_name' => $this->channelName, 'chosen_channel_name' => $channelName]);
+        $this->loggingGateway->info("Decided to received message from `{$channelName}` for `{$this->channelName}`", $message, ['channel_name' => $this->channelName, 'chosen_channel_name' => $channelName]);
 
         return $message;
     }
@@ -59,7 +59,7 @@ final class DynamicMessageChannel implements PollableChannel
         $channel = $this->resolveMessageChannel($channelName);
 
         $message = $channel->receive();
-        $this->loggingGateway->info("Decided to received message from `{$channelName}` for `{$this->channelName}`", $message, contextData: ['channel_name' => $this->channelName, 'chosen_channel_name' => $channelName]);
+        $this->loggingGateway->info("Decided to received message from `{$channelName}` for `{$this->channelName}`", $message, ['channel_name' => $this->channelName, 'chosen_channel_name' => $channelName]);
 
         return $message;
     }

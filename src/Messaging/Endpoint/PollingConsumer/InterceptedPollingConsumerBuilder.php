@@ -23,7 +23,6 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Scheduling\Clock;
-use Psr\Log\LoggerInterface;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -101,7 +100,7 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
             $this->compileMessagePoller($builder, $messageHandlerBuilder),
             new PollingMetadataReference($endpointId),
             new Reference(Clock::class),
-            new Reference(LoggerInterface::class),
+            new Reference(LoggingGateway::class),
             new Reference(MessagingEntrypoint::class),
         ]);
         $builder->registerPollingEndpoint($endpointId, $consumerRunner, $this->withContinuesPolling());

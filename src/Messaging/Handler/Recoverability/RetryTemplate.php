@@ -68,7 +68,7 @@ final class RetryTemplate implements DefinedObject
                     throw $exception;
                 }
 
-                $logger->info($retryMessage, $message, $exception);
+                $logger->info($retryMessage, $message, ['exception' => $exception]);
                 usleep($this->calculateNextDelay($retryNumber) * 1000);
                 $retryNumber++;
 

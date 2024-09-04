@@ -71,7 +71,7 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
                 throw $exception;
             }
 
-            $logger->error(
+            $logger->critical(
                 sprintf(
                     'Error occurred during acknowledging message with id `%s` in Message Channel `%s`. This means message may return to the channel. Error: %s',
                     $message->getHeaders()->getMessageId(),
@@ -79,7 +79,7 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
                     $exception->getMessage()
                 ),
                 $message,
-                $exception,
+                ['exception' => $exception],
             );
         }
     }

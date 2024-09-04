@@ -35,7 +35,7 @@ class InstantRetryInterceptor implements DefinedObject
                     $logger->info(
                         sprintf('Instant retry have exceed %d/%d retry limit. No more retries will be done', $retries, $this->maxRetryAttempts),
                         $message,
-                        $exception
+                        ['exception' => $exception],
                     );
                     throw $exception;
                 }
@@ -49,7 +49,7 @@ class InstantRetryInterceptor implements DefinedObject
                         $exception->getMessage()
                     ),
                     $message,
-                    $exception
+                    ['exception' => $exception]
                 );
             }
         }

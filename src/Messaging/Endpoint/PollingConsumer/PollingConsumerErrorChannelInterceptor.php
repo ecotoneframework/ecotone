@@ -40,10 +40,10 @@ class PollingConsumerErrorChannelInterceptor
             $errorChannelName = $pollingMetadata->getErrorChannelName();
 
             if ($errorChannelName && $this->channelResolver->hasChannelWithName($errorChannelName)) {
-                $this->loggingGateway->error(
+                $this->loggingGateway->critical(
                     sprintf('Error occurred during handling message. Sending Message to handle it in predefined Error Channel: `%s`.', $errorChannelName),
                     $requestMessage,
-                    $exception,
+                    ['exception' => $exception],
                 );
 
                 $errorChannel = $this->channelResolver->resolve($errorChannelName);
@@ -52,7 +52,7 @@ class PollingConsumerErrorChannelInterceptor
                 $this->loggingGateway->info(
                     sprintf('Message was sent to Error Channel: `%s` successfully.', $errorChannelName),
                     $requestMessage,
-                    $exception,
+                    ['exception' => $exception],
                 );
 
                 return true;

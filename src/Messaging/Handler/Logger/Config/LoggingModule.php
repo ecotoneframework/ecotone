@@ -10,7 +10,6 @@ use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
-use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -19,12 +18,11 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogBefore;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
-use Ecotone\Messaging\Handler\Logger\LoggingService;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Precedence;
-use Psr\Log\LoggerInterface;
 
 #[ModuleAnnotation]
 /**
@@ -46,13 +44,14 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         $messagingConfiguration->registerServiceDefinition(LoggingInterceptor::class, [
-            new Definition(LoggingService::class, [Reference::to(ConversionService::REFERENCE_NAME), Reference::to(LoggerInterface::class)]),
+            Reference::to(LoggingGateway::class),
+            Reference::to(ConversionService::class),
         ]);
 
         $messagingConfiguration->registerBeforeMethodInterceptor(
             MethodInterceptorBuilder::create(
                 Reference::to(LoggingInterceptor::class),
-                $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'logBefore'),
+                $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'log'),
                 Precedence::EXCEPTION_LOGGING_PRECEDENCE,
                 LogBefore::class
             )
@@ -60,7 +59,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
         $messagingConfiguration->registerAfterMethodInterceptor(
             MethodInterceptorBuilder::create(
                 Reference::to(LoggingInterceptor::class),
-                $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'logAfter'),
+                $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'log'),
                 Precedence::EXCEPTION_LOGGING_PRECEDENCE,
                 LogAfter::class
             )

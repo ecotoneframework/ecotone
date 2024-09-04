@@ -4,18 +4,13 @@ declare(strict_types=0);
 
 namespace Ecotone\Messaging\Handler\Logger;
 
-use Ecotone\Messaging\Attribute\Parameter\Header;
-use Ecotone\Messaging\Attribute\Parameter\Payload;
-use Ecotone\Messaging\Attribute\ServiceActivator;
-use Ecotone\Messaging\Conversion\ConversionService;
-use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\TypeDefinitionException;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use function array_merge;
+
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 use Psr\Log\LoggerInterface;
-use Throwable;
+use Psr\Log\LoggerTrait;
+use Psr\Log\LogLevel;
+use Stringable;
 
 /**
  * Class LoggingService
@@ -25,132 +20,50 @@ use Throwable;
 /**
  * licence Apache-2.0
  */
-class LoggingService
+class LoggingService implements LoggingGateway, SubscribableLoggingGateway
 {
-    public const CONTEXT_MESSAGE_HEADER = 'ecotone.logging.contextMessage';
-    public const CONTEXT_EXCEPTION_HEADER = 'ecotone.logging.exceptionMessage';
-    public const CONTEXT_DATA_HEADER = 'ecotone.logging.contextData';
-    public const INFO_LOGGING_CHANNEL = 'infoLoggingChannel';
-    public const ERROR_LOGGING_CHANNEL = 'errorLoggingChannel';
-
-    private ConversionService $conversionService;
-    private LoggerInterface $logger;
+    use LoggerTrait;
 
     /**
-     * LoggingService constructor.
-     * @param ConversionService $conversionService
-     * @param LoggerInterface $logger
+     * @var LoggerInterface[] $loggers
      */
-    public function __construct(ConversionService $conversionService, LoggerInterface $logger)
+    private array $loggers = [];
+
+    public function info(Stringable|string $message, Message|array|null $context = [], array $additionalContext = []): void
     {
-        $this->conversionService = $conversionService;
-        $this->logger = $logger;
+        $this->log(LogLevel::INFO, $message, $context ?? [], $additionalContext);
     }
 
-    #[ServiceActivator(self::INFO_LOGGING_CHANNEL)]
-    public function info(
-        #[Payload] string $text,
-        #[Header(self::CONTEXT_MESSAGE_HEADER)] ?Message $message,
-        #[Header(self::CONTEXT_EXCEPTION_HEADER)] ?Throwable $exception,
-        #[Header(self::CONTEXT_DATA_HEADER)] array $contextData,
-    ): void {
-        if ($message === null) {
-            $this->logger->info($text, $contextData);
+    public function error(Stringable|string $message, Message|array|null $context = [], array $additionalContext = []): void
+    {
+        $this->log(LogLevel::ERROR, $message, $context ?? [], $additionalContext);
+    }
 
-            return;
-        }
+    public function critical(Stringable|string $message, Message|array|null $context = [], array $additionalContext = []): void
+    {
+        $this->log(LogLevel::CRITICAL, $message, $context ?? [], $additionalContext);
+    }
 
-        $this->logger->info(
-            $text,
-            array_merge($contextData, [
-                'message_id' => $message->getHeaders()->getMessageId(),
-                'correlation_id' => $message->getHeaders()->getCorrelationId(),
-                'parent_id' => $message->getHeaders()->getParentId(),
-                'headers' => (string)$message->getHeaders(),
-                'exception' => $exception,
-            ])
+    public function log($level, Stringable|string $message, Message|array $context = [], array $additionalContext = []): void
+    {
+        $resultingContext = array_merge(
+            $context instanceof Message ? [
+                'message_id' => $context->getHeaders()->getMessageId(),
+                'correlation_id' => $context->getHeaders()->getCorrelationId(),
+                'parent_id' => $context->getHeaders()->getParentId(),
+            ] : $context,
+            $additionalContext
         );
-    }
 
-    #[ServiceActivator(self::ERROR_LOGGING_CHANNEL)]
-    public function error(
-        #[Payload] string $text,
-        #[Header(self::CONTEXT_MESSAGE_HEADER)] Message $message,
-        #[Header(self::CONTEXT_EXCEPTION_HEADER)] ?Throwable $exception,
-        #[Header(self::CONTEXT_DATA_HEADER)] array $contextData,
-    ): void {
-        $this->logger->critical(
-            $text,
-            array_merge($contextData, [
-                'message_id' => $message->getHeaders()->getMessageId(),
-                'correlation_id' => $message->getHeaders()->getCorrelationId(),
-                'parent_id' => $message->getHeaders()->getParentId(),
-                'headers' => (string)$message->getHeaders(),
-                'exception' => $exception,
-            ])
-        );
-    }
-
-    /**
-     * @param LoggingLevel $loggingLevel
-     * @param Message $message
-     * @throws InvalidArgumentException
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     */
-    public function log(LoggingLevel $loggingLevel, Message $message): void
-    {
-        $payload = $this->convertPayloadToScalarType($message);
-
-        if ($loggingLevel->isFullMessageLog()) {
-            $this->logger->{$loggingLevel->getLevel()}($payload, ['headers' => (string)$message->getHeaders()]);
-            return;
+        foreach ($this->loggers as $logger) {
+            $logger->log($level, $message, $resultingContext);
         }
-
-        $this->logger->{$loggingLevel->getLevel()}($payload);
     }
 
-    /**
-     * @param LoggingLevel $loggingLevel
-     * @param Throwable $exception
-     * @param Message $message
-     * @throws InvalidArgumentException
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     */
-    public function logException(LoggingLevel $loggingLevel, Throwable $exception, Message $message): void
+    public function registerLogger(?LoggerInterface $logger): void
     {
-        $context = ['payload' => $this->convertPayloadToScalarType($message), 'exception' => $exception];
-
-        if ($loggingLevel->isFullMessageLog()) {
-            $context = array_merge(['headers' => (string)$message->getHeaders()], $context);
+        if ($logger && ! in_array($logger, $this->loggers)) {
+            $this->loggers[] = $logger;
         }
-
-        $this->logger->{$loggingLevel->getLevel()}($exception->getMessage(), $context);
-    }
-
-    /**
-     * @param Message $message
-     * @throws InvalidArgumentException
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     */
-    private function convertPayloadToScalarType(Message $message): string
-    {
-        $data = $message->getPayload();
-        $sourceMediaType = $message->getHeaders()->hasContentType() ? $message->getHeaders()->getContentType() : MediaType::createApplicationXPHP();
-        $sourceTypeDescriptor = $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : TypeDescriptor::createFromVariable($message->getPayload());
-
-        if (is_object($data) && method_exists($data, '__toString')) {
-            $data = (string)$data;
-        } elseif (! TypeDescriptor::createFromVariable($data)->isScalar()) {
-            if ($this->conversionService->canConvert($sourceTypeDescriptor, $sourceMediaType, TypeDescriptor::createStringType(), MediaType::createApplicationJson())) {
-                $data = $this->conversionService->convert($data, $sourceTypeDescriptor, $sourceMediaType, TypeDescriptor::createStringType(), MediaType::createApplicationJson());
-            } else {
-                $data = $this->conversionService->convert($data, $sourceTypeDescriptor, $sourceMediaType, TypeDescriptor::createStringType(), MediaType::createApplicationXPHPSerialized());
-            }
-        }
-
-        return $data;
     }
 }

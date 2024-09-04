@@ -17,8 +17,6 @@ use function is_object;
 use function method_exists;
 
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 use ReflectionMethod;
 
 use function str_starts_with;
@@ -110,14 +108,6 @@ class InMemoryContainerImplementation implements ContainerImplementation
         }
         if ($this->externalContainer?->has(self::ALIAS_PREFIX . $id)) {
             return $this->externalContainer->get(self::ALIAS_PREFIX . $id);
-        }
-        // This is the only default service we provide
-        if ($id === 'logger' || $id === LoggerInterface::class) {
-            $alias = $id === 'logger' ? LoggerInterface::class : 'logger';
-            $logger = $this->externalContainer?->has($alias) ? $this->externalContainer->get($alias) : new NullLogger();
-            $this->container->set('logger', $logger);
-            $this->container->set(LoggerInterface::class, $logger);
-            return $logger;
         }
         if ($reference->getInvalidBehavior() === self::NULL_ON_INVALID_REFERENCE) {
             return null;

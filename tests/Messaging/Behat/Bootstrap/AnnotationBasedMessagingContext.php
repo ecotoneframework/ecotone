@@ -19,7 +19,6 @@ use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\NullLogger;
 use Ramsey\Uuid\Uuid;
 use ReflectionException;
 use Test\Ecotone\Messaging\Fixture\Behat\Calculating\Calculator;
@@ -353,7 +352,6 @@ class AnnotationBasedMessagingContext extends TestCase implements Context
                 }
         }
 
-        $objects['logger'] = new NullLogger();
         $cacheDirectoryPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString() . 'ecotone_testing_behat_cache';
 
         $applicationConfiguration = ServiceConfiguration::createWithAsynchronicityOnly()

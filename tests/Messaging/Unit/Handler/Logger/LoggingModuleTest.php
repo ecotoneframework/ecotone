@@ -8,7 +8,6 @@ use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
-use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
 use Ecotone\Test\LoggerExample;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\Handler\FailureHandler\ExampleFailureCommandHandler;
@@ -29,7 +28,7 @@ final class LoggingModuleTest extends TestCase
         $loggerExample = LoggerExample::create();
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ExampleFailureCommandHandler::class],
-            [new ExampleFailureCommandHandler(), LoggingHandlerBuilder::LOGGER_REFERENCE => $loggerExample],
+            [new ExampleFailureCommandHandler(), 'logger' => $loggerExample],
             enableAsynchronousProcessing: [
                 SimpleMessageChannelBuilder::createQueueChannel(self::CHANNEL_NAME),
             ]
@@ -47,7 +46,7 @@ final class LoggingModuleTest extends TestCase
         $loggerExample = LoggerExample::create();
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ExampleFailureCommandHandler::class],
-            [new ExampleFailureCommandHandler(), LoggingHandlerBuilder::LOGGER_REFERENCE => $loggerExample],
+            [new ExampleFailureCommandHandler(), 'logger' => $loggerExample],
             ServiceConfiguration::createWithDefaults()
                 ->withDefaultErrorChannel('customErrorChannel'),
             enableAsynchronousProcessing: [

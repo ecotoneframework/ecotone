@@ -42,7 +42,7 @@ class EventBusRouter
         $this->loggingGateway->info(
             sprintf('Publishing Event Message using Class routing: %s.', $reflectionClass->getName()),
             $message,
-            contextData: ['resolvedChannels' => $channelsToSend]
+            ['resolvedChannels' => $channelsToSend]
         );
         return $channelsToSend;
     }
@@ -91,7 +91,7 @@ class EventBusRouter
         $this->loggingGateway->info(
             sprintf('Publishing Event Message using Named routing: %s.', $routedName),
             $message,
-            contextData: ['resolvedChannels' => $resolvedChannels]
+            ['resolvedChannels' => $resolvedChannels]
         );
         return $resolvedChannels;
     }

@@ -30,9 +30,9 @@ class LiteContainerImplementationTest extends ContainerImplementationTestCase
     {
         $logger = LoggerExample::create();
         $externalContainer = InMemoryPSRContainer::createFromAssociativeArray([
-            'logger' => $logger,
+            'externallyDefined' => $logger,
         ]);
-        $container = self::buildContainerFromDefinitions(['aReference' => new Reference('logger')], $externalContainer);
+        $container = self::buildContainerFromDefinitions(['aReference' => new Reference('externallyDefined')], $externalContainer);
 
         self::assertSame($logger, $container->get('aReference'));
     }

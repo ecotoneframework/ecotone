@@ -11,12 +11,10 @@ use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingCommands\MessagingCommandsModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\LicenceDecider;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverterBuilder;
 use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverterBuilder;
 use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverterBuilder;
@@ -33,8 +31,6 @@ use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderB
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\Logger\LoggingHandlerBuilder;
-use Ecotone\Messaging\Handler\Logger\LoggingService;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PollingMetadataConverter;
 use Ecotone\Messaging\Handler\Router\HeaderRouter;
@@ -195,17 +191,6 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
                 GatewayHeaderBuilder::create('commandName', MessagingCommandsModule::ECOTONE_CONSOLE_COMMAND_NAME),
                 GatewayPayloadBuilder::create('parameters'),
             ])
-        );
-
-        $messagingConfiguration->registerServiceDefinition(
-            LoggingService::class,
-            new Definition(
-                LoggingService::class,
-                [
-                    Reference::to(ConversionService::REFERENCE_NAME),
-                    Reference::to(LoggingHandlerBuilder::LOGGER_REFERENCE),
-                ]
-            )
         );
 
         $messagingConfiguration->registerServiceDefinition(PollingMetadataConverter::class, new Definition(PollingMetadataConverter::class));

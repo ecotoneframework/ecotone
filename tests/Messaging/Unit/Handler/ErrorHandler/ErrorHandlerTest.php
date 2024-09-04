@@ -61,7 +61,7 @@ class ErrorHandlerTest extends TestCase
         ));
         $this->assertNotNull($consumedChannel->receive());
         $this->assertCount(2, $logger->getInfo());
-        $this->assertCount(0, $logger->getCritical());
+        $this->assertCount(0, $logger->getError());
     }
 
     private function createFailedMessage(Message $message, Throwable $exception = null): ErrorMessage
@@ -114,7 +114,7 @@ class ErrorHandlerTest extends TestCase
 
         $this->assertEquals('exceptionMessage', $resultMessage->getHeaders()->get(ErrorHandler::EXCEPTION_MESSAGE));
         $this->assertNotEmpty($resultMessage->getHeaders()->get(ErrorHandler::EXCEPTION_STACKTRACE));
-        $this->assertCount(1, $logger->getCritical());
+        $this->assertCount(1, $logger->getError());
     }
 
     public function test_if_exceeded_retries_and_no_dead_letter_defined_drop_message()
@@ -140,7 +140,7 @@ class ErrorHandlerTest extends TestCase
         );
 
         $this->assertNull($resultMessage);
-        $this->assertCount(1, $logger->getCritical());
+        $this->assertCount(1, $logger->getError());
     }
 
     public function test_if_exceeded_retries_returning_message_with_causation_exception_if_exists()

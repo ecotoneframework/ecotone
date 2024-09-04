@@ -23,7 +23,6 @@ class LoggerExample implements LoggerInterface
     private array $notice = [];
     private array $info = [];
     private array $debug = [];
-    private array $log = [];
 
     private function __construct()
     {
@@ -99,14 +98,6 @@ class LoggerExample implements LoggerInterface
     }
 
     /**
-     * @return array
-     */
-    public function getLog(): array
-    {
-        return $this->log;
-    }
-
-    /**
      * @inheritDoc
      */
     public function emergency(string|Stringable $message, array $context = []): void
@@ -175,7 +166,7 @@ class LoggerExample implements LoggerInterface
      */
     public function log($level, string|Stringable $message, array $context = []): void
     {
-        $this->log[] = $level;
+        $this->$level[] = $message;
     }
 
     public function clear(): void
@@ -188,6 +179,5 @@ class LoggerExample implements LoggerInterface
         $this->notice = [];
         $this->info = [];
         $this->debug = [];
-        $this->log = [];
     }
 }

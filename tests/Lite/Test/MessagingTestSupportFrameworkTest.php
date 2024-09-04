@@ -17,7 +17,6 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Scheduling\TimeSpan;
 use Ecotone\Modelling\CommandBus;
 use PHPUnit\Framework\TestCase;
-use Psr\Log\NullLogger;
 use Ramsey\Uuid\Uuid;
 use stdClass;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
@@ -147,7 +146,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
     {
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, PlaceOrderConverter::class],
-            [new OrderService(), new PlaceOrderConverter(), 'logger' => new NullLogger()],
+            [new OrderService(), new PlaceOrderConverter()],
             enableAsynchronousProcessing: [
                 SimpleMessageChannelBuilder::createQueueChannel('orders', conversionMediaType: MediaType::createApplicationXPHPArray()),
             ],

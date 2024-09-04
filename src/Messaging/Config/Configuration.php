@@ -143,5 +143,7 @@ interface Configuration extends CompilerPass
 
     public function isRunningForEnterpriseLicence(): bool;
 
+    public function addCompilerPass(CompilerPass $compilerPass): self;
+
     public function isRunningForTest(): bool;
 }

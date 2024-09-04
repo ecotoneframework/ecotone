@@ -8,8 +8,6 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\DefinedObjectWrapper;
 use InvalidArgumentException;
 use Psr\Container\ContainerInterface;
-use Psr\Log\LoggerInterface;
-use Psr\Log\NullLogger;
 use ReflectionMethod;
 
 /**
@@ -92,14 +90,6 @@ class LazyInMemoryContainer implements ContainerInterface
         }
         if ($this->externalContainer?->has(InMemoryContainerImplementation::ALIAS_PREFIX . $id)) {
             return $this->externalContainer->get(InMemoryContainerImplementation::ALIAS_PREFIX . $id);
-        }
-        // This is the only default service we provide
-        if ($id === 'logger' || $id === LoggerInterface::class) {
-            $alias = $id === 'logger' ? LoggerInterface::class : 'logger';
-            $logger = $this->externalContainer?->has($alias) ? $this->externalContainer->get($alias) : new NullLogger();
-            $this->resolvedObjects['logger'] = $logger;
-            $this->resolvedObjects[LoggerInterface::class] = $logger;
-            return $logger;
         }
         if ($reference->getInvalidBehavior() === ContainerImplementation::NULL_ON_INVALID_REFERENCE) {
             return null;

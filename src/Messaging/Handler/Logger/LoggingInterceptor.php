@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Logger;
 
-use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
-use Ecotone\Messaging\Handler\Logger\Annotation\LogBefore;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
-use Ecotone\Messaging\Handler\TypeDefinitionException;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\InvalidArgumentException;
+use Psr\Log\LogLevel;
 use Throwable;
 
 /**
@@ -24,50 +23,52 @@ use Throwable;
  */
 class LoggingInterceptor
 {
-    public function __construct(private LoggingService $loggingService)
+    public function __construct(private LoggingGateway $loggingGateway, private ConversionService $conversionService)
     {
     }
 
-    /**
-     * @param Message $message
-     * @param LogBefore $log
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws TypeDefinitionException
-     */
-    public function logBefore(Message $message, ?LogBefore $log): void
+    public function log(Message $message, Logger $logAnnotation): void
     {
-        $log ??= new LogBefore();
+        $payload = $this->convertPayloadToScalarType($message);
 
-        $this->loggingService->log(LoggingLevel::create($log->logLevel, $log->logFullMessage), $message);
+        $this->loggingGateway->log($logAnnotation->logLevel, $payload, $logAnnotation->logFullMessage ? ['headers' => (string)$message->getHeaders()] : []);
     }
 
-    /**
-     * @param Message $message
-     * @param LogAfter $log
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws TypeDefinitionException
-     */
-    public function logAfter(Message $message, ?LogAfter $log): void
+    public function logException(MethodInvocation $methodInvocation, Message $message, ?LogError $logAnnotation)
     {
-        $log ??= new LogAfter();
-
-        $this->loggingService->log(LoggingLevel::create($log->logLevel, $log->logFullMessage), $message);
-    }
-
-    public function logException(MethodInvocation $methodInvocation, Message $message, ?LogError $log)
-    {
-        $log ??= new LogError();
-
         try {
             $returnValue = $methodInvocation->proceed();
         } catch (Throwable $exception) {
-            $this->loggingService->logException(LoggingLevel::create($log->logLevel, $log->logFullMessage), $exception, $message);
+            $context = ['payload' => $this->convertPayloadToScalarType($message), 'exception' => $exception];
+
+            if ($logAnnotation?->isLogFullMessage()) {
+                $context['headers'] = (string)$message->getHeaders();
+            }
+
+            $this->loggingGateway->log($logAnnotation?->logLevel ?? LogLevel::CRITICAL, $exception->getMessage(), $context);
 
             throw $exception;
         }
 
         return $returnValue;
+    }
+
+    private function convertPayloadToScalarType(Message $message): string
+    {
+        $data = $message->getPayload();
+        $sourceMediaType = $message->getHeaders()->hasContentType() ? $message->getHeaders()->getContentType() : MediaType::createApplicationXPHP();
+        $sourceTypeDescriptor = $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : TypeDescriptor::createFromVariable($message->getPayload());
+
+        if (is_object($data) && method_exists($data, '__toString')) {
+            $data = (string)$data;
+        } elseif (! TypeDescriptor::createFromVariable($data)->isScalar()) {
+            if ($this->conversionService->canConvert($sourceTypeDescriptor, $sourceMediaType, TypeDescriptor::createStringType(), MediaType::createApplicationJson())) {
+                $data = $this->conversionService->convert($data, $sourceTypeDescriptor, $sourceMediaType, TypeDescriptor::createStringType(), MediaType::createApplicationJson());
+            } else {
+                $data = $this->conversionService->convert($data, $sourceTypeDescriptor, $sourceMediaType, TypeDescriptor::createStringType(), MediaType::createApplicationXPHPSerialized());
+            }
+        }
+
+        return (string) $data;
     }
 }

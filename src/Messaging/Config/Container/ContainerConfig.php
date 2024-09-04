@@ -11,8 +11,6 @@ use Ecotone\Messaging\Config\Container\Compiler\ValidityCheckPass;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
-use Ecotone\Messaging\Handler\Logger\LoggingGateway;
-use Ecotone\Messaging\Handler\Logger\StubLoggingGateway;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Psr\Container\ContainerInterface;
 
@@ -35,9 +33,6 @@ class ContainerConfig
         $container = new LazyInMemoryContainer($containerBuilder->getDefinitions(), $externalContainer);
         $container->set(ConfigurationVariableService::REFERENCE_NAME, $configurationVariableService ?? InMemoryConfigurationVariableService::createEmpty());
         $container->set(ProxyFactory::class, $proxyFactory ?? new ProxyFactory(ServiceCacheConfiguration::noCache()));
-        if (! $container->has(LoggingGateway::class)) {
-            $container->set(LoggingGateway::class, StubLoggingGateway::create());
-        }
         return $container->get(ConfiguredMessagingSystem::class);
     }
 

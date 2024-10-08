@@ -35,7 +35,7 @@ class ProxyFactory
 
     public static function getGatewayProxyDefinitionFor(GatewayProxyReference $proxyReference): Definition
     {
-        return new Definition(self::getClassNameFor($proxyReference), [
+        return new Definition(self::getFullClassNameFor($proxyReference), [
             new Definition(GatewayProxyReference::class, [
                 $proxyReference->getReferenceName(),
                 $proxyReference->getInterfaceName(),

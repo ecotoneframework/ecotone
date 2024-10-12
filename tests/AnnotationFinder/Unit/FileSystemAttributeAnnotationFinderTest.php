@@ -421,7 +421,7 @@ class FileSystemAttributeAnnotationFinderTest extends TestCase
         );
     }
 
-    public function test_throwing_exception_if_class_is_registed_under_incorrect_namespace()
+    public function test_throwing_exception_if_class_is_registered_under_incorrect_namespace()
     {
         $this->expectException(ReflectionException::class);
 

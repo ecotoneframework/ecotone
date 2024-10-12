@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\AnnotationFinder\FileSystem;
 
+use Composer\Autoload\ClassLoader;
 use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\AnnotationFinder\AnnotatedMethod;
 use Ecotone\AnnotationFinder\AnnotationFinder;
@@ -137,18 +138,6 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         );
 
         $this->registeredClasses = array_unique($registeredClasses);
-    }
-
-    private function getPathsToSearchIn(AutoloadNamespaceParser $autoloadNamespaceParser, string $rootProjectDir, array $namespaces): array
-    {
-        $paths = [];
-
-        $autoloadPsr4 = require($rootProjectDir . '/vendor/composer/autoload_psr4.php');
-        $autoloadPsr0 = require($rootProjectDir . '/vendor/composer/autoload_namespaces.php');
-        $paths = array_merge($paths, $autoloadNamespaceParser->getFor($namespaces, $autoloadPsr4, true));
-        $paths = array_merge($paths, $autoloadNamespaceParser->getFor($namespaces, $autoloadPsr0, false));
-
-        return array_unique($paths);
     }
 
     private function getDirContents(string $dir, array &$results = []): array
@@ -425,9 +414,28 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         $rootProjectDir = self::getRealRootCatalog($rootProjectDir, $rootProjectDir);
         $namespacesToUse = array_map(fn (string $namespace) => trim($namespace, "\t\n\r\\"), $namespacesToUse);
 
-        $paths = $this->getPathsToSearchIn($autoloadNamespaceParser, $rootProjectDir, $namespacesToUse);
+        /** @var ClassLoader $autoloader */
+        $autoloader = require($rootProjectDir . '/vendor/autoload.php');
 
-        return $this->getClassesIn($paths, $namespacesToUse);
+        if ($autoloader->isClassMapAuthoritative()) {
+            return array_values(
+                \array_filter(
+                    array_keys($autoloader->getClassMap()),
+                    fn (string $className) => $this->isInAvailableNamespaces($namespacesToUse, $className)
+                )
+            );
+        } else {
+            $paths = [];
+
+            $autoloadPsr4 = require($rootProjectDir . '/vendor/composer/autoload_psr4.php');
+            $autoloadPsr0 = require($rootProjectDir . '/vendor/composer/autoload_namespaces.php');
+            $paths = array_merge($paths, $autoloadNamespaceParser->getFor($namespacesToUse, $autoloadPsr4, true));
+            $paths = array_merge($paths, $autoloadNamespaceParser->getFor($namespacesToUse, $autoloadPsr0, false));
+
+            $paths = array_unique($paths);
+
+            return $this->getClassesIn($paths, $namespacesToUse);
+        }
     }
 
     private function isAbstractClass(array $classAnnotations): bool

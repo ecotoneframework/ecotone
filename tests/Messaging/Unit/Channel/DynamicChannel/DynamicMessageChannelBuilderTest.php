@@ -12,6 +12,7 @@ use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\LicensingException;
+use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\Channel\DynamicChannel\DynamicChannelResolver;
 use Test\Ecotone\Messaging\Fixture\Channel\DynamicChannel\SimpleConsumptionDecider;
@@ -41,7 +42,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                 DynamicMessageChannelBuilder::createRoundRobin('async_channel', ['channel_one']),
                 SimpleMessageChannelBuilder::createQueueChannel('channel_one'),
             ],
-            withEnterpriseLicence: true,
+            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', ['test']);
@@ -71,7 +72,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                 SimpleMessageChannelBuilder::createQueueChannel('channel_one'),
                 SimpleMessageChannelBuilder::createQueueChannel('channel_two'),
             ],
-            withEnterpriseLicence: true,
+            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         /** Send to channel_one */
@@ -109,7 +110,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         SimpleMessageChannelBuilder::createQueueChannel('channel_two'),
                     ]),
             ],
-            withEnterpriseLicence: true,
+            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         /** Send to channel_one */
@@ -147,7 +148,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         'y' => SimpleMessageChannelBuilder::createQueueChannel('channel_two'),
                     ]),
             ],
-            withEnterpriseLicence: true,
+            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         /** Send to x */
@@ -192,7 +193,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                 SimpleMessageChannelBuilder::createQueueChannel('channel_one'),
                 SimpleMessageChannelBuilder::createQueueChannel('channel_two'),
             ],
-            withEnterpriseLicence: true,
+            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', ['test']);
@@ -226,7 +227,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                     ->withCustomReceivingStrategy('dynamicChannel.receive'),
                 SimpleMessageChannelBuilder::createQueueChannel('channel_one'),
             ],
-            withEnterpriseLicence: true,
+            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', ['test']);
@@ -265,7 +266,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                 SimpleMessageChannelBuilder::createQueueChannel('channel_two'),
                 SimpleMessageChannelBuilder::createQueueChannel('channel_three'),
             ],
-            withEnterpriseLicence: true,
+            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         /** Sending to channel one */
@@ -317,7 +318,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         SimpleMessageChannelBuilder::createQueueChannel('channel_three'),
                     ]),
             ],
-            withEnterpriseLicence: true,
+            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', ['test'], ['tenant' => 'tenant_b']);
@@ -365,7 +366,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                 SimpleMessageChannelBuilder::createQueueChannel('channel_two'),
                 SimpleMessageChannelBuilder::createQueueChannel('channel_three'),
             ],
-            withEnterpriseLicence: true,
+            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', ['test'], ['tenant' => 'tenant_b']);
@@ -410,7 +411,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         SimpleMessageChannelBuilder::createQueueChannel('tenant_c'),
                     ]),
             ],
-            withEnterpriseLicence: true,
+            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', ['test'], ['tenant' => 'tenant_b']);
@@ -450,7 +451,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         'tenant',
                     ),
             ],
-            withEnterpriseLicence: true,
+            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $this->expectException(InvalidArgumentException::class);
@@ -479,7 +480,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         SimpleMessageChannelBuilder::createQueueChannel('tenant_shared'),
                     ]),
             ],
-            withEnterpriseLicence: true,
+            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', ['test']);
@@ -512,7 +513,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         SimpleMessageChannelBuilder::createQueueChannel('tenant_a'),
                     ]),
             ],
-            withEnterpriseLicence: true,
+            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $this->expectException(InvalidArgumentException::class);
@@ -538,7 +539,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         SimpleMessageChannelBuilder::createQueueChannel('async_channel'),
                     ]),
             ],
-            withEnterpriseLicence: true,
+            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 

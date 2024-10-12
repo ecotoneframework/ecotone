@@ -7,6 +7,7 @@ namespace Test\Ecotone\Modelling\Unit;
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Lite\Test\FlowTestSupport;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Test\LicenceTesting;
 use Test\Ecotone\Messaging\BaseEcotoneTest;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CustomRepositories\EventSourcing\Comment;
@@ -104,7 +105,7 @@ final class CustomRepositoriesTest extends BaseEcotoneTest
                 ArticleRepository::class => $articleRepository,
                 PageRepository::class => $pageRepository,
             ],
-            withEnterpriseLicence: $isEnterprise,
+            enterpriseLicenceKey: $isEnterprise ? LicenceTesting::VALID_LICENCE : null,
         );
 
         // We have provided multiple standard repositories, therefore there is single Event Sourced repository

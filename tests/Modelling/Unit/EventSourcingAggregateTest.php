@@ -6,6 +6,7 @@ namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\EventRevision\Person;
 use Test\Ecotone\Modelling\Fixture\EventRevision\RegisterPerson;
@@ -20,7 +21,7 @@ final class EventSourcingAggregateTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting([
             Person::class,
-        ], withEnterpriseLicence: true);
+        ], enterpriseLicenceKey: LicenceTesting::VALID_LICENCE);
 
 
         $ecotoneLite->sendCommand(new RegisterPerson('123', 'premium'));
@@ -36,7 +37,7 @@ final class EventSourcingAggregateTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting([
             Person::class,
-        ], withEnterpriseLicence: false);
+        ]);
 
 
         $this->expectException(InvalidArgumentException::class);

@@ -14,6 +14,7 @@ use Ecotone\Messaging\Channel\PollableChannel\PollableChannelConfiguration;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
+use Ecotone\Test\LicenceTesting;
 use Ecotone\Test\LoggerExample;
 use Exception;
 use PHPUnit\Framework\TestCase;
@@ -293,7 +294,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
             ServiceConfiguration::createWithDefaults()
                 ->withExtensionObjects($extensionObjects),
             enableAsynchronousProcessing: $channelBuilders,
-            withEnterpriseLicence: $withEnterpriseLicence
+            enterpriseLicenceKey: $withEnterpriseLicence ? LicenceTesting::VALID_LICENCE : null
         );
     }
 }

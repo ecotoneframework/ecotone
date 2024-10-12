@@ -32,6 +32,7 @@ use Ecotone\Messaging\Config\Container\GatewayProxyReference;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Config\Licence\LicenceService;
 use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
@@ -156,7 +157,7 @@ final class MessagingSystemConfiguration implements Configuration
 
     private InterfaceToCallRegistry $interfaceToCallRegistry;
 
-    private bool $isRunningForEnterpriseLicence;
+    private bool $isRunningForEnterpriseLicence = false;
     /**
      * @var CompilerPass[] $compilerPasses
      */
@@ -209,7 +210,12 @@ final class MessagingSystemConfiguration implements Configuration
         $this->isRunningForTest = ExtensionObjectResolver::contains(TestConfiguration::class, $extensionObjects);
 
         $extensionObjects[] = $serviceConfiguration;
-        $this->isRunningForEnterpriseLicence = $serviceConfiguration->hasEnterpriseLicence();
+
+        if ($serviceConfiguration->getLicenceKey() !== null) {
+            (new LicenceService())->validate($serviceConfiguration->getLicenceKey());
+            $this->isRunningForEnterpriseLicence = true;
+        }
+
         $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $serviceConfiguration);
     }
 

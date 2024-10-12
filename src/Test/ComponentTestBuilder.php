@@ -57,6 +57,11 @@ class ComponentTestBuilder
         FileSystemAnnotationFinder::getRealRootCatalog($pathToRootCatalog, $pathToRootCatalog);
 
         $configurationVariableService = InMemoryConfigurationVariableService::create($configurationVariables);
+        $serviceConfiguration = $configuration ?? ServiceConfiguration::createWithDefaults()->withSkippedModulePackageNames(ModulePackageList::allPackages());
+        if ($defaultEnterpriseMode) {
+            $serviceConfiguration = $serviceConfiguration->withLicenceKey(LicenceTesting::VALID_LICENCE);
+        }
+
         return new self(
             InMemoryPSRContainer::createFromAssociativeArray([
                 ServiceCacheConfiguration::REFERENCE_NAME => ServiceCacheConfiguration::noCache(),
@@ -65,7 +70,7 @@ class ComponentTestBuilder
             MessagingSystemConfiguration::prepare(
                 $pathToRootCatalog,
                 $configurationVariableService,
-                $configuration ?? ServiceConfiguration::createWithDefaults()->withSkippedModulePackageNames(ModulePackageList::allPackages())->withEnterpriseLicence($defaultEnterpriseMode),
+                $serviceConfiguration,
                 $classesToResolve,
                 true,
             )

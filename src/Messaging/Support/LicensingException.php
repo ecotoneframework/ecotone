@@ -7,7 +7,7 @@ namespace Ecotone\Messaging\Support;
 use Ecotone\Messaging\MessagingException;
 
 /**
- * licence Apache-2.0
+ * licence Enterprise
  */
 final class LicensingException extends MessagingException
 {

@@ -45,7 +45,7 @@ class ServiceConfiguration
      */
     private array $pollableEndpointAnnotations = [];
 
-    private bool $hasEnterpriseLicence = false;
+    private ?string $licenceKey = null;
 
     private function __construct()
     {
@@ -224,16 +224,16 @@ class ServiceConfiguration
         return $this;
     }
 
-    public function withEnterpriseLicence(bool $enabled): self
+    public function withLicenceKey(string $licenceKey): self
     {
-        $this->hasEnterpriseLicence = $enabled;
+        $this->licenceKey = $licenceKey;
 
         return $this;
     }
 
-    public function hasEnterpriseLicence(): bool
+    public function getLicenceKey(): ?string
     {
-        return $this->hasEnterpriseLicence;
+        return $this->licenceKey;
     }
 
     /**

@@ -20,6 +20,7 @@ use Ecotone\Messaging\Conversion\ConversionException;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -355,7 +356,7 @@ final class CollectorModuleTest extends TestCase
             ServiceConfiguration::createWithDefaults()
                 ->withExtensionObjects($collectorConfigurations),
             enableAsynchronousProcessing: $channelBuilders,
-            withEnterpriseLicence: $withEnterpriseLicence
+            enterpriseLicenceKey: $withEnterpriseLicence ? LicenceTesting::VALID_LICENCE : null
         );
     }
 

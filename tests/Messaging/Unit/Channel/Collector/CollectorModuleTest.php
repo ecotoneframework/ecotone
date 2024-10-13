@@ -356,7 +356,7 @@ final class CollectorModuleTest extends TestCase
             ServiceConfiguration::createWithDefaults()
                 ->withExtensionObjects($collectorConfigurations),
             enableAsynchronousProcessing: $channelBuilders,
-            enterpriseLicenceKey: $withEnterpriseLicence ? LicenceTesting::VALID_LICENCE : null
+            licenceKey: $withEnterpriseLicence ? LicenceTesting::VALID_LICENCE : null
         );
     }
 

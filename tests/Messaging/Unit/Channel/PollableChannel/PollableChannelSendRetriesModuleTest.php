@@ -294,7 +294,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
             ServiceConfiguration::createWithDefaults()
                 ->withExtensionObjects($extensionObjects),
             enableAsynchronousProcessing: $channelBuilders,
-            enterpriseLicenceKey: $withEnterpriseLicence ? LicenceTesting::VALID_LICENCE : null
+            licenceKey: $withEnterpriseLicence ? LicenceTesting::VALID_LICENCE : null
         );
     }
 }

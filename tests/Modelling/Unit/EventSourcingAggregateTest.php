@@ -21,7 +21,7 @@ final class EventSourcingAggregateTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting([
             Person::class,
-        ], enterpriseLicenceKey: LicenceTesting::VALID_LICENCE);
+        ], licenceKey: LicenceTesting::VALID_LICENCE);
 
 
         $ecotoneLite->sendCommand(new RegisterPerson('123', 'premium'));

@@ -42,7 +42,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                 DynamicMessageChannelBuilder::createRoundRobin('async_channel', ['channel_one']),
                 SimpleMessageChannelBuilder::createQueueChannel('channel_one'),
             ],
-            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', ['test']);
@@ -72,7 +72,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                 SimpleMessageChannelBuilder::createQueueChannel('channel_one'),
                 SimpleMessageChannelBuilder::createQueueChannel('channel_two'),
             ],
-            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         /** Send to channel_one */
@@ -110,7 +110,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         SimpleMessageChannelBuilder::createQueueChannel('channel_two'),
                     ]),
             ],
-            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         /** Send to channel_one */
@@ -148,7 +148,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         'y' => SimpleMessageChannelBuilder::createQueueChannel('channel_two'),
                     ]),
             ],
-            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         /** Send to x */
@@ -193,7 +193,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                 SimpleMessageChannelBuilder::createQueueChannel('channel_one'),
                 SimpleMessageChannelBuilder::createQueueChannel('channel_two'),
             ],
-            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', ['test']);
@@ -227,7 +227,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                     ->withCustomReceivingStrategy('dynamicChannel.receive'),
                 SimpleMessageChannelBuilder::createQueueChannel('channel_one'),
             ],
-            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', ['test']);
@@ -266,7 +266,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                 SimpleMessageChannelBuilder::createQueueChannel('channel_two'),
                 SimpleMessageChannelBuilder::createQueueChannel('channel_three'),
             ],
-            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         /** Sending to channel one */
@@ -318,7 +318,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         SimpleMessageChannelBuilder::createQueueChannel('channel_three'),
                     ]),
             ],
-            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', ['test'], ['tenant' => 'tenant_b']);
@@ -366,7 +366,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                 SimpleMessageChannelBuilder::createQueueChannel('channel_two'),
                 SimpleMessageChannelBuilder::createQueueChannel('channel_three'),
             ],
-            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', ['test'], ['tenant' => 'tenant_b']);
@@ -411,7 +411,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         SimpleMessageChannelBuilder::createQueueChannel('tenant_c'),
                     ]),
             ],
-            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', ['test'], ['tenant' => 'tenant_b']);
@@ -451,7 +451,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         'tenant',
                     ),
             ],
-            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $this->expectException(InvalidArgumentException::class);
@@ -480,7 +480,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         SimpleMessageChannelBuilder::createQueueChannel('tenant_shared'),
                     ]),
             ],
-            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', ['test']);
@@ -513,7 +513,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         SimpleMessageChannelBuilder::createQueueChannel('tenant_a'),
                     ]),
             ],
-            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $this->expectException(InvalidArgumentException::class);
@@ -539,7 +539,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         SimpleMessageChannelBuilder::createQueueChannel('async_channel'),
                     ]),
             ],
-            enterpriseLicenceKey: LicenceTesting::VALID_LICENCE,
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 

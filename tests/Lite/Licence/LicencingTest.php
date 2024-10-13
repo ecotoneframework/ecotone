@@ -26,7 +26,7 @@ final class LicencingTest extends TestCase
 
         EcotoneLite::bootstrap([
             Person::class,
-        ], enterpriseLicenceKey: 'incorrect');
+        ], licenceKey: 'incorrect');
     }
 
     /**
@@ -38,7 +38,7 @@ final class LicencingTest extends TestCase
 
         EcotoneLite::bootstrap([
             Person::class,
-        ], enterpriseLicenceKey: base64_encode($licenceKey));
+        ], licenceKey: base64_encode($licenceKey));
     }
 
     public function test_valid_licence(): void
@@ -47,7 +47,7 @@ final class LicencingTest extends TestCase
             [
                 Person::class,
             ],
-            enterpriseLicenceKey: $this->generate(
+            licenceKey: $this->generate(
                 (new DateTimeImmutable('now', new DateTimeZone('UTC')))->modify('+30 seconds'),
                 false
             )
@@ -64,7 +64,7 @@ final class LicencingTest extends TestCase
             [
                 Person::class,
             ],
-            enterpriseLicenceKey: $this->generate(
+            licenceKey: $this->generate(
                 (new DateTimeImmutable('now', new DateTimeZone('UTC')))->modify('-30 seconds'),
                 false
             )
@@ -80,7 +80,7 @@ final class LicencingTest extends TestCase
             [
                 Person::class,
             ],
-            enterpriseLicenceKey: $this->generate(
+            licenceKey: $this->generate(
                 $releaseTime->modify('+30 seconds'),
                 true
             )
@@ -100,7 +100,7 @@ final class LicencingTest extends TestCase
             [
                 Person::class,
             ],
-            enterpriseLicenceKey: $this->generate(
+            licenceKey: $this->generate(
                 $releaseTime->modify('-30 seconds'),
                 true
             )

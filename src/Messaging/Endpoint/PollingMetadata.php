@@ -152,8 +152,10 @@ final class PollingMetadata implements DefinedObject
             $copy = $copy->setCron($executionPollingMetadata->getCron());
         }
         if (! is_null($executionPollingMetadata->getFinishWhenNoMessages())) {
-            $copy = $copy
-                        ->setFinishWhenNoMessages($executionPollingMetadata->getFinishWhenNoMessages());
+            $copy = $copy->setFinishWhenNoMessages($executionPollingMetadata->getFinishWhenNoMessages());
+        }
+        if (! is_null($executionPollingMetadata->getExecutionAmountLimit())) {
+            $copy = $copy->setExecutionAmountLimit($executionPollingMetadata->getExecutionAmountLimit());
         }
 
         return $copy;

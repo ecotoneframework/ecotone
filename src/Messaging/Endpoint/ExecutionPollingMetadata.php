@@ -13,6 +13,7 @@ final class ExecutionPollingMetadata
     private ?string $cron = null;
     private ?bool $stopOnError = null;
     private ?bool $finishWhenNoMessages = null;
+    private ?int $executionAmountLimit = null;
 
     private function __construct()
     {
@@ -107,6 +108,14 @@ final class ExecutionPollingMetadata
         return $self;
     }
 
+    public function withExecutionAmountLimit(int $limit): self
+    {
+        $self = clone $this;
+        $self->executionAmountLimit = $limit;
+
+        return $self;
+    }
+
     public function getCron(): ?string
     {
         return $this->cron;
@@ -135,5 +144,10 @@ final class ExecutionPollingMetadata
     public function getFinishWhenNoMessages(): ?bool
     {
         return $this->finishWhenNoMessages;
+    }
+
+    public function getExecutionAmountLimit(): ?int
+    {
+        return $this->executionAmountLimit;
     }
 }

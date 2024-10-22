@@ -9,7 +9,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  */
-class BaseEcotoneTest extends TestCase
+abstract class BaseEcotoneTest extends TestCase
 {
     /**
      * @dataProvider enterpriseMode

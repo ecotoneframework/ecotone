@@ -74,6 +74,6 @@ class InstantRetryInterceptor implements DefinedObject
 
     public function getDefinition(): Definition
     {
-        return new Definition(self::class, [$this->maxRetryAttempts]);
+        return new Definition(self::class, [$this->maxRetryAttempts, $this->exceptions]);
     }
 }

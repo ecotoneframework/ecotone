@@ -101,9 +101,19 @@ final class InstantRetryModuleTest extends TestCase
                 ])
         );
 
-        $this->expectException(RuntimeException::class);
+        $exceptionThrown = false;
+        try {
+            $ecotoneLite->sendCommandWithRoutingKey('retried.synchronous', 2);
+        } catch (RuntimeException $e) {
+            $exceptionThrown = true;
+            $this->assertInstanceOf(RuntimeException::class, $e);
+        }
 
-        $ecotoneLite->sendCommandWithRoutingKey('retried.synchronous', 2);
+        if (! $exceptionThrown) {
+            $this->fail('RuntimeException was not thrown');
+        }
+
+        $this->assertEquals(1, $ecotoneLite->sendQueryWithRouting('retried.getCallCount'));
     }
 
     public function test_retrying_with_asynchronous_handler()

@@ -27,11 +27,15 @@ use Ramsey\Uuid\Uuid;
  */
 class GatewayInternalProcessor implements MessageProcessor, AroundInterceptable
 {
+    /**
+     * @param string[] $routingSlipChannels
+     */
     public function __construct(
         private string $interfaceToCallName,
         private ?Type $returnType,
         private bool $returnTypeAllowsNull,
         private MessageChannel $requestChannel,
+        private array $routingSlipChannels,
         private ?PollableChannel $replyChannel,
         private int $replyMilliSecondsTimeout
     ) {
@@ -47,6 +51,8 @@ class GatewayInternalProcessor implements MessageProcessor, AroundInterceptable
     {
         //      Gateway can be called inside service activator. So it means, we need to preserve reply channel in order to reply with it
         $previousReplyChannel = $requestMessage->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL) ? $requestMessage->getHeaders()->getReplyChannel() : null;
+        $previousRoutingSlip = $requestMessage->getHeaders()->containsKey(MessageHeaders::ROUTING_SLIP) ? $requestMessage->getHeaders()->get(MessageHeaders::ROUTING_SLIP) : null;
+
         $canReturnValue = $this->returnType?->isVoid() === false;
 
         $requestMessage = MessageBuilder::fromMessage($requestMessage);
@@ -58,7 +64,9 @@ class GatewayInternalProcessor implements MessageProcessor, AroundInterceptable
             $requestMessage = $requestMessage->removeHeader(MessageHeaders::REPLY_CHANNEL);
         }
 
-        $requestMessage = $requestMessage->build();
+        $requestMessage = $requestMessage
+            ->setRoutingSlip($this->routingSlipChannels)
+            ->build();
 
         $this->requestChannel->send($requestMessage);
 
@@ -78,6 +86,7 @@ class GatewayInternalProcessor implements MessageProcessor, AroundInterceptable
         if ($replyMessage instanceof Message && $previousReplyChannel) {
             $replyMessage = MessageBuilder::fromMessage($replyMessage)
                 ->setReplyChannel($previousReplyChannel)
+                ->setHeader(MessageHeaders::ROUTING_SLIP, $previousRoutingSlip)
                 ->build();
         }
 

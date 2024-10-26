@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Attribute\MessageGateway;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\Parameter\Header;
@@ -24,6 +25,8 @@ use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayload
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\LicensingException;
 
 #[ModuleAnnotation]
 /**
@@ -123,6 +126,12 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($this->gatewayBuilders as $gatewayBuilder) {
+            /** @var Asynchronous[] $asynchronous */
+            $asynchronous = $interfaceToCallRegistry->getFor($gatewayBuilder->getInterfaceName(), $gatewayBuilder->getRelatedMethodName())->getAnnotationsByImportanceOrder(TypeDescriptor::create(Asynchronous::class));
+            if ($asynchronous && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
+                throw LicensingException::create("Gateway {$gatewayBuilder->getInterfaceName()}::{$gatewayBuilder->getRelatedMethodName()} is marked as asynchronous. This functionality is available as part of Ecotone Enterprise.");
+            }
+
             $messagingConfiguration->registerGatewayBuilder($gatewayBuilder);
         }
     }

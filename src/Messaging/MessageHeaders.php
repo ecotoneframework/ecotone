@@ -6,7 +6,7 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\AggregateMessage;
-use Ecotone\Modelling\Config\BusModule;
+use Ecotone\Modelling\Config\MessageBusChannel;
 use Ecotone\Modelling\DistributionEntrypoint;
 
 use function json_encode;
@@ -265,12 +265,12 @@ final class MessageHeaders
     public static function unsetBusKeys(array $metadata): array
     {
         unset(
-            $metadata[BusModule::COMMAND_CHANNEL_NAME_BY_NAME],
-            $metadata[BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT],
-            $metadata[BusModule::EVENT_CHANNEL_NAME_BY_NAME],
-            $metadata[BusModule::EVENT_CHANNEL_NAME_BY_OBJECT],
-            $metadata[BusModule::QUERY_CHANNEL_NAME_BY_NAME],
-            $metadata[BusModule::QUERY_CHANNEL_NAME_BY_OBJECT]
+            $metadata[MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME],
+            $metadata[MessageBusChannel::COMMAND_CHANNEL_NAME_BY_OBJECT],
+            $metadata[MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME],
+            $metadata[MessageBusChannel::EVENT_CHANNEL_NAME_BY_OBJECT],
+            $metadata[MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME],
+            $metadata[MessageBusChannel::QUERY_CHANNEL_NAME_BY_OBJECT]
         );
 
         return $metadata;

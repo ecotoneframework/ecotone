@@ -56,8 +56,8 @@ class BusRouterBuilder implements MessageHandlerBuilder
     public static function createEventBusByObject(array $channelNamesRouting): self
     {
         return new self(
-            BusModule::EVENT_CHANNEL_NAME_BY_OBJECT . '.endpoint',
-            BusModule::EVENT_CHANNEL_NAME_BY_OBJECT,
+            MessageBusChannel::EVENT_CHANNEL_NAME_BY_OBJECT . '.endpoint',
+            MessageBusChannel::EVENT_CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
             'eventByObject'
         );
@@ -72,8 +72,8 @@ class BusRouterBuilder implements MessageHandlerBuilder
     public static function createEventBusByName(array $channelNamesRouting): self
     {
         return new self(
-            BusModule::EVENT_CHANNEL_NAME_BY_NAME . '.endpoint',
-            BusModule::EVENT_CHANNEL_NAME_BY_NAME,
+            MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME . '.endpoint',
+            MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
             'eventByName'
         );
@@ -88,8 +88,8 @@ class BusRouterBuilder implements MessageHandlerBuilder
     public static function createCommandBusByObject(array $channelNamesRouting): self
     {
         return new self(
-            BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT . '.endpoint',
-            BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT,
+            MessageBusChannel::COMMAND_CHANNEL_NAME_BY_OBJECT . '.endpoint',
+            MessageBusChannel::COMMAND_CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
             'commandByObject'
         );
@@ -104,8 +104,8 @@ class BusRouterBuilder implements MessageHandlerBuilder
     public static function createCommandBusByName(array $channelNamesRouting): self
     {
         return new self(
-            BusModule::COMMAND_CHANNEL_NAME_BY_NAME . '.endpoint',
-            BusModule::COMMAND_CHANNEL_NAME_BY_NAME,
+            MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME . '.endpoint',
+            MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
             'commandByName'
         );
@@ -120,8 +120,8 @@ class BusRouterBuilder implements MessageHandlerBuilder
     public static function createQueryBusByObject(array $channelNamesRouting): self
     {
         return new self(
-            BusModule::QUERY_CHANNEL_NAME_BY_OBJECT . '.endpoint',
-            BusModule::QUERY_CHANNEL_NAME_BY_OBJECT,
+            MessageBusChannel::QUERY_CHANNEL_NAME_BY_OBJECT . '.endpoint',
+            MessageBusChannel::QUERY_CHANNEL_NAME_BY_OBJECT,
             $channelNamesRouting,
             'queryByObject'
         );
@@ -136,8 +136,8 @@ class BusRouterBuilder implements MessageHandlerBuilder
     public static function createQueryBusByName(array $channelNamesRouting): self
     {
         return new self(
-            BusModule::QUERY_CHANNEL_NAME_BY_NAME . '.endpoint',
-            BusModule::QUERY_CHANNEL_NAME_BY_NAME,
+            MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME . '.endpoint',
+            MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME,
             $channelNamesRouting,
             'queryByName'
         );
@@ -161,7 +161,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
                 'config' => fn (RouterBuilder $router) => $router
                     ->setResolutionRequired(false)
                     ->withMethodParameterConverters([
-                        HeaderBuilder::createOptional('routedName', BusModule::EVENT_CHANNEL_NAME_BY_NAME),
+                        HeaderBuilder::createOptional('routedName', MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME),
                         MessageConverterBuilder::create('message'),
                     ]),
             ],
@@ -179,7 +179,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
                 'method' => 'routeByName',
                 'config' => fn (RouterBuilder $router) => $router
                     ->withMethodParameterConverters([
-                        HeaderBuilder::createOptional('name', BusModule::COMMAND_CHANNEL_NAME_BY_NAME),
+                        HeaderBuilder::createOptional('name', MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME),
                         MessageConverterBuilder::create('message'),
                     ]),
             ],
@@ -197,7 +197,7 @@ class BusRouterBuilder implements MessageHandlerBuilder
                 'method' => 'routeByName',
                 'config' => fn (RouterBuilder $router) => $router
                     ->withMethodParameterConverters([
-                        HeaderBuilder::createOptional('name', BusModule::QUERY_CHANNEL_NAME_BY_NAME),
+                        HeaderBuilder::createOptional('name', MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME),
                         MessageConverterBuilder::create('message'),
                     ]),
             ],

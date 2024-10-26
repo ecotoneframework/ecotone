@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
+use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\ChannelReference;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
@@ -27,6 +28,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Processor\ChainedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
@@ -316,7 +318,12 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
         }
 
         foreach ($this->methodArgumentConverters as $messageConverterBuilder) {
-            $methodArgumentConverters[] = $messageConverterBuilder->compile($builder, $interfaceToCall);
+            /** This need to evaluated first, as other Header Converters may replace given Message Header */
+            if ($messageConverterBuilder instanceof GatewayHeadersBuilder) {
+                array_unshift($methodArgumentConverters, $messageConverterBuilder->compile($builder, $interfaceToCall));
+            } else {
+                $methodArgumentConverters[] = $messageConverterBuilder->compile($builder, $interfaceToCall);
+            }
         }
 
         $messageConverters = [];
@@ -380,10 +387,15 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
             $aroundInterceptors,
         );
 
+        /** @var Asynchronous[] $asynchronous */
+        $asynchronous = $interfaceToCall->getAnnotationsByImportanceOrder(TypeDescriptor::create(Asynchronous::class));
+        $channelNames = $asynchronous ? $asynchronous[0]->getChannelName() : [];
+
         return ChainedMessageProcessorBuilder::create()
             ->chainInterceptedProcessor(new GatewayInternalProcessorBuilder(
                 $interfaceToCallReference,
                 $this->requestChannelName,
+                $channelNames,
                 $this->replyChannelName,
                 $this->replyMilliSecondsTimeout
             ))

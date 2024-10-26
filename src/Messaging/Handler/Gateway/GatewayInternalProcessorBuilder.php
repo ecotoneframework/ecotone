@@ -16,22 +16,30 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\PayloadResultMessageConver
 
 class GatewayInternalProcessorBuilder implements InterceptedMessageProcessorBuilder
 {
+    /**
+     * @param string[] $asynchronousChannels
+     */
     public function __construct(
         private InterfaceToCallReference $interfaceToCallReference,
-        private string $requestChannelName,
-        private ?string $replyChannelName,
-        private int $replyMilliSecondsTimeout,
+        private string                   $requestChannelName,
+        private array                    $asynchronousChannels,
+        private ?string                  $replyChannelName,
+        private int                      $replyMilliSecondsTimeout,
     ) {
     }
 
     public function compile(MessagingContainerBuilder $builder, array $aroundInterceptors = []): Definition|Reference
     {
+        $routingSlipChannels = $this->asynchronousChannels;
+        $routingSlipChannels[] = $this->requestChannelName;
+
         $interfaceToCall = $builder->getInterfaceToCall($this->interfaceToCallReference);
         $gatewayInternalProcessor = new Definition(GatewayInternalProcessor::class, [
             $interfaceToCall->toString(),
             $interfaceToCall->getReturnType(),
             $interfaceToCall->canItReturnNull(),
-            new ChannelReference($this->requestChannelName),
+            new ChannelReference(array_shift($routingSlipChannels)),
+            $routingSlipChannels,
             $this->replyChannelName ? new ChannelReference($this->replyChannelName) : null,
             $this->replyMilliSecondsTimeout,
         ]);

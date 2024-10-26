@@ -61,7 +61,7 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Modelling\Config\BusModule;
+use Ecotone\Modelling\Config\MessageBusChannel;
 use Exception;
 
 use function is_a;
@@ -410,10 +410,10 @@ final class MessagingSystemConfiguration implements Configuration
                     $this->registerMessageHandler(
                         UninterruptibleServiceActivator::create(
                             HeaderEnricher::create([
-                                BusModule::COMMAND_CHANNEL_NAME_BY_NAME => null,
-                                BusModule::COMMAND_CHANNEL_NAME_BY_OBJECT => null,
-                                BusModule::EVENT_CHANNEL_NAME_BY_OBJECT => null,
-                                BusModule::EVENT_CHANNEL_NAME_BY_NAME => null,
+                                MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME => null,
+                                MessageBusChannel::COMMAND_CHANNEL_NAME_BY_OBJECT => null,
+                                MessageBusChannel::EVENT_CHANNEL_NAME_BY_OBJECT => null,
+                                MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME => null,
                                 MessageHeaders::ROUTING_SLIP => implode(',', $consequentialChannels),
                             ]),
                             'transform',

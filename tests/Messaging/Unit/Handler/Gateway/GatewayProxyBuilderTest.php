@@ -2,6 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Gateway;
 
+use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor\BeforeSendGateway;
@@ -47,6 +48,8 @@ use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\TransactionalIn
 use Test\Ecotone\Messaging\Fixture\MessageConverter\FakeMessageConverter;
 use Test\Ecotone\Messaging\Fixture\MessageConverter\FakeMessageConverterGatewayExample;
 use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
+use Test\Ecotone\Messaging\Fixture\Service\Gateway\TicketCreator;
+use Test\Ecotone\Messaging\Fixture\Service\Gateway\TicketService;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingNoArguments;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceCalculatingService;
@@ -54,6 +57,7 @@ use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceRece
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceReceiveOnlyWithNull;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnly;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArguments;
+use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArgumentsAndArray;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceWithFutureReceive;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceWithMixed;
 use Test\Ecotone\Messaging\Unit\MessagingTest;
@@ -72,6 +76,24 @@ use TypeError;
  */
 class GatewayProxyBuilderTest extends MessagingTest
 {
+    public function test_running_gateway(): void
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [TicketCreator::class, TicketService::class],
+            [new TicketService()]
+        );
+
+        /** @var TicketCreator $ticketCreator */
+        $ticketCreator = $ecotoneLite->getGateway(TicketCreator::class);
+
+        $ticketCreator->create('some');
+
+        $this->assertEquals(
+            ['some'],
+            $ecotoneLite->sendQueryWithRouting('getTickets')
+        );
+    }
+
     public function test_creating_gateway_for_send_only_interface()
     {
         $messageHandler = NoReturnMessageHandler::create();
@@ -219,6 +241,34 @@ class GatewayProxyBuilderTest extends MessagingTest
             $payload,
             $messaging->getGateway(ServiceInterfaceReceiveOnly::class)->sendMail()
         );
+    }
+
+    public function test_specific_headers_always_override_array_of_headers(): void
+    {
+        $messaging = ComponentTestBuilder::create()
+            ->withGateway(
+                GatewayProxyBuilder::create(
+                    ServiceInterfaceSendOnlyWithTwoArgumentsAndArray::class,
+                    ServiceInterfaceSendOnlyWithTwoArgumentsAndArray::class,
+                    'send',
+                    $inputChannel = 'inputChannel'
+                )
+                    ->withParameterConverters(
+                        [
+                            GatewayHeaderBuilder::create('value', 'personId'),
+                            GatewayHeadersBuilder::create('data'),
+                        ]
+                    )
+            )
+            ->withChannel(SimpleMessageChannelBuilder::createQueueChannel($inputChannel))
+            ->build();
+
+        $gateway = $messaging->getGateway(ServiceInterfaceSendOnlyWithTwoArgumentsAndArray::class);
+
+        $gateway->send('someValue', ['personId' => '123', 'data' => 'some']);
+
+        $message = $messaging->receiveMessageFrom($inputChannel);
+        $this->assertSame('someValue', $message->getHeaders()->get('personId'));
     }
 
     public function test_executing_with_method_argument_converters()

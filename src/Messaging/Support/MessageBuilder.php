@@ -112,6 +112,17 @@ final class MessageBuilder
         return $this;
     }
 
+    public function setRoutingSlip(array $routingSlip): self
+    {
+        if (! $routingSlip) {
+            return $this;
+        }
+
+        $this->setHeader(MessageHeaders::ROUTING_SLIP, implode(',', $routingSlip));
+
+        return $this;
+    }
+
     /**
      * @param MediaType $mediaType
      * @return MessageBuilder

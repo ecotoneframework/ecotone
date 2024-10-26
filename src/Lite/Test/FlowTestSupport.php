@@ -20,7 +20,7 @@ use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\Config\BusModule;
+use Ecotone\Modelling\Config\MessageBusChannel;
 use Ecotone\Modelling\Config\ModellingHandlerModule;
 use Ecotone\Modelling\Event;
 use Ecotone\Modelling\EventBus;
@@ -303,9 +303,9 @@ final class FlowTestSupport
     {
         $commandWithRouting = [];
         foreach ($this->getRecordedCommandHeaders() as $commandHeaders) {
-            if ($commandHeaders->containsKey(BusModule::COMMAND_CHANNEL_NAME_BY_NAME)) {
+            if ($commandHeaders->containsKey(MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME)) {
                 $command = [
-                    $commandHeaders->get(BusModule::COMMAND_CHANNEL_NAME_BY_NAME),
+                    $commandHeaders->get(MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME),
                 ];
 
                 if ($commandHeaders->containsKey('aggregate.id')) {

@@ -57,7 +57,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
 
     public function test_bootstraping_with_namespace()
     {
-        $ecotoneTestSupport = EcotoneLite::bootstrapForTesting(
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [],
             [new OrderService(), new PlaceOrderConverter(), new OrderWasPlacedConverter()],
             ServiceConfiguration::createWithDefaults()
@@ -68,9 +68,9 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         );
 
         $orderId = 'someId';
-        $ecotoneTestSupport->getCommandBus()->sendWithRouting('order.register', new PlaceOrder($orderId));
+        $ecotoneTestSupport->sendCommandWithRoutingKey('order.register', new PlaceOrder($orderId));
 
-        $this->assertNotEmpty($ecotoneTestSupport->getQueryBus()->sendWithRouting('order.getOrders'));
+        $this->assertNotEmpty($ecotoneTestSupport->sendQueryWithRouting('order.getOrders'));
     }
 
     public function test_bootstraping_with_given_set_of_classes_and_asynchronous_module()

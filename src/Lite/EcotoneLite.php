@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite;
 
+use Ecotone\AnnotationFinder\FileSystem\AutoloadFileNamespaceParser;
 use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
 use Ecotone\AnnotationFinder\FileSystem\RootCatalogNotFound;
 use Ecotone\Dbal\Configuration\DbalConfiguration;
@@ -189,6 +190,15 @@ final class EcotoneLite
         // get file contents based on class names, configuration and configuration variables
         $fileSha = '';
 
+        if ($serviceConfiguration->getNamespaces()) {
+            $classes = FileSystemAnnotationFinder::getRegisteredClassesForNamespaces($pathToRootCatalog, new AutoloadFileNamespaceParser(), $serviceConfiguration->getNamespaces());
+
+            foreach ($classes as $class) {
+                $filePath = (new ReflectionClass($class))->getFileName();
+                $fileSha .= sha1_file($filePath);
+            }
+        }
+
         if (file_exists($pathToRootCatalog . 'composer.lock')) {
             $fileSha .= sha1_file($pathToRootCatalog . 'composer.lock');
         }
@@ -245,11 +255,15 @@ final class EcotoneLite
         );
         $configurationVariableService = InMemoryConfigurationVariableService::create($configurationVariables);
         $definitionHolder = null;
+        $messagingSystemCachePath = null;
 
-        $messagingSystemCachePath = $serviceCacheConfiguration->getPath() . DIRECTORY_SEPARATOR . self::getFileNameBasedOnConfig($pathToRootCatalog, $useCachedVersion, $classesToResolve, $serviceConfiguration, $configurationVariables, $enableTesting);
-        if ($serviceCacheConfiguration->shouldUseCache() && file_exists($messagingSystemCachePath)) {
-            /** It may fail on deserialization, then return `false` and we can build new one */
-            $definitionHolder = unserialize(file_get_contents($messagingSystemCachePath));
+        if ($serviceCacheConfiguration->shouldUseCache()) {
+            $messagingSystemCachePath = $serviceCacheConfiguration->getPath() . DIRECTORY_SEPARATOR . self::getFileNameBasedOnConfig($pathToRootCatalog, $useCachedVersion, $classesToResolve, $serviceConfiguration, $configurationVariables, $enableTesting);
+
+            if (file_exists($messagingSystemCachePath)) {
+                /** It may fail on deserialization, then return `false` and we can build new one */
+                $definitionHolder = unserialize(file_get_contents($messagingSystemCachePath));
+            }
         }
 
         if (! $definitionHolder) {
@@ -263,6 +277,8 @@ final class EcotoneLite
             $definitionHolder = ContainerConfig::buildDefinitionHolder($messagingConfiguration);
 
             if ($serviceCacheConfiguration->shouldUseCache()) {
+                Assert::notNull($messagingSystemCachePath, 'Cache path should be defined');
+
                 MessagingSystemConfiguration::prepareCacheDirectory($serviceCacheConfiguration);
                 file_put_contents($messagingSystemCachePath, serialize($definitionHolder));
             }

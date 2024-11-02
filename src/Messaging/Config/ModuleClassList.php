@@ -17,6 +17,7 @@ use Ecotone\Dbal\Recoverability\DbalDeadLetterModule;
 use Ecotone\EventSourcing\Config\EventSourcingModule;
 use Ecotone\JMSConverter\Configuration\JMSConverterConfigurationModule;
 use Ecotone\JMSConverter\Configuration\JMSDefaultSerialization;
+use Ecotone\Kafka\Configuration\KafkaModule;
 use Ecotone\Laravel\Config\LaravelConnectionModule;
 use Ecotone\Lite\Test\Configuration\EcotoneTestSupportModule;
 use Ecotone\Messaging\Channel\Collector\Config\CollectorModule;
@@ -156,5 +157,9 @@ class ModuleClassList
 
     public const SYMFONY_MODULES = [
         SymfonyConnectionModule::class,
+    ];
+
+    public const KAFKA_MODULES = [
+        KafkaModule::class,
     ];
 }

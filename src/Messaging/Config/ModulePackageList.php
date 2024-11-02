@@ -15,6 +15,7 @@ final class ModulePackageList
     public const DBAL_PACKAGE = 'dbal';
     public const REDIS_PACKAGE = 'redis';
     public const SQS_PACKAGE = 'sqs';
+    public const KAFKA_PACKAGE = 'kafka';
     public const EVENT_SOURCING_PACKAGE = 'eventSourcing';
     public const JMS_CONVERTER_PACKAGE = 'jmsConverter';
     public const TRACING_PACKAGE = 'tracing';
@@ -31,6 +32,7 @@ final class ModulePackageList
             ModulePackageList::DBAL_PACKAGE => ModuleClassList::DBAL_MODULES,
             ModulePackageList::REDIS_PACKAGE => ModuleClassList::REDIS_MODULES,
             ModulePackageList::SQS_PACKAGE => ModuleClassList::SQS_MODULES,
+            ModulePackageList::KAFKA_PACKAGE => ModuleClassList::KAFKA_MODULES,
             ModulePackageList::EVENT_SOURCING_PACKAGE => ModuleClassList::EVENT_SOURCING_MODULES,
             ModulePackageList::JMS_CONVERTER_PACKAGE => ModuleClassList::JMS_CONVERTER_MODULES,
             ModulePackageList::TRACING_PACKAGE => ModuleClassList::TRACING_MODULES,
@@ -52,6 +54,7 @@ final class ModulePackageList
             self::AMQP_PACKAGE,
             self::REDIS_PACKAGE,
             self::SQS_PACKAGE,
+            self::KAFKA_PACKAGE,
             self::DBAL_PACKAGE,
             self::EVENT_SOURCING_PACKAGE,
             self::JMS_CONVERTER_PACKAGE,

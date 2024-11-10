@@ -30,7 +30,7 @@ use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\TransformerInterceptor
  * licence Apache-2.0
  * @internal
  */
-class MethodInterceptorModuleTest extends AnnotationConfigurationTest
+class MethodInterceptorModuleTestCase extends AnnotationConfigurationTestCase
 {
     public function test_registering_around_method_level_interceptor_with_parameter_converters()
     {

@@ -4,6 +4,9 @@ namespace Test\Ecotone\Messaging\Fixture\InterceptorsOrdering;
 
 use Ecotone\Messaging\Attribute\MessageGateway;
 
+/**
+ * licence Apache-2.0
+ */
 interface Gateway
 {
     #[MessageGateway(requestChannel: 'serviceEndpointReturning')]

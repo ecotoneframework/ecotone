@@ -66,7 +66,7 @@ use Test\Ecotone\Messaging\Fixture\Service\CalculatingServiceForAsynchronousScen
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceCalculatingService;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceWithoutReturnValue;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceWithReturnValue;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 ;
 
@@ -81,7 +81,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class MessagingSystemConfigurationTest extends MessagingTest
+class MessagingSystemConfigurationTest extends MessagingTestCase
 {
     /**
      * @throws ConfigurationException

@@ -14,7 +14,7 @@ use Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext\StdClassExtensi
 use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleConfiguration;
 use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleExtensionObject;
 use Test\Ecotone\Messaging\Fixture\Annotation\ModuleConfiguration\ExampleModuleExtensionWithVariableConfiguration;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
  * Class AnnotationModuleConfigurationRetrievingServiceTest
@@ -27,7 +27,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class AnnotationModuleRetrievingServiceTest extends MessagingTest
+class AnnotationModuleRetrievingServiceTest extends MessagingTestCase
 {
     public function test_creating_module()
     {

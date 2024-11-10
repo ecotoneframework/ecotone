@@ -18,7 +18,7 @@ class OutboundMessageConverter
 {
     public function __construct(
         private HeaderMapper $headerMapper,
-        private ?MediaType $defaultConversionMediaType,
+        private ?MediaType $defaultConversionMediaType = null,
         private ?int $defaultDeliveryDelay = null,
         private ?int $defaultTimeToLive = null,
         private ?int $defaultPriority = null,

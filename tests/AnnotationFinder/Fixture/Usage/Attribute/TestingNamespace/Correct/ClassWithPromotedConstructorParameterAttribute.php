@@ -5,6 +5,9 @@ namespace Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\TestingNamespace
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\ParameterAttribute;
 use Test\Ecotone\AnnotationFinder\Fixture\Usage\Attribute\Annotation\PropertyAttribute;
 
+/**
+ * licence Apache-2.0
+ */
 class ClassWithPromotedConstructorParameterAttribute
 {
     public function __construct(

@@ -16,7 +16,7 @@ use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceReturningMessage;
 use Test\Ecotone\Messaging\Fixture\Service\StaticallyCalledService;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
  * Class ServiceActivatorBuilderTest
@@ -29,7 +29,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class ServiceActivatorBuilderTest extends MessagingTest
+class ServiceActivatorBuilderTest extends MessagingTestCase
 {
     /**
      * @throws Exception

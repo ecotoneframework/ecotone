@@ -60,7 +60,7 @@ use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSend
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceSendOnlyWithTwoArgumentsAndArray;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceInterfaceWithFutureReceive;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceWithMixed;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 use TypeError;
 
 /**
@@ -74,7 +74,7 @@ use TypeError;
  * licence Apache-2.0
  * @internal
  */
-class GatewayProxyBuilderTest extends MessagingTest
+class GatewayProxyBuilderTest extends MessagingTestCase
 {
     public function test_running_gateway(): void
     {

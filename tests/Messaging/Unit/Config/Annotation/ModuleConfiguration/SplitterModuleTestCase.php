@@ -1,18 +1,17 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\TransformerModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\SplitterModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
-use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
+use Ecotone\Messaging\Handler\Splitter\SplitterBuilder;
 use Exception;
-use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Transformer\TransformerWithMethodParameterExample;
+use ReflectionException;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Splitter\SplitterExample;
 
 /**
  * Class AnnotationTransformerConfigurationTest
@@ -25,32 +24,35 @@ use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Transformer\Transf
  * licence Apache-2.0
  * @internal
  */
-class TransformerModuleTest extends AnnotationConfigurationTest
+class SplitterModuleTestCase extends AnnotationConfigurationTestCase
 {
     /**
+     * @throws \Doctrine\Common\Annotations\AnnotationException
      * @throws Exception
+     * @throws ReflectionException
+     * @throws \Ecotone\Messaging\Config\ConfigurationException
      * @throws \Ecotone\Messaging\MessagingException
      */
     public function test_creating_transformer_builder()
     {
-        $annotationConfiguration = TransformerModule::create(
-            InMemoryAnnotationFinder::createFrom([TransformerWithMethodParameterExample::class]),
+        $annotationConfiguration = SplitterModule::create(
+            InMemoryAnnotationFinder::createFrom([SplitterExample::class]),
             InterfaceToCallRegistry::createEmpty()
         );
 
         $configuration = $this->createMessagingSystemConfiguration();
         $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
-        $messageHandlerBuilder = TransformerBuilder::create(
-            TransformerWithMethodParameterExample::class,
-            InterfaceToCall::create(TransformerWithMethodParameterExample::class, 'send')
+        $messageHandlerBuilder = SplitterBuilder::create(
+            SplitterExample::class,
+            InterfaceToCall::create(SplitterExample::class, 'split')
         )
-            ->withEndpointId('some-id')
+            ->withEndpointId('testId')
             ->withInputChannelName('inputChannel')
             ->withOutputMessageChannel('outputChannel')
             ->withRequiredInterceptorNames(['someReference']);
         $messageHandlerBuilder->withMethodParameterConverters([
-            PayloadBuilder::create('message'),
+            PayloadBuilder::create('payload'),
         ]);
 
         $this->assertEquals(

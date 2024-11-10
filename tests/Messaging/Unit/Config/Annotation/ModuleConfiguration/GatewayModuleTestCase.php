@@ -27,7 +27,7 @@ use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MultipleMethodsGatewayExample
  * licence Apache-2.0
  * @internal
  */
-class GatewayModuleTest extends AnnotationConfigurationTest
+class GatewayModuleTestCase extends AnnotationConfigurationTestCase
 {
     /**
      * @throws \Doctrine\Common\Annotations\AnnotationException

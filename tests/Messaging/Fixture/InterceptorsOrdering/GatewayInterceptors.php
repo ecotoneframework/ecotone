@@ -8,6 +8,9 @@ use Ecotone\Messaging\Attribute\Interceptor\Before;
 use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
+/**
+ * licence Apache-2.0
+ */
 class GatewayInterceptors
 {
     #[Around(pointcut: Gateway::class)]

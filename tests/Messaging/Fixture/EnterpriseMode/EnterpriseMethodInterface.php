@@ -6,6 +6,9 @@ namespace Test\Ecotone\Messaging\Fixture\EnterpriseMode;
 
 use Ecotone\Messaging\Attribute\Enterprise;
 
+/**
+ * licence Apache-2.0
+ */
 class EnterpriseMethodInterface
 {
     #[Enterprise]

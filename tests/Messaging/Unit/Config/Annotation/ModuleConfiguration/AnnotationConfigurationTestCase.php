@@ -6,17 +6,17 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
- * Class AnnotationConfigurationTest
+ * Class AnnotationConfigurationTestCase
  * @package Test\Ecotone\Messaging\Unit\Config\Annotation\Annotation
  * @author Dariusz Gafka <support@simplycodedsoftware.com>
  */
 /**
  * licence Apache-2.0
  */
-abstract class AnnotationConfigurationTest extends MessagingTest
+abstract class AnnotationConfigurationTestCase extends MessagingTestCase
 {
     protected function createAnnotationRegistrationService(string $className, string $methodName, $classAnnotationObject, $methodAnnotationObject): AnnotationFinder
     {

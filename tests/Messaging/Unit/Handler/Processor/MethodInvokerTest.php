@@ -28,7 +28,7 @@ use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingMessageAndReturningMe
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingThreeArguments;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
  * Class MethodInvocationTest
@@ -41,7 +41,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class MethodInvokerTest extends MessagingTest
+class MethodInvokerTest extends MessagingTestCase
 {
     public function test_invoking_service()
     {

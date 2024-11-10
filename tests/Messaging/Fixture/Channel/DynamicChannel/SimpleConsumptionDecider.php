@@ -8,6 +8,9 @@ use Ecotone\Messaging\Attribute\InternalHandler;
 use Ecotone\Messaging\Attribute\Parameter\Header;
 use PHPUnit\Framework\Assert;
 
+/**
+ * licence Apache-2.0
+ */
 final class SimpleConsumptionDecider
 {
     public function __construct(private array $results, private string $expectedDynamicChannelName)

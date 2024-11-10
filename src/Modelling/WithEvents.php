@@ -9,6 +9,9 @@ use Ecotone\Modelling\Attribute\AggregateEvents;
  * @package Ecotone\Modelling
  * @author Dariusz Gafka <support@simplycodedsoftware.com>
  */
+/**
+ * licence Apache-2.0
+ */
 trait WithEvents
 {
     private ?array $recordedEvents = null;

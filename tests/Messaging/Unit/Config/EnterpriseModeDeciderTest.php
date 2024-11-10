@@ -16,6 +16,10 @@ use Test\Ecotone\Messaging\Fixture\EnterpriseMode\StandardInterface;
 /**
  * @internal
  */
+/**
+ * licence Apache-2.0
+ * @internal
+ */
 final class EnterpriseModeDeciderTest extends TestCase
 {
     public function test_it_should_return_true_when_enterprise_mode_is_default(): void

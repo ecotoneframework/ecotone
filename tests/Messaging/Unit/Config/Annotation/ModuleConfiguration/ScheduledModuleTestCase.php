@@ -19,7 +19,7 @@ use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdap
  * licence Apache-2.0
  * @internal
  */
-class ScheduledModuleTest extends AnnotationConfigurationTest
+class ScheduledModuleTestCase extends AnnotationConfigurationTestCase
 {
     public function test_creating_inbound_channel_adapter_builder_from_annotation()
     {

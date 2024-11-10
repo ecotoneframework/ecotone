@@ -17,7 +17,7 @@ use stdClass;
 use Test\Ecotone\Messaging\Fixture\Router\MultipleChannelRouter;
 use Test\Ecotone\Messaging\Fixture\Router\Order;
 use Test\Ecotone\Messaging\Fixture\Router\SingleChannelRouter;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
  * Class RouterBuilderTest
@@ -30,7 +30,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class RouterBuilderTest extends MessagingTest
+class RouterBuilderTest extends MessagingTestCase
 {
     /**
      * @throws Exception

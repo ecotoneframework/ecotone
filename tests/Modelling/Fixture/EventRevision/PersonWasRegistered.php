@@ -7,6 +7,9 @@ namespace Test\Ecotone\Modelling\Fixture\EventRevision;
 use Ecotone\Modelling\Attribute\Revision;
 
 #[Revision(2)]
+/**
+ * licence Apache-2.0
+ */
 final class PersonWasRegistered
 {
     public function __construct(

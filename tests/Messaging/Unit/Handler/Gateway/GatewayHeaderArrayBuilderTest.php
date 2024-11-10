@@ -10,7 +10,7 @@ use Ecotone\Test\ComponentTestBuilder;
 use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceInterface\ServiceWithMixed;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
  * Class GatewayHeaderArrayBuilderTest
@@ -23,7 +23,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class GatewayHeaderArrayBuilderTest extends MessagingTest
+class GatewayHeaderArrayBuilderTest extends MessagingTestCase
 {
     /**
      * @throws \Ecotone\Messaging\MessagingException

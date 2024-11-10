@@ -20,7 +20,7 @@ use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingTwoArguments;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceWithoutReturnValue;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceWithReturnValue;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
  * Class TransformerBuilder
@@ -33,7 +33,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class TransformerBuilderTest extends MessagingTest
+class TransformerBuilderTest extends MessagingTestCase
 {
     public function test_modifying_payload()
     {

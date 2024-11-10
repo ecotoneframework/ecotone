@@ -10,6 +10,9 @@ use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Modelling\Attribute\EventHandler;
 
+/**
+ * licence Apache-2.0
+ */
 class InterceptorOrderingInterceptors
 {
     #[After(precedence: -1, pointcut: InterceptorOrderingAggregate::class . '||' . InterceptorOrderingCase::class, changeHeaders: true)]

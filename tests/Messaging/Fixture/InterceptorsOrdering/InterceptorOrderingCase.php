@@ -7,6 +7,9 @@ use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Modelling\Attribute\CommandHandler;
 
+/**
+ * licence Apache-2.0
+ */
 class InterceptorOrderingCase
 {
     #[CommandHandler(routingKey: 'commandEndpointReturning')]

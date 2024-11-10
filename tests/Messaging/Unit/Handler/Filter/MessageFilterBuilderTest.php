@@ -12,7 +12,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Test\ComponentTestBuilder;
 use Exception;
 use Test\Ecotone\Messaging\Fixture\Handler\Selector\MessageSelectorExample;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
  * Class MessageFilterBuilderTest
@@ -25,7 +25,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class MessageFilterBuilderTest extends MessagingTest
+class MessageFilterBuilderTest extends MessagingTestCase
 {
     /**
      * @throws InvalidArgumentException

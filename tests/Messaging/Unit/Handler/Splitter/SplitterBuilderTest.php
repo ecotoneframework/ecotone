@@ -13,7 +13,7 @@ use Ecotone\Test\ComponentTestBuilder;
 use Exception;
 use Test\Ecotone\Messaging\Fixture\Handler\Splitter\ServiceSplittingArrayPayload;
 use Test\Ecotone\Messaging\Fixture\Handler\Splitter\WrongSplittingService;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
  * Class SplitterBuilderTest
@@ -26,7 +26,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class SplitterBuilderTest extends MessagingTest
+class SplitterBuilderTest extends MessagingTestCase
 {
     public function test_splitting_incoming_message_where_service_returns_payloads()
     {

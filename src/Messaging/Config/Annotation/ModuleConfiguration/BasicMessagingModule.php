@@ -57,7 +57,6 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
      */
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        $serviceConfiguration = ExtensionObjectResolver::resolveUnique(ServiceConfiguration::class, $extensionObjects, ServiceConfiguration::createWithDefaults());
         foreach ($extensionObjects as $extensionObject) {
             if ($extensionObject instanceof ChannelInterceptorBuilder) {
                 $messagingConfiguration->registerChannelInterceptor($extensionObject);

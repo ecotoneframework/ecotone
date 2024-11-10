@@ -9,7 +9,7 @@ use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Test\ComponentTestBuilder;
 use ReflectionException;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
  * Class PayloadBuilder
@@ -22,7 +22,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class PayloadBuilderTest extends MessagingTest
+class PayloadBuilderTest extends MessagingTestCase
 {
     /**
      * @throws ReflectionException

@@ -29,7 +29,7 @@ use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Ecotone\Modelling\QueryBus;
 use stdClass;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerExample;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithDoubledActionMethod;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateCommandHandlerWithDoubledFactoryMethod;
@@ -73,7 +73,7 @@ use Test\Ecotone\Modelling\Fixture\Handler\ServiceWithCommandAndQueryHandlersUnd
  * licence Apache-2.0
  * @internal
  */
-class BusRoutingModuleTest extends MessagingTest
+class BusRoutingModuleTest extends MessagingTestCase
 {
     public function test_registering_service_command_handler_with_endpoint_id()
     {

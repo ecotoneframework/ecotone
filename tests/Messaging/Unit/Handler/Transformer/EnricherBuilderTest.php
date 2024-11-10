@@ -31,7 +31,7 @@ use Exception;
 use Test\Ecotone\Messaging\Fixture\Conversion\FakeConverterService;
 use Test\Ecotone\Messaging\Fixture\Dto\OrderExample;
 use Test\Ecotone\Messaging\Fixture\Handler\ReplyViaHeadersMessageHandler;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
  * Class PayloadEnricherBuilderTest
@@ -44,7 +44,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class EnricherBuilderTest extends MessagingTest
+class EnricherBuilderTest extends MessagingTestCase
 {
     /**
      * @throws ConfigurationException

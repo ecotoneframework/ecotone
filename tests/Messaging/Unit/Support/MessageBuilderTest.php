@@ -11,7 +11,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
 use function json_decode;
 
 use stdClass;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
  * Class MessageBuilderTest
@@ -24,7 +24,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class MessageBuilderTest extends MessagingTest
+class MessageBuilderTest extends MessagingTestCase
 {
     public function test_creating_from_payload()
     {

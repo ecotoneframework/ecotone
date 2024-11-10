@@ -15,7 +15,7 @@ use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Ecotone\Modelling\SnapshotEvent;
 use Ecotone\Test\ComponentTestBuilder;
-use Test\Ecotone\Messaging\BaseEcotoneTest;
+use Test\Ecotone\Messaging\BaseEcotoneTestCase;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateWithoutMessageClassesExample;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\EventSourcingHandlerMethodWithReturnType;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\EventSourcingHandlerMethodWithWrongParameterCountExample;
@@ -39,7 +39,7 @@ use Test\Ecotone\Modelling\Fixture\Ticket\WorkerWasAssignedEvent;
  * licence Apache-2.0
  * @internal
  */
-class LoadAggregateServiceBuilderTest extends BaseEcotoneTest
+class LoadAggregateServiceBuilderTestCase extends BaseEcotoneTestCase
 {
     public function test_enriching_command_with_aggregate_if_found()
     {

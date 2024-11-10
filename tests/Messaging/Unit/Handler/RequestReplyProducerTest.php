@@ -18,7 +18,7 @@ use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Test\Ecotone\Messaging\Fixture\Handler\FakeReplyMessageProducer;
 use Test\Ecotone\Messaging\Fixture\Handler\NoReplyMessageProducer;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
  * Class RequestReplyProducerTest
@@ -31,7 +31,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class RequestReplyProducerTest extends MessagingTest
+class RequestReplyProducerTest extends MessagingTestCase
 {
     public function test_processing_message_without_reply()
     {

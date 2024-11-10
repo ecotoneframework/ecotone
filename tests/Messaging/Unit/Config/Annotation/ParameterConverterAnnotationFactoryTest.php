@@ -15,7 +15,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder
 use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\ServiceWithSingleArgumentDefinedByConverter;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
  * Class ParameterConverterAnnotationFactoryTest
@@ -28,7 +28,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class ParameterConverterAnnotationFactoryTest extends MessagingTest
+class ParameterConverterAnnotationFactoryTest extends MessagingTestCase
 {
     public function test_creating_with_class_name_as_reference_name_if_no_reference_passed()
     {

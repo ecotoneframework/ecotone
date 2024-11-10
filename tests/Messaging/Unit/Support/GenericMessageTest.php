@@ -4,7 +4,7 @@ namespace Test\Ecotone\Messaging\Unit\Support;
 
 use Ecotone\Messaging\Support\GenericMessage;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
  * Class GenericMessageTest
@@ -17,7 +17,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class GenericMessageTest extends MessagingTest
+class GenericMessageTest extends MessagingTestCase
 {
     public function test_creating_generic_message_with_headers_as_key_value()
     {

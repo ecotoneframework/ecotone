@@ -8,7 +8,7 @@ use Ecotone\Lite\EcotoneLite;
 use Ecotone\Lite\Test\FlowTestSupport;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Test\LicenceTesting;
-use Test\Ecotone\Messaging\BaseEcotoneTest;
+use Test\Ecotone\Messaging\BaseEcotoneTestCase;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CustomRepositories\EventSourcing\Comment;
 use Test\Ecotone\Modelling\Fixture\CustomRepositories\Standard\Article;
@@ -25,7 +25,7 @@ use Test\Ecotone\Modelling\Fixture\CustomRepositories\Standard\RepositoryBusines
  * licence Apache-2.0
  * @internal
  */
-final class CustomRepositoriesTest extends BaseEcotoneTest
+final class CustomRepositoriesTestCase extends BaseEcotoneTestCase
 {
     public function test_using_custom_repository_for_standard_aggregates()
     {

@@ -26,7 +26,7 @@ use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerStoppingService;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingNoArguments;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
-use Test\Ecotone\Messaging\Unit\MessagingTest;
+use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
  * Class InboundChannelAdapterBuilderTest
@@ -39,7 +39,7 @@ use Test\Ecotone\Messaging\Unit\MessagingTest;
  * licence Apache-2.0
  * @internal
  */
-class InboundChannelAdapterBuilderTest extends MessagingTest
+class InboundChannelAdapterBuilderTest extends MessagingTestCase
 {
     /**
      * @throws \Ecotone\Messaging\MessagingException

@@ -11,6 +11,9 @@ use Ecotone\Modelling\Attribute\AggregateEvents;
  * @deprecated Use Ecotone\Modelling\WithEvents instead
  * @TODO Ecotone 2.0 replace with WithEvents
  */
+/**
+ * licence Apache-2.0
+ */
 trait WithAggregateEvents
 {
     private ?array $recordedEvents = null;

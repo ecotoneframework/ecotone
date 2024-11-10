@@ -7,6 +7,9 @@ namespace Test\Ecotone\Messaging\Fixture\InterceptorsOrdering;
 use Ecotone\Messaging\Attribute\InternalHandler;
 use Ecotone\Messaging\Attribute\Parameter\Reference;
 
+/**
+ * licence Apache-2.0
+ */
 final class OutputHandler
 {
     #[InternalHandler(inputChannelName: 'internal-channel')]

@@ -9,7 +9,10 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  */
-abstract class BaseEcotoneTest extends TestCase
+/**
+ * licence Apache-2.0
+ */
+abstract class BaseEcotoneTestCase extends TestCase
 {
     /**
      * @dataProvider enterpriseMode

@@ -8,14 +8,14 @@ use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Class MessagingTest
+ * Class MessagingTestCase
  * @package Ecotone\Messaging
  * @author Dariusz Gafka <support@simplycodedsoftware.com>
  */
 /**
  * licence Apache-2.0
  */
-abstract class MessagingTest extends TestCase
+abstract class MessagingTestCase extends TestCase
 {
     public const FIXTURE_DIR = __DIR__ . '/../Fixture';
 

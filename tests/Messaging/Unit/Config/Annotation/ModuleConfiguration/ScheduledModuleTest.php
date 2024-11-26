@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\PollerModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ScheduledModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter\SchedulerWithPollerExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter\SchedulerExample;
 
 /**
  * @internal
@@ -18,13 +19,13 @@ use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdap
  * licence Apache-2.0
  * @internal
  */
-class PollerModuleTestCase extends AnnotationConfigurationTestCase
+final class ScheduledModuleTest extends AnnotationConfigurationTestCase
 {
     public function test_creating_inbound_channel_adapter_builder_from_annotation()
     {
-        $annotationConfiguration = PollerModule::create(
+        $annotationConfiguration = ScheduledModule::create(
             InMemoryAnnotationFinder::createFrom([
-                SchedulerWithPollerExample::class,
+                SchedulerExample::class,
             ]),
             InterfaceToCallRegistry::createEmpty()
         );
@@ -35,14 +36,10 @@ class PollerModuleTestCase extends AnnotationConfigurationTestCase
         $this->assertEquals(
             $configuration,
             $this->createMessagingSystemConfiguration()
-                ->registerPollingMetadata(
-                    PollingMetadata::create('run')
-                        ->setCron('*****')
-                        ->setErrorChannelName('errorChannel')
-                        ->setInitialDelayInMilliseconds(100)
-                        ->setMemoryLimitInMegaBytes(100)
-                        ->setHandledMessageLimit(10)
-                        ->setExecutionTimeLimitInMilliseconds(100)
+                ->registerConsumer(
+                    InboundChannelAdapterBuilder::create('requestChannel', SchedulerExample::class, InterfaceToCall::create(SchedulerExample::class, 'doRun'))
+                        ->withEndpointId('run')
+                        ->withRequiredInterceptorNames(['some'])
                 )
         );
     }

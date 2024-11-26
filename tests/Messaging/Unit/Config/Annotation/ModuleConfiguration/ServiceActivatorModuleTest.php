@@ -18,8 +18,8 @@ use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined\ServiceActivatorWithAllConfigurationDefined;
 
 /**
- * Class AnnotationServiceActivatorConfigurationTest
- * @package Test\Ecotone\Messaging\Unit\Config\Annotation\Annotation
+ * Class ServiceActivatorModuleTest
+ * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <support@simplycodedsoftware.com>
  *
  * @internal
@@ -28,7 +28,7 @@ use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\A
  * licence Apache-2.0
  * @internal
  */
-class ServiceActivatorModuleTestCase extends AnnotationConfigurationTestCase
+final class ServiceActivatorModuleTest extends AnnotationConfigurationTestCase
 {
     public function test_creating_service_activator_builder_from_annotation()
     {

@@ -25,7 +25,7 @@ use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Transformer\Transf
  * licence Apache-2.0
  * @internal
  */
-class TransformerModuleTestCase extends AnnotationConfigurationTestCase
+class TransformerModuleTest extends AnnotationConfigurationTestCase
 {
     /**
      * @throws Exception

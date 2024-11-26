@@ -15,7 +15,7 @@ use Ecotone\Messaging\Handler\Recoverability\ErrorHandlerConfiguration;
  * licence Apache-2.0
  * @internal
  */
-class ErrorHandlerModuleTestCase extends AnnotationConfigurationTestCase
+class ErrorHandlerModuleTest extends AnnotationConfigurationTestCase
 {
     public function test_registering_module_with_default_error_handling()
     {

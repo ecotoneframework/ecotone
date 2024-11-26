@@ -28,7 +28,7 @@ use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand\Ref
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand\StdClassConverter;
 
 /**
- * Class InboundChannelAdapterModuleTest
+ * Class ConsoleCommandModuleTest
  * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <support@simplycodedsoftware.com>
  *
@@ -38,7 +38,7 @@ use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand\Std
  * licence Apache-2.0
  * @internal
  */
-class ConsoleCommandModuleTestCase extends AnnotationConfigurationTestCase
+final class ConsoleCommandModuleTest extends AnnotationConfigurationTestCase
 {
     public function test_registering_reference_based_command()
     {

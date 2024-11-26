@@ -17,8 +17,8 @@ use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\BookStoreG
 use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MultipleMethodsGatewayExample;
 
 /**
- * Class AnnotationTransformerConfigurationTest
- * @package Test\Ecotone\Messaging\Unit\Config\Annotation\Annotation
+ * Class GatewayModuleTest
+ * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <support@simplycodedsoftware.com>
  *
  * @internal
@@ -27,7 +27,7 @@ use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MultipleMethodsGatewayExample
  * licence Apache-2.0
  * @internal
  */
-class GatewayModuleTestCase extends AnnotationConfigurationTestCase
+final class GatewayModuleTest extends AnnotationConfigurationTestCase
 {
     /**
      * @throws \Doctrine\Common\Annotations\AnnotationException

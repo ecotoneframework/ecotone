@@ -42,7 +42,7 @@ use Test\Ecotone\Modelling\Fixture\Retry\RetriedCommandHandler;
  * licence Apache-2.0
  * @internal
  */
-class AsynchronousModuleTestCase extends AnnotationConfigurationTestCase
+final class AsynchronousModuleTest extends AnnotationConfigurationTestCase
 {
     /**
      * @throws AnnotationException

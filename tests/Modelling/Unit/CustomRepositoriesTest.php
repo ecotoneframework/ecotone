@@ -25,7 +25,7 @@ use Test\Ecotone\Modelling\Fixture\CustomRepositories\Standard\RepositoryBusines
  * licence Apache-2.0
  * @internal
  */
-final class CustomRepositoriesTestCase extends BaseEcotoneTestCase
+final class CustomRepositoriesTest extends BaseEcotoneTestCase
 {
     public function test_using_custom_repository_for_standard_aggregates()
     {

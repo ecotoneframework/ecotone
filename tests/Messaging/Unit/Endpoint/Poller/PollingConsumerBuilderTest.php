@@ -12,7 +12,6 @@ use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
-use Ecotone\Messaging\Endpoint\PollingConsumer\RejectMessageException;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
@@ -251,8 +250,6 @@ class PollingConsumerBuilderTest extends MessagingTestCase
             ->withInputChannelName($inputChannelName);
 
         $messaging = $this->createPollingConsumer($inputChannelName, $inputChannel, $messageHandler, true);
-
-        $this->expectException(RejectMessageException::class);
 
         $messaging->sendMessageDirectToChannel($inputChannelName, $message);
         $messaging->run('some-id');

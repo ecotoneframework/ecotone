@@ -23,7 +23,7 @@ use stdClass;
 use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleSingleConverterService;
 
 /**
- * Class ConverterModuleTest
+ * Class SerializerModuleTest
  * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <support@simplycodedsoftware.com>
  *
@@ -33,7 +33,7 @@ use Test\Ecotone\Messaging\Fixture\Annotation\Converter\ExampleSingleConverterSe
  * licence Apache-2.0
  * @internal
  */
-class SerializerModuleTestCase extends AnnotationConfigurationTestCase
+final class SerializerModuleTest extends AnnotationConfigurationTestCase
 {
     /**
      * @throws AnnotationException

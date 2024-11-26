@@ -61,6 +61,17 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
         try {
             $this->handle($message, $methodInvocation, $logger, $messageChannelName);
         } catch (Throwable $exception) {
+            $logger->critical(
+                sprintf(
+                    'Error occurred during acknowledging message with id `%s` in Message Channel `%s`.  Error: %s',
+                    $message->getHeaders()->getMessageId(),
+                    $messageChannelName,
+                    $exception->getMessage()
+                ),
+                $message,
+                ['exception' => $exception],
+            );
+
             $pollingMetadata = $message->getHeaders()->get(MessageHeaders::CONSUMER_POLLING_METADATA);
             if ($pollingMetadata->isStoppedOnError() === true) {
                 $logger->info(
@@ -70,17 +81,6 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
 
                 throw $exception;
             }
-
-            $logger->critical(
-                sprintf(
-                    'Error occurred during acknowledging message with id `%s` in Message Channel `%s`. This means message may return to the channel. Error: %s',
-                    $message->getHeaders()->getMessageId(),
-                    $messageChannelName,
-                    $exception->getMessage()
-                ),
-                $message,
-                ['exception' => $exception],
-            );
         }
     }
 
@@ -99,7 +99,7 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
         $amqpAcknowledgementCallback = $message->getHeaders()->get($message->getHeaders()->get(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION));
         try {
             $methodInvocation->proceed();
-        } catch (RejectMessageException $exception) {
+        } catch (RejectMessageException) {
             if ($amqpAcknowledgementCallback->isAutoAck()) {
                 $retryStrategy->runCallbackWithRetries(function () use ($message, $logger, $messageChannelName, $amqpAcknowledgementCallback) {
                     $amqpAcknowledgementCallback->reject();
@@ -111,7 +111,7 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
                 }, $message, Exception::class, $logger, sprintf('Rejecting Message in Message Channel `%s` failed. Trying to self-heal and retry.', $messageChannelName));
             }
 
-            throw $exception;
+            return;
         } catch (Throwable $exception) {
             if ($amqpAcknowledgementCallback->isAutoAck()) {
                 $retryStrategy->runCallbackWithRetries(function () use ($message, $logger, $messageChannelName, $amqpAcknowledgementCallback, $exception) {

@@ -5,12 +5,11 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ScheduledModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\PollerModule;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
-use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter\SchedulerExample;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter\SchedulerWithPollerExample;
 
 /**
  * @internal
@@ -19,13 +18,13 @@ use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdap
  * licence Apache-2.0
  * @internal
  */
-class ScheduledModuleTestCase extends AnnotationConfigurationTestCase
+final class PollerModuleTest extends AnnotationConfigurationTestCase
 {
     public function test_creating_inbound_channel_adapter_builder_from_annotation()
     {
-        $annotationConfiguration = ScheduledModule::create(
+        $annotationConfiguration = PollerModule::create(
             InMemoryAnnotationFinder::createFrom([
-                SchedulerExample::class,
+                SchedulerWithPollerExample::class,
             ]),
             InterfaceToCallRegistry::createEmpty()
         );
@@ -36,10 +35,14 @@ class ScheduledModuleTestCase extends AnnotationConfigurationTestCase
         $this->assertEquals(
             $configuration,
             $this->createMessagingSystemConfiguration()
-                ->registerConsumer(
-                    InboundChannelAdapterBuilder::create('requestChannel', SchedulerExample::class, InterfaceToCall::create(SchedulerExample::class, 'doRun'))
-                        ->withEndpointId('run')
-                        ->withRequiredInterceptorNames(['some'])
+                ->registerPollingMetadata(
+                    PollingMetadata::create('run')
+                        ->setCron('*****')
+                        ->setErrorChannelName('errorChannel')
+                        ->setInitialDelayInMilliseconds(100)
+                        ->setMemoryLimitInMegaBytes(100)
+                        ->setHandledMessageLimit(10)
+                        ->setExecutionTimeLimitInMilliseconds(100)
                 )
         );
     }

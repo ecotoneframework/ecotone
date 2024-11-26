@@ -33,6 +33,7 @@ abstract class MessagingException extends Exception
     public const MESSAGE_DISPATCHING_EXCEPTION = 201;
     public const WRONG_HANDLER_AMOUNT_EXCEPTION = 202;
     public const MESSAGE_HANDLING_EXCEPTION = 205;
+    public const MESSAGE_PUBLISH_EXCEPTION = 206;
 
     public const WRONG_EXPRESSION_TO_EVALUATE = 300;
 

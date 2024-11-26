@@ -17,7 +17,7 @@ use Test\Ecotone\Messaging\Fixture\Annotation\Consumer\ExampleConsumer;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
 
 /**
- * Class ConverterModuleTest
+ * Class RequiredConsumersModuleTest
  * @package Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration
  * @author Dariusz Gafka <support@simplycodedsoftware.com>
  *
@@ -27,7 +27,7 @@ use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
  * licence Apache-2.0
  * @internal
  */
-class RequiredConsumersModuleTestCase extends AnnotationConfigurationTestCase
+final class RequiredConsumersModuleTest extends AnnotationConfigurationTestCase
 {
     public function test_throwing_exception_if_consumer_was_not_registered()
     {

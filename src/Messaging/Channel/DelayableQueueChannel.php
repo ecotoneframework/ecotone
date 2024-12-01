@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
 
+use DateTimeInterface;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Scheduling\EpochBasedClock;
+use Ecotone\Messaging\Scheduling\TimeSpan;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -19,13 +22,13 @@ final class DelayableQueueChannel implements PollableChannel, DefinedObject
     /**
      * @param Message[] $queue
      */
-    private function __construct(private string $name, private array $queue, private int $releaseMessagesAwaitingFor = 0)
+    public function __construct(private string $name, private array $queue = [], private int|DateTimeInterface $releaseMessagesAwaitingFor = 0)
     {
     }
 
-    public static function create(string $name = 'unknown'): self
+    public static function create(string $name): self
     {
-        return new self($name, []);
+        return new self($name);
     }
 
     /**
@@ -44,7 +47,7 @@ final class DelayableQueueChannel implements PollableChannel, DefinedObject
         $message = array_shift($this->queue);
 
         if ($message !== null && $message->getHeaders()->containsKey(MessageHeaders::DELIVERY_DELAY)) {
-            if ($message->getHeaders()->get(MessageHeaders::DELIVERY_DELAY) > $this->releaseMessagesAwaitingFor) {
+            if ($message->getHeaders()->get(MessageHeaders::DELIVERY_DELAY) > $this->getCurrentDeliveryTimeShift($message)) {
                 $nextAvailableMessage = $this->receive();
                 array_unshift($this->queue, $message);
 
@@ -71,9 +74,9 @@ final class DelayableQueueChannel implements PollableChannel, DefinedObject
         return $this->receive();
     }
 
-    public function releaseMessagesAwaitingFor(int $milliseconds): void
+    public function releaseMessagesAwaitingFor(int|TimeSpan|DateTimeInterface $time): void
     {
-        $this->releaseMessagesAwaitingFor = $milliseconds;
+        $this->releaseMessagesAwaitingFor = $time instanceof TimeSpan ? $time->toMilliseconds() : $time;
     }
 
     public function __toString()
@@ -84,5 +87,14 @@ final class DelayableQueueChannel implements PollableChannel, DefinedObject
     public function getDefinition(): Definition
     {
         return new Definition(self::class, [$this->name], 'create');
+    }
+
+    public function getCurrentDeliveryTimeShift(Message $message): int
+    {
+        if ($this->releaseMessagesAwaitingFor instanceof DateTimeInterface) {
+            return EpochBasedClock::getTimestampWithMillisecondsFor($this->releaseMessagesAwaitingFor) - ($message->getHeaders()->getTimestamp() * 1000);
+        }
+
+        return $this->releaseMessagesAwaitingFor;
     }
 }

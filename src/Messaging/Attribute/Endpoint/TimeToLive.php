@@ -17,8 +17,8 @@ class TimeToLive extends AddHeader
     /**
      * @param int|TimeSpan $time if integer is provided it is treated as milliseconds
      */
-    public function __construct(int|TimeSpan $time)
+    public function __construct(int|TimeSpan|null $time = null, ?string $expression = null)
     {
-        parent::__construct(MessageHeaders::TIME_TO_LIVE, $time instanceof TimeSpan ? $time->toMilliseconds() : $time);
+        parent::__construct(MessageHeaders::TIME_TO_LIVE, $time instanceof TimeSpan ? $time->toMilliseconds() : $time, $expression);
     }
 }

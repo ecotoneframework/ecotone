@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
 
+use DateTimeInterface;
+
 /**
  * Class UTCBasedClock
  * @package Ecotone\Messaging\Scheduling
@@ -19,6 +21,21 @@ class EpochBasedClock implements Clock
      */
     public function unixTimeInMilliseconds(): int
     {
+        return $this->getCurrentTimeInMilliseconds();
+    }
+
+    public static function getCurrentTimeInMilliseconds(): int
+    {
         return (int)round(microtime(true) * 1000);
+    }
+
+    public static function getTimestampWithMillisecondsFor(DateTimeInterface $dateTime): int
+    {
+        return (int)round($dateTime->format('U.u') * 1000);
+    }
+
+    public static function getTimestampFor(DateTimeInterface $dateTime): int
+    {
+        return (int)$dateTime->format('U');
     }
 }

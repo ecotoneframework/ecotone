@@ -22,6 +22,31 @@ final class TimeSpan implements DefinedObject
 
     }
 
+    public static function withMilliseconds(int $milliseconds): self
+    {
+        return new self(milliseconds: $milliseconds);
+    }
+
+    public static function withSeconds(int $seconds): self
+    {
+        return new self(seconds: $seconds);
+    }
+
+    public static function withMinutes(int $minutes): self
+    {
+        return new self(minutes: $minutes);
+    }
+
+    public static function withHours(int $hours): self
+    {
+        return new self(hours: $hours);
+    }
+
+    public static function withDays(int $days): self
+    {
+        return new self(days: $days);
+    }
+
     public function toMilliseconds(): int
     {
         return $this->milliseconds + $this->seconds * 1000 + $this->minutes * 60 * 1000 + $this->hours * 60 * 60 * 1000 + $this->days * 24 * 60 * 60 * 1000;

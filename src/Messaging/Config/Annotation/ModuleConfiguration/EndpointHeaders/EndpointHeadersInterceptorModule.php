@@ -10,8 +10,10 @@ use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Precedence;
@@ -38,7 +40,7 @@ class EndpointHeadersInterceptorModule extends NoExternalConfigurationModule imp
         $interfaceToCall = $interfaceToCallRegistry->getFor(EndpointHeadersInterceptor::class, 'addMetadata');
         $messagingConfiguration->registerBeforeSendInterceptor(
             MethodInterceptorBuilder::create(
-                new Definition(EndpointHeadersInterceptor::class),
+                new Definition(EndpointHeadersInterceptor::class, [Reference::to(ExpressionEvaluationService::REFERENCE)]),
                 $interfaceToCall,
                 Precedence::ENDPOINT_HEADERS_PRECEDENCE,
                 AddHeader::class . '||' . RemoveHeader::class,

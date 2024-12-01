@@ -2,6 +2,7 @@
 
 namespace Ecotone\Messaging\Channel\PollableChannel\Serialization;
 
+use DateTimeInterface;
 use Ecotone\Messaging\Conversion\ConversionException;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
@@ -10,6 +11,7 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Scheduling\EpochBasedClock;
 
 /**
  * licence Apache-2.0
@@ -91,11 +93,21 @@ class OutboundMessageConverter
         }
         $applicationHeaders[MessageHeaders::CONTENT_TYPE] = $sourceMediaType?->toString();
 
+        $deliveryDelay = $messageToConvert->getHeaders()->containsKey(MessageHeaders::DELIVERY_DELAY) ? $messageToConvert->getHeaders()->get(MessageHeaders::DELIVERY_DELAY) : $this->defaultDeliveryDelay;
+
+        if ($deliveryDelay instanceof DateTimeInterface) {
+            $deliveryDelay = EpochBasedClock::getTimestampWithMillisecondsFor($deliveryDelay) - ($messageToConvert->getHeaders()->getTimestamp() * 1000);
+
+            if ($deliveryDelay < 0) {
+                $deliveryDelay = null;
+            }
+        }
+
         return new OutboundMessage(
             $messagePayload,
             array_merge($applicationHeaders, $this->staticHeadersToAdd),
             $applicationHeaders[MessageHeaders::CONTENT_TYPE],
-            $messageToConvert->getHeaders()->containsKey(MessageHeaders::DELIVERY_DELAY) ? $messageToConvert->getHeaders()->get(MessageHeaders::DELIVERY_DELAY) : $this->defaultDeliveryDelay,
+            $deliveryDelay,
             $messageToConvert->getHeaders()->containsKey(MessageHeaders::TIME_TO_LIVE) ? $messageToConvert->getHeaders()->get(MessageHeaders::TIME_TO_LIVE) : $this->defaultTimeToLive,
             $messageToConvert->getHeaders()->containsKey(MessageHeaders::PRIORITY) ? $messageToConvert->getHeaders()->get(MessageHeaders::PRIORITY) : $this->defaultPriority,
         );

@@ -200,7 +200,7 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
             )
                 ->withMethodParameterConverters([
                     HeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
-                    PayloadBuilder::create('timeInMilliseconds'),
+                    PayloadBuilder::create('timeInMillisecondsOrDateTime'),
                     ReferenceBuilder::create('channelResolver', ChannelResolver::class),
                 ])
                 ->withInputChannelName(self::inputChannelName(self::RELEASE_DELAYED_MESSAGES)))
@@ -211,7 +211,7 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                 self::inputChannelName(self::RELEASE_DELAYED_MESSAGES)
             )->withParameterConverters([
                 GatewayHeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
-                GatewayPayloadBuilder::create('timeInMilliseconds'),
+                GatewayPayloadBuilder::create('timeInMillisecondsOrDateTime'),
             ]));
     }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite\Test;
 
+use DateTimeInterface;
 use Ecotone\EventSourcing\EventStore;
 use Ecotone\EventSourcing\ProjectionManager;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
@@ -90,12 +91,13 @@ final class FlowTestSupport
     }
 
     /**
-     * @param int $time Time in milliseconds or DelayedTime object
+     * @param int $time Time in milliseconds or TimeSpan object
+     *
+     * @deprecated use run instead
      */
-    public function releaseAwaitingMessagesAndRunConsumer(string $channelName, int|TimeSpan $time, ?ExecutionPollingMetadata $executionPollingMetadata = null): self
+    public function releaseAwaitingMessagesAndRunConsumer(string $channelName, int|TimeSpan|DateTimeInterface $time, ?ExecutionPollingMetadata $executionPollingMetadata = null): self
     {
-        $this->testSupportGateway->releaseMessagesAwaitingFor($channelName, $time instanceof TimeSpan ? $time->toMilliseconds() : $time);
-        $this->run($channelName, $executionPollingMetadata);
+        $this->run($channelName, $executionPollingMetadata, is_int($time) ? TimeSpan::withMilliseconds($time) : $time);
 
         return $this;
     }
@@ -129,8 +131,14 @@ final class FlowTestSupport
         return $messageChannel->receive();
     }
 
-    public function run(string $name, ?ExecutionPollingMetadata $executionPollingMetadata = null): self
+    /**
+     * @param int|TimeSpan|DateTimeInterface $releaseAwaitingFor will release messages which are delayed for given time
+     */
+    public function run(string $name, ?ExecutionPollingMetadata $executionPollingMetadata = null, TimeSpan|DateTimeInterface|null $releaseAwaitingFor = null): self
     {
+        if ($releaseAwaitingFor) {
+            $this->testSupportGateway->releaseMessagesAwaitingFor($name, $releaseAwaitingFor);
+        }
         $this->configuredMessagingSystem->run($name, $executionPollingMetadata);
 
         return $this;

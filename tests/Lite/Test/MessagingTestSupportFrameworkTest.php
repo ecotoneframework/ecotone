@@ -2,6 +2,7 @@
 
 namespace Test\Ecotone\Lite\Test;
 
+use DateTimeImmutable;
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Lite\Test\Configuration\InMemoryRepositoryBuilder;
@@ -14,6 +15,7 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\DestinationResolutionException;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Scheduling\EpochBasedClock;
 use Ecotone\Messaging\Scheduling\TimeSpan;
 use Ecotone\Modelling\CommandBus;
 use PHPUnit\Framework\TestCase;
@@ -462,32 +464,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $this->assertNotEmpty($ecotoneLite->getQueryBus()->sendWithRouting('order.getOrders'));
     }
 
-    public function test_releasing_delayed_message_with_passed_milliseconds()
-    {
-        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
-            [OrderService::class, PlaceOrderConverter::class, OrderWasPlacedConverter::class],
-            [new OrderService(), new PlaceOrderConverter(), new OrderWasPlacedConverter()],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('orders', true, MediaType::createApplicationXPHPArray()),
-            ]
-        );
-
-        $orderId = 'someId';
-        $ecotoneTestSupport->sendCommandWithRoutingKey('order.register', new PlaceOrder($orderId), metadata: [
-            MessageHeaders::DELIVERY_DELAY => 100,
-        ]);
-
-        $ecotoneTestSupport->run('orders');
-        $this->assertEquals([], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
-
-        $ecotoneTestSupport->releaseAwaitingMessagesAndRunConsumer('orders', 10);
-        $this->assertEquals([], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
-
-        $ecotoneTestSupport->releaseAwaitingMessagesAndRunConsumer('orders', 100);
-        $this->assertEquals([$orderId], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
-    }
-
-    public function test_releasing_delayed_message()
+    public function test_releasing_delayed_message_time_time_span_object()
     {
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, PlaceOrderConverter::class, OrderWasPlacedConverter::class],
@@ -505,10 +482,55 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport->run('orders');
         $this->assertEquals([], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
 
-        $ecotoneTestSupport->releaseAwaitingMessagesAndRunConsumer('orders', new TimeSpan(milliseconds: 10));
+        $ecotoneTestSupport->run('orders', releaseAwaitingFor: new TimeSpan(milliseconds: 10));
         $this->assertEquals([], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
 
-        $ecotoneTestSupport->releaseAwaitingMessagesAndRunConsumer('orders', new TimeSpan(100));
+        $ecotoneTestSupport->run('orders', releaseAwaitingFor: new TimeSpan(100));
+        $this->assertEquals([$orderId], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
+    }
+
+    public function test_delaying_till_specific_moment_in_time()
+    {
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [OrderService::class, PlaceOrderConverter::class, OrderWasPlacedConverter::class],
+            [new OrderService(), new PlaceOrderConverter(), new OrderWasPlacedConverter()],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('orders', true, MediaType::createApplicationXPHPArray()),
+            ],
+        );
+
+        $orderId = 'someId';
+        $ecotoneTestSupport->sendCommandWithRoutingKey('order.register', new PlaceOrder($orderId), metadata: [
+            MessageHeaders::DELIVERY_DELAY => $delayTime = new DateTimeImmutable('+1 hour'),
+        ]);
+
+        $ecotoneTestSupport->run('orders');
+        $this->assertEquals([], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
+
+        $ecotoneTestSupport->run('orders', releaseAwaitingFor: $delayTime->modify('-1 seconds'));
+        $this->assertEquals([], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
+
+        $ecotoneTestSupport->run('orders', releaseAwaitingFor: $delayTime);
+        $this->assertEquals([$orderId], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
+    }
+
+    public function test_delaying_with_past_date_make_it_available_right_away(): void
+    {
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [OrderService::class, PlaceOrderConverter::class, OrderWasPlacedConverter::class],
+            [new OrderService(), new PlaceOrderConverter(), new OrderWasPlacedConverter()],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('orders', true, MediaType::createApplicationXPHPArray()),
+            ],
+        );
+
+        $orderId = 'someId';
+        $ecotoneTestSupport->sendCommandWithRoutingKey('order.register', new PlaceOrder($orderId), metadata: [
+            MessageHeaders::TIMESTAMP => EpochBasedClock::getTimestampFor($time = new DateTimeImmutable('2020-01-01 12:00:00')),
+            MessageHeaders::DELIVERY_DELAY => $time->modify('-1 hour'),
+        ]);
+
+        $ecotoneTestSupport->run('orders');
         $this->assertEquals([$orderId], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
     }
 }

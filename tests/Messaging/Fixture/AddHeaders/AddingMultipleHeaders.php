@@ -28,4 +28,14 @@ final class AddingMultipleHeaders
     {
 
     }
+
+    #[Delayed(expression: 'payload.delay')]
+    #[AddHeader('token', expression: 'headers["token"]')]
+    #[TimeToLive(expression: 'payload.timeToLive')]
+    #[Asynchronous('async')]
+    #[CommandHandler('addHeadersWithExpression', endpointId: 'addHeadersEndpointWithExpression')]
+    public function withExpression(): void
+    {
+
+    }
 }

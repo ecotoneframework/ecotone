@@ -8,6 +8,7 @@ use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Channel\DynamicChannel\DynamicMessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -525,20 +526,19 @@ final class DynamicMessageChannelBuilderTest extends TestCase
     {
         $this->expectException(ConfigurationException::class);
 
-        EcotoneLite::bootstrapFlowTesting(
+        EcotoneLite::bootstrap(
             [DynamicChannelResolver::class, SuccessServiceActivator::class],
             [new SuccessServiceActivator()],
             ServiceConfiguration::createWithDefaults()
                 ->withExtensionObjects([
                     PollingMetadata::create('async_channel')
                         ->setExecutionAmountLimit(1),
-                ]),
-            enableAsynchronousProcessing: [
-                DynamicMessageChannelBuilder::createRoundRobin('dynamic_channel', ['async_channel'])
-                    ->withInternalChannels([
-                        SimpleMessageChannelBuilder::createQueueChannel('async_channel'),
-                    ]),
-            ],
+                    DynamicMessageChannelBuilder::createRoundRobin('dynamic_channel', ['async_channel'])
+                        ->withInternalChannels([
+                            SimpleMessageChannelBuilder::createQueueChannel('async_channel'),
+                        ]),
+                ])
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE])),
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }

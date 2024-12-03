@@ -118,6 +118,11 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         }
     }
 
+    public function registeredClasses(): array
+    {
+        return $this->registeredClasses;
+    }
+
     private function init(string $rootProjectDir, array $namespacesToUse, string $catalogToLoad, AutoloadNamespaceParser $autoloadNamespaceParser, array $systemClassesToRegister, array $userClassesToRegister, bool $isRunningForTesting)
     {
         if (! $catalogToLoad && $namespacesToUse == [] && $userClassesToRegister == [] && ! $isRunningForTesting) {
@@ -405,7 +410,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         return $classes;
     }
 
-    public static function getRegisteredClassesForNamespaces(
+    private static function getRegisteredClassesForNamespaces(
         string $rootProjectDir,
         AutoloadNamespaceParser $autoloadNamespaceParser,
         array $namespacesToUse

@@ -533,4 +533,47 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport->run('orders');
         $this->assertEquals([$orderId], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
     }
+
+    public function test_when_asynchronous_processing_enabled_defaults_channel_to_in_memory_delayable(): void
+    {
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [OrderService::class, PlaceOrderConverter::class, OrderWasPlacedConverter::class],
+            [new OrderService(), new PlaceOrderConverter(), new OrderWasPlacedConverter()],
+            enableAsynchronousProcessing: true,
+        );
+
+        $orderId = 'someId';
+        $ecotoneTestSupport->sendCommandWithRoutingKey('order.register', new PlaceOrder($orderId), metadata: [
+            MessageHeaders::DELIVERY_DELAY => $delayTime = new DateTimeImmutable('+1 hour'),
+        ]);
+
+        $ecotoneTestSupport->run('orders');
+        $this->assertEquals([], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
+
+        $ecotoneTestSupport->run('orders', releaseAwaitingFor: $delayTime->modify('-1 seconds'));
+        $this->assertEquals([], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
+
+        $ecotoneTestSupport->run('orders', releaseAwaitingFor: $delayTime);
+        $this->assertEquals([$orderId], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
+    }
+
+    public function test_channel_provided_default_channel_is_not_used(): void
+    {
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [OrderService::class, PlaceOrderConverter::class, OrderWasPlacedConverter::class],
+            [new OrderService(), new PlaceOrderConverter(), new OrderWasPlacedConverter()],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('orders', false),
+            ],
+        );
+
+        $orderId = 'someId';
+        $ecotoneTestSupport->sendCommandWithRoutingKey('order.register', new PlaceOrder($orderId), metadata: [
+            MessageHeaders::DELIVERY_DELAY => new DateTimeImmutable('+1 hour'),
+        ]);
+
+        // the default channel is with delay, so if it would be used, the message would be available
+        $ecotoneTestSupport->run('orders');
+        $this->assertEquals([$orderId], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
+    }
 }

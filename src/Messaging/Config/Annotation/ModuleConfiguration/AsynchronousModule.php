@@ -10,6 +10,7 @@ use Ecotone\Messaging\Attribute\EndpointAnnotation;
 use Ecotone\Messaging\Attribute\InternalHandler;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Channel\CombinedMessageChannel;
+use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
@@ -127,31 +128,17 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
      */
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
+        $endpointChannels = $this->resolveChannels($extensionObjects);
         $serviceConfiguration = ExtensionObjectResolver::resolveUnique(ServiceConfiguration::class, $extensionObjects, ServiceConfiguration::createWithDefaults());
         $pollingMetadata = ExtensionObjectResolver::resolve(PollingMetadata::class, $extensionObjects);
         $polingChannelBuilders = ExtensionObjectResolver::resolve(SimpleMessageChannelBuilder::class, $extensionObjects);
 
-        $combinedMessageChannels = [];
-        /** @var CombinedMessageChannel $combinedMessageChannel */
-        foreach (ExtensionObjectResolver::resolve(CombinedMessageChannel::class, $extensionObjects) as $combinedMessageChannel) {
-            $combinedMessageChannels[$combinedMessageChannel->getReferenceName()] = $combinedMessageChannel->getCombinedChannels();
-        }
-
-        foreach ($this->asyncEndpoints as $endpointId => $asyncChannels) {
-            $asyncChannels         = is_array($asyncChannels) ? $asyncChannels : [$asyncChannels];
-            $asyncChannelsResolved = [];
-            foreach ($asyncChannels as $asyncChannel) {
-                if (array_key_exists($asyncChannel, $combinedMessageChannels)) {
-                    $asyncChannelsResolved = array_merge($asyncChannelsResolved, $combinedMessageChannels[$asyncChannel]);
-                } else {
-                    $asyncChannelsResolved[] = $asyncChannel;
-                }
-            }
-            $messagingConfiguration->registerAsynchronousEndpoint($asyncChannelsResolved, $endpointId);
+        foreach ($endpointChannels as $endpointChannel => $asyncChannels) {
+            $messagingConfiguration->registerAsynchronousEndpoint($asyncChannels, $endpointChannel);
 
             /** Default polling metadata for tests */
             if ($serviceConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
-                foreach ($asyncChannelsResolved as $asyncEndpointChannel) {
+                foreach ($asyncChannels as $asyncEndpointChannel) {
                     if (! $this->hasPollingMetadata($pollingMetadata, $asyncEndpointChannel)) {
                         if ($this->isInMemoryPollableChannel($polingChannelBuilders, $asyncEndpointChannel)) {
                             $messagingConfiguration->registerPollingMetadata(
@@ -171,6 +158,36 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
                 }
             }
         }
+    }
+
+    public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
+    {
+        $defaultChannels = [];
+
+        if ($serviceConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
+            $polingChannelBuilders = array_map(
+                fn (MessageChannelBuilder $channelBuilder) => $channelBuilder->getMessageChannelName(),
+                ExtensionObjectResolver::resolve(MessageChannelBuilder::class, $serviceExtensions)
+            );
+            $endpointChannels = array_reduce(
+                $this->resolveChannels($serviceExtensions),
+                fn (array $carry, array $item) => array_unique(array_merge($carry, $item)),
+                []
+            );
+
+            foreach ($endpointChannels as $endpointChannel) {
+                if (in_array($endpointChannel, $polingChannelBuilders)) {
+                    continue;
+                }
+
+                $defaultChannels[] = SimpleMessageChannelBuilder::createQueueChannel(
+                    $endpointChannel,
+                    true,
+                );
+            }
+        }
+
+        return $defaultChannels;
     }
 
     public function getModulePackageName(): string
@@ -201,5 +218,33 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
         }
 
         return false;
+    }
+
+    /**
+     * @return array<string, array<string>>
+     */
+    public function resolveChannels(array $extensionObjects): array
+    {
+        $combinedMessageChannels = [];
+        /** @var CombinedMessageChannel $combinedMessageChannel */
+        foreach (ExtensionObjectResolver::resolve(CombinedMessageChannel::class, $extensionObjects) as $combinedMessageChannel) {
+            $combinedMessageChannels[$combinedMessageChannel->getReferenceName()] = $combinedMessageChannel->getCombinedChannels();
+        }
+
+        $endpointChannels = [];
+        foreach ($this->asyncEndpoints as $endpointId => $asyncChannels) {
+            $asyncChannels = is_array($asyncChannels) ? $asyncChannels : [$asyncChannels];
+            $asyncChannelsResolved = [];
+            foreach ($asyncChannels as $asyncChannel) {
+                if (array_key_exists($asyncChannel, $combinedMessageChannels)) {
+                    $asyncChannelsResolved = array_merge($asyncChannelsResolved, $combinedMessageChannels[$asyncChannel]);
+                } else {
+                    $asyncChannelsResolved[] = $asyncChannel;
+                }
+            }
+            $endpointChannels[$endpointId] = $asyncChannelsResolved;
+        }
+
+        return $endpointChannels;
     }
 }

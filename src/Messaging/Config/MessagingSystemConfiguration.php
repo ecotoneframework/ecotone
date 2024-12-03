@@ -222,16 +222,16 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @param string[] $skippedModulesPackages
      */
-    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $serviceExtensions, ServiceConfiguration $applicationConfiguration): void
+    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $serviceExtensions, ServiceConfiguration $serviceConfiguration): void
     {
         $moduleReferenceSearchService = ModuleReferenceSearchService::createEmpty();
 
-        $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations($applicationConfiguration->getSkippedModulesPackages());
+        $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations($serviceConfiguration->getSkippedModulesPackages());
         $moduleExtensions = [];
 
         $extensionObjects = $serviceExtensions;
         foreach ($modules as $module) {
-            $extensionObjects = array_merge($extensionObjects, $module->getModuleExtensions($serviceExtensions));
+            $extensionObjects = array_merge($extensionObjects, $module->getModuleExtensions($serviceConfiguration, $serviceExtensions));
         }
         foreach ($modules as $module) {
             $moduleExtensions[get_class($module)] = [];
@@ -252,6 +252,29 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         $this->moduleReferenceSearchService = $moduleReferenceSearchService;
+    }
+
+    public static function getModuleClassesFor(ServiceConfiguration $serviceConfiguration): array
+    {
+        $modulesClasses = [];
+        foreach (array_diff(array_merge(ModulePackageList::allPackages(), [ModulePackageList::TEST_PACKAGE]), $serviceConfiguration->getSkippedModulesPackages()) as $availablePackage) {
+            $modulesClasses = array_merge($modulesClasses, ModulePackageList::getModuleClassesForPackage($availablePackage));
+        }
+
+        return array_filter($modulesClasses, fn (string $moduleClassName): bool => class_exists($moduleClassName) || interface_exists($moduleClassName));
+    }
+
+    public static function addCorePackage(ServiceConfiguration $serviceConfiguration, bool $enableTestPackage): ServiceConfiguration
+    {
+        $requiredModules = [ModulePackageList::CORE_PACKAGE];
+        $skippedPackages = $serviceConfiguration->getSkippedModulesPackages();
+        if ($enableTestPackage) {
+            $requiredModules[] = ModulePackageList::TEST_PACKAGE;
+        } else {
+            $skippedPackages[] = ModulePackageList::TEST_PACKAGE;
+        }
+
+        return $serviceConfiguration->withSkippedModulePackageNames(array_diff($skippedPackages, $requiredModules));
     }
 
     private function prepareAndOptimizeConfiguration(InterfaceToCallRegistry $interfaceToCallRegistry): void
@@ -514,19 +537,9 @@ final class MessagingSystemConfiguration implements Configuration
         ConfigurationVariableService $configurationVariableService,
         ServiceConfiguration $serviceConfiguration,
         array $userLandClassesToRegister = [],
-        bool $enableTestPackage = false
+        bool $enableTestPackage = false,
     ): Configuration {
-        $requiredModules = [ModulePackageList::CORE_PACKAGE];
-        if ($enableTestPackage) {
-            $requiredModules[] = ModulePackageList::TEST_PACKAGE;
-        }
-
-        $serviceConfiguration = $serviceConfiguration->withSkippedModulePackageNames(array_diff($serviceConfiguration->getSkippedModulesPackages(), $requiredModules));
-
-        $modulesClasses = [];
-        foreach (array_diff(array_merge(ModulePackageList::allPackages(), [ModulePackageList::TEST_PACKAGE]), $serviceConfiguration->getSkippedModulesPackages()) as $availablePackage) {
-            $modulesClasses = array_merge($modulesClasses, ModulePackageList::getModuleClassesForPackage($availablePackage));
-        }
+        $serviceConfiguration = self::addCorePackage($serviceConfiguration, $enableTestPackage);
 
         return self::prepareWithAnnotationFinder(
             AnnotationFinderFactory::createForAttributes(
@@ -534,22 +547,25 @@ final class MessagingSystemConfiguration implements Configuration
                 $serviceConfiguration->getNamespaces(),
                 $serviceConfiguration->getEnvironment(),
                 $serviceConfiguration->getLoadedCatalog() ?? '',
-                array_filter($modulesClasses, fn (string $moduleClassName): bool => class_exists($moduleClassName) || interface_exists($moduleClassName)),
+                self::getModuleClassesFor($serviceConfiguration),
                 $userLandClassesToRegister,
                 $enableTestPackage
             ),
             $configurationVariableService,
             $serviceConfiguration,
+            $enableTestPackage,
         );
     }
 
-    private static function prepareWithAnnotationFinder(
+    public static function prepareWithAnnotationFinder(
         AnnotationFinder $annotationFinder,
         ConfigurationVariableService $configurationVariableService,
         ServiceConfiguration $serviceConfiguration,
+        bool $enableTestPackage = false,
     ): Configuration {
-        $preparationInterfaceRegistry = InterfaceToCallRegistry::createWith($annotationFinder);
+        $serviceConfiguration = self::addCorePackage($serviceConfiguration, $enableTestPackage);
 
+        $preparationInterfaceRegistry = InterfaceToCallRegistry::createWith($annotationFinder);
         return self::prepareWithModuleRetrievingService(
             new AnnotationModuleRetrievingService(
                 $annotationFinder,

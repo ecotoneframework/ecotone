@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 
 /**
  * Class NoExternalConfigurationModule
@@ -16,7 +17,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotationModule;
  */
 abstract class NoExternalConfigurationModule implements AnnotationModule
 {
-    public function getModuleExtensions(array $serviceExtensions): array
+    public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
     {
         return [];
     }

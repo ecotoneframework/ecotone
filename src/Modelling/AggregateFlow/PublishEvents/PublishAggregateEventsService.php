@@ -29,8 +29,8 @@ final class PublishAggregateEventsService implements MessageProcessor
         $resultAggregateEvents = $message->getHeaders()->containsKey(AggregateMessage::RESULT_AGGREGATE_EVENTS) ? $message->getHeaders()->get(AggregateMessage::RESULT_AGGREGATE_EVENTS) : [];
         $calledAggregateEvents = $message->getHeaders()->containsKey(AggregateMessage::CALLED_AGGREGATE_EVENTS) ? $message->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_EVENTS) : [];
 
-        $this->publishEvents(SaveAggregateServiceTemplate::buildEcotoneEvents($resultAggregateEvents, $this->calledInterface, $message));
         $this->publishEvents(SaveAggregateServiceTemplate::buildEcotoneEvents($calledAggregateEvents, $this->calledInterface, $message));
+        $this->publishEvents(SaveAggregateServiceTemplate::buildEcotoneEvents($resultAggregateEvents, $this->calledInterface, $message));
 
         $isExecutionResultNull = $message->getHeaders()->containsKey(AggregateMessage::NULL_EXECUTION_RESULT) ? $message->getHeaders()->get(AggregateMessage::NULL_EXECUTION_RESULT) : false;
         if ($isExecutionResultNull) {

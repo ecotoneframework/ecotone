@@ -176,16 +176,11 @@ final class EcotoneLite
 
     private static function getFileNameBasedOnConfig(
         string $pathToRootCatalog,
-        bool $useCachedVersion,
         FileSystemAnnotationFinder $annotationFinder,
         ServiceConfiguration $serviceConfiguration,
         array $configurationVariables,
         bool $enableTesting
     ): string {
-        if ($useCachedVersion) {
-            return 'messaging';
-        }
-
         // this is temporary cache based on if files have changed
         // get file contents based on class names, configuration and configuration variables
         $fileSha = '';
@@ -236,16 +231,8 @@ final class EcotoneLite
         }
 
         $externalContainer = $containerOrAvailableServices instanceof ContainerInterface ? $containerOrAvailableServices : InMemoryPSRContainer::createFromAssociativeArray($containerOrAvailableServices);
-
-        $serviceCacheConfiguration = new ServiceCacheConfiguration(
-            $serviceConfiguration->getCacheDirectoryPath(),
-            self::shouldUseAutomaticCache($useCachedVersion, $pathToRootCatalog),
-        );
-        $configurationVariableService = InMemoryConfigurationVariableService::create($configurationVariables);
-        $definitionHolder = null;
-        $messagingSystemCachePath = null;
-
         $serviceConfiguration = MessagingSystemConfiguration::addCorePackage($serviceConfiguration, $enableTesting);
+
         $annotationFinder = AnnotationFinderFactory::createForAttributes(
             realpath($pathToRootCatalog),
             $serviceConfiguration->getNamespaces(),
@@ -255,13 +242,19 @@ final class EcotoneLite
             $classesToResolve,
             $enableTesting
         );
-        if ($serviceCacheConfiguration->shouldUseCache()) {
-            $messagingSystemCachePath = $serviceCacheConfiguration->getPath() . DIRECTORY_SEPARATOR . self::getFileNameBasedOnConfig($pathToRootCatalog, $useCachedVersion, $annotationFinder, $serviceConfiguration, $configurationVariables, $enableTesting);
+        $cacheHash = self::getFileNameBasedOnConfig($pathToRootCatalog, $annotationFinder, $serviceConfiguration, $configurationVariables, $enableTesting);
+        $serviceCacheConfiguration = new ServiceCacheConfiguration(
+            $serviceConfiguration->getCacheDirectoryPath() . DIRECTORY_SEPARATOR . $cacheHash,
+            self::shouldUseAutomaticCache($useCachedVersion, $pathToRootCatalog),
+        );
 
-            if (file_exists($messagingSystemCachePath)) {
-                /** It may fail on deserialization, then return `false` and we can build new one */
-                $definitionHolder = unserialize(file_get_contents($messagingSystemCachePath));
-            }
+        $configurationVariableService = InMemoryConfigurationVariableService::create($configurationVariables);
+        $definitionHolder = null;
+        $messagingSystemCachePath = $serviceCacheConfiguration->getPath() . DIRECTORY_SEPARATOR . 'messaging';
+
+        if ($serviceCacheConfiguration->shouldUseCache() && file_exists($messagingSystemCachePath)) {
+            /** It may fail on deserialization, then return `false` and we can build new one */
+            $definitionHolder = unserialize(file_get_contents($messagingSystemCachePath));
         }
 
         if (! $definitionHolder) {

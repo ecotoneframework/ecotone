@@ -75,6 +75,9 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
                 continue;
             }
 
+            $payload = ! is_object($payload) && $message->getHeaders()->containsKey(AggregateMessage::CALLED_AGGREGATE_INSTANCE)
+                ? $message->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_INSTANCE)
+                : $payload;
             $aggregateIdentifiers[$aggregateIdentifierName] =
                 $this->propertyReaderAccessor->hasPropertyValue(PropertyPath::createWith($aggregateIdentifierMappingName), $payload)
                     ? $this->propertyReaderAccessor->getPropertyValue(PropertyPath::createWith($aggregateIdentifierMappingName), $payload)

@@ -7,8 +7,13 @@ use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Messaging\Attribute\EndpointAnnotation;
+use Ecotone\Messaging\Attribute\InputOutputEndpointAnnotation;
 use Ecotone\Messaging\Attribute\MessageGateway;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Messaging\Attribute\Parameter\ConfigurationVariable;
+use Ecotone\Messaging\Attribute\Parameter\Header;
+use Ecotone\Messaging\Attribute\Parameter\Headers;
 use Ecotone\Messaging\Attribute\PropagateHeaders;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
@@ -26,6 +31,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\Assert;
@@ -33,6 +39,7 @@ use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\Distributed;
 use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\IgnorePayload;
 use Ecotone\Modelling\Attribute\NotUniqueHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\CommandBus;
@@ -40,12 +47,13 @@ use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Ecotone\Modelling\QueryBus;
 use ReflectionMethod;
+use ReflectionParameter;
 
 #[ModuleAnnotation]
 /**
  * licence Apache-2.0
  */
-class BusRoutingModule implements AnnotationModule
+class MessageHandlerRoutingModule implements AnnotationModule
 {
     private BusRouterBuilder $commandBusByObject;
     private BusRouterBuilder $queryBusByObject;
@@ -85,16 +93,16 @@ class BusRoutingModule implements AnnotationModule
     {
         $objectCommandHandlers = [];
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, CommandHandler::class) as $registration) {
-            if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+            if (self::hasMessageNameDefined($registration)) {
                 continue;
             }
             if ($hasToBeDistributed && (! $registration->hasMethodAnnotation(Distributed::class) && ! $registration->hasClassAnnotation(Distributed::class))) {
                 continue;
             }
 
-            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration, $interfaceToCallRegistry);
+            $classChannel = MessageHandlerRoutingModule::getFirstParameterClassIfAny($registration, $interfaceToCallRegistry);
             if ($classChannel) {
-                $objectCommandHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
+                $objectCommandHandlers[$classChannel][] = self::getRoutingInputMessageChannelFor($registration, $interfaceToCallRegistry);
                 $objectCommandHandlers[$classChannel]   = array_unique($objectCommandHandlers[$classChannel]);
                 $uniqueChannels[$classChannel][]        = $registration;
             }
@@ -103,16 +111,16 @@ class BusRoutingModule implements AnnotationModule
             if ($registration->hasClassAnnotation(Aggregate::class)) {
                 continue;
             }
-            if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+            if (self::hasMessageNameDefined($registration)) {
                 continue;
             }
             if ($hasToBeDistributed && (! $registration->hasMethodAnnotation(Distributed::class) && ! $registration->hasClassAnnotation(Distributed::class))) {
                 continue;
             }
 
-            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration, $interfaceToCallRegistry);
+            $classChannel = MessageHandlerRoutingModule::getFirstParameterClassIfAny($registration, $interfaceToCallRegistry);
             if ($classChannel) {
-                $objectCommandHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
+                $objectCommandHandlers[$classChannel][] = self::getRoutingInputMessageChannelFor($registration, $interfaceToCallRegistry);
                 $objectCommandHandlers[$classChannel]   = array_unique($objectCommandHandlers[$classChannel]);
                 $uniqueChannels[$classChannel][]        = $registration;
             }
@@ -131,7 +139,7 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
+            $namedChannel = self::getRoutingInputMessageChannelFor($registration, $interfaceToCallRegistry);
             if ($namedChannel) {
                 $namedCommandHandlers[$namedChannel][] = $namedChannel;
                 $namedCommandHandlers[$namedChannel]   = array_unique($namedCommandHandlers[$namedChannel]);
@@ -154,7 +162,7 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $namedChannel = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
+            $namedChannel = self::getRoutingInputMessageChannelFor($registration, $interfaceToCallRegistry);
             if ($namedChannel) {
                 $namedCommandHandlers[$namedChannel][] = $namedChannel;
                 $namedCommandHandlers[$namedChannel]   = array_unique($namedCommandHandlers[$namedChannel]);
@@ -171,13 +179,13 @@ class BusRoutingModule implements AnnotationModule
     {
         $objectQueryHandlers = [];
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, QueryHandler::class) as $registration) {
-            if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+            if (self::hasMessageNameDefined($registration)) {
                 continue;
             }
 
-            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration, $interfaceToCallRegistry);
+            $classChannel = MessageHandlerRoutingModule::getFirstParameterClassIfAny($registration, $interfaceToCallRegistry);
             if ($classChannel) {
-                $objectQueryHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
+                $objectQueryHandlers[$classChannel][] = self::getRoutingInputMessageChannelFor($registration, $interfaceToCallRegistry);
                 $objectQueryHandlers[$classChannel]   = array_unique($objectQueryHandlers[$classChannel]);
                 $uniqueChannels[$classChannel][]      = $registration;
             }
@@ -186,13 +194,13 @@ class BusRoutingModule implements AnnotationModule
             if ($registration->hasClassAnnotation(Aggregate::class)) {
                 continue;
             }
-            if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+            if (self::hasMessageNameDefined($registration)) {
                 continue;
             }
 
-            $classChannel = ModellingHandlerModule::getPayloadClassIfAny($registration, $interfaceToCallRegistry);
+            $classChannel = MessageHandlerRoutingModule::getFirstParameterClassIfAny($registration, $interfaceToCallRegistry);
             if ($classChannel) {
-                $objectQueryHandlers[$classChannel][] = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
+                $objectQueryHandlers[$classChannel][] = self::getRoutingInputMessageChannelFor($registration, $interfaceToCallRegistry);
                 $objectQueryHandlers[$classChannel]   = array_unique($objectQueryHandlers[$classChannel]);
                 $uniqueChannels[$classChannel][]      = $registration;
             }
@@ -203,11 +211,61 @@ class BusRoutingModule implements AnnotationModule
         return $objectQueryHandlers;
     }
 
+    public static function getFirstParameterClassIfAny(AnnotatedFinding $registration, InterfaceToCallRegistry $interfaceToCallRegistry): ?string
+    {
+        $type = TypeDescriptor::create(self::getFirstParameterTypeFor($registration, $interfaceToCallRegistry));
+
+        if ($type->isClassOrInterface() && ! $type->isClassOfType(TypeDescriptor::create(Message::class))) {
+            return $type->toString();
+        }
+
+        return null;
+    }
+
+    public static function getFirstParameterEventPayloadClasses(AnnotatedFinding $registration, InterfaceToCallRegistry $interfaceToCallRegistry): array
+    {
+        $type = TypeDescriptor::create(self::getFirstParameterTypeFor($registration, $interfaceToCallRegistry));
+        if ($type->isClassOrInterface() && ! $type->isClassOfType(TypeDescriptor::create(Message::class))) {
+            if ($type->isUnionType()) {
+                return array_map(fn (TypeDescriptor $type) => $type->toString(), $type->getUnionTypes());
+            }
+
+            return [$type->toString()];
+        }
+
+        return [];
+    }
+
+    public static function getFirstParameterTypeFor(AnnotatedFinding $registration, InterfaceToCallRegistry $interfaceToCallRegistry): string
+    {
+        $interfaceToCall = $interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName());
+
+        if ($interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(IgnorePayload::class)) || $interfaceToCall->hasNoParameters()) {
+            return TypeDescriptor::ARRAY;
+        }
+
+        $firstParameterType = $interfaceToCall->getFirstParameter()->getTypeDescriptor();
+
+        if ($firstParameterType->isClassOrInterface() && ! $firstParameterType->isClassOfType(TypeDescriptor::create(Message::class))) {
+            $reflectionParameter = new ReflectionParameter([$registration->getClassName(), $registration->getMethodName()], 0);
+
+            foreach ($reflectionParameter->getAttributes() as $attribute) {
+                if (in_array($attribute->getName(), [ConfigurationVariable::class, Header::class, Headers::class, \Ecotone\Messaging\Attribute\Parameter\Reference::class])) {
+                    return TypeDescriptor::ARRAY;
+                }
+            }
+
+            return $firstParameterType;
+        }
+
+        return TypeDescriptor::ARRAY;
+    }
+
     public static function getQueryBusByNamesMapping(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry, array &$uniqueChannels = []): array
     {
         $namedQueryHandlers = [];
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, QueryHandler::class) as $registration) {
-            $namedChannel                        = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
+            $namedChannel                        = self::getRoutingInputMessageChannelFor($registration, $interfaceToCallRegistry);
             $namedQueryHandlers[$namedChannel][] = $namedChannel;
             $namedQueryHandlers[$namedChannel]   = array_unique($namedQueryHandlers[$namedChannel]);
             $uniqueChannels[$namedChannel][]     = $registration;
@@ -217,7 +275,7 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $namedChannel                        = ModellingHandlerModule::getNamedMessageChannelFor($registration, $interfaceToCallRegistry);
+            $namedChannel                        = self::getRoutingInputMessageChannelFor($registration, $interfaceToCallRegistry);
             $namedQueryHandlers[$namedChannel][] = $namedChannel;
             $namedQueryHandlers[$namedChannel]   = array_unique($namedQueryHandlers[$namedChannel]);
             $uniqueChannels[$namedChannel][]     = $registration;
@@ -232,15 +290,15 @@ class BusRoutingModule implements AnnotationModule
     {
         $objectEventHandlers = [];
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, EventHandler::class) as $registration) {
-            if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+            if (self::hasMessageNameDefined($registration)) {
                 continue;
             }
             if ($hasToBeDistributed && (! $registration->hasMethodAnnotation(Distributed::class) || ! $registration->hasClassAnnotation(Distributed::class))) {
                 continue;
             }
 
-            $unionEventClasses           = ModellingHandlerModule::getEventPayloadClasses($registration, $interfaceToCallRegistry);
-            $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
+            $unionEventClasses           = self::getFirstParameterEventPayloadClasses($registration, $interfaceToCallRegistry);
+            $namedMessageChannelFor = self::getRoutingInputMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
 
             foreach ($unionEventClasses as $classChannel) {
                 $objectEventHandlers[$classChannel][] = $namedMessageChannelFor;
@@ -259,7 +317,7 @@ class BusRoutingModule implements AnnotationModule
             if ($registration->hasClassAnnotation(Aggregate::class)) {
                 continue;
             }
-            if (ModellingHandlerModule::hasMessageNameDefined($registration)) {
+            if (self::hasMessageNameDefined($registration)) {
                 continue;
             }
 
@@ -267,8 +325,8 @@ class BusRoutingModule implements AnnotationModule
                 continue;
             }
 
-            $unionEventClasses           = ModellingHandlerModule::getEventPayloadClasses($registration, $interfaceToCallRegistry);
-            $namedMessageChannelFor = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
+            $unionEventClasses           = self::getFirstParameterEventPayloadClasses($registration, $interfaceToCallRegistry);
+            $namedMessageChannelFor = self::getRoutingInputMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
             foreach ($unionEventClasses as $classChannel) {
                 if (! EventBusRouter::isRegexBasedRoute($namedMessageChannelFor)) {
                     $objectEventHandlers[$classChannel][] = $namedMessageChannelFor;
@@ -294,13 +352,13 @@ class BusRoutingModule implements AnnotationModule
             }
 
             if ($annotation->getListenTo()) {
-                $chanelName = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
+                $chanelName = self::getRoutingInputMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
                 $namedEventHandlers[$chanelName][] = $chanelName;
                 $namedEventHandlers[$chanelName]   = array_unique($namedEventHandlers[$chanelName]);
             }
         }
         foreach ($annotationRegistrationService->findCombined(Aggregate::class, EventHandler::class) as $registration) {
-            $channelName = ModellingHandlerModule::getNamedMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
+            $channelName = self::getRoutingInputMessageChannelForEventHandler($registration, $interfaceToCallRegistry);
             if (EventBusRouter::isRegexBasedRoute($channelName)) {
                 throw ConfigurationException::create("Can not registered regex listen to channel for aggregates in {$registration}");
             }
@@ -366,6 +424,78 @@ class BusRoutingModule implements AnnotationModule
 
             throw ConfigurationException::create("Channel name `{$uniqueChannelName}` should be unique, but is used in multiple handlers:{$combinedRegistrationNames}");
         }
+    }
+
+    /**
+     * This allows to decouple input channel for routing from specific channel that executes the Handler.
+     * This way each handler can be treated separately (e.g. for async processing)
+     */
+    public static function getExecutionMessageHandlerChannel(AnnotatedFinding $registration): string
+    {
+        /** @var EndpointAnnotation $annotationForMethod */
+        $annotationForMethod = $registration->getAnnotationForMethod();
+
+        return $annotationForMethod->getEndpointId() . '.target';
+    }
+
+    public static function getRoutingInputMessageChannelForEventHandler(AnnotatedFinding $registration, InterfaceToCallRegistry $interfaceToCallRegistry): string
+    {
+        /** @var InputOutputEndpointAnnotation $annotationForMethod */
+        $annotationForMethod = $registration->getAnnotationForMethod();
+
+        $inputChannelName = null;
+        if ($annotationForMethod instanceof EventHandler) {
+            $inputChannelName = $annotationForMethod->getListenTo();
+        }
+
+        if (! $inputChannelName) {
+            $interfaceToCall = $interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName());
+            if ($interfaceToCall->hasNoParameters()) {
+                throw ConfigurationException::create("Missing command class or listen routing for {$registration}.");
+            }
+            $inputChannelName = $interfaceToCall->getFirstParameterTypeHint();
+        }
+
+        return $inputChannelName;
+    }
+
+    public static function getRoutingInputMessageChannelFor(AnnotatedFinding $registration, InterfaceToCallRegistry $interfaceToCallRegistry): string
+    {
+        /** @var InputOutputEndpointAnnotation $annotationForMethod */
+        $annotationForMethod = $registration->getAnnotationForMethod();
+
+        if ($annotationForMethod instanceof EventHandler) {
+            $inputChannelName = $annotationForMethod->getListenTo();
+        } else {
+            $inputChannelName = $annotationForMethod->getInputChannelName();
+        }
+
+        if (! $inputChannelName) {
+            $interfaceToCall = $interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName());
+            if ($interfaceToCall->hasNoParameters()) {
+                throw ConfigurationException::create("Missing class type hint or routing key for {$registration}.");
+            }
+            if ($interfaceToCall->getFirstParameter()->getTypeDescriptor()->isUnionType()) {
+                throw ConfigurationException::create("Query and Command handlers can not be registered with union Command type in {$registration}");
+            }
+            $inputChannelName = $interfaceToCall->getFirstParameterTypeHint();
+        }
+
+        return $inputChannelName;
+    }
+
+    public static function hasMessageNameDefined(AnnotatedFinding $registration): bool
+    {
+        /** @var InputOutputEndpointAnnotation $annotationForMethod */
+        $annotationForMethod = $registration->getAnnotationForMethod();
+
+        if ($annotationForMethod instanceof EventHandler) {
+            $inputChannelName = $annotationForMethod->getListenTo();
+        } else {
+            $inputChannelName = $annotationForMethod->getInputChannelName();
+        }
+
+        return $inputChannelName ? true : false;
     }
 
     /**

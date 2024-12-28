@@ -57,6 +57,9 @@ interface ConfiguredMessagingSystem
 
     /**
      * @throws InvalidArgumentException if trying to find not existing service reference
+     * @template T
+     * @param class-string<T> $referenceName
+     * @return T
      */
     public function getServiceFromContainer(string $referenceName): object;
 

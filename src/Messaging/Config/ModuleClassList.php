@@ -46,10 +46,11 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\TransformerModule;
 use Ecotone\Messaging\Handler\Logger\Config\LoggingModule;
 use Ecotone\Messaging\Handler\Logger\Config\MessageHandlerLogger;
 use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\Config\BusRoutingModule;
+use Ecotone\Modelling\Config\AggregrateHandlerModule;
 use Ecotone\Modelling\Config\DistributedGatewayModule;
 use Ecotone\Modelling\Config\InstantRetry\InstantRetryModule;
-use Ecotone\Modelling\Config\ModellingHandlerModule;
+use Ecotone\Modelling\Config\MessageHandlerRoutingModule;
+use Ecotone\Modelling\Config\ServiceHandlerModule;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Ecotone\Modelling\QueryBus;
@@ -67,8 +68,9 @@ class ModuleClassList
 {
     public const CORE_MODULES = [
         DistributedGatewayModule::class,
-        ModellingHandlerModule::class,
-        BusRoutingModule::class,
+        AggregrateHandlerModule::class,
+        ServiceHandlerModule::class,
+        MessageHandlerRoutingModule::class,
         MethodInterceptorModule::class,
         MessagingCommandsModule::class,
         EndpointHeadersInterceptorModule::class,

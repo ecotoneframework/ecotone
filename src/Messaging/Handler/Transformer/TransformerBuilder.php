@@ -133,24 +133,7 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
 
     public function compile(MessagingContainerBuilder $builder): Definition
     {
-        if ($this->expression) {
-            $objectToInvokeOn = new Definition(ExpressionTransformer::class, [$this->expression, new Reference(ExpressionEvaluationService::REFERENCE), new Reference(ReferenceSearchService::class)]);
-            $interfaceToCallReference = new InterfaceToCallReference(ExpressionTransformer::class, 'transform');
-        } else {
-            $objectToInvokeOn = $this->directObject ?: new Reference($this->objectToInvokeReferenceName);
-            if ($this->methodNameOrInterface instanceof InterfaceToCall) {
-                $interfaceToCallReference = InterfaceToCallReference::fromInstance($this->methodNameOrInterface);
-            } else {
-                $className = $this->directObject ? \get_class($objectToInvokeOn) : $this->objectToInvokeReferenceName;
-                $interfaceToCallReference = new InterfaceToCallReference($className, $this->getMethodName());
-            }
-        }
-
-        $interfaceToCall = $builder->getInterfaceToCall($interfaceToCallReference);
-
-        if (! $interfaceToCall->canReturnValue()) {
-            throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
-        }
+        [$objectToInvokeOn, $interfaceToCallReference, $interfaceToCall] = $this->prepare($builder);
 
         $newImplementation = MessageProcessorActivatorBuilder::create()
             ->withEndpointId($this->getEndpointId())
@@ -170,6 +153,17 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
             );
 
         return $newImplementation->compile($builder);
+    }
+
+    public function compileProcessor(MessagingContainerBuilder $builder): Definition
+    {
+        [$objectToInvokeOn, $interfaceToCallReference, $interfaceToCall] = $this->prepare($builder);
+
+        return MethodInvokerBuilder::create(
+            $objectToInvokeOn,
+            $interfaceToCallReference,
+            $this->methodParameterConverterBuilders
+        )->compile($builder);
     }
 
     private function setDirectObjectToInvoke(DefinedObject $objectToInvoke): void
@@ -201,5 +195,29 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
         return $this->methodNameOrInterface instanceof InterfaceToCall
             ? $this->methodNameOrInterface->getMethodName()
             : $this->methodNameOrInterface;
+    }
+
+    public function prepare(MessagingContainerBuilder $builder): array
+    {
+        if ($this->expression) {
+            $objectToInvokeOn = new Definition(ExpressionTransformer::class, [$this->expression, new Reference(ExpressionEvaluationService::REFERENCE), new Reference(ReferenceSearchService::class)]);
+            $interfaceToCallReference = new InterfaceToCallReference(ExpressionTransformer::class, 'transform');
+        } else {
+            $objectToInvokeOn = $this->directObject ?: new Reference($this->objectToInvokeReferenceName);
+            if ($this->methodNameOrInterface instanceof InterfaceToCall) {
+                $interfaceToCallReference = InterfaceToCallReference::fromInstance($this->methodNameOrInterface);
+            } else {
+                $className = $this->directObject ? \get_class($objectToInvokeOn) : $this->objectToInvokeReferenceName;
+                $interfaceToCallReference = new InterfaceToCallReference($className, $this->getMethodName());
+            }
+        }
+
+        $interfaceToCall = $builder->getInterfaceToCall($interfaceToCallReference);
+
+        if (! $interfaceToCall->canReturnValue()) {
+            throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
+        }
+
+        return [$objectToInvokeOn, $interfaceToCallReference, $interfaceToCall];
     }
 }

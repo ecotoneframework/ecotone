@@ -3,6 +3,7 @@
 namespace Test\Ecotone\Modelling\Fixture\QueryHandlerAggregate;
 
 use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\Attribute\QueryHandler;
 
@@ -20,6 +21,7 @@ class Storage
     {
     }
 
+    #[CommandHandler]
     public static function create(CreateStorage $command): self
     {
         return new self(
@@ -39,15 +41,16 @@ class Storage
     }
 
     /**
-     * @return Box[]
+     * @return Box[]|BigBox[]
      */
+    #[QueryHandler('storage.getBoxes')]
     public function getBoxes(): array
     {
         return array_merge($this->smallBoxes, $this->bigBoxes);
     }
 
     /**
-     * @return Box[]|BigBox[]
+     * @return Box[]
      */
     public function getBigBoxes(): array
     {

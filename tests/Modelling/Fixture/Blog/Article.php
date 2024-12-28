@@ -66,6 +66,12 @@ class Article
     {
     }
 
+    #[CommandHandler(routingKey: 'close')]
+    public function closeArticle(): void
+    {
+        $this->isPublished = false;
+    }
+
     /**
      * @return string
      */
@@ -88,5 +94,10 @@ class Article
     public function getContent(): string
     {
         return $this->content;
+    }
+
+    public function isPublished(): bool
+    {
+        return $this->isPublished;
     }
 }

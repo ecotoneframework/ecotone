@@ -2,35 +2,29 @@
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Messaging\Handler\ClassDefinition;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Modelling\AggregateFlow\LoadAggregate\LoadAggregateMode;
-use Ecotone\Modelling\AggregateFlow\LoadAggregate\LoadAggregateServiceBuilder;
-use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\AggregateNotFoundException;
-use Ecotone\Modelling\InMemoryEventSourcedRepository;
-use Ecotone\Modelling\SnapshotEvent;
-use Ecotone\Test\ComponentTestBuilder;
 use Test\Ecotone\Messaging\BaseEcotoneTestCase;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateWithoutMessageClassesExample;
+use Test\Ecotone\Modelling\Fixture\Blog\Article;
+use Test\Ecotone\Modelling\Fixture\Blog\PublishArticleCommand;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\EventSourcingHandlerMethodWithReturnType;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\EventSourcingHandlerMethodWithWrongParameterCountExample;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoFactoryMethodAggregateExample;
+use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory\CreateNoIdDefinedAggregate;
+use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifierGetMethodForEventSourcedAggregate;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\StaticEventSourcingHandlerMethodExample;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\WithConstructorHavingParameters;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\WithPrivateConstructor;
+use Test\Ecotone\Modelling\Fixture\NoIdentifierAggregate\Product;
 use Test\Ecotone\Modelling\Fixture\Renter\Appointment;
-use Test\Ecotone\Modelling\Fixture\Renter\AppointmentRepositoryBuilder;
+use Test\Ecotone\Modelling\Fixture\Renter\AppointmentRepositoryInterface;
 use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
-use Test\Ecotone\Modelling\Fixture\Ticket\AssignWorkerCommand;
-use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
-use Test\Ecotone\Modelling\Fixture\Ticket\TicketWasStartedEvent;
-use Test\Ecotone\Modelling\Fixture\Ticket\WorkerWasAssignedEvent;
+use Test\Ecotone\Modelling\Fixture\Saga\OrderFulfilment;
+use Test\Ecotone\Modelling\Fixture\Saga\PaymentWasDoneEvent;
 
 /**
  * @internal
@@ -41,283 +35,171 @@ use Test\Ecotone\Modelling\Fixture\Ticket\WorkerWasAssignedEvent;
  */
 final class LoadAggregateServiceBuilderTest extends BaseEcotoneTestCase
 {
-    public function test_enriching_command_with_aggregate_if_found()
+    public function test_calling_aggregate_via_query_handler()
+    {
+        $this->assertEquals(
+            $duration = 1000,
+            EcotoneLite::bootstrapFlowTesting(classesToResolve: [Appointment::class])
+                ->sendCommand(new CreateAppointmentCommand(123, $duration))
+                ->sendQueryWithRouting('getDuration', metadata: ['aggregate.id' => 123])
+        );
+    }
+
+    public function test_loading_aggregate_by_metadata()
+    {
+        $this->assertEquals(
+            'done',
+            EcotoneLite::bootstrapFlowTesting(classesToResolve: [OrderFulfilment::class])
+                ->sendCommandWithRoutingKey('order.start', $oderId = 100)
+                ->publishEvent(PaymentWasDoneEvent::create(), metadata: ['paymentId' => $oderId])
+                ->sendQueryWithRouting('order.status', metadata: ['aggregate.id' => $oderId])
+        );
+    }
+
+    public function test_loading_aggregate_by_metadata_with_public_method_identifier()
+    {
+        $this->assertEquals(
+            100,
+            EcotoneLite::bootstrapFlowTesting(classesToResolve: [PublicIdentifierGetMethodForEventSourcedAggregate::class])
+                ->sendCommand(new CreateNoIdDefinedAggregate(100))
+                ->getAggregate(PublicIdentifierGetMethodForEventSourcedAggregate::class, 100)
+                ->getId()
+        );
+    }
+
+    public function test_providing_override_aggregate_identifier_as_array()
+    {
+        $this->assertFalse(
+            EcotoneLite::bootstrapFlowTesting(classesToResolve: [Article::class])
+                ->sendCommand(PublishArticleCommand::createWith(1000, 'Some', 'bla bla'))
+                ->sendCommandWithRoutingKey('close', metadata: ['aggregate.id' => ['author' => 1000, 'title' => 'Some']])
+                ->getAggregate(Article::class, ['author' => 1000, 'title' => 'Some'])
+                ->isPublished()
+        );
+    }
+
+    public function test_throwing_exception_if_aggregate_has_no_identifiers_defined()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        EcotoneLite::bootstrapFlowTesting(classesToResolve: [Product::class]);
+    }
+
+    public function test_fetch_aggregate_via_business_repository()
     {
         $appointment = Appointment::create(new CreateAppointmentCommand(123, 1000));
-        $messaging = ComponentTestBuilder::create()
-            ->withReference('repository', AppointmentRepositoryBuilder::createWith([
-                $appointment,
-            ]))
-            ->withMessageHandler(
-                MessageProcessorActivatorBuilder::create()
-                    ->chain(
-                        LoadAggregateServiceBuilder::create(
-                            ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
-                            'getAppointmentId',
-                            null,
-                            LoadAggregateMode::createThrowOnNotFound(),
-                            InterfaceToCallRegistry::createEmpty()
-                        )
-                            ->withAggregateRepositoryFactories(['repository'])
-                    )
-                    ->withInputChannelName($inputChannel = 'inputChannel')
-            )
-            ->build();
-
-        $replyMessage = $messaging->sendDirectToChannelWithMessageReply(
-            $inputChannel,
-            MessageBuilder::withPayload([])
-                ->setHeader(AggregateMessage::AGGREGATE_ID, ['appointmentId' => 123])
-                ->build()
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [Appointment::class, AppointmentStandardRepository::class, AppointmentRepositoryInterface::class],
+            [
+                AppointmentStandardRepository::class => AppointmentStandardRepository::createWith([$appointment]),
+            ]
         );
 
+        /** @var AppointmentRepositoryInterface $repository */
+        $repository = $ecotoneLite->getServiceFromContainer(AppointmentRepositoryInterface::class);
         $this->assertEquals(
-            $appointment,
-            $replyMessage->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT)
+            1000,
+            $repository->get(123)->getDuration()
         );
     }
 
-    public function test_setting_correct_aggregate_version_when_loading_via_event_sourcing_repository()
+    public function test_fetch_aggregate_via_business_repository_with_nulls()
     {
-        $ticketWasStartedEvent = new TicketWasStartedEvent(1);
-        $messaging = ComponentTestBuilder::create()
-            ->withReference('repository', InMemoryEventSourcedRepository::createWithExistingAggregate(['ticketId' => 1], Ticket::class, [$ticketWasStartedEvent]))
-            ->withMessageHandler(
-                MessageProcessorActivatorBuilder::create()
-                    ->chain(
-                        LoadAggregateServiceBuilder::create(
-                            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-                            'assignWorker',
-                            ClassDefinition::createFor(TypeDescriptor::create(AssignWorkerCommand::class)),
-                            LoadAggregateMode::createThrowOnNotFound(),
-                            InterfaceToCallRegistry::createEmpty()
-                        )
-                            ->withAggregateRepositoryFactories(['repository'])
-                    )
-                    ->withInputChannelName($inputChannel = 'inputChannel')
-            )
-            ->build();
-
-        $replyMessage = $messaging->sendDirectToChannelWithMessageReply(
-            $inputChannel,
-            MessageBuilder::withPayload(new AssignWorkerCommand(1, 2))
-                ->setHeader(AggregateMessage::AGGREGATE_ID, ['ticketId' => 1])
-                ->build()
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [Appointment::class, AppointmentStandardRepository::class, AppointmentRepositoryInterface::class],
+            [
+                AppointmentStandardRepository::class => AppointmentStandardRepository::createEmpty(),
+            ]
         );
 
-        $ticket = new Ticket();
-        $ticket->onTicketWasStarted($ticketWasStartedEvent);
-        $ticket->setVersion(1);
-
-        /** @var Ticket $reconstructedTicket */
-        $reconstructedTicket = $replyMessage->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT);
-        $this->assertEquals(
-            $ticket,
-            $reconstructedTicket
-        );
+        /** @var AppointmentRepositoryInterface $repository */
+        $repository = $ecotoneLite->getServiceFromContainer(AppointmentRepositoryInterface::class);
+        $this->assertNull($repository->find(123));
     }
 
-    /**
-     * @dataProvider enterpriseMode
-     */
-    public function test_setting_correct_aggregate_when_snapshot_is_used(bool $isEnterpriseMode)
+    public function test_fetch_nulls_on_non_null_business_repository()
     {
-        $ticket = new Ticket();
-        $ticket->onTicketWasStarted(new TicketWasStartedEvent(1));
-        $extraEvent = new WorkerWasAssignedEvent(1, 100);
-
-        $messaging = ComponentTestBuilder::create(defaultEnterpriseMode: $isEnterpriseMode)
-            ->withReference('repository', InMemoryEventSourcedRepository::createWithExistingAggregate(['ticketId' => 1], Ticket::class, [new SnapshotEvent(clone $ticket), $extraEvent]))
-            ->withMessageHandler(
-                MessageProcessorActivatorBuilder::create()
-                    ->chain(
-                        LoadAggregateServiceBuilder::create(
-                            ClassDefinition::createFor(TypeDescriptor::create(Ticket::class)),
-                            'assignWorker',
-                            ClassDefinition::createFor(TypeDescriptor::create(AssignWorkerCommand::class)),
-                            LoadAggregateMode::createThrowOnNotFound(),
-                            InterfaceToCallRegistry::createEmpty()
-                        )
-                            ->withAggregateRepositoryFactories(['repository'])
-                    )
-                    ->withInputChannelName($inputChannel = 'inputChannel')
-            )
-            ->build();
-
-        $replyMessage = $messaging->sendDirectToChannelWithMessageReply(
-            $inputChannel,
-            MessageBuilder::withPayload(new AssignWorkerCommand(1, 2))
-                ->setHeader(AggregateMessage::AGGREGATE_ID, ['ticketId' => 1])
-                ->build()
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [Appointment::class, AppointmentStandardRepository::class, AppointmentRepositoryInterface::class],
+            [
+                AppointmentStandardRepository::class => AppointmentStandardRepository::createEmpty(),
+            ]
         );
 
-        $ticket->onWorkerWasAssigned($extraEvent);
-        $ticket->setVersion(2);
+        /** @var AppointmentRepositoryInterface $repository */
+        $repository = $ecotoneLite->getServiceFromContainer(AppointmentRepositoryInterface::class);
 
-        /** @var Ticket $ticket */
-        $reconstructedTicket = $replyMessage->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT);
-        $this->assertEquals(
-            $ticket,
-            $reconstructedTicket
-        );
+        $this->expectException(AggregateNotFoundException::class);
+        $repository->get(123);
     }
 
-    public function test_enriching_command_with_aggregate_if_found_using_repository_builder()
+    public function test_storing_standard_aggregate_via_business_repository(): void
     {
-        $appointment = Appointment::create(new CreateAppointmentCommand(123, 1000));
-        $aggregateCommandHandler = ComponentTestBuilder::create()
-            ->withReference('repository', AppointmentRepositoryBuilder::createWith([
-                $appointment,
-            ]))
-            ->withMessageHandler(
-                MessageProcessorActivatorBuilder::create()
-                    ->chain(
-                        LoadAggregateServiceBuilder::create(
-                            ClassDefinition::createFor(TypeDescriptor::create(Appointment::class)),
-                            'getAppointmentId',
-                            null,
-                            LoadAggregateMode::createThrowOnNotFound(),
-                            InterfaceToCallRegistry::createEmpty()
-                        )
-                            ->withAggregateRepositoryFactories(['repository'])
-                    )
-                    ->withInputChannelName($inputChannel = 'inputChannel')
-            )
-            ->build();
-
-        $replyMessage = $aggregateCommandHandler->sendDirectToChannelWithMessageReply(
-            $inputChannel,
-            MessageBuilder::withPayload([])
-                ->setHeader(AggregateMessage::AGGREGATE_ID, ['appointmentId' => 123])
-                ->build()
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [Appointment::class, AppointmentStandardRepository::class, AppointmentRepositoryInterface::class],
+            [
+                AppointmentStandardRepository::class => AppointmentStandardRepository::createEmpty(),
+            ]
         );
 
+        /** @var AppointmentRepositoryInterface $repository */
+        $repository = $ecotoneLite->getServiceFromContainer(AppointmentRepositoryInterface::class);
+
+        $repository->save(Appointment::create(new CreateAppointmentCommand(123, 1000)));
+
         $this->assertEquals(
-            $appointment,
-            $replyMessage->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT)
+            1000,
+            $repository->get(123)->getDuration()
         );
     }
 
     public function test_throwing_exception_if_no_id_found_in_command()
     {
-        $messaging = ComponentTestBuilder::create()
-            ->withReference('repository', AppointmentStandardRepository::createEmpty())
-            ->withMessageHandler(
-                MessageProcessorActivatorBuilder::create()
-                    ->chain(
-                        LoadAggregateServiceBuilder::create(
-                            ClassDefinition::createFor(TypeDescriptor::create(AggregateWithoutMessageClassesExample::class)),
-                            'doSomething',
-                            null,
-                            LoadAggregateMode::createThrowOnNotFound(),
-                            InterfaceToCallRegistry::createEmpty()
-                        )
-                            ->withAggregateRepositoryFactories(['repository'])
-                    )
-                    ->withInputChannelName($inputChannel = 'inputChannel')
-            )
-            ->build();
-
         $this->expectException(AggregateNotFoundException::class);
 
-        $messaging->sendMessageDirectToChannel(
-            $inputChannel,
-            MessageBuilder::withPayload([])
-                ->setHeader(AggregateMessage::AGGREGATE_ID, [])
-                ->build()
-        );
+        EcotoneLite::bootstrapFlowTesting(classesToResolve: [AggregateWithoutMessageClassesExample::class])
+            ->sendCommandWithRoutingKey('doSomething');
     }
 
     public function test_throwing_exception_if_no_event_sourcing_handler_defined_for_event_sourced_aggregate()
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $aggregateCallingCommandHandler = LoadAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(NoFactoryMethodAggregateExample::class)),
-            'doSomething',
-            null,
-            LoadAggregateMode::createThrowOnNotFound(),
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withAggregateRepositoryFactories(['repository']);
-
-        ComponentTestBuilder::create()
-            ->withReference('repository', InMemoryEventSourcedRepository::createEmpty())
-            ->withMessageHandler(
-                MessageProcessorActivatorBuilder::create()
-                    ->chain($aggregateCallingCommandHandler)
-                    ->withInputChannelName('inputChannel')
-            )
-            ->build();
+        EcotoneLite::bootstrapFlowTesting(classesToResolve: [NoFactoryMethodAggregateExample::class]);
     }
 
     public function test_throwing_exception_if_factory_method_for_event_sourced_aggregate_has_no_parameters()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(ConfigurationException::class);
 
-        LoadAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(EventSourcingHandlerMethodWithWrongParameterCountExample::class)),
-            'doSomething',
-            null,
-            LoadAggregateMode::createThrowOnNotFound(),
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withAggregateRepositoryFactories(['repository']);
+        EcotoneLite::bootstrapFlowTesting(classesToResolve: [EventSourcingHandlerMethodWithWrongParameterCountExample::class]);
     }
 
     public function test_throwing_exception_if_construct_having_parameters()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(ConfigurationException::class);
 
-        LoadAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(WithConstructorHavingParameters::class)),
-            'doSomething',
-            null,
-            LoadAggregateMode::createThrowOnNotFound(),
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withAggregateRepositoryFactories(['repository']);
+        EcotoneLite::bootstrapFlowTesting(classesToResolve: [WithConstructorHavingParameters::class]);
     }
 
     public function test_throwing_exception_if_construct_is_private()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(ConfigurationException::class);
 
-        LoadAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(WithPrivateConstructor::class)),
-            'doSomething',
-            null,
-            LoadAggregateMode::createThrowOnNotFound(),
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withAggregateRepositoryFactories(['repository']);
+        EcotoneLite::bootstrapFlowTesting(classesToResolve: [WithPrivateConstructor::class]);
     }
 
     public function test_throwing_exception_if_event_sourcing_handler_is_non_void()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(ConfigurationException::class);
 
-        LoadAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(EventSourcingHandlerMethodWithReturnType::class)),
-            'doSomething',
-            null,
-            LoadAggregateMode::createThrowOnNotFound(),
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withAggregateRepositoryFactories(['repository']);
+        EcotoneLite::bootstrapFlowTesting(classesToResolve: [EventSourcingHandlerMethodWithReturnType::class]);
     }
 
     public function test_throwing_exception_if_event_sourcing_handler_is_static()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(ConfigurationException::class);
 
-        LoadAggregateServiceBuilder::create(
-            ClassDefinition::createFor(TypeDescriptor::create(StaticEventSourcingHandlerMethodExample::class)),
-            'doSomething',
-            null,
-            LoadAggregateMode::createThrowOnNotFound(),
-            InterfaceToCallRegistry::createEmpty()
-        )
-            ->withAggregateRepositoryFactories(['repository']);
+        EcotoneLite::bootstrapFlowTesting(classesToResolve: [StaticEventSourcingHandlerMethodExample::class]);
     }
 }

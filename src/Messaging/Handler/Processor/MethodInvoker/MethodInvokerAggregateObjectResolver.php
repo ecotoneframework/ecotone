@@ -13,6 +13,6 @@ class MethodInvokerAggregateObjectResolver implements MethodInvokerObjectResolve
 {
     public function resolveFor(Message $message): object
     {
-        return $message->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_OBJECT);
+        return $message->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_INSTANCE);
     }
 }

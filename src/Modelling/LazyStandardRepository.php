@@ -14,24 +14,24 @@ class LazyStandardRepository implements StandardRepository
         $this->repositoryStorage = $repositoryStorage;
     }
 
-    public static function create(string $aggregateClassName, bool $isEventSourcedAggregate, array $aggregateRepositories): self
+    public static function create(array $aggregateRepositories): self
     {
         /** @phpstan-ignore-next-line */
-        return new static(new RepositoryStorage($aggregateClassName, $isEventSourcedAggregate, $aggregateRepositories));
+        return new static(new RepositoryStorage($aggregateRepositories));
     }
 
     public function canHandle(string $aggregateClassName): bool
     {
-        return $this->repositoryStorage->getRepository()->canHandle($aggregateClassName);
+        return $this->repositoryStorage->getRepository($aggregateClassName, false)->canHandle($aggregateClassName);
     }
 
     public function findBy(string $aggregateClassName, array $identifiers): ?object
     {
-        return $this->repositoryStorage->getRepository()->findBy($aggregateClassName, $identifiers);
+        return $this->repositoryStorage->getRepository($aggregateClassName, false)->findBy($aggregateClassName, $identifiers);
     }
 
     public function save(array $identifiers, object $aggregate, array $metadata, ?int $versionBeforeHandling): void
     {
-        $this->repositoryStorage->getRepository()->save($identifiers, $aggregate, $metadata, $versionBeforeHandling);
+        $this->repositoryStorage->getRepository(get_class($aggregate), false)->save($identifiers, $aggregate, $metadata, $versionBeforeHandling);
     }
 }

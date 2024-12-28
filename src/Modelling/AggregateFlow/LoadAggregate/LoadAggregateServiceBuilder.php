@@ -103,8 +103,6 @@ class LoadAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
     private function loadEventSourcingAggregateService(): Definition
     {
         $repository = new Definition(LazyEventSourcedRepository::class, [
-            $this->aggregateClassName,
-            $this->isEventSourced,
             array_map(fn ($id) => new Reference($id), $this->aggregateRepositoryReferenceNames),
         ], 'create')
         ;
@@ -126,11 +124,8 @@ class LoadAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
     private function loadStateBasedAggregateService(): Definition
     {
         $repository = new Definition(LazyStandardRepository::class, [
-            $this->aggregateClassName,
-            $this->isEventSourced,
             array_map(fn ($id) => new Reference($id), $this->aggregateRepositoryReferenceNames),
-        ], 'create')
-        ;
+        ], 'create');
 
         return new Definition(LoadStateBasedAggregateService::class, [
             $repository,

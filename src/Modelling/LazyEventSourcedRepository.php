@@ -14,24 +14,24 @@ class LazyEventSourcedRepository implements EventSourcedRepository
         $this->repositoryStorage = $repositoryStorage;
     }
 
-    public static function create(string $aggregateClassName, bool $isEventSourcedAggregate, array $aggregateRepositories): self
+    public static function create(array $aggregateRepositories): self
     {
         /** @phpstan-ignore-next-line */
-        return new static(new RepositoryStorage($aggregateClassName, $isEventSourcedAggregate, $aggregateRepositories));
+        return new static(new RepositoryStorage($aggregateRepositories));
     }
 
     public function canHandle(string $aggregateClassName): bool
     {
-        return $this->repositoryStorage->getRepository()->canHandle($aggregateClassName);
+        return $this->repositoryStorage->getRepository($aggregateClassName, true)->canHandle($aggregateClassName);
     }
 
     public function findBy(string $aggregateClassName, array $identifiers): EventStream
     {
-        return $this->repositoryStorage->getRepository()->findBy($aggregateClassName, $identifiers);
+        return $this->repositoryStorage->getRepository($aggregateClassName, true)->findBy($aggregateClassName, $identifiers);
     }
 
     public function save(array $identifiers, string $aggregateClassName, array $events, array $metadata, int $versionBeforeHandling): void
     {
-        $this->repositoryStorage->getRepository()->save($identifiers, $aggregateClassName, $events, $metadata, $versionBeforeHandling);
+        $this->repositoryStorage->getRepository($aggregateClassName, true)->save($identifiers, $aggregateClassName, $events, $metadata, $versionBeforeHandling);
     }
 }

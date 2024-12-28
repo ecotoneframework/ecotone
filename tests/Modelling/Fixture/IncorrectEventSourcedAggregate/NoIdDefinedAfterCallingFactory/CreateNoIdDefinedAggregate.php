@@ -10,4 +10,8 @@ use Ecotone\Modelling\Attribute\EventSourcingAggregate;
  */
 class CreateNoIdDefinedAggregate
 {
+    public function __construct(public int $id)
+    {
+
+    }
 }

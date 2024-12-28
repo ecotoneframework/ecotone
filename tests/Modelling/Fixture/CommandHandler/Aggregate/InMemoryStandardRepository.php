@@ -23,7 +23,9 @@ class InMemoryStandardRepository implements StandardRepository
     private function __construct(array $aggregates)
     {
         foreach ($aggregates as $aggregate) {
-            $this->save([], $aggregate, [], null);
+            $this->save([
+                'id' => $aggregate->getId(),
+            ], $aggregate, [], null);
         }
     }
 

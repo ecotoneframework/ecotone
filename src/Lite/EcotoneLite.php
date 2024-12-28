@@ -21,14 +21,9 @@ use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\ConfigurationVariableService;
-use Ecotone\Messaging\Handler\ClassDefinition;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
-use Ecotone\Modelling\Config\RegisterAggregateRepositoryChannels;
 
 use function json_decode;
 
@@ -348,17 +343,6 @@ final class EcotoneLite
                 Assert::isTrue($channelBuilder instanceof MessageChannelBuilder, 'You can only provide MessageChannelBuilder as asynchronous processing channel, under `enableAsynchronousProcessing`');
                 $configuration = $configuration->addExtensionObject($channelBuilder);
             }
-        }
-
-        $aggregateAnnotation = TypeDescriptor::create(Aggregate::class);
-        foreach ($classesToResolve as $class) {
-            Assert::isTrue(is_string($class), 'Classes to resolve must be strings, instead given: ' . TypeDescriptor::createFromVariable($class)->toString());
-            $aggregateClass = ClassDefinition::createFor(TypeDescriptor::create($class));
-            if (! $aggregateClass->hasClassAnnotation($aggregateAnnotation)) {
-                continue;
-            }
-
-            $configuration = $configuration->addExtensionObject(new RegisterAggregateRepositoryChannels($aggregateClass->getClassType()->toString(), $aggregateClass->getSingleClassAnnotation($aggregateAnnotation) instanceof EventSourcingAggregate));
         }
 
         $configuration = $configuration

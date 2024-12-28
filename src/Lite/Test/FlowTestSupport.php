@@ -11,6 +11,7 @@ use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
@@ -19,10 +20,11 @@ use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Scheduling\TimeSpan;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\Config\AggregrateHandlerModule;
 use Ecotone\Modelling\Config\MessageBusChannel;
-use Ecotone\Modelling\Config\ModellingHandlerModule;
 use Ecotone\Modelling\Event;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
@@ -39,6 +41,7 @@ final class FlowTestSupport
         private CommandBus $commandBus,
         private EventBus $eventBus,
         private QueryBus $queryBus,
+        private AggregateDefinitionRegistry $aggregateDefinitionRegistry,
         private MessagingTestSupport $testSupportGateway,
         private MessagingEntrypoint $messagingEntrypoint,
         private ConfiguredMessagingSystem $configuredMessagingSystem
@@ -179,15 +182,19 @@ final class FlowTestSupport
      */
     public function withEventsFor(string|object|array $identifiers, string $aggregateClass, array $events, int $aggregateVersion = 0): self
     {
+        $aggregateDefinition = $this->aggregateDefinitionRegistry->getFor(TypeDescriptor::create($aggregateClass));
+        Assert::isTrue($aggregateDefinition->isEventSourced(), "Aggregate {$aggregateClass} is not event sourced. Can't store events for it.");
+
         $this->messagingEntrypoint->sendWithHeaders(
-            $events,
+            [],
             [
-                AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => is_object($identifiers) ? (string)$identifiers : $identifiers,
+                AggregateMessage::AGGREGATE_ID => is_object($identifiers) ? (string)$identifiers : $identifiers,
                 AggregateMessage::TARGET_VERSION => $aggregateVersion,
-                AggregateMessage::RESULT_AGGREGATE_OBJECT => $aggregateClass,
-                AggregateMessage::RESULT_AGGREGATE_EVENTS => $events,
+                AggregateMessage::CALLED_AGGREGATE_CLASS => $aggregateClass,
+                AggregateMessage::CALLED_AGGREGATE_INSTANCE => new $aggregateClass(),
+                AggregateMessage::RECORDED_AGGREGATE_EVENTS => $events,
             ],
-            ModellingHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregateClass). '.test_setup_state'
+            AggregrateHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregateClass). '.test_setup_state'
         );
 
         return $this;
@@ -198,9 +205,10 @@ final class FlowTestSupport
         $this->messagingEntrypoint->sendWithHeaders(
             $aggregate,
             [
-                AggregateMessage::RESULT_AGGREGATE_OBJECT => $aggregate,
+                AggregateMessage::CALLED_AGGREGATE_INSTANCE => $aggregate,
+                AggregateMessage::CALLED_AGGREGATE_CLASS => $aggregate::class,
             ],
-            ModellingHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregate::class). '.test_setup_state'
+            AggregrateHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregate::class). '.test_setup_state'
         );
 
         return $this;
@@ -339,7 +347,7 @@ final class FlowTestSupport
             [
                 AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => is_object($identifiers) ? (string)$identifiers : $identifiers,
             ],
-            ModellingHandlerModule::getRegisterAggregateLoadRepositoryInputChannel($className)
+            AggregrateHandlerModule::getRegisterAggregateLoadRepositoryInputChannel($className, false)
         );
     }
 
@@ -397,6 +405,7 @@ final class FlowTestSupport
     }
 
     /**
+     * @template T
      * @param class-string<T> $referenceName
      * @return T
      */

@@ -2,16 +2,21 @@
 
 namespace Ecotone\Modelling;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Store\Document\DocumentStore;
 
 /**
  * licence Apache-2.0
  */
-class BaseEventSourcingConfiguration
+class BaseEventSourcingConfiguration implements DefinedObject
 {
     public const DEFAULT_SNAPSHOT_TRIGGER_THRESHOLD = 100;
 
-    private array $snapshotsAggregateClasses = [];
+    public function __construct(private array $snapshotsAggregateClasses = [])
+    {
+
+    }
 
     /**
      * @TODO Ecotone 2.0 drop it
@@ -54,5 +59,15 @@ class BaseEventSourcingConfiguration
     public function getDocumentStoreReferenceFor(string $className): string
     {
         return $this->snapshotsAggregateClasses[$className]['documentStore'] ?? DocumentStore::class;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(
+            self::class,
+            [
+                $this->snapshotsAggregateClasses,
+            ]
+        );
     }
 }

@@ -51,8 +51,11 @@ class CallAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
 
         $eventSourcedAggregateAnnotation = TypeDescriptor::create(EventSourcingAggregate::class);
         $eventSourcedSagaAnnotation = TypeDescriptor::create(EventSourcingSaga::class);
+        /** @var EventSourcingAggregate|null $eventSourcingAttribute */
+        $eventSourcingAttribute = null;
         if ($interfaceToCall->hasClassAnnotation($eventSourcedAggregateAnnotation) || $interfaceToCall->hasClassAnnotation($eventSourcedSagaAnnotation)) {
             $this->isEventSourced = true;
+            $eventSourcingAttribute = $interfaceToCall->getSingleClassAnnotationOf($eventSourcedAggregateAnnotation);
         }
 
         $aggregateVersionPropertyName = null;
@@ -71,7 +74,11 @@ class CallAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
 
         $this->interfaceToCall = $interfaceToCall;
         $isFactoryMethod = $this->interfaceToCall->isFactoryMethod();
-        if (! $this->isEventSourced && $isFactoryMethod) {
+        if ($isFactoryMethod) {
+            if ($this->isEventSourced && ! $eventSourcingAttribute->hasInternalEventRecorder()) {
+                return;
+            }
+
             Assert::isTrue($this->interfaceToCall->getReturnType()->isClassNotInterface(), "Factory method {$this->interfaceToCall} for standard aggregate should return object. Did you wanted to register Event Sourced Aggregate?");
         }
     }

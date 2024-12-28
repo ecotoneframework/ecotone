@@ -32,7 +32,7 @@ final class CustomRepositoriesTest extends BaseEcotoneTestCase
         $articleRepository = ArticleRepository::createEmpty();
 
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            [Article::class, ArticleRepository::class, RepositoryBusinessInterface::class],
+            [Article::class, ArticleRepository::class, RepositoryBusinessInterface::class, Page::class, Author::class],
             [ArticleRepository::class => $articleRepository],
             addInMemoryStateStoredRepository: false,
         );
@@ -50,7 +50,7 @@ final class CustomRepositoriesTest extends BaseEcotoneTestCase
         $pageRepository = PageRepository::createEmpty();
 
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            [Article::class, ArticleRepository::class, Page::class, PageRepository::class, RepositoryBusinessInterface::class],
+            [Article::class, ArticleRepository::class, Page::class, Author::class, PageRepository::class, RepositoryBusinessInterface::class],
             [
                 ArticleRepository::class => $articleRepository,
                 PageRepository::class => $pageRepository,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher;
 
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use ReflectionClass;
@@ -37,6 +38,14 @@ class PropertyReaderAccessor
         }
 
         return true;
+    }
+
+    public static function getDefinition(): Definition
+    {
+        return new Definition(
+            self::class,
+            [],
+        );
     }
 
     /**

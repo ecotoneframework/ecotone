@@ -30,14 +30,15 @@ class RepositoryStorageTest extends TestCase
         $repository = InMemoryStandardRepository::createEmpty();
 
         $repositoryStorage = new RepositoryStorage(
-            Order::class,
-            false,
             [InMemoryStandardRepository::class => $repository]
         );
 
         $this->assertEquals(
             $repository,
-            $repositoryStorage->getRepository()
+            $repositoryStorage->getRepository(
+                Order::class,
+                false,
+            )
         );
     }
 
@@ -46,14 +47,15 @@ class RepositoryStorageTest extends TestCase
         $repository = InMemoryEventSourcedRepository::createEmpty();
 
         $repositoryStorage = new RepositoryStorage(
-            Order::class,
-            true,
             [InMemoryEventSourcedRepository::class => $repository]
         );
 
         $this->assertEquals(
             $repository,
-            $repositoryStorage->getRepository()
+            $repositoryStorage->getRepository(
+                Order::class,
+                true,
+            )
         );
     }
 
@@ -62,14 +64,15 @@ class RepositoryStorageTest extends TestCase
         $repository = InMemoryEventSourcedRepository::createEmpty();
 
         $repositoryStorage = new RepositoryStorage(
-            Order::class,
-            false,
             [InMemoryEventSourcedRepository::class => $repository]
         );
 
         $this->expectException(InvalidArgumentException::class);
 
-        $repositoryStorage->getRepository();
+        $repositoryStorage->getRepository(
+            Order::class,
+            false,
+        );
     }
 
     public function test_throwing_exception_if_only_standard_repository_available_for_event_sourced_aggregate()
@@ -77,14 +80,15 @@ class RepositoryStorageTest extends TestCase
         $repository = InMemoryStandardRepository::createEmpty();
 
         $repositoryStorage = new RepositoryStorage(
-            Order::class,
-            true,
             [InMemoryStandardRepository::class => $repository]
         );
 
         $this->expectException(InvalidArgumentException::class);
 
-        $repositoryStorage->getRepository();
+        $repositoryStorage->getRepository(
+            Order::class,
+            true,
+        );
     }
 
     public function test_returning_standard_repository_in_case_there_are_two_types()
@@ -92,8 +96,6 @@ class RepositoryStorageTest extends TestCase
         $repository = InMemoryStandardRepository::createEmpty();
 
         $repositoryStorage = new RepositoryStorage(
-            Order::class,
-            false,
             [
                 InMemoryEventSourcedRepository::class => InMemoryEventSourcedRepository::createEmpty(),
                 InMemoryStandardRepository::class => $repository,
@@ -102,7 +104,10 @@ class RepositoryStorageTest extends TestCase
 
         $this->assertEquals(
             $repository,
-            $repositoryStorage->getRepository()
+            $repositoryStorage->getRepository(
+                Order::class,
+                false,
+            )
         );
     }
 
@@ -111,8 +116,6 @@ class RepositoryStorageTest extends TestCase
         $repository = InMemoryEventSourcedRepository::createEmpty();
 
         $repositoryStorage = new RepositoryStorage(
-            Order::class,
-            true,
             [
                 InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty(),
                 InMemoryEventSourcedRepository::class => $repository,
@@ -121,7 +124,10 @@ class RepositoryStorageTest extends TestCase
 
         $this->assertEquals(
             $repository,
-            $repositoryStorage->getRepository()
+            $repositoryStorage->getRepository(
+                Order::class,
+                true,
+            )
         );
     }
 
@@ -130,8 +136,6 @@ class RepositoryStorageTest extends TestCase
         $repository = InMemoryArticleStandardRepository::createWith([Article::createWith(PublishArticleCommand::createWith('test', 'title', 'test'))]);
 
         $repositoryStorage = new RepositoryStorage(
-            Article::class,
-            false,
             [
                 'incorrect' => AppointmentStandardRepository::createEmpty(),
                 'correct' => $repository,
@@ -140,15 +144,13 @@ class RepositoryStorageTest extends TestCase
 
         $this->assertEquals(
             $repository,
-            $repositoryStorage->getRepository()
+            $repositoryStorage->getRepository(Article::class, false)
         );
     }
 
     public function test_throwing_exception_if_repository_handling_different_type()
     {
         $repositoryStorage = new RepositoryStorage(
-            Article::class,
-            false,
             [
                 1 => InMemoryEventSourcedRepository::createEmpty(),
                 2 => InMemoryEventSourcedRepository::createEmpty(),
@@ -157,7 +159,10 @@ class RepositoryStorageTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $repositoryStorage->getRepository();
+        $repositoryStorage->getRepository(
+            Article::class,
+            false,
+        );
     }
 
     public function test_throwing_exception_if_aggregate_was_not_found_when_multiple_of_same_type_are_registered()
@@ -165,8 +170,6 @@ class RepositoryStorageTest extends TestCase
         $repository = InMemoryArticleStandardRepository::createWith([Article::createWith(PublishArticleCommand::createWith('test', 'title', 'test'))]);
 
         $repositoryStorage = new RepositoryStorage(
-            stdClass::class,
-            false,
             [
                 'incorrect' => AppointmentStandardRepository::createEmpty(),
                 'correct' => $repository,
@@ -175,14 +178,15 @@ class RepositoryStorageTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $repositoryStorage->getRepository();
+        $repositoryStorage->getRepository(
+            stdClass::class,
+            false,
+        );
     }
 
     public function test_returning_built_repository_builder()
     {
         $repositoryStorage = new RepositoryStorage(
-            Appointment::class,
-            false,
             [
                 AppointmentRepositoryBuilder::class => AppointmentRepositoryBuilder::createEmpty(),
             ]
@@ -190,7 +194,10 @@ class RepositoryStorageTest extends TestCase
 
         $this->assertEquals(
             AppointmentStandardRepository::createEmpty(),
-            $repositoryStorage->getRepository()
+            $repositoryStorage->getRepository(
+                Appointment::class,
+                false,
+            )
         );
     }
 }

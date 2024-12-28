@@ -7,6 +7,7 @@ namespace Test\Ecotone\Modelling\Fixture\Renter;
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\Identifier;
+use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\WithAggregateEvents;
 
 #[Aggregate]
@@ -36,6 +37,12 @@ class Appointment
     public static function create(CreateAppointmentCommand $command): self
     {
         return new self($command);
+    }
+
+    #[QueryHandler('getDuration')]
+    public function getDuration(): int
+    {
+        return $this->duration;
     }
 
     /**

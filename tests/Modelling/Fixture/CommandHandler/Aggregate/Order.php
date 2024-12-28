@@ -93,6 +93,7 @@ class Order implements VersionAggregate
     /**
      * @return string|null
      */
+    #[QueryHandler('get_customer_id')]
     public function getCustomerId(): ?string
     {
         return $this->customerId;

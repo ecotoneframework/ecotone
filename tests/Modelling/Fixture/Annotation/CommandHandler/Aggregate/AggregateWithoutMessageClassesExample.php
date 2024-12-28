@@ -27,11 +27,11 @@ class AggregateWithoutMessageClassesExample
         return $aggregateWithoutMessageClassesExample;
     }
 
-    #[CommandHandler('createAggregate')]
-    public static function create(): self
+    #[CommandHandler('createAggregateNoParams')]
+    public static function create(int $id = 1): self
     {
         $aggregateWithoutMessageClassesExample = new self();
-        $aggregateWithoutMessageClassesExample->id =  1;
+        $aggregateWithoutMessageClassesExample->id =  $id;
 
         return $aggregateWithoutMessageClassesExample;
     }
@@ -48,7 +48,7 @@ class AggregateWithoutMessageClassesExample
         $this->something = $data;
     }
 
-    #[CommandHandler('doSomething')]
+    #[CommandHandler('doSomethingWithReference')]
     public function doSomethingWithReference(stdClass $class): void
     {
         $this->something = true;

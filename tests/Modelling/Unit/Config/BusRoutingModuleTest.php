@@ -24,7 +24,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\BusRouterBuilder;
-use Ecotone\Modelling\Config\BusRoutingModule;
+use Ecotone\Modelling\Config\MessageHandlerRoutingModule;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Ecotone\Modelling\QueryBus;
@@ -143,7 +143,7 @@ class BusRoutingModuleTest extends MessagingTestCase
 
     private function prepareModule(AnnotationFinder $annotationRegistrationService): Configuration
     {
-        $module = BusRoutingModule::create($annotationRegistrationService, InterfaceToCallRegistry::createEmpty());
+        $module = MessageHandlerRoutingModule::create($annotationRegistrationService, InterfaceToCallRegistry::createEmpty());
 
         $extendedConfiguration = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
         $module->prepare(

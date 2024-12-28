@@ -1,0 +1,111 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver;
+
+use Ecotone\Messaging\Handler\ClassDefinition;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Modelling\Attribute\AggregateEvents;
+use Ecotone\Modelling\Attribute\AggregateIdentifier;
+use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
+use Ecotone\Modelling\Attribute\AggregateVersion;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Attribute\Identifier;
+use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
+
+/**
+ * licence Apache-2.0
+ */
+final class AggregateDefinitionResolver
+{
+    public static function resolve(string $aggregateClass, InterfaceToCallRegistry $interfaceToCallRegistry): AggregateClassDefinition
+    {
+        $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($aggregateClass));
+
+        $isAggregateEventSourced = $aggregateClassDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcingAggregate::class));
+
+        [$calledAggregateIdentifierMapping, $calledAggregateIdentifierGetMethods] = self::resolveAggregateIdentifierMapping($aggregateClassDefinition, $interfaceToCallRegistry);
+        [$calledAggregateVersionProperty, $isCalledAggregateVersionAutomaticallyIncreased]  = self::resolveAggregateVersionProperty($aggregateClassDefinition);
+
+
+        $aggregateIdentifierAnnotation = TypeDescriptor::create(Identifier::class);
+        $aggregateIdentifiers = [];
+        foreach ($aggregateClassDefinition->getProperties() as $property) {
+            if ($property->hasAnnotation($aggregateIdentifierAnnotation)) {
+                $aggregateIdentifiers[$property->getName()] = null;
+            }
+        }
+
+        $eventRecorderMethodAnnotation = TypeDescriptor::create(AggregateEvents::class);
+        $eventRecorderMethod = null;
+        foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
+            $methodToCheck = $interfaceToCallRegistry->getFor($aggregateClassDefinition->getClassType()->toString(), $method);
+            if ($methodToCheck->hasMethodAnnotation($eventRecorderMethodAnnotation)) {
+                if ($methodToCheck->getReturnType()->isVoid()) {
+                    throw NoCorrectIdentifierDefinedException::create($methodToCheck . ' should return events, and can\'t be void.');
+                }
+
+                $eventRecorderMethod = $method;
+            }
+        }
+
+        return new AggregateClassDefinition(
+            $aggregateClass,
+            $isAggregateEventSourced,
+            $eventRecorderMethod,
+            $calledAggregateVersionProperty,
+            $isCalledAggregateVersionAutomaticallyIncreased,
+            $calledAggregateIdentifierMapping,
+            $calledAggregateIdentifierGetMethods
+        );
+    }
+
+    private static function resolveAggregateIdentifierMapping(ClassDefinition $aggregateClassDefinition, InterfaceToCallRegistry $interfaceToCallRegistry): array
+    {
+        $aggregateIdentifierGetMethodAttribute = TypeDescriptor::create(AggregateIdentifierMethod::class);
+        $aggregateIdentifiers = [];
+        $aggregateIdentifierGetMethods = [];
+
+        foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
+            $methodToCheck = $interfaceToCallRegistry->getFor($aggregateClassDefinition->getClassType()->toString(), $method);
+            if ($methodToCheck->hasMethodAnnotation($aggregateIdentifierGetMethodAttribute)) {
+                if (! $methodToCheck->hasNoParameters()) {
+                    throw NoCorrectIdentifierDefinedException::create($methodToCheck . ' should not have any parameters.');
+                }
+
+                /** @var AggregateIdentifierMethod $attribute */
+                $attribute = $methodToCheck->getSingleMethodAnnotationOf($aggregateIdentifierGetMethodAttribute);
+                $aggregateIdentifiers[$attribute->getIdentifierPropertyName()] = null;
+                $aggregateIdentifierGetMethods[$attribute->getIdentifierPropertyName()] = $method;
+            }
+        }
+
+        $aggregateIdentifierAnnotation = TypeDescriptor::create(AggregateIdentifier::class);
+        foreach ($aggregateClassDefinition->getProperties() as $property) {
+            if ($property->hasAnnotation($aggregateIdentifierAnnotation)) {
+                $aggregateIdentifiers[$property->getName()] = null;
+            }
+        }
+
+        return [$aggregateIdentifiers, $aggregateIdentifierGetMethods];
+    }
+
+    private static function resolveAggregateVersionProperty(ClassDefinition $aggregateClassDefinition): array
+    {
+        $aggregateVersionPropertyName = null;
+        $isAggregateVersionAutomaticallyIncreased = false;
+        $versionAnnotation = TypeDescriptor::create(AggregateVersion::class);
+        foreach ($aggregateClassDefinition->getProperties() as $property) {
+            if ($property->hasAnnotation($versionAnnotation)) {
+                $aggregateVersionPropertyName = $property->getName();
+                /** @var AggregateVersion $annotation */
+                $annotation = $property->getAnnotation($versionAnnotation);
+                $isAggregateVersionAutomaticallyIncreased = $annotation->isAutoIncreased();
+            }
+        }
+
+        return [$aggregateVersionPropertyName, $isAggregateVersionAutomaticallyIncreased];
+    }
+}

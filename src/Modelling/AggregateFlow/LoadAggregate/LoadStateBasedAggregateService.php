@@ -76,15 +76,13 @@ final class LoadStateBasedAggregateService implements MessageProcessor
             if (! is_null($aggregateVersion) && $this->isAggregateVersionAutomaticallyIncreased) {
                 $this->propertyEditorAccessor->enrichDataWith(PropertyPath::createWith($this->aggregateVersionPropertyName), $aggregate, $aggregateVersion, $message, null);
             }
-            $resultMessage = $resultMessage->setHeader(AggregateMessage::CALLED_AGGREGATE_OBJECT, $aggregate);
+            $resultMessage = $resultMessage->setHeader(AggregateMessage::CALLED_AGGREGATE_INSTANCE, $aggregate);
         }
 
         if (! $message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
             $resultMessage = $resultMessage->setReplyChannel(NullableMessageChannel::create());
         }
 
-        return $resultMessage
-            ->setHeader(AggregateMessage::AGGREGATE_OBJECT_EXISTS, ! is_null($aggregate))
-            ->build();
+        return $resultMessage->build();
     }
 }

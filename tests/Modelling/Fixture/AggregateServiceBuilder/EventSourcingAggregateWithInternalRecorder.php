@@ -58,4 +58,9 @@ final class EventSourcingAggregateWithInternalRecorder
     {
         $this->somethingWasDone = true;
     }
+
+    public function getVersion(): int
+    {
+        return $this->version;
+    }
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher;
 
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\Assert;
@@ -33,6 +35,17 @@ class PropertyEditorAccessor
     public static function create(ExpressionEvaluationService $expressionEvaluationService): self
     {
         return self::createWithMapping($expressionEvaluationService, '');
+    }
+
+    public static function getDefinition(): Definition
+    {
+        return new Definition(
+            self::class,
+            [
+                Reference::to(ExpressionEvaluationService::REFERENCE),
+            ],
+            [self::class, 'create']
+        );
     }
 
     /**

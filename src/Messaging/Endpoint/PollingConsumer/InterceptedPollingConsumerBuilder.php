@@ -4,6 +4,7 @@ namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Channel\DynamicChannel\DynamicMessageChannelBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\ChannelReference;
@@ -55,6 +56,10 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
      */
     public function isSupporting(MessageHandlerBuilder $messageHandlerBuilder, MessageChannelBuilder $relatedMessageChannel): bool
     {
+        if ($relatedMessageChannel instanceof DynamicMessageChannelBuilder && ! $relatedMessageChannel->hasReceiveStrategy()) {
+            return false;
+        }
+
         return $relatedMessageChannel->isPollable();
     }
 

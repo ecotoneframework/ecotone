@@ -387,15 +387,11 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
             $aroundInterceptors,
         );
 
-        /** @var Asynchronous[] $asynchronous */
-        $asynchronous = $interfaceToCall->getAnnotationsByImportanceOrder(TypeDescriptor::create(Asynchronous::class));
-        $channelNames = $asynchronous ? $asynchronous[0]->getChannelName() : [];
-
         return ChainedMessageProcessorBuilder::create()
             ->chainInterceptedProcessor(new GatewayInternalProcessorBuilder(
                 $interfaceToCallReference,
                 $this->requestChannelName,
-                $channelNames,
+                $this->getAsynchronousChannels($interfaceToCall),
                 $this->replyChannelName,
                 $this->replyMilliSecondsTimeout
             ))
@@ -424,5 +420,26 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
         }
 
         return false;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getAsynchronousChannels(InterfaceToCall $interfaceToCall): array
+    {
+        /** @var Asynchronous[] $asynchronous */
+        $asynchronous = $interfaceToCall->getAnnotationsByImportanceOrder(TypeDescriptor::create(Asynchronous::class));
+        $channelNames = $asynchronous ? $asynchronous[0]->getChannelName() : [];
+
+        if ($channelNames === []) {
+            foreach ($this->endpointAnnotations as $endpointAnnotation) {
+                if ($endpointAnnotation->getClassName() === Asynchronous::class) {
+                    $channelNames = $endpointAnnotation->instance()->getChannelName();
+                    break;
+                }
+            }
+        }
+
+        return $channelNames;
     }
 }

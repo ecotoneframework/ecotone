@@ -8,7 +8,8 @@ use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Modelling\DistributionEntrypoint;
+use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
+use Ecotone\Modelling\MessageHandling\Distribution\DistributionEntrypoint;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\DistributedCommandHandler\ShoppingCenter;
 
@@ -36,7 +37,7 @@ final class DistributedBusTest extends TestCase
 
         $this->assertEquals(0, $ecotoneTestSupport->getQueryBus()->sendWithRouting(ShoppingCenter::COUNT_BOUGHT_GOODS, ));
 
-        $distributedBus->distributeMessage('milk', [DistributionEntrypoint::DISTRIBUTED_ROUTING_KEY => ShoppingCenter::SHOPPING_BUY, DistributionEntrypoint::DISTRIBUTED_PAYLOAD_TYPE => 'command'], MediaType::TEXT_PLAIN);
+        $distributedBus->distributeMessage('milk', [DistributedBusHeader::DISTRIBUTED_ROUTING_KEY => ShoppingCenter::SHOPPING_BUY, DistributedBusHeader::DISTRIBUTED_PAYLOAD_TYPE => 'command'], MediaType::TEXT_PLAIN);
         $this->assertEquals(1, $ecotoneTestSupport->getQueryBus()->sendWithRouting(ShoppingCenter::COUNT_BOUGHT_GOODS, ));
     }
 }

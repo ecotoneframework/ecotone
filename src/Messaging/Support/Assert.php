@@ -2,6 +2,8 @@
 
 namespace Ecotone\Messaging\Support;
 
+use Ecotone\Messaging\Config\ConfigurationException;
+
 /**
  * Class Assert
  * @package Ecotone\Messaging\Support
@@ -31,10 +33,10 @@ class Assert
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function isFalse(bool $toCheck, string $message): void
+    public static function isFalse(bool $toCheck, string $message, bool $configurationException = false): void
     {
         if ($toCheck) {
-            throw InvalidArgumentException::create($message);
+            throw $configurationException ? ConfigurationException::create($message) : InvalidArgumentException::create($message);
         }
     }
 
@@ -100,6 +102,15 @@ class Assert
     {
         foreach ($arrayToCheck as $classToCompare) {
             Assert::isSubclassOf($classToCompare, $className, '');
+        }
+    }
+
+    public static function allObjects(array $arrayToCheck, string $exceptionMessage): void
+    {
+        foreach ($arrayToCheck as $potentialObject) {
+            if (! is_object($potentialObject)) {
+                throw InvalidArgumentException::create($exceptionMessage);
+            }
         }
     }
 

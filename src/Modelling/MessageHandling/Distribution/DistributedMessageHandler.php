@@ -6,9 +6,9 @@ use Ecotone\Messaging\Attribute\Parameter\Header;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\EventBusRouter;
-use Ecotone\Modelling\DistributionEntrypoint;
 use Ecotone\Modelling\EventBus;
 
 /**
@@ -16,26 +16,27 @@ use Ecotone\Modelling\EventBus;
  */
 class DistributedMessageHandler
 {
-    private array $distributedEventHandlerRoutingKeys;
-    private array $distributedCommandHandlerRoutingKeys;
+    public function __construct(
+        private array $distributedEventHandlerRoutingKeys,
+        private array $distributedCommandHandlerRoutingKeys,
+        private string $thisServiceName,
+    ) {
 
-    public function __construct(array $distributedEventHandlerRoutingKeys, array $distributedCommandHandlerRoutingKeys)
-    {
-        $this->distributedEventHandlerRoutingKeys = $distributedEventHandlerRoutingKeys;
-        $this->distributedCommandHandlerRoutingKeys = $distributedCommandHandlerRoutingKeys;
     }
 
     public function handle(
-        $payload,
-        array $metadata,
-        #[Header(DistributionEntrypoint::DISTRIBUTED_PAYLOAD_TYPE)]
-        string $payloadType,
-        #[Header(DistributionEntrypoint::DISTRIBUTED_ROUTING_KEY)]
-        string $routingKey,
+        mixed               $payload,
+        array               $metadata,
+        #[Header(DistributedBusHeader::DISTRIBUTED_PAYLOAD_TYPE)]
+        string              $payloadType,
+        #[Header(DistributedBusHeader::DISTRIBUTED_ROUTING_KEY)]
+        string              $routingKey,
         #[Header(MessageHeaders::CONTENT_TYPE)]
-        string $contentType,
-        CommandBus $commandBus,
-        EventBus $eventBus,
+        string              $contentType,
+        #[Header(DistributedBusHeader::DISTRIBUTED_TARGET_SERVICE_NAME)]
+        ?string             $targetedServiceName,
+        CommandBus          $commandBus,
+        EventBus            $eventBus,
         MessagingEntrypoint $messagingEntrypoint
     ) {
         if ($payloadType === 'event') {
@@ -44,14 +45,22 @@ class DistributedMessageHandler
             }
         } elseif ($payloadType === 'command') {
             if (! in_array($routingKey, $this->distributedCommandHandlerRoutingKeys)) {
-                throw RoutingKeyIsNotDistributed::create('Trying to run NOT distributed command handler with routing key ' . $routingKey);
+                throw RoutingKeyIsNotDistributed::create('There is no Distributed Command Handler registered with routing key: ' . $routingKey);
+            }
+
+            if ($targetedServiceName !== null && $targetedServiceName !== $this->thisServiceName) {
+                throw InvalidArgumentException::create("Received command message which targets {$targetedServiceName} Service, but consuming in {$this->thisServiceName}. Message was wrongly distributed.");
             }
 
             $commandBus->sendWithRouting($routingKey, $payload, $contentType, $metadata);
         } elseif ($payloadType === 'message') {
+            if ($targetedServiceName !== null && $targetedServiceName !== $this->thisServiceName) {
+                throw InvalidArgumentException::create("Received command message which targets {$targetedServiceName} Service, but consuming in {$this->thisServiceName}. Message was wrongly distributed.");
+            }
+
             $messagingEntrypoint->sendWithHeaders($payload, $metadata, $routingKey);
         } else {
-            throw InvalidArgumentException::create("Trying to call distributed command handler for payload type {$payloadType} and allowed are event/command");
+            throw InvalidArgumentException::create("Trying to call distributed command handler for payload type {$payloadType} and allowed are event/command/message");
         }
     }
 

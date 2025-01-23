@@ -63,7 +63,7 @@ use ReflectionMethod;
 /**
  * licence Apache-2.0
  */
-class AggregrateHandlerModule implements AnnotationModule
+class AggregrateModule implements AnnotationModule
 {
     /**
      * @param string[] $aggregateClasses

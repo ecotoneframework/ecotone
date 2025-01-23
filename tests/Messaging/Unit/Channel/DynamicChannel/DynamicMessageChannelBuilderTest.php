@@ -8,15 +8,22 @@ use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Channel\DynamicChannel\DynamicMessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\InMemoryModuleMessaging;
+use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
+use Ecotone\Messaging\Endpoint\PollingConsumer\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\Channel\DynamicChannel\DynamicChannelResolver;
 use Test\Ecotone\Messaging\Fixture\Channel\DynamicChannel\SimpleConsumptionDecider;
+use Test\Ecotone\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
+use Test\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
 use Test\Ecotone\Messaging\Fixture\Handler\SuccessServiceActivator;
 
 /**
@@ -55,6 +62,46 @@ final class DynamicMessageChannelBuilderTest extends TestCase
         $ecotoneLite->sendDirectToChannel('handle_channel', ['test']);
         $ecotoneLite->run('async_channel');
         $this->assertSame(2, $ecotoneLite->sendQueryWithRouting('get_number_of_calls'));
+    }
+
+    public function test_sending_to_send_only_channel(): void
+    {
+        $channelName = 'channel_one';
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            enableAsynchronousProcessing: [
+                DynamicMessageChannelBuilder::createWithSendOnlyStrategy(
+                    $sharedChannel = SimpleMessageChannelBuilder::createQueueChannel($channelName)
+                ),
+            ],
+            licenceKey: LicenceTesting::VALID_LICENCE,
+        );
+
+        $ecotoneLite->sendDirectToChannel($channelName, ['test']);
+
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            enableAsynchronousProcessing: [
+                $sharedChannel,
+            ],
+            licenceKey: LicenceTesting::VALID_LICENCE,
+        );
+        $this->assertNotNull($ecotoneLite->getMessageChannel($channelName)->receive());
+    }
+
+    public function test_throwing_exception_on_polling_from_send_only_channel(): void
+    {
+        $channelName = 'channel_one';
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            enableAsynchronousProcessing: [
+                DynamicMessageChannelBuilder::createWithSendOnlyStrategy(
+                    SimpleMessageChannelBuilder::createQueueChannel($channelName)
+                ),
+            ],
+            licenceKey: LicenceTesting::VALID_LICENCE,
+        );
+
+        $this->expectException(ConfigurationException::class);
+
+        $ecotoneLite->getMessageChannel($channelName)->receive();
     }
 
     public function test_sending_and_receiving_from_multiple_channels(): void
@@ -560,5 +607,33 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                 SimpleMessageChannelBuilder::createQueueChannel('channel_one'),
             ]
         );
+    }
+
+    public function test_hiding_polling_consumer_for_send_only_channel_with_poll_or_throw()
+    {
+        $messageChannelName = 'test';
+        $messageHandler = NoReturnMessageHandler::create();
+
+        $messagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $messageChannelName))
+            ->registerMessageChannel(DynamicMessageChannelBuilder::createWithSendOnlyStrategy(SimpleMessageChannelBuilder::createQueueChannel($messageChannelName)))
+            ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $this->assertEmpty($messagingSystem->list());
+    }
+
+    public function test_hiding_polling_consumer_for_send_only_channel()
+    {
+        $messageChannelName = 'test';
+        $messageHandler = NoReturnMessageHandler::create();
+
+        $messagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $messageChannelName))
+            ->registerMessageChannel(DynamicMessageChannelBuilder::createWithSendOnlyStrategy(SimpleMessageChannelBuilder::createQueueChannel($messageChannelName)))
+            ->registerConsumerFactory(new PollingConsumerBuilder())
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+
+        $this->assertEmpty($messagingSystem->list());
     }
 }

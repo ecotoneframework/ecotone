@@ -24,7 +24,7 @@ class DistributedMessageHandlerTest extends TestCase
         $eventBus                  = StorageEventBus::create();
         $commandBus                = StorageCommandBus::create();
         $messagingEntrypoint = StorageMessagingEntrypoint::create();
-        $distributedMessageHandler = new DistributedMessageHandler(['order.was_placed'], []);
+        $distributedMessageHandler = new DistributedMessageHandler(['order.was_placed'], [], 'thisService');
 
         $distributedMessageHandler->handle(
             'some',
@@ -32,6 +32,7 @@ class DistributedMessageHandlerTest extends TestCase
             'event',
             'order.was_placed',
             MediaType::TEXT_PLAIN,
+            'someService',
             $commandBus,
             $eventBus,
             $messagingEntrypoint
@@ -50,7 +51,7 @@ class DistributedMessageHandlerTest extends TestCase
         $eventBus                  = StorageEventBus::create();
         $commandBus                = StorageCommandBus::create();
         $messagingEntrypoint = StorageMessagingEntrypoint::create();
-        $distributedMessageHandler = new DistributedMessageHandler([], []);
+        $distributedMessageHandler = new DistributedMessageHandler([], [], 'thisService');
 
         $distributedMessageHandler->handle(
             'some',
@@ -58,6 +59,7 @@ class DistributedMessageHandlerTest extends TestCase
             'event',
             'order.was_placed',
             MediaType::TEXT_PLAIN,
+            'someService',
             $commandBus,
             $eventBus,
             $messagingEntrypoint
@@ -74,7 +76,7 @@ class DistributedMessageHandlerTest extends TestCase
         $eventBus                  = StorageEventBus::create();
         $commandBus                = StorageCommandBus::create();
         $messagingEntrypoint = StorageMessagingEntrypoint::create();
-        $distributedMessageHandler = new DistributedMessageHandler([], ['order.place_order']);
+        $distributedMessageHandler = new DistributedMessageHandler([], ['order.place_order'], 'thisService');
 
         $distributedMessageHandler->handle(
             'some',
@@ -82,6 +84,7 @@ class DistributedMessageHandlerTest extends TestCase
             'command',
             'order.place_order',
             MediaType::TEXT_PLAIN,
+            'thisService',
             $commandBus,
             $eventBus,
             $messagingEntrypoint
@@ -102,7 +105,7 @@ class DistributedMessageHandlerTest extends TestCase
         $eventBus                  = StorageEventBus::create();
         $commandBus                = StorageCommandBus::create();
         $messagingEntrypoint = StorageMessagingEntrypoint::create();
-        $distributedMessageHandler = new DistributedMessageHandler([], []);
+        $distributedMessageHandler = new DistributedMessageHandler([], [], 'thisService');
 
         $distributedMessageHandler->handle(
             'some',
@@ -110,6 +113,7 @@ class DistributedMessageHandlerTest extends TestCase
             'command',
             'order.place_order',
             MediaType::TEXT_PLAIN,
+            'someService',
             $commandBus,
             $eventBus,
             $messagingEntrypoint

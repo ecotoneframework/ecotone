@@ -6,7 +6,7 @@ use Behat\Behat\Context\Context;
 use Behat\Gherkin\Node\TableNode;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Modelling\AggregateMessage;
-use Ecotone\Modelling\DistributionEntrypoint;
+use Ecotone\Modelling\MessageHandling\Distribution\DistributionEntrypoint;
 use Exception;
 use InvalidArgumentException;
 use PHPUnit\Framework\Assert;

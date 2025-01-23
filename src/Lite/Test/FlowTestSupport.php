@@ -23,8 +23,9 @@ use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\Config\AggregrateHandlerModule;
+use Ecotone\Modelling\Config\AggregrateModule;
 use Ecotone\Modelling\Config\MessageBusChannel;
+use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\Event;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
@@ -194,7 +195,7 @@ final class FlowTestSupport
                 AggregateMessage::CALLED_AGGREGATE_INSTANCE => new $aggregateClass(),
                 AggregateMessage::RECORDED_AGGREGATE_EVENTS => $events,
             ],
-            AggregrateHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregateClass). '.test_setup_state'
+            AggregrateModule::getRegisterAggregateSaveRepositoryInputChannel($aggregateClass). '.test_setup_state'
         );
 
         return $this;
@@ -208,7 +209,7 @@ final class FlowTestSupport
                 AggregateMessage::CALLED_AGGREGATE_INSTANCE => $aggregate,
                 AggregateMessage::CALLED_AGGREGATE_CLASS => $aggregate::class,
             ],
-            AggregrateHandlerModule::getRegisterAggregateSaveRepositoryInputChannel($aggregate::class). '.test_setup_state'
+            AggregrateModule::getRegisterAggregateSaveRepositoryInputChannel($aggregate::class). '.test_setup_state'
         );
 
         return $this;
@@ -347,7 +348,7 @@ final class FlowTestSupport
             [
                 AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => is_object($identifiers) ? (string)$identifiers : $identifiers,
             ],
-            AggregrateHandlerModule::getRegisterAggregateLoadRepositoryInputChannel($className, false)
+            AggregrateModule::getRegisterAggregateLoadRepositoryInputChannel($className, false)
         );
     }
 
@@ -412,6 +413,11 @@ final class FlowTestSupport
     public function getGateway(string $referenceName): object
     {
         return $this->configuredMessagingSystem->getGatewayByName($referenceName);
+    }
+
+    public function getDistributedBus(string $referenceName = DistributedBus::class): DistributedBus
+    {
+        return $this->getGateway($referenceName);
     }
 
     /**

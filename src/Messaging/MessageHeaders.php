@@ -6,8 +6,8 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\AggregateMessage;
+use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
 use Ecotone\Modelling\Config\MessageBusChannel;
-use Ecotone\Modelling\DistributionEntrypoint;
 
 use function json_encode;
 
@@ -254,9 +254,10 @@ final class MessageHeaders
     public static function unsetDistributionKeys(array $metadata): array
     {
         unset(
-            $metadata[DistributionEntrypoint::DISTRIBUTED_CHANNEL],
-            $metadata[DistributionEntrypoint::DISTRIBUTED_PAYLOAD_TYPE],
-            $metadata[DistributionEntrypoint::DISTRIBUTED_ROUTING_KEY]
+            $metadata[DistributedBusHeader::DISTRIBUTED_PAYLOAD_TYPE],
+            $metadata[DistributedBusHeader::DISTRIBUTED_ROUTING_KEY],
+            $metadata[DistributedBusHeader::DISTRIBUTED_SOURCE_SERVICE_NAME],
+            $metadata[DistributedBusHeader::DISTRIBUTED_TARGET_SERVICE_NAME],
         );
 
         return $metadata;

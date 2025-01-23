@@ -112,6 +112,9 @@ final class MessageBuilder
         return $this;
     }
 
+    /**
+     * @param string[] $routingSlip
+     */
     public function setRoutingSlip(array $routingSlip): self
     {
         if (! $routingSlip) {
@@ -121,6 +124,18 @@ final class MessageBuilder
         $this->setHeader(MessageHeaders::ROUTING_SLIP, implode(',', $routingSlip));
 
         return $this;
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getRoutingSlip(): array
+    {
+        if (! $this->headerAccessor->hasHeader(MessageHeaders::ROUTING_SLIP)) {
+            return [];
+        }
+
+        return explode(',', $this->headerAccessor->getHeader(MessageHeaders::ROUTING_SLIP));
     }
 
     /**

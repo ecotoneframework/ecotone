@@ -19,6 +19,7 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
@@ -177,7 +178,8 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
     {
         return
             $extensionObject instanceof TestConfiguration
-            || ($extensionObject instanceof MessageChannelBuilder && $extensionObject->isPollable());
+            || ($extensionObject instanceof MessageChannelBuilder && $extensionObject->isPollable())
+            || $extensionObject instanceof ServiceConfiguration;
     }
 
     public function getModulePackageName(): string

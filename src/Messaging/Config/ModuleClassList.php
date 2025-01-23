@@ -46,12 +46,13 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\TransformerModule;
 use Ecotone\Messaging\Handler\Logger\Config\LoggingModule;
 use Ecotone\Messaging\Handler\Logger\Config\MessageHandlerLogger;
 use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\Config\AggregrateHandlerModule;
-use Ecotone\Modelling\Config\DistributedGatewayModule;
+use Ecotone\Modelling\Config\AggregrateModule;
 use Ecotone\Modelling\Config\InstantRetry\InstantRetryModule;
 use Ecotone\Modelling\Config\MessageHandlerRoutingModule;
 use Ecotone\Modelling\Config\ServiceHandlerModule;
 use Ecotone\Modelling\EventBus;
+use Ecotone\Modelling\MessageHandling\Distribution\Module\DistributedBusWithServiceMapModule;
+use Ecotone\Modelling\MessageHandling\Distribution\Module\DistributedHandlerModule;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Ecotone\Modelling\QueryBus;
 use Ecotone\OpenTelemetry\Configuration\OpenTelemetryModule;
@@ -67,8 +68,9 @@ use Ecotone\SymfonyBundle\Config\SymfonyConnectionModule;
 class ModuleClassList
 {
     public const CORE_MODULES = [
-        DistributedGatewayModule::class,
-        AggregrateHandlerModule::class,
+        DistributedHandlerModule::class,
+        DistributedBusWithServiceMapModule::class,
+        AggregrateModule::class,
         ServiceHandlerModule::class,
         MessageHandlerRoutingModule::class,
         MethodInterceptorModule::class,

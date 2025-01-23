@@ -6,7 +6,6 @@ namespace Ecotone\Lite\Test;
 
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Modelling\Config\RegisterAggregateRepositoryChannels;
 
 /**
  * licence Apache-2.0
@@ -15,7 +14,6 @@ final class TestConfiguration
 {
     /**
      * @param string[] $spiedChannelNames
-     * @param RegisterAggregateRepositoryChannels[] $relatedAggregates
      */
     private function __construct(
         private bool $failOnCommandHandlerNotFound,
@@ -23,13 +21,12 @@ final class TestConfiguration
         private ?MediaType $pollableChannelMediaTypeConversion,
         private string $channelToConvertOn,
         private array $spiedChannelNames,
-        private array $relatedAggregates
     ) {
     }
 
     public static function createWithDefaults(): self
     {
-        return new self(true, true, null, '', [], []);
+        return new self(true, true, null, '', []);
     }
 
     public function withFailOnCommandHandlerNotFound(bool $shouldFail): self
@@ -94,13 +91,5 @@ final class TestConfiguration
     public function getSpiedChannels(): array
     {
         return $this->spiedChannelNames;
-    }
-
-    /**
-     * @return RegisterAggregateRepositoryChannels[]
-     */
-    public function getAggregatesAndSagasUnderTest(): array
-    {
-        return $this->relatedAggregates;
     }
 }

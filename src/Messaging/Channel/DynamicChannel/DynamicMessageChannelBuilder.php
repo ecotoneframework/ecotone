@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Channel\DynamicChannel;
 
 use Ecotone\Messaging\Channel\DynamicChannel\ReceivingStrategy\CustomReceivingStrategy;
+use Ecotone\Messaging\Channel\DynamicChannel\ReceivingStrategy\NoReceivingStrategy;
 use Ecotone\Messaging\Channel\DynamicChannel\ReceivingStrategy\RoundRobinReceivingStrategy;
 use Ecotone\Messaging\Channel\DynamicChannel\ReceivingStrategy\SkippingReceivingStrategy;
 use Ecotone\Messaging\Channel\DynamicChannel\SendingStrategy\CustomSendingStrategy;
 use Ecotone\Messaging\Channel\DynamicChannel\SendingStrategy\HeaderSendingStrategy;
+use Ecotone\Messaging\Channel\DynamicChannel\SendingStrategy\NoSendingStrategy;
 use Ecotone\Messaging\Channel\DynamicChannel\SendingStrategy\RoundRobinSendingStrategy;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
@@ -55,6 +57,11 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
         );
     }
 
+    public function hasReceiveStrategy(): bool
+    {
+        return ! ($this->channelReceivingStrategy->getClassName() === NoReceivingStrategy::class);
+    }
+
     /**
      * Creates with default round robin strategy for sending and receiving
      *
@@ -70,6 +77,26 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
             new Definition(RoundRobinSendingStrategy::class, [$channelNames]),
             new Definition(RoundRobinReceivingStrategy::class, [$channelNames]),
         );
+    }
+
+    public static function createNoStrategy(string $thisMessageChannelName): self
+    {
+        return new self(
+            $thisMessageChannelName,
+            new Definition(NoSendingStrategy::class, [$thisMessageChannelName]),
+            new Definition(NoReceivingStrategy::class, [$thisMessageChannelName]),
+        );
+    }
+
+    public static function createWithSendOnlyStrategy(MessageChannelBuilder $targetMessageChannel): self
+    {
+        return (new self(
+            $targetMessageChannel->getMessageChannelName(),
+            new Definition(RoundRobinSendingStrategy::class, [[$targetMessageChannel->getMessageChannelName()]]),
+            new Definition(NoReceivingStrategy::class, [$targetMessageChannel->getMessageChannelName()]),
+        ))->withInternalChannels([
+            $targetMessageChannel->getMessageChannelName() => $targetMessageChannel,
+        ]);
     }
 
     /**

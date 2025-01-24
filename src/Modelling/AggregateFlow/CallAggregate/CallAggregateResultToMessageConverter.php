@@ -12,6 +12,7 @@ use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\AggregateMessage;
 
 /**
@@ -20,6 +21,8 @@ use Ecotone\Modelling\AggregateMessage;
 final class CallAggregateResultToMessageConverter implements ResultToMessageConverter
 {
     public function __construct(
+        private AggregateDefinitionRegistry $aggregateDefinitionRegistry,
+        private string                 $aggregateClass,
         private ?Type                  $returnType,
         private PropertyReaderAccessor $propertyReaderAccessor,
         private bool                   $isCommandHandler,
@@ -40,6 +43,10 @@ final class CallAggregateResultToMessageConverter implements ResultToMessageConv
         if ($this->isCommandHandler) {
             $calledAggregate = $requestMessage->getHeaders()->containsKey(AggregateMessage::CALLED_AGGREGATE_INSTANCE) ? $requestMessage->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_INSTANCE) : null;
             $versionBeforeHandling = $requestMessage->getHeaders()->containsKey(AggregateMessage::TARGET_VERSION) ? $requestMessage->getHeaders()->get(AggregateMessage::TARGET_VERSION) : null;
+
+            if ($result === null && $this->aggregateDefinitionRegistry->getFor(TypeDescriptor::create($this->aggregateClass))->isPureEventSourcedAggregate()) {
+                $result = [];
+            }
 
             if (is_null($versionBeforeHandling) && $this->aggregateVersionProperty) {
                 if ($this->isFactoryMethod) {

@@ -9,6 +9,7 @@ use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
 use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\WithAggregateVersioning;
+use stdClass;
 
 #[EventSourcingAggregate]
 /**
@@ -32,6 +33,12 @@ final class EventSourcingAggregateExample
     public function doSomething(DoSomething $command): array
     {
         return [new SomethingWasDone($this->id)];
+    }
+
+    #[CommandHandler('aggregate.onlySideEffects')]
+    public function handle(stdClass $class): void
+    {
+        $class->name = 'test';
     }
 
     #[EventSourcingHandler]

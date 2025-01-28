@@ -18,16 +18,12 @@ use Ecotone\Messaging\Config\Container\Definition;
 final class ServiceCacheConfiguration implements DefinedObject
 {
     public const REFERENCE_NAME = self::class;
-    private const CACHE_DIRECTORY_SUFFIX = DIRECTORY_SEPARATOR . 'ecotone';
-
-    private string $path;
 
     /**
      * @param bool $shouldUseCache
      */
-    public function __construct(string $path, private bool $shouldUseCache)
+    public function __construct(private string $path, private bool $shouldUseCache)
     {
-        $this->path = $path . self::CACHE_DIRECTORY_SUFFIX;
     }
 
     public static function noCache(): self

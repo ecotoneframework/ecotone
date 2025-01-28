@@ -12,9 +12,11 @@ use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\Attribute\Environment;
 use Ecotone\AnnotationFinder\ConfigurationException;
 use Ecotone\Messaging\Attribute\IsAbstract;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use ReflectionClass;
 
 /**
  * Class FileSystemAnnotationRegistrationService
@@ -473,5 +475,31 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         }
 
         return $rootProjectDir;
+    }
+
+    public function getCacheMessagingFileNameBasedOnConfig(
+        string $pathToRootCatalog,
+        ServiceConfiguration $serviceConfiguration,
+        array $configurationVariables,
+        bool $enableTesting
+    ): string {
+        // this is temporary cache based on if files have changed
+        // get file contents based on class names, configuration and configuration variables
+        $fileSha = '';
+
+        foreach ($this->registeredClasses() as $class) {
+            $filePath = (new ReflectionClass($class))->getFileName();
+            $fileSha .= sha1_file($filePath);
+        }
+
+        if (file_exists($pathToRootCatalog . 'composer.lock')) {
+            $fileSha .= sha1_file($pathToRootCatalog . 'composer.lock');
+        }
+
+        $fileSha .= sha1(serialize($serviceConfiguration));
+        $fileSha .= sha1(serialize($configurationVariables));
+        $fileSha .= $enableTesting ? 'true' : 'false';
+
+        return 'ecotone' . DIRECTORY_SEPARATOR . sha1($fileSha);
     }
 }

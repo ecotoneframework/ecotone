@@ -28,7 +28,6 @@ use Ecotone\Modelling\BaseEventSourcingConfiguration;
 use function json_decode;
 
 use Psr\Container\ContainerInterface;
-use ReflectionClass;
 
 /**
  * licence Apache-2.0
@@ -169,33 +168,6 @@ final class EcotoneLite
             ->getFlowTestSupport();
     }
 
-    private static function getFileNameBasedOnConfig(
-        string $pathToRootCatalog,
-        FileSystemAnnotationFinder $annotationFinder,
-        ServiceConfiguration $serviceConfiguration,
-        array $configurationVariables,
-        bool $enableTesting
-    ): string {
-        // this is temporary cache based on if files have changed
-        // get file contents based on class names, configuration and configuration variables
-        $fileSha = '';
-
-        foreach ($annotationFinder->registeredClasses() as $class) {
-            $filePath = (new ReflectionClass($class))->getFileName();
-            $fileSha .= sha1_file($filePath);
-        }
-
-        if (file_exists($pathToRootCatalog . 'composer.lock')) {
-            $fileSha .= sha1_file($pathToRootCatalog . 'composer.lock');
-        }
-
-        $fileSha .= sha1(serialize($serviceConfiguration));
-        $fileSha .= sha1(serialize($configurationVariables));
-        $fileSha .= $enableTesting ? 'true' : 'false';
-
-        return sha1($fileSha);
-    }
-
     /**
      * @param string[] $packagesToEnable
      * @param ContainerInterface|object[] $containerOrAvailableServices
@@ -237,7 +209,7 @@ final class EcotoneLite
             $classesToResolve,
             $enableTesting
         );
-        $cacheHash = self::getFileNameBasedOnConfig($pathToRootCatalog, $annotationFinder, $serviceConfiguration, $configurationVariables, $enableTesting);
+        $cacheHash = $annotationFinder->getCacheMessagingFileNameBasedOnConfig($pathToRootCatalog, $serviceConfiguration, $configurationVariables, $enableTesting);
         $serviceCacheConfiguration = new ServiceCacheConfiguration(
             $serviceConfiguration->getCacheDirectoryPath() . DIRECTORY_SEPARATOR . $cacheHash,
             self::shouldUseAutomaticCache($useCachedVersion, $pathToRootCatalog),

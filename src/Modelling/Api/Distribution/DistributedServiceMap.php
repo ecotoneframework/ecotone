@@ -32,7 +32,7 @@ final class DistributedServiceMap implements DefinedObject
         Assert::allObjects($this->distributedBusAnnotations, 'Annotations passed to DistributedServiceMap, must all be objects');
     }
 
-    public static function createEmpty(string $referenceName = DistributedBus::class): self
+    public static function initialize(string $referenceName = DistributedBus::class): self
     {
         return new self($referenceName);
     }

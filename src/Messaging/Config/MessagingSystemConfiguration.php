@@ -734,6 +734,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function registerMessageChannel(MessageChannelBuilder $messageChannelBuilder): Configuration
     {
+        Assert::notNullAndEmpty($messageChannelBuilder->getMessageChannelName(), "Message channel name can't be empty");
         if (array_key_exists($messageChannelBuilder->getMessageChannelName(), $this->channelBuilders)) {
             throw ConfigurationException::create("Trying to register message channel with name `{$messageChannelBuilder->getMessageChannelName()}` twice.");
         }

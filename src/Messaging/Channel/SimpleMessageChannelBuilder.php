@@ -28,7 +28,8 @@ class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuil
         private string $messageChannelName,
         private MessageChannel $messageChannel,
         private bool $isPollable,
-        private ?MediaType $conversionMediaType
+        private ?MediaType $conversionMediaType,
+        private HeaderMapper $headerMapper,
     ) {
     }
 
@@ -38,7 +39,8 @@ class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuil
             $messageChannelName,
             $messageChannel,
             $messageChannel instanceof PollableChannel,
-            $conversionMediaType ? (is_string($conversionMediaType) ? MediaType::parseMediaType($conversionMediaType) : $conversionMediaType) : null
+            $conversionMediaType ? (is_string($conversionMediaType) ? MediaType::parseMediaType($conversionMediaType) : $conversionMediaType) : null,
+            DefaultHeaderMapper::createAllHeadersMapping(),
         );
     }
 
@@ -72,6 +74,13 @@ class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuil
         return $this->isPollable;
     }
 
+    public function withDefaultConversionMediaType(string $mediaType): self
+    {
+        $this->conversionMediaType = MediaType::parseMediaType($mediaType);
+
+        return $this;
+    }
+
     /**
      * @inheritDoc
      */
@@ -87,7 +96,15 @@ class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuil
 
     public function getHeaderMapper(): HeaderMapper
     {
-        return DefaultHeaderMapper::createAllHeadersMapping();
+        return $this->headerMapper;
+    }
+
+    public function withHeaderMapping(string $headerMapper): self
+    {
+        $mapping = explode(',', $headerMapper);
+        $this->headerMapper = DefaultHeaderMapper::createWith($mapping, $mapping);
+
+        return $this;
     }
 
     public function compile(MessagingContainerBuilder $builder): Definition

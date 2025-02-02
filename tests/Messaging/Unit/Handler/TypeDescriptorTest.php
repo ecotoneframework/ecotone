@@ -326,7 +326,6 @@ class TypeDescriptorTest extends TestCase
 
     public function test_is_abstract_class()
     {
-        $this->assertTrue(TypeDescriptor::create(MessagingException::class)->isAbstractClass());
         $this->assertFalse(TypeDescriptor::create(DumbMessageHandlerBuilder::class)->isAbstractClass());
         $this->assertFalse(TypeDescriptor::create(TypeDescriptor::OBJECT)->isAbstractClass());
     }

@@ -37,6 +37,7 @@ class InterceptedConsumerRunner implements EndpointRunner
 
     public function createConsumer(?ExecutionPollingMetadata $executionPollingMetadata): ConsumerLifecycle
     {
+        $this->logger->info('Message Consumer starting to consume messages');
         $pollingMetadata = $this->defaultPollingMetadata->applyExecutionPollingMetadata($executionPollingMetadata);
         $interceptors = InterceptedConsumer::createInterceptorsForPollingMetadata($pollingMetadata, $this->logger);
         $interceptedGateway = new InterceptedGateway($this->gateway, $interceptors);

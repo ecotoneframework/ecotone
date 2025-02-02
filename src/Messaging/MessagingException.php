@@ -16,9 +16,10 @@ use Throwable;
 /**
  * licence Apache-2.0
  */
-abstract class MessagingException extends Exception
+class MessagingException extends Exception
 {
     public const LICENSE_EXCEPTION = 1;
+    public const RUNTIME_EXCEPTION = 2;
     public const INVALID_MESSAGE_HEADER_EXCEPTION = 100;
     public const MESSAGE_HEADER_NOT_AVAILABLE_EXCEPTION = 101;
     public const INVALID_ARGUMENT_EXCEPTION = 102;
@@ -45,10 +46,10 @@ abstract class MessagingException extends Exception
      * @param string $message
      * @return MessagingException|static
      */
-    public static function create(string $message): self
+    public static function create(string $message, ?int $errorCode = null): self
     {
         /** @phpstan-ignore-next-line */
-        return new static($message, static::errorCode());
+        return new static($message, is_null($errorCode) ? static::errorCode() : $errorCode);
     }
 
     /**
@@ -100,7 +101,10 @@ abstract class MessagingException extends Exception
     /**
      * @return int
      */
-    abstract protected static function errorCode(): int;
+    protected static function errorCode(): int
+    {
+        return self::RUNTIME_EXCEPTION;
+    }
 
     /**
      * @param Message $message

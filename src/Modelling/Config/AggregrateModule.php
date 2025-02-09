@@ -5,18 +5,21 @@ namespace Ecotone\Modelling\Config;
 use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\PriorityBasedOnType;
 use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
@@ -31,6 +34,7 @@ use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerProcessorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\AggregateFlow\CallAggregate\CallAggregateServiceBuilder;
 use Ecotone\Modelling\AggregateFlow\LoadAggregate\LoadAggregateMode;
@@ -45,6 +49,7 @@ use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\NamedEvent;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\Attribute\RelatedAggregate;
 use Ecotone\Modelling\Attribute\Repository;
@@ -81,7 +86,8 @@ class AggregrateModule implements AnnotationModule
         private array $aggregateQueryHandlers,
         private array $aggregateEventHandlers,
         private array $aggregateRepositoryReferenceNames,
-        private array $gatewayRepositoryMethods
+        private array $gatewayRepositoryMethods,
+        private EventMapper $eventMapper,
     ) {
     }
 
@@ -103,6 +109,20 @@ class AggregrateModule implements AnnotationModule
         $aggregateClassDefinitions = [];
         foreach ($aggregateClasses as $aggregateClass) {
             $aggregateClassDefinitions[$aggregateClass] = AggregateDefinitionResolver::resolve($aggregateClass, $interfaceToCallRegistry);
+        }
+
+        $fromClassToNameMapping = [];
+        $fromNameToClassMapping = [];
+        foreach ($annotationRegistrationService->findAnnotatedClasses(NamedEvent::class) as $namedEventClass) {
+            /** @var NamedEvent $attribute */
+            $attribute = $annotationRegistrationService->getAttributeForClass($namedEventClass, NamedEvent::class);
+
+            if (array_key_exists($attribute->getName(), $fromNameToClassMapping)) {
+                throw ConfigurationException::create(sprintf('Named Events should have unique names. However, `%s` is used more than once.', $attribute->getName()));
+            }
+
+            $fromClassToNameMapping[$namedEventClass] = $attribute->getName();
+            $fromNameToClassMapping[$attribute->getName()] = $namedEventClass;
         }
 
         return new self(
@@ -127,7 +147,8 @@ class AggregrateModule implements AnnotationModule
                 }
             ),
             $aggregateRepositoryReferenceNames,
-            $annotationRegistrationService->findAnnotatedMethods(Repository::class)
+            $annotationRegistrationService->findAnnotatedMethods(Repository::class),
+            EventMapper::createWith($fromClassToNameMapping, $fromNameToClassMapping)
         );
     }
 
@@ -152,6 +173,7 @@ class AggregrateModule implements AnnotationModule
      */
     public function prepare(Configuration $messagingConfiguration, array $moduleExtensions, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
+        $messagingConfiguration->registerServiceDefinition(EventMapper::class, $this->eventMapper->compile());
         $this->initialization($messagingConfiguration, $interfaceToCallRegistry);
 
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
@@ -173,7 +195,7 @@ class AggregrateModule implements AnnotationModule
         $this->registerBusinessRepositories($interfaceToCallRegistry, $messagingConfiguration);
 
         foreach ($this->aggregateQueryHandlers as $registration) {
-            $this->registerAggregateQueryHandler($registration, $interfaceToCallRegistry, $parameterConverterAnnotationFactory, $messagingConfiguration);
+            $this->registerAggregateQueryHandler($registration, $interfaceToCallRegistry, $parameterConverterAnnotationFactory, $messagingConfiguration, $baseEventSourcingConfiguration);
         }
 
         foreach ($this->getCombinedCommandAndEventHandlers($interfaceToCallRegistry, $messagingConfiguration) as $channelNameRegistrations) {
@@ -229,7 +251,7 @@ class AggregrateModule implements AnnotationModule
                     ->withInputChannelName($inputChannelNameForRouting)
                     ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $factoryIdentifierMetadataMapping, $factoryIdentifierMapping, $factoryHandledPayloadType, $interfaceToCallRegistry))
                     ->chainInterceptedProcessor(
-                        LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $factoryHandledPayloadType, LoadAggregateMode::createContinueOnNotFound(), $interfaceToCallRegistry)
+                        LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $factoryHandledPayloadType, LoadAggregateMode::createContinueOnNotFound(), $interfaceToCallRegistry, $baseEventSourcingConfiguration)
                             ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
                     )
                     ->chain(RouterProcessorBuilder::createHeaderExistsRouter(AggregateMessage::CALLED_AGGREGATE_INSTANCE, $actionChannels[0], $factoryChannel))
@@ -274,7 +296,7 @@ class AggregrateModule implements AnnotationModule
                 $serviceActivatorHandler
                     ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $annotation->getIdentifierMetadataMapping(), $annotation->getIdentifierMapping(), $handledPayloadType, $interfaceToCallRegistry))
                     ->chain(
-                        LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $handledPayloadType, $dropMessageOnNotFound ? LoadAggregateMode::createDropMessageOnNotFound() : LoadAggregateMode::createThrowOnNotFound(), $interfaceToCallRegistry)
+                        LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $handledPayloadType, $dropMessageOnNotFound ? LoadAggregateMode::createDropMessageOnNotFound() : LoadAggregateMode::createThrowOnNotFound(), $interfaceToCallRegistry, $baseEventSourcingConfiguration)
                             ->withAggregateRepositoryFactories($aggregateRepositoryReferenceNames)
                     );
             }
@@ -297,7 +319,7 @@ class AggregrateModule implements AnnotationModule
         }
     }
 
-    private function registerAggregateQueryHandler(AnnotatedFinding $registration, InterfaceToCallRegistry $interfaceToCallRegistry, ParameterConverterAnnotationFactory $parameterConverterAnnotationFactory, Configuration $configuration): void
+    private function registerAggregateQueryHandler(AnnotatedFinding $registration, InterfaceToCallRegistry $interfaceToCallRegistry, ParameterConverterAnnotationFactory $parameterConverterAnnotationFactory, Configuration $configuration, BaseEventSourcingConfiguration $baseEventSourcingConfiguration): void
     {
         /** @var QueryHandler $annotationForMethod */
         $annotationForMethod = $registration->getAnnotationForMethod();
@@ -324,7 +346,7 @@ class AggregrateModule implements AnnotationModule
                 ->withOutputMessageChannel($annotationForMethod->getOutputChannelName())
                 ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], [], $handledPayloadType, $interfaceToCallRegistry))
                 ->chain(
-                    LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $handledPayloadType, LoadAggregateMode::createThrowOnNotFound(), $interfaceToCallRegistry)
+                    LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $handledPayloadType, LoadAggregateMode::createThrowOnNotFound(), $interfaceToCallRegistry, $baseEventSourcingConfiguration)
                         ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
                 )
                 ->chainInterceptedProcessor(
@@ -336,7 +358,7 @@ class AggregrateModule implements AnnotationModule
         );
     }
 
-    private function registerLoadAggregate(ClassDefinition $aggregateClassDefinition, bool $canReturnNull, Configuration $configuration, MessageProcessorActivatorBuilder $chainMessageHandlerBuilder, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    private function registerLoadAggregate(ClassDefinition $aggregateClassDefinition, bool $canReturnNull, Configuration $configuration, MessageProcessorActivatorBuilder $chainMessageHandlerBuilder, InterfaceToCallRegistry $interfaceToCallRegistry, $baseEventSourcingConfiguration): void
     {
         /** @TODO do not require method name in save service */
         $methodName = $aggregateClassDefinition->getPublicMethodNames() ? $aggregateClassDefinition->getPublicMethodNames()[0] : '__construct';
@@ -345,7 +367,7 @@ class AggregrateModule implements AnnotationModule
             $chainMessageHandlerBuilder
                 ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], [], null, $interfaceToCallRegistry))
                 ->chain(
-                    LoadAggregateServiceBuilder::create($aggregateClassDefinition, $methodName, null, $canReturnNull ? LoadAggregateMode::createContinueOnNotFound() : LoadAggregateMode::createThrowOnNotFound(), $interfaceToCallRegistry)
+                    LoadAggregateServiceBuilder::create($aggregateClassDefinition, $methodName, null, $canReturnNull ? LoadAggregateMode::createContinueOnNotFound() : LoadAggregateMode::createThrowOnNotFound(), $interfaceToCallRegistry, $baseEventSourcingConfiguration)
                         ->withAggregateRepositoryFactories($this->aggregateRepositoryReferenceNames)
                 )
                 ->chain(new Definition(FetchAggregate::class))
@@ -424,6 +446,9 @@ class AggregrateModule implements AnnotationModule
                 Reference::to(GroupedEventSourcingExecutor::class),
                 PropertyEditorAccessor::getDefinition(),
                 PropertyReaderAccessor::getDefinition(),
+                Reference::to(ConversionService::REFERENCE_NAME),
+                DefaultHeaderMapper::createAllHeadersMapping()->getDefinition(),
+                Reference::to(EventMapper::class),
             ])
         );
     }
@@ -460,7 +485,8 @@ class AggregrateModule implements AnnotationModule
                 $messagingConfiguration,
                 MessageProcessorActivatorBuilder::create()
                     ->withInputChannelName(self::getRegisterAggregateLoadRepositoryInputChannel($aggregateClass, true)),
-                $interfaceToCallRegistry
+                $interfaceToCallRegistry,
+                $baseEventSourcingConfiguration,
             );
 
             $this->registerLoadAggregate(
@@ -469,7 +495,8 @@ class AggregrateModule implements AnnotationModule
                 $messagingConfiguration,
                 MessageProcessorActivatorBuilder::create()
                     ->withInputChannelName(self::getRegisterAggregateLoadRepositoryInputChannel($aggregateClass, false)),
-                $interfaceToCallRegistry
+                $interfaceToCallRegistry,
+                $baseEventSourcingConfiguration,
             );
 
             $messagingConfiguration->registerMessageHandler(

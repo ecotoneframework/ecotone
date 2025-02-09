@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\AggregateFlow\SaveAggregate;
 
+use Ecotone\EventSourcing\Mapping\EventMapper;
+use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Metadata\RevisionMetadataEnricher;
 use Ecotone\Messaging\Support\Assert;
@@ -132,31 +135,35 @@ class SaveAggregateServiceTemplate
     /**
      * @return Event[]
      */
-    public static function buildEcotoneEvents(mixed $events, string $calledInterface, Message $message): array
+    public static function buildEcotoneEvents(mixed $events, string $calledInterface, Message $message, HeaderMapper $headerMapper, ConversionService $conversionService, EventMapper $eventMapper): array
     {
         Assert::isIterable($events, "Return value Event Sourced Aggregate {$calledInterface} must return array of events");
-        $metadata = $message->getHeaders()->headers();
-
-        return array_map(static function ($event) use ($message, $metadata, $calledInterface): Event {
+        return array_map(static function ($event) use ($message, $calledInterface, $headerMapper, $conversionService, $eventMapper): Event {
             if (! is_object($event)) {
                 $typeDescriptor = TypeDescriptor::createFromVariable($event);
                 throw InvalidArgumentException::create("Events return by after calling {$calledInterface} must all be objects, {$typeDescriptor->toString()} given");
             }
+            $eventMetadata = $message->getHeaders()->headers();
             if ($event instanceof Event) {
-                $metadata = $event->getMetadata();
+                $eventMetadata = $event->getMetadata();
                 $event = $event->getPayload();
             }
+            $eventMetadata = MessageHeaders::unsetAllFrameworkHeaders($eventMetadata);
+            $eventMetadata = $headerMapper->mapFromMessageHeaders($eventMetadata, $conversionService);
 
-            $metadata = MessageHeaders::unsetAllFrameworkHeaders($metadata);
-            $metadata = RevisionMetadataEnricher::enrich($metadata, $event);
-            $metadata[MessageHeaders::MESSAGE_ID] ??= Uuid::uuid4()->toString();
-            $metadata[MessageHeaders::TIMESTAMP] ??= (int)round(microtime(true));
-            $metadata = MessageHeaders::propagateContextHeaders([
+            $eventMetadata = RevisionMetadataEnricher::enrich($eventMetadata, $event);
+            $eventMetadata[MessageHeaders::MESSAGE_ID] ??= Uuid::uuid4()->toString();
+            $eventMetadata[MessageHeaders::TIMESTAMP] ??= (int)round(microtime(true));
+            $eventMetadata = MessageHeaders::propagateContextHeaders([
                 MessageHeaders::MESSAGE_ID => $message->getHeaders()->getMessageId(),
                 MessageHeaders::MESSAGE_CORRELATION_ID => $message->getHeaders()->getCorrelationId(),
-            ], $metadata);
+            ], $eventMetadata);
 
-            return Event::create($event, $metadata);
+            return Event::createWithType(
+                $eventMapper->mapEventToName($event),
+                $event,
+                $eventMetadata
+            );
         }, $events);
     }
 }

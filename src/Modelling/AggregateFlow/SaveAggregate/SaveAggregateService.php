@@ -11,7 +11,6 @@ use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateResolver;
 use Ecotone\Modelling\Attribute\NamedEvent;
@@ -82,13 +81,10 @@ final class SaveAggregateService implements MessageProcessor
                 foreach ($resolvedAggregate->getEvents() as $event) {
                     $version += 1;
                     if ($version % $snapshotTriggerThreshold === 0) {
-                        $identifiers = $resolvedAggregate->getIdentifiers();
-                        Assert::isTrue(count($identifiers) === 1, 'Snapshoting is possible only for aggregates having single identifiers');
-
                         $documentStore = $this->container->get(
                             $this->eventSourcingConfiguration->getDocumentStoreReferenceFor($resolvedAggregate->getAggregateClassName())
                         );
-                        $documentStore->upsertDocument(self::getSnapshotCollectionName($resolvedAggregate->getAggregateClassName()), reset($identifiers), $resolvedAggregate->getAggregateInstance());
+                        $documentStore->upsertDocument(self::getSnapshotCollectionName($resolvedAggregate->getAggregateClassName()), self::getSnapshotDocumentId($resolvedAggregate->getIdentifiers()), $resolvedAggregate->getAggregateInstance());
                     }
                 }
             }
@@ -131,5 +127,10 @@ final class SaveAggregateService implements MessageProcessor
     public static function getSnapshotCollectionName(string $aggregateClassname): string
     {
         return self::SNAPSHOT_COLLECTION . $aggregateClassname;
+    }
+
+    public static function getSnapshotDocumentId(array $identifiers): string
+    {
+        return count($identifiers) === 1 ? (string)reset($identifiers) : json_encode($identifiers);
     }
 }

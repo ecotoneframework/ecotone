@@ -6,7 +6,7 @@ use Ecotone\Lite\InMemoryContainerImplementation;
 use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Test\LoggerExample;
+use Ecotone\Test\StubLogger;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -28,7 +28,7 @@ class LiteContainerImplementationTest extends ContainerImplementationTestCase
 
     public function test_it_replace_provided_dependencies(): void
     {
-        $logger = LoggerExample::create();
+        $logger = StubLogger::create();
         $externalContainer = InMemoryPSRContainer::createFromAssociativeArray([
             'externallyDefined' => $logger,
         ]);

@@ -15,15 +15,17 @@ final class AggregateClassDefinition implements DefinedObject
     /**
      * @param array<string, string> $aggregateIdentifierMapping
      * @param array<string> $aggregateIdentifierGetMethods
+     * @param array<object> $classAnnotations
      */
     public function __construct(
-        private string $className,
-        private bool $isEventSourced,
+        private string  $className,
+        private bool    $isEventSourced,
         private ?string $eventRecorderMethod,
         private ?string $aggregateVersionProperty,
         private bool    $isAggregateVersionAutomaticallyIncreased,
-        private array $aggregateIdentifierMapping,
-        private array $aggregateIdentifierGetMethods,
+        private array   $aggregateIdentifierMapping,
+        private array   $aggregateIdentifierGetMethods,
+        private string  $aggregateClassType,
     ) {
 
     }
@@ -84,6 +86,11 @@ final class AggregateClassDefinition implements DefinedObject
         return $this->aggregateIdentifierGetMethods;
     }
 
+    public function getAggregateClassType(): string
+    {
+        return $this->aggregateClassType;
+    }
+
     public function getDefinition(): Definition
     {
         return new Definition(self::class, [
@@ -94,6 +101,7 @@ final class AggregateClassDefinition implements DefinedObject
             $this->isAggregateVersionAutomaticallyIncreased,
             $this->aggregateIdentifierMapping,
             $this->aggregateIdentifierGetMethods,
+            $this->aggregateClassType,
         ]);
     }
 }

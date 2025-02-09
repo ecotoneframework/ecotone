@@ -54,6 +54,11 @@ class Ticket
         return [$event];
     }
 
+    public function id(): mixed
+    {
+        return $this->ticketId;
+    }
+
     public function getVersion(): int
     {
         return $this->version;

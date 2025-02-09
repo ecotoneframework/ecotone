@@ -15,7 +15,7 @@ use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Test\LicenceTesting;
-use Ecotone\Test\LoggerExample;
+use Ecotone\Test\StubLogger;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -34,7 +34,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
 {
     public function test_retrying_on_failure_with_success()
     {
-        $loggerExample = LoggerExample::create();
+        $loggerExample = StubLogger::create();
         $ecotoneLite = $this->bootstrapEcotone(
             [OrderService::class],
             [new OrderService(), 'logger' => $loggerExample],
@@ -53,7 +53,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
 
     public function test_retrying_two_time_on_failure_and_recovering()
     {
-        $loggerExample = LoggerExample::create();
+        $loggerExample = StubLogger::create();
         $ecotoneLite = $this->bootstrapEcotone(
             [OrderService::class],
             [new OrderService(), 'logger' => $loggerExample],
@@ -72,7 +72,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
 
     public function test_retrying_exceeded_and_fails()
     {
-        $loggerExample = LoggerExample::create();
+        $loggerExample = StubLogger::create();
 
         $ecotoneLite = $this->bootstrapEcotone(
             [OrderService::class],
@@ -100,7 +100,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
     public function test_dynamic_message_channel_is_not_retried()
     {
         $dynamicChannelResolver = new DynamicChannelResolver(['orders_priority'], ['orders_priority']);
-        $loggerExample = LoggerExample::create();
+        $loggerExample = StubLogger::create();
 
         $ecotoneLite = $this->bootstrapEcotone(
             [OrderService::class, DynamicChannelResolver::class],
@@ -134,7 +134,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
     public function test_dynamic_message_channel_is_not_retried_but_chosen_channel_is()
     {
         $dynamicChannelResolver = new DynamicChannelResolver(['orders_priority'], ['orders_priority']);
-        $loggerExample = LoggerExample::create();
+        $loggerExample = StubLogger::create();
         $ecotoneLite = $this->bootstrapEcotone(
             [OrderService::class, DynamicChannelResolver::class],
             [new OrderService(), 'logger' => $loggerExample, $dynamicChannelResolver],
@@ -160,7 +160,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
 
     public function test_with_custom_retry_strategy()
     {
-        $loggerExample = LoggerExample::create();
+        $loggerExample = StubLogger::create();
         $ecotoneLite = $this->bootstrapEcotone(
             [OrderService::class],
             [new OrderService(), 'logger' => $loggerExample],
@@ -179,7 +179,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
 
     public function test_disabling_retries()
     {
-        $loggerExample = LoggerExample::create();
+        $loggerExample = StubLogger::create();
 
         $ecotoneLite = $this->bootstrapEcotone(
             [OrderService::class],
@@ -208,7 +208,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
 
     public function test_sending_to_dead_letter_on_failure()
     {
-        $loggerExample = LoggerExample::create();
+        $loggerExample = StubLogger::create();
 
         $ecotoneLite = $this->bootstrapEcotone(
             [OrderService::class],
@@ -231,7 +231,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
 
     public function test_sending_to_dead_letter_on_failure_using_global_configuration()
     {
-        $loggerExample = LoggerExample::create();
+        $loggerExample = StubLogger::create();
 
         $ecotoneLite = $this->bootstrapEcotone(
             [OrderService::class],
@@ -254,7 +254,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
 
     public function test_on_success_recover_message_is_not_sent_to_dlq()
     {
-        $loggerExample = LoggerExample::create();
+        $loggerExample = StubLogger::create();
         $ecotoneLite = $this->bootstrapEcotone(
             [OrderService::class],
             [new OrderService(), 'logger' => $loggerExample],

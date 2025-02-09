@@ -56,9 +56,11 @@ use Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter\OrderService;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerContinuouslyWorkingService;
 use Test\Ecotone\Messaging\Fixture\Handler\DumbMessageHandlerBuilder;
 use Test\Ecotone\Messaging\Fixture\Handler\ExceptionMessageHandler;
+use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MultipleMethodsGatewayExample;
 use Test\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithAnnotationFromMethodInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\StubCallSavingService;
+use Test\Ecotone\Messaging\Fixture\InterceptedBridge\BridgeExampleIncomplete;
 use Test\Ecotone\Messaging\Fixture\SameChannelAndRouting\SomeTestCommandHandler;
 use Test\Ecotone\Messaging\Fixture\SameChannelAndRouting\SomeTestEventHandler;
 use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
@@ -2167,6 +2169,26 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
                 ->withExtensionObjects([
                     SimpleMessageChannelBuilder::createQueueChannel('input'),
                 ])
+        );
+    }
+
+    public function test_throwing_exception_on_lacking_request_channel_for_gateway(): void
+    {
+        $this->expectException(ConfigurationException::class);
+
+        EcotoneLite::bootstrapFlowTesting(
+            [MultipleMethodsGatewayExample::class],
+            [],
+        );
+    }
+
+    public function test_throwing_exception_on_lacking_output_channel_for_endpoint(): void
+    {
+        $this->expectException(ConfigurationException::class);
+
+        EcotoneLite::bootstrapFlowTesting(
+            [BridgeExampleIncomplete::class],
+            [],
         );
     }
 }

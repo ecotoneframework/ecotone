@@ -2,6 +2,7 @@
 
 namespace Ecotone\Modelling\EventSourcingExecutor;
 
+use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
@@ -77,6 +78,7 @@ final class EventSourcingHandlerExecutorBuilder
             $classDefinition->getClassType()->toString(),
             $eventSourcingHandlerMethods,
             LicenceDecider::prepareDefinition(AggregateMethodInvoker::class, Reference::to(OpenCoreAggregateMethodInvoker::class), Reference::to(EnterpriseAggregateMethodInvoker::class)),
+            Reference::to(EventMapper::class),
         ]);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\AggregateFlow\LoadAggregate;
 
+use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
@@ -12,11 +13,17 @@ use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\NullableMessageChannel;
+use Ecotone\Messaging\Store\Document\DocumentStore;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\AggregateFlow\SaveAggregate\SaveAggregateService;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\AggregateNotFoundException;
+use Ecotone\Modelling\Attribute\AggregateVersion;
+use Ecotone\Modelling\BaseEventSourcingConfiguration;
 use Ecotone\Modelling\EventSourcedRepository;
 use Ecotone\Modelling\EventSourcingExecutor\EventSourcingHandlerExecutor;
+use Psr\Container\ContainerInterface;
 
 /**
  * licence Apache-2.0
@@ -33,7 +40,9 @@ final class LoadEventSourcingAggregateService implements MessageProcessor
         private PropertyReaderAccessor $propertyReaderAccessor,
         private PropertyEditorAccessor $propertyEditorAccessor,
         private EventSourcingHandlerExecutor $eventSourcingHandlerExecutor,
-        private LoadAggregateMode $loadAggregateMode
+        private LoadAggregateMode $loadAggregateMode,
+        private ContainerInterface $container,
+        private BaseEventSourcingConfiguration $eventSourcingConfiguration,
     ) {
     }
 
@@ -59,14 +68,29 @@ final class LoadEventSourcingAggregateService implements MessageProcessor
             $resultMessage = $resultMessage->setHeader(AggregateMessage::TARGET_VERSION, $expectedVersion);
         }
 
-        $aggregateVersion = null;
-        $eventStream = $this->repository->findBy($this->aggregateClassName, $aggregateIdentifiers);
+        $aggregateVersion = 1;
+        $aggregate = null;
+        foreach ($this->eventSourcingConfiguration->getSnapshotsConfig() as $aggregateClass => $config) {
+            if ($aggregateClass === $this->aggregateClassName) {
+                /** @var DocumentStore $documentStore */
+                $documentStore = $this->container->get($config['documentStore']);
+
+                $aggregate = $documentStore->findDocument(SaveAggregateService::getSnapshotCollectionName($this->aggregateClassName), SaveAggregateService::getSnapshotDocumentId($aggregateIdentifiers));
+
+                if (! is_null($aggregate)) {
+                    $aggregateVersion = $this->getAggregateVersion($aggregate);
+                    Assert::isTrue($aggregateVersion > 0, sprintf('Serialization for snapshot of %s is set incorrectly, it does not serialize aggregate version', $aggregate::class));
+                }
+            }
+        }
+
+        $eventStream = $this->repository->findBy($this->aggregateClassName, $aggregateIdentifiers, $aggregate === null ? 1 : ($aggregateVersion + 1));
 
         if (! $eventStream->getEvents()) {
-            $eventStream = null;
+            $eventStream = $aggregate;
         } else {
             $aggregateVersion = $eventStream->getAggregateVersion();
-            $eventStream = $this->eventSourcingHandlerExecutor->fill($eventStream->getEvents(), null);
+            $eventStream = $this->eventSourcingHandlerExecutor->fill($eventStream->getEvents(), $aggregate);
         }
 
         if (! $eventStream && $this->loadAggregateMode->isDroppingMessageOnNotFound()) {
@@ -92,5 +116,23 @@ final class LoadEventSourcingAggregateService implements MessageProcessor
         }
 
         return $resultMessage->build();
+    }
+
+    private function getAggregateVersion(object|array|string $aggregate): mixed
+    {
+        $propertyReader = new PropertyReaderAccessor();
+        $versionAnnotation = TypeDescriptor::create(AggregateVersion::class);
+        $aggregateVersionPropertyName = null;
+        foreach (ClassDefinition::createFor(TypeDescriptor::createFromVariable($aggregate))->getProperties() as $property) {
+            if ($property->hasAnnotation($versionAnnotation)) {
+                $aggregateVersionPropertyName = $property->getName();
+                break;
+            }
+        }
+
+        return $propertyReader->getPropertyValue(
+            PropertyPath::createWith($aggregateVersionPropertyName),
+            $aggregate
+        );
     }
 }

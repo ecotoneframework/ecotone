@@ -13,7 +13,7 @@ use Stringable;
 /**
  * licence Apache-2.0
  */
-class LoggerExample implements LoggerInterface
+class StubLogger implements LoggerInterface
 {
     private array $emergency = [];
     private array $alert = [];

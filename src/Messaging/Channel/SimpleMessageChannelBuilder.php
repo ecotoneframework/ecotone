@@ -66,6 +66,11 @@ class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuil
         return self::create($messageChannelName, NullableMessageChannel::create(), null);
     }
 
+    public static function createExceptionChannel(ExceptionalQueueChannel $exceptionalQueueChannel): self
+    {
+        return self::create($exceptionalQueueChannel->getMessageChannelName(), $exceptionalQueueChannel);
+    }
+
     /**
      * @inheritDoc
      */

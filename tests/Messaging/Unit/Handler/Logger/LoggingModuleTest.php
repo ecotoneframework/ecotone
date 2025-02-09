@@ -8,7 +8,7 @@ use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
-use Ecotone\Test\LoggerExample;
+use Ecotone\Test\StubLogger;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\Handler\FailureHandler\ExampleFailureCommandHandler;
 
@@ -25,7 +25,7 @@ final class LoggingModuleTest extends TestCase
 
     public function test_logging_critical_when_exception_occurred_on_message_consumer()
     {
-        $loggerExample = LoggerExample::create();
+        $loggerExample = StubLogger::create();
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ExampleFailureCommandHandler::class],
             [new ExampleFailureCommandHandler(), 'logger' => $loggerExample],
@@ -38,12 +38,12 @@ final class LoggingModuleTest extends TestCase
             ->sendCommandWithRoutingKey('handler.fail', ['command' => 2])
             ->run(self::CHANNEL_NAME, ExecutionPollingMetadata::createWithTestingSetup(failAtError: false));
 
-        $this->assertCount(2, $loggerExample->getCritical());
+        $this->assertCount(1, $loggerExample->getCritical());
     }
 
     public function test_it_does_log_critical_if_message_sent_to_error_channel()
     {
-        $loggerExample = LoggerExample::create();
+        $loggerExample = StubLogger::create();
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ExampleFailureCommandHandler::class],
             [new ExampleFailureCommandHandler(), 'logger' => $loggerExample],

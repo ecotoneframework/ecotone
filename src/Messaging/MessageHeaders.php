@@ -114,6 +114,12 @@ final class MessageHeaders
 
     public const TEMPORARY_SPAN_CONTEXT_HEADER = 'ecotone.temporarySpanContext';
 
+    public const EVENT_AGGREGATE_TYPE = '_aggregate_type';
+
+    public const EVENT_AGGREGATE_ID = '_aggregate_id';
+
+    public const EVENT_AGGREGATE_VERSION = '_aggregate_version';
+
     private array $headers;
 
     /**
@@ -487,6 +493,11 @@ final class MessageHeaders
         }
         if (! array_key_exists(self::TIMESTAMP, $headers)) {
             $headers[self::TIMESTAMP] = (int)round(microtime(true));
+        } else {
+            $headers[self::TIMESTAMP] = (int)$headers[self::TIMESTAMP];
+            if ($headers[self::TIMESTAMP] === 0) {
+                $headers[self::TIMESTAMP] = (int)round(microtime(true));
+            }
         }
         if (! array_key_exists(self::MESSAGE_CORRELATION_ID, $headers)) {
             $headers[self::MESSAGE_CORRELATION_ID] = Uuid::uuid4()->toString();

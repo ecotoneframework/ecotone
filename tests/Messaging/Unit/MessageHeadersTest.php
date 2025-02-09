@@ -46,6 +46,27 @@ class MessageHeadersTest extends TestCase
         $this->assertEquals(4, $messageHeaders->size());
     }
 
+    public function test_creating_with_tiumestamp_as_string()
+    {
+        $headers = [
+            MessageHeaders::TIMESTAMP => '1738512870',
+        ];
+        $messageHeaders = MessageHeaders::create($headers);
+
+        $this->assertEquals(1738512870, $messageHeaders->getTimestamp());
+    }
+
+    public function test_setting_now_timestamp_if_incorrect_value()
+    {
+        $headers = [
+            MessageHeaders::TIMESTAMP => 'test',
+        ];
+        $messageHeaders = MessageHeaders::create($headers);
+
+        $this->assertNotSame(0, $messageHeaders->getTimestamp());
+        $this->assertTrue(is_int($messageHeaders->getTimestamp()));
+    }
+
     public function test_throwing_exception_when_asking_for_not_existing_header()
     {
         $messageHeaders = MessageHeaders::createEmpty();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\AnnotationFinder\FileSystem;
 
+use Closure;
 use Composer\Autoload\ClassLoader;
 use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\AnnotationFinder\AnnotatedMethod;
@@ -497,9 +498,28 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         }
 
         $fileSha .= sha1(serialize($serviceConfiguration));
-        $fileSha .= sha1(serialize($configurationVariables));
+        $fileSha .= sha1(serialize($this->skipClosures($configurationVariables)));
         $fileSha .= $enableTesting ? 'true' : 'false';
 
         return 'ecotone' . DIRECTORY_SEPARATOR . sha1($fileSha);
+    }
+
+    /**
+     * @param array<string, mixed> $configuration
+     */
+    private function skipClosures(iterable $configuration): array
+    {
+        $configurationVariables = [];
+        foreach ($configuration as $key => $value) {
+            if (is_iterable($value)) {
+                $configurationVariables[$key] = $this->skipClosures($value);
+            } elseif ($value instanceof Closure) {
+                $configurationVariables[$key] = 'Closure';
+            } else {
+                $configurationVariables[$key] = $value;
+            }
+        }
+
+        return $configurationVariables;
     }
 }

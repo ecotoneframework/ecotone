@@ -5,6 +5,7 @@ namespace Test\Ecotone\Lite;
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Lite\Test\TestConfiguration;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\ConsoleCommandResultSet;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use PHPUnit\Framework\TestCase;
@@ -62,6 +63,25 @@ class EcotoneLiteTest extends TestCase
                 'test2',
             ],
             $ecotoneLite->getRecordedMessagePayloadsFrom('async2')
+        );
+    }
+
+    public function test_handling_closure_configuration_variables(): void
+    {
+        $ecotone = EcotoneLite::bootstrap(
+            [OrderService::class, ChannelConfiguration::class],
+            [new OrderService()],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+                ->withEnvironment('test'),
+            configurationVariables: [
+                'name' => fn () => 'Name',
+            ]
+        );
+
+        $this->assertEquals(
+            ConsoleCommandResultSet::create(['Name'], []),
+            $ecotone->runConsoleCommand('ecotone:list', [])
         );
     }
 }

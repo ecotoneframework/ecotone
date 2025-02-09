@@ -281,6 +281,11 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
         return new Reference($this->getReferenceName());
     }
 
+    public function getRequestChannelName(): string
+    {
+        return $this->requestChannelName;
+    }
+
     public function compile(MessagingContainerBuilder $builder): Definition
     {
         $interfaceToCallReference = new InterfaceToCallReference($this->interfaceName, $this->methodName);

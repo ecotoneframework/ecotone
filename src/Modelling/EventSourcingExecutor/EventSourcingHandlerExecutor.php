@@ -3,10 +3,10 @@
 namespace Ecotone\Modelling\EventSourcingExecutor;
 
 use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Event;
 use Ecotone\Modelling\EventSourcingHandlerMethod;
-use Ecotone\Modelling\SnapshotEvent;
 
 /**
  * licence Apache-2.0
@@ -34,17 +34,13 @@ final class EventSourcingHandlerExecutor
             $metadata = [];
             if ($event instanceof Event) {
                 $eventPayload = $event->getPayload();
+                Assert::isObject($eventPayload, 'Event returned by repository should be deserialized objects. Got: ' . TypeDescriptor::createFromVariable($eventPayload)->toString());
                 $eventType = TypeDescriptor::createFromVariable($eventPayload);
                 $metadata  = $event->getMetadata();
             } else {
+                Assert::isObject($event, 'Event returned by repository should be deserialized objects. Got: ' . TypeDescriptor::createFromVariable($event)->toString());
                 $eventType = TypeDescriptor::createFromVariable($event);
                 $eventPayload = $event;
-            }
-
-            if ($eventType->toString() === SnapshotEvent::class) {
-                $aggregate = $eventPayload->getAggregate();
-
-                continue;
             }
 
             $message = MessageBuilder::withPayload($eventPayload)

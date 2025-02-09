@@ -49,6 +49,6 @@ class Event
 
     public function withAddedMetadata(array $metadata): self
     {
-        return self::create($this->payload, array_merge($this->metadata, $metadata));
+        return self::createWithType($this->eventName, $this->payload, array_merge($this->metadata, $metadata));
     }
 }

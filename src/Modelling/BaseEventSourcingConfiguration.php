@@ -18,6 +18,11 @@ class BaseEventSourcingConfiguration implements DefinedObject
 
     }
 
+    public static function withDefaults(): self
+    {
+        return new self();
+    }
+
     /**
      * @TODO Ecotone 2.0 drop it
      * @deprecated use BaseEventSourcingConfiguration::withSnapshotsFor instead

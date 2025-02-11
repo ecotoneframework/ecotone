@@ -423,7 +423,7 @@ final class FlowTestSupport
     /**
      * @param array<string, mixed> $parameters
      */
-    public function runConsoleCommand(string $name, array $parameters)
+    public function runConsoleCommand(string $name, array $parameters = [])
     {
         $this->configuredMessagingSystem->runConsoleCommand($name, $parameters);
 

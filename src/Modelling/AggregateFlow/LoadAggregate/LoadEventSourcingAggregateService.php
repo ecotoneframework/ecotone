@@ -8,11 +8,13 @@ use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\NullableMessageChannel;
+use Ecotone\Messaging\Store\Document\DocumentException;
 use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -43,6 +45,7 @@ final class LoadEventSourcingAggregateService implements MessageProcessor
         private LoadAggregateMode $loadAggregateMode,
         private ContainerInterface $container,
         private BaseEventSourcingConfiguration $eventSourcingConfiguration,
+        private LoggingGateway $loggingGateway,
     ) {
     }
 
@@ -75,11 +78,20 @@ final class LoadEventSourcingAggregateService implements MessageProcessor
                 /** @var DocumentStore $documentStore */
                 $documentStore = $this->container->get($config['documentStore']);
 
-                $aggregate = $documentStore->findDocument(SaveAggregateService::getSnapshotCollectionName($this->aggregateClassName), SaveAggregateService::getSnapshotDocumentId($aggregateIdentifiers));
+                try {
+                    $aggregate = $documentStore->findDocument(SaveAggregateService::getSnapshotCollectionName($this->aggregateClassName), SaveAggregateService::getSnapshotDocumentId($aggregateIdentifiers));
+                } catch (DocumentException $documentException) {
+                    $this->loggingGateway->error("Failure during loading snapshot for aggregate {$this->aggregateClassName} with identifiers " . json_encode($aggregateIdentifiers) . '. Snapshot ignored to self system system. Error: ' . $documentException->getMessage(), [
+                        'exception' => $documentException,
+                    ]);
+                }
 
-                if (! is_null($aggregate)) {
+                if ($aggregate !== null && $aggregate::class === $this->aggregateClassName) {
                     $aggregateVersion = $this->getAggregateVersion($aggregate);
                     Assert::isTrue($aggregateVersion > 0, sprintf('Serialization for snapshot of %s is set incorrectly, it does not serialize aggregate version', $aggregate::class));
+                } elseif ($aggregate !== null) {
+                    $this->loggingGateway->error("Snapshot for aggregate {$this->aggregateClassName} was found, but it is not instance of {$this->aggregateClassName}. It is type of " . gettype($aggregate) . '. Snapshot ignored to self-heal system.');
+                    $aggregate = null;
                 }
             }
         }

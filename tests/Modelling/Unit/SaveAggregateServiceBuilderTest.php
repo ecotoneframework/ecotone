@@ -5,6 +5,7 @@ namespace Test\Ecotone\Modelling\Unit;
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Store\Document\DocumentException;
 use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Messaging\Store\Document\InMemoryDocumentStore;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -12,8 +13,10 @@ use Ecotone\Modelling\AggregateFlow\SaveAggregate\SaveAggregateService;
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
+use Ecotone\Test\StubLogger;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
+use stdClass;
 use Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder\AggregateCreated;
 use Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder\CreateAggregate;
 use Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder\CreateSomething;
@@ -76,7 +79,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $ticket = EcotoneLite::bootstrapFlowTesting(
             [Ticket::class],
-            [DocumentStore::class => $inMemoryDocumentStore],
+            [DocumentStore::class => $inMemoryDocumentStore, 'logger' => $stubLogger = StubLogger::create()],
             configuration: ServiceConfiguration::createWithDefaults()
                 ->withExtensionObjects([
                     (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 1),
@@ -89,6 +92,63 @@ class SaveAggregateServiceBuilderTest extends TestCase
             $ticket,
             $inMemoryDocumentStore->getDocument(SaveAggregateService::getSnapshotCollectionName(Ticket::class), 1)
         );
+        $this->assertCount(0, $stubLogger->getError());
+    }
+
+    public function test_recovering_from_undesired_snapshot()
+    {
+        $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
+
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [Ticket::class],
+            [DocumentStore::class => $inMemoryDocumentStore, 'logger' => $stubLogger = StubLogger::create()],
+            configuration: ServiceConfiguration::createWithDefaults()
+                ->withExtensionObjects([
+                    (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 1),
+                ])
+        );
+
+        $ecotoneLite
+            ->sendCommand(new StartTicketCommand($ticketId = 1))
+            ->getAggregate(Ticket::class, ['ticketId' => $ticketId]);
+
+        $inMemoryDocumentStore->upsertDocument(SaveAggregateService::getSnapshotCollectionName(Ticket::class), SaveAggregateService::getSnapshotDocumentId(['ticketId' => 1]), new stdClass());
+
+        $ecotoneLite->sendCommand(new AssignWorkerCommand($ticketId, 'johny'));
+
+        $this->assertEquals(
+            $ecotoneLite->getAggregate(Ticket::class, ['ticketId' => $ticketId]),
+            $inMemoryDocumentStore->getDocument(SaveAggregateService::getSnapshotCollectionName(Ticket::class), 1)
+        );
+        $this->assertCount(1, $stubLogger->getError());
+    }
+
+    public function test_recovering_from_conversion_exception()
+    {
+        $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
+
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [Ticket::class],
+            [DocumentStore::class => $inMemoryDocumentStore, 'logger' => $stubLogger = StubLogger::create()],
+            configuration: ServiceConfiguration::createWithDefaults()
+                ->withExtensionObjects([
+                    (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 1),
+                ])
+        );
+
+        $ecotoneLite
+            ->sendCommand(new StartTicketCommand($ticketId = 1))
+            ->getAggregate(Ticket::class, ['ticketId' => $ticketId]);
+
+        $inMemoryDocumentStore->upsertDocument(SaveAggregateService::getSnapshotCollectionName(Ticket::class), SaveAggregateService::getSnapshotDocumentId(['ticketId' => 1]), DocumentException::create('failure on conversion'));
+
+        $ecotoneLite->sendCommand(new AssignWorkerCommand($ticketId, 'johny'));
+
+        $this->assertEquals(
+            $ecotoneLite->getAggregate(Ticket::class, ['ticketId' => $ticketId]),
+            $inMemoryDocumentStore->getDocument(SaveAggregateService::getSnapshotCollectionName(Ticket::class), 1)
+        );
+        $this->assertCount(1, $stubLogger->getError());
     }
 
     public function test_snapshoting_different_aggregate_instances()

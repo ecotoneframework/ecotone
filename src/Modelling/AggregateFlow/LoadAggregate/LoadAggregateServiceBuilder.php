@@ -11,6 +11,7 @@ use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Processor\InterceptedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Attribute\AggregateVersion;
@@ -122,6 +123,7 @@ class LoadAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
             new Definition(LoadAggregateMode::class, [$this->loadAggregateMode->getType()]),
             new Reference(ContainerInterface::class),
             $this->eventSourcingConfiguration,
+            Reference::to(LoggingGateway::class),
         ]);
     }
 

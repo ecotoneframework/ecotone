@@ -38,6 +38,11 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
 
     public function process(Message $message): Message
     {
+        /** @TODO Ecotone 2.0 (remove) this. For backward compatibility because it's ran again when message is consumed from Queue e*/
+        if ($message->getHeaders()->containsKey(AggregateMessage::AGGREGATE_ID)) {
+            return $message;
+        }
+
         if ($message->getHeaders()->containsKey(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER)) {
             $aggregateIds = $message->getHeaders()->get(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER);
             $aggregateIds = is_array($aggregateIds) ? $aggregateIds : [array_key_first($this->messageIdentifierMapping) => $aggregateIds];

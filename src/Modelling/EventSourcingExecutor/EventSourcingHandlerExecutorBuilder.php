@@ -20,16 +20,8 @@ use ReflectionClass;
  */
 final class EventSourcingHandlerExecutorBuilder
 {
-    public static function createFor(ClassDefinition $classDefinition, bool $isEventSourced, InterfaceToCallRegistry $interfaceToCallRegistry): Definition
+    public static function createFor(ClassDefinition $classDefinition, InterfaceToCallRegistry $interfaceToCallRegistry): Definition
     {
-        if (! $isEventSourced) {
-            return new Definition($classDefinition->getClassType()->toString(), [
-                $classDefinition->getClassType()->toString(),
-                [],
-                LicenceDecider::prepareDefinition(AggregateMethodInvoker::class, OpenCoreAggregateMethodInvoker::class, EnterpriseAggregateMethodInvoker::class),
-            ]);
-        }
-
         $parameterConverterFactory = ParameterConverterAnnotationFactory::create();
         $class = new ReflectionClass($classDefinition->getClassType()->toString());
 

@@ -16,7 +16,6 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerAggregateObje
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\EventSourcingSaga;
@@ -120,8 +119,6 @@ class CallAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
         )
             ->withResultToMessageConverter(
                 new Definition(CallAggregateResultToMessageConverter::class, [
-                    Reference::to(AggregateDefinitionRegistry::class),
-                    $this->interfaceToCall->getInterfaceName(),
                     $this->interfaceToCall->getReturnType(),
                     new Reference(PropertyReaderAccessor::class),
                     $this->isCommandHandler,

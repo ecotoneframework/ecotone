@@ -8,6 +8,7 @@ use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\EventSourcingSaga;
+use Ecotone\Modelling\Attribute\Repository;
 
 /**
  * Class InMemoryEventSourcedRepository
@@ -17,6 +18,7 @@ use Ecotone\Modelling\Attribute\EventSourcingSaga;
 /**
  * licence Apache-2.0
  */
+#[Repository]
 class InMemoryEventSourcedRepository implements EventSourcedRepository
 {
     /**

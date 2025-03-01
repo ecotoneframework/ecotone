@@ -21,17 +21,23 @@ final class AggregateDefinitionRegistry
 
     }
 
-    public function getFor(TypeDescriptor $className): AggregateClassDefinition
+    /**
+     * @param TypeDescriptor|class-string $className
+     */
+    public function getFor(TypeDescriptor|string $className): AggregateClassDefinition
     {
-        if (isset($this->aggregateDefinitions[$className->toString()])) {
-            return $this->aggregateDefinitions[$className->toString()];
+        if (isset($this->aggregateDefinitions[(string) $className])) {
+            return $this->aggregateDefinitions[(string) $className];
         }
 
-        throw new ConfigurationException("No aggregate was registered for {$className->toString()}. Is this class name correct, and have you marked this class with #[Aggregate] attribute?");
+        throw new ConfigurationException("No aggregate was registered for {$className}. Is this class name correct, and have you marked this class with #[Aggregate] attribute?");
     }
 
-    public function has(TypeDescriptor $className): bool
+    /**
+     * @param TypeDescriptor|class-string $className
+     */
+    public function has(TypeDescriptor|string $className): bool
     {
-        return isset($this->aggregateDefinitions[$className->toString()]);
+        return isset($this->aggregateDefinitions[(string) $className]);
     }
 }

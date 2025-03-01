@@ -6,6 +6,7 @@ namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Modelling\AggregateMessage;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\IdentifierMapping\AttributeMapping\OrderProcessWithAttributeHeadersMapping;
 use Test\Ecotone\Modelling\Fixture\IdentifierMapping\AttributeMapping\OrderProcessWithAttributePayloadMapping;
@@ -150,6 +151,9 @@ final class IdentifierMappingTest extends TestCase
                 ->getSaga(OrderProcessWithAttributePayloadMapping::class, '123')
                 ->getStatus()
         );
+
+        $recordedEvents = $ecotoneLite->getRecordedEventHeaders();
+        $this->assertArrayNotHasKey(AggregateMessage::AGGREGATE_ID, $recordedEvents[0]->headers());
     }
 
     public function test_mapping_using_attribute_mapper_from_header(): void

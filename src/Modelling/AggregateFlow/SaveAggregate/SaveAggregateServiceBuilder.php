@@ -8,11 +8,8 @@ use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateResolver;
-use Ecotone\Modelling\BaseEventSourcingConfiguration;
 use Ecotone\Modelling\EventBus;
-use Ecotone\Modelling\LazyEventSourcedRepository;
-use Ecotone\Modelling\LazyStandardRepository;
-use Psr\Container\ContainerInterface;
+use Ecotone\Modelling\Repository\AllAggregateRepository;
 
 /**
  * Class AggregateCallingCommandHandlerBuilder
@@ -24,36 +21,16 @@ use Psr\Container\ContainerInterface;
  */
 class SaveAggregateServiceBuilder implements CompilableBuilder
 {
-    /**
-     * @var string[]
-     */
-    private array $aggregateRepositoryReferenceNames = [];
-
     private ?string $calledAggregateClassName = null;
 
     private function __construct(
-        private BaseEventSourcingConfiguration $eventSourcingConfiguration,
         private bool $publishEvents = true,
     ) {
     }
 
-    /**
-     * @param string[] $aggregateClasses
-     */
-    public static function create(
-        BaseEventSourcingConfiguration $eventSourcingConfiguration,
-    ): self {
-        return new self($eventSourcingConfiguration);
-    }
-
-    /**
-     * @param string[] $aggregateRepositoryReferenceNames
-     */
-    public function withAggregateRepositoryFactories(array $aggregateRepositoryReferenceNames): self
+    public static function create(): self
     {
-        $this->aggregateRepositoryReferenceNames = $aggregateRepositoryReferenceNames;
-
-        return $this;
+        return new self();
     }
 
     public function withPublishEvents(bool $publishEvents): self
@@ -65,23 +42,12 @@ class SaveAggregateServiceBuilder implements CompilableBuilder
 
     public function compile(MessagingContainerBuilder $builder): Definition
     {
-        $eventSourcedRepository = new Definition(LazyEventSourcedRepository::class, [
-            array_map(static fn ($id) => new Reference($id), $this->aggregateRepositoryReferenceNames),
-        ], 'create');
-
-        $standardRepository = new Definition(LazyStandardRepository::class, [
-            array_map(static fn ($id) => new Reference($id), $this->aggregateRepositoryReferenceNames),
-        ], 'create');
-
         return new Definition(SaveAggregateService::class, [
-            $eventSourcedRepository,
+            new Reference(AllAggregateRepository::class),
             Definition::createFor(PropertyReaderAccessor::class, []),
-            $standardRepository,
             new Reference(AggregateResolver::class),
-            $this->eventSourcingConfiguration,
             $this->publishEvents,
             Reference::to(EventBus::class),
-            Reference::to(ContainerInterface::class),
         ]);
     }
 

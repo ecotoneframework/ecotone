@@ -17,6 +17,7 @@ use Ecotone\Messaging\Metadata\RevisionMetadataEnricher;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\AggregateFlow\AggregateIdMetadata;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateClassDefinition;
 use Ecotone\Modelling\AggregateIdResolver;
 use Ecotone\Modelling\AggregateMessage;
@@ -65,14 +66,8 @@ class SaveAggregateServiceTemplate
         AggregateClassDefinition $aggregateDefinition,
         bool $throwOnNoIdentifier
     ): array {
-        $aggregateIds = $metadata[AggregateMessage::AGGREGATE_ID] ?? [];
-        if ($aggregateIds) {
-            if (! is_array($aggregateIds)) {
-                return [
-                    array_key_first($aggregateDefinition->getAggregateIdentifierMapping()) => (string)$aggregateIds,
-                ];
-            }
-
+        $aggregateIds = isset($metadata[AggregateMessage::AGGREGATE_ID]) ? AggregateIdMetadata::createFrom($metadata[AggregateMessage::AGGREGATE_ID])->getIdentifiers() : [];
+        if ($aggregateIds && self::hasAnyIdentifiersDefined($aggregateIds)) {
             return $aggregateIds;
         }
 
@@ -102,7 +97,7 @@ class SaveAggregateServiceTemplate
             $aggregateIds[$aggregateIdName] = $id;
         }
 
-        return AggregateIdResolver::resolveArrayOfIdentifiers(get_class($aggregate), $aggregateIds);
+        return AggregateIdResolver::resolveArrayOfIdentifiers(get_class($aggregate), $aggregateIds)->getIdentifiers();
     }
 
     /**
@@ -149,6 +144,8 @@ class SaveAggregateServiceTemplate
                 $event = $event->getPayload();
             }
             $eventMetadata = MessageHeaders::unsetAllFrameworkHeaders($eventMetadata);
+            /** This need to be removed explicitly after saving, to be passed correctly across asynchronous message channels */
+            unset($eventMetadata[AggregateMessage::AGGREGATE_ID]);
             $eventMetadata = $headerMapper->mapFromMessageHeaders($eventMetadata, $conversionService);
 
             $eventMetadata = RevisionMetadataEnricher::enrich($eventMetadata, $event);
@@ -165,5 +162,10 @@ class SaveAggregateServiceTemplate
                 $eventMetadata
             );
         }, $events);
+    }
+
+    public static function hasAnyIdentifiersDefined(array $aggregateIds): bool
+    {
+        return array_unique(array_values($aggregateIds)) !== [null];
     }
 }

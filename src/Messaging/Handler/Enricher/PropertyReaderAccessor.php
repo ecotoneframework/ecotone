@@ -93,9 +93,11 @@ class PropertyReaderAccessor
             } else {
                 $objectReflection = new ReflectionClass($fromData);
                 $classProperty = $objectReflection->getProperty($currentAccessProperty);
-                $classProperty->setAccessible(true);
 
-                return $classProperty->getValue($fromData);
+                if ($classProperty->isInitialized($fromData)) {
+                    $classProperty->setAccessible(true);
+                    return $classProperty->getValue($fromData);
+                }
             }
         }
 

@@ -7,11 +7,13 @@ namespace Ecotone\Modelling;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\Attribute\Saga;
 
 /**
  * licence Apache-2.0
  */
+#[Repository]
 class InMemoryStandardRepository implements StandardRepository
 {
     /**

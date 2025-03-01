@@ -8,7 +8,7 @@ use Ecotone\Messaging\Support\Assert;
 /**
  * licence Apache-2.0
  */
-class Reference
+class Reference implements CompilableBuilder
 {
     public function __construct(protected string $id, protected int $invalidBehavior = ContainerImplementation::EXCEPTION_ON_INVALID_REFERENCE)
     {
@@ -41,6 +41,11 @@ class Reference
     public function getInvalidBehavior(): int
     {
         return $this->invalidBehavior;
+    }
+
+    public function compile(MessagingContainerBuilder $builder): self
+    {
+        return $this;
     }
 
     public function __toString(): string

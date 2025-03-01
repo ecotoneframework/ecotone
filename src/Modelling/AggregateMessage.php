@@ -12,11 +12,12 @@ namespace Ecotone\Modelling;
  */
 interface AggregateMessage
 {
+    /** User facing header, may contain scalar and array format  */
     public const OVERRIDE_AGGREGATE_IDENTIFIER = 'aggregate.id';
-    public const AGGREGATE_OBJECT_EXISTS = 'ecotone.modelling.aggregate_exists';
+    /** Internal header, format is always array (identityName: value). Should be used via AggregateIdMetadata */
+    public const AGGREGATE_ID = 'ecotone.modelling.aggregate.id';
     public const CALLED_AGGREGATE_INSTANCE = 'ecotone.modelling.called_aggregate';
     public const CALLED_AGGREGATE_CLASS = 'ecotone.modelling.called_aggregate_class';
-    public const AGGREGATE_ID = 'ecotone.modelling.aggregate.id';
     public const TARGET_VERSION = 'ecotone.modelling.aggregate.target_version';
     public const RECORDED_AGGREGATE_EVENTS = 'ecotone.modelling.called_aggregate_events';
     public const NULL_EXECUTION_RESULT = 'ecotone.modelling.is_nullable_execution_result';

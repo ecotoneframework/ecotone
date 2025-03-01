@@ -68,6 +68,11 @@ final class AggregateResolver
 
         /** Pure Event Sourced Aggregates returns events directly, therefore it lands as message payload */
         if ($aggregateDefinition->isPureEventSourcedAggregate()) {
+            if ($message->getHeaders()->containsKey(AggregateMessage::NULL_EXECUTION_RESULT)
+                && $message->getHeaders()->get(AggregateMessage::NULL_EXECUTION_RESULT) === true
+            ) {
+                return [];
+            }
             $returnType = TypeDescriptor::createFromVariable($message->getPayload());
             if ($this->isNewAggregateInstanceReturned($returnType)) {
                 return [];

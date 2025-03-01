@@ -10,18 +10,10 @@ use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Processor\InterceptedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Modelling\Attribute\AggregateVersion;
-use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\TargetAggregateVersion;
-use Ecotone\Modelling\BaseEventSourcingConfiguration;
-use Ecotone\Modelling\EventSourcingExecutor\EventSourcingHandlerExecutorBuilder;
-use Ecotone\Modelling\LazyEventSourcedRepository;
-use Ecotone\Modelling\LazyStandardRepository;
-use Psr\Container\ContainerInterface;
+use Ecotone\Modelling\Repository\AllAggregateRepository;
 
 /**
  * licence Apache-2.0
@@ -31,25 +23,20 @@ class LoadAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
     private string $aggregateClassName;
     private string $methodName;
     private ?string $messageVersionPropertyName;
-    private ?string $aggregateVersionPropertyName = null;
-    private array $aggregateRepositoryReferenceNames;
-    private Definition $eventSourcingHandlerExecutor;
     private LoadAggregateMode $loadAggregateMode;
-    private bool $isEventSourced;
-    private bool $isAggregateVersionAutomaticallyIncreased = true;
 
-    private function __construct(ClassDefinition $aggregateClassName, string $methodName, ?ClassDefinition $handledMessageClass, LoadAggregateMode $loadAggregateMode, InterfaceToCallRegistry $interfaceToCallRegistry, private BaseEventSourcingConfiguration $eventSourcingConfiguration)
+    private function __construct(ClassDefinition $aggregateClassName, string $methodName, ?ClassDefinition $handledMessageClass, LoadAggregateMode $loadAggregateMode)
     {
         $this->aggregateClassName      = $aggregateClassName;
         $this->methodName              = $methodName;
         $this->loadAggregateMode = $loadAggregateMode;
 
-        $this->initialize($aggregateClassName, $handledMessageClass, $interfaceToCallRegistry);
+        $this->initialize($handledMessageClass);
     }
 
-    public static function create(ClassDefinition $aggregateClassDefinition, string $methodName, ?ClassDefinition $handledMessageClass, LoadAggregateMode $loadAggregateMode, InterfaceToCallRegistry $interfaceToCallRegistry, BaseEventSourcingConfiguration $eventSourcingConfiguration): self
+    public static function create(ClassDefinition $aggregateClassDefinition, string $methodName, ?ClassDefinition $handledMessageClass, LoadAggregateMode $loadAggregateMode): self
     {
-        return new self($aggregateClassDefinition, $methodName, $handledMessageClass, $loadAggregateMode, $interfaceToCallRegistry, $eventSourcingConfiguration);
+        return new self($aggregateClassDefinition, $methodName, $handledMessageClass, $loadAggregateMode);
     }
 
     public function compile(MessagingContainerBuilder $builder, array $aroundInterceptors = []): Definition
@@ -60,26 +47,18 @@ class LoadAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
             ], 'create'));
         }
 
-        if ($this->isEventSourced) {
-            return $this->loadEventSourcingAggregateService();
-        } else {
-            return $this->loadStateBasedAggregateService();
-        }
+        return new Definition(LoadAggregateMessageProcessor::class, [
+            new Reference(AllAggregateRepository::class),
+            $this->aggregateClassName,
+            $this->methodName,
+            $this->messageVersionPropertyName,
+            new Reference(PropertyReaderAccessor::class),
+            new Definition(LoadAggregateMode::class, [$this->loadAggregateMode->getType()]),
+        ]);
     }
 
-    /**
-     * @param string[] $aggregateRepositoryReferenceNames
-     */
-    public function withAggregateRepositoryFactories(array $aggregateRepositoryReferenceNames): self
+    private function initialize(?ClassDefinition $handledMessageClassName): void
     {
-        $this->aggregateRepositoryReferenceNames = $aggregateRepositoryReferenceNames;
-
-        return $this;
-    }
-
-    private function initialize(ClassDefinition $aggregateClassDefinition, ?ClassDefinition $handledMessageClassName, InterfaceToCallRegistry $interfaceToCallRegistry): void
-    {
-        $this->isEventSourced = $aggregateClassDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcingAggregate::class));
         $aggregateMessageVersionPropertyName = null;
         if ($handledMessageClassName) {
             $targetAggregateVersion            = TypeDescriptor::create(TargetAggregateVersion::class);
@@ -89,61 +68,8 @@ class LoadAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
                 }
             }
         }
-        $versionAnnotation = TypeDescriptor::create(AggregateVersion::class);
-        foreach ($aggregateClassDefinition->getProperties() as $property) {
-            if ($property->hasAnnotation($versionAnnotation)) {
-                /** @var AggregateVersion $annotation */
-                $annotation = $property->getAnnotation($versionAnnotation);
-                $this->aggregateVersionPropertyName = $property->getName();
-                $this->isAggregateVersionAutomaticallyIncreased = $annotation->isAutoIncreased();
-            }
-        }
 
         $this->messageVersionPropertyName = $aggregateMessageVersionPropertyName;
-        $this->eventSourcingHandlerExecutor = EventSourcingHandlerExecutorBuilder::createFor($aggregateClassDefinition, $this->isEventSourced, $interfaceToCallRegistry);
-    }
-
-    private function loadEventSourcingAggregateService(): Definition
-    {
-        $repository = new Definition(LazyEventSourcedRepository::class, [
-            array_map(fn ($id) => new Reference($id), $this->aggregateRepositoryReferenceNames),
-        ], 'create')
-        ;
-
-        return new Definition(LoadEventSourcingAggregateService::class, [
-            $repository,
-            $this->aggregateClassName,
-            $this->methodName,
-            $this->messageVersionPropertyName,
-            $this->aggregateVersionPropertyName,
-            $this->isAggregateVersionAutomaticallyIncreased,
-            new Reference(PropertyReaderAccessor::class),
-            new Reference(PropertyEditorAccessor::class),
-            $this->eventSourcingHandlerExecutor,
-            new Definition(LoadAggregateMode::class, [$this->loadAggregateMode->getType()]),
-            new Reference(ContainerInterface::class),
-            $this->eventSourcingConfiguration,
-            Reference::to(LoggingGateway::class),
-        ]);
-    }
-
-    private function loadStateBasedAggregateService(): Definition
-    {
-        $repository = new Definition(LazyStandardRepository::class, [
-            array_map(fn ($id) => new Reference($id), $this->aggregateRepositoryReferenceNames),
-        ], 'create');
-
-        return new Definition(LoadStateBasedAggregateService::class, [
-            $repository,
-            $this->aggregateClassName,
-            $this->methodName,
-            $this->messageVersionPropertyName,
-            $this->aggregateVersionPropertyName,
-            $this->isAggregateVersionAutomaticallyIncreased,
-            new Reference(PropertyReaderAccessor::class),
-            new Reference(PropertyEditorAccessor::class),
-            new Definition(LoadAggregateMode::class, [$this->loadAggregateMode->getType()]),
-        ]);
     }
 
     public function getInterceptedInterface(): InterfaceToCallReference

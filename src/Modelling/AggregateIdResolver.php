@@ -2,6 +2,8 @@
 
 namespace Ecotone\Modelling;
 
+use Ecotone\Modelling\AggregateFlow\AggregateIdMetadata;
+
 /**
  * licence Apache-2.0
  */
@@ -23,13 +25,13 @@ class AggregateIdResolver
         return $id;
     }
 
-    public static function resolveArrayOfIdentifiers(string $aggregateClass, array $ids): array
+    public static function resolveArrayOfIdentifiers(string $aggregateClass, array $ids): AggregateIdMetadata
     {
         $resolvedIdentifiers = [];
         foreach ($ids as $name => $id) {
             $resolvedIdentifiers[$name] = self::resolve($aggregateClass, $id);
         }
 
-        return $resolvedIdentifiers;
+        return new AggregateIdMetadata($resolvedIdentifiers);
     }
 }

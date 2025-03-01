@@ -47,6 +47,7 @@ use Ecotone\Messaging\Handler\Logger\Config\LoggingModule;
 use Ecotone\Messaging\Handler\Logger\Config\MessageHandlerLogger;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\AggregrateModule;
+use Ecotone\Modelling\Config\EventSourcedRepositoryModule;
 use Ecotone\Modelling\Config\InstantRetry\InstantRetryModule;
 use Ecotone\Modelling\Config\MessageHandlerRoutingModule;
 use Ecotone\Modelling\Config\ServiceHandlerModule;
@@ -94,6 +95,7 @@ class ModuleClassList
         MessageConsumerModule::class,
         InstantRetryModule::class,
         DynamicMessageChannelModule::class,
+        EventSourcedRepositoryModule::class,
 
         /** Attribute based configurations */
         MessageHeadersPropagatorInterceptor::class,

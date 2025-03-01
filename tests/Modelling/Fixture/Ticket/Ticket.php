@@ -64,6 +64,11 @@ class Ticket
         return $this->version;
     }
 
+    public function getWorkerId(): ?string
+    {
+        return $this->workerId;
+    }
+
     public function setVersion(int $version): void
     {
         $this->version = $version;

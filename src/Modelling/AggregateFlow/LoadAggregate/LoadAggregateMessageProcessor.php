@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\AggregateFlow\LoadAggregate;
 
-use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\MessageProcessor;
@@ -13,24 +12,22 @@ use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\AggregateFlow\AggregateIdMetadata;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\AggregateNotFoundException;
-use Ecotone\Modelling\StandardRepository;
+use Ecotone\Modelling\Repository\AggregateRepository;
 
 /**
  * licence Apache-2.0
  */
-final class LoadStateBasedAggregateService implements MessageProcessor
+final class LoadAggregateMessageProcessor implements MessageProcessor
 {
     public function __construct(
-        private StandardRepository $repository,
+        private AggregateRepository $repository,
         private string $aggregateClassName,
         private string $aggregateMethod,
         private ?string $messageVersionPropertyName,
-        private ?string $aggregateVersionPropertyName,
-        private bool $isAggregateVersionAutomaticallyIncreased,
         private PropertyReaderAccessor $propertyReaderAccessor,
-        private PropertyEditorAccessor $propertyEditorAccessor,
         private LoadAggregateMode $loadAggregateMode
     ) {
     }
@@ -39,7 +36,9 @@ final class LoadStateBasedAggregateService implements MessageProcessor
     {
         $resultMessage = MessageBuilder::fromMessage($message);
 
-        $aggregateIdentifiers = $message->getHeaders()->get(AggregateMessage::AGGREGATE_ID);
+        $aggregateIdentifiers = AggregateIdMetadata::createFrom(
+            $message->getHeaders()->get(AggregateMessage::AGGREGATE_ID)
+        )->getIdentifiers();
 
         foreach ($aggregateIdentifiers as $identifierName => $aggregateIdentifier) {
             if (is_null($aggregateIdentifier)) {
@@ -58,7 +57,6 @@ final class LoadStateBasedAggregateService implements MessageProcessor
         }
 
         $aggregate = $this->repository->findBy($this->aggregateClassName, $aggregateIdentifiers);
-        $aggregateVersion = null;
 
         if (! $aggregate && $this->loadAggregateMode->isDroppingMessageOnNotFound()) {
             return null;
@@ -73,10 +71,7 @@ final class LoadStateBasedAggregateService implements MessageProcessor
         }
 
         if ($aggregate) {
-            if (! is_null($aggregateVersion) && $this->isAggregateVersionAutomaticallyIncreased) {
-                $this->propertyEditorAccessor->enrichDataWith(PropertyPath::createWith($this->aggregateVersionPropertyName), $aggregate, $aggregateVersion, $message, null);
-            }
-            $resultMessage = $resultMessage->setHeader(AggregateMessage::CALLED_AGGREGATE_INSTANCE, $aggregate);
+            $resultMessage = $resultMessage->setHeader(AggregateMessage::CALLED_AGGREGATE_INSTANCE, $aggregate->getAggregateInstance());
         }
 
         if (! $message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {

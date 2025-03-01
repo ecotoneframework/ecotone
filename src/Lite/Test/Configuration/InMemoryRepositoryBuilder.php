@@ -53,11 +53,6 @@ final class InMemoryRepositoryBuilder implements RepositoryBuilder
         return isset($this->aggregateClassNames[$aggregateClassName]);
     }
 
-    public function isEventSourced(): bool
-    {
-        return $this->isEventSourced;
-    }
-
     public function compile(MessagingContainerBuilder $builder): Definition
     {
         return match ($this->isEventSourced) {

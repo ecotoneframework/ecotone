@@ -14,12 +14,9 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateResolver;
 use Ecotone\Modelling\Attribute\NamedEvent;
-use Ecotone\Modelling\BaseEventSourcingConfiguration;
 use Ecotone\Modelling\Event;
 use Ecotone\Modelling\EventBus;
-use Ecotone\Modelling\EventSourcedRepository;
-use Ecotone\Modelling\StandardRepository;
-use Psr\Container\ContainerInterface;
+use Ecotone\Modelling\Repository\AggregateRepository;
 
 /**
  * licence Apache-2.0
@@ -30,14 +27,11 @@ final class SaveAggregateService implements MessageProcessor
     public const SNAPSHOT_COLLECTION = 'aggregate_snapshots_';
 
     public function __construct(
-        private EventSourcedRepository $eventSourcedAggregateRepository,
+        private AggregateRepository $aggregateRepository,
         private PropertyReaderAccessor $propertyReaderAccessor,
-        private StandardRepository     $standardRepository,
         private AggregateResolver      $aggregateResolver,
-        private BaseEventSourcingConfiguration $eventSourcingConfiguration,
         private bool $publishEvents,
         private EventBus $eventBus,
-        private ContainerInterface $container,
     ) {
 
     }
@@ -54,42 +48,22 @@ final class SaveAggregateService implements MessageProcessor
         foreach ($resolvedAggregates as $key => $resolvedAggregate) {
             $version = $resolvedAggregate->getVersionBeforeHandling();
 
-            if (! $resolvedAggregate->getAggregateClassDefinition()->isEventSourced()) {
-                $this->standardRepository->save(
-                    $resolvedAggregate->getIdentifiers(),
+            $this->aggregateRepository->save(
+                $resolvedAggregate,
+                $metadata,
+                $version
+            );
+
+            /** For ORM identifier may be assigned after saving */
+            $resolvedAggregates[$key] = $resolvedAggregate->withIdentifiers(
+                SaveAggregateServiceTemplate::getAggregateIds(
+                    $this->propertyReaderAccessor,
+                    $message->getHeaders()->headers(),
                     $resolvedAggregate->getAggregateInstance(),
-                    $metadata,
-                    $version
-                );
-
-                /** For ORM identifier may be assigned after saving */
-                $resolvedAggregates[$key] = $resolvedAggregate->withIdentifiers(
-                    SaveAggregateServiceTemplate::getAggregateIds(
-                        $this->propertyReaderAccessor,
-                        $message->getHeaders()->headers(),
-                        $resolvedAggregate->getAggregateInstance(),
-                        $resolvedAggregate->getAggregateClassDefinition(),
-                        true,
-                    )
-                );
-
-                continue;
-            }
-
-            if ($this->eventSourcingConfiguration->useSnapshotFor($resolvedAggregate->getAggregateClassName())) {
-                $snapshotTriggerThreshold = $this->eventSourcingConfiguration->getSnapshotTriggerThresholdFor($resolvedAggregate->getAggregateClassName());
-                foreach ($resolvedAggregate->getEvents() as $event) {
-                    $version += 1;
-                    if ($version % $snapshotTriggerThreshold === 0) {
-                        $documentStore = $this->container->get(
-                            $this->eventSourcingConfiguration->getDocumentStoreReferenceFor($resolvedAggregate->getAggregateClassName())
-                        );
-                        $documentStore->upsertDocument(self::getSnapshotCollectionName($resolvedAggregate->getAggregateClassName()), self::getSnapshotDocumentId($resolvedAggregate->getIdentifiers()), $resolvedAggregate->getAggregateInstance());
-                    }
-                }
-            }
-
-            $this->eventSourcedAggregateRepository->save($resolvedAggregate->getIdentifiers(), $resolvedAggregate->getAggregateClassName(), $resolvedAggregate->getEvents(), $metadata, $resolvedAggregate->getVersionBeforeHandling());
+                    $resolvedAggregate->getAggregateClassDefinition(),
+                    true,
+                )
+            );
         }
 
         if ($this->publishEvents) {

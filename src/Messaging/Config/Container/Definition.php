@@ -65,7 +65,7 @@ class Definition implements CompilableBuilder
         return $this->methodCalls;
     }
 
-    public function compile(MessagingContainerBuilder $builder): Definition|Reference
+    public function compile(MessagingContainerBuilder $builder): self
     {
         return $this;
     }

@@ -41,11 +41,6 @@ class AppointmentRepositoryBuilder implements LazyRepositoryBuilder
         return $aggregateClassName === Appointment::class;
     }
 
-    public function isEventSourced(): bool
-    {
-        return false;
-    }
-
     public function build(): EventSourcedRepository|StandardRepository
     {
         return AppointmentStandardRepository::createWith($this->appointments);

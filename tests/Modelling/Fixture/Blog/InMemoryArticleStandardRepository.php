@@ -3,6 +3,7 @@
 namespace Test\Ecotone\Modelling\Fixture\Blog;
 
 use Ecotone\Modelling\AggregateNotFoundException;
+use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\StandardRepository;
 
 /**
@@ -13,6 +14,7 @@ use Ecotone\Modelling\StandardRepository;
 /**
  * licence Apache-2.0
  */
+#[Repository]
 class InMemoryArticleStandardRepository implements StandardRepository
 {
     /**

@@ -34,4 +34,15 @@ class AggregateIdResolver
 
         return new AggregateIdMetadata($resolvedIdentifiers);
     }
+
+    public static function canResolveAggregateId(string $aggregateClass, array $aggregateIdentifiers): bool
+    {
+        foreach ($aggregateIdentifiers as $name => $id) {
+            if (self::resolve($aggregateClass, $id) !== null) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

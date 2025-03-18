@@ -7,12 +7,12 @@ namespace Test\Ecotone\Modelling\Fixture\Saga;
  */
 class PaymentWasDoneEvent
 {
-    private function __construct()
+    private function __construct(public readonly int $paymentId)
     {
     }
 
-    public static function create(): self
+    public static function create(int $paymentId): self
     {
-        return new self();
+        return new self($paymentId);
     }
 }

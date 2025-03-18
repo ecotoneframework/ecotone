@@ -35,6 +35,11 @@ final class LoadAggregateMessageProcessor implements MessageProcessor
     public function process(Message $message): ?Message
     {
         $resultMessage = MessageBuilder::fromMessage($message);
+        $messageType = TypeDescriptor::createFromVariable($message->getPayload());
+
+        if (! $message->getHeaders()->containsKey(AggregateMessage::AGGREGATE_ID)) {
+            throw AggregateNotFoundException::create("Can't call Aggregate {$this->aggregateClassName}:{$this->aggregateMethod} as identifier header is missing. Please check your identifier mapping in {$messageType->toString()}. Have you forgot to add #[TargetIdentifier] in your Command or `aggregate.id` in metadata?");
+        }
 
         $aggregateIdentifiers = AggregateIdMetadata::createFrom(
             $message->getHeaders()->get(AggregateMessage::AGGREGATE_ID)
@@ -42,7 +47,6 @@ final class LoadAggregateMessageProcessor implements MessageProcessor
 
         foreach ($aggregateIdentifiers as $identifierName => $aggregateIdentifier) {
             if (is_null($aggregateIdentifier)) {
-                $messageType = TypeDescriptor::createFromVariable($message->getPayload());
                 throw AggregateNotFoundException::create("Can't call Aggregate {$this->aggregateClassName}:{$this->aggregateMethod} as value for identifier `{$identifierName}` is missing. Please check your identifier mapping in {$messageType->toString()}. Have you forgot to add #[TargetIdentifier] in your Command or `aggregate.id` in metadata?");
             }
         }

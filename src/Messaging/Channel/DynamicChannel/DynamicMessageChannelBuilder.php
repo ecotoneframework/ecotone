@@ -79,6 +79,10 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
         );
     }
 
+    /**
+     * This will create dummy channel that by default will do nothing.
+     * Therefore can be used for customization
+     */
     public static function createNoStrategy(string $thisMessageChannelName): self
     {
         return new self(
@@ -100,6 +104,8 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
     }
 
     /**
+     * This make use of HeaderSendingStrategy for sending and round robin for receiving
+     *
      * @param string $headerName Name of the header that will be used to decide on channel name
      * @param string[] $headerMapping Mapping of header value to channel name. If null header value wil be taken as channel name
      * @param string|null $defaultChannelName Name of the channel that will be used if no mapping is found. If null Exception will be thrown.
@@ -122,13 +128,13 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
     }
 
     /**
-     * This enriches default Rounb Robin strategy with ability to decide if consuming should be skipped
-     * from given channel
+     * This make use of throttling strategy for consumption.
+     * If used for sending it will use round robin strategy
      *
      * @param string $requestChannelName Name of the inputChannel of Internal Message Handler that will decide on the consumption
      * @param string[] $channelNames
      */
-    public static function createRoundRobinWithSkippingStrategy(
+    public static function createThrottlingStrategy(
         string $thisMessageChannelName,
         string $requestChannelName,
         array $channelNames = [],

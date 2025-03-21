@@ -233,7 +233,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
                         ->setExecutionAmountLimit(1),
                 ]),
             enableAsynchronousProcessing: [
-                DynamicMessageChannelBuilder::createRoundRobinWithSkippingStrategy(
+                DynamicMessageChannelBuilder::createThrottlingStrategy(
                     'async_channel',
                     'dynamicChannel.decide',
                     ['channel_one', 'channel_two']

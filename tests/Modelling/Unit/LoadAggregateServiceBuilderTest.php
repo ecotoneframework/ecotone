@@ -3,6 +3,7 @@
 namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\AggregateNotFoundException;
@@ -23,9 +24,11 @@ use Test\Ecotone\Modelling\Fixture\Renter\Appointment;
 use Test\Ecotone\Modelling\Fixture\Renter\AppointmentRepositoryInterface;
 use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
+use Test\Ecotone\Modelling\Fixture\Saga\AsynchronousOrderFulfilment;
 use Test\Ecotone\Modelling\Fixture\Saga\BeforeFinishOrder;
 use Test\Ecotone\Modelling\Fixture\Saga\OrderFulfilment;
 use Test\Ecotone\Modelling\Fixture\Saga\PaymentWasDoneEvent;
+use Test\Ecotone\Modelling\Fixture\Saga\PresendFinishOrder;
 
 /**
  * @internal
@@ -57,7 +60,22 @@ final class LoadAggregateServiceBuilderTest extends BaseEcotoneTestCase
         );
     }
 
-    public function test_loading_aggregate_by_metadata_using_interceptor()
+    public function test_loading_aggregate_by_metadata_async_scenario()
+    {
+        $this->assertEquals(
+            'done',
+            EcotoneLite::bootstrapFlowTesting(
+                classesToResolve: [AsynchronousOrderFulfilment::class],
+                enableAsynchronousProcessing: [SimpleMessageChannelBuilder::createQueueChannel('async')]
+            )
+                ->sendCommandWithRoutingKey('order.start', $oderId = 100)
+                ->publishEvent(PaymentWasDoneEvent::create($oderId), metadata: ['paymentId' => $oderId])
+                ->run('async')
+                ->sendQueryWithRouting('order.status', metadata: ['aggregate.id' => $oderId])
+        );
+    }
+
+    public function test_loading_aggregate_by_metadata_using_before_interceptor()
     {
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [
@@ -70,6 +88,58 @@ final class LoadAggregateServiceBuilderTest extends BaseEcotoneTestCase
         );
         $ecotone->sendCommandWithRoutingKey('order.start', $oderId = 100);
         $ecotone->publishEvent(PaymentWasDoneEvent::create($oderId));
+        $this->assertEquals('done', $ecotone->sendQueryWithRouting('order.status', metadata: ['aggregate.id' => $oderId]));
+    }
+
+    public function test_loading_aggregate_by_metadata_using_before_interceptor_async_scenario()
+    {
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            classesToResolve: [
+                AsynchronousOrderFulfilment::class,
+                BeforeFinishOrder::class,
+            ],
+            containerOrAvailableServices: [
+                new BeforeFinishOrder(),
+            ],
+            enableAsynchronousProcessing: [SimpleMessageChannelBuilder::createQueueChannel('async')]
+        );
+        $ecotone->sendCommandWithRoutingKey('order.start', $oderId = 100);
+        $ecotone->publishEvent(PaymentWasDoneEvent::create($oderId));
+        $ecotone->run('async');
+        $this->assertEquals('done', $ecotone->sendQueryWithRouting('order.status', metadata: ['aggregate.id' => $oderId]));
+    }
+
+    public function test_loading_aggregate_by_metadata_using_presend_interceptor()
+    {
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            classesToResolve: [
+                OrderFulfilment::class,
+                PresendFinishOrder::class,
+            ],
+            containerOrAvailableServices: [
+                new PresendFinishOrder(),
+            ],
+        );
+        $ecotone->sendCommandWithRoutingKey('order.start', $oderId = 100);
+        $ecotone->publishEvent(PaymentWasDoneEvent::create($oderId));
+        $this->assertEquals('done', $ecotone->sendQueryWithRouting('order.status', metadata: ['aggregate.id' => $oderId]));
+    }
+
+    public function test_loading_aggregate_by_metadata_using_presend_interceptor_async_scenario()
+    {
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            classesToResolve: [
+                AsynchronousOrderFulfilment::class,
+                PresendFinishOrder::class,
+            ],
+            containerOrAvailableServices: [
+                new PresendFinishOrder(),
+            ],
+            enableAsynchronousProcessing: [SimpleMessageChannelBuilder::createQueueChannel('async')]
+        );
+        $ecotone->sendCommandWithRoutingKey('order.start', $oderId = 100);
+        $ecotone->publishEvent(PaymentWasDoneEvent::create($oderId));
+        $ecotone->run('async');
         $this->assertEquals('done', $ecotone->sendQueryWithRouting('order.status', metadata: ['aggregate.id' => $oderId]));
     }
 

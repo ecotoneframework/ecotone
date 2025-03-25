@@ -45,6 +45,7 @@ use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDef
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionResolver;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateResolver;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\SaveAggregateServiceBuilder;
+use Ecotone\Modelling\AggregateFlow\SaveAggregate\SaveAggregateTestSetupServiceBuilder;
 use Ecotone\Modelling\AggregateIdentifierRetrevingServiceBuilder;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\Attribute\Aggregate;
@@ -523,7 +524,7 @@ class AggregrateModule implements AnnotationModule
                     MessageProcessorActivatorBuilder::create()
                         ->withInputChannelName(self::getRegisterAggregateSaveRepositoryInputChannel($aggregateClass, forTesting: true))
                         ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], [], null, $interfaceToCallRegistry))
-                        ->chain(SaveAggregateServiceBuilder::create()->withPublishEvents(false))
+                        ->chain(SaveAggregateTestSetupServiceBuilder::create())
                 );
             }
         }

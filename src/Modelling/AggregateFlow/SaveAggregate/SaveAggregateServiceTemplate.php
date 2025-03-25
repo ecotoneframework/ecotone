@@ -168,4 +168,16 @@ class SaveAggregateServiceTemplate
     {
         return array_unique(array_values($aggregateIds)) !== [null];
     }
+
+    public static function enrichAggregateEvents(array $events, int $versionBeforeHandling, array $identifiers, AggregateClassDefinition $aggregateDefinition): array
+    {
+        $incrementedVersion = $versionBeforeHandling;
+        return array_map(static function (object $event) use (&$incrementedVersion, $identifiers, $aggregateDefinition): object {
+            return $event->withAddedMetadata([
+                MessageHeaders::EVENT_AGGREGATE_ID => count($identifiers) === 1 ? $identifiers[array_key_first($identifiers)] : $identifiers,
+                MessageHeaders::EVENT_AGGREGATE_TYPE => $aggregateDefinition->getAggregateClassType(),
+                MessageHeaders::EVENT_AGGREGATE_VERSION => ++$incrementedVersion,
+            ]);
+        }, $events);
+    }
 }

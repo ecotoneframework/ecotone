@@ -23,21 +23,9 @@ class SaveAggregateServiceBuilder implements CompilableBuilder
 {
     private ?string $calledAggregateClassName = null;
 
-    private function __construct(
-        private bool $publishEvents = true,
-    ) {
-    }
-
     public static function create(): self
     {
         return new self();
-    }
-
-    public function withPublishEvents(bool $publishEvents): self
-    {
-        $this->publishEvents = $publishEvents;
-
-        return $this;
     }
 
     public function compile(MessagingContainerBuilder $builder): Definition
@@ -46,7 +34,6 @@ class SaveAggregateServiceBuilder implements CompilableBuilder
             new Reference(AllAggregateRepository::class),
             Definition::createFor(PropertyReaderAccessor::class, []),
             new Reference(AggregateResolver::class),
-            $this->publishEvents,
             Reference::to(EventBus::class),
         ]);
     }

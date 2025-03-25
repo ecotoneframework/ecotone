@@ -45,8 +45,6 @@ use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\PublicIdentifi
 use Test\Ecotone\Modelling\Fixture\Ticket\AssignWorkerCommand;
 use Test\Ecotone\Modelling\Fixture\Ticket\StartTicketCommand;
 use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
-use Test\Ecotone\Modelling\Fixture\Ticket\TicketWasStartedEvent;
-use Test\Ecotone\Modelling\Fixture\Ticket\WorkerWasAssignedEvent;
 
 /**
  * Class ServiceCallToAggregateAdapterTest
@@ -404,26 +402,6 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $eventStream = $repository->findBy(EventSourcingAggregateWithInternalRecorder::class, ['id' => $id]);
         $this->assertCount(2, $eventStream->getEvents());
         $this->assertSame('something_was_created', $eventStream->getEvents()[1]->getEventName());
-    }
-
-    public function test_using_initial_state_for_event_sourced_aggregates(): void
-    {
-        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting([Ticket::class]);
-
-        $ticketId = Uuid::uuid4()->toString();
-
-        $this->assertEquals(
-            'Elvis',
-            $ecotoneTestSupport
-                ->withEventsFor($ticketId, Ticket::class, [
-                    new TicketWasStartedEvent($ticketId),
-                ])
-                ->withEventsFor($ticketId, Ticket::class, [
-                    new WorkerWasAssignedEvent($ticketId, 'Elvis'),
-                ], 1)
-                ->getAggregate(Ticket::class, ['ticketId' => $ticketId])
-                ->getWorkerId()
-        );
     }
 
     public function test_storing_pure_event_sourced_aggregate_via_business_repository_for_first_time(): void

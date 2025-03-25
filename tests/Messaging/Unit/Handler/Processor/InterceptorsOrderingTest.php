@@ -195,8 +195,6 @@ class InterceptorsOrderingTest extends TestCase
             [new InterceptorOrderingInterceptors(), $callStack],
         )
             ->withStateFor(new InterceptorOrderingAggregate('existingAggregateId'));
-        // Remove event handler event from stack
-        $callStack->reset();
 
         $ecotone
             ->sendCommandWithRoutingKey('actionVoid', metadata: ['aggregate.id' => 'existingAggregateId']);
@@ -307,7 +305,6 @@ class InterceptorsOrderingTest extends TestCase
                 'around end',
                 'afterChangeHeaders',
                 'after',
-
                 'command-output-channel',
             ],
             $callStack->getCalls()

@@ -1,4 +1,4 @@
-Copyright (c) 2024 Dariusz Gafka <support@simplycodedsoftware.com>
+Copyright (c) 2025 Dariusz Gafka <support@simplycodedsoftware.com>
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,4 +18,4 @@ THE SOFTWARE.
 
 Apache-2.0 Licence applies to non Enterprise Functionalities of the Ecotone Framework.
 Functionalities of the Ecotone Framework referred to as Enterprise functionalities, are not covered under the Apache-2.0 license. These functionalities are provided under a separate Enterprise License.
-For details on the Enterprise License, please write to support@simplycodedsoftware.com.
+For details on the Enterprise License, please refer to the [LICENSE-ENTERPRISE](./LICENSE-ENTERPRISE) file.

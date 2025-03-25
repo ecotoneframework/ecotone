@@ -25,7 +25,7 @@ class SimplifiedAggregate
     }
 
     #[CommandHandler('aggregate.enable')]
-    public function enable(#[Reference] IdGenerator $idGenerator): void
+    public function enable(): void
     {
         $this->isEnabled = true;
     }
@@ -36,7 +36,7 @@ class SimplifiedAggregate
     }
 
     #[QueryHandler('aggregate.isEnabled')]
-    public function isEnabled(#[Reference] IdGenerator $idGenerator): bool
+    public function isEnabled(): bool
     {
         return $this->isEnabled;
     }

@@ -11,13 +11,16 @@ To contribute make use of [Ecotone-Dev repository](https://github.com/ecotonefra
 [![Total Downloads](https://img.shields.io/packagist/dt/ecotone/ecotone)](https://packagist.org/packages/ecotone/ecotone)
 [![PHP Version Require](https://img.shields.io/packagist/dependency-v/ecotone/ecotone/php.svg)](https://packagist.org/packages/ecotone/ecotone)
 
-`Ecotone Framework` is a `Service Bus` which enables `Message-Driven` architecture in `PHP`.  
-Based on  resilient Message-Driven principles provides support for building applications that follows `Domain-Driven Design` (DDD), `Command Query Responsibility Segregation` (CQRS) and `Event Sourcing` (ES).
+The roots of Object Oriented Programming (OOP) were mainly about communication using Messages and logic encapsulation.   
+`Ecotone` aims to return to the origins of OOP, by providing tools which allows us to fully move the focus from Objects to Flows, from Data storage to Application Design, from Technicalities to Business logic.  
+Ecotone does that by making Messages first class-citizen in our Applications.
 
-> The term "Ecotone", in ecology means transition area between ecosystems, such as forest and grassland.  
-The Ecotone Framework functions as transition area between your components, modules and services. It glues things together, yet respects the boundaries of each area.
+Thanks to being Message-Driven at the foundation level, Ecotone provides architecture which is resilient and scalable by default, making it possible for Developers to focus on business problems instead of technical concerns.      
+Together with declarative configuration and higher level building blocks, it makes the system design explicit, easy to follow and change no matter of Developers experience.
 
-> Ecotone can be used with [Symfony](https://docs.ecotone.tech/modules/symfony-ddd-cqrs-event-sourcing) and [Laravel](https://docs.ecotone.tech/modules/laravel-ddd-cqrs-event-sourcing) frameworks.
+Visit main page [ecotone.tech](https://ecotone.tech) to learn more.
+
+> Ecotone can be used with [Symfony](https://docs.ecotone.tech/modules/symfony-ddd-cqrs-event-sourcing) and [Laravel](https://docs.ecotone.tech/modules/laravel-ddd-cqrs-event-sourcing) frameworks, or any other framework using [Ecotone Lite](https://docs.ecotone.tech/install-php-service-bus#install-ecotone-lite-no-framework).
 
 ## Getting started
 
@@ -47,4 +50,4 @@ If you want to help building and improving Ecotone consider becoming a sponsor:
 
 ## Tags
 
-PHP DDD CQRS Event Sourcing Symfony Laravel Service Bus
+PHP, DDD, CQRS, Event Sourcing, Symfony, Laravel, Service Bus, Event Driven Architecture, SOA, Events, Commands

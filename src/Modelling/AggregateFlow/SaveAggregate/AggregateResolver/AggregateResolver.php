@@ -12,7 +12,6 @@ use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\SaveAggregateServiceTemplate;
@@ -169,17 +168,12 @@ final class AggregateResolver
             $aggregateDefinition->isEventSourced(),
         );
 
-        $enrichedEvents = [];
-        $incrementedVersion = $versionBeforeHandling;
-        foreach ($events as $event) {
-            $incrementedVersion += 1;
-
-            $enrichedEvents[] = $event->withAddedMetadata([
-                MessageHeaders::EVENT_AGGREGATE_ID => count($identifiers) == 1 ? $identifiers[array_key_first($identifiers)] : $identifiers,
-                MessageHeaders::EVENT_AGGREGATE_TYPE => $aggregateDefinition->getAggregateClassType(),
-                MessageHeaders::EVENT_AGGREGATE_VERSION => $incrementedVersion,
-            ]);
-        }
+        $enrichedEvents = SaveAggregateServiceTemplate::enrichAggregateEvents(
+            events: $events,
+            versionBeforeHandling: (int) $versionBeforeHandling,
+            identifiers: $identifiers,
+            aggregateDefinition: $aggregateDefinition
+        );
 
         return new ResolvedAggregate(
             $aggregateDefinition,

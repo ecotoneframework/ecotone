@@ -29,8 +29,7 @@ final class SaveAggregateService implements MessageProcessor
     public function __construct(
         private AggregateRepository $aggregateRepository,
         private PropertyReaderAccessor $propertyReaderAccessor,
-        private AggregateResolver      $aggregateResolver,
-        private bool $publishEvents,
+        private AggregateResolver $aggregateResolver,
         private EventBus $eventBus,
     ) {
 
@@ -66,10 +65,8 @@ final class SaveAggregateService implements MessageProcessor
             );
         }
 
-        if ($this->publishEvents) {
-            foreach ($resolvedAggregates as $resolvedAggregate) {
-                $this->publishEvents($resolvedAggregate->getEvents());
-            }
+        foreach ($resolvedAggregates as $resolvedAggregate) {
+            $this->publishEvents($resolvedAggregate->getEvents());
         }
 
         return SaveAggregateServiceTemplate::buildReplyMessage(

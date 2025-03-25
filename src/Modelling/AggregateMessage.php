@@ -21,4 +21,10 @@ interface AggregateMessage
     public const TARGET_VERSION = 'ecotone.modelling.aggregate.target_version';
     public const RECORDED_AGGREGATE_EVENTS = 'ecotone.modelling.called_aggregate_events';
     public const NULL_EXECUTION_RESULT = 'ecotone.modelling.is_nullable_execution_result';
+
+    // test setup state headers
+    public const TEST_SETUP_AGGREGATE_VERSION = 'ecotone.modeling.test_setup.aggregate_version';
+    public const TEST_SETUP_AGGREGATE_CLASS = 'ecotone.modeling.test_setup.aggregate_class';
+    public const TEST_SETUP_AGGREGATE_INSTANCE = 'ecotone.modeling.test_setup.aggregate_instance';
+    public const TEST_SETUP_AGGREGATE_EVENTS = 'ecotone.modeling.test_setup.aggregate_events';
 }

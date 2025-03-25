@@ -190,10 +190,10 @@ final class FlowTestSupport
             [],
             [
                 AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => is_object($identifiers) ? (string)$identifiers : $identifiers,
-                AggregateMessage::TARGET_VERSION => $aggregateVersion,
-                AggregateMessage::CALLED_AGGREGATE_CLASS => $aggregateClass,
-                AggregateMessage::CALLED_AGGREGATE_INSTANCE => new $aggregateClass(),
-                AggregateMessage::RECORDED_AGGREGATE_EVENTS => $events,
+                AggregateMessage::TEST_SETUP_AGGREGATE_VERSION => $aggregateVersion,
+                AggregateMessage::TEST_SETUP_AGGREGATE_CLASS => $aggregateClass,
+                AggregateMessage::TEST_SETUP_AGGREGATE_INSTANCE => new $aggregateClass(),
+                AggregateMessage::TEST_SETUP_AGGREGATE_EVENTS => $events,
             ],
             AggregrateModule::getRegisterAggregateSaveRepositoryInputChannel($aggregateClass, forTesting: true)
         );
@@ -206,8 +206,8 @@ final class FlowTestSupport
         $this->messagingEntrypoint->sendWithHeaders(
             $aggregate,
             [
-                AggregateMessage::CALLED_AGGREGATE_INSTANCE => $aggregate,
-                AggregateMessage::CALLED_AGGREGATE_CLASS => $aggregate::class,
+                AggregateMessage::TEST_SETUP_AGGREGATE_INSTANCE => $aggregate,
+                AggregateMessage::TEST_SETUP_AGGREGATE_CLASS => $aggregate::class,
             ],
             AggregrateModule::getRegisterAggregateSaveRepositoryInputChannel($aggregate::class, forTesting: true)
         );

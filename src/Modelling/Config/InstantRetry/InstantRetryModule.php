@@ -8,6 +8,8 @@ use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ServiceConfiguration;
@@ -15,6 +17,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Modelling\CommandBus;
+use Ramsey\Uuid\Uuid;
 
 #[ModuleAnnotation]
 /**
@@ -40,6 +43,7 @@ final class InstantRetryModule implements AnnotationModule
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         $configuration = ExtensionObjectResolver::resolveUnique(InstantRetryConfiguration::class, $extensionObjects, InstantRetryConfiguration::createWithDefaults());
+        $messagingConfiguration->registerServiceDefinition(RetryStatusTracker::class, Definition::createFor(RetryStatusTracker::class, [false]));
 
         if ($configuration->isEnabledForCommandBus()) {
             $this->registerInterceptor($messagingConfiguration, $interfaceToCallRegistry, $configuration->getCommandBusRetryTimes(), $configuration->getCommandBuExceptions(), CommandBus::class);
@@ -69,12 +73,14 @@ final class InstantRetryModule implements AnnotationModule
 
     private function registerInterceptor(Configuration $messagingConfiguration, InterfaceToCallRegistry $interfaceToCallRegistry, int $retryAttempt, array $exceptions, string $pointcut): void
     {
+        $instantRetryId = Uuid::uuid4()->toString();
+        $messagingConfiguration->registerServiceDefinition($instantRetryId, Definition::createFor(InstantRetryInterceptor::class, [$retryAttempt, $exceptions, Reference::to(RetryStatusTracker::class)]));
+
         $messagingConfiguration
             ->registerAroundMethodInterceptor(
-                AroundInterceptorBuilder::createWithDirectObjectAndResolveConverters(
-                    $interfaceToCallRegistry,
-                    new InstantRetryInterceptor($retryAttempt, $exceptions),
-                    'retry',
+                AroundInterceptorBuilder::create(
+                    $instantRetryId,
+                    $interfaceToCallRegistry->getFor(InstantRetryInterceptor::class, 'retry'),
                     Precedence::AROUND_INSTANT_RETRY_PRECEDENCE,
                     $pointcut
                 )

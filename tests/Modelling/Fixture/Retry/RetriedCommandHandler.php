@@ -7,6 +7,7 @@ namespace Test\Ecotone\Modelling\Fixture\Retry;
 use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Modelling\CommandBus;
 use RuntimeException;
 
 /**
@@ -15,6 +16,7 @@ use RuntimeException;
 final class RetriedCommandHandler
 {
     private int $called = 0;
+    private int $outerCalled = 0;
 
     #[CommandHandler('retried.synchronous')]
     public function handleSynchronousCommandHandler(int $stopThrowingAfterAttempt): void
@@ -26,6 +28,17 @@ final class RetriedCommandHandler
         }
     }
 
+    #[CommandHandler('retried.nested.sync')]
+    public function nestedSynchronousCommandHandler(int $stopThrowingAfterAttempt, CommandBus $commandBus): void
+    {
+        $this->outerCalled++;
+        $commandBus->sendWithRouting('retried.synchronous', $stopThrowingAfterAttempt);
+
+        if ($this->outerCalled < $stopThrowingAfterAttempt) {
+            throw new RuntimeException('test');
+        }
+    }
+
     #[Asynchronous('async')]
     #[CommandHandler('retried.asynchronous', endpointId: 'async.handler')]
     public function handleAsynchronousHandler(int $stopThrowingAfterAttempt): void
@@ -33,6 +46,18 @@ final class RetriedCommandHandler
         $this->called++;
 
         if ($this->called < $stopThrowingAfterAttempt) {
+            throw new RuntimeException('test');
+        }
+    }
+
+    #[Asynchronous('async')]
+    #[CommandHandler('retried.nested.async', endpointId: 'async.nested')]
+    public function nestedAsynchronousCommandHandler(int $stopThrowingAfterAttempt, CommandBus $commandBus): void
+    {
+        $this->outerCalled++;
+        $commandBus->sendWithRouting('retried.synchronous', $stopThrowingAfterAttempt);
+
+        if ($this->outerCalled < $stopThrowingAfterAttempt) {
             throw new RuntimeException('test');
         }
     }

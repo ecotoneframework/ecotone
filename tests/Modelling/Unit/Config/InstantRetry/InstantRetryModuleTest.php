@@ -46,6 +46,28 @@ final class InstantRetryModuleTest extends TestCase
         );
     }
 
+    public function test_retrying_with_command_bus_and_ignoring_retries_on_nested_command_bus()
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [RetriedCommandHandler::class],
+            [
+                new RetriedCommandHandler(),
+            ],
+            ServiceConfiguration::createWithDefaults()
+                ->withExtensionObjects([
+                    InstantRetryConfiguration::createWithDefaults()
+                        ->withCommandBusRetry(true, 3),
+                ])
+        );
+
+        $this->assertEquals(
+            4,
+            $ecotoneLite
+                ->sendCommandWithRoutingKey('retried.nested.sync', 4)
+                ->sendQueryWithRouting('retried.getCallCount')
+        );
+    }
+
     public function test_exceeding_retries_with_command_bus()
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
@@ -136,6 +158,32 @@ final class InstantRetryModuleTest extends TestCase
             4,
             $ecotoneLite
                 ->sendCommandWithRoutingKey('retried.asynchronous', 4)
+                ->run('async', ExecutionPollingMetadata::createWithDefaults()->withTestingSetup())
+                ->sendQueryWithRouting('retried.getCallCount')
+        );
+    }
+
+    public function test_retrying_with_asynchronous_handler_and_ignoring_retries_on_nested_command_bus()
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [RetriedCommandHandler::class],
+            [
+                new RetriedCommandHandler(),
+            ],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withExtensionObjects([
+                    SimpleMessageChannelBuilder::createQueueChannel('async'),
+                    InstantRetryConfiguration::createWithDefaults()
+                        ->withAsynchronousEndpointsRetry(true, 3)
+                        ->withCommandBusRetry(true, 3),
+                ])
+        );
+
+        $this->assertEquals(
+            4,
+            $ecotoneLite
+                ->sendCommandWithRoutingKey('retried.nested.async', 4)
                 ->run('async', ExecutionPollingMetadata::createWithDefaults()->withTestingSetup())
                 ->sendQueryWithRouting('retried.getCallCount')
         );

@@ -10,6 +10,7 @@ To contribute make use of [Ecotone-Dev repository](https://github.com/ecotonefra
 [![License](https://poser.pugx.org/ecotone/ecotone/license)](https://packagist.org/packages/ecotone/ecotone)
 [![Total Downloads](https://img.shields.io/packagist/dt/ecotone/ecotone)](https://packagist.org/packages/ecotone/ecotone)
 [![PHP Version Require](https://img.shields.io/packagist/dependency-v/ecotone/ecotone/php.svg)](https://packagist.org/packages/ecotone/ecotone)
+[![libs.tech recommends](https://libs.tech/project/199891288/badge.svg)](https://libs.tech/project/199891288/ecotone)
 
 The roots of Object Oriented Programming (OOP) were mainly about communication using Messages and logic encapsulation.   
 `Ecotone` aims to return to the origins of OOP, by providing tools which allows us to fully move the focus from Objects to Flows, from Data storage to Application Design, from Technicalities to Business logic.  

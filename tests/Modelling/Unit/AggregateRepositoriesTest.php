@@ -6,11 +6,11 @@ use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
+use Ecotone\Modelling\InMemoryStandardRepository;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Blog\Article;
 use Test\Ecotone\Modelling\Fixture\Blog\InMemoryArticleStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Blog\PublishArticleCommand;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\Job;
 use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\StartJob;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
@@ -55,6 +55,32 @@ class AggregateRepositoriesTest extends TestCase
                 ->sendCommand(new StartJob('123'))
                 ->getAggregate(Job::class, '123')
         );
+    }
+
+    public function test_throwing_if_no_event_sourced_repository_available_and_multiple_state_based_repositories_are(): void
+    {
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [Job::class, InMemoryStandardRepository::class],
+            [InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty()],
+            addInMemoryEventSourcedRepository: false,
+        );
+
+        self::expectException(InvalidArgumentException::class);
+
+        $ecotone->sendCommand(new StartJob('123'));
+    }
+
+    public function test_throwing_error_if_no_standard_repository_available_and_multiple_event_sourced_repositories(): void
+    {
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [Order::class, InMemoryEventSourcedRepository::class],
+            [InMemoryEventSourcedRepository::class => InMemoryEventSourcedRepository::createEmpty()],
+            addInMemoryStateStoredRepository: false,
+        );
+
+        self::expectException(InvalidArgumentException::class);
+
+        $ecotone->sendCommandWithRoutingKey('order.register', new PlaceOrder('123'));
     }
 
     public function test_throwing_exception_if_only_event_soured_repository_available_for_standard_aggregate()

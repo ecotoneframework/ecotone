@@ -109,7 +109,7 @@ final class LicencingTest extends TestCase
         $this->expectNotToPerformAssertions();
     }
 
-    public function licenceWithMissingField(): iterable
+    public static function licenceWithMissingField(): iterable
     {
         yield 'missing email' => [
             json_encode([

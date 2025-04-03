@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Channel;
 
-use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Channel\PollableChannelInterceptorAdapter;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -30,24 +29,20 @@ class ChannelInterceptorTest extends TestCase
         $transformedMessage = MessageBuilder::withPayload('some2')->build();
         $queueChannel = QueueChannel::create();
 
-        $channelInterceptor = $this->createMock(ChannelInterceptor::class);
-        $channelInterceptor
-            ->method('preSend')
-            ->willReturn($transformedMessage);
-        $channelInterceptor
-            ->expects($this->once())
-            ->method('postSend')
-            ->with($transformedMessage, $queueChannel);
-        $channelInterceptor
-            ->expects($this->once())
-            ->method('afterSendCompletion')
-            ->with($transformedMessage, $queueChannel, null);
+        $channelInterceptor = new TestChannelInterceptor($transformedMessage);
 
         $pollableChannel = new PollableChannelInterceptorAdapter(
             $queueChannel,
             [$channelInterceptor]
         );
         $pollableChannel->send($requestMessage);
+
+        $this->assertTrue($channelInterceptor->wasPreSendCalled());
+        $this->assertTrue($channelInterceptor->wasPostSendCalled());
+        $this->assertTrue($channelInterceptor->wasAfterSendCompletionCalled());
+        $this->assertSame($transformedMessage, $channelInterceptor->getCapturedMessage());
+        $this->assertSame($queueChannel, $channelInterceptor->getCapturedChannel());
+        $this->assertNull($channelInterceptor->getCapturedException());
     }
 
     public function test_intercepting_to_not_send_the_request_message()
@@ -55,39 +50,27 @@ class ChannelInterceptorTest extends TestCase
         $requestMessage = MessageBuilder::withPayload('some1')->build();
         $queueChannel = QueueChannel::create();
 
-        $channelInterceptor = $this->createMock(ChannelInterceptor::class);
-        $channelInterceptor
-            ->method('preSend')
-            ->willReturn(null);
-        $channelInterceptor
-            ->expects($this->never())
-            ->method('postSend');
+        $channelInterceptor = new TestChannelInterceptor(null, true, false, null);
+        $channelInterceptor->setReturnNullOnPreSend(true);
 
         $pollableChannel = new PollableChannelInterceptorAdapter(
             $queueChannel,
             [$channelInterceptor]
         );
         $pollableChannel->send($requestMessage);
+
+        $this->assertTrue($channelInterceptor->wasPreSendCalled());
+        $this->assertFalse($channelInterceptor->wasPostSendCalled());
+        $this->assertFalse($channelInterceptor->wasAfterSendCompletionCalled());
+        $this->assertSame($requestMessage, $channelInterceptor->getCapturedMessage());
     }
 
     public function test_intercepting_send_completion_if_exception_occurred()
     {
         $requestMessage = MessageBuilder::withPayload('some1')->build();
-        $queueChannel = $this->createMock(QueueChannel::class);
-        $queueChannel
-            ->method('send')
-            ->willThrowException(new InvalidArgumentException())
-            ->with($requestMessage);
+        $queueChannel = TestQueueChannel::createWithException();
 
-        $channelInterceptor = $this->createMock(ChannelInterceptor::class);
-        $channelInterceptor
-            ->method('preSend')
-            ->willReturn($requestMessage);
-        $channelInterceptor
-            ->expects($this->once())
-            ->method('afterSendCompletion')
-            ->with($requestMessage, $queueChannel, new InvalidArgumentException(''))
-            ->willReturn(false);
+        $channelInterceptor = new TestChannelInterceptor($requestMessage, true, false);
 
         $this->expectException(InvalidArgumentException::class);
 
@@ -101,32 +84,22 @@ class ChannelInterceptorTest extends TestCase
     public function test_intercepting_send_completion_if_exception_occurred_and_was_handled()
     {
         $requestMessage = MessageBuilder::withPayload('some1')->build();
-        $queueChannel = $this->createMock(QueueChannel::class);
-        $queueChannel
-            ->method('send')
-            ->willThrowException(new InvalidArgumentException())
-            ->with($requestMessage);
+        $queueChannel = TestQueueChannel::createWithException();
 
-        $channelInterceptor = $this->createMock(ChannelInterceptor::class);
-        $channelInterceptor
-            ->method('preSend')
-            ->willReturn($requestMessage);
-        $channelInterceptor
-            ->expects($this->once())
-            ->method('afterSendCompletion')
-            ->with($requestMessage, $queueChannel, new InvalidArgumentException(''))
-            ->willReturn(true);
-
-        $channelInterceptor
-            ->expects($this->once())
-            ->method('postSend')
-            ->with($requestMessage, $queueChannel);
+        $channelInterceptor = new TestChannelInterceptor($requestMessage, true, true);
 
         $pollableChannel = new PollableChannelInterceptorAdapter(
             $queueChannel,
             [$channelInterceptor]
         );
         $pollableChannel->send($requestMessage);
+
+        $this->assertTrue($channelInterceptor->wasPreSendCalled());
+        $this->assertTrue($channelInterceptor->wasPostSendCalled());
+        $this->assertTrue($channelInterceptor->wasAfterSendCompletionCalled());
+        $this->assertSame($requestMessage, $channelInterceptor->getCapturedMessage());
+        $this->assertSame($queueChannel, $channelInterceptor->getCapturedChannel());
+        $this->assertInstanceOf(InvalidArgumentException::class, $channelInterceptor->getCapturedException());
     }
 
     public function test_intercepting_receiving_message_with_success()
@@ -135,25 +108,20 @@ class ChannelInterceptorTest extends TestCase
         $queueChannel = QueueChannel::create();
         $queueChannel->send($message);
 
-        $channelInterceptor = $this->createMock(ChannelInterceptor::class);
-        $channelInterceptor
-            ->method('preReceive')
-            ->with($queueChannel)
-            ->willReturn(true);
-        $channelInterceptor
-            ->expects($this->once())
-            ->method('postReceive')
-            ->with($message, $queueChannel);
-        $channelInterceptor
-            ->expects($this->once())
-            ->method('afterReceiveCompletion')
-            ->with($message, $queueChannel, null);
+        $channelInterceptor = new TestChannelInterceptor(null, true, false, null);
 
         $pollableChannel = new PollableChannelInterceptorAdapter(
             $queueChannel,
             [$channelInterceptor]
         );
         $pollableChannel->receive();
+
+        $this->assertTrue($channelInterceptor->wasPreReceiveCalled());
+        $this->assertTrue($channelInterceptor->wasPostReceiveCalled());
+        $this->assertTrue($channelInterceptor->wasAfterReceiveCompletionCalled());
+        $this->assertSame($message, $channelInterceptor->getCapturedMessage());
+        $this->assertSame($queueChannel, $channelInterceptor->getCapturedChannel());
+        $this->assertNull($channelInterceptor->getCapturedException());
     }
 
     public function test_stopping_message_receiving()
@@ -162,38 +130,26 @@ class ChannelInterceptorTest extends TestCase
         $queueChannel = QueueChannel::create();
         $queueChannel->send($message);
 
-        $channelInterceptor = $this->createMock(ChannelInterceptor::class);
-        $channelInterceptor
-            ->method('preReceive')
-            ->with($queueChannel)
-            ->willReturn(false);
-        $channelInterceptor
-            ->expects($this->never())
-            ->method('postReceive');
+        $channelInterceptor = new TestChannelInterceptor(null, false);
 
         $pollableChannel = new PollableChannelInterceptorAdapter(
             $queueChannel,
             [$channelInterceptor]
         );
         $pollableChannel->receive();
+
+        $this->assertTrue($channelInterceptor->wasPreReceiveCalled());
+        $this->assertFalse($channelInterceptor->wasPostReceiveCalled());
+        $this->assertFalse($channelInterceptor->wasAfterReceiveCompletionCalled());
+        $this->assertNull($channelInterceptor->getCapturedMessage());
+        $this->assertSame($queueChannel, $channelInterceptor->getCapturedChannel());
     }
 
     public function test_intercepting_when_exception_occurrs()
     {
-        $queueChannel = $this->createMock(QueueChannel::class);
-        $queueChannel
-            ->method('receive')
-            ->willThrowException(new InvalidArgumentException());
+        $queueChannel = TestQueueChannel::createWithException();
 
-        $channelInterceptor = $this->createMock(ChannelInterceptor::class);
-        $channelInterceptor
-            ->method('preReceive')
-            ->with($queueChannel)
-            ->willReturn(true);
-        $channelInterceptor
-            ->expects($this->once())
-            ->method('afterReceiveCompletion')
-            ->with(null, $queueChannel, new InvalidArgumentException(''));
+        $channelInterceptor = new TestChannelInterceptor();
 
         $this->expectException(InvalidArgumentException::class);
 

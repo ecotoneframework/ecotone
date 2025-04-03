@@ -22,21 +22,24 @@ final class AnnotationAggregateConstructorTest extends TestCase
 {
     public function test_aggregate_cannot_have_constructor_being_annotated_as_command_handler(): void
     {
-        $this->expectExceptionObject(InvalidArgumentException::create('Test\Ecotone\Modelling\Fixture\AnnotatedConstructor\ConstructorAsCommandHandler::__construct cannot be annotated as command handler'));
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Test\Ecotone\Modelling\Fixture\AnnotatedConstructor\ConstructorAsCommandHandler::__construct cannot be annotated as command handler');
 
         EcotoneLite::bootstrapFlowTesting([ConstructorAsCommandHandler::class]);
     }
 
     public function test_aggregate_cannot_have_constructor_being_annotated_as_event_handler(): void
     {
-        $this->expectExceptionObject(InvalidArgumentException::create('Test\Ecotone\Modelling\Fixture\AnnotatedConstructor\ConstructorAsEventHandler::__construct cannot be annotated as event handler'));
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Test\Ecotone\Modelling\Fixture\AnnotatedConstructor\ConstructorAsEventHandler::__construct cannot be annotated as event handler');
 
         EcotoneLite::bootstrapFlowTesting([ConstructorAsEventHandler::class]);
     }
 
     public function test_aggregate_cannot_have_constructor_being_annotated_as_query_handler(): void
     {
-        $this->expectExceptionObject(InvalidArgumentException::create('Test\Ecotone\Modelling\Fixture\AnnotatedConstructor\ConstructorAsQueryHandler::__construct cannot be annotated as query handler'));
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Test\Ecotone\Modelling\Fixture\AnnotatedConstructor\ConstructorAsQueryHandler::__construct cannot be annotated as query handler');
 
         EcotoneLite::bootstrapFlowTesting([ConstructorAsQueryHandler::class]);
     }

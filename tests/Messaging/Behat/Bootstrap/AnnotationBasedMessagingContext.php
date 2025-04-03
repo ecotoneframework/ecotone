@@ -81,6 +81,10 @@ use Test\Ecotone\Modelling\Fixture\TwoSagas\TwoSagasRepository;
  */
 class AnnotationBasedMessagingContext extends TestCase implements Context
 {
+    public function __construct(?string $name = 'AnnotationBasedMessagingContext')
+    {
+        parent::__construct($name);
+    }
     private static ?\Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem = null;
 
     private static array $loadedNamespaces = [];

@@ -45,6 +45,10 @@ use Test\Ecotone\Modelling\Fixture\TwoSagas\Shipment;
  */
 class DomainContext extends TestCase implements Context
 {
+    public function __construct(?string $name = 'DomainContext')
+    {
+        parent::__construct($name);
+    }
     /**
      * @Given I have order with id :orderId for :productAmount products registered to shipping address :shippingAddress
      *

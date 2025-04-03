@@ -105,7 +105,8 @@ class ProxyFactory
         // Code adapted from doctrine/orm/src/Proxy/ProxyFactory.php
         $parentDirectory = dirname($fileName);
 
-        if (! is_dir($parentDirectory) && ! @mkdir($parentDirectory, 0775, true)) {
+        // mkdir race condition https://github.com/kalessil/phpinspectionsea/blob/master/docs/probable-bugs.md#mkdir-race-condition
+        if (! is_dir($parentDirectory) && ! @mkdir($parentDirectory, 0775, true) && ! is_dir($parentDirectory)) {
             throw ConfigurationException::create("Cannot create cache directory {$parentDirectory}");
         }
 

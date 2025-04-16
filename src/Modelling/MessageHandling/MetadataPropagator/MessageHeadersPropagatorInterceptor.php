@@ -7,6 +7,7 @@ use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Modelling\AggregateMessage;
 
 /**
  * licence Apache-2.0
@@ -26,6 +27,12 @@ class MessageHeadersPropagatorInterceptor
             $userlandHeaders = [];
         } else {
             $userlandHeaders = MessageHeaders::unsetAllFrameworkHeaders($message->getHeaders()->headers());
+            unset(
+                $userlandHeaders[AggregateMessage::AGGREGATE_ID],
+                $userlandHeaders[AggregateMessage::CALLED_AGGREGATE_CLASS],
+                $userlandHeaders[AggregateMessage::CALLED_AGGREGATE_INSTANCE],
+                $userlandHeaders[AggregateMessage::TARGET_VERSION],
+            );
             $userlandHeaders[MessageHeaders::MESSAGE_ID] = $message->getHeaders()->getMessageId();
             $userlandHeaders[MessageHeaders::MESSAGE_CORRELATION_ID] = $message->getHeaders()->getCorrelationId();
         }

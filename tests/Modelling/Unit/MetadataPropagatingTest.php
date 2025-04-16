@@ -12,6 +12,14 @@ use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Modelling\AggregateMessage;
 use PHPUnit\Framework\TestCase;
+use Test\Ecotone\Modelling\Fixture\BasketWithReservations\AddItemToBasket;
+use Test\Ecotone\Modelling\Fixture\BasketWithReservations\Basket;
+use Test\Ecotone\Modelling\Fixture\BasketWithReservations\BasketCreated;
+use Test\Ecotone\Modelling\Fixture\BasketWithReservations\ItemInventory;
+use Test\Ecotone\Modelling\Fixture\BasketWithReservations\ItemInventoryCreated;
+use Test\Ecotone\Modelling\Fixture\BasketWithReservations\ItemReservationCreated;
+use Test\Ecotone\Modelling\Fixture\BasketWithReservations\ItemReserved;
+use Test\Ecotone\Modelling\Fixture\BasketWithReservations\ItemWasAddedToBasket;
 use Test\Ecotone\Modelling\Fixture\MetadataPropagatingWithDoubleEventHandlers\OrderService;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\Order;
@@ -159,5 +167,45 @@ final class MetadataPropagatingTest extends TestCase
             MessageHeaders::CONSUMER_POLLING_METADATA,
             $ecotoneTestSupport->getMessageChannel('orders')->receive()->getHeaders()->headers()
         );
+    }
+
+    public function test_propagating_headers_to_all_published_asynchronous_event_handlers_extended(): void
+    {
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            classesToResolve: [Basket::class, ItemInventory::class],
+            configuration: ServiceConfiguration::createWithDefaults(),
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('basket'),
+                SimpleMessageChannelBuilder::createQueueChannel('itemInventory'),
+            ]
+        );
+
+        $ecotoneTestSupport->withEventsFor(
+            'basket-123',
+            Basket::class,
+            [
+                new BasketCreated('basket-123'),
+            ]
+        );
+
+        $ecotoneTestSupport->withEventsFor(
+            'item-123',
+            ItemInventory::class,
+            [
+                new ItemInventoryCreated('item-123'),
+            ]
+        );
+
+        $ecotoneTestSupport->sendCommand(new AddItemToBasket('basket-123', 'item-123'));
+
+        self::assertEquals([new ItemWasAddedToBasket('basket-123', 'item-123')], $ecotoneTestSupport->getRecordedEvents());
+
+        $ecotoneTestSupport->run('basket', ExecutionPollingMetadata::createWithTestingSetup());
+
+        self::assertEquals([new ItemReservationCreated('item-123')], $ecotoneTestSupport->getRecordedEvents());
+
+        $ecotoneTestSupport->run('itemInventory', ExecutionPollingMetadata::createWithTestingSetup());
+
+        self::assertEquals([new ItemReserved('item-123')], $ecotoneTestSupport->getRecordedEvents());
     }
 }

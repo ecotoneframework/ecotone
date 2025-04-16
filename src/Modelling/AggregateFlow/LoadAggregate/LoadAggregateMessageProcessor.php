@@ -38,7 +38,7 @@ final class LoadAggregateMessageProcessor implements MessageProcessor
         $messageType = TypeDescriptor::createFromVariable($message->getPayload());
 
         if (! $message->getHeaders()->containsKey(AggregateMessage::AGGREGATE_ID)) {
-            throw AggregateNotFoundException::create("Can't call Aggregate {$this->aggregateClassName}:{$this->aggregateMethod} as identifier header is missing. Please check your identifier mapping in {$messageType->toString()}. Have you forgot to add #[TargetIdentifier] in your Command or `aggregate.id` in metadata?");
+            throw AggregateNotFoundException::create(sprintf("Can't call Aggregate {$this->aggregateClassName}:{$this->aggregateMethod} as identifier header is missing. Please check your identifier mapping in {$messageType->toString()}. Have you forgot to add #[TargetIdentifier] in your Command or `%s` in metadata?", AggregateMessage::AGGREGATE_ID));
         }
 
         $aggregateIdentifiers = AggregateIdMetadata::createFrom(
@@ -47,7 +47,7 @@ final class LoadAggregateMessageProcessor implements MessageProcessor
 
         foreach ($aggregateIdentifiers as $identifierName => $aggregateIdentifier) {
             if (is_null($aggregateIdentifier)) {
-                throw AggregateNotFoundException::create("Can't call Aggregate {$this->aggregateClassName}:{$this->aggregateMethod} as value for identifier `{$identifierName}` is missing. Please check your identifier mapping in {$messageType->toString()}. Have you forgot to add #[TargetIdentifier] in your Command or `aggregate.id` in metadata?");
+                throw AggregateNotFoundException::create(sprintf("Can't call Aggregate {$this->aggregateClassName}:{$this->aggregateMethod} as value for identifier `{$identifierName}` is missing. Please check your identifier mapping in {$messageType->toString()}. Have you forgot to add #[TargetIdentifier] in your Command or `%s` in metadata?", AggregateMessage::AGGREGATE_ID));
             }
         }
 

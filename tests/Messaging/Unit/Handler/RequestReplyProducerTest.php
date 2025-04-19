@@ -273,7 +273,7 @@ class RequestReplyProducerTest extends MessagingTestCase
         );
     }
 
-    private function createRequestReplyProducer(MessageProcessor $replyMessageProducer, MessageChannel $outputChannel = null, bool $requireReply = false): RequestReplyProducer
+    private function createRequestReplyProducer(MessageProcessor $replyMessageProducer, ?MessageChannel $outputChannel = null, bool $requireReply = false): RequestReplyProducer
     {
         $outputChannelName = $outputChannel ? 'output-channel' : '';
         $channelResolver = $outputChannel ? InMemoryChannelResolver::createFromAssociativeArray([

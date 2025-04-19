@@ -22,7 +22,7 @@ use RuntimeException;
  * @codeCoverageIgnore
  */
 /**
- * licence Apache-2.0
+ * licence MIT
  */
 class CronExpression
 {
@@ -74,7 +74,7 @@ class CronExpression
     /**
      * @deprecated since version 3.0.2, use __construct instead.
      */
-    public static function factory(string $expression, FieldFactoryInterface $fieldFactory = null): CronExpression
+    public static function factory(string $expression, ?FieldFactoryInterface $fieldFactory = null): CronExpression
     {
         /** @phpstan-ignore-next-line */
         return new static($expression, $fieldFactory);
@@ -104,7 +104,7 @@ class CronExpression
      * @param string $expression CRON expression (e.g. '8 * * * *')
      * @param null|FieldFactoryInterface $fieldFactory Factory to create cron fields
      */
-    public function __construct(string $expression, FieldFactoryInterface $fieldFactory = null)
+    public function __construct(string $expression, ?FieldFactoryInterface $fieldFactory = null)
     {
         $shortcut = strtolower($expression);
         $expression = self::MAPPINGS[$shortcut] ?? $expression;

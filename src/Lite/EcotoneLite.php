@@ -115,7 +115,7 @@ final class EcotoneLite
         bool                     $addInMemoryStateStoredRepository = true,
         bool                     $addInMemoryEventSourcedRepository = true,
         array|bool|null          $enableAsynchronousProcessing = null,
-        TestConfiguration        $testConfiguration = null,
+        ?TestConfiguration        $testConfiguration = null,
         ?string                  $licenceKey = null
     ): FlowTestSupport {
         $configuration = self::prepareForFlowTesting($configuration, ModulePackageList::allPackages(), $classesToResolve, $addInMemoryStateStoredRepository, $enableAsynchronousProcessing, $testConfiguration, $licenceKey);
@@ -147,7 +147,7 @@ final class EcotoneLite
         bool                     $addInMemoryStateStoredRepository = true,
         bool                     $runForProductionEventStore = false,
         array|bool|null          $enableAsynchronousProcessing = null,
-        TestConfiguration        $testConfiguration = null,
+        ?TestConfiguration        $testConfiguration = null,
         ?string                  $licenceKey = null,
     ): FlowTestSupport {
         $configuration = self::prepareForFlowTesting($configuration, ModulePackageList::allPackagesExcept([ModulePackageList::EVENT_SOURCING_PACKAGE, ModulePackageList::DBAL_PACKAGE, ModulePackageList::JMS_CONVERTER_PACKAGE]), $classesToResolve, $addInMemoryStateStoredRepository, $enableAsynchronousProcessing, $testConfiguration, $licenceKey);

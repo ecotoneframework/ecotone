@@ -64,7 +64,7 @@ class ErrorHandlerTest extends TestCase
         $this->assertCount(0, $logger->getError());
     }
 
-    private function createFailedMessage(Message $message, Throwable $exception = null): ErrorMessage
+    private function createFailedMessage(Message $message, ?Throwable $exception = null): ErrorMessage
     {
         return ErrorMessage::create(MessageHandlingException::fromOtherException($exception ?? new MessageHandlingException(), $message));
     }

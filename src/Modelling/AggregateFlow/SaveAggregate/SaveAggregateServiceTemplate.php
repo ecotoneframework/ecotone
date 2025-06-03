@@ -106,6 +106,7 @@ class SaveAggregateServiceTemplate
     public static function buildReplyMessage(
         bool $isFactoryMethod,
         array $aggregateIds,
+        int $versionAfterHandling,
         Message $message
     ): Message|null {
         if ($message->getHeaders()->containsKey(AggregateMessage::NULL_EXECUTION_RESULT)) {
@@ -114,17 +115,19 @@ class SaveAggregateServiceTemplate
             }
         }
 
+        $messageBuilder = MessageBuilder::fromMessage($message)
+            ->setHeader(AggregateMessage::TARGET_VERSION, $versionAfterHandling)
+        ;
+
         if ($isFactoryMethod) {
             if (count($aggregateIds) === 1) {
                 $aggregateIds = reset($aggregateIds);
             }
 
-            $message = MessageBuilder::fromMessage($message)
-                ->setPayload($aggregateIds)
-                ->build();
+            $messageBuilder = $messageBuilder->setPayload($aggregateIds);
         }
 
-        return MessageBuilder::fromMessage($message)->build();
+        return $messageBuilder->build();
     }
 
     /**

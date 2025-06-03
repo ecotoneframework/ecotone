@@ -15,5 +15,10 @@ interface AggregateRepository
 
     public function findBy(string $aggregateClassName, array $identifiers): ?ResolvedAggregate;
 
-    public function save(ResolvedAggregate $aggregate, array $metadata): void;
+    /**
+     * @param ResolvedAggregate $aggregate
+     * @param array $metadata
+     * @return int Aggregate version after save
+     */
+    public function save(ResolvedAggregate $aggregate, array $metadata): int;
 }

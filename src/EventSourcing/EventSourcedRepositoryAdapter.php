@@ -110,7 +110,7 @@ class EventSourcedRepositoryAdapter implements AggregateRepository
         );
     }
 
-    public function save(ResolvedAggregate $aggregate, array $metadata): void
+    public function save(ResolvedAggregate $aggregate, array $metadata): int
     {
         $version = $aggregate->getVersionBeforeHandling();
 
@@ -134,6 +134,8 @@ class EventSourcedRepositoryAdapter implements AggregateRepository
             $metadata,
             $aggregate->getVersionBeforeHandling()
         );
+
+        return $version + count($aggregate->getEvents());
     }
 
     private function getAggregateVersion(object|array|string $aggregate): mixed

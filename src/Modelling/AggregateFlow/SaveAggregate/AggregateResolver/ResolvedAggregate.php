@@ -11,6 +11,8 @@ use Ecotone\Modelling\Event;
  */
 final class ResolvedAggregate
 {
+    private ?int $versionAfterHandling;
+
     /**
      * @param object $aggregateInstance
      * @param array<string, mixed> $identifiers
@@ -24,6 +26,7 @@ final class ResolvedAggregate
         private array                    $identifiers,
         private array                    $events,
     ) {
+        $this->versionAfterHandling = $this->versionBeforeHandling;
     }
 
     public function getAggregateClassName(): string
@@ -61,6 +64,11 @@ final class ResolvedAggregate
         return $this->versionBeforeHandling;
     }
 
+    public function getVersionAfterHandling(): ?int
+    {
+        return $this->versionAfterHandling;
+    }
+
     /**
      * @param array<string, mixed> $identifiers
      */
@@ -74,5 +82,13 @@ final class ResolvedAggregate
             $identifiers,
             $this->events
         );
+    }
+
+    public function withVersionAfterHandling(int $versionAfterHandling): self
+    {
+        $clone = clone $this;
+        $clone->versionAfterHandling = $versionAfterHandling;
+
+        return $clone;
     }
 }

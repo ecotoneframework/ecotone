@@ -9,6 +9,7 @@ use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Attribute\EndpointAnnotation;
 use Ecotone\Messaging\Attribute\InternalHandler;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Messaging\Attribute\StreamBasedSource;
 use Ecotone\Messaging\Channel\CombinedMessageChannel;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
@@ -21,15 +22,18 @@ use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Modelling\Config\Routing\RoutingEvent;
+use Ecotone\Modelling\Config\Routing\RoutingEventHandler;
 
 #[ModuleAnnotation]
 /**
  * licence Apache-2.0
  */
-class AsynchronousModule extends NoExternalConfigurationModule implements AnnotationModule
+class AsynchronousModule implements AnnotationModule, RoutingEventHandler
 {
     /**
      * @param array<string, array<string>> $asyncEndpoints
@@ -60,6 +64,9 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
                     /** @var EndpointAnnotation $annotationForMethod */
                     $annotationForMethod = $endpoint->getAnnotationForMethod();
                     if ($annotationForMethod instanceof QueryHandler) {
+                        continue;
+                    }
+                    if ($endpoint->hasClassAnnotation(StreamBasedSource::class)) {
                         continue;
                     }
                     if (in_array(get_class($annotationForMethod), [CommandHandler::class, EventHandler::class, InternalHandler::class])) {
@@ -162,7 +169,7 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
     {
-        $defaultChannels = [];
+        $extensions = [$this];
 
         if ($serviceConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
             $polingChannelBuilders = array_map(
@@ -180,14 +187,14 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
                     continue;
                 }
 
-                $defaultChannels[] = SimpleMessageChannelBuilder::createQueueChannel(
+                $extensions[] = SimpleMessageChannelBuilder::createQueueChannel(
                     $endpointChannel,
                     true,
                 );
             }
         }
 
-        return $defaultChannels;
+        return $extensions;
     }
 
     public function getModulePackageName(): string
@@ -246,5 +253,23 @@ class AsynchronousModule extends NoExternalConfigurationModule implements Annota
         }
 
         return $endpointChannels;
+    }
+
+    public function handleRoutingEvent(RoutingEvent $event, ?Configuration $messagingConfiguration = null): void
+    {
+        $registration = $event->getRegistration();
+        $isAsynchronous = $registration->hasMethodAnnotation(Asynchronous::class);
+        if (! $isAsynchronous) {
+            return;
+        }
+
+        $annotationForMethod = $registration->getAnnotationForMethod();
+        $asynchronous = $registration->getMethodAnnotationsWithType(Asynchronous::class)[0];
+
+        if ($annotationForMethod instanceof CommandHandler) {
+            Assert::isTrue(! in_array($annotationForMethod->getInputChannelName(), $asynchronous->getChannelName()), "Command Handler routing key can't be equal to asynchronous channel name in {$registration}");
+        } elseif ($annotationForMethod instanceof EventHandler) {
+            Assert::isTrue(! in_array($annotationForMethod->getListenTo(), $asynchronous->getChannelName()), "Event Handler listen to routing can't be equal to asynchronous channel name in {$registration}");
+        }
     }
 }

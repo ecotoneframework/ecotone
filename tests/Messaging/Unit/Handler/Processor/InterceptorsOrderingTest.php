@@ -163,10 +163,12 @@ class InterceptorsOrderingTest extends TestCase
     public function test_aggregate_with_factory_method(): void
     {
         $callStack = new InterceptorOrderingStack();
-        EcotoneLite::bootstrapFlowTesting(
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
             [InterceptorOrderingAggregate::class, InterceptorOrderingInterceptors::class],
             [new InterceptorOrderingInterceptors(), $callStack],
-        )->sendCommandWithRoutingKey('endpoint', metadata: ['aggregate.id' => 'id']);
+        );
+
+        $ecotone->sendCommandWithRoutingKey('endpoint', metadata: ['aggregate.id' => 'id']);
 
         self::assertEquals(
             [
@@ -182,6 +184,25 @@ class InterceptorsOrderingTest extends TestCase
                 'afterChangeHeaders',
                 'after',
                 'eventHandler',
+            ],
+            $callStack->getCalls()
+        );
+
+        $callStack->reset();
+        $ecotone->sendCommandWithRoutingKey('endpoint', metadata: ['aggregate.id' => 'id']);
+        self::assertEquals(
+            [
+                'beforeChangeHeaders',
+                'before',
+                'afterChangeHeaders',
+                'after',
+                'beforeChangeHeaders',
+                'before',
+                'around begin',
+                'action',
+                'around end',
+                'afterChangeHeaders',
+                'after',
             ],
             $callStack->getCalls()
         );
@@ -312,6 +333,32 @@ class InterceptorsOrderingTest extends TestCase
     }
 
     public function test_aggregate_with_factory_method_and_output_channel(): void
+    {
+        $callStack = new InterceptorOrderingStack();
+        EcotoneLite::bootstrapFlowTesting(
+            [InterceptorOrderingAggregate::class, InterceptorOrderingInterceptors::class, OutputHandler::class],
+            [new InterceptorOrderingInterceptors(), $callStack, new OutputHandler()],
+        )->sendCommandWithRoutingKey('endpointFactoryWithOutput', metadata: ['aggregate.id' => 'id']);
+
+        self::assertEquals(
+            [
+                'beforeChangeHeaders',
+                'before',
+                'around begin',
+                'factory',
+                'around end',
+                'afterChangeHeaders',
+                'after',
+
+                'eventHandler',
+
+                'command-output-channel',
+            ],
+            $callStack->getCalls()
+        );
+    }
+
+    public function test_aggregate_with_factory_and_action_channel(): void
     {
         $callStack = new InterceptorOrderingStack();
         EcotoneLite::bootstrapFlowTesting(

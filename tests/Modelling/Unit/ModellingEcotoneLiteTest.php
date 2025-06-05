@@ -24,6 +24,7 @@ use Test\Ecotone\Modelling\Fixture\PriorityEventHandler\AggregateSynchronousPrio
 use Test\Ecotone\Modelling\Fixture\PriorityEventHandler\AggregateSynchronousPriorityWithLowerPriorityHandler;
 use Test\Ecotone\Modelling\Fixture\PriorityEventHandler\OrderWasPlaced;
 use Test\Ecotone\Modelling\Fixture\PriorityEventHandler\SynchronousPriorityHandler;
+use Test\Ecotone\Modelling\Fixture\PriorityEventHandler\SynchronousPriorityHandlerWithInheritance;
 
 /**
  * @internal
@@ -65,6 +66,23 @@ final class ModellingEcotoneLiteTest extends TestCase
 
         $this->assertSame(
             ['higherPriorityHandler', 'middlePriorityHandler', 'lowerPriorityHandler'],
+            $ecotoneTestSupport
+                ->publishEvent(new OrderWasPlaced(1))
+                ->sendQueryWithRouting('getTriggers')
+        );
+    }
+
+    public function test_synchronous_event_handlers_should_be_handled_in_priority_with_inheritance()
+    {
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [SynchronousPriorityHandlerWithInheritance::class],
+            [
+                new SynchronousPriorityHandlerWithInheritance(),
+            ]
+        );
+
+        $this->assertSame(
+            ['higherPriorityHandler', 'middlePriorityHandler', 'lowerPriorityHandlerWithObjectRouting'],
             $ecotoneTestSupport
                 ->publishEvent(new OrderWasPlaced(1))
                 ->sendQueryWithRouting('getTriggers')

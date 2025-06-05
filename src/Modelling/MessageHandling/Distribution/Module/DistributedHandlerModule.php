@@ -6,7 +6,6 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\ModulePackageList;
@@ -25,8 +24,11 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\Distributed;
+use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\Config\MessageHandlerRoutingModule;
+use Ecotone\Modelling\Config\Routing\BusRoutingMapBuilder;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributedMessageHandler;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributionEntrypoint;
@@ -35,40 +37,43 @@ use Ecotone\Modelling\MessageHandling\Distribution\DistributionEntrypoint;
 /**
  * licence Apache-2.0
  */
-class DistributedHandlerModule extends NoExternalConfigurationModule implements AnnotationModule
+class DistributedHandlerModule implements AnnotationModule
 {
-    private array $distributedEventHandlerRoutingKeys;
-    private array $distributedCommandHandlerRoutingKeys;
-
-    public function __construct(array $distributedEventHandlerRoutingKeys, array $distributedCommandHandlerRoutingKeys)
-    {
-        $this->distributedEventHandlerRoutingKeys   = $distributedEventHandlerRoutingKeys;
-        $this->distributedCommandHandlerRoutingKeys = $distributedCommandHandlerRoutingKeys;
+    public function __construct(
+        private BusRoutingMapBuilder $commandBusDistributedRoutes,
+        private BusRoutingMapBuilder $eventBusDistributedRoutes,
+    ) {
     }
 
     public static function create(AnnotationFinder $annotationFinder, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
-        return new self(self::getDistributedEventHandlerRoutingKeys($annotationFinder, $interfaceToCallRegistry), self::getDistributedCommandHandlerRoutingKeys($annotationFinder, $interfaceToCallRegistry));
+        $commandBusDistributedRoutes = new BusRoutingMapBuilder();
+        foreach ($annotationFinder->findAnnotatedMethods(CommandHandler::class) as $registration) {
+            if ($registration->hasAnnotation(Distributed::class)) {
+                $commandBusDistributedRoutes->addRoutesFromAnnotatedFinding($registration, $interfaceToCallRegistry);
+            }
+        }
+
+        $eventBusDistributedRoutes = new BusRoutingMapBuilder();
+        foreach ($annotationFinder->findAnnotatedMethods(EventHandler::class) as $registration) {
+            if ($registration->hasAnnotation(Distributed::class)) {
+                $eventBusDistributedRoutes->addRoutesFromAnnotatedFinding($registration, $interfaceToCallRegistry);
+            }
+        }
+        return new self($commandBusDistributedRoutes, $eventBusDistributedRoutes);
     }
 
-    public static function getDistributedCommandHandlerRoutingKeys(AnnotationFinder $annotationFinder, InterfaceToCallRegistry $interfaceToCallRegistry): array
+    /**
+     * @return array<string>
+     */
+    public function getDistributedEventHandlerRoutes(): array
     {
-        $routingKeys = array_merge(
-            MessageHandlerRoutingModule::getCommandBusByNamesMapping($annotationFinder, $interfaceToCallRegistry, true),
-            MessageHandlerRoutingModule::getCommandBusByObjectMapping($annotationFinder, $interfaceToCallRegistry, true)
-        );
-
-        return array_keys($routingKeys);
+        return $this->eventBusDistributedRoutes->getRoutingKeys();
     }
 
-    public static function getDistributedEventHandlerRoutingKeys(AnnotationFinder $annotationFinder, InterfaceToCallRegistry $interfaceToCallRegistry): array
+    public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
     {
-        $routingKeys = array_merge(
-            MessageHandlerRoutingModule::getEventBusByNamesMapping($annotationFinder, $interfaceToCallRegistry, true),
-            MessageHandlerRoutingModule::getEventBusByObjectsMapping($annotationFinder, $interfaceToCallRegistry, true)
-        );
-
-        return array_keys($routingKeys);
+        return [$this];
     }
 
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
@@ -96,8 +101,8 @@ class DistributedHandlerModule extends NoExternalConfigurationModule implements 
         $messagingConfiguration->registerServiceDefinition(
             DistributedMessageHandler::class,
             new Definition(DistributedMessageHandler::class, [
-                $this->distributedEventHandlerRoutingKeys,
-                $this->distributedCommandHandlerRoutingKeys,
+                $this->eventBusDistributedRoutes->compile(),
+                $this->commandBusDistributedRoutes->compile(),
                 $serviceConfiguration->getServiceName(),
             ])
         );

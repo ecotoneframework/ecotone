@@ -2,6 +2,8 @@
 
 namespace Ecotone\AnnotationFinder;
 
+use Ecotone\Messaging\Handler\TypeDescriptor;
+
 /**
  * licence Apache-2.0
  */
@@ -46,5 +48,5 @@ interface AnnotatedFinding
 
     public function hasClassAnnotation(string $type): bool;
 
-    public function hasAnnotation(string $type): bool;
+    public function hasAnnotation(string|TypeDescriptor $type): bool;
 }

@@ -41,17 +41,13 @@ class RouterProcessorBuilder implements CompilableBuilder
         );
     }
 
-    public static function createHeaderExistsRouter(string $headerName, string $routeToChannel, string $fallbackRoute): self
+    public static function createHeaderExistsRouter(string $headerName, CompilableBuilder $existsProcessor, CompilableBuilder $fallbackProcessor): self
     {
         return new self(
-            HeaderExistsRouter::create($headerName, $routeToChannel, $fallbackRoute)->getDefinition(),
+            HeaderExistsRouter::create($headerName, 'exists', 'fallback')->getDefinition(),
             [
-                $routeToChannel => new Definition(SendToChannelProcessor::class, [
-                    new ChannelReference($routeToChannel),
-                ]),
-                $fallbackRoute => new Definition(SendToChannelProcessor::class, [
-                    new ChannelReference($fallbackRoute),
-                ]),
+                'exists' => $existsProcessor,
+                'fallback' => $fallbackProcessor,
             ]
         );
     }

@@ -6,6 +6,7 @@ namespace Test\Ecotone\Modelling\Fixture\AnnotatedConstructor;
 
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\Identifier;
 use stdClass;
 
 #[Aggregate]
@@ -14,6 +15,9 @@ use stdClass;
  */
 final class ConstructorAsEventHandler
 {
+    #[Identifier]
+    private string $id;
+
     #[EventHandler(endpointId: 'commandHandler')]
     public function __construct(stdClass $event)
     {

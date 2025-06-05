@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Config\ConfigurationException;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\SagaWithMultipleActions\RandomEvent;
 use Test\Ecotone\Modelling\Fixture\SagaWithMultipleActions\SagaWithMultipleEventHandlers;
@@ -22,7 +22,8 @@ final class SagaTest extends TestCase
 {
     public function test_throwing_exception_if_registering_multiple_actions_with_factory_method(): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage('Message Handlers on Aggregate and Saga can be used either for single factory method and single action method together, or for multiple actions methods');
 
         EcotoneLite::bootstrapFlowTesting(
             [SagaWithMultipleEventHandlersAndFactoryMethod::class]

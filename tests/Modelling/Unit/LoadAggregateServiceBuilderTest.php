@@ -7,6 +7,7 @@ use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\AggregateNotFoundException;
+use Exception;
 use Test\Ecotone\Messaging\BaseEcotoneTestCase;
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateWithoutMessageClassesExample;
 use Test\Ecotone\Modelling\Fixture\Blog\Article;
@@ -250,7 +251,8 @@ final class LoadAggregateServiceBuilderTest extends BaseEcotoneTestCase
 
     public function test_throwing_exception_if_no_event_sourcing_handler_defined_for_event_sourced_aggregate()
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage("You must define at least one EventSourcingHandler to provide aggregate's identifier after first event.");
 
         EcotoneLite::bootstrapFlowTesting(classesToResolve: [NoFactoryMethodAggregateExample::class]);
     }
@@ -258,8 +260,13 @@ final class LoadAggregateServiceBuilderTest extends BaseEcotoneTestCase
     public function test_throwing_exception_if_factory_method_for_event_sourced_aggregate_has_no_parameters()
     {
         $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage(EventSourcingHandlerMethodWithWrongParameterCountExample::class .'::factory is Event Sourcing Handler and should have at least one parameter.');
 
-        EcotoneLite::bootstrapFlowTesting(classesToResolve: [EventSourcingHandlerMethodWithWrongParameterCountExample::class]);
+        try {
+            EcotoneLite::bootstrapFlowTesting(classesToResolve: [EventSourcingHandlerMethodWithWrongParameterCountExample::class]);
+        } catch (Exception $e) {
+            throw $e;
+        }
     }
 
     public function test_throwing_exception_if_construct_having_parameters()

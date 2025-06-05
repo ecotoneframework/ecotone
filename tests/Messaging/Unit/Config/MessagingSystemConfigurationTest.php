@@ -2095,6 +2095,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
     public function test_throwing_exception_if_registered_command_handler_with_same_routing_as_asynchronous_channel()
     {
         $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Command Handler routing key can't be equal to asynchronous channel name");
 
         EcotoneLite::bootstrapForTesting(
             [SomeTestCommandHandler::class],
@@ -2110,6 +2111,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
     public function test_throwing_exception_if_registered_event_handler_with_same_routing_as_asynchronous_channel()
     {
         $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Event Handler listen to routing can't be equal to asynchronous channel name");
 
         EcotoneLite::bootstrapForTesting(
             [SomeTestEventHandler::class],

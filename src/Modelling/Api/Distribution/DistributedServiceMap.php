@@ -9,7 +9,7 @@ use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Modelling\Config\EventBusRouter;
+use Ecotone\Modelling\Config\Routing\BusRoutingMap;
 use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\MessageHandling\Distribution\UnknownDistributedDestination;
 
@@ -78,7 +78,7 @@ final class DistributedServiceMap implements DefinedObject
                 }
 
                 foreach ($this->subscriptionRoutingKeys[$service] as $subscriptionEventFilter) {
-                    if (EventBusRouter::doesListenForRoutedName($subscriptionEventFilter, $routingKey)) {
+                    if (BusRoutingMap::globMatch($subscriptionEventFilter, $routingKey)) {
                         $filteredChannels[] = $channel;
 
                         break;

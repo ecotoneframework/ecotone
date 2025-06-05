@@ -25,7 +25,9 @@ interface AnnotationFinder extends AnnotationResolver
     public function findAnnotatedMethods(string $methodAnnotationClassName): array;
 
     /**
-     * @return object
+     * @template T
+     * @param class-string<T> $attributeClassName
+     * @return T
      * @throws InvalidArgumentException
      */
     public function getAttributeForClass(string $className, string $attributeClassName): object;

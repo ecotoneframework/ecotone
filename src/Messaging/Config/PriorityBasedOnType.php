@@ -85,4 +85,18 @@ final class PriorityBasedOnType
     {
         return $this->type;
     }
+
+    public function getPriorityArray(): array
+    {
+        return [$this->number, $this->getTypePriority()];
+    }
+
+    private function getTypePriority(): int
+    {
+        return match ($this->type) {
+            self::AGGREGATE_TYPE => 3,
+            self::PROJECTION_TYPE => 2,
+            default => 1
+        };
+    }
 }

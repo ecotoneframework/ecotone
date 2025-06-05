@@ -8,7 +8,7 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
 use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\Config\EventBusRouter;
+use Ecotone\Modelling\Config\Routing\BusRoutingMap;
 use Ecotone\Modelling\EventBus;
 
 /**
@@ -17,11 +17,10 @@ use Ecotone\Modelling\EventBus;
 class DistributedMessageHandler
 {
     public function __construct(
-        private array $distributedEventHandlerRoutingKeys,
-        private array $distributedCommandHandlerRoutingKeys,
+        private BusRoutingMap $distributedEventHandlerRoutingKeys,
+        private BusRoutingMap $distributedCommandHandlerRoutingKeys,
         private string $thisServiceName,
     ) {
-
     }
 
     public function handle(
@@ -40,11 +39,11 @@ class DistributedMessageHandler
         MessagingEntrypoint $messagingEntrypoint
     ) {
         if ($payloadType === 'event') {
-            if ($this->hasAnyListingHandlers($routingKey)) {
+            if (! empty($this->distributedEventHandlerRoutingKeys->get($routingKey))) {
                 $eventBus->publishWithRouting($routingKey, $payload, $contentType, $metadata);
             }
         } elseif ($payloadType === 'command') {
-            if (! in_array($routingKey, $this->distributedCommandHandlerRoutingKeys)) {
+            if (empty($this->distributedCommandHandlerRoutingKeys->get($routingKey))) {
                 throw RoutingKeyIsNotDistributed::create('There is no Distributed Command Handler registered with routing key: ' . $routingKey);
             }
 
@@ -62,20 +61,5 @@ class DistributedMessageHandler
         } else {
             throw InvalidArgumentException::create("Trying to call distributed command handler for payload type {$payloadType} and allowed are event/command/message");
         }
-    }
-
-    private function hasAnyListingHandlers(string $routingKey): bool
-    {
-        if (! in_array($routingKey, $this->distributedEventHandlerRoutingKeys)) {
-            foreach ($this->distributedEventHandlerRoutingKeys as $listenTo) {
-                if (EventBusRouter::doesListenForRoutedName($listenTo, $routingKey)) {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        return true;
     }
 }

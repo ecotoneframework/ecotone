@@ -4,13 +4,13 @@ namespace Ecotone\Modelling\EventSourcingExecutor;
 
 use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\LicenceDecider;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
 use Ecotone\Modelling\EventSourcingHandlerMethod;
 use ReflectionClass;
@@ -29,10 +29,10 @@ final class EventSourcingHandlerExecutorBuilder
             $constructMethod = $class->getMethod('__construct');
 
             if ($constructMethod->getParameters()) {
-                throw InvalidArgumentException::create("Constructor for Event Sourced {$classDefinition} should not have any parameters");
+                throw ConfigurationException::create("Constructor for Event Sourced {$classDefinition} should not have any parameters");
             }
             if (! $constructMethod->isPublic()) {
-                throw InvalidArgumentException::create("Constructor for Event Sourced {$classDefinition} should be public");
+                throw ConfigurationException::create("Constructor for Event Sourced {$classDefinition} should be public");
             }
         }
 
@@ -43,16 +43,16 @@ final class EventSourcingHandlerExecutorBuilder
 
             if ($methodToCheck->hasMethodAnnotation($aggregateFactoryAnnotation)) {
                 if ($methodToCheck->isStaticallyCalled()) {
-                    throw InvalidArgumentException::create("{$methodToCheck} is Event Sourcing Handler and should not be static.");
+                    throw ConfigurationException::create("{$methodToCheck} is Event Sourcing Handler and should not be static.");
                 }
                 if ($methodToCheck->getInterfaceParameterAmount() < 1) {
-                    throw InvalidArgumentException::create("{$methodToCheck} is Event Sourcing Handler and should have at least one parameter.");
+                    throw ConfigurationException::create("{$methodToCheck} is Event Sourcing Handler and should have at least one parameter.");
                 }
                 if (! $methodToCheck->getFirstParameter()->isObjectTypeHint()) {
-                    throw InvalidArgumentException::create("{$methodToCheck} is Event Sourcing Handler and should have first parameter as Event Class type hint.");
+                    throw ConfigurationException::create("{$methodToCheck} is Event Sourcing Handler and should have first parameter as Event Class type hint.");
                 }
                 if (! $methodToCheck->hasReturnTypeVoid()) {
-                    throw InvalidArgumentException::create("{$methodToCheck} is Event Sourcing Handler and should return void return type");
+                    throw ConfigurationException::create("{$methodToCheck} is Event Sourcing Handler and should return void return type");
                 }
 
                 $eventSourcingHandlerMethods[$method] = EventSourcingHandlerMethod::prepareDefinition(
@@ -63,7 +63,7 @@ final class EventSourcingHandlerExecutorBuilder
         }
 
         if (! $eventSourcingHandlerMethods) {
-            throw InvalidArgumentException::create("Your aggregate {$classDefinition->getClassType()}, is event sourced. You must define at least one EventSourcingHandler to provide aggregate's identifier after first event.");
+            throw ConfigurationException::create("Your aggregate {$classDefinition->getClassType()}, is event sourced. You must define at least one EventSourcingHandler to provide aggregate's identifier after first event.");
         }
 
         return new Definition(EventSourcingHandlerExecutor::class, [

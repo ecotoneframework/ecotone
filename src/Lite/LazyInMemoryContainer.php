@@ -40,7 +40,7 @@ class LazyInMemoryContainer implements ContainerInterface
     private function resolveArgument(mixed $argument): mixed
     {
         if (is_array($argument)) {
-            return array_map(fn ($argument) => $this->resolveArgument($argument), $argument);
+            return array_map(fn ($a) => $this->resolveArgument($a), $argument);
         } elseif ($argument instanceof Definition) {
             $object = $this->instantiateDefinition($argument);
             foreach ($argument->getMethodCalls() as $methodCall) {

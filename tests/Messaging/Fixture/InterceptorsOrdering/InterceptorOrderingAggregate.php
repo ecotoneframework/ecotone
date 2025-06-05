@@ -2,6 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\InterceptorsOrdering;
 
+use Ecotone\Messaging\Attribute\Parameter\Headers;
 use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\CommandHandler;
@@ -24,14 +25,14 @@ class InterceptorOrderingAggregate
 
 
     #[CommandHandler(routingKey: 'endpoint')]
-    public static function factory(#[Reference] InterceptorOrderingStack $stack): self
+    public static function factory(#[Reference] InterceptorOrderingStack $stack, #[Headers] array $metadata): self
     {
         $stack->add('factory');
         return new self($metadata['aggregate.id'] ?? 'id');
     }
 
     #[CommandHandler(routingKey: 'endpointFactoryWithOutput', outputChannelName: 'internal-channel')]
-    public static function factoryWithOutput(#[Reference] InterceptorOrderingStack $stack): self
+    public static function factoryWithOutput(#[Reference] InterceptorOrderingStack $stack, #[Headers] array $metadata): self
     {
         $stack->add('factory');
         return new self($metadata['aggregate.id'] ?? 'id');

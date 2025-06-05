@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * licence Apache-2.0
  */
@@ -15,7 +17,7 @@ use Ecotone\Messaging\Config\Container\MethodInterceptorsConfiguration;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\MessageProcessor;
 
-class ChainedMessageProcessorBuilder
+class ChainedMessageProcessorBuilder implements CompilableBuilder
 {
     private ?InterceptedMessageProcessorBuilder $interceptedProcessor = null;
 
@@ -80,5 +82,37 @@ class ChainedMessageProcessorBuilder
             1 => $compiledProcessors[0],
             default => new Definition(ChainedMessageProcessor::class, [$compiledProcessors])
         };
+    }
+
+    private array $annotations = [];
+    public function withEndpointAnnotations(array $annotations): self
+    {
+        $self = clone $this;
+        $self->annotations = $annotations;
+
+        return $self;
+    }
+
+    private iterable $requiredInterceptorNames = [];
+    public function withRequiredInterceptorNames(array $requiredInterceptorNames): self
+    {
+        $self = clone $this;
+        $self->requiredInterceptorNames = $requiredInterceptorNames;
+
+        return $self;
+    }
+
+    public function compile(MessagingContainerBuilder $builder): Definition|Reference
+    {
+        $interceptedInterface = $this->getInterceptedInterface();
+        $interceptorsConfiguration = $interceptedInterface
+            ? $builder->getRelatedInterceptors(
+                $interceptedInterface,
+                $this->annotations,
+                $this->requiredInterceptorNames,
+            )
+            : MethodInterceptorsConfiguration::createEmpty();
+
+        return $this->compileProcessor($builder, $interceptorsConfiguration);
     }
 }

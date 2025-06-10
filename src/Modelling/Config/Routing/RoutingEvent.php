@@ -19,6 +19,7 @@ class RoutingEvent
      * @param int|int[] $priority
      */
     public function __construct(
+        private BusRoutingMapBuilder $busRoutingMapBuilder,
         private readonly AnnotatedFinding $registration,
         private string $destinationChannel,
         private array $routingKeys,
@@ -82,5 +83,10 @@ class RoutingEvent
     public function stopPropagation(): void
     {
         $this->isPropagationStopped = true;
+    }
+
+    public function getBusRoutingMapBuilder(): BusRoutingMapBuilder
+    {
+        return $this->busRoutingMapBuilder;
     }
 }

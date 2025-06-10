@@ -17,7 +17,10 @@ use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\PriorityBasedOnType;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\NamedEvent;
 use RuntimeException;
 
 use function str_contains;
@@ -49,19 +52,15 @@ class BusRoutingMapBuilder extends BusRoutingMap
             return [$routingKey];
         }
 
-        $interfaceToCall = $interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName());
-        if ($interfaceToCall->hasNoParameters()) {
+        $type = $this->getFirstParameterType($interfaceToCallRegistry, $registration);
+        if (! $type) {
             return [];
-        }
-        $type = $interfaceToCall->getFirstParameter()->getTypeDescriptor();
-        if ($type->isUnionType()) {
+        } else {
             $routes = [];
             foreach ($type->getUnionTypes() as $unionType) {
                 $routes[] = (string) $unionType;
             }
             return $routes;
-        } else {
-            return [(string) $type];
         }
     }
 
@@ -76,9 +75,36 @@ class BusRoutingMapBuilder extends BusRoutingMap
         $routes = $this->getRoutesFromAnnotatedFinding($registration, $interfaceToCallRegistry);
         $priority = PriorityBasedOnType::fromAnnotatedFinding($registration);
 
-        $routingEvent = new RoutingEvent($registration, $destinationChannel, $routes, $priority->getPriorityArray());
+        $routingEvent = new RoutingEvent($this, $registration, $destinationChannel, $routes, $priority->getPriorityArray());
 
-        return $this->dispatchRoutingEvent($routingEvent);
+        $this->dispatchRoutingEvent($routingEvent);
+
+        if ($routingEvent->isCanceled()) {
+            return null; // event is canceled, no routing
+        }
+        $destinationChannel = $routingEvent->getDestinationChannel();
+        $priority = $routingEvent->getPriority();
+
+        foreach ($routingEvent->getRoutingKeys() as $routingKey) {
+            $this->addRoute($routingKey, $destinationChannel, $priority);
+        }
+
+        // add object alias if the routing key is a class and has a NamedEvent annotation
+        $type = $this->getFirstParameterType($interfaceToCallRegistry, $registration);
+        if ($type) {
+            foreach ($type->getUnionTypes() as $unionType) {
+                $className = (string) $unionType;
+                if (class_exists($className)) {
+                    $classDefinition = $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($className));
+                    if ($classDefinition->hasClassAnnotation(TypeDescriptor::create(NamedEvent::class))) {
+                        $namedEvent = $classDefinition->getSingleClassAnnotation(TypeDescriptor::create(NamedEvent::class));
+                        $this->addObjectAlias($className, $namedEvent->getName());
+                    }
+                }
+            }
+        }
+
+        return $destinationChannel;
     }
 
     /**
@@ -166,6 +192,9 @@ class BusRoutingMapBuilder extends BusRoutingMap
     public function addObjectAlias(string $class, string $routingKey): void
     {
         if (isset($this->classToNameAliases[$class])) {
+            if ($this->classToNameAliases[$class] === $routingKey) {
+                return; // already registered
+            }
             throw ConfigurationException::create("Class $class already has an alias registered: " . $this->classToNameAliases[$class]);
         }
         if (isset($this->nameToClassAliases[$routingKey])) {
@@ -243,6 +272,11 @@ class BusRoutingMapBuilder extends BusRoutingMap
         ]);
     }
 
+    public function getMessagingConfiguration(): ?Configuration
+    {
+        return $this->messagingConfiguration;
+    }
+
     private function channelName(string $channel): string
     {
         if (isset($this->channelsName[$channel])) {
@@ -263,25 +297,22 @@ class BusRoutingMapBuilder extends BusRoutingMap
     /**
      * @return ?string the destination channel name or null if the event is canceled
      */
-    private function dispatchRoutingEvent(RoutingEvent $routingEvent): ?string
+    private function dispatchRoutingEvent(RoutingEvent $routingEvent): void
     {
         foreach ($this->routingEventHandlers as $routingEventHandler) {
-            $routingEventHandler->handleRoutingEvent($routingEvent, $this->messagingConfiguration);
-            if ($routingEvent->isCanceled()) {
-                return null;
-            }
-            if ($routingEvent->isPropagationStopped()) {
-                break;
+            $routingEventHandler->handleRoutingEvent($routingEvent);
+            if ($routingEvent->isCanceled() || $routingEvent->isPropagationStopped()) {
+                return;
             }
         }
+    }
 
-        $destinationChannel = $routingEvent->getDestinationChannel();
-        $priority = $routingEvent->getPriority();
-
-        foreach ($routingEvent->getRoutingKeys() as $routingKey) {
-            $this->addRoute($routingKey, $destinationChannel, $priority);
+    private function getFirstParameterType(InterfaceToCallRegistry $interfaceToCallRegistry, AnnotatedFinding $registration): ?Type
+    {
+        $interfaceToCall = $interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName());
+        if ($interfaceToCall->hasNoParameters()) {
+            return null;
         }
-
-        return $destinationChannel;
+        return $interfaceToCall->getFirstParameter()->getTypeDescriptor();
     }
 }

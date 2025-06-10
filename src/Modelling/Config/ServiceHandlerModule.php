@@ -62,7 +62,7 @@ final class ServiceHandlerModule implements AnnotationModule, RoutingEventHandle
     {
     }
 
-    public function handleRoutingEvent(RoutingEvent $event, ?Configuration $messagingConfiguration = null): void
+    public function handleRoutingEvent(RoutingEvent $event): void
     {
         $registration = $event->getRegistration();
         if ($registration->hasClassAnnotation(Aggregate::class)) {
@@ -80,7 +80,7 @@ final class ServiceHandlerModule implements AnnotationModule, RoutingEventHandle
             ? TransformerBuilder::create(AnnotatedDefinitionReference::getReferenceFor($registration), $this->interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName()))
             : ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($registration), $this->interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName()));
 
-        $messagingConfiguration->registerMessageHandler(
+        $event->getBusRoutingMapBuilder()->getMessagingConfiguration()->registerMessageHandler(
             $handler
                 ->withInputChannelName($event->getDestinationChannel())
                 ->withOutputMessageChannel($methodAnnotation->getOutputChannelName())

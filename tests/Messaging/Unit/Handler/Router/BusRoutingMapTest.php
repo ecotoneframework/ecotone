@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 /**
  * @internal
  */
-class BusRoutingConfigTest extends TestCase
+class BusRoutingMapTest extends TestCase
 {
     public static function optimizedProvider(): iterable
     {

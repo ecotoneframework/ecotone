@@ -496,13 +496,15 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
         }
     }
 
-    public function handleRoutingEvent(RoutingEvent $event, ?Configuration $messagingConfiguration = null): void
+    public function handleRoutingEvent(RoutingEvent $event): void
     {
         $registration = $event->getRegistration();
 
         if (! $registration->hasAnnotation(Aggregate::class)) {
             return;
         }
+
+        $messagingConfiguration = $event->getBusRoutingMapBuilder()->getMessagingConfiguration();
 
         Assert::notNull($messagingConfiguration, 'RoutingEvent should be handled with messaging configuration, but it is null. Did you forget to pass it?');
 
@@ -548,12 +550,14 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
         $isFactoryMethod       = $relatedClassInterface->isFactoryMethod();
         $parameterConverters   = $parameterConverterAnnotationFactory->createParameterWithDefaults($relatedClassInterface);
         $aggregateClassDefinition = $this->interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($registration->getClassName()));
+        $handledPayloadType = MessageHandlerRoutingModule::getFirstParameterClassIfAny($registration, $this->interfaceToCallRegistry);
+        $handledPayloadType = $handledPayloadType ? $this->interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($handledPayloadType)) : null;
 
         // This is executed before sending to async channel
         $aggregateIdentifierHandlerPreCheck = MessageProcessorActivatorBuilder::create()
             ->withInputChannelName($destinationChannel)
             ->withOutputMessageChannel($connectionChannel = $destinationChannel . '-connection')
-            ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $annotation->getIdentifierMetadataMapping(), $annotation->getIdentifierMapping(), null, $this->interfaceToCallRegistry))
+            ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $annotation->getIdentifierMetadataMapping(), $annotation->getIdentifierMapping(), $handledPayloadType, $this->interfaceToCallRegistry))
         ;
         $messagingConfiguration->registerMessageHandler($aggregateIdentifierHandlerPreCheck);
 
@@ -569,8 +573,6 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
             ));
 
         if (! $isFactoryMethod) {
-            $handledPayloadType = MessageHandlerRoutingModule::getFirstParameterClassIfAny($registration, $this->interfaceToCallRegistry);
-            $handledPayloadType = $handledPayloadType ? $this->interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($handledPayloadType)) : null;
             $serviceActivatorHandler
                 /** @TODO Ecotone 2.0 (remove) this. For backward compatibility when messages without AggregateMessage::AGGREGATE_ID is not available*/
                 ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $annotation->getIdentifierMetadataMapping(), $annotation->getIdentifierMapping(), $handledPayloadType, $this->interfaceToCallRegistry))

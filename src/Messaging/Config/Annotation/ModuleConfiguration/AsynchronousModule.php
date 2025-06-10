@@ -255,7 +255,7 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
         return $endpointChannels;
     }
 
-    public function handleRoutingEvent(RoutingEvent $event, ?Configuration $messagingConfiguration = null): void
+    public function handleRoutingEvent(RoutingEvent $event): void
     {
         $registration = $event->getRegistration();
         $isAsynchronous = $registration->hasMethodAnnotation(Asynchronous::class);

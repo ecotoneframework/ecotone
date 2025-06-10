@@ -7,9 +7,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\Config\Routing;
 
-use Ecotone\Messaging\Config\Configuration;
-
 interface RoutingEventHandler
 {
-    public function handleRoutingEvent(RoutingEvent $event, ?Configuration $messagingConfiguration = null): void;
+    public function handleRoutingEvent(RoutingEvent $event): void;
 }

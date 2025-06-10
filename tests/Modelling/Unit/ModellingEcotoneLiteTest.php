@@ -18,6 +18,8 @@ use Test\Ecotone\Modelling\Fixture\EventSourcedSaga\PaymentWasDoneEvent;
 use Test\Ecotone\Modelling\Fixture\HandlerWithAbstractClass\TestAbstractHandler;
 use Test\Ecotone\Modelling\Fixture\HandlerWithAbstractClass\TestCommand;
 use Test\Ecotone\Modelling\Fixture\HandlerWithAbstractClass\TestHandler;
+use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestViewer;
+use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestWasAddedToBook;
 use Test\Ecotone\Modelling\Fixture\NoEventsReturnedFromFactoryMethod\Aggregate;
 use Test\Ecotone\Modelling\Fixture\Outbox\OutboxWithMultipleChannels;
 use Test\Ecotone\Modelling\Fixture\PriorityEventHandler\AggregateSynchronousPriorityWithHigherPriorityHandler;
@@ -242,6 +244,27 @@ final class ModellingEcotoneLiteTest extends TestCase
             $ecotoneLite
                 ->sendCommandWithRoutingKey('aggregate.create')
                 ->getRecordedEvents()
+        );
+    }
+
+    public function test_named_event_are_aliased_without_being_part_of_resolved_classes(): void
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            classesToResolve: [
+                GuestViewer::class,
+                // GuestWasAddedToBook::class // Not necessary to resolve named event for aliasing
+            ],
+            containerOrAvailableServices: [new GuestViewer()],
+            configuration: ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+        );
+
+        self::assertEquals(
+            ['John Doe'],
+            $ecotoneLite
+                ->publishEvent(new GuestWasAddedToBook('book-1', 'John Doe'))
+                ->sendQueryWithRouting(GuestViewer::BOOK_GET_GUESTS, 'book-1'),
+            'Named event should be aliased to GuestWasAddedToBook without being part of resolved classes'
         );
     }
 }

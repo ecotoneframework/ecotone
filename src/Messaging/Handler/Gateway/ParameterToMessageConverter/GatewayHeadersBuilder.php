@@ -2,11 +2,16 @@
 
 namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
+use Ecotone\Messaging\Attribute\BusinessMethod;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverterBuilder;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\EventBus;
+use Ecotone\Modelling\QueryBus;
 
 /**
  * Class GatewayHeaderArrayBuilder
@@ -45,6 +50,26 @@ class GatewayHeadersBuilder implements GatewayParameterConverterBuilder
 
     public function compile(MessagingContainerBuilder $builder, InterfaceToCall $interfaceToCall): Definition
     {
-        return new Definition(GatewayHeadersConverter::class, [$this->parameterName]);
+        return new Definition(GatewayHeadersConverter::class, [
+            $this->parameterName,
+            $this->isStartingNewFlow($interfaceToCall),
+        ]);
+    }
+
+    private function isStartingNewFlow(InterfaceToCall $interfaceToCall): bool
+    {
+        foreach ([BusinessMethod::class] as $attribute) {
+            if ($interfaceToCall->hasAnnotation(TypeDescriptor::create($attribute))) {
+                return true;
+            }
+        }
+
+        foreach ([CommandBus::class, EventBus::class, QueryBus::class] as $gateway) {
+            if ($interfaceToCall->getInterfaceType()->isCompatibleWith(TypeDescriptor::create($gateway))) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

@@ -9,6 +9,16 @@ use Ecotone\Messaging\MessageHeaders;
  */
 class ErrorContext
 {
+    public const WHOLE_ERROR_CONTEXT = [
+        self::EXCEPTION,
+        self::EXCEPTION_STACKTRACE,
+        self::EXCEPTION_FILE,
+        self::EXCEPTION_LINE,
+        self::EXCEPTION_CODE,
+        self::EXCEPTION_MESSAGE,
+    ];
+
+    public const EXCEPTION = 'exception';
     public const EXCEPTION_STACKTRACE = 'exception-stacktrace';
     public const EXCEPTION_FILE = 'exception-file';
     public const EXCEPTION_LINE = 'exception-line';

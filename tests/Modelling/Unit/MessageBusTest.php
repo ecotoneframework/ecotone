@@ -5,11 +5,21 @@ declare(strict_types=1);
 namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingGatewayModule;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\Config\MessageBusChannel;
+use Ecotone\Modelling\EventBus;
+use Ecotone\Modelling\QueryBus;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\CreateMerchant;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\Merchant;
+use Test\Ecotone\Modelling\Fixture\CommandEventFlow\MerchantConversion;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\MerchantSubscriber;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\User;
 use Test\Ecotone\Modelling\Fixture\EventSourcedSaga\OrderDispatch;
@@ -20,6 +30,7 @@ use Test\Ecotone\Modelling\Fixture\HandlerWithAbstractClass\TestCommand;
 use Test\Ecotone\Modelling\Fixture\HandlerWithAbstractClass\TestHandler;
 use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestViewer;
 use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestWasAddedToBook;
+use Test\Ecotone\Modelling\Fixture\NamedEventAsyncSubscriber\GuestNotifier;
 use Test\Ecotone\Modelling\Fixture\NoEventsReturnedFromFactoryMethod\Aggregate;
 use Test\Ecotone\Modelling\Fixture\Outbox\OutboxWithMultipleChannels;
 use Test\Ecotone\Modelling\Fixture\PriorityEventHandler\AggregateSynchronousPriorityWithHigherPriorityHandler;
@@ -29,13 +40,14 @@ use Test\Ecotone\Modelling\Fixture\PriorityEventHandler\SynchronousPriorityHandl
 use Test\Ecotone\Modelling\Fixture\PriorityEventHandler\SynchronousPriorityHandlerWithInheritance;
 
 /**
- * @internal
- */
-/**
  * licence Apache-2.0
  * @internal
  */
-final class ModellingEcotoneLiteTest extends TestCase
+#[CoversClass(CommandBus::class)]
+#[CoversClass(EventBus::class)]
+#[CoversClass(QueryBus::class)]
+#[CoversClass(MessagingGatewayModule::class)]
+final class MessageBusTest extends TestCase
 {
     public function test_command_event_command_flow()
     {
@@ -265,6 +277,64 @@ final class ModellingEcotoneLiteTest extends TestCase
                 ->publishEvent(new GuestWasAddedToBook('book-1', 'John Doe'))
                 ->sendQueryWithRouting(GuestViewer::BOOK_GET_GUESTS, 'book-1'),
             'Named event should be aliased to GuestWasAddedToBook without being part of resolved classes'
+        );
+    }
+
+    public function test_it_does_use_endpoint_ids_as_routing_slips_to_ensure_it_kept_static(): void
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            classesToResolve: [
+                GuestNotifier::class,
+            ],
+            containerOrAvailableServices: [new GuestNotifier()],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+                SimpleMessageChannelBuilder::createQueueChannel('background'),
+            ]
+        );
+
+        $ecotoneLite
+            ->publishEvent(new GuestWasAddedToBook('book-1', 'John Doe'));
+
+        $channelAsync = $ecotoneLite->getMessageChannel('async');
+        $channelBackground = $ecotoneLite->getMessageChannel('background');
+
+        $message = $channelAsync->receive();
+        self::assertNotNull($message);
+        self::assertEquals('guestViewer.notify1.target.execute', $message->getHeaders()->get(MessageHeaders::ROUTING_SLIP));
+
+        $message = $channelAsync->receive();
+        self::assertNotNull($message);
+        self::assertEquals('guestViewer.notify2.target.execute', $message->getHeaders()->get(MessageHeaders::ROUTING_SLIP));
+
+        $message = $channelBackground->receive();
+        self::assertNotNull($message);
+        self::assertEquals('guestViewer.notify3.target.execute', $message->getHeaders()->get(MessageHeaders::ROUTING_SLIP));
+    }
+
+    public function test_sending_to_command_channel_directly_with_type_id_and_serialized_payload(): void
+    {
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [Merchant::class, MerchantConversion::class],
+            [new MerchantConversion()],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
+        );
+
+        $merchantId = '123';
+
+        $this->assertSame(
+            $merchantId, // factory method returns aggregate id
+            $ecotoneTestSupport
+                ->sendDirectToChannel(
+                    MessageBusChannel::COMMAND_CHANNEL_NAME_BY_OBJECT,
+                    ['merchantId' => $merchantId],
+                    metadata: [
+                        MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME => 'create.merchant',
+                        MessageHeaders::TYPE_ID => CreateMerchant::class,
+                        MessageHeaders::CONTENT_TYPE => MediaType::createApplicationXPHPArray()->toString(),
+                    ]
+                )
         );
     }
 }

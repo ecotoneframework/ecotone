@@ -8,7 +8,6 @@ use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Channel\DynamicChannel\DynamicMessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
@@ -614,7 +613,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
         $messageChannelName = 'test';
         $messageHandler = NoReturnMessageHandler::create();
 
-        $messagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+        $messagingSystem = MessagingSystemConfiguration::prepareWithDefaultsForTesting()
             ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $messageChannelName))
             ->registerMessageChannel(DynamicMessageChannelBuilder::createWithSendOnlyStrategy(SimpleMessageChannelBuilder::createQueueChannel($messageChannelName)))
             ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
@@ -628,7 +627,7 @@ final class DynamicMessageChannelBuilderTest extends TestCase
         $messageChannelName = 'test';
         $messageHandler = NoReturnMessageHandler::create();
 
-        $messagingSystem = MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty())
+        $messagingSystem = MessagingSystemConfiguration::prepareWithDefaultsForTesting()
             ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $messageChannelName))
             ->registerMessageChannel(DynamicMessageChannelBuilder::createWithSendOnlyStrategy(SimpleMessageChannelBuilder::createQueueChannel($messageChannelName)))
             ->registerConsumerFactory(new PollingConsumerBuilder())

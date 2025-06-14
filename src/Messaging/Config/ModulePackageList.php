@@ -10,6 +10,9 @@ namespace Ecotone\Messaging\Config;
 final class ModulePackageList
 {
     public const CORE_PACKAGE = 'core';
+    /**
+     * @TODO Ecotone 2.0 add to Core package
+     */
     public const ASYNCHRONOUS_PACKAGE = 'asynchronous';
     public const AMQP_PACKAGE = 'amqp';
     public const DBAL_PACKAGE = 'dbal';

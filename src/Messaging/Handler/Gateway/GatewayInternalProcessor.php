@@ -104,7 +104,7 @@ class GatewayInternalProcessor implements MessageProcessor, AroundInterceptable
                 throw InvalidArgumentException::create("{$this->interfaceToCallName} expects value, but null was returned. Have you consider changing return value to nullable?");
             }
             if ($replyMessage instanceof ErrorMessage) {
-                throw ($replyMessage->getPayload()->getCause() ?: $replyMessage->getPayload());
+                throw $replyMessage->getException();
             }
 
             return $replyMessage;

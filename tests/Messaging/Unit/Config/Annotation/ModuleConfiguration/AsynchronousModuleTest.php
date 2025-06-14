@@ -13,7 +13,6 @@ use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -21,12 +20,8 @@ use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\MessagingException;
 use ReflectionException;
 use RuntimeException;
-use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncClassExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncCommandHandlerWithoutIdExample;
-use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncEventHandlerExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncEventHandlerWithoutIdExample;
-use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncMethodExample;
-use Test\Ecotone\Messaging\Fixture\Annotation\Async\AsyncQueryHandlerExample;
 use Test\Ecotone\Modelling\Fixture\Order\OrderService;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\Retry\RetriedCommandHandler;
@@ -44,86 +39,6 @@ use Test\Ecotone\Modelling\Fixture\Retry\RetriedCommandHandler;
  */
 final class AsynchronousModuleTest extends AnnotationConfigurationTestCase
 {
-    /**
-     * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     */
-    public function test_registering_async_channel_for_method()
-    {
-        $annotationConfiguration = AsynchronousModule::create(
-            InMemoryAnnotationFinder::createEmpty()
-                ->registerClassWithAnnotations(AsyncMethodExample::class),
-            InterfaceToCallRegistry::createEmpty()
-        );
-        $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
-
-        $this->assertEquals(
-            $this->createMessagingSystemConfiguration()
-                ->registerAsynchronousEndpoint('asyncChannel', 'asyncServiceActivator'),
-            $configuration
-        );
-    }
-
-    /**
-     * @throws AnnotationException
-     * @throws ReflectionException
-     * @throws TypeDefinitionException
-     * @throws MessagingException
-     */
-    public function test_registering_async_channel_for_whole_class()
-    {
-        $annotationConfiguration = AsynchronousModule::create(
-            InMemoryAnnotationFinder::createEmpty()
-                ->registerClassWithAnnotations(AsyncClassExample::class),
-            InterfaceToCallRegistry::createEmpty()
-        );
-        $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
-
-        $this->assertEquals(
-            $this->createMessagingSystemConfiguration()
-                ->registerAsynchronousEndpoint('asyncChannel1', 'asyncServiceActivator1')
-                ->registerAsynchronousEndpoint('asyncChannel2', 'asyncServiceActivator2'),
-            $configuration
-        );
-    }
-
-    public function test_registering_event_handler()
-    {
-        $annotationConfiguration = AsynchronousModule::create(
-            InMemoryAnnotationFinder::createEmpty()
-                ->registerClassWithAnnotations(AsyncEventHandlerExample::class),
-            InterfaceToCallRegistry::createEmpty()
-        );
-        $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
-
-        $this->assertEquals(
-            $this->createMessagingSystemConfiguration()
-                ->registerAsynchronousEndpoint('asyncChannel', 'asyncEvent'),
-            $configuration
-        );
-    }
-
-    public function test_ignoring_query_handler_as_async()
-    {
-        $annotationConfiguration = AsynchronousModule::create(
-            InMemoryAnnotationFinder::createEmpty()
-                ->registerClassWithAnnotations(AsyncQueryHandlerExample::class),
-            InterfaceToCallRegistry::createEmpty()
-        );
-        $configuration = $this->createMessagingSystemConfiguration();
-        $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
-
-        $this->assertEquals(
-            $this->createMessagingSystemConfiguration(),
-            $configuration
-        );
-    }
-
     /**
      * @throws AnnotationException
      * @throws ReflectionException

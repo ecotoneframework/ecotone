@@ -6,6 +6,7 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\ErrorChannel;
 use Ecotone\Messaging\Attribute\MessageGateway;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\Parameter\Header;
@@ -32,7 +33,7 @@ use Ecotone\Messaging\Support\LicensingException;
 /**
  * licence Apache-2.0
  */
-class GatewayModule extends NoExternalConfigurationModule implements AnnotationModule
+class MessagingGatewayModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public const MODULE_NAME = 'gatewayModule';
 
@@ -130,6 +131,10 @@ class GatewayModule extends NoExternalConfigurationModule implements AnnotationM
             $asynchronous = $interfaceToCallRegistry->getFor($gatewayBuilder->getInterfaceName(), $gatewayBuilder->getRelatedMethodName())->getAnnotationsByImportanceOrder(TypeDescriptor::create(Asynchronous::class));
             if ($asynchronous && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
                 throw LicensingException::create("Gateway {$gatewayBuilder->getInterfaceName()}::{$gatewayBuilder->getRelatedMethodName()} is marked as asynchronous. This functionality is available as part of Ecotone Enterprise.");
+            }
+            $errorChannel = $interfaceToCallRegistry->getFor($gatewayBuilder->getInterfaceName(), $gatewayBuilder->getRelatedMethodName())->getAnnotationsByImportanceOrder(TypeDescriptor::create(ErrorChannel::class));
+            if ($errorChannel && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
+                throw LicensingException::create("Gateway {$gatewayBuilder->getInterfaceName()}::{$gatewayBuilder->getRelatedMethodName()} is marked with synchronous Error Channel. This functionality is available as part of Ecotone Enterprise.");
             }
 
             $messagingConfiguration->registerGatewayBuilder($gatewayBuilder);

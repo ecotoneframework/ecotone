@@ -6,15 +6,19 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Channel\PollableChannel\Serialization\OutboundMessageConverter;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingCommands\MessagingCommandsModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\LicenceDecider;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverterBuilder;
 use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverterBuilder;
 use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverterBuilder;
@@ -26,15 +30,18 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Gateway\ConsoleCommandRunner;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
+use Ecotone\Messaging\Handler\Gateway\ErrorChannelService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PollingMetadataConverter;
 use Ecotone\Messaging\Handler\Router\HeaderRouter;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
+use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\NullableMessageChannel;
 
@@ -57,6 +64,8 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
      */
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
+        $serviceConfiguration = ExtensionObjectResolver::resolveUnique(ServiceConfiguration::class, $extensionObjects, ServiceConfiguration::createWithDefaults());
+
         foreach ($extensionObjects as $extensionObject) {
             if ($extensionObject instanceof ChannelInterceptorBuilder) {
                 $messagingConfiguration->registerChannelInterceptor($extensionObject);
@@ -189,6 +198,18 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
             )->withParameterConverters([
                 GatewayHeaderBuilder::create('commandName', MessagingCommandsModule::ECOTONE_CONSOLE_COMMAND_NAME),
                 GatewayPayloadBuilder::create('parameters'),
+            ])
+        );
+
+        $messagingConfiguration->registerServiceDefinition(
+            ErrorChannelService::class,
+            Definition::createFor(ErrorChannelService::class, [
+                Reference::to(LoggingGateway::class),
+                new Definition(OutboundMessageConverter::class, [
+                    DefaultHeaderMapper::createAllHeadersMapping()->getDefinition(),
+                    MediaType::parseMediaType($serviceConfiguration->getDefaultSerializationMediaType()),
+                ]),
+                Reference::to(ConversionService::REFERENCE_NAME),
             ])
         );
 

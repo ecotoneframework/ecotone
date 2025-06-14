@@ -126,6 +126,17 @@ final class MessageBuilder
         return $this;
     }
 
+    public function prependRoutingSlip(array $routingSlip): self
+    {
+        if (! $routingSlip) {
+            return $this;
+        }
+
+        $this->setHeader(MessageHeaders::ROUTING_SLIP, implode(',', array_merge($routingSlip, $this->getRoutingSlip())));
+
+        return $this;
+    }
+
     /**
      * @return string[]
      */

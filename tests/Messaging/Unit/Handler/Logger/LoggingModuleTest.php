@@ -41,7 +41,7 @@ final class LoggingModuleTest extends TestCase
         $this->assertCount(1, $loggerExample->getCritical());
     }
 
-    public function test_it_does_log_critical_if_message_sent_to_error_channel()
+    public function test_it_does_log_error_if_message_sent_to_error_channel()
     {
         $loggerExample = StubLogger::create();
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
@@ -60,6 +60,6 @@ final class LoggingModuleTest extends TestCase
         $ecotoneLite->run(self::CHANNEL_NAME, ExecutionPollingMetadata::createWithTestingSetup(failAtError: false));
 
         $this->assertNotNull($ecotoneLite->getMessageChannel('customErrorChannel')->receive());
-        $this->assertCount(1, $loggerExample->getCritical());
+        $this->assertCount(1, $loggerExample->getError());
     }
 }

@@ -64,7 +64,7 @@ final class MediaType implements DefinedObject
 
         $this->type = $type;
         $this->subtype = $subtype;
-        $this->parameters = $parameters;
+        $this->parameters = array_filter($parameters, fn ($parameter) => $parameter !== null);
     }
 
     /**
@@ -150,6 +150,10 @@ final class MediaType implements DefinedObject
         return self::parseMediaType(self::APPLICATION_X_PHP . ";type={$type}");
     }
 
+    public function withoutTypeParameter(): self
+    {
+        return self::createWithParameters($this->type, $this->subtype, array_diff_key($this->parameters, [self::TYPE_PARAMETER => null]));
+    }
 
     /**
      * @return MediaType

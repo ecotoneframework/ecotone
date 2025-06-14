@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use Ecotone\Messaging\Handler\Logger\LoggingGateway;
-use Ecotone\Messaging\Handler\MessageHandlingException;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
-use Ecotone\Messaging\Support\ErrorMessage;
 use Throwable;
 
 /**
@@ -17,8 +14,11 @@ use Throwable;
  */
 class ErrorChannelInterceptor
 {
-    public function __construct(private MessageChannel $errorChannel, private LoggingGateway $loggingGateway)
-    {
+    public function __construct(
+        private ErrorChannelService $errorChannelService,
+        private MessageChannel      $errorChannel,
+        private ?string             $errorChannelRoutingSlip = null,
+    ) {
     }
 
     public function handle(MethodInvocation $methodInvocation, Message $requestMessage)
@@ -26,18 +26,12 @@ class ErrorChannelInterceptor
         try {
             return $methodInvocation->proceed();
         } catch (Throwable $exception) {
-            $this->loggingGateway->info(
-                'Error occurred during handling message. Sending Message to handle it in predefined Error Channel.',
+            $this->errorChannelService->handle(
                 $requestMessage,
-                ['exception' => $exception],
-            );
-
-            $this->errorChannel->send(ErrorMessage::create(MessageHandlingException::fromOtherException($exception, $requestMessage)));
-
-            $this->loggingGateway->info(
-                'Message was sent to Error Channel successfully.',
-                $requestMessage,
-                ['exception' => $exception],
+                $exception,
+                $this->errorChannel,
+                null,
+                $this->errorChannelRoutingSlip,
             );
         }
     }

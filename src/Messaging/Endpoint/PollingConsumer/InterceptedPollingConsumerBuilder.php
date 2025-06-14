@@ -18,6 +18,7 @@ use Ecotone\Messaging\Endpoint\InboundChannelAdapterEntrypoint;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gateway\ErrorChannelService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
@@ -115,8 +116,8 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
     {
         if (! $builder->has(PollingConsumerErrorChannelInterceptor::class)) {
             $builder->register(PollingConsumerErrorChannelInterceptor::class, new Definition(PollingConsumerErrorChannelInterceptor::class, [
+                Reference::to(ErrorChannelService::class),
                 new Reference(ChannelResolver::class),
-                Reference::to(LoggingGateway::class),
             ]));
         }
         return AroundInterceptorBuilder::create(

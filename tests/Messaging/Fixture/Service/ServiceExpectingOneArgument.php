@@ -98,6 +98,11 @@ class ServiceExpectingOneArgument implements DefinedObject
         return $value;
     }
 
+    public function withObjectTypeHint(object $value)
+    {
+        return $value;
+    }
+
     public function withInterface(UuidInterface $value)
     {
         return $value;

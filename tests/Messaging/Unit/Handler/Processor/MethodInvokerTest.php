@@ -8,6 +8,7 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -17,6 +18,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Test\ComponentTestBuilder;
 use Ecotone\Test\InMemoryConversionService;
+use PHPUnit\Framework\Attributes\CoversClass;
 use Ramsey\Uuid\Uuid;
 use ReflectionException;
 use stdClass;
@@ -41,6 +43,10 @@ use Test\Ecotone\Messaging\Unit\MessagingTestCase;
  * licence Apache-2.0
  * @internal
  */
+#[CoversClass(MethodInvoker::class)]
+#[CoversClass(PayloadBuilder::class)]
+#[CoversClass(HeaderBuilder::class)]
+#[CoversClass(MessageConverterBuilder::class)]
 class MethodInvokerTest extends MessagingTestCase
 {
     public function test_invoking_service()
@@ -331,6 +337,38 @@ class MethodInvokerTest extends MessagingTestCase
                 $data,
                 metadata: [
                     MessageHeaders::TYPE_ID => TypeDescriptor::ARRAY,
+                    MessageHeaders::CONTENT_TYPE => MediaType::createApplicationJson()->toString(),
+                ]
+            )
+        );
+    }
+
+    public function test_invoking_with_conversion_and_object_type_resolving_type_from_type_header()
+    {
+        $messaging = ComponentTestBuilder::create()
+            ->withConverter(
+                InMemoryConversionService::createWithConversion(
+                    $data = '893a660c-0208-4140-8be6-95fb2dcd2fdd',
+                    MediaType::createApplicationJson(),
+                    TypeDescriptor::STRING,
+                    MediaType::createApplicationXPHP(),
+                    stdClass::class,
+                    $result = new stdClass()
+                )
+            )
+            ->withMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(new ServiceExpectingOneArgument(), 'withObjectTypeHint')
+                    ->withInputChannelName($inputChannel = 'inputChannel')
+            )
+            ->build();
+
+        $this->assertEquals(
+            $result,
+            $messaging->sendDirectToChannel(
+                $inputChannel,
+                $data,
+                metadata: [
+                    MessageHeaders::TYPE_ID => stdClass::class,
                     MessageHeaders::CONTENT_TYPE => MediaType::createApplicationJson()->toString(),
                 ]
             )

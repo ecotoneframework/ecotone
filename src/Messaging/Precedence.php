@@ -45,12 +45,19 @@ interface Precedence
      */
     public const DATABASE_TRANSACTION_PRECEDENCE = -2000;
 
+    /**
+     * Collects messages to be sent to asynchronous channels.
+     */
+    public const COLLECTOR_SENDER_PRECEDENCE = self::DATABASE_TRANSACTION_PRECEDENCE + 1;
+
     public const BETWEEN_INSTANT_RETRY_AND_TRANSACTION_PRECEDENCE = -2001;
+
+    public const CUSTOM_INSTANT_RETRY_PRECEDENCE = -2003;
 
     /**
      * Retrying is executed before transactions, as we want to retry completely from the beginning (for example to recover from mysql gone away)
      */
-    public const AROUND_INSTANT_RETRY_PRECEDENCE = -2002;
+    public const GLOBAL_INSTANT_RETRY_PRECEDENCE = -2002;
 
     /**
      * Lazy events are published at this precedence
@@ -60,9 +67,4 @@ interface Precedence
     public const DEFAULT_PRECEDENCE = 1;
 
     public const AGGREGATE_MESSAGE_PAYLOAD_CONVERTER = Precedence::DEFAULT_PRECEDENCE + 10000;
-
-    /**
-     * Collects messages to be sent to asynchronous channels.
-     */
-    public const COLLECTOR_SENDER_PRECEDENCE = self::DATABASE_TRANSACTION_PRECEDENCE + 1;
 }

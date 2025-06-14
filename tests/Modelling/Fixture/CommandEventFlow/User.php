@@ -18,7 +18,7 @@ final class User
     #[Identifier]
     private string $userId;
 
-    #[CommandHandler]
+    #[CommandHandler(routingKey: RegisterUser::class)]
     public static function register(RegisterUser $command): self
     {
         $user = new self();

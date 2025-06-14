@@ -31,9 +31,9 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConverterModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders\EndpointHeadersInterceptorModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ErrorHandlerModule;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\GatewayModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessageConsumerModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingCommands\MessagingCommandsModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingGatewayModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor\MethodInterceptorModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\PollerModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\RequiredConsumersModule;
@@ -48,6 +48,7 @@ use Ecotone\Messaging\Handler\Logger\Config\MessageHandlerLogger;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\AggregrateModule;
 use Ecotone\Modelling\Config\EventSourcedRepositoryModule;
+use Ecotone\Modelling\Config\InstantRetry\InstantRetryAttributeModule;
 use Ecotone\Modelling\Config\InstantRetry\InstantRetryModule;
 use Ecotone\Modelling\Config\MessageHandlerRoutingModule;
 use Ecotone\Modelling\Config\ServiceHandlerModule;
@@ -81,7 +82,7 @@ class ModuleClassList
         ConsoleCommandModule::class,
         ConverterModule::class,
         ErrorHandlerModule::class,
-        GatewayModule::class,
+        MessagingGatewayModule::class,
         LoggingModule::class,
         PollerModule::class,
         RequiredConsumersModule::class,
@@ -94,6 +95,7 @@ class ModuleClassList
         TransformerModule::class,
         MessageConsumerModule::class,
         InstantRetryModule::class,
+        InstantRetryAttributeModule::class,
         DynamicMessageChannelModule::class,
         EventSourcedRepositoryModule::class,
 

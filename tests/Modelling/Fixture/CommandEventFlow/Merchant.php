@@ -18,6 +18,7 @@ final class Merchant
     #[Identifier]
     private string $merchantId;
 
+    #[CommandHandler('create.merchant')]
     #[CommandHandler]
     public static function create(CreateMerchant $command, EventBus $eventBus): self
     {
@@ -27,5 +28,10 @@ final class Merchant
         $eventBus->publish(new MerchantCreated($command->merchantId));
 
         return $self;
+    }
+
+    public function getMerchantId(): string
+    {
+        return $this->merchantId;
     }
 }

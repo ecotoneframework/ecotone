@@ -50,6 +50,7 @@ class OutboundMessageConverter
             }
 
             $sourceType      = $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : TypeDescriptor::createFromVariable($messagePayload);
+            $sourceMediaType = $sourceMediaType->withoutTypeParameter();
             $targetConversionMediaType = $this->defaultConversionMediaType ?: MediaType::createApplicationXPHPSerialized();
             $targetType = TypeDescriptor::createStringType();
             if ($targetConversionMediaType->hasTypeParameter()) {

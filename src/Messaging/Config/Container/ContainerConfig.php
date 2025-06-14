@@ -39,13 +39,11 @@ class ContainerConfig
     public static function buildDefinitionHolder(
         Configuration $configuration,
     ): ContainerDefinitionsHolder {
-        $definitionHolder = new ContainerDefinitionsHolder($configuration->getRegisteredConsoleCommands());
         $ecotoneBuilder = new ContainerBuilder();
         $ecotoneBuilder->addCompilerPass($configuration);
         $ecotoneBuilder->addCompilerPass(new RegisterInterfaceToCallReferences());
         $ecotoneBuilder->addCompilerPass(new ValidityCheckPass());
-        $ecotoneBuilder->addCompilerPass($definitionHolder);
-        $ecotoneBuilder->compile();
-        return $definitionHolder;
+
+        return $ecotoneBuilder->compile();
     }
 }

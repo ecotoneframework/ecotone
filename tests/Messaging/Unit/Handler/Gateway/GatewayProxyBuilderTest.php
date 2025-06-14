@@ -517,7 +517,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
             )
             ->build();
 
-        $messaging->getMessageChannel($replyChannelName)->send(ErrorMessage::create(MessageHandlingException::create('error occurred')));
+        $messaging->getMessageChannel($replyChannelName)->send(ErrorMessage::create(MessageBuilder::withPayload('some')->build(), MessageHandlingException::create('error occurred')));
 
         $this->expectException(MessageHandlingException::class);
 
@@ -544,7 +544,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
             )
             ->build();
 
-        $messaging->getMessageChannel($replyChannelName)->send(ErrorMessage::create(MessageHandlingException::create('error occurred')));
+        $messaging->getMessageChannel($replyChannelName)->send(ErrorMessage::create(MessageBuilder::withPayload('some')->build(), MessageHandlingException::create('error occurred')));
 
         $this->expectException(MessageHandlingException::class);
 
@@ -646,7 +646,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
             )
             ->build();
 
-        $messaging->getMessageChannel($replyChannelName)->send(ErrorMessage::create(MessageHandlingException::create('error occurred')));
+        $messaging->getMessageChannel($replyChannelName)->send(ErrorMessage::create(MessageBuilder::withPayload('some')->build(), MessageHandlingException::create('error occurred')));
 
         $messaging->getGateway(ServiceInterfaceReceiveOnlyWithNull::class)->sendMail();
 

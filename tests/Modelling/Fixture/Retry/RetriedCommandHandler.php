@@ -19,11 +19,11 @@ final class RetriedCommandHandler
     private int $outerCalled = 0;
 
     #[CommandHandler('retried.synchronous')]
-    public function handleSynchronousCommandHandler(int $stopThrowingAfterAttempt): void
+    public function handleSynchronousCommandHandler(int $stopThrowingAtAttempt): void
     {
         $this->called++;
 
-        if ($this->called < $stopThrowingAfterAttempt) {
+        if ($this->called < $stopThrowingAtAttempt) {
             throw new RuntimeException('test');
         }
     }

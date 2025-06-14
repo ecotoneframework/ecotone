@@ -6,14 +6,11 @@ namespace Ecotone\Messaging\Channel\PollableChannel\SendRetries;
 
 use Ecotone\Messaging\Channel\AbstractChannelInterceptor;
 use Ecotone\Messaging\Channel\ChannelInterceptor;
-use Ecotone\Messaging\Channel\MessageDispatchingException;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
+use Ecotone\Messaging\Handler\Gateway\ErrorChannelService;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplate;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
-use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\Support\ErrorMessage;
-use Ecotone\Messaging\Support\MessageBuilder;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -27,6 +24,7 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
         private string $relatedChannel,
         private RetryTemplate $retryTemplate,
         private ?string $deadLetterChannel,
+        private ErrorChannelService $errorChannelService,
         private ConfiguredMessagingSystem $configuredMessagingSystem,
         private LoggerInterface $logger,
     ) {
@@ -66,13 +64,12 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
         ]);
 
         if ($this->deadLetterChannel !== null) {
-            $this->configuredMessagingSystem->getMessageChannelByName($this->deadLetterChannel)
-                ->send(ErrorMessage::create(MessageDispatchingException::fromOtherException(
-                    $exception,
-                    MessageBuilder::fromMessage($message)
-                        ->setHeader(MessageHeaders::POLLED_CHANNEL_NAME, $this->relatedChannel)
-                        ->build()
-                )));
+            $this->errorChannelService->handle(
+                $message,
+                $exception,
+                $this->configuredMessagingSystem->getMessageChannelByName($this->deadLetterChannel),
+                $this->relatedChannel,
+            );
 
             return true;
         }

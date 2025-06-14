@@ -9,6 +9,7 @@ use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Handler\Gateway\ErrorChannelService;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplate;
 use Ecotone\Messaging\PrecedenceChannelInterceptor;
@@ -41,6 +42,7 @@ final class RetriesChannelInterceptorBuilder implements ChannelInterceptorBuilde
             $this->relatedChannel,
             $this->retryTemplate,
             $this->errorChannel,
+            Reference::to(ErrorChannelService::class),
             new Reference(ConfiguredMessagingSystem::class),
             new Reference(LoggingGateway::class),
         ]);

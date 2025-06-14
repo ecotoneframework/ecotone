@@ -8,11 +8,10 @@ use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -41,7 +40,7 @@ use Test\Ecotone\Messaging\Fixture\Behat\Shopping\ShoppingService;
  */
 class DomainContext implements Context
 {
-    private MessagingSystemConfiguration $messagingSystemConfiguration;
+    private Configuration $messagingSystemConfiguration;
     private ?\Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem;
     private ?InMemoryPSRContainer $inMemoryPsrContainer;
     private ?\Ecotone\Messaging\Future $future;
@@ -387,10 +386,7 @@ class DomainContext implements Context
     {
         $this->inMemoryPsrContainer = InMemoryPSRContainer::createEmpty();
         $this->inMemoryPsrContainer->set(ServiceCacheConfiguration::REFERENCE_NAME, ServiceCacheConfiguration::noCache());
-        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaults(
-            InMemoryModuleMessaging::createEmpty(),
-            ServiceConfiguration::createWithAsynchronicityOnly()
-        );
+        $this->messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaultsForTesting();
     }
 
     /**

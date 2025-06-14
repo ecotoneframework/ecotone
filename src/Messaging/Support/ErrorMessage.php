@@ -2,9 +2,10 @@
 
 namespace Ecotone\Messaging\Support;
 
+use Ecotone\Messaging\Handler\Recoverability\ErrorContext;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\MessagingException;
+use Throwable;
 
 /**
  * Class ErrorMessage where payload is thrown exception
@@ -16,27 +17,23 @@ use Ecotone\Messaging\MessagingException;
  */
 final class ErrorMessage implements Message
 {
-    private MessagingException $messagingException;
-    private MessageHeaders $messageHeaders;
-
-    /**
-     * ErrorMessage constructor.
-     * @param MessagingException $messagingException
-     * @param MessageHeaders $messageHeaders
-     */
-    private function __construct(MessagingException $messagingException, MessageHeaders $messageHeaders)
-    {
-        $this->messagingException = $messagingException;
-        $this->messageHeaders = $messageHeaders;
+    private function __construct(
+        private Message $message
+    ) {
     }
 
-    /**
-     * @param MessagingException $messagingException
-     * @return ErrorMessage
-     */
-    public static function create(MessagingException $messagingException): self
+    public static function create(Message $message, Throwable $cause): self
     {
-        return new self($messagingException, $messagingException->getFailedMessage() ? $messagingException->getFailedMessage()->getHeaders() : MessageHeaders::createEmpty());
+        return new self(
+            MessageBuilder::fromMessage($message)
+                ->setHeader(ErrorContext::EXCEPTION, $cause)
+                ->setHeader(ErrorContext::EXCEPTION_MESSAGE, $cause->getMessage())
+                ->setHeader(ErrorContext::EXCEPTION_STACKTRACE, $cause->getTraceAsString())
+                ->setHeader(ErrorContext::EXCEPTION_FILE, $cause->getFile())
+                ->setHeader(ErrorContext::EXCEPTION_LINE, $cause->getLine())
+                ->setHeader(ErrorContext::EXCEPTION_CODE, $cause->getCode())
+                ->build()
+        );
     }
 
     /**
@@ -44,14 +41,19 @@ final class ErrorMessage implements Message
      */
     public function getHeaders(): MessageHeaders
     {
-        return $this->messageHeaders;
+        return $this->message->getHeaders();
     }
 
     /**
      * @inheritDoc
      */
-    public function getPayload(): MessagingException
+    public function getPayload(): mixed
     {
-        return $this->messagingException;
+        return $this->message->getPayload();
+    }
+
+    public function getException(): Throwable
+    {
+        return $this->getHeaders()->get(ErrorContext::EXCEPTION);
     }
 }

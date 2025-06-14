@@ -20,6 +20,11 @@ class ChannelResolverWithContainer implements ChannelResolver
         if ($channelName instanceof MessageChannel) {
             return $channelName;
         }
+
+        if (! $this->hasChannelWithName($channelName)) {
+            throw MessageChannelNotFound::create(sprintf('Channel with name "%s" was not found. Have you used correct name and annotated Message Handler correctly?', $channelName));
+        }
+
         return $this->container->get(new ChannelReference($channelName));
     }
 

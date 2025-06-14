@@ -4,7 +4,7 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Messaging\Config\InMemoryModuleMessaging;
+use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
@@ -48,11 +48,8 @@ abstract class AnnotationConfigurationTestCase extends MessagingTestCase
         return $inMemoryAnnotationRegistrationService;
     }
 
-    /**
-     * @return MessagingSystemConfiguration
-     */
-    protected function createMessagingSystemConfiguration(): MessagingSystemConfiguration
+    protected function createMessagingSystemConfiguration(): Configuration
     {
-        return MessagingSystemConfiguration::prepareWithDefaults(InMemoryModuleMessaging::createEmpty());
+        return MessagingSystemConfiguration::prepareWithDefaultsForTesting();
     }
 }

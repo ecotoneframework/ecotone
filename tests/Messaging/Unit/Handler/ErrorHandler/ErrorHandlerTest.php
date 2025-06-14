@@ -8,7 +8,8 @@ use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Handler\Logger\StubLoggingGateway;
 use Ecotone\Messaging\Handler\MessageHandlingException;
-use Ecotone\Messaging\Handler\Recoverability\ErrorHandler;
+use Ecotone\Messaging\Handler\Recoverability\DelayedRetryErrorHandler;
+use Ecotone\Messaging\Handler\Recoverability\ErrorContext;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
@@ -35,7 +36,7 @@ class ErrorHandlerTest extends TestCase
 
         $consumedChannel = QueueChannel::create();
         $logger = StubLoggingGateway::create();
-        $errorHandler = new ErrorHandler($retryTemplate, false, StubLoggingGateway::create());
+        $errorHandler = new DelayedRetryErrorHandler($retryTemplate, false, StubLoggingGateway::create());
 
         $this->assertNull(
             $errorHandler->handle(
@@ -74,13 +75,13 @@ class ErrorHandlerTest extends TestCase
         $retryTemplate = RetryTemplateBuilder::exponentialBackoff(10, 2)->build();
 
         $consumedChannel = QueueChannel::create();
-        $errorHandler = new ErrorHandler($retryTemplate, false, StubLoggingGateway::create());
+        $errorHandler = new DelayedRetryErrorHandler($retryTemplate, false, StubLoggingGateway::create());
 
         $errorHandler->handle(
             $this->createFailedMessage(
                 MessageBuilder::withPayload('some')
                     ->setHeader(MessageHeaders::POLLED_CHANNEL_NAME, 'errorChannel')
-                    ->setHeader(ErrorHandler::ECOTONE_RETRY_HEADER, 2)
+                    ->setHeader(DelayedRetryErrorHandler::ECOTONE_RETRY_HEADER, 2)
                     ->build()
             ),
             InMemoryChannelResolver::createFromAssociativeArray(['errorChannel' => $consumedChannel]),
@@ -98,13 +99,13 @@ class ErrorHandlerTest extends TestCase
 
         $consumedChannel = QueueChannel::create();
         $logger = StubLoggingGateway::create();
-        $errorHandler = new ErrorHandler($retryTemplate, true, StubLoggingGateway::create());
+        $errorHandler = new DelayedRetryErrorHandler($retryTemplate, true, StubLoggingGateway::create());
 
         $resultMessage = $errorHandler->handle(
             $this->createFailedMessage(
                 MessageBuilder::withPayload('payload')
                     ->setHeader(MessageHeaders::POLLED_CHANNEL_NAME, 'errorChannel')
-                    ->setHeader(ErrorHandler::ECOTONE_RETRY_HEADER, 2)
+                    ->setHeader(DelayedRetryErrorHandler::ECOTONE_RETRY_HEADER, 2)
                     ->build(),
                 new InvalidArgumentException('exceptionMessage')
             ),
@@ -112,8 +113,13 @@ class ErrorHandlerTest extends TestCase
             $logger
         );
 
-        $this->assertEquals('exceptionMessage', $resultMessage->getHeaders()->get(ErrorHandler::EXCEPTION_MESSAGE));
-        $this->assertNotEmpty($resultMessage->getHeaders()->get(ErrorHandler::EXCEPTION_STACKTRACE));
+        $this->assertEquals('exceptionMessage', $resultMessage->getHeaders()->get(ErrorContext::EXCEPTION_MESSAGE));
+        $this->assertNotEmpty($resultMessage->getHeaders()->get(ErrorContext::EXCEPTION_STACKTRACE));
+        $this->assertNotEmpty($resultMessage->getHeaders()->get(ErrorContext::EXCEPTION_MESSAGE));
+        $this->assertNotEmpty($resultMessage->getHeaders()->get(ErrorContext::EXCEPTION_CLASS));
+        $this->assertNotEmpty($resultMessage->getHeaders()->get(ErrorContext::EXCEPTION_FILE));
+        $this->assertNotEmpty($resultMessage->getHeaders()->get(ErrorContext::EXCEPTION_LINE));
+        $this->assertIsInt($resultMessage->getHeaders()->get(ErrorContext::EXCEPTION_CODE));
         $this->assertCount(1, $logger->getError());
     }
 
@@ -125,13 +131,13 @@ class ErrorHandlerTest extends TestCase
 
         $consumedChannel = QueueChannel::create();
         $logger = StubLoggingGateway::create();
-        $errorHandler = new ErrorHandler($retryTemplate, false, StubLoggingGateway::create());
+        $errorHandler = new DelayedRetryErrorHandler($retryTemplate, false, StubLoggingGateway::create());
 
         $resultMessage = $errorHandler->handle(
             $this->createFailedMessage(
                 MessageBuilder::withPayload('payload')
                     ->setHeader(MessageHeaders::POLLED_CHANNEL_NAME, 'errorChannel')
-                    ->setHeader(ErrorHandler::ECOTONE_RETRY_HEADER, 2)
+                    ->setHeader(DelayedRetryErrorHandler::ECOTONE_RETRY_HEADER, 2)
                     ->build(),
                 new InvalidArgumentException('exceptionMessage')
             ),
@@ -150,13 +156,13 @@ class ErrorHandlerTest extends TestCase
             ->build();
 
         $consumedChannel = QueueChannel::create();
-        $errorHandler = new ErrorHandler($retryTemplate, true, StubLoggingGateway::create());
+        $errorHandler = new DelayedRetryErrorHandler($retryTemplate, true, StubLoggingGateway::create());
 
         $resultMessage = $errorHandler->handle(
             $this->createFailedMessage(
                 MessageBuilder::withPayload('payload')
                     ->setHeader(MessageHeaders::POLLED_CHANNEL_NAME, 'errorChannel')
-                    ->setHeader(ErrorHandler::ECOTONE_RETRY_HEADER, 2)
+                    ->setHeader(DelayedRetryErrorHandler::ECOTONE_RETRY_HEADER, 2)
                     ->build(),
                 new InvalidArgumentException('causation')
             ),
@@ -164,13 +170,13 @@ class ErrorHandlerTest extends TestCase
             StubLoggingGateway::create()
         );
 
-        $this->assertEquals('causation', $resultMessage->getHeaders()->get(ErrorHandler::EXCEPTION_MESSAGE));
-        $this->assertNotEmpty($resultMessage->getHeaders()->get(ErrorHandler::EXCEPTION_STACKTRACE));
+        $this->assertEquals('causation', $resultMessage->getHeaders()->get(ErrorContext::EXCEPTION_MESSAGE));
+        $this->assertNotEmpty($resultMessage->getHeaders()->get(ErrorContext::EXCEPTION_STACKTRACE));
     }
 
     public function test_rethrowing_exception_if_no_polled_channel_exists()
     {
-        $errorHandler = new ErrorHandler(
+        $errorHandler = new DelayedRetryErrorHandler(
             RetryTemplateBuilder::exponentialBackoff(1, 2)
                 ->maxRetryAttempts(2)
                 ->build(),
@@ -178,7 +184,7 @@ class ErrorHandlerTest extends TestCase
             StubLoggingGateway::create()
         );
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(MessageHandlingException::class);
 
         $errorHandler->handle(
             $this->createFailedMessage(

@@ -7,22 +7,19 @@ namespace Ecotone\Messaging\Handler\Recoverability;
 use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
+use Ecotone\Messaging\Handler\MessageHandlingException;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\ErrorMessage;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
  */
-class ErrorHandler
+class DelayedRetryErrorHandler
 {
     public const ECOTONE_RETRY_HEADER = 'ecotone_retry_number';
-    public const EXCEPTION_STACKTRACE = 'exception-stacktrace';
-    public const EXCEPTION_FILE = 'exception-file';
-    public const EXCEPTION_LINE = 'exception-line';
-    public const EXCEPTION_CODE = 'exception-code';
-    public const EXCEPTION_MESSAGE = 'exception-message';
 
     public function __construct(
         private RetryTemplate $delayedRetryTemplate,
@@ -32,12 +29,11 @@ class ErrorHandler
     }
 
     public function handle(
-        Message $errorMessage,
+        ErrorMessage $errorMessage,
         ChannelResolver $channelResolver,
         #[Reference] LoggingGateway $logger
     ): ?Message {
         $failedMessage = $errorMessage;
-        $cause = $errorMessage->getHeaders()->get(ErrorContext::EXCEPTION);
         $retryNumber = $failedMessage->getHeaders()->containsKey(self::ECOTONE_RETRY_HEADER) ? $failedMessage->getHeaders()->get(self::ECOTONE_RETRY_HEADER) + 1 : 1;
 
         if (! $failedMessage->getHeaders()->containsKey(MessageHeaders::POLLED_CHANNEL_NAME)) {
@@ -45,10 +41,9 @@ class ErrorHandler
                 'Failed to handle Error Message via your Retry Configuration, as it does not contain information about origination channel from which it was polled.
                     This means that most likely Synchronous Dead Letter is configured with Retry Configuration which works only for Asynchronous configuration.',
                 $failedMessage,
-                ['exception' => $cause],
             );
 
-            throw $cause;
+            throw MessageHandlingException::create('Failed to handle Error Message via Retry Configuration, as it does not contain information about origination channel from which it was polled. Original error message: ' . $failedMessage->getExceptionMessage());
         }
         /** @var MessageChannel $messageChannel */
         $messageChannel = $channelResolver->resolve($failedMessage->getHeaders()->get(MessageHeaders::POLLED_CHANNEL_NAME));
@@ -62,7 +57,6 @@ class ErrorHandler
             MessageHeaders::DELIVERY_DELAY,
             MessageHeaders::TIME_TO_LIVE,
             MessageHeaders::CONSUMER_ACK_HEADER_LOCATION,
-            ErrorContext::EXCEPTION,
             self::ECOTONE_RETRY_HEADER,
         ]);
 
@@ -73,10 +67,10 @@ class ErrorHandler
                         'Discarding message %s as no dead letter channel was defined. Retried maximum number of `%s` times. Due to: %s',
                         $failedMessage->getHeaders()->getMessageId(),
                         $retryNumber,
-                        $cause->getMessage()
+                        $errorMessage->getExceptionMessage()
                     ),
                     $failedMessage,
-                    ['exception' => $cause],
+                    $errorMessage->getErrorContext()->toArray(),
                 );
 
                 return null;
@@ -87,10 +81,10 @@ class ErrorHandler
                     'Sending message `%s` to dead letter channel, as retried maximum number of `%s` times. Due to: %s',
                     $failedMessage->getHeaders()->getMessageId(),
                     $retryNumber,
-                    $cause->getMessage()
+                    $errorMessage->getExceptionMessage()
                 ),
                 $failedMessage,
-                ['exception' => $cause],
+                [ErrorContext::EXCEPTION_CLASS => $errorMessage->getExceptionClass()],
             );
 
             return $messageBuilder->build();
@@ -105,10 +99,10 @@ class ErrorHandler
                 $this->delayedRetryTemplate->getMaxAttempts()
                     ? sprintf('Try %d out of %s', $retryNumber, $this->delayedRetryTemplate->getMaxAttempts())
                     : '',
-                $cause->getMessage()
+                $errorMessage->getExceptionMessage()
             ),
             $failedMessage,
-            ['exception' => $cause],
+            [ErrorContext::EXCEPTION_CLASS => $errorMessage->getExceptionClass()],
         );
         $messageChannel->send(
             $messageBuilder

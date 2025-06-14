@@ -16,7 +16,7 @@ use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
-use Ecotone\Messaging\Handler\Recoverability\ErrorHandler;
+use Ecotone\Messaging\Handler\Recoverability\DelayedRetryErrorHandler;
 use Ecotone\Messaging\Handler\Recoverability\ErrorHandlerConfiguration;
 use Ecotone\Messaging\Handler\Router\HeaderRouter;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
@@ -57,7 +57,7 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
             }
 
             $errorHandler = ServiceActivatorBuilder::createWithDefinition(
-                new Definition(ErrorHandler::class, [
+                new Definition(DelayedRetryErrorHandler::class, [
                     $extensionObject->getDelayedRetryTemplate(),
                     (bool)$extensionObject->getDeadLetterQueueChannel(),
                     Reference::to(LoggingGateway::class),

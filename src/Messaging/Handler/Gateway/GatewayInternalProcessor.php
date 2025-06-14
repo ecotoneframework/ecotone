@@ -4,6 +4,7 @@ namespace Ecotone\Messaging\Handler\Gateway;
 
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Future;
+use Ecotone\Messaging\Handler\MessageHandlingException;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptable;
 use Ecotone\Messaging\Handler\Type;
@@ -104,7 +105,10 @@ class GatewayInternalProcessor implements MessageProcessor, AroundInterceptable
                 throw InvalidArgumentException::create("{$this->interfaceToCallName} expects value, but null was returned. Have you consider changing return value to nullable?");
             }
             if ($replyMessage instanceof ErrorMessage) {
-                throw $replyMessage->getException();
+                throw MessageHandlingException::create(
+                    $replyMessage->getExceptionMessage(),
+                    $replyMessage->getExceptionCode(),
+                );
             }
 
             return $replyMessage;

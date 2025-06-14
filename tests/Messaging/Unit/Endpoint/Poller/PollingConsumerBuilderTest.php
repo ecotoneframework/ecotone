@@ -15,6 +15,7 @@ use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
+use Ecotone\Messaging\Handler\Recoverability\ErrorContext;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\MessageHeaders;
@@ -28,6 +29,7 @@ use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerStoppingService;
 use Test\Ecotone\Messaging\Fixture\Endpoint\ConsumerThrowingExceptionService;
 use Test\Ecotone\Messaging\Fixture\Handler\DataReturningService;
 use Test\Ecotone\Messaging\Fixture\Handler\FailureHandler\ExampleFailureCommandHandler;
+use Test\Ecotone\Messaging\Fixture\Handler\FailureHandler\FailureErrorHandler;
 use Test\Ecotone\Messaging\Fixture\Handler\SuccessServiceActivator;
 use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
@@ -303,14 +305,43 @@ class PollingConsumerBuilderTest extends MessagingTestCase
             enableAsynchronousProcessing: true,
         );
 
-        $originalNessage = MessageBuilder::withPayload('some')->build();
         $messaging->sendCommandWithRoutingKey('handler.fail', ['command' => 0]);
 
         $messaging->run($asyncChannelName);
 
-        $this->assertNotNull($messaging->getMessageChannel($errorChannelName)->receive());
+        $message = $messaging->getMessageChannel($errorChannelName)->receive();
+        $this->assertNotNull($message);
+        $this->assertTrue($message->getHeaders()->containsKey(ErrorContext::EXCEPTION_MESSAGE));
     }
 
+    public function test_receiving_error_message_with_asynchronous_handler()
+    {
+        $asyncChannelName = 'async';
+
+        $messaging = EcotoneLite::bootstrapFlowTesting(
+            [ExampleFailureCommandHandler::class, FailureErrorHandler::class],
+            [new ExampleFailureCommandHandler(), $failureHandler = new FailureErrorHandler()],
+            ServiceConfiguration::createWithDefaults()
+                ->withExtensionObjects([
+                    SimpleMessageChannelBuilder::createQueueChannel($asyncChannelName),
+                    PollingMetadata::create('async')
+                        ->setStopOnError(false)
+                        ->setExecutionAmountLimit(1)
+                        ->setErrorChannelName('errorHandler'),
+                ]),
+            enableAsynchronousProcessing: true,
+        );
+
+        $messaging->sendCommandWithRoutingKey('handler.fail', ['command' => 0]);
+
+        // process message, end up with error message
+        $messaging->run($asyncChannelName);
+        $this->assertNull($failureHandler->getMessage());
+
+        // handle error message
+        $messaging->run($asyncChannelName);
+        $this->assertNotNull($failureHandler->getMessage());
+    }
 
     public function test_requeing_when_error_channel_throws_exception_with_in_memory_channel()
     {

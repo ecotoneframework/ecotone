@@ -4,7 +4,6 @@ namespace Ecotone\Messaging;
 
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
-use Ecotone\Messaging\Handler\Recoverability\ErrorContext;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
@@ -178,7 +177,6 @@ final class MessageHeaders
             self::STREAM_BASED_SOURCED,
             MessagingEntrypoint::ENTRYPOINT,
             self::CHANNEL_SEND_RETRY_NUMBER,
-            ErrorContext::EXCEPTION,
         ];
     }
 
@@ -252,7 +250,7 @@ final class MessageHeaders
             $metadata[self::POLLED_CHANNEL_NAME],
             $metadata[self::CONSUMER_POLLING_METADATA],
             $metadata[self::REPLY_CHANNEL],
-            $metadata[self::TEMPORARY_SPAN_CONTEXT_HEADER]
+            $metadata[self::TEMPORARY_SPAN_CONTEXT_HEADER],
         );
 
         return $metadata;

@@ -31,6 +31,11 @@ final class ServiceCacheConfiguration implements DefinedObject
         return new self(sys_get_temp_dir(), false);
     }
 
+    public static function defaultCachePath(): string
+    {
+        return sys_get_temp_dir();
+    }
+
     public function getPath(): string
     {
         return $this->path;

@@ -12,6 +12,7 @@ use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\AuditLog;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\CreateMerchant;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\CreateMerchantService;
+use Test\Ecotone\Modelling\Fixture\CommandEventFlow\ExtendedCommandBus;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\Merchant;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\MerchantSubscriber;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\RegisterUser;
@@ -79,6 +80,27 @@ final class RoutingSlipTest extends TestCase
         );
 
         $ecotoneLite->sendCommand(
+            new CreateMerchant('123'),
+            metadata: [
+                MessageHeaders::ROUTING_SLIP => 'audit',
+            ]
+        );
+
+        $this->assertEquals([], $ecotoneLite->sendQueryWithRouting('audit.getData'));
+    }
+
+    public function test_routing_slip_will_not_be_propagated_by_extended_command_bus(): void
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [Merchant::class, MerchantSubscriber::class, AuditLog::class, User::class, ExtendedCommandBus::class],
+            [new MerchantSubscriber(), new AuditLog()],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
+        );
+
+        /** @var ExtendedCommandBus $commandBus */
+        $commandBus = $ecotoneLite->getGateway(ExtendedCommandBus::class);
+        $commandBus->send(
             new CreateMerchant('123'),
             metadata: [
                 MessageHeaders::ROUTING_SLIP => 'audit',

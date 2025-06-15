@@ -49,7 +49,7 @@ class ServiceConfiguration
 
     private function __construct()
     {
-        $this->cacheDirectoryPath = sys_get_temp_dir();
+        $this->cacheDirectoryPath = ServiceCacheConfiguration::defaultCachePath();
     }
 
     public static function createWithDefaults(): self

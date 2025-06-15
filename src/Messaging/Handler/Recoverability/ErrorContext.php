@@ -19,12 +19,12 @@ class ErrorContext
     ];
 
     public const EXCEPTION = 'exception';
-    public const EXCEPTION_MESSAGE = 'ecotone.exception.message';
-    public const EXCEPTION_CLASS = 'ecotone.exception.class';
-    public const EXCEPTION_STACKTRACE = 'ecotone.exception.stacktrace';
-    public const EXCEPTION_FILE = 'ecotone.exception.file';
-    public const EXCEPTION_LINE = 'ecotone.exception.line';
-    public const EXCEPTION_CODE = 'ecotone.exception.code';
+    public const EXCEPTION_CLASS = 'ecotone-class';
+    public const EXCEPTION_STACKTRACE = 'exception-stacktrace';
+    public const EXCEPTION_FILE = 'exception-file';
+    public const EXCEPTION_LINE = 'exception-line';
+    public const EXCEPTION_CODE = 'exception-code';
+    public const EXCEPTION_MESSAGE = 'exception-message';
     public const DLQ_MESSAGE_REPLIED = 'ecotone.dlq.message_replied';
 
     private string $exceptionClass;

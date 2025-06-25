@@ -13,6 +13,7 @@ use Ecotone\Messaging\Handler\Gateway\ErrorChannelService;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplate;
 use Ecotone\Messaging\PrecedenceChannelInterceptor;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 
 /**
  * licence Apache-2.0
@@ -45,6 +46,7 @@ final class RetriesChannelInterceptorBuilder implements ChannelInterceptorBuilde
             Reference::to(ErrorChannelService::class),
             new Reference(ConfiguredMessagingSystem::class),
             new Reference(LoggingGateway::class),
+            new Reference(EcotoneClockInterface::class),
         ]);
     }
 }

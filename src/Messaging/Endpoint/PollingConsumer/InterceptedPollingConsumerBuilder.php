@@ -23,8 +23,9 @@ use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
+use Ecotone\Messaging\Handler\Recoverability\RetryRunner;
 use Ecotone\Messaging\Precedence;
-use Ecotone\Messaging\Scheduling\Clock;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -97,7 +98,7 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
         ));
         $gatewayBuilder
             ->addAroundInterceptor($this->getErrorInterceptorReference($builder))
-            ->addAroundInterceptor(AcknowledgeConfirmationInterceptor::createAroundInterceptorBuilder($builder->getInterfaceToCallRegistry()));
+            ->addAroundInterceptor($this->getAcknowledgeInterceptorReference($builder));
 
         $gateway = $gatewayBuilder->compile($builder);
 
@@ -105,7 +106,7 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
             $gateway,
             $this->compileMessagePoller($builder, $messageHandlerBuilder),
             new PollingMetadataReference($endpointId),
-            new Reference(Clock::class),
+            new Reference(EcotoneClockInterface::class),
             new Reference(LoggingGateway::class),
             new Reference(MessagingEntrypoint::class),
         ]);
@@ -124,6 +125,21 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
             PollingConsumerErrorChannelInterceptor::class,
             $builder->getInterfaceToCall(new InterfaceToCallReference(PollingConsumerErrorChannelInterceptor::class, 'handle')),
             Precedence::ERROR_CHANNEL_PRECEDENCE,
+        );
+    }
+
+    private function getAcknowledgeInterceptorReference(MessagingContainerBuilder $builder): AroundInterceptorBuilder
+    {
+        if (! $builder->has(AcknowledgeConfirmationInterceptor::class)) {
+            $builder->register(AcknowledgeConfirmationInterceptor::class, new Definition(AcknowledgeConfirmationInterceptor::class, [
+                Reference::to(RetryRunner::class),
+                Reference::to(LoggingGateway::class),
+            ]));
+        }
+        return AroundInterceptorBuilder::create(
+            AcknowledgeConfirmationInterceptor::class,
+            $builder->getInterfaceToCall(new InterfaceToCallReference(AcknowledgeConfirmationInterceptor::class, 'ack')),
+            Precedence::MESSAGE_ACKNOWLEDGE_PRECEDENCE,
         );
     }
 }

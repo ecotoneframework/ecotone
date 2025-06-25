@@ -31,6 +31,7 @@ class BusRoutingMapTest extends TestCase
         $routingConfig->addNamedRoute('test.named', 'testNamedChannel');
         $routingConfig->addNamedRoute('test.*', 'testChannelRegex');
         $routingConfig->addObjectAlias(AClass::class, 'test.a_class');
+        $routingConfig->addRoute(NotificationInterface::class, 'NotificationInterfaceChannel');
 
         if ($isOptimized) {
             $routingConfig->optimize();
@@ -86,6 +87,17 @@ class BusRoutingMapTest extends TestCase
 
         self::assertEqualsCanonicalizing(['testChannelRegex'], $routingConfig->get('test.unknown'));
     }
+
+    #[DataProvider('optimizedProvider')]
+    public function test_it_can_route_by_interface(bool $isOptimized): void
+    {
+        $routingConfig = self::routingConfig($isOptimized);
+
+        self::assertEquals([
+            'NotificationInterfaceChannel',
+            'CatchAllRouteChannel',
+        ], $routingConfig->get(ANotification::class));
+    }
 }
 
 /**
@@ -99,5 +111,14 @@ class AClass
  * @internal
  */
 class BClass extends AClass
+{
+}
+
+
+interface NotificationInterface
+{
+}
+
+class ANotification implements NotificationInterface
 {
 }

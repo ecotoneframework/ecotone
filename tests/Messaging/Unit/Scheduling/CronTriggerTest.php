@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Scheduling;
 
 use Ecotone\Messaging\Scheduling\CronTrigger;
+use Ecotone\Messaging\Scheduling\DatePoint;
 use Ecotone\Messaging\Scheduling\SimpleTriggerContext;
 use Ecotone\Messaging\Scheduling\StubUTCClock;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -28,7 +29,7 @@ class CronTriggerTest extends TestCase
         $cronTrigger = CronTrigger::createWith('* * * * *');
 
         $this->assertEquals(
-            StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 00:01:00'),
+            new DatePoint('2017-01-01 00:01:00'),
             $cronTrigger->nextExecutionTime(StubUTCClock::createWithCurrentTime('2017-01-01 00:00:01'), SimpleTriggerContext::createEmpty())
         );
     }
@@ -38,7 +39,7 @@ class CronTriggerTest extends TestCase
         $cronTrigger = CronTrigger::createWith('* * * * *');
 
         $this->assertEquals(
-            StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 00:01:00'),
+            new DatePoint('2017-01-01 00:01:00'),
             $cronTrigger->nextExecutionTime(StubUTCClock::createWithCurrentTime('2017-01-01 00:01:00'), SimpleTriggerContext::createEmpty())
         );
     }
@@ -48,7 +49,7 @@ class CronTriggerTest extends TestCase
         $cronTrigger = CronTrigger::createWith('*/5 */23 * * *');
 
         $this->assertEquals(
-            StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 23:00:00'),
+            new DatePoint('2017-01-01 23:00:00'),
             $cronTrigger->nextExecutionTime(StubUTCClock::createWithCurrentTime('2017-01-01 01:01:00'), SimpleTriggerContext::createEmpty())
         );
     }
@@ -65,12 +66,12 @@ class CronTriggerTest extends TestCase
         $cronTrigger = CronTrigger::createWith('*/5 */23 * * *');
 
         $this->assertEquals(
-            StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 23:05:00'),
+            new DatePoint('2017-01-01 23:05:00'),
             $cronTrigger->nextExecutionTime(
                 StubUTCClock::createWithCurrentTime('2017-01-01 23:01:00'),
                 SimpleTriggerContext::createWith(
-                    StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 23:05:00'),
-                    StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 23:00:00')
+                    new DatePoint('2017-01-01 23:05:00'),
+                    new DatePoint('2017-01-01 23:00:00')
                 )
             )
         );
@@ -81,11 +82,11 @@ class CronTriggerTest extends TestCase
         $cronTrigger = CronTrigger::createWith('*/5 */23 * * *');
 
         $this->assertEquals(
-            StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 23:00:00'),
+            new DatePoint('2017-01-01 23:00:00'),
             $cronTrigger->nextExecutionTime(
                 StubUTCClock::createWithCurrentTime('2017-01-01 23:01:00'),
                 SimpleTriggerContext::createWith(
-                    StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 23:00:00'),
+                    new DatePoint('2017-01-01 23:00:00'),
                     null
                 )
             )
@@ -97,12 +98,12 @@ class CronTriggerTest extends TestCase
         $cronTrigger = CronTrigger::createWith('*/5 */23 * * *');
 
         $this->assertEquals(
-            StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 23:05:00'),
+            new DatePoint('2017-01-01 23:05:00'),
             $cronTrigger->nextExecutionTime(
                 StubUTCClock::createWithCurrentTime('2017-01-01 23:05:02'),
                 SimpleTriggerContext::createWith(
-                    StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 23:05:00'),
-                    StubUTCClock::createEpochTimeFromDateTimeString('2017-01-01 23:00:00')
+                    new DatePoint('2017-01-01 23:05:00'),
+                    new DatePoint('2017-01-01 23:00:00')
                 )
             )
         );

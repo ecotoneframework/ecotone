@@ -115,7 +115,7 @@ class BusRoutingMapBuilder extends BusRoutingMap
     {
         if ($routingKey === 'object') {
             $this->addCatchAllRoute($channel, $priority);
-        } elseif (class_exists($routingKey)) {
+        } elseif (class_exists($routingKey) || interface_exists($routingKey)) {
             $this->addObjectRoute($routingKey, $channel, $priority);
         } else {
             $this->addNamedRoute($routingKey, $channel, $priority);

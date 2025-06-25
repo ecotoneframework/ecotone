@@ -4,24 +4,21 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
 
-use DateTime;
 use DateTimeInterface;
 use DateTimeZone;
 
 /**
- * Class StubClock
  * @package Ecotone\Messaging\Scheduling
  * @author Dariusz Gafka <support@simplycodedsoftware.com>
  */
 /**
  * licence Apache-2.0
  */
-class StubUTCClock implements Clock
+class StubUTCClock implements EcotoneClockInterface
 {
     public function __construct(
-        private ?int $currentTime = null
+        private DatePoint $currentTime = new DatePoint('now', new DateTimeZone('UTC'))
     ) {
-
     }
 
     /**
@@ -30,64 +27,21 @@ class StubUTCClock implements Clock
      */
     public static function createWithCurrentTime(string $currentTime): self
     {
-        return new self(self::createEpochTimeInMilliseconds($currentTime));
-    }
-
-    public static function createNow(): self
-    {
-        return new self();
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function unixTimeInMilliseconds(): int
-    {
-        return $this->currentTime !== null ? $this->currentTime : self::createEpochTimeInMilliseconds('now');
-    }
-
-    public function sleep(int $seconds): void
-    {
-        $this->currentTime += $seconds * 1000;
-    }
-
-    public function usleep(int $microseconds): void
-    {
-        $this->currentTime += (int)round($microseconds / 1000);
+        return new self(new DatePoint($currentTime, new DateTimeZone('UTC')));
     }
 
     public function changeCurrentTime(string|DateTimeInterface $newCurrentTime): void
     {
-        $this->currentTime = self::createEpochTimeInMilliseconds($newCurrentTime);
+        $this->currentTime = new DatePoint($newCurrentTime);
     }
 
-    public function changeCurrentTimeWithMillisecondsTimestamp(int $milliseconds): void
+    public function now(): DatePoint
     {
-        $this->currentTime = $milliseconds;
+        return $this->currentTime;
     }
 
-    /**
-     * @param string $dateTimeAsString
-     * @return int
-     */
-    public static function createEpochTimeFromDateTimeString(string $dateTimeAsString): int
+    public function sleep(Duration $duration): void
     {
-        return self::createEpochTimeInMilliseconds($dateTimeAsString);
-    }
-
-    public function isTimeAlreadyChanged(): bool
-    {
-        return $this->currentTime !== null;
-    }
-
-    private static function createEpochTimeInMilliseconds(string|DateTimeInterface $dateTime): int
-    {
-        if ($dateTime === 'now') {
-            return EpochBasedClock::getCurrentTimeInMilliseconds();
-        }
-
-        return EpochBasedClock::getTimestampWithMillisecondsFor(
-            is_string($dateTime) ? new DateTime($dateTime, new DateTimeZone('UTC')) : $dateTime
-        );
+        $this->currentTime = $this->currentTime->add($duration->zeroIfNegative());
     }
 }

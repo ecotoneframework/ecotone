@@ -6,6 +6,9 @@ namespace Ecotone\Messaging\Endpoint\Interceptor;
 
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
+use Ecotone\Messaging\Scheduling\DatePoint;
+use Ecotone\Messaging\Scheduling\Duration;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Throwable;
 
 /**
@@ -18,24 +21,20 @@ use Throwable;
  */
 class TimeLimitInterceptor implements ConsumerInterceptor
 {
-    /**
-     * @var int
-     */
-    private $milliseconds;
-    private ?float $startTime;
+    private ?DatePoint $startTime;
+    private Duration $timeout;
 
     /**
      * LimitMemoryUsageInterceptor constructor.
      * @param int $milliseconds
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public function __construct(int $milliseconds)
+    public function __construct(private EcotoneClockInterface $clock, int $milliseconds)
     {
         if ($milliseconds <= 0) {
-            throw ConfigurationException::create("Tim limit is set to incorrect value: {$milliseconds}");
+            throw ConfigurationException::create("Time limit is set to incorrect value: {$milliseconds}");
         }
-
-        $this->milliseconds = $milliseconds;
+        $this->timeout = Duration::milliseconds($milliseconds);
     }
 
     /**
@@ -43,7 +42,7 @@ class TimeLimitInterceptor implements ConsumerInterceptor
      */
     public function onStartup(): void
     {
-        $this->startTime = microtime(true) * 1000;
+        $this->startTime = $this->clock->now();
     }
 
     /**
@@ -51,9 +50,7 @@ class TimeLimitInterceptor implements ConsumerInterceptor
      */
     public function shouldBeStopped(): bool
     {
-        $currentTime = microtime(true) * 1000;
-
-        return ($currentTime - $this->startTime) > $this->milliseconds;
+        return $this->clock->now()->durationSince($this->startTime)->isGreaterThan($this->timeout);
     }
 
     /**

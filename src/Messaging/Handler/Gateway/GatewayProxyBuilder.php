@@ -32,6 +32,7 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Precedence;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Ecotone\Messaging\SubscribableChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -356,6 +357,7 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
             new Definition(MethodCallToMessageConverter::class, [
                 $methodArgumentConverters,
                 $interfaceToCall->getInterfaceParametersNames(),
+                new Reference(EcotoneClockInterface::class),
             ]),
             $interfaceToCall->getReturnType(),
             $messageConverters,

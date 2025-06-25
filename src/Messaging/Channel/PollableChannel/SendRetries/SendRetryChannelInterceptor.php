@@ -11,6 +11,7 @@ use Ecotone\Messaging\Handler\Gateway\ErrorChannelService;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplate;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -27,6 +28,7 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
         private ErrorChannelService $errorChannelService,
         private ConfiguredMessagingSystem $configuredMessagingSystem,
         private LoggerInterface $logger,
+        private EcotoneClockInterface $clock
     ) {
     }
 
@@ -45,9 +47,7 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
                 ]);
 
                 try {
-                    if ($this->retryTemplate->calculateNextDelay($attempt) > 0) {
-                        usleep($this->retryTemplate->calculateNextDelay($attempt) * 1000);
-                    }
+                    $this->clock->sleep($this->retryTemplate->durationToNextRetry($attempt));
 
                     $messageChannel->send($message);
 

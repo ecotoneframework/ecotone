@@ -9,6 +9,7 @@ namespace Ecotone\Modelling\Config\Routing;
 
 use function array_unique;
 use function class_exists;
+use function interface_exists;
 use function usort;
 
 class BusRoutingMap
@@ -67,7 +68,7 @@ class BusRoutingMap
     protected function resolveWithoutOptimization(string $routingKeyOrClass): array
     {
         $result = [];
-        $isObject = class_exists($routingKeyOrClass);
+        $isObject = class_exists($routingKeyOrClass) || interface_exists($routingKeyOrClass);
 
         if ($isObject) {
             $className = $routingKeyOrClass;

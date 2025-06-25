@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Recoverability;
 
-use Closure;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Handler\Logger\LoggingGateway;
-use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Scheduling\Duration;
 use Ecotone\Messaging\Support\Assert;
-use Throwable;
 
 /**
  * @internal
@@ -52,31 +49,9 @@ final class RetryTemplate implements DefinedObject
         return $this->delayForRetryNumber($retryNumber);
     }
 
-    public function runCallbackWithRetries(Closure $closure, Message $message, string $exceptionClass, LoggingGateway $logger, string $retryMessage): void
+    public function durationToNextRetry(int $retryNumber): Duration
     {
-        $retryNumber = 1;
-        do {
-            try {
-                $closure();
-                break;
-            } catch (Throwable $exception) {
-                if (! $exception instanceof $exceptionClass) {
-                    throw $exception;
-                }
-
-                if (! $this->canBeCalledNextTime($retryNumber)) {
-                    throw $exception;
-                }
-
-                $logger->info($retryMessage, $message, ['exception' => $exception]);
-                usleep($this->calculateNextDelay($retryNumber) * 1000);
-                $retryNumber++;
-
-                if ($retryNumber > $this->maxAttempts) {
-                    throw $exception;
-                }
-            }
-        } while ($retryNumber <= $this->maxAttempts);
+        return Duration::milliseconds($this->calculateNextDelay($retryNumber))->zeroIfNegative();
     }
 
     public function canBeCalledNextTime(int $retryNumber): bool

@@ -1,21 +1,54 @@
 <?php
 
+/*
+ * licence Apache-2.0
+ */
 declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
 
-/**
- * Interface Clock
- * @package Ecotone\Messaging\Scheduling
- * @author Dariusz Gafka <support@simplycodedsoftware.com>
- */
-/**
- * licence Apache-2.0
- */
-interface Clock
+use Psr\Clock\ClockInterface as PsrClockInterface;
+
+class Clock implements EcotoneClockInterface
 {
+    private static ?EcotoneClockInterface $globalClock = null;
+
+    public function __construct(
+        private readonly ?PsrClockInterface $clock = null,
+    ) {
+    }
+
+    public static function set(PsrClockInterface $clock): void
+    {
+        self::$globalClock = $clock instanceof EcotoneClockInterface ? $clock : new self($clock);
+    }
+
     /**
-     * @return integer Milliseconds since Epoch
+     * @deprecated inject Clock interface instead
      */
-    public function unixTimeInMilliseconds(): int;
+    public static function get(): EcotoneClockInterface
+    {
+        return self::$globalClock ??= new NativeClock();
+    }
+
+    public function now(): DatePoint
+    {
+        $now = ($this->clock ?? self::get())->now();
+        if (! $now instanceof DatePoint) {
+            $now = DatePoint::createFromInterface($now);
+        }
+
+        return $now;
+    }
+
+    public function sleep(Duration $duration): void
+    {
+        $clock = $this->clock ?? self::get();
+
+        if ($clock instanceof EcotoneClockInterface) {
+            $clock->sleep($duration);
+        } else {
+            (new NativeClock())->sleep($duration);
+        }
+    }
 }

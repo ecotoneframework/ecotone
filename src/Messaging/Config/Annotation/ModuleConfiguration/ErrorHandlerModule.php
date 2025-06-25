@@ -18,10 +18,12 @@ use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Recoverability\DelayedRetryErrorHandler;
 use Ecotone\Messaging\Handler\Recoverability\ErrorHandlerConfiguration;
+use Ecotone\Messaging\Handler\Recoverability\RetryRunner;
 use Ecotone\Messaging\Handler\Router\HeaderRouter;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 
 #[ModuleAnnotation]
 /**
@@ -49,6 +51,7 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
         if (! $this->hasErrorConfiguration($extensionObjects)) {
             $extensionObjects = [ErrorHandlerConfiguration::createDefault()];
         }
+        $messagingConfiguration->registerServiceDefinition(RetryRunner::class, [new Reference(EcotoneClockInterface::class), new Reference(LoggingGateway::class)]);
 
         /** @var ErrorHandlerConfiguration $extensionObject */
         foreach ($extensionObjects as $index => $extensionObject) {

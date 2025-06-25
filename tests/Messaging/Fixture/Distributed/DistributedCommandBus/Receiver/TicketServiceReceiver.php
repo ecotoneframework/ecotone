@@ -3,6 +3,7 @@
 namespace Test\Ecotone\Messaging\Fixture\Distributed\DistributedCommandBus\Receiver;
 
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Modelling\Attribute\Distributed;
 use Ecotone\Modelling\Attribute\QueryHandler;
@@ -46,11 +47,11 @@ class TicketServiceReceiver
 
     #[Distributed]
     #[CommandHandler(self::CREATE_TICKET_WITH_EVENT_ENDPOINT)]
-    public function registerTicketWithEvent(string $ticket, EventBus $eventBus): void
+    public function registerTicketWithEvent(string $ticket, EventBus $eventBus, EcotoneClockInterface $clock): void
     {
         $delay = array_shift($this->delays);
         if ($delay) {
-            sleep($delay);
+            $clock->sleep($delay);
         }
 
         $this->tickets[] = $ticket;

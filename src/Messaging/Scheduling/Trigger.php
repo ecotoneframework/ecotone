@@ -14,10 +14,5 @@ namespace Ecotone\Messaging\Scheduling;
  */
 interface Trigger
 {
-    /**
-     * @param Clock $clock
-     * @param TriggerContext $triggerContext
-     * @return int 	Milliseconds since Epoch
-     */
-    public function nextExecutionTime(Clock $clock, TriggerContext $triggerContext): int;
+    public function nextExecutionTime(EcotoneClockInterface $clock, TriggerContext $triggerContext): DatePoint;
 }

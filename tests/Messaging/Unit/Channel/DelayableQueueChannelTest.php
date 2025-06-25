@@ -5,7 +5,7 @@ namespace Test\Ecotone\Messaging\Unit\Channel;
 use DateTimeImmutable;
 use Ecotone\Messaging\Channel\DelayableQueueChannel;
 use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\Scheduling\EpochBasedClock;
+use Ecotone\Messaging\Scheduling\DatePoint;
 use Ecotone\Messaging\Scheduling\TimeSpan;
 use Ecotone\Messaging\Support\MessageBuilder;
 use PHPUnit\Framework\TestCase;
@@ -45,7 +45,7 @@ class DelayableQueueChannelTest extends TestCase
         $queueChannel = new DelayableQueueChannel('test');
 
         $message = MessageBuilder::withPayload('a')
-                        ->setHeader(MessageHeaders::TIMESTAMP, EpochBasedClock::getTimestampFor(new DateTimeImmutable('2020-01-01 00:00:10.000')))
+                        ->setHeader(MessageHeaders::TIMESTAMP, (new DatePoint('2020-01-01 00:00:10.000'))->unixTime()->inSeconds())
                         ->setHeader(MessageHeaders::DELIVERY_DELAY, 10_000)
                         ->build();
 
@@ -72,17 +72,17 @@ class DelayableQueueChannelTest extends TestCase
         $queueChannel = new DelayableQueueChannel('test');
 
         $firstMessage = MessageBuilder::withPayload('first')
-            ->setHeader(MessageHeaders::TIMESTAMP, EpochBasedClock::getTimestampFor(new DateTimeImmutable('2020-01-01 00:00:10.000')))
+            ->setHeader(MessageHeaders::TIMESTAMP, (new DatePoint('2020-01-01 00:00:10.000'))->unixTime()->inSeconds())
             ->setHeader(MessageHeaders::DELIVERY_DELAY, 3000)
             ->build();
 
         $secondMessage = MessageBuilder::withPayload('second')
-            ->setHeader(MessageHeaders::TIMESTAMP, EpochBasedClock::getTimestampFor(new DateTimeImmutable('2020-01-01 00:00:10.000')))
+            ->setHeader(MessageHeaders::TIMESTAMP, (new DatePoint('2020-01-01 00:00:10.000'))->unixTime()->inSeconds())
             ->setHeader(MessageHeaders::DELIVERY_DELAY, 2000)
             ->build();
 
         $thirdMessage = MessageBuilder::withPayload('third')
-            ->setHeader(MessageHeaders::TIMESTAMP, EpochBasedClock::getTimestampFor(new DateTimeImmutable('2020-01-01 00:00:10.000')))
+            ->setHeader(MessageHeaders::TIMESTAMP, (new DatePoint('2020-01-01 00:00:10.000'))->unixTime()->inSeconds())
             ->setHeader(MessageHeaders::DELIVERY_DELAY, 1000)
             ->build();
 
@@ -120,17 +120,17 @@ class DelayableQueueChannelTest extends TestCase
         $queueChannel = new DelayableQueueChannel('test');
 
         $firstMessage = MessageBuilder::withPayload('first')
-            ->setHeader(MessageHeaders::TIMESTAMP, EpochBasedClock::getTimestampFor(new DateTimeImmutable('2020-01-01 00:00:10.000')))
+            ->setHeader(MessageHeaders::TIMESTAMP, (new DatePoint('2020-01-01 00:00:10.000'))->unixTime()->inSeconds())
             ->setHeader(MessageHeaders::DELIVERY_DELAY, 1000)
             ->build();
 
         $secondMessage = MessageBuilder::withPayload('second')
-            ->setHeader(MessageHeaders::TIMESTAMP, EpochBasedClock::getTimestampFor(new DateTimeImmutable('2020-01-01 00:00:10.000')))
+            ->setHeader(MessageHeaders::TIMESTAMP, (new DatePoint('2020-01-01 00:00:10.000'))->unixTime()->inSeconds())
             ->setHeader(MessageHeaders::DELIVERY_DELAY, 2000)
             ->build();
 
         $thirdMessage = MessageBuilder::withPayload('third')
-            ->setHeader(MessageHeaders::TIMESTAMP, EpochBasedClock::getTimestampFor(new DateTimeImmutable('2020-01-01 00:00:10.000')))
+            ->setHeader(MessageHeaders::TIMESTAMP, (new DatePoint('2020-01-01 00:00:10.000'))->unixTime()->inSeconds())
             ->setHeader(MessageHeaders::DELIVERY_DELAY, 1000)
             ->build();
 
@@ -167,17 +167,17 @@ class DelayableQueueChannelTest extends TestCase
         $queueChannel = new DelayableQueueChannel('test');
 
         $firstMessage = MessageBuilder::withPayload('first')
-            ->setHeader(MessageHeaders::TIMESTAMP, EpochBasedClock::getTimestampFor(new DateTimeImmutable('2020-01-01 00:00:10.000')))
+            ->setHeader(MessageHeaders::TIMESTAMP, (new DatePoint('2020-01-01 00:00:10.000'))->unixTime()->inSeconds())
             ->setHeader(MessageHeaders::DELIVERY_DELAY, 1000)
             ->build();
 
         $secondMessage = MessageBuilder::withPayload('second')
-            ->setHeader(MessageHeaders::TIMESTAMP, EpochBasedClock::getTimestampFor(new DateTimeImmutable('2020-01-01 00:00:10.000')))
+            ->setHeader(MessageHeaders::TIMESTAMP, (new DatePoint('2020-01-01 00:00:10.000'))->unixTime()->inSeconds())
             ->setHeader(MessageHeaders::DELIVERY_DELAY, 2000)
             ->build();
 
         $thirdMessage = MessageBuilder::withPayload('third')
-            ->setHeader(MessageHeaders::TIMESTAMP, EpochBasedClock::getTimestampFor(new DateTimeImmutable('2020-01-01 00:00:10.000')))
+            ->setHeader(MessageHeaders::TIMESTAMP, (new DatePoint('2020-01-01 00:00:10.000'))->unixTime()->inSeconds())
             ->setHeader(MessageHeaders::DELIVERY_DELAY, 1000)
             ->build();
 

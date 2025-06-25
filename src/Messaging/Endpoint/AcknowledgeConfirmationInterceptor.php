@@ -4,19 +4,14 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
-use Ecotone\Messaging\Attribute\Parameter\Reference;
-use Ecotone\Messaging\Config\Container\DefinedObject;
-use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Endpoint\PollingConsumer\RejectMessageException;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Messaging\Handler\Recoverability\RetryRunner;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Precedence;
 use Exception;
 use Throwable;
 
@@ -26,11 +21,10 @@ use Throwable;
 /**
  * licence Apache-2.0
  */
-class AcknowledgeConfirmationInterceptor implements DefinedObject
+class AcknowledgeConfirmationInterceptor
 {
-    public static function createAroundInterceptorBuilder(InterfaceToCallRegistry $interfaceToCallRegistry): AroundInterceptorBuilder
+    public function __construct(private RetryRunner $retryRunner, private LoggingGateway $logger)
     {
-        return AroundInterceptorBuilder::createWithDirectObjectAndResolveConverters($interfaceToCallRegistry, new self(), 'ack', Precedence::MESSAGE_ACKNOWLEDGE_PRECEDENCE, '');
     }
 
     /**
@@ -40,11 +34,11 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
      * @throws Throwable
      * @throws MessagingException
      */
-    public function ack(MethodInvocation $methodInvocation, Message $message, #[Reference] LoggingGateway $logger)
+    public function ack(MethodInvocation $methodInvocation, Message $message)
     {
         $messageChannelName = $message->getHeaders()->containsKey(MessageHeaders::POLLED_CHANNEL_NAME) ? $message->getHeaders()->get(MessageHeaders::POLLED_CHANNEL_NAME) : 'unknown';
 
-        $logger->info(
+        $this->logger->info(
             sprintf(
                 'Message with id `%s` received from Message Channel `%s`',
                 $message->getHeaders()->getMessageId(),
@@ -56,16 +50,12 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
             return $methodInvocation->proceed();
         }
 
-        $this->handle($message, $methodInvocation, $logger, $messageChannelName, $message->getHeaders()->get(MessageHeaders::CONSUMER_POLLING_METADATA));
+        $this->handle($message, $methodInvocation, $messageChannelName, $message->getHeaders()->get(MessageHeaders::CONSUMER_POLLING_METADATA));
     }
 
-    public function getDefinition(): Definition
+    private function handle(Message $message, MethodInvocation $methodInvocation, string $messageChannelName, PollingMetadata $pollingMetadata): void
     {
-        return new Definition(self::class);
-    }
-
-    private function handle(Message $message, MethodInvocation $methodInvocation, LoggingGateway $logger, string $messageChannelName, PollingMetadata $pollingMetadata): void
-    {
+        $logger = $this->logger;
         $retryStrategy = RetryTemplateBuilder::exponentialBackoffWithMaxDelay(10, 10, 1000)
             ->maxRetryAttempts(3)
             ->build();
@@ -76,14 +66,14 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
             $methodInvocation->proceed();
         } catch (RejectMessageException) {
             if ($acknowledgementCallback->isAutoAck()) {
-                $retryStrategy->runCallbackWithRetries(function () use ($message, $logger, $messageChannelName, $acknowledgementCallback) {
+                $this->retryRunner->runWithRetry(function () use ($message, $logger, $messageChannelName, $acknowledgementCallback) {
                     $acknowledgementCallback->reject();
 
                     $logger->info(
                         sprintf('Message with id `%s` rejected in Message Channel `%s`', $message->getHeaders()->getMessageId(), $messageChannelName),
                         $message
                     );
-                }, $message, Exception::class, $logger, sprintf('Rejecting Message in Message Channel `%s` failed. Trying to self-heal and retry.', $messageChannelName));
+                }, $retryStrategy, $message, Exception::class, sprintf('Rejecting Message in Message Channel `%s` failed. Trying to self-heal and retry.', $messageChannelName));
             }
 
             return;
@@ -101,7 +91,7 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
                 throw $exception;
             }
 
-            $retryStrategy->runCallbackWithRetries(function () use ($message, $logger, $messageChannelName, $acknowledgementCallback, $exception) {
+            $this->retryRunner->runWithRetry(function () use ($message, $logger, $messageChannelName, $acknowledgementCallback, $exception) {
                 $acknowledgementCallback->requeue();
 
                 $logger->info(
@@ -114,7 +104,7 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
                     $message,
                     ['exception' => $exception, 'channel' => $messageChannelName]
                 );
-            }, $message, Exception::class, $logger, sprintf('Re-queuing Message in Message Channel `%s` failed. Trying to self-heal and retry.', $messageChannelName));
+            }, $retryStrategy, $message, Exception::class, sprintf('Re-queuing Message in Message Channel `%s` failed. Trying to self-heal and retry.', $messageChannelName));
 
             if ($pollingMetadata->isStoppedOnError() === true) {
                 $logger->info(
@@ -130,14 +120,14 @@ class AcknowledgeConfirmationInterceptor implements DefinedObject
         }
 
         if ($acknowledgementCallback->isAutoAck()) {
-            $retryStrategy->runCallbackWithRetries(function () use ($message, $logger, $messageChannelName, $acknowledgementCallback) {
+            $this->retryRunner->runWithRetry(function () use ($message, $logger, $messageChannelName, $acknowledgementCallback) {
                 $acknowledgementCallback->accept();
 
                 $logger->info(
                     sprintf('Message with id `%s` was acknowledged in Message Channel `%s`', $message->getHeaders()->getMessageId(), $messageChannelName),
                     $message
                 );
-            }, $message, Exception::class, $logger, sprintf('Acknowledging Message in Message Channel `%s` failed. Trying to self-heal and retry.', $messageChannelName));
+            }, $retryStrategy, $message, Exception::class, sprintf('Acknowledging Message in Message Channel `%s` failed. Trying to self-heal and retry.', $messageChannelName));
         }
     }
 }

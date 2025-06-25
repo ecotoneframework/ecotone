@@ -16,16 +16,16 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
  */
 class SyncTaskScheduler implements TaskScheduler
 {
-    private function __construct(private Clock $clock, private TriggerContext $triggerContext, private PollingMetadata $pollingMetadata)
+    private function __construct(private EcotoneClockInterface $clock, private TriggerContext $triggerContext, private PollingMetadata $pollingMetadata)
     {
     }
 
-    public static function createWithEmptyTriggerContext(Clock $clock, PollingMetadata $pollingMetadata): self
+    public static function createWithEmptyTriggerContext(EcotoneClockInterface $clock, PollingMetadata $pollingMetadata): self
     {
         return new self($clock, SimpleTriggerContext::createEmpty(), $pollingMetadata);
     }
 
-    public static function createWith(Clock $clock, SimpleTriggerContext $triggerContext, PollingMetadata $pollingMetadata): self
+    public static function createWith(EcotoneClockInterface $clock, SimpleTriggerContext $triggerContext, PollingMetadata $pollingMetadata): self
     {
         return new self($clock, $triggerContext, $pollingMetadata);
     }
@@ -42,7 +42,7 @@ class SyncTaskScheduler implements TaskScheduler
             $this->triggerContext = $this->triggerContext->withLastActualExecutionTime($this->triggerContext->lastScheduledTime());
             $taskExecutor->execute($this->pollingMetadata);
         } else {
-            usleep($this->howMuchMicrosecondsTimeToWait());
+            $this->clock->sleep($this->waitTime());
         }
     }
 
@@ -55,7 +55,7 @@ class SyncTaskScheduler implements TaskScheduler
             return false;
         }
 
-        return ($this->triggerContext->lastScheduledTime() - $this->triggerContext->lastActualExecutionTime()) == 0;
+        return $this->triggerContext->lastScheduledTime() == $this->triggerContext->lastActualExecutionTime();
     }
 
     /**
@@ -63,16 +63,14 @@ class SyncTaskScheduler implements TaskScheduler
      */
     private function isItTimeForNextExecution(): bool
     {
-        return $this->clock->unixTimeInMilliseconds() >= $this->triggerContext->lastScheduledTime();
+        return $this->clock->now() >= $this->triggerContext->lastScheduledTime();
     }
 
     /**
      * @return int
      */
-    private function howMuchMicrosecondsTimeToWait(): int
+    private function waitTime(): Duration
     {
-        $toWait = $this->triggerContext->lastScheduledTime() - $this->clock->unixTimeInMilliseconds();
-
-        return $toWait < 0 ? 0 : $toWait * 1000;
+        return $this->triggerContext->lastScheduledTime()->durationSince($this->clock->now());
     }
 }

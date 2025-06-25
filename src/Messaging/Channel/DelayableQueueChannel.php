@@ -10,7 +10,7 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\PollableChannel;
-use Ecotone\Messaging\Scheduling\EpochBasedClock;
+use Ecotone\Messaging\Scheduling\DatePoint;
 use Ecotone\Messaging\Scheduling\TimeSpan;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -92,7 +92,9 @@ final class DelayableQueueChannel implements PollableChannel, DefinedObject
     public function getCurrentDeliveryTimeShift(Message $message): int
     {
         if ($this->releaseMessagesAwaitingFor instanceof DateTimeInterface) {
-            return EpochBasedClock::getTimestampWithMillisecondsFor($this->releaseMessagesAwaitingFor) - ($message->getHeaders()->getTimestamp() * 1000);
+            $releaseAt = DatePoint::createFromInterface($this->releaseMessagesAwaitingFor);
+            $messageTimestamp = DatePoint::createFromTimestamp($message->getHeaders()->getTimestamp());
+            return $releaseAt->durationSince($messageTimestamp)->inMilliseconds();
         }
 
         return $this->releaseMessagesAwaitingFor;

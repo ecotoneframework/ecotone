@@ -20,7 +20,8 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Scheduling\Clock;
-use Ecotone\Messaging\Scheduling\EpochBasedClock;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
+use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -32,7 +33,7 @@ class RegisterSingletonMessagingServices implements CompilerPass
     {
         $this->registerDefault($builder, Bridge::class, new Definition(Bridge::class));
         $this->registerDefault($builder, Reference::toChannel(NullableMessageChannel::CHANNEL_NAME), new Definition(NullableMessageChannel::class));
-        $this->registerDefault($builder, Clock::class, new Definition(EpochBasedClock::class));
+        $this->registerDefault($builder, EcotoneClockInterface::class, new Definition(Clock::class, [new Reference(ClockInterface::class, ContainerImplementation::NULL_ON_INVALID_REFERENCE)]));
         $this->registerDefault($builder, ChannelResolver::class, new Definition(ChannelResolverWithContainer::class, [new Reference(ContainerInterface::class)]));
         $this->registerDefault($builder, ReferenceSearchService::class, new Definition(ReferenceSearchServiceWithContainer::class, [new Reference(ContainerInterface::class)]));
         $this->registerDefault($builder, ExpressionEvaluationService::REFERENCE, new Definition(SymfonyExpressionEvaluationAdapter::class, [new Reference(ReferenceSearchService::class)], 'create'));
@@ -42,7 +43,7 @@ class RegisterSingletonMessagingServices implements CompilerPass
         $this->registerDefault($builder, ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), [], []]));
     }
 
-    private function registerDefault(ContainerBuilder $builder, string $id, object|array|string $definition): void
+    private function registerDefault(ContainerBuilder $builder, string $id, Definition|Reference $definition): void
     {
         if (! $builder->has($id)) {
             $builder->register($id, $definition);

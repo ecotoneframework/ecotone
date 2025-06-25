@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
 
-use DateTime;
-use DateTimeZone;
 use Ecotone\Messaging\Scheduling\CronIntegration\CronExpression;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
@@ -40,7 +38,7 @@ class CronTrigger implements Trigger
     /**
      * @inheritDoc
      */
-    public function nextExecutionTime(Clock $clock, TriggerContext $triggerContext): int
+    public function nextExecutionTime(EcotoneClockInterface $clock, TriggerContext $triggerContext): DatePoint
     {
         $cron = CronExpression::factory($this->cronExpression);
 
@@ -51,15 +49,14 @@ class CronTrigger implements Trigger
             return $triggerContext->lastScheduledTime();
         }
 
-        $dateTime = new DateTime('now', new DateTimeZone('UTC'));
-        $dateTime->setTimestamp((int)($clock->unixTimeInMilliseconds() / 1000));
+        $dateTime = $clock->now();
 
-        $nextExecutionTime = $cron->getNextRunDate($dateTime, 0, true, 'UTC')->getTimestamp();
-        if ($nextExecutionTime < $dateTime->getTimestamp()) {
-            $nextExecutionTime = $cron->getNextRunDate($dateTime, 1, true, 'UTC')->getTimestamp();
+        $nextExecutionTime = $cron->getNextRunDate($dateTime, 0, true, 'UTC');
+        if ($nextExecutionTime < $dateTime) {
+            $nextExecutionTime = $cron->getNextRunDate($dateTime, 1, true, 'UTC');
         }
 
-        return $nextExecutionTime * 1000;
+        return DatePoint::createFromInterface($nextExecutionTime);
     }
 
     /**

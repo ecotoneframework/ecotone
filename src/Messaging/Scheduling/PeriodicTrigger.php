@@ -14,18 +14,11 @@ namespace Ecotone\Messaging\Scheduling;
  */
 class PeriodicTrigger implements Trigger
 {
-    private int $fixedRateInMilliseconds;
-    private int $initialDelayInMilliseconds;
-
     /**
      * PeriodicTrigger constructor.
-     * @param int $fixedRateInMilliseconds
-     * @param int $initialDelayInMilliseconds
      */
-    private function __construct(int $fixedRateInMilliseconds, int $initialDelayInMilliseconds)
+    private function __construct(private Duration $fixedRate, private Duration $initialDelay)
     {
-        $this->fixedRateInMilliseconds = $fixedRateInMilliseconds;
-        $this->initialDelayInMilliseconds = $initialDelayInMilliseconds;
     }
 
     /**
@@ -35,20 +28,16 @@ class PeriodicTrigger implements Trigger
      */
     public static function create(int $fixedRateInMilliseconds, int $initialDelayInMilliseconds): self
     {
-        return new self($fixedRateInMilliseconds, $initialDelayInMilliseconds);
+        return new self(Duration::milliseconds($fixedRateInMilliseconds), Duration::milliseconds($initialDelayInMilliseconds));
     }
 
     /**
      * @inheritDoc
      */
-    public function nextExecutionTime(Clock $clock, TriggerContext $triggerContext): int
+    public function nextExecutionTime(EcotoneClockInterface $clock, TriggerContext $triggerContext): DatePoint
     {
         if ($this->isFirstSchedule($triggerContext)) {
-            if ($this->initialDelayInMilliseconds) {
-                return $clock->unixTimeInMilliseconds() + $this->initialDelayInMilliseconds;
-            }
-
-            return $clock->unixTimeInMilliseconds();
+            return $clock->now()->add($this->initialDelay);
         }
 
         if ($this->isPlannedAndNeverExecuted($triggerContext) || $this->isPlannedTimeAfterExecution($triggerContext)) {
@@ -56,8 +45,8 @@ class PeriodicTrigger implements Trigger
         }
 
         return $triggerContext->lastScheduledTime()
-                ? $triggerContext->lastScheduledTime() + $this->fixedRateInMilliseconds
-                : $triggerContext->lastActualExecutionTime() + $this->fixedRateInMilliseconds;
+                ? $triggerContext->lastScheduledTime()->add($this->fixedRate)
+                : $triggerContext->lastActualExecutionTime()->add($this->fixedRate);
     }
 
     /**
@@ -84,6 +73,6 @@ class PeriodicTrigger implements Trigger
      */
     private function isPlannedTimeAfterExecution(TriggerContext $triggerContext): bool
     {
-        return $triggerContext->lastScheduledTime() > $triggerContext->lastActualExecutionTime();
+        return $triggerContext->lastScheduledTime() && $triggerContext->lastScheduledTime() > $triggerContext->lastActualExecutionTime();
     }
 }

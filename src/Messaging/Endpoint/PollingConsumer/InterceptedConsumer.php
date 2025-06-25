@@ -12,6 +12,7 @@ use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\TimeLimitInterceptor;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -78,7 +79,7 @@ class InterceptedConsumer implements ConsumerLifecycle
      * @return ConsumerInterceptor[]
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createInterceptorsForPollingMetadata(PollingMetadata $pollingMetadata, LoggerInterface $logger): array
+    public static function createInterceptorsForPollingMetadata(PollingMetadata $pollingMetadata, LoggerInterface $logger, EcotoneClockInterface $clock): array
     {
         $interceptors = [];
         if ($pollingMetadata->getHandledMessageLimit() > 0) {
@@ -94,12 +95,12 @@ class InterceptedConsumer implements ConsumerLifecycle
             $interceptors[] = new LimitExecutionAmountInterceptor($pollingMetadata->getExecutionAmountLimit());
         }
         if ($pollingMetadata->getExecutionTimeLimitInMilliseconds() > 0) {
-            $interceptors[] = new TimeLimitInterceptor($pollingMetadata->getExecutionTimeLimitInMilliseconds());
+            $interceptors[] = new TimeLimitInterceptor($clock, $pollingMetadata->getExecutionTimeLimitInMilliseconds());
         }
         if ($pollingMetadata->finishWhenNoMessages()) {
-            $interceptors[] = new FinishWhenNoMessagesInterceptor();
+            $interceptors[] = new FinishWhenNoMessagesInterceptor($clock);
         }
-        $interceptors[] = new ConnectionExceptionRetryInterceptor($logger, $pollingMetadata->getConnectionRetryTemplate(), $pollingMetadata->isStoppedOnError());
+        $interceptors[] = new ConnectionExceptionRetryInterceptor($clock, $logger, $pollingMetadata->getConnectionRetryTemplate(), $pollingMetadata->isStoppedOnError());
 
         return $interceptors;
     }

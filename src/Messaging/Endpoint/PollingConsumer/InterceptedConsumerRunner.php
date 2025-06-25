@@ -10,8 +10,8 @@ use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\MessagePoller;
-use Ecotone\Messaging\Scheduling\Clock;
 use Ecotone\Messaging\Scheduling\CronTrigger;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Ecotone\Messaging\Scheduling\PeriodicTrigger;
 use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
 
@@ -21,12 +21,12 @@ use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
 class InterceptedConsumerRunner implements EndpointRunner
 {
     public function __construct(
-        private NonProxyGateway $gateway,
-        private MessagePoller $messagePoller,
-        private PollingMetadata $defaultPollingMetadata,
-        private Clock $clock,
-        private LoggingGateway $logger,
-        private MessagingEntrypoint $messagingEntrypoint,
+        private NonProxyGateway       $gateway,
+        private MessagePoller         $messagePoller,
+        private PollingMetadata       $defaultPollingMetadata,
+        private EcotoneClockInterface $clock,
+        private LoggingGateway        $logger,
+        private MessagingEntrypoint   $messagingEntrypoint,
     ) {
     }
 
@@ -39,7 +39,7 @@ class InterceptedConsumerRunner implements EndpointRunner
     {
         $this->logger->info('Message Consumer starting to consume messages');
         $pollingMetadata = $this->defaultPollingMetadata->applyExecutionPollingMetadata($executionPollingMetadata);
-        $interceptors = InterceptedConsumer::createInterceptorsForPollingMetadata($pollingMetadata, $this->logger);
+        $interceptors = InterceptedConsumer::createInterceptorsForPollingMetadata($pollingMetadata, $this->logger, $this->clock);
         $interceptedGateway = new InterceptedGateway($this->gateway, $interceptors);
 
         $interceptedConsumer = new ScheduledTaskConsumer(

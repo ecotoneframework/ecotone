@@ -37,6 +37,5 @@ class RouterProcessor implements MessageProcessor
             }
             return null;
         }
-
     }
 }

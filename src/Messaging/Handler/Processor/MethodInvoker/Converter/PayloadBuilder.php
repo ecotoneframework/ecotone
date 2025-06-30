@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
+use Ecotone\EventSourcing\Mapping\EventMapper;
+use Ecotone\Messaging\Config\Container\Compiler\ContainerImplementation;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
@@ -39,6 +41,7 @@ class PayloadBuilder implements ParameterConverterBuilder
         $interfaceParameter = $interfaceToCall->getParameterWithName($this->parameterName);
         return new Definition(PayloadConverter::class, [
             new Reference(ConversionService::REFERENCE_NAME),
+            new Reference(EventMapper::class, ContainerImplementation::NULL_ON_INVALID_REFERENCE),
             $interfaceToCall->toString(),
             $this->parameterName,
             $interfaceParameter->getTypeDescriptor(),

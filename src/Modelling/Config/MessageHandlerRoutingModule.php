@@ -49,6 +49,7 @@ use Ecotone\Modelling\Config\Routing\CommandBusRouteSelector;
 use Ecotone\Modelling\Config\Routing\EventBusRouteSelector;
 use Ecotone\Modelling\Config\Routing\QueryBusRouteSelector;
 use Ecotone\Modelling\Config\Routing\RoutingEventHandler;
+use Ecotone\Modelling\Config\Routing\TypeAliasResolverProcessor;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Ecotone\Modelling\QueryBus;
@@ -150,20 +151,32 @@ class MessageHandlerRoutingModule implements AnnotationModule
         foreach ($this->annotationFinder->findAnnotatedMethods(EventHandler::class) as $registration) {
             $eventBusRouting->addRoutesFromAnnotatedFinding($registration, $this->interfaceToCallRegistry);
         }
+        $eventBusTypeAliases = [];
         foreach ($this->annotationFinder->findAnnotatedClasses(NamedEvent::class) as $className) {
             $attribute = $this->annotationFinder->getAttributeForClass($className, NamedEvent::class);
             $eventBusRouting->addObjectAlias($className, $attribute->getName());
+            $eventBusTypeAliases[$attribute->getName()] = $className;
         }
 
         $messagingConfiguration
             ->registerMessageHandler(
-                $this->buildRouterHandler($commandBusRoutingConfig, MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME)
+                MessageProcessorActivatorBuilder::create()
+                    ->withInputChannelName(MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME)
+                    ->chain($this->buildRouterProcessor($commandBusRoutingConfig, MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME))
             )
             ->registerMessageHandler(
-                $this->buildRouterHandler($queryBusRouting, MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME)
+                MessageProcessorActivatorBuilder::create()
+                    ->withInputChannelName(MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME)
+                    ->chain($this->buildRouterProcessor($queryBusRouting, MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME))
             )
             ->registerMessageHandler(
-                $this->buildRouterHandler($eventBusRouting, MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME, false)
+                MessageProcessorActivatorBuilder::create()
+                    ->withInputChannelName(MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME)
+                    ->chain(new Definition(TypeAliasResolverProcessor::class, [
+                        $eventBusTypeAliases,
+                        MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME,
+                    ]))
+                    ->chain($this->buildRouterProcessor($eventBusRouting, MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME, false))
             );
 
         $messagingConfiguration->registerServiceDefinition(
@@ -210,7 +223,7 @@ class MessageHandlerRoutingModule implements AnnotationModule
             );
     }
 
-    private function buildRouterHandler(BusRoutingMapBuilder $busRoutingConfig, string $channel, bool $isResolutionRequired = true): MessageProcessorActivatorBuilder
+    private function buildRouterProcessor(BusRoutingMapBuilder $busRoutingConfig, string $channel, bool $isResolutionRequired = true): Definition
     {
         $busRouteSelectorClass = match ($channel) {
             MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME => CommandBusRouteSelector::class,
@@ -218,17 +231,15 @@ class MessageHandlerRoutingModule implements AnnotationModule
             MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME => EventBusRouteSelector::class,
             default => BusRouteSelector::class,
         };
-        return MessageProcessorActivatorBuilder::create()
-            ->withInputChannelName($channel)
-            ->chain(new Definition(RouterProcessor::class, [
-                new Definition($busRouteSelectorClass, [
-                    $busRoutingConfig->compile(),
-                    new Definition(BusRoutingKeyResolver::class, [$channel]), // Yes, the channel name is also used as routing key header
-                    new Reference(LoggingGateway::class),
-                ]),
-                new Definition(RouteToChannelResolver::class, [new Reference(ChannelResolver::class)]),
-                $isResolutionRequired, // Single route if resolution is required
-            ]));
+        return new Definition(RouterProcessor::class, [
+            new Definition($busRouteSelectorClass, [
+                $busRoutingConfig->compile(),
+                new Definition(BusRoutingKeyResolver::class, [$channel]), // Yes, the channel name is also used as routing key header
+                new Reference(LoggingGateway::class),
+            ]),
+            new Definition(RouteToChannelResolver::class, [new Reference(ChannelResolver::class)]),
+            $isResolutionRequired, // Single route if resolution is required
+        ]);
     }
 
     /**

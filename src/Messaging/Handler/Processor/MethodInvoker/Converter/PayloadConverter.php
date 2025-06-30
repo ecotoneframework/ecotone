@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
+use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Conversion\ConversionException;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDescriptor;
@@ -24,13 +24,8 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class PayloadConverter implements ParameterConverter
 {
-    public function __construct(private ConversionService $conversionService, private string $interfaceName, private string $parameterName, private Type $targetType)
+    public function __construct(private ConversionService $conversionService, private ?EventMapper $mapper, private string $interfaceName, private string $parameterName, private Type $targetType)
     {
-    }
-
-    public static function create(ConversionService $conversionService, InterfaceParameter $interfaceParameter): PayloadConverter
-    {
-        return new self($conversionService, '', $interfaceParameter->getName(), $interfaceParameter->getTypeDescriptor());
     }
 
     /**
@@ -60,7 +55,8 @@ class PayloadConverter implements ParameterConverter
             )) {
                 $convertedData = $this->doConversion($data, $sourceTypeDescriptor, $sourceMediaType, $parameterType, $parameterMediaType);
             } elseif ($message->getHeaders()->containsKey(MessageHeaders::TYPE_ID)) {
-                $resolvedTargetParameterType = TypeDescriptor::create($message->getHeaders()->get(MessageHeaders::TYPE_ID));
+                $typeHeader = $message->getHeaders()->get(MessageHeaders::TYPE_ID);
+                $resolvedTargetParameterType = TypeDescriptor::create($this->mapper?->mapNameToEventType($typeHeader) ?? $typeHeader);
                 if ($this->canConvertParameter(
                     $sourceTypeDescriptor,
                     $sourceMediaType,

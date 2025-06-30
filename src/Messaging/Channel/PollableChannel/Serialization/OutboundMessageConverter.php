@@ -67,7 +67,9 @@ class OutboundMessageConverter
                     $targetType,
                     $targetConversionMediaType
                 )) {
-                    $applicationHeaders[MessageHeaders::TYPE_ID] = TypeDescriptor::createFromVariable($messagePayload)->toString();
+                    if (! isset($applicationHeaders[MessageHeaders::TYPE_ID])) {
+                        $applicationHeaders[MessageHeaders::TYPE_ID] = TypeDescriptor::createFromVariable($messagePayload)->toString();
+                    }
                     $messagePayload = $conversionService->convert(
                         $messagePayload,
                         $sourceType,

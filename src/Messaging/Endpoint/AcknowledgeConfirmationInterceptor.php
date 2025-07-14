@@ -65,23 +65,21 @@ class AcknowledgeConfirmationInterceptor
         try {
             $methodInvocation->proceed();
         } catch (RejectMessageException) {
-            if ($acknowledgementCallback->isAutoAck()) {
-                $this->retryRunner->runWithRetry(function () use ($message, $logger, $messageChannelName, $acknowledgementCallback) {
-                    $acknowledgementCallback->reject();
+            $this->retryRunner->runWithRetry(function () use ($message, $logger, $messageChannelName, $acknowledgementCallback) {
+                $acknowledgementCallback->reject();
 
-                    $logger->info(
-                        sprintf('Message with id `%s` rejected in Message Channel `%s`', $message->getHeaders()->getMessageId(), $messageChannelName),
-                        $message
-                    );
-                }, $retryStrategy, $message, Exception::class, sprintf('Rejecting Message in Message Channel `%s` failed. Trying to self-heal and retry.', $messageChannelName));
-            }
+                $logger->info(
+                    sprintf('Message with id `%s` rejected in Message Channel `%s`', $message->getHeaders()->getMessageId(), $messageChannelName),
+                    $message
+                );
+            }, $retryStrategy, $message, Exception::class, sprintf('Rejecting Message in Message Channel `%s` failed. Trying to self-heal and retry.', $messageChannelName));
 
             return;
         } catch (Throwable $exception) {
-            if (! $acknowledgementCallback->isAutoAck()) {
+            if ($acknowledgementCallback->getFailureStrategy() === FinalFailureStrategy::STOP || $pollingMetadata->isStoppedOnError()) {
                 $logger->critical(
                     sprintf(
-                        'Acknowledgment mode is not auto and unrecoverable error happened. Stopping Message Consumer without acknowledgment to avoid Message loss.  Error: %s',
+                        'Acknowledgment mode is set to stop on failure. Stopping Message Consumer without acknowledgment to avoid Message loss.  Error: %s',
                         $exception->getMessage()
                     ),
                     $message,
@@ -92,11 +90,21 @@ class AcknowledgeConfirmationInterceptor
             }
 
             $this->retryRunner->runWithRetry(function () use ($message, $logger, $messageChannelName, $acknowledgementCallback, $exception) {
-                $acknowledgementCallback->requeue();
 
+                if ($acknowledgementCallback->getFailureStrategy() === FinalFailureStrategy::IGNORE) {
+                    $acknowledgementCallback->reject();
+                    $logger->info(
+                        sprintf('Message with id `%s` rejected in Message Channel `%s`', $message->getHeaders()->getMessageId(), $messageChannelName),
+                        $message
+                    );
+
+                    return;
+                }
+
+                $acknowledgementCallback->requeue();
                 $logger->info(
                     sprintf(
-                        'Message with id `%s` requeued in Message Channel `%s`. Due to %s',
+                        'Message with id `%s` resent to Message Channel `%s`. Due to %s',
                         $message->getHeaders()->getMessageId(),
                         $messageChannelName,
                         $exception->getMessage()
@@ -104,22 +112,13 @@ class AcknowledgeConfirmationInterceptor
                     $message,
                     ['exception' => $exception, 'channel' => $messageChannelName]
                 );
-            }, $retryStrategy, $message, Exception::class, sprintf('Re-queuing Message in Message Channel `%s` failed. Trying to self-heal and retry.', $messageChannelName));
-
-            if ($pollingMetadata->isStoppedOnError() === true) {
-                $logger->info(
-                    'Should stop on error configuration enabled, stopping Message Consumer.',
-                    $message,
-                    ['channel' => $messageChannelName]
-                );
-
-                throw $exception;
-            }
+            }, $retryStrategy, $message, Exception::class, sprintf('Re-sending Message in Message Channel `%s` failed. Trying to self-heal and retry.', $messageChannelName));
 
             return;
         }
 
-        if ($acknowledgementCallback->isAutoAck()) {
+        // Only auto-acknowledge if auto-ack is enabled
+        if ($acknowledgementCallback->isAutoAcked()) {
             $this->retryRunner->runWithRetry(function () use ($message, $logger, $messageChannelName, $acknowledgementCallback) {
                 $acknowledgementCallback->accept();
 

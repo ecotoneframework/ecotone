@@ -2,6 +2,7 @@
 
 namespace Ecotone\AnnotationFinder;
 
+use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use InvalidArgumentException;
 
@@ -66,6 +67,27 @@ class AnnotatedMethod implements AnnotatedFinding
     public function getMethodAnnotations(): array
     {
         return $this->methodAnnotations;
+    }
+
+    /**
+     * @return AttributeDefinition[]
+     */
+    public function getAllAnnotationDefinitions(): array
+    {
+        $annotations = [];
+        foreach ($this->classAnnotations as $endpointAnnotation) {
+            if ($this->hasMethodAnnotation($endpointAnnotation->getClassName())) {
+                continue;
+            }
+
+            $annotations[] = AttributeDefinition::fromObject($endpointAnnotation);
+        }
+
+        foreach ($this->methodAnnotations as $methodAnnotation) {
+            $annotations[] = AttributeDefinition::fromObject($methodAnnotation);
+        }
+
+        return $annotations;
     }
 
     public function hasMethodAnnotation(string|TypeDescriptor $type): bool

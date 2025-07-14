@@ -24,7 +24,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class PayloadConverter implements ParameterConverter
 {
-    public function __construct(private ConversionService $conversionService, private ?EventMapper $mapper, private string $interfaceName, private string $parameterName, private Type $targetType)
+    public function __construct(private ConversionService $conversionService, private EventMapper $mapper, private string $interfaceName, private string $parameterName, private Type $targetType)
     {
     }
 

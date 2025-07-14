@@ -8,6 +8,7 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\DefinedObjectWrapper;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Endpoint\FinalFailureStrategy;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
@@ -25,15 +26,17 @@ use Ecotone\Messaging\PollableChannel;
 class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuilder
 {
     private function __construct(
-        private string $messageChannelName,
-        private MessageChannel $messageChannel,
-        private bool $isPollable,
-        private ?MediaType $conversionMediaType,
-        private HeaderMapper $headerMapper,
+        private string               $messageChannelName,
+        private MessageChannel       $messageChannel,
+        private bool                 $isPollable,
+        private ?MediaType           $conversionMediaType,
+        private HeaderMapper         $headerMapper,
+        private FinalFailureStrategy $finalFailureStrategy,
+        private bool                 $isAutoAcked,
     ) {
     }
 
-    public static function create(string $messageChannelName, MessageChannel $messageChannel, string|MediaType|null $conversionMediaType = null): self
+    public static function create(string $messageChannelName, MessageChannel $messageChannel, string|MediaType|null $conversionMediaType = null, FinalFailureStrategy $finalFailureStrategy = FinalFailureStrategy::RESEND, bool $isAutoAcked = true): self
     {
         return new self(
             $messageChannelName,
@@ -41,6 +44,8 @@ class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuil
             $messageChannel instanceof PollableChannel,
             $conversionMediaType ? (is_string($conversionMediaType) ? MediaType::parseMediaType($conversionMediaType) : $conversionMediaType) : null,
             DefaultHeaderMapper::createAllHeadersMapping(),
+            $finalFailureStrategy,
+            $isAutoAcked,
         );
     }
 
@@ -54,11 +59,11 @@ class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuil
         return self::create($messageChannelName, PublishSubscribeChannel::create($messageChannelName), null);
     }
 
-    public static function createQueueChannel(string $messageChannelName, bool $delayable = false, string|MediaType|null $conversionMediaType = null): self
+    public static function createQueueChannel(string $messageChannelName, bool $delayable = false, string|MediaType|null $conversionMediaType = null, FinalFailureStrategy $finalFailureStrategy = FinalFailureStrategy::RESEND, bool $isAutoAcked = true): self
     {
         $messageChannel = $delayable ? DelayableQueueChannel::create($messageChannelName) : QueueChannel::create($messageChannelName);
 
-        return self::create($messageChannelName, $messageChannel, $conversionMediaType);
+        return self::create($messageChannelName, $messageChannel, $conversionMediaType, $finalFailureStrategy, $isAutoAcked);
     }
 
     public static function createNullableChannel(string $messageChannelName): self
@@ -77,6 +82,16 @@ class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuil
     public function isPollable(): bool
     {
         return $this->isPollable;
+    }
+
+    public function getFinalFailureStrategy(): FinalFailureStrategy
+    {
+        return $this->finalFailureStrategy;
+    }
+
+    public function isAutoAcked(): bool
+    {
+        return $this->isAutoAcked;
     }
 
     public function withDefaultConversionMediaType(string $mediaType): self

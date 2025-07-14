@@ -14,7 +14,7 @@ use Ecotone\Messaging\Support\LicensingException;
  */
 final class StandardGatewayErrorChannelResolver implements GatewayErrorChannelResolver
 {
-    public function getErrorChannel(InterfaceToCall $interfaceToCall, ?string $errorChannelName): ?string
+    public function getErrorChannel(InterfaceToCall $interfaceToCall, array $endpointAnnotations, ?string $errorChannelName): ?string
     {
         $errorChannelAttributes = $interfaceToCall->getAnnotationsByImportanceOrder(TypeDescriptor::create(ErrorChannel::class));
         if ($errorChannelAttributes) {
@@ -24,7 +24,7 @@ final class StandardGatewayErrorChannelResolver implements GatewayErrorChannelRe
         return $errorChannelName;
     }
 
-    public function getErrorChannelRoutingSlip(InterfaceToCall $interfaceToCall, string $requestChannelName): ?string
+    public function getErrorChannelRoutingSlip(InterfaceToCall $interfaceToCall, array $endpointAnnotations, string $requestChannelName): ?string
     {
         return null;
     }

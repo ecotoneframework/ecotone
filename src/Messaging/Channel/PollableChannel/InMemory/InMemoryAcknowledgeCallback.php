@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Channel\PollableChannel\InMemory;
 
 use Ecotone\Messaging\Endpoint\AcknowledgementCallback;
+use Ecotone\Messaging\Endpoint\FinalFailureStrategy;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\Assert;
@@ -16,27 +17,33 @@ use RuntimeException;
 final class InMemoryAcknowledgeCallback implements AcknowledgementCallback
 {
     public function __construct(
-        private PollableChannel $queueChannel,
-        private Message $message,
-        private bool $isAutoAck = true,
-        private bool $wasAcked = false
+        private PollableChannel           $queueChannel,
+        private Message                   $message,
+        private FinalFailureStrategy      $failureStrategy = FinalFailureStrategy::RESEND,
+        private bool                      $isAutoAcked = true,
+        private InMemoryAcknowledgeStatus $status = InMemoryAcknowledgeStatus::AWAITING
     ) {
     }
 
     /**
-     * @return bool
+     * @inheritDoc
      */
-    public function isAutoAck(): bool
+    public function getFailureStrategy(): FinalFailureStrategy
     {
-        return $this->isAutoAck;
+        return $this->failureStrategy;
     }
 
     /**
-     * Disable auto acknowledgment
+     * @inheritDoc
      */
-    public function disableAutoAck(): void
+    public function isAutoAcked(): bool
     {
-        $this->isAutoAck = false;
+        return $this->isAutoAcked;
+    }
+
+    public function getStatus(): InMemoryAcknowledgeStatus
+    {
+        return $this->status;
     }
 
     /**
@@ -44,9 +51,8 @@ final class InMemoryAcknowledgeCallback implements AcknowledgementCallback
      */
     public function accept(): void
     {
-        Assert::isFalse($this->wasAcked, 'Trying to acknowledge message that was already acknowledged');
-
-        $this->wasAcked = true;
+        Assert::isTrue(in_array($this->status, [InMemoryAcknowledgeStatus::AWAITING, InMemoryAcknowledgeStatus::RESENT], true), 'Message was already acknowledged.');
+        $this->status = InMemoryAcknowledgeStatus::ACKED;
     }
 
     /**
@@ -54,9 +60,8 @@ final class InMemoryAcknowledgeCallback implements AcknowledgementCallback
      */
     public function reject(): void
     {
-        Assert::isFalse($this->wasAcked, 'Trying to acknowledge message that was already acknowledged');
-
-        $this->wasAcked = true;
+        Assert::isTrue(in_array($this->status, [InMemoryAcknowledgeStatus::AWAITING, InMemoryAcknowledgeStatus::RESENT], true), 'Message was already acknowledged.');
+        $this->status = InMemoryAcknowledgeStatus::IGNORED;
     }
 
     private int $requeueCount = 0;
@@ -66,6 +71,9 @@ final class InMemoryAcknowledgeCallback implements AcknowledgementCallback
      */
     public function requeue(): void
     {
+        Assert::isTrue(in_array($this->status, [InMemoryAcknowledgeStatus::AWAITING, InMemoryAcknowledgeStatus::RESENT], true), 'Message was already acknowledged.');
+
+        $this->status = InMemoryAcknowledgeStatus::RESENT;
         $this->requeueCount++;
 
         if ($this->requeueCount > 100) {

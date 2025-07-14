@@ -9,7 +9,7 @@ use Attribute;
 /**
  * licence Enterprise
  */
-#[Attribute(Attribute::TARGET_CLASS)]
+#[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
 class InstantRetry
 {
     /**

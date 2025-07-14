@@ -23,18 +23,32 @@ class NullAcknowledgementCallback implements AcknowledgementCallback
 
     private int $status = self::AWAITING;
 
-    private bool $isAutoAck = true;
-
-    private function __construct()
+    private function __construct(private FinalFailureStrategy $failureStrategy, private bool $isAutoAcked = true)
     {
     }
 
     /**
      * @return NullAcknowledgementCallback
      */
-    public static function create(): self
+    public static function create(FinalFailureStrategy $failureStrategy = FinalFailureStrategy::RESEND): self
     {
-        return new self();
+        return new self($failureStrategy);
+    }
+
+    /**
+     * @return NullAcknowledgementCallback
+     */
+    public static function createWithAutoAck(FinalFailureStrategy $failureStrategy = FinalFailureStrategy::RESEND): self
+    {
+        return new self($failureStrategy, true);
+    }
+
+    /**
+     * @return NullAcknowledgementCallback
+     */
+    public static function createWithManualAck(FinalFailureStrategy $failureStrategy = FinalFailureStrategy::RESEND): self
+    {
+        return new self($failureStrategy, false);
     }
 
     public function isAcked(): bool
@@ -55,17 +69,17 @@ class NullAcknowledgementCallback implements AcknowledgementCallback
     /**
      * @inheritDoc
      */
-    public function isAutoAck(): bool
+    public function getFailureStrategy(): FinalFailureStrategy
     {
-        return $this->isAutoAck;
+        return $this->failureStrategy;
     }
 
     /**
      * @inheritDoc
      */
-    public function disableAutoAck(): void
+    public function isAutoAcked(): bool
     {
-        $this->isAutoAck = false;
+        return $this->isAutoAcked;
     }
 
     /**

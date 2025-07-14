@@ -306,7 +306,7 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
             Assert::isTrue(is_a($requestChannelDefinition->getClassName(), SubscribableChannel::class, true), 'Gateway request channel should not be pollable if expected return type is not nullable');
         }
 
-        $errorChannelName = $errorChannelResolver->getErrorChannel($interfaceToCall, $this->errorChannelName);
+        $errorChannelName = $errorChannelResolver->getErrorChannel($interfaceToCall, $this->endpointAnnotations, $this->errorChannelName);
         if (! $interfaceToCall->canItReturnNull() && $errorChannelName && ! $interfaceToCall->hasReturnTypeVoid()) {
             throw InvalidArgumentException::create("Gateway {$interfaceToCall} with error channel must allow nullable return type");
         }
@@ -377,9 +377,9 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
         $interfaceToCall = $builder->getInterfaceToCall($interfaceToCallReference);
 
         $aroundInterceptors = $this->aroundInterceptors;
-        $errorChannelName = $errorChannelResolver->getErrorChannel($interfaceToCall, $this->errorChannelName);
+        $errorChannelName = $errorChannelResolver->getErrorChannel($interfaceToCall, $this->endpointAnnotations, $this->errorChannelName);
         if ($errorChannelName) {
-            $errorChannelRoutingSlip = $errorChannelResolver->getErrorChannelRoutingSlip($interfaceToCall, $this->requestChannelName);
+            $errorChannelRoutingSlip = $errorChannelResolver->getErrorChannelRoutingSlip($interfaceToCall, $this->endpointAnnotations, $this->requestChannelName);
 
             $interceptorReference = $builder->register(
                 Uuid::uuid4()->toString(),

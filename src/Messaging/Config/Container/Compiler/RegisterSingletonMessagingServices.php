@@ -2,6 +2,7 @@
 
 namespace Ecotone\Messaging\Config\Container\Compiler;
 
+use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\Container\ChannelResolverWithContainer;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
@@ -41,6 +42,7 @@ class RegisterSingletonMessagingServices implements CompilerPass
         $this->registerDefault($builder, PropertyEditorAccessor::class, new Definition(PropertyEditorAccessor::class, [new Reference(ExpressionEvaluationService::REFERENCE)], 'create'));
         $this->registerDefault($builder, PropertyReaderAccessor::class, new Definition(PropertyReaderAccessor::class));
         $this->registerDefault($builder, ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), [], []]));
+        $this->registerDefault($builder, EventMapper::class, new Definition(EventMapper::class, factory: 'createEmpty'));
     }
 
     private function registerDefault(ContainerBuilder $builder, string $id, Definition|Reference $definition): void

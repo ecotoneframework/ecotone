@@ -23,6 +23,11 @@ class DefinitionHelper
         return new Definition(get_class($object), [serialize($object)], [self::class, 'unserializeSerializedObject']);
     }
 
+    public static function buildAttributeDefinitionFromInstance(object $object): AttributeDefinition
+    {
+        return new AttributeDefinition(get_class($object), [serialize($object)], [self::class, 'unserializeSerializedObject']);
+    }
+
     public static function unserializeSerializedObject(string $serializedObject): object
     {
         return unserialize($serializedObject);

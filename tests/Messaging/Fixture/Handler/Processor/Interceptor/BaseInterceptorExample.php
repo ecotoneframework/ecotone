@@ -35,7 +35,7 @@ abstract class BaseInterceptorExample implements DefinedObject
      * StubCallSavingService constructor.
      * @param $valueToReturn
      */
-    private function __construct($valueToReturn)
+    public function __construct($valueToReturn)
     {
         $this->valueToReturn = $valueToReturn;
     }
@@ -81,6 +81,6 @@ abstract class BaseInterceptorExample implements DefinedObject
 
     public function getDefinition(): Definition
     {
-        return new Definition(self::class, [$this->valueToReturn]);
+        return new Definition(static::class, [$this->valueToReturn]);
     }
 }

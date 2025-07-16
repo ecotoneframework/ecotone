@@ -69,7 +69,8 @@ class FetchAggregateConverter implements ParameterConverter
         );
 
         if (! $resolvedAggregate && ! $this->doesAllowsNull) {
-            throw new AggregateNotFoundException("Aggregate {$this->aggregateClassName} was not found for identifiers {$identifiers}.");
+            $identifiersString = is_array($identifiers) ? json_encode($identifiers) : (string) $identifiers;
+            throw new AggregateNotFoundException("Aggregate {$this->aggregateClassName} was not found for identifiers {$identifiersString}.");
         }
 
         return $resolvedAggregate?->getAggregateInstance();

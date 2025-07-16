@@ -23,7 +23,7 @@ final class DistributedServiceMap implements DefinedObject
      * @param array<string, array<string>> $subscriptionRoutingKeys
      * @param array<object> $distributedBusAnnotations
      */
-    private function __construct(
+    public function __construct(
         private string $referenceName,
         private array $serviceMapping = [],
         private ?array $subscriptionRoutingKeys = null,
@@ -117,6 +117,7 @@ final class DistributedServiceMap implements DefinedObject
         return Definition::createFor(
             self::class,
             [
+                $this->referenceName,
                 $this->serviceMapping,
                 $this->subscriptionRoutingKeys,
                 $this->distributedBusAnnotations,

@@ -13,6 +13,7 @@ use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Scheduling\DatePoint;
 use Ecotone\Messaging\Scheduling\Duration;
+use Ecotone\Messaging\Scheduling\TimeSpan;
 
 /**
  * licence Apache-2.0
@@ -105,6 +106,10 @@ class OutboundMessageConverter
 
         if ($deliveryDelay instanceof Duration) {
             $deliveryDelay = $deliveryDelay->inMilliseconds();
+        }
+
+        if ($deliveryDelay instanceof TimeSpan) {
+            $deliveryDelay = $deliveryDelay->toMilliseconds();
         }
 
         if ($deliveryDelay && $deliveryDelay < 0) {

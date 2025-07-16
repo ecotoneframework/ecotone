@@ -7,6 +7,7 @@ use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor\BeforeSendGateway;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
@@ -832,7 +833,21 @@ class GatewayProxyBuilderTest extends MessagingTestCase
 
     public function test_calling_interface_with_before_and_after_interceptors()
     {
+        $beforeInterceptor1Ref = 'beforeInterceptor1';
+        $beforeInterceptor2Ref = 'beforeInterceptor2';
+        $afterInterceptor1Ref = 'afterInterceptor1';
+        $afterInterceptor2Ref = 'afterInterceptor2';
+
+        $beforeInterceptor1 = CalculatingService::create(3);
+        $beforeInterceptor2 = CalculatingService::create(3);
+        $afterInterceptor1 = CalculatingService::create(0);
+        $afterInterceptor2 = CalculatingService::create(2);
+
         $messaging = ComponentTestBuilder::create()
+            ->withReference($beforeInterceptor1Ref, $beforeInterceptor1)
+            ->withReference($beforeInterceptor2Ref, $beforeInterceptor2)
+            ->withReference($afterInterceptor1Ref, $afterInterceptor1)
+            ->withReference($afterInterceptor2Ref, $afterInterceptor2)
             ->withGateway(
                 GatewayProxyBuilder::create(
                     ServiceInterfaceCalculatingService::class,
@@ -843,7 +858,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
             )
             ->withBeforeInterceptor(
                 MethodInterceptorBuilder::create(
-                    CalculatingService::create(3),
+                    Reference::to($beforeInterceptor1Ref),
                     InterfaceToCall::create(CalculatingService::class, 'multiply'),
                     0,
                     ServiceInterfaceCalculatingService::class
@@ -851,7 +866,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
             )
             ->withBeforeInterceptor(
                 MethodInterceptorBuilder::create(
-                    CalculatingService::create(3),
+                    Reference::to($beforeInterceptor2Ref),
                     InterfaceToCall::create(CalculatingService::class, 'sum'),
                     1,
                     ServiceInterfaceCalculatingService::class
@@ -859,7 +874,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
             )
             ->withAfterInterceptor(
                 MethodInterceptorBuilder::create(
-                    CalculatingService::create(0),
+                    Reference::to($afterInterceptor1Ref),
                     InterfaceToCall::create(CalculatingService::class, 'result'),
                     1,
                     ServiceInterfaceCalculatingService::class
@@ -867,7 +882,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
             )
             ->withAfterInterceptor(
                 MethodInterceptorBuilder::create(
-                    CalculatingService::create(2),
+                    Reference::to($afterInterceptor2Ref),
                     InterfaceToCall::create(CalculatingService::class, 'multiply'),
                     0,
                     ServiceInterfaceCalculatingService::class

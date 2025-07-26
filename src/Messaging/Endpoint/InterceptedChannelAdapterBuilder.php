@@ -15,6 +15,7 @@ use Ecotone\Messaging\Endpoint\PollingConsumer\InterceptedConsumerRunner;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerErrorChannelInterceptor;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\ErrorChannelService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -67,6 +68,7 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
             new Reference(EcotoneClockInterface::class),
             new Reference(LoggingGateway::class),
             new Reference(MessagingEntrypoint::class),
+            new Reference(ExpressionEvaluationService::REFERENCE),
         ]);
         $builder->registerPollingEndpoint($this->endpointId, $consumerRunner);
     }

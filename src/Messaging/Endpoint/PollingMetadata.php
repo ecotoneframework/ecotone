@@ -50,6 +50,8 @@ final class PollingMetadata implements DefinedObject
         private string $taskExecutorName = '',
         private bool $stopOnError = self::DEFAULT_STOP_ON_ERROR,
         private bool $finishWhenNoMessages = self::DEFAULT_FINISH_WHEN_NO_MESSAGES,
+        private ?string $fixedRateExpression = null,
+        private ?string $cronExpression = null,
     ) {
         $this->withSignalInterceptors = $withSignalInterceptors ?? extension_loaded('pcntl');
     }
@@ -430,6 +432,42 @@ final class PollingMetadata implements DefinedObject
         return $this->finishWhenNoMessages;
     }
 
+    public function getFixedRateExpression(): ?string
+    {
+        return $this->fixedRateExpression;
+    }
+
+    public function getCronExpression(): ?string
+    {
+        return $this->cronExpression;
+    }
+
+    public function hasFixedRateExpression(): bool
+    {
+        return $this->fixedRateExpression !== null;
+    }
+
+    public function hasCronExpression(): bool
+    {
+        return $this->cronExpression !== null;
+    }
+
+    public function setFixedRateExpression(?string $fixedRateExpression): PollingMetadata
+    {
+        $copy = $this->createCopy();
+        $copy->fixedRateExpression = $fixedRateExpression;
+
+        return $copy;
+    }
+
+    public function setCronExpression(?string $cronExpression): PollingMetadata
+    {
+        $copy = $this->createCopy();
+        $copy->cronExpression = $cronExpression;
+
+        return $copy;
+    }
+
     /**
      * @return PollingMetadata
      */
@@ -458,6 +496,8 @@ final class PollingMetadata implements DefinedObject
             $this->taskExecutorName,
             $this->stopOnError,
             $this->finishWhenNoMessages,
+            $this->fixedRateExpression,
+            $this->cronExpression,
         ]);
     }
 }

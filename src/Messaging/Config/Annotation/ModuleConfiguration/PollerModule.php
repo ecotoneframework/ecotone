@@ -52,7 +52,9 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
                     ->setErrorChannelName($poller->getErrorChannelName())
                     ->setMemoryLimitInMegaBytes($poller->getMemoryLimitInMegabytes())
                     ->setHandledMessageLimit($poller->getHandledMessageLimit())
-                    ->setExecutionTimeLimitInMilliseconds($poller->getExecutionTimeLimitInMilliseconds());
+                    ->setExecutionTimeLimitInMilliseconds($poller->getExecutionTimeLimitInMilliseconds())
+                    ->setFixedRateExpression($poller->getFixedRateExpression())
+                    ->setCronExpression($poller->getCronExpression());
 
                 $multiplePollingMetadata[] = $pollingMetadata;
             }

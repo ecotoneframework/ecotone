@@ -21,7 +21,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class GatewayHeadersConverter implements GatewayParameterConverter
 {
-    public function __construct(private string $parameterName, private bool $isStartingNewFlow)
+    public function __construct(private string $parameterName)
     {
     }
 
@@ -43,7 +43,7 @@ class GatewayHeadersConverter implements GatewayParameterConverter
              * Do not propagate routing slip when calling higher level Gateways (Command, Query, Event Bus)
              * This is because they start new flows which should not be routed back to the original one
              */
-            if ($this->isStartingNewFlow && in_array($headerName, [MessageHeaders::ROUTING_SLIP])) {
+            if (in_array($headerName, [MessageHeaders::ROUTING_SLIP])) {
                 continue;
             }
             if ($headerName === MessageHeaders::CONTENT_TYPE) {

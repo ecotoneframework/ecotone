@@ -6,6 +6,7 @@ use Ecotone\Messaging\Attribute\Parameter\Header;
 use Ecotone\Messaging\Attribute\Parameter\Headers;
 use Ecotone\Messaging\Attribute\Parameter\Payload;
 use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
 
 /**
  * licence Apache-2.0
@@ -16,9 +17,9 @@ interface MessagingEntrypoint
 
     public function send(#[Payload] $payload, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel): mixed;
 
-    public function sendWithHeaders(#[Payload] $payload, #[Headers] array $headers, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel): mixed;
+    public function sendWithHeaders(#[Payload] $payload, #[Headers] array $headers, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel, #[Header(MessageHeaders::ROUTING_SLIP)] ?string $routingSlip = null): mixed;
 
-    public function sendWithHeadersWithMessageReply(#[Payload] $payload, #[Headers] array $headers, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel): ?Message;
+    public function sendWithHeadersWithMessageReply(#[Payload] $payload, #[Headers] array $headers, #[Header(MessagingEntrypoint::ENTRYPOINT)] string $targetChannel, #[Header(MessageHeaders::ROUTING_SLIP)] ?string $routingSlip = null): ?Message;
 
     /**
      * It must contain {MessagingEntrypoint::ENTRYPOINT} header

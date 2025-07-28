@@ -15,6 +15,9 @@ interface RepositoryBusinessInterface
     public function getArticle(string $id): Article;
 
     #[Repository]
+    public function findArticle(string $id, array $metadata = []): Article;
+
+    #[Repository]
     public function getPage(string $id): Page;
 
     #[Repository]

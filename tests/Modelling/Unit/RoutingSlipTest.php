@@ -17,6 +17,12 @@ use Test\Ecotone\Modelling\Fixture\CommandEventFlow\Merchant;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\MerchantSubscriber;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\RegisterUser;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\User;
+use Test\Ecotone\Modelling\Fixture\CustomRepositories\Standard\Article;
+use Test\Ecotone\Modelling\Fixture\CustomRepositories\Standard\ArticleRepository;
+use Test\Ecotone\Modelling\Fixture\CustomRepositories\Standard\ArticleService;
+use Test\Ecotone\Modelling\Fixture\CustomRepositories\Standard\Author;
+use Test\Ecotone\Modelling\Fixture\CustomRepositories\Standard\Page;
+use Test\Ecotone\Modelling\Fixture\CustomRepositories\Standard\RepositoryBusinessInterface;
 
 /**
  * licence Apache-2.0
@@ -166,5 +172,36 @@ final class RoutingSlipTest extends TestCase
             ]
         );
         $this->assertEquals([], $ecotoneLite->sendQueryWithRouting('audit.getData'));
+    }
+
+    public function test_routing_slip_will_not_be_propagated_by_business_repository(): void
+    {
+        $articleRepository = ArticleRepository::createEmpty();
+
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [Article::class, ArticleRepository::class, RepositoryBusinessInterface::class, Page::class, Author::class, AuditLog::class, ArticleService::class],
+            [ArticleRepository::class => $articleRepository, new AuditLog(), new ArticleService()],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
+            addInMemoryStateStoredRepository: false,
+        );
+
+        // First create an article to retrieve
+        $ecotoneLite->sendDirectToChannel('create.article', '123');
+
+        // Call command handler that uses business repository internally
+        // The routing slip should be called once for the command handler, but not propagated to the repository
+        $ecotoneLite->sendDirectToChannel(
+            'get.article.via.service',
+            '123',
+            metadata: [
+                MessageHeaders::ROUTING_SLIP => 'audit',
+            ]
+        );
+
+        // The audit should contain only the result from the command handler (Article object)
+        $auditData = $ecotoneLite->sendQueryWithRouting('audit.getData');
+        $this->assertCount(1, $auditData);
+        $this->assertInstanceOf(Article::class, $auditData[0]);
     }
 }

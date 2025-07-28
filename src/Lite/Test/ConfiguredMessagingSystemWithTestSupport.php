@@ -10,6 +10,7 @@ use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use Ecotone\Messaging\Handler\Gateway\Gateway;
 use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagePublisher;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\CommandBus;
@@ -66,7 +67,7 @@ final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessag
         /** @var MessagingEntrypoint $messagingEntrypoint */
         $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
 
-        return $messagingEntrypoint->sendWithHeaders($payload, $metadata, $targetChannel);
+        return $messagingEntrypoint->sendWithHeaders($payload, $metadata, $targetChannel, $metadata[MessageHeaders::ROUTING_SLIP] ?? null);
     }
 
     public function getMessagePublisher(string $referenceName = MessagePublisher::class): MessagePublisher

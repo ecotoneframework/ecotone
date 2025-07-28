@@ -368,7 +368,7 @@ final class FlowTestSupport
         /** @var MessagingEntrypoint $messagingEntrypoint */
         $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
 
-        return $messagingEntrypoint->sendWithHeaders($payload, $metadata, $targetChannel);
+        return $messagingEntrypoint->sendWithHeaders($payload, $metadata, $targetChannel, $metadata[MessageHeaders::ROUTING_SLIP] ?? null);
     }
 
     public function sendDirectToChannelWithMessageReply(string $targetChannel, mixed $payload = '', array $metadata = []): Message
@@ -376,7 +376,7 @@ final class FlowTestSupport
         /** @var MessagingEntrypoint $messagingEntrypoint */
         $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
 
-        return $messagingEntrypoint->sendWithHeadersWithMessageReply($payload, $metadata, $targetChannel);
+        return $messagingEntrypoint->sendWithHeadersWithMessageReply($payload, $metadata, $targetChannel, $metadata[MessageHeaders::ROUTING_SLIP] ?? null);
     }
 
     public function sendMessageDirectToChannel(string $targetChannel, Message $message): mixed
@@ -402,6 +402,7 @@ final class FlowTestSupport
             $message->getPayload(),
             $message->getHeaders()->headers(),
             $targetChannel,
+            $message->getHeaders()->containsKey(MessageHeaders::ROUTING_SLIP) ? $message->getHeaders()->get(MessageHeaders::ROUTING_SLIP) : null
         );
     }
 

@@ -122,6 +122,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
                 GatewayPayloadBuilder::create('payload'),
                 GatewayHeadersBuilder::create('headers'),
                 GatewayHeaderBuilder::create('targetChannel', MessagingEntrypoint::ENTRYPOINT),
+                GatewayHeaderBuilder::create('routingSlip', MessageHeaders::ROUTING_SLIP),
             ])
         );
         $messagingConfiguration->registerGatewayBuilder(
@@ -134,6 +135,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
                 GatewayPayloadBuilder::create('payload'),
                 GatewayHeadersBuilder::create('headers'),
                 GatewayHeaderBuilder::create('targetChannel', MessagingEntrypoint::ENTRYPOINT),
+                GatewayHeaderBuilder::create('routingSlip', MessageHeaders::ROUTING_SLIP),
             ])
         );
         $messagingConfiguration->registerGatewayBuilder(
@@ -166,6 +168,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
                 GatewayPayloadBuilder::create('payload'),
                 GatewayHeadersBuilder::create('headers'),
                 GatewayHeaderBuilder::create('targetChannel', MessagingEntrypoint::ENTRYPOINT),
+                GatewayHeaderBuilder::create('routingSlip', MessageHeaders::ROUTING_SLIP),
             ])
         );
         $messagingConfiguration->registerGatewayBuilder(
@@ -178,6 +181,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
                 GatewayPayloadBuilder::create('payload'),
                 GatewayHeadersBuilder::create('headers'),
                 GatewayHeaderBuilder::create('targetChannel', MessagingEntrypoint::ENTRYPOINT),
+                GatewayHeaderBuilder::create('routingSlip', MessageHeaders::ROUTING_SLIP),
             ])
         );
         $messagingConfiguration->registerGatewayBuilder(

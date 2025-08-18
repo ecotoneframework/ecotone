@@ -473,6 +473,11 @@ class InterfaceToCall
         return $this->parameterAmount() >= 2;
     }
 
+    public function hasThirdParameter(): bool
+    {
+        return $this->parameterAmount() >= 3;
+    }
+
     /**
      * @return string
      */

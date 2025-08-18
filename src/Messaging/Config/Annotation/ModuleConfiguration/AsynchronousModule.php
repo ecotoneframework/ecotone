@@ -7,7 +7,6 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Attribute\EndpointAnnotation;
-use Ecotone\Messaging\Attribute\InternalHandler;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\StreamBasedSource;
 use Ecotone\Messaging\Channel\CombinedMessageChannel;
@@ -69,7 +68,7 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
                     if ($endpoint->hasClassAnnotation(StreamBasedSource::class)) {
                         continue;
                     }
-                    if (in_array(get_class($annotationForMethod), [CommandHandler::class, EventHandler::class, InternalHandler::class])) {
+                    if (in_array(get_class($annotationForMethod), [CommandHandler::class, EventHandler::class])) {
                         if ($annotationForMethod->isEndpointIdGenerated()) {
                             throw ConfigurationException::create("{$endpoint} should have endpointId defined for handling asynchronously");
                         }
@@ -90,7 +89,7 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
                     if ($annotationForMethod instanceof QueryHandler) {
                         continue;
                     }
-                    if (in_array(get_class($annotationForMethod), [CommandHandler::class, EventHandler::class, InternalHandler::class])) {
+                    if (in_array(get_class($annotationForMethod), [CommandHandler::class, EventHandler::class])) {
                         if ($annotationForMethod->isEndpointIdGenerated()) {
                             throw ConfigurationException::create("{$endpoint} should have endpointId defined for handling asynchronously");
                         }

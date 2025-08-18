@@ -55,10 +55,9 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\InterceptorWithPointCut;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\UninterruptibleServiceActivator;
-use Ecotone\Messaging\Handler\Transformer\HeaderEnricher;
+use Ecotone\Messaging\Handler\Transformer\RoutingSlipPrepender;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\PollableChannel;
@@ -420,11 +419,13 @@ final class MessagingSystemConfiguration implements Configuration
                     $generatedEndpointId = Uuid::uuid4()->toString();
                     $this->registerMessageHandler(
                         UninterruptibleServiceActivator::create(
-                            HeaderEnricher::create([
-                                MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME => null,
-                                MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME => null,
-                                MessageHeaders::ROUTING_SLIP => implode(',', $consequentialChannels),
-                            ]),
+                            RoutingSlipPrepender::create(
+                                $consequentialChannels,
+                                [
+                                    MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME,
+                                    MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME,
+                                ]
+                            ),
                             'transform',
                         )
                             ->withEndpointId($generatedEndpointId)

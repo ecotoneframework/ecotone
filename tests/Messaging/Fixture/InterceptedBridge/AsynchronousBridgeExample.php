@@ -20,7 +20,7 @@ final class AsynchronousBridgeExample
     public int $result = 2;
 
     #[Asynchronous('async')]
-    #[ServiceActivator('bridgeExample', outputChannelName: 'bridgeSum')]
+    #[ServiceActivator('bridgeExample', 'async_bridge_result', outputChannelName: 'bridgeSum')]
     public function result(int $result): int
     {
         $this->result += $result;

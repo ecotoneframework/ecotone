@@ -36,6 +36,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessageConsumerModul
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingCommands\MessagingCommandsModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingGatewayModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor\MethodInterceptorModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\Orchestrator\OrchestratorModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\PollerModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\RequiredConsumersModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\RouterModule;
@@ -94,6 +95,7 @@ class ModuleClassList
         ServiceActivatorModule::class,
         SplitterModule::class,
         TransformerModule::class,
+        OrchestratorModule::class,
         MessageConsumerModule::class,
         InstantRetryModule::class,
         InstantRetryAttributeModule::class,

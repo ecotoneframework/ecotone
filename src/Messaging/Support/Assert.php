@@ -20,10 +20,10 @@ class Assert
      * @throws InvalidArgumentException
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function isTrue(bool $toCheck, string $message): void
+    public static function isTrue(bool $toCheck, string $message, bool $configurationException = false): void
     {
         if (! $toCheck) {
-            throw InvalidArgumentException::create($message);
+            $configurationException ? throw ConfigurationException::create($message) : throw InvalidArgumentException::create($message);
         }
     }
 

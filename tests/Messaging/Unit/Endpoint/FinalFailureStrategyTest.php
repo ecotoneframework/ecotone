@@ -185,7 +185,7 @@ class FailingService
     private Message $message;
 
     #[Asynchronous('async')]
-    #[ServiceActivator('executionChannel')]
+    #[ServiceActivator('executionChannel', 'failing_service')]
     public function handle(Message $message): void
     {
         $this->message = $message;
@@ -204,7 +204,7 @@ class SuccessService
     private Message $message;
 
     #[Asynchronous('async')]
-    #[ServiceActivator('executionChannel')]
+    #[ServiceActivator('executionChannel', 'success_service')]
     public function handle(Message $message): void
     {
         $this->message = $message;
@@ -223,7 +223,7 @@ class RejectingService
     private Message $message;
 
     #[Asynchronous('async')]
-    #[ServiceActivator('executionChannel')]
+    #[ServiceActivator('executionChannel', 'rejecting_service')]
     public function handle(Message $message): void
     {
         $this->message = $message;
@@ -242,7 +242,7 @@ class ManualAckService
     private Message $message;
 
     #[Asynchronous('async')]
-    #[ServiceActivator('executionChannel')]
+    #[ServiceActivator('executionChannel', 'manual_ack_service')]
     public function handle(Message $message): void
     {
         $this->message = $message;

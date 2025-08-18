@@ -18,7 +18,7 @@ final class SuccessServiceActivator
     private Message $lastCalledMessage;
 
     #[Asynchronous('async_channel')]
-    #[ServiceActivator('handle_channel')]
+    #[ServiceActivator('handle_channel', 'success_service_activator')]
     public function handle(Message $message): void
     {
         $this->lastCalledMessage = $message;

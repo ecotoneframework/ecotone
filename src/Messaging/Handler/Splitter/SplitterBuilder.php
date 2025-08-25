@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Splitter;
 
-use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\ChannelReference;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -97,10 +97,6 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
             throw InvalidArgumentException::create("Can't create transformer for {$interfaceToCall}, because method has no return value");
         }
 
-        if (! $this->outputMessageChannelName) {
-            throw ConfigurationException::create('Output channel required for splitter handler');
-        }
-
         $interceptorsConfiguration = $builder->getRelatedInterceptors(
             $this->interfaceToCallReference,
             $this->getEndpointAnnotations(),
@@ -116,8 +112,9 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
             ->compileProcessor($builder, $interceptorsConfiguration);
 
         return new Definition(SplitterHandler::class, [
-            new ChannelReference($this->outputMessageChannelName),
+            $this->outputMessageChannelName ? new ChannelReference($this->outputMessageChannelName) : null,
             $processor,
+            new Reference(ChannelResolver::class),
             $interfaceToCall->toString(),
         ]);
     }

@@ -39,17 +39,18 @@ class PollingConsumerErrorChannelInterceptor
             $pollingMetadata = $requestMessage->getHeaders()->get(MessageHeaders::CONSUMER_POLLING_METADATA);
             $errorChannelName = $pollingMetadata->getErrorChannelName();
 
-            if ($errorChannelName && $this->channelResolver->hasChannelWithName($errorChannelName)) {
-                $errorChannel = $this->channelResolver->resolve($errorChannelName);
-                $this->errorChannelService->handle(
-                    $requestMessage,
-                    $exception,
-                    $errorChannel,
-                    $requestMessage->getHeaders()->get(MessageHeaders::POLLED_CHANNEL_NAME)
-                );
-
-                return true;
+            if (! $errorChannelName) {
+                return false;
             }
+
+            $this->errorChannelService->handle(
+                $requestMessage,
+                $exception,
+                $this->channelResolver->resolve($errorChannelName),
+                $requestMessage->getHeaders()->get(MessageHeaders::POLLED_CHANNEL_NAME)
+            );
+
+            return true;
         }
 
         return false;

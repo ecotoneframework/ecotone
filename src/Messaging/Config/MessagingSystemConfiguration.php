@@ -314,6 +314,9 @@ final class MessagingSystemConfiguration implements Configuration
             if (! $this->hasMessageHandlerWithName($pollingMetadata) && ! $this->hasChannelAdapterWithName($pollingMetadata)) {
                 throw ConfigurationException::create("Trying to register polling meta data for non existing endpoint {$pollingMetadata->getEndpointId()}. Verify if there is any asynchronous endpoint with such name.");
             }
+            if ($pollingMetadata->getErrorChannelName() && ! isset($this->channelBuilders[$pollingMetadata->getErrorChannelName()])) {
+                throw ConfigurationException::create("Trying to register polling meta data for non existing error channel `{$pollingMetadata->getErrorChannelName()}` for endpoint `{$pollingMetadata->getEndpointId()}`");
+            }
         }
 
         foreach ($this->gatewayBuilders as $gatewayBuilder) {

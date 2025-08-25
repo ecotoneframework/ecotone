@@ -38,6 +38,8 @@ use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Orchestrator\Orche
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Orchestrator\OrchestratorWithAsynchronousAndInputOutputChannels;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Orchestrator\OrchestratorWithAsynchronousStep;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Orchestrator\OrchestratorWithInternalBus;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Orchestrator\OrchestratorWithSplitterOutputChannel;
+use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Orchestrator\OrchestratorWithSplitterStep;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Orchestrator\SimpleOrchestrator;
 
 /**
@@ -488,5 +490,48 @@ class OrchestratorTest extends TestCase
                 ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::CORE_PACKAGE]))
             // No license key provided - should throw exception
         );
+    }
+
+    public function test_orchestrator_with_splitter_as_workflow_step(): void
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [OrchestratorWithSplitterStep::class],
+            [$service = new OrchestratorWithSplitterStep()],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::CORE_PACKAGE]))
+                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+        );
+
+        $ecotoneLite->sendDirectToChannel('orchestrator.with.splitter', 'test-data');
+
+        // Verify execution steps and processed items
+        $executedSteps = $service->getExecutedSteps();
+
+        $this->assertEquals([
+            'prepare', 'split',
+            'processed_item1:test-data', 'processed_item2:test-data', 'processed_item3:test-data',
+        ], $executedSteps);
+    }
+
+    public function test_orchestrator_with_splitter_having_output_channel(): void
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [OrchestratorWithSplitterOutputChannel::class],
+            [$service = new OrchestratorWithSplitterOutputChannel()],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::CORE_PACKAGE]))
+                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+        );
+
+        $ecotoneLite->sendDirectToChannel('orchestrator.with.splitter.output', 'test-data');
+
+        // Verify execution steps: prepare once, split once, transform three times, finalize three times
+        $executedSteps = $service->getExecutedSteps();
+        $this->assertEquals([
+            'prepare', 'split',
+            'finalized:transformed:data1:test-data',
+            'finalized:transformed:data2:test-data',
+            'finalized:transformed:data3:test-data',
+        ], $executedSteps);
     }
 }

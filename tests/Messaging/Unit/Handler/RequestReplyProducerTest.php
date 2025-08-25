@@ -213,7 +213,7 @@ class RequestReplyProducerTest extends MessagingTestCase
     {
         $replyData = [1, 2, 3, 4];
         $outputChannel = QueueChannel::create();
-        $requestReplyProducer = new SplitterHandler($outputChannel, FakeReplyMessageProducer::create($replyData));
+        $requestReplyProducer = new SplitterHandler($outputChannel, FakeReplyMessageProducer::create($replyData), InMemoryChannelResolver::createEmpty());
 
         $requestMessage = MessageBuilder::withPayload('some')
             ->setHeader('token', 'abcd')
@@ -228,7 +228,7 @@ class RequestReplyProducerTest extends MessagingTestCase
     {
         $replyData = [MessageBuilder::withPayload('some1')->build(), MessageBuilder::withPayload('some2')->build()];
         $outputChannel = QueueChannel::create();
-        $requestReplyProducer = new SplitterHandler($outputChannel, FakeReplyMessageProducer::create($replyData));
+        $requestReplyProducer = new SplitterHandler($outputChannel, FakeReplyMessageProducer::create($replyData), InMemoryChannelResolver::createEmpty());
 
         $requestMessage = MessageBuilder::withPayload('some')
             ->setHeader('token', 'abcd')
@@ -263,7 +263,7 @@ class RequestReplyProducerTest extends MessagingTestCase
     public function test_throwing_exception_if_result_of_service_call_is_not_array()
     {
         $replyData = 'someString';
-        $requestReplyProducer = new SplitterHandler(QueueChannel::create(), FakeReplyMessageProducer::create($replyData));
+        $requestReplyProducer = new SplitterHandler(QueueChannel::create(), FakeReplyMessageProducer::create($replyData), InMemoryChannelResolver::createEmpty());
 
         $this->expectException(MessageDeliveryException::class);
 

@@ -3,6 +3,7 @@
 namespace Ecotone\Messaging\Handler\Splitter;
 
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
@@ -18,8 +19,9 @@ use Ecotone\Messaging\Support\MessageBuilder;
 class SplitterHandler implements MessageHandler
 {
     public function __construct(
-        private MessageChannel   $outputChannel,
+        private ?MessageChannel  $outputChannel,
         private MessageProcessor $messageProcessor,
+        private ChannelResolver  $channelResolver,
         private string           $name = '',
     ) {
     }
@@ -41,26 +43,51 @@ class SplitterHandler implements MessageHandler
         $sequenceSize = count($replyData);
         for ($sequenceNumber = 0; $sequenceNumber < $sequenceSize; $sequenceNumber++) {
             $payload = $replyData[$sequenceNumber];
-            if ($payload instanceof Message) {
-                $this->outputChannel->send(
-                    MessageBuilder::fromMessage($payload)
-                        ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $message->getHeaders()->getCorrelationId())
-                        ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber + 1)
-                        ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
-                        ->build()
-                );
-            } else {
-                $this->outputChannel->send(
-                    MessageBuilder::fromParentMessage($replyMessage)
-                        ->setPayload($payload)
-                        ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::createFromVariable($payload)->toString()))
-                        ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $message->getHeaders()->getCorrelationId())
-                        ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber + 1)
-                        ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
-                        ->build()
-                );
-            }
+
+            $messageToSend = $payload instanceof Message
+                ? MessageBuilder::fromMessage($payload)
+                    ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $message->getHeaders()->getCorrelationId())
+                    ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber + 1)
+                    ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
+                    ->build()
+                : MessageBuilder::fromParentMessage($replyMessage)
+                    ->setPayload($payload)
+                    ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::createFromVariable($payload)->toString()))
+                    ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $message->getHeaders()->getCorrelationId())
+                    ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber + 1)
+                    ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
+                    ->build();
+
+            $this->sendMessage($messageToSend);
         }
+    }
+
+    private function sendMessage(Message $message): void
+    {
+        if ($this->outputChannel) {
+            $this->outputChannel->send($message);
+            return;
+        }
+
+        $routingSlip = $message->getHeaders()->containsKey(MessageHeaders::ROUTING_SLIP)
+            ? $message->getHeaders()->resolveRoutingSlip()
+            : [];
+
+        if (empty($routingSlip)) {
+            throw MessageDeliveryException::createWithFailedMessage(
+                'Splitter has no output channel to determine next step to send message to.',
+                $message
+            );
+        }
+
+        $nextStep = array_shift($routingSlip);
+        $targetChannel = $this->channelResolver->resolve($nextStep);
+
+        $messageToSend = MessageBuilder::fromMessage($message)
+            ->setRoutingSlip($routingSlip)
+            ->build();
+
+        $targetChannel->send($messageToSend);
     }
 
     public function __toString(): string

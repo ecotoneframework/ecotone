@@ -118,7 +118,7 @@ final class MessageBuilder
     public function setRoutingSlip(array $routingSlip): self
     {
         if (! $routingSlip) {
-            return $this;
+            return $this->removeHeader(MessageHeaders::ROUTING_SLIP);
         }
 
         $this->setHeader(MessageHeaders::ROUTING_SLIP, implode(',', $routingSlip));

@@ -103,6 +103,24 @@ class NullAcknowledgementCallback implements AcknowledgementCallback
     /**
      * @inheritDoc
      */
+    public function resend(): void
+    {
+        Assert::isTrue($this->isAwaiting(), 'Acknowledge was already sent');
+        $this->status = self::REQUEUED;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function release(): void
+    {
+        Assert::isTrue($this->isAwaiting(), 'Acknowledge was already sent');
+        $this->status = self::REQUEUED;
+    }
+
+    /**
+     * Requeue the message using the original mechanism
+     */
     public function requeue(): void
     {
         Assert::isTrue($this->isAwaiting(), 'Acknowledge was already sent');

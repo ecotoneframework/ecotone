@@ -26,9 +26,18 @@ enum FinalFailureStrategy: string implements DefinedObject
     case IGNORE = 'ignore';
 
     /**
-     * Resends the failed message back to original Message Channel - it will be redelivered
+     * Resends the failed message back to original Message Channel to the end of the Channel.
+     * This will result in lost Message order, yet message processing will be unblocked
      */
     case RESEND = 'resend';
+
+    /**
+     * Releases the failed message for redelivery. Logic depends on transport:
+     * - AMQP: Rejects message with requeue=true (goes to beginning of queue, preserves order)
+     * - Kafka: Resets consumer offset to redeliver same message (preserves order)
+     * This may result in infinite loop if the message keeps failing
+     */
+    case RELEASE = 'release';
 
     /**
      * Stop the consumer by rethrowing the exception

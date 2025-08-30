@@ -37,7 +37,12 @@ interface AcknowledgementCallback
     public function reject(): void;
 
     /**
-     * Reject the message and requeue so that it will be redelivered
+     * Resends the message back to the original channel
      */
-    public function requeue(): void;
+    public function resend(): void;
+
+    /**
+     * Releases the message back to the end of the original channel
+     */
+    public function release(): void;
 }

@@ -69,6 +69,40 @@ final class InMemoryAcknowledgeCallback implements AcknowledgementCallback
     /**
      * Reject the message and requeue so that it will be redelivered
      */
+    public function resend(): void
+    {
+        Assert::isTrue(in_array($this->status, [InMemoryAcknowledgeStatus::AWAITING, InMemoryAcknowledgeStatus::RESENT], true), 'Message was already acknowledged.');
+
+        $this->status = InMemoryAcknowledgeStatus::RESENT;
+        $this->requeueCount++;
+
+        if ($this->requeueCount > 100) {
+            throw new RuntimeException('Requeue loop was detected');
+        }
+
+        $this->queueChannel->send($this->message);
+    }
+
+    /**
+     * Release the message back to the end of the channel
+     */
+    public function release(): void
+    {
+        Assert::isTrue(in_array($this->status, [InMemoryAcknowledgeStatus::AWAITING, InMemoryAcknowledgeStatus::RESENT], true), 'Message was already acknowledged.');
+
+        $this->status = InMemoryAcknowledgeStatus::RESENT;
+        $this->requeueCount++;
+
+        if ($this->requeueCount > 100) {
+            throw new RuntimeException('Requeue loop was detected');
+        }
+
+        $this->queueChannel->send($this->message);
+    }
+
+    /**
+     * Requeue the message using the original mechanism
+     */
     public function requeue(): void
     {
         Assert::isTrue(in_array($this->status, [InMemoryAcknowledgeStatus::AWAITING, InMemoryAcknowledgeStatus::RESENT], true), 'Message was already acknowledged.');

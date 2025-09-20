@@ -49,13 +49,13 @@ class MethodCallToMessageConverter
         Assert::allInstanceOfType($methodArguments, MethodArgument::class);
 
         foreach ($this->methodArgumentConverters as $methodParameterConverter) {
-            if (empty($methodArguments) && $methodParameterConverter->isSupporting(null) && ! $this->isPayloadConverter($methodParameterConverter)) {
+            if (empty($methodArguments) &&  ! $this->isPayloadConverter($methodParameterConverter) && $methodParameterConverter->isSupporting(null)) {
                 $messageBuilder = $methodParameterConverter->convertToMessage(null, $messageBuilder);
                 continue;
             }
 
             foreach ($methodArguments as $methodArgument) {
-                if ($methodParameterConverter->isSupporting($methodArgument) && ! $this->isPayloadConverter($methodParameterConverter)) {
+                if (! $this->isPayloadConverter($methodParameterConverter) && $methodParameterConverter->isSupporting($methodArgument)) {
                     $messageBuilder = $methodParameterConverter->convertToMessage($methodArgument, $messageBuilder);
                     break;
                 }
@@ -75,7 +75,7 @@ class MethodCallToMessageConverter
             ->setHeader(MessageHeaders::TIMESTAMP, $this->clock->now()->unixTime()->inSeconds());
         foreach ($methodArguments as $methodArgument) {
             foreach ($this->methodArgumentConverters as $methodParameterConverter) {
-                if ($methodParameterConverter->isSupporting($methodArgument) && $this->isPayloadConverter($methodParameterConverter)) {
+                if ($this->isPayloadConverter($methodParameterConverter) && $methodParameterConverter->isSupporting($methodArgument)) {
                     return $methodParameterConverter->convertToMessage($methodArgument, $defaultBuilder);
                 }
             }

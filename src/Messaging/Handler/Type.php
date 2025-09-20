@@ -123,6 +123,8 @@ interface Type
 
     public function isNullType(): bool;
 
+    public function isEnum(): bool;
+
     /**
      * @return string
      */

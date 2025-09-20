@@ -33,7 +33,7 @@ interface Module
      */
     public function canHandle($extensionObject): bool;
 
-    public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array;
+    public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions /* , InterfaceToCallRegistry $interfaceToCallRegistry  */): array;
 
     public function getModulePackageName(): string;
 }

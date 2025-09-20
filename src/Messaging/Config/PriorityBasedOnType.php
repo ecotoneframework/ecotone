@@ -9,7 +9,6 @@ use Ecotone\Messaging\Attribute\Endpoint\Priority;
 use Ecotone\Messaging\Attribute\StreamBasedSource;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\Aggregate;
 
@@ -50,13 +49,13 @@ final class PriorityBasedOnType
     private static function getPriorityBasedOnType(InterfaceToCall|AnnotatedFinding $objectToCheck): PriorityBasedOnType
     {
         $type = match (true) {
-            $objectToCheck->hasAnnotation(TypeDescriptor::create(StreamBasedSource::class)) => self::PROJECTION_TYPE,
-            $objectToCheck->hasAnnotation(TypeDescriptor::create(Aggregate::class)) => self::AGGREGATE_TYPE,
+            $objectToCheck->hasAnnotation(StreamBasedSource::class) => self::PROJECTION_TYPE,
+            $objectToCheck->hasAnnotation(Aggregate::class) => self::AGGREGATE_TYPE,
             default => self::STANDARD_TYPE
         };
 
-        return $objectToCheck->hasAnnotation(TypeDescriptor::create(Priority::class))
-            ? new self($objectToCheck->getAnnotationsByImportanceOrder(TypeDescriptor::create(Priority::class))[0]->getHeaderValue(), $type)
+        return $objectToCheck->hasAnnotation(Priority::class)
+            ? new self($objectToCheck->getAnnotationsByImportanceOrder(Priority::class)[0]->getHeaderValue(), $type)
             : new self(Priority::DEFAULT_PRIORITY, $type);
     }
 

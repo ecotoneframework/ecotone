@@ -33,7 +33,7 @@ final class ModuleConfigurationCompilerPass implements CompilerPass
     {
         $extensionObjects = $this->extensionObjects;
         foreach ($this->modules as $module) {
-            $extensionObjects = array_merge($extensionObjects, $module->getModuleExtensions($this->serviceConfiguration, $this->extensionObjects));
+            $extensionObjects = array_merge($extensionObjects, $module->getModuleExtensions($this->serviceConfiguration, $this->extensionObjects, $this->configuration->getInterfaceToCallRegistry()));
         }
 
         $moduleExtensions = [];

@@ -49,7 +49,7 @@ class GatewayHeaderConverter implements GatewayParameterConverter
      */
     public function isSupporting(?MethodArgument $methodArgument): bool
     {
-        return $methodArgument && ($this->parameterName == $methodArgument->getParameterName());
+        return $methodArgument && ($this->parameterName === $methodArgument->getParameterName());
     }
 
     /**

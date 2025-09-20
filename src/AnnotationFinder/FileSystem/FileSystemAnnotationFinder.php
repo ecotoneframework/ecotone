@@ -14,7 +14,6 @@ use Ecotone\AnnotationFinder\Attribute\Environment;
 use Ecotone\AnnotationFinder\ConfigurationException;
 use Ecotone\Messaging\Attribute\IsAbstract;
 use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use ReflectionClass;
@@ -328,7 +327,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
     {
         $attributes = $this->getAnnotationsForClass($className);
         foreach ($attributes as $attributeToVerify) {
-            if (TypeDescriptor::createFromVariable($attributeToVerify)->isCompatibleWith(TypeDescriptor::create($attributeClassName))) {
+            if ($attributeToVerify instanceof $attributeClassName) {
                 return $attributeToVerify;
             }
         }

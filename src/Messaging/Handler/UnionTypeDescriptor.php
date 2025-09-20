@@ -420,6 +420,11 @@ class UnionTypeDescriptor implements Type, DefinedObject
         return $typeHint->isResource() && $typeToCompare->isCompoundType() || $typeHint->isCompoundType() && $typeToCompare->isResource();
     }
 
+    public function isEnum(): bool
+    {
+        return false;
+    }
+
     public function __toString()
     {
         return $this->toString();

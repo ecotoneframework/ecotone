@@ -2,11 +2,14 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Handler\InterfaceParameter;
+use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\InterceptedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvokerProcessor;
@@ -91,16 +94,10 @@ class MethodInvokerBuilder implements InterceptedMessageProcessorBuilder
             ]);
         }
 
-        $parameterConvertersBuilders = MethodArgumentsFactory::createDefaultMethodParameters($interfaceToCall, $this->methodParametersConverterBuilders);
-        $parameterConverters = array_map(
-            fn (ParameterConverterBuilder $parameterConverterBuilder) => $parameterConverterBuilder->compile($interfaceToCall),
-            $parameterConvertersBuilders
-        );
-
         return new Definition(MethodInvoker::class, [
             $objectToInvokeOnResolver,
             $interfaceToCall->getMethodName(),
-            $parameterConverters,
+            $this->buildParameterConverters($interfaceToCall),
             $interfaceToCall->getInterfaceParametersNames(),
             $aroundInterceptors,
         ]);
@@ -109,5 +106,37 @@ class MethodInvokerBuilder implements InterceptedMessageProcessorBuilder
     public function getInterceptedInterface(): InterfaceToCallReference
     {
         return $this->interfaceToCallReference;
+    }
+
+    /**
+     * @return list<Definition|Reference>
+     */
+    private function buildParameterConverters(InterfaceToCall $interfaceToCall): array
+    {
+        $parameterConverterBuilders = $this->methodParametersConverterBuilders;
+        foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
+            if (! $this->hasConverterFor($interfaceParameter)) {
+                $converter = ParameterConverterAnnotationFactory::getConverterFor($interfaceParameter);
+                if ($converter) {
+                    $parameterConverterBuilders[] = $converter;
+                }
+            }
+        }
+        $parameterConvertersBuilders = MethodArgumentsFactory::createDefaultMethodParameters($interfaceToCall, $parameterConverterBuilders);
+        return array_map(
+            fn (ParameterConverterBuilder $parameterConverterBuilder) => $parameterConverterBuilder->compile($interfaceToCall),
+            $parameterConvertersBuilders
+        );
+    }
+
+    private function hasConverterFor(InterfaceParameter $interfaceParameter): bool
+    {
+        foreach ($this->methodParametersConverterBuilders as $passedMethodParameterConverter) {
+            if ($passedMethodParameterConverter->isHandling($interfaceParameter)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

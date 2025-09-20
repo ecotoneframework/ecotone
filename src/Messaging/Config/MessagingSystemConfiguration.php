@@ -147,14 +147,9 @@ final class MessagingSystemConfiguration implements Configuration
     private array $consoleCommands = [];
 
     /**
-     * @var array<string, Definition> $serviceDefinitions
+     * @var array<string, Definition|Reference> $serviceDefinitions
      */
     private array $serviceDefinitions = [];
-
-    /**
-     * @var array<string, Reference> $serviceAliases
-     */
-    private array $serviceAliases = [];
 
     private InterfaceToCallRegistry $interfaceToCallRegistry;
 
@@ -825,7 +820,7 @@ final class MessagingSystemConfiguration implements Configuration
         return $this;
     }
 
-    public function registerServiceDefinition(string|Reference $id, Definition|array $definition = []): Configuration
+    public function registerServiceDefinition(string|Reference $id, Definition|Reference|array $definition = []): Configuration
     {
         if (! isset($this->serviceDefinitions[(string) $id])) {
             if (is_array($definition)) {
@@ -833,15 +828,6 @@ final class MessagingSystemConfiguration implements Configuration
             }
             $this->serviceDefinitions[(string) $id] = $definition;
         }
-        return $this;
-    }
-
-    public function registerServiceAlias(string|Reference $id, Reference $aliasTo): Configuration
-    {
-        if (! isset($this->serviceAliases[(string) $id])) {
-            $this->serviceAliases[(string) $id] = $aliasTo;
-        }
-
         return $this;
     }
 
@@ -979,10 +965,6 @@ final class MessagingSystemConfiguration implements Configuration
                 Reference::to(MessagingEntrypointWithHeadersPropagation::class),
                 $consoleCommandConfiguration,
             ]));
-        }
-
-        foreach ($this->serviceAliases as $id => $aliasTo) {
-            $messagingBuilder->replace($id, $aliasTo);
         }
 
         $messagingBuilder->register(ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), $messagingBuilder->getPollingEndpoints(), $gatewayListReferences]));

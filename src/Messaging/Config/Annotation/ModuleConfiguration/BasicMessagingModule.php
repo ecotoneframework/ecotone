@@ -18,11 +18,13 @@ use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\EnumToScalar\EnumToScalarConverter;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverterBuilder;
-use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverterBuilder;
-use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverterBuilder;
-use Ecotone\Messaging\Conversion\UuidToString\UuidToStringConverterBuilder;
+use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverter;
+use Ecotone\Messaging\Conversion\ScalarToEnum\ScalarToEnumConverter;
+use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverter;
+use Ecotone\Messaging\Conversion\StringToUuid\StringToUuidConverter;
+use Ecotone\Messaging\Conversion\UuidToString\UuidToStringConverter;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
@@ -87,10 +89,12 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
 
         $messagingConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
         $messagingConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
-        $messagingConfiguration->registerConverter(new UuidToStringConverterBuilder());
-        $messagingConfiguration->registerConverter(new StringToUuidConverterBuilder());
-        $messagingConfiguration->registerConverter(new SerializingConverterBuilder());
-        $messagingConfiguration->registerConverter(new DeserializingConverterBuilder());
+        $messagingConfiguration->registerConverter(new Definition(UuidToStringConverter::class));
+        $messagingConfiguration->registerConverter(new Definition(StringToUuidConverter::class));
+        $messagingConfiguration->registerConverter(new Definition(SerializingConverter::class));
+        $messagingConfiguration->registerConverter(new Definition(DeserializingConverter::class));
+        $messagingConfiguration->registerConverter(new Definition(EnumToScalarConverter::class));
+        $messagingConfiguration->registerConverter(new Definition(ScalarToEnumConverter::class));
 
         $messagingConfiguration
             ->registerMessageHandler(

@@ -489,7 +489,7 @@ final class TypeDescriptor implements Type, DefinedObject
      */
     public function isClassOfType(string $interfaceName): bool
     {
-        return self::isItTypeOfExistingClassOrInterface($this->type) && ($this->type === $interfaceName || $this->type === '\\' . $interfaceName || is_subclass_of($this->type, $interfaceName));
+        return \is_a($this->type, $interfaceName, true);
     }
 
     /**
@@ -795,6 +795,11 @@ final class TypeDescriptor implements Type, DefinedObject
     public function isNullType(): bool
     {
         return $this->type === self::NULL;
+    }
+
+    public function isEnum(): bool
+    {
+        return enum_exists($this->type);
     }
 
     /**

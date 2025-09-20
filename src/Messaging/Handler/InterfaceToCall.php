@@ -99,16 +99,17 @@ class InterfaceToCall
     }
 
     /**
-     * @param Type $className
+     * @param Type|class-string $className
      *
      * @return bool
      * @throws TypeDefinitionException
      * @throws MessagingException
      */
-    public function hasMethodAnnotation(Type $className): bool
+    public function hasMethodAnnotation(Type|string $className): bool
     {
+        $className = (string) $className;
         foreach ($this->methodAnnotations as $methodAnnotation) {
-            if (TypeDescriptor::createFromVariable($methodAnnotation)->isCompatibleWith($className)) {
+            if ($methodAnnotation instanceof $className) {
                 return true;
             }
         }
@@ -117,16 +118,17 @@ class InterfaceToCall
     }
 
     /**
-     * @param Type $className
+     * @param Type|class-string $className
      *
      * @return bool
      * @throws TypeDefinitionException
      * @throws MessagingException
      */
-    public function hasClassAnnotation(Type $className): bool
+    public function hasClassAnnotation(Type|string $className): bool
     {
+        $className = (string) $className;
         foreach ($this->getClassAnnotations() as $classAnnotation) {
-            if (TypeDescriptor::createFromVariable($classAnnotation)->isCompatibleWith($className)) {
+            if ($classAnnotation instanceof $className) {
                 return true;
             }
         }
@@ -134,7 +136,10 @@ class InterfaceToCall
         return false;
     }
 
-    public function hasAnnotation(Type $className): bool
+    /**
+     * @param Type|class-string $className
+     */
+    public function hasAnnotation(Type|string $className): bool
     {
         return $this->hasMethodAnnotation($className) || $this->hasClassAnnotation($className);
     }

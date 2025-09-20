@@ -7,11 +7,11 @@ use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\JsonToArray\JsonToArrayConverter;
-use Ecotone\Messaging\Conversion\JsonToArray\JsonToArrayConverterBuilder;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
 use Ecotone\Messaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
@@ -128,7 +128,7 @@ class EnricherBuilderTest extends MessagingTestCase
                 EnrichPayloadWithValueBuilder::createWith('token', '123'),
             ],
             [
-                new JsonToArrayConverterBuilder(),
+                new Definition(JsonToArrayConverter::class),
             ]
         );
 

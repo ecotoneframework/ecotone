@@ -51,12 +51,12 @@ class ParameterConverterAnnotationFactory
     /**
      * @return ParameterConverterBuilder[]
      */
-    public function createParameterWithDefaults(InterfaceToCall $relatedClassInterface): array
+    public static function createParameterWithDefaults(InterfaceToCall $relatedClassInterface): array
     {
         return
             MethodArgumentsFactory::createDefaultMethodParameters(
                 $relatedClassInterface,
-                $this->createParameterConverters($relatedClassInterface),
+                self::createParameterConverters($relatedClassInterface),
                 $relatedClassInterface->hasMethodAnnotation(TypeDescriptor::create(IgnorePayload::class))
             );
     }
@@ -64,12 +64,12 @@ class ParameterConverterAnnotationFactory
     /**
      * @return ParameterConverterBuilder[]
      */
-    public function createParameterConverters(InterfaceToCall $relatedClassInterface): array
+    public static function createParameterConverters(InterfaceToCall $relatedClassInterface): array
     {
         $parameterConverters = [];
 
         foreach ($relatedClassInterface->getInterfaceParameters() as $interfaceParameter) {
-            $converter = $this->getConverterFor($interfaceParameter);
+            $converter = self::getConverterFor($interfaceParameter);
 
             if ($converter) {
                 $parameterConverters[] = $converter;
@@ -79,7 +79,7 @@ class ParameterConverterAnnotationFactory
         return $parameterConverters;
     }
 
-    public function getConverterFor(InterfaceParameter $interfaceParameter): ParameterConverterBuilder|null
+    public static function getConverterFor(InterfaceParameter $interfaceParameter): ParameterConverterBuilder|null
     {
         foreach ($interfaceParameter->getAnnotations() as $annotation) {
             if ($annotation instanceof Header) {

@@ -77,7 +77,6 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
 
                 $parameters[] = $this->variableConfigurationService->getByName($variableName);
             }
-            // TODO: check from @dgafka
             $extensionObjectToResolve = $newInstance->{$interfaceToCall->getMethodName()}(...$parameters);
 
             if (! is_array($extensionObjectToResolve)) {

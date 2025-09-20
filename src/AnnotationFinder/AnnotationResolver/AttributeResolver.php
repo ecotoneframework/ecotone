@@ -48,19 +48,30 @@ class AttributeResolver implements AnnotationResolver
      */
     public function getAnnotationsForClass(string $className): array
     {
-        $analyzedClass = new ReflectionClass($className);
-        $attributes = array_reduce(($analyzedClass)->getAttributes(), function (array $carry, ReflectionAttribute $attribute) {
-            if (! class_exists($attribute->getName())) {
-                return $carry;
+        $attributes = [];
+        $currentClass = new ReflectionClass($className);
+        $level = 0;
+
+        while ($currentClass) {
+            $currentLevelAttributes = [];
+            foreach ($currentClass->getAttributes() as $attribute) {
+                if (! class_exists($attribute->getName())) {
+                    continue;
+                }
+                if (in_array($attribute->getName(), array_map(fn ($attr) => $attr::class, $attributes))) {
+                    continue; // Avoid duplicate attributes from parent classes
+                }
+                $currentLevelAttributes[] = $attribute->newInstance();
             }
 
-            $carry[] = $attribute->newInstance();
+            $attributes = array_merge($attributes, $currentLevelAttributes);
 
-            return $carry;
-        }, []);
+            if ($level === 0 && $currentClass->isAbstract() && ! $currentClass->isInterface()) {
+                $attributes[] = new IsAbstract();
+            }
 
-        if ($analyzedClass->isAbstract() && ! $analyzedClass->isInterface()) {
-            $attributes[] = new IsAbstract();
+            $currentClass = $currentClass->getParentClass();
+            $level++;
         }
 
         return $attributes;

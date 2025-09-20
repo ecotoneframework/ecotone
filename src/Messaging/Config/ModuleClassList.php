@@ -16,6 +16,7 @@ use Ecotone\Dbal\MultiTenant\Module\MultiTenantConnectionFactoryModule;
 use Ecotone\Dbal\ObjectManager\ObjectManagerModule;
 use Ecotone\Dbal\Recoverability\DbalDeadLetterModule;
 use Ecotone\EventSourcing\Config\EventSourcingModule;
+use Ecotone\EventSourcing\Config\ProophProjectingModule;
 use Ecotone\JMSConverter\Configuration\JMSConverterConfigurationModule;
 use Ecotone\JMSConverter\Configuration\JMSDefaultSerialization;
 use Ecotone\Kafka\Configuration\KafkaModule;
@@ -60,6 +61,9 @@ use Ecotone\Modelling\MessageHandling\Distribution\Module\DistributedHandlerModu
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Ecotone\Modelling\QueryBus;
 use Ecotone\OpenTelemetry\Configuration\OpenTelemetryModule;
+use Ecotone\Projecting\Config\ProjectingAttributeModule;
+use Ecotone\Projecting\Config\ProjectingConsoleCommands;
+use Ecotone\Projecting\Config\ProjectingModule;
 use Ecotone\Redis\Configuration\RedisMessageConsumerModule;
 use Ecotone\Redis\Configuration\RedisMessagePublisherModule;
 use Ecotone\Sqs\Configuration\SqsMessageConsumerModule;
@@ -101,6 +105,8 @@ class ModuleClassList
         InstantRetryAttributeModule::class,
         DynamicMessageChannelModule::class,
         EventSourcedRepositoryModule::class,
+        ProjectingModule::class,
+        ProjectingAttributeModule::class,
 
         /** Attribute based configurations */
         MessageHeadersPropagatorInterceptor::class,
@@ -108,6 +114,7 @@ class ModuleClassList
         CommandBus::class,
         QueryBus::class,
         EventBus::class,
+        ProjectingConsoleCommands::class,
     ];
 
     public const ASYNCHRONOUS_MODULE = [
@@ -148,6 +155,7 @@ class ModuleClassList
 
     public const EVENT_SOURCING_MODULES = [
         EventSourcingModule::class,
+        ProophProjectingModule::class,
     ];
 
     public const JMS_CONVERTER_MODULES = [

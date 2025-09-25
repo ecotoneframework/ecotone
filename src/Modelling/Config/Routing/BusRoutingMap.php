@@ -7,33 +7,28 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\Config\Routing;
 
-use function array_unique;
+use function array_keys;
 use function class_exists;
 use function interface_exists;
-use function usort;
 
 class BusRoutingMap
 {
     public function __construct(
         /**
-         * @var array<string, int|array<int>> key is the channel name, value is the priority
-         */
-        protected array $channelsPriority = [],
-        /**
-         * @var array<string, list<string>> key is the class name, value is the list of channels
+         * @var array<string, array<string, int|array<int>>> key is the class name, second key is the channel, value is the priority
          */
         protected array $objectRoutes = [],
 
         /**
-         * @var list<string> list of channels
+         * @var array<string, int|array<int>> key is the channel, value is the priority
          */
         protected array $catchAllRoutes = [],
         /**
-         * @var array<string, list<string>> key is the route name, value is the list of channels
+         * @var array<string, array<string, int|array<int>>> key is the route name, second key is the channel, value is the priority
          */
         protected array $namedRoutes = [],
         /**
-         * @var array<string, list<string>> key is the regex pattern, value is the list of channels
+         * @var array<string, array<string, int|array<int>>> key is the regex pattern, second key is the channel, value is the priority
          */
         protected array $regexRoutes = [],
         /**
@@ -67,7 +62,7 @@ class BusRoutingMap
 
     protected function resolveWithoutOptimization(string $routingKeyOrClass): array
     {
-        $result = [];
+        $resultingChannels = [];
         $isObject = class_exists($routingKeyOrClass) || interface_exists($routingKeyOrClass);
 
         if ($isObject) {
@@ -81,28 +76,26 @@ class BusRoutingMap
         if ($className) {
             $classRoutingKeys = $this->getClassInheritanceRoutes($className);
             foreach ($classRoutingKeys as $classRoutingKey) {
-                $result = array_merge($result, $this->objectRoutes[$classRoutingKey]);
+                $resultingChannels = array_merge($resultingChannels, $this->objectRoutes[$classRoutingKey]);
             }
 
-            $result = array_merge($result, $this->catchAllRoutes);
+            $resultingChannels = array_merge($resultingChannels, $this->catchAllRoutes);
         }
 
         if ($routingKey) {
             if (isset($this->namedRoutes[$routingKey])) {
-                $result = array_merge($result, $this->namedRoutes[$routingKey]);
+                $resultingChannels = array_merge($resultingChannels, $this->namedRoutes[$routingKey]);
             }
             foreach ($this->regexRoutes as $pattern => $routes) {
                 if (self::globMatch($pattern, $routingKey)) {
-                    $result = array_merge($result, $routes);
+                    $resultingChannels = array_merge($resultingChannels, $routes);
                 }
             }
         }
 
-        $result = array_unique($result);
+        uasort($resultingChannels, $this->sortByChannelPriority(...));
 
-        usort($result, $this->sortByChannelPriority(...));
-
-        return $result;
+        return array_keys($resultingChannels);
     }
 
     public static function globMatch(string $pattern, string $route): bool
@@ -128,11 +121,8 @@ class BusRoutingMap
         return $resultRoutingKeys;
     }
 
-    private function sortByChannelPriority(string $aChannel, string $bChannel): int
+    private function sortByChannelPriority(int|array $a, int|array $b): int
     {
-        $a = $this->channelsPriority[$aChannel];
-        $b = $this->channelsPriority[$bChannel];
-
         $a = is_array($a) ? $a : [$a];
         $b = is_array($b) ? $b : [$b];
 

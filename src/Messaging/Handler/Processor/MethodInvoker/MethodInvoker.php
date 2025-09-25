@@ -2,8 +2,10 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
+use Ecotone\Messaging\Handler\MethodInvocationException;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Message;
+use Throwable;
 
 /**
  * @licence Apache-2.0
@@ -56,7 +58,19 @@ final class MethodInvoker implements AroundInterceptable
 
         for ($index = 0; $index < $count; $index++) {
             $parameterName = $this->methodParameterNames[$index];
-            $data = $this->methodParameterConverters[$index]->getArgumentFrom($message);
+            try {
+                $data = $this->methodParameterConverters[$index]->getArgumentFrom($message);
+            } catch (Throwable $exception) {
+                $objectToInvokeOn = $this->getObjectToInvokeOn($message);
+                $classToInvokeOn = is_string($objectToInvokeOn) ? $objectToInvokeOn : $objectToInvokeOn::class;
+                throw MethodInvocationException::createFromPreviousException(
+                    <<<TEXT
+                        Cannot resolve parameter '{$parameterName}' while calling {$classToInvokeOn}::{$this->getMethodName()}
+                        Reason: {$exception->getMessage()}
+                        TEXT,
+                    $exception
+                );
+            }
 
             $methodArguments[$parameterName] = $data;
         }

@@ -10,6 +10,7 @@ namespace Test\Ecotone\Projecting;
 use Ecotone\EventSourcing\Attribute\ProjectionInitialization;
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\Endpoint\Priority;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModulePackageList;
@@ -193,5 +194,65 @@ class ProjectingTest extends TestCase
                 ->withSkippedModulePackageNames(ModulePackageList::allPackages())
                 ->addExtensionObject(new InMemoryStreamSourceBuilder())
         );
+    }
+
+    public function test_it_with_event_handler_priority(): void
+    {
+        $db = [];
+        $projectionA = new #[Projection('A')] class ($db) {
+            public function __construct(private array &$db)
+            {
+            }
+            #[EventHandler('no-priority')]
+            public function handle(array $event): void
+            {
+                $this->db[] = 'projectionA-no-priority';
+            }
+            #[Priority(-42)]
+            #[EventHandler('with-priority')]
+            public function handleHighPriority(array $event): void
+            {
+                $this->db[] = 'projectionA-with-priority';
+            }
+        };
+        $projectionB = new #[Projection('B')] class ($db) {
+            public function __construct(private array &$db)
+            {
+            }
+
+            #[EventHandler('no-priority')]
+            public function handle(array $event): void
+            {
+                $this->db[] = 'projectionB-no-priority';
+            }
+            #[Priority(10)]
+            #[EventHandler('with-priority')]
+            public function handleHighPriority(array $event): void
+            {
+                $this->db[] = 'projectionB-with-priority';
+            }
+        };
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [$projectionA::class, $projectionB::class],
+            [$projectionA, $projectionB],
+            configuration: ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder())
+        );
+
+        $streamSource->append(
+            Event::createWithType('no-priority', []),
+        );
+
+        $ecotone->publishEventWithRoutingKey('no-priority');
+        self::assertEquals(['projectionA-no-priority', 'projectionB-no-priority'], $db);
+
+        $db = [];
+        $streamSource->append(
+            Event::createWithType('with-priority', []),
+        );
+        $ecotone->publishEventWithRoutingKey('with-priority');
+        self::assertEquals(['projectionB-with-priority', 'projectionA-with-priority'], $db);
     }
 }

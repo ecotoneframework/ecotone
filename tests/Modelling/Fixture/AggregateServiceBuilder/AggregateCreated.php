@@ -7,7 +7,7 @@ namespace Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder;
 /**
  * licence Apache-2.0
  */
-final class AggregateCreated
+final class AggregateCreated implements AggregateCreatedInterface
 {
     public function __construct(public int $id)
     {

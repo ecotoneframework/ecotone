@@ -185,9 +185,9 @@ final class InterfaceParameter
     /**
      * @return bool
      */
-    public function isObjectTypeHint(): bool
+    public function isClassOrInterface(): bool
     {
-        return class_exists($this->getTypeHint());
+        return class_exists($this->getTypeHint()) || interface_exists($this->getTypeHint());
     }
 
     public function __toString()

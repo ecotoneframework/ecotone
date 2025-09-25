@@ -42,7 +42,7 @@ final class EventSourcingAggregateExample
     }
 
     #[EventSourcingHandler]
-    public function applyAggregateCreated(AggregateCreated $event): void
+    public function applyAggregateCreated(AggregateCreatedInterface $event): void
     {
         $this->id = $event->id;
     }

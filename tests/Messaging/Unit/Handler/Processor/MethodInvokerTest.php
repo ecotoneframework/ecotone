@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\MethodInvocationException;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
@@ -229,14 +230,20 @@ class MethodInvokerTest extends MessagingTestCase
             )
             ->build();
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(MethodInvocationException::class);
 
-        $messaging->sendMessageDirectToChannelWithMessageReply(
-            $inputChannel,
-            MessageBuilder::withPayload(addslashes(serialize(Order::create('1', 'correct'))))
-                ->setContentType(MediaType::createApplicationXml())
-                ->build()
-        );
+        try {
+            $messaging->sendMessageDirectToChannelWithMessageReply(
+                $inputChannel,
+                MessageBuilder::withPayload(addslashes(serialize(Order::create('1', 'correct'))))
+                    ->setContentType(MediaType::createApplicationXml())
+                    ->build()
+            );
+        } catch (MethodInvocationException $e) {
+            self::assertInstanceOf(InvalidArgumentException::class, $e->getPrevious());
+
+            throw $e;
+        }
     }
 
     public function test_calling_if_media_type_is_incompatible_but_types_are_fine()
@@ -394,12 +401,18 @@ class MethodInvokerTest extends MessagingTestCase
             )
             ->build();
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(MethodInvocationException::class);
 
-        $messaging->sendDirectToChannel(
-            $inputChannel,
-            $data,
-        );
+        try {
+            $messaging->sendDirectToChannel(
+                $inputChannel,
+                $data,
+            );
+        } catch (MethodInvocationException $e) {
+            self::assertInstanceOf(InvalidArgumentException::class, $e->getPrevious());
+
+            throw $e;
+        }
     }
 
     public function test_invoking_with_header_conversion_for_union_type_parameter()

@@ -7,7 +7,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\Config\Routing;
 
-use function array_map;
 use function array_unique;
 
 use Ecotone\AnnotationFinder\AnnotatedFinding;
@@ -27,8 +26,6 @@ use function str_contains;
 
 class BusRoutingMapBuilder extends BusRoutingMap
 {
-    private array $channelsName = [];
-
     /**
      * @param array<RoutingEventHandler> $routingEventHandlers
      */
@@ -131,8 +128,7 @@ class BusRoutingMapBuilder extends BusRoutingMap
         if ($class === 'object') {
             $this->addCatchAllRoute($channel, $priority);
         } else {
-            $this->addChannel($channel, $priority);
-            $this->objectRoutes[$class][] = $channel;
+            $this->addChannelToRoute($this->objectRoutes, $class, $channel, $priority);
         }
     }
 
@@ -142,31 +138,30 @@ class BusRoutingMapBuilder extends BusRoutingMap
      */
     public function addCatchAllRoute(string $channel, int|array $priority = 1): void
     {
-        $this->addChannel($channel, $priority);
-        $this->catchAllRoutes[] = $channel;
+        if (isset($this->catchAllRoutes[$channel])) {
+            throw new RuntimeException("Catch all route for channel $channel is already registered with another priority");
+        }
+        $this->catchAllRoutes[$channel] = $priority;
     }
 
     public function merge(self $routingConfig): void
     {
-        foreach ($routingConfig->channelsPriority as $channel => $priority) {
-            $this->addChannel($channel, $priority);
-        }
         foreach ($routingConfig->objectRoutes as $class => $channels) {
-            foreach ($channels as $channel) {
-                $this->objectRoutes[$class][] = $channel;
+            foreach ($channels as $channel => $priority) {
+                $this->addChannelToRoute($this->objectRoutes, $class, $channel, $priority);
             }
         }
-        foreach ($routingConfig->catchAllRoutes as $channel) {
-            $this->catchAllRoutes[] = $channel;
+        foreach ($routingConfig->catchAllRoutes as $channel => $priority) {
+            $this->addCatchAllRoute($channel, $priority);
         }
         foreach ($routingConfig->namedRoutes as $routeName => $channels) {
-            foreach ($channels as $channel) {
-                $this->namedRoutes[$routeName][] = $channel;
+            foreach ($channels as $channel => $priority) {
+                $this->addChannelToRoute($this->namedRoutes, $routeName, $channel, $priority);
             }
         }
         foreach ($routingConfig->regexRoutes as $pattern => $channels) {
-            foreach ($channels as $channel) {
-                $this->regexRoutes[$pattern][] = $channel;
+            foreach ($channels as $channel => $priority) {
+                $this->addChannelToRoute($this->regexRoutes, $pattern, $channel, $priority);
             }
         }
     }
@@ -176,12 +171,10 @@ class BusRoutingMapBuilder extends BusRoutingMap
      */
     public function addNamedRoute(string $routeName, string $channel, int|array $priority = 1): void
     {
-        $this->addChannel($channel, $priority);
-
         if (str_contains($routeName, '*')) {
-            $this->regexRoutes[$routeName][] = $channel;
+            $this->addChannelToRoute($this->regexRoutes, $routeName, $channel, $priority);
         } else {
-            $this->namedRoutes[$routeName][] = $channel;
+            $this->addChannelToRoute($this->namedRoutes, $routeName, $channel, $priority);
         }
     }
 
@@ -208,10 +201,6 @@ class BusRoutingMapBuilder extends BusRoutingMap
     public function optimize(array $routingKeysToOptimize = []): void
     {
         $this->optimizedRoutes = [];
-        $this->objectRoutes = $this->uniqueRoutedChannels($this->objectRoutes);
-        $this->namedRoutes = $this->uniqueRoutedChannels($this->namedRoutes);
-        $this->regexRoutes = $this->uniqueRoutedChannels($this->regexRoutes);
-        $this->catchAllRoutes = array_unique($this->catchAllRoutes);
 
         $allKnownRoutingKeys = array_merge(
             $routingKeysToOptimize,
@@ -238,16 +227,16 @@ class BusRoutingMapBuilder extends BusRoutingMap
         return array_unique($allKnownRoutingKeys);
     }
 
-    private function addChannel(string $channel, int|array $priority): void
+    private function addChannelToRoute(array &$routes, string $routingKey, string $channel, int|array $priority): void
     {
         if (! empty($this->optimizedRoutes)) {
             throw new RuntimeException("Cannot add channel $channel to routing config, because it is already optimized");
         }
 
-        if (isset($this->channelsPriority[$channel]) && $this->channelsPriority[$channel] !== $priority) {
+        if (isset($routes[$routingKey][$channel])) {
             throw new RuntimeException("Channel $channel is already registered with another priority");
         }
-        $this->channelsPriority[$channel] = $priority;
+        $routes[$routingKey][$channel] = $priority;
     }
 
     public function compile(): Definition
@@ -256,12 +245,11 @@ class BusRoutingMapBuilder extends BusRoutingMap
         if ($this->isUnique) {
             foreach ($this->optimizedRoutes as $routingKey => $channels) {
                 if (count($channels) > 1) {
-                    throw ConfigurationException::create("Routing key $routingKey is registered with multiple channels: " . implode(', ', array_map($this->channelName(...), $channels)));
+                    throw ConfigurationException::create("Routing key $routingKey is registered with multiple channels: " . implode(', ', $channels));
                 }
             }
         }
         return new Definition(BusRoutingMap::class, [
-            $this->channelsPriority,
             $this->objectRoutes,
             $this->catchAllRoutes,
             $this->namedRoutes,
@@ -275,23 +263,6 @@ class BusRoutingMapBuilder extends BusRoutingMap
     public function getMessagingConfiguration(): ?Configuration
     {
         return $this->messagingConfiguration;
-    }
-
-    private function channelName(string $channel): string
-    {
-        if (isset($this->channelsName[$channel])) {
-            return $this->channelsName[$channel];
-        }
-        return $channel;
-    }
-
-    private function uniqueRoutedChannels(array $routes): array
-    {
-        $uniqueRoutes = [];
-        foreach ($routes as $route => $channels) {
-            $uniqueRoutes[$route] = array_unique($channels);
-        }
-        return $uniqueRoutes;
     }
 
     /**

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
+namespace Ecotone\Messaging\Handler;
 
 use Ecotone\Messaging\MessagingException;
 

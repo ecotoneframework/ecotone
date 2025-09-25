@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
+use Ecotone\Messaging\Handler\MethodInvocationException;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderExpressionBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -86,12 +87,15 @@ class HeaderExpressionBuilderTest extends TestCase
             )
             ->build();
 
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException(MethodInvocationException::class);
 
-        $this->assertEquals(
-            '1001',
-            $messaging->sendDirectToChannel($inputChannel, metadata: [])
-        );
+        try {
+            $messaging->sendDirectToChannel($inputChannel, metadata: []);
+        } catch (MethodInvocationException $e) {
+            self::assertInstanceOf(InvalidArgumentException::class, $e->getPrevious());
+
+            throw $e;
+        }
     }
 
     public function test_not_throwing_exception_if_header_does_not_exists_and_is_no_required()

@@ -8,7 +8,7 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -127,19 +127,19 @@ class InternalEnrichingService
             $mediaType = MediaType::parseMediaType($message->getHeaders()->get(MessageHeaders::CONTENT_TYPE));
             if (! $mediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP)) {
                 if ($this->conversionService->canConvert(
-                    $mediaType->hasTypeParameter() ? $mediaType->getTypeParameter() : TypeDescriptor::createFromVariable($message->getPayload()),
+                    $mediaType->hasTypeParameter() ? $mediaType->getTypeParameter() : Type::createFromVariable($message->getPayload()),
                     $mediaType,
-                    TypeDescriptor::createArrayType(),
+                    Type::array(),
                     MediaType::createApplicationXPHP()
                 )) {
                     $enrichedMessage = $enrichedMessage
-                        ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::ARRAY))
+                        ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(Type::ARRAY))
                         ->setPayload(
                             $this->conversionService->convert(
                                 $message->getPayload(),
-                                TypeDescriptor::createFromVariable($message->getPayload()),
+                                Type::createFromVariable($message->getPayload()),
                                 $mediaType,
-                                TypeDescriptor::createArrayType(),
+                                Type::array(),
                                 MediaType::createApplicationXPHP()
                             )
                         );

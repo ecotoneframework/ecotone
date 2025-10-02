@@ -8,7 +8,6 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Future;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\MessageConverter;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -47,7 +46,7 @@ class GatewayReplyConverter
         $isMessage = $result instanceof Message;
         $data = $isMessage ? $result->getPayload() : $result;
         $sourceMediaType = MediaType::createApplicationXPHP();
-        $sourceType = TypeDescriptor::createFromVariable($data);
+        $sourceType = Type::createFromVariable($data);
 
         if ($isMessage) {
             if ($result->getHeaders()->hasContentType()) {
@@ -63,8 +62,8 @@ class GatewayReplyConverter
             if ($data instanceof Generator) {
                 $isCollection = $this->returnType->isCollection();
                 $genericType = null;
-                if ($isCollection) {
-                    $resolvedTypes = $this->returnType->resolveGenericTypes();
+                if ($this->returnType instanceof Type\GenericType) {
+                    $resolvedTypes = $this->returnType->genericTypes;
 
                     if (count($resolvedTypes) === 1) {
                         $genericType = $resolvedTypes[0];
@@ -92,7 +91,7 @@ class GatewayReplyConverter
         }
 
         if (! $sourceMediaType->isCompatibleWith($replyContentType) || ($replyContentType->hasTypeParameter() && $replyContentType->getTypeParameter()->isIterable())) {
-            $targetType = $replyContentType->hasTypeParameter() ? $replyContentType->getTypeParameter() : TypeDescriptor::createAnythingType();
+            $targetType = $replyContentType->hasTypeParameter() ? $replyContentType->getTypeParameter() : Type::anything();
             if (! $this->conversionService->canConvert(
                 $sourceType,
                 $sourceMediaType,
@@ -121,14 +120,12 @@ class GatewayReplyConverter
         return $data;
     }
 
-    private function yieldResults(Generator $data, bool $isCollection, ?TypeDescriptor $expectedType): Generator
+    private function yieldResults(Generator $data, bool $isCollection, ?Type $expectedType): Generator
     {
         foreach ($data as $result) {
             if ($expectedType !== null) {
-                $sourceType = TypeDescriptor::createFromVariable($result);
-
-                if ($isCollection && ! $sourceType->isCompatibleWith($expectedType)) {
-                    $result = $this->conversionService->convert($result, $sourceType, MediaType::createApplicationXPHP(), $expectedType, MediaType::createApplicationXPHP());
+                if ($isCollection && ! $expectedType->accepts($result)) {
+                    $result = $this->conversionService->convert($result, Type::createFromVariable($result), MediaType::createApplicationXPHP(), $expectedType, MediaType::createApplicationXPHP());
                 }
             }
 

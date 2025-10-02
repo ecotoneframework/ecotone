@@ -40,6 +40,19 @@ interface Precedence
      * Endpoint headers like delivery delay, priority, time to live
      */
     public const ENDPOINT_HEADERS_PRECEDENCE = -3000;
+
+    /**
+     * Custom retries taking precedence over global to allow overriding configuration
+     */
+    public const CUSTOM_INSTANT_RETRY_PRECEDENCE = -2003;
+
+    /**
+     * Retrying is executed before transactions, as we want to retry completely from the beginning (for example to recover from mysql gone away)
+     */
+    public const GLOBAL_INSTANT_RETRY_PRECEDENCE = -2002;
+
+    public const BETWEEN_INSTANT_RETRY_AND_TRANSACTION_PRECEDENCE = -2001;
+
     /**
      * Database transactions are started at this precedence
      */
@@ -50,14 +63,7 @@ interface Precedence
      */
     public const COLLECTOR_SENDER_PRECEDENCE = self::DATABASE_TRANSACTION_PRECEDENCE + 1;
 
-    public const BETWEEN_INSTANT_RETRY_AND_TRANSACTION_PRECEDENCE = -2001;
-
-    public const CUSTOM_INSTANT_RETRY_PRECEDENCE = -2003;
-
-    /**
-     * Retrying is executed before transactions, as we want to retry completely from the beginning (for example to recover from mysql gone away)
-     */
-    public const GLOBAL_INSTANT_RETRY_PRECEDENCE = -2002;
+    public const DATABASE_OBJECT_MANAGER_PRECEDENCE = self::COLLECTOR_SENDER_PRECEDENCE + 1;
 
     /**
      * Lazy events are published at this precedence

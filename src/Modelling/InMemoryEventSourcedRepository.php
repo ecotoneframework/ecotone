@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Handler\ClassDefinition;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\EventSourcingSaga;
 use Ecotone\Modelling\Attribute\Repository;
@@ -63,8 +63,8 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
             return true;
         }
 
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create($aggregateClassName));
-        return $classDefinition->hasClassAnnotationOfPreciseType(TypeDescriptor::create(EventSourcingAggregate::class)) || $classDefinition->hasClassAnnotationOfPreciseType(TypeDescriptor::create(EventSourcingSaga::class));
+        $classDefinition = ClassDefinition::createFor(Type::object($aggregateClassName));
+        return $classDefinition->hasClassAnnotationOfPreciseType(Type::attribute(EventSourcingAggregate::class)) || $classDefinition->hasClassAnnotationOfPreciseType(Type::attribute(EventSourcingSaga::class));
     }
 
     /**

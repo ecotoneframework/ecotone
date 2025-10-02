@@ -12,10 +12,10 @@ class ExampleIncorrectUnionReturnTypeConverterService
 {
     /**
      * @param string[] $data
-     * @return stdClass[]
+     * @return stdClass[]|string
      */
     #[Converter]
-    public function convert(array|string $data): iterable
+    public function convert(array $data): iterable|string
     {
         $converted = [];
         foreach ($data as $str) {

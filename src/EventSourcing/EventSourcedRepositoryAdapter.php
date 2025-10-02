@@ -11,7 +11,7 @@ use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Store\Document\DocumentException;
 use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Messaging\Support\Assert;
@@ -141,9 +141,9 @@ class EventSourcedRepositoryAdapter implements AggregateRepository
     private function getAggregateVersion(object|array|string $aggregate): mixed
     {
         $propertyReader = new PropertyReaderAccessor();
-        $versionAnnotation = TypeDescriptor::create(AggregateVersion::class);
+        $versionAnnotation = Type::attribute(AggregateVersion::class);
         $aggregateVersionPropertyName = null;
-        foreach (ClassDefinition::createFor(TypeDescriptor::createFromVariable($aggregate))->getProperties() as $property) {
+        foreach (ClassDefinition::createFor(Type::createFromVariable($aggregate))->getProperties() as $property) {
             if ($property->hasAnnotation($versionAnnotation)) {
                 $aggregateVersionPropertyName = $property->getName();
                 break;

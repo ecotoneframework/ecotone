@@ -3,8 +3,8 @@
 namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\Handler\UnionTypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Handler\Type\UnionType;
 use Ecotone\Modelling\CommandBus;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
@@ -73,7 +73,7 @@ class CallAggregateServiceBuilderTest extends TestCase
         $storageId = Uuid::uuid4()->toString();
 
         $this->assertEquals(
-            TypeDescriptor::createCollection(SmallBox::class),
+            Type::createCollection(SmallBox::class),
             EcotoneLite::bootstrapFlowTesting(
                 [Storage::class, StorageService::class],
             )
@@ -88,10 +88,10 @@ class CallAggregateServiceBuilderTest extends TestCase
     {
         $storageId = Uuid::uuid4()->toString();
 
-        $this->assertEquals(
-            new UnionTypeDescriptor([
-                TypeDescriptor::createCollection(Box::class),
-                TypeDescriptor::createCollection(BigBox::class),
+        $this->assertEqualsCanonicalizing(
+            new UnionType([
+                Type::createCollection(Box::class),
+                Type::createCollection(BigBox::class),
             ]),
             EcotoneLite::bootstrapFlowTesting(
                 [Storage::class, StorageService::class],

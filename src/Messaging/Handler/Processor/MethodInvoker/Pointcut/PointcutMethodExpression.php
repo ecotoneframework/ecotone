@@ -5,17 +5,16 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\PointcutExpression;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * licence Apache-2.0
  */
 class PointcutMethodExpression implements PointcutExpression
 {
-    private Type $classTypeDescriptor;
+    private Type\ObjectType $classTypeDescriptor;
     public function __construct(string $class, private string $method)
     {
-        $this->classTypeDescriptor = TypeDescriptor::create($class);
+        $this->classTypeDescriptor = Type::object($class);
     }
 
     public function doesItCutWith(array $endpointAnnotations, InterfaceToCall $interfaceToCall): bool

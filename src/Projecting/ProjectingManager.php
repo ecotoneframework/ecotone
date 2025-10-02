@@ -19,6 +19,7 @@ class ProjectingManager
         private PartitionProvider      $partitionProvider,
         private string                 $projectionName,
         private int                    $batchSize = 1000,
+        private bool                   $autoInit = true,
     ) {
         if ($batchSize < 1) {
             throw new InvalidArgumentException('Batch size must be at least 1');
@@ -28,7 +29,9 @@ class ProjectingManager
     // This is the method that is linked to the event bus routing channel
     public function execute(?string $partitionKey = null): void
     {
-        $this->init();
+        if ($this->autoInit) {
+            $this->init();
+        }
 
         do {
             $transaction = $this->projectionStateStorage->beginTransaction();

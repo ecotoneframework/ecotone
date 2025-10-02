@@ -27,7 +27,7 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\ChainedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
@@ -445,7 +445,7 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
     public function getAsynchronousChannels(InterfaceToCall $interfaceToCall): array
     {
         /** @var Asynchronous[] $asynchronous */
-        $asynchronous = $interfaceToCall->getAnnotationsByImportanceOrder(TypeDescriptor::create(Asynchronous::class));
+        $asynchronous = $interfaceToCall->getAnnotationsByImportanceOrder(Type::attribute(Asynchronous::class));
         $channelNames = $asynchronous ? $asynchronous[0]->getChannelName() : [];
 
         if ($channelNames === []) {

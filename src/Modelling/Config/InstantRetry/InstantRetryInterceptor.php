@@ -6,7 +6,6 @@ use Ecotone\Messaging\Attribute\Parameter\Reference;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Exception;
 
@@ -42,6 +41,8 @@ class InstantRetryInterceptor
 
             $result = null;
             while (! $isSuccessful) {
+                $retryableInvocationState = $methodInvocation->cloneCurrentState();
+
                 try {
                     $result = $methodInvocation->proceed();
                     $isSuccessful = true;
@@ -66,6 +67,7 @@ class InstantRetryInterceptor
                         $message,
                         ['exception' => $exception]
                     );
+                    $methodInvocation = $retryableInvocationState;
                 }
             }
         } finally {
@@ -82,7 +84,7 @@ class InstantRetryInterceptor
         }
 
         foreach ($this->exceptions as $exception) {
-            if (TypeDescriptor::createFromVariable($thrownException)->isCompatibleWith(TypeDescriptor::create($exception))) {
+            if ($thrownException instanceof $exception) {
                 return true;
             }
         }

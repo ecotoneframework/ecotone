@@ -10,7 +10,7 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Test\ComponentTestBuilder;
 use stdClass;
@@ -210,7 +210,7 @@ class TransformerBuilderTest extends MessagingTestCase
             ->build();
 
         $this->assertEquals(
-            MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::STRING),
+            MediaType::createApplicationXPHPWithTypeParameter(Type::STRING),
             $messaging->sendDirectToChannelWithMessageReply('input', 'johny')->getHeaders()->getContentType()
         );
     }

@@ -7,7 +7,7 @@ namespace Ecotone\Modelling\AggregateFlow\LoadAggregate;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\MessageProcessor;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\NullableMessageChannel;
@@ -35,7 +35,7 @@ final class LoadAggregateMessageProcessor implements MessageProcessor
     public function process(Message $message): ?Message
     {
         $resultMessage = MessageBuilder::fromMessage($message);
-        $messageType = TypeDescriptor::createFromVariable($message->getPayload());
+        $messageType = Type::createFromVariable($message->getPayload());
 
         if (! $message->getHeaders()->containsKey(AggregateMessage::AGGREGATE_ID)) {
             throw AggregateNotFoundException::create(sprintf("Can't call Aggregate {$this->aggregateClassName}:{$this->aggregateMethod} as identifier header is missing. Please check your identifier mapping in {$messageType->toString()}. Have you forgot to add #[TargetIdentifier] in your Command or `%s` in metadata?", AggregateMessage::AGGREGATE_ID));

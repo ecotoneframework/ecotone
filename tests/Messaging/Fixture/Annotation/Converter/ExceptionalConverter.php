@@ -4,7 +4,7 @@ namespace Test\Ecotone\Messaging\Fixture\Annotation\Converter;
 
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use InvalidArgumentException;
 
 /**
@@ -20,7 +20,7 @@ class ExceptionalConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
+    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType)
     {
         throw new InvalidArgumentException('Converter should not be called');
     }
@@ -28,7 +28,7 @@ class ExceptionalConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
+    public function matches(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
     {
         return true;
     }

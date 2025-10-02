@@ -7,8 +7,8 @@ namespace Ecotone\Messaging\MessageConverter;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\Handler\UnionTypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Handler\Type\UnionType;
 
 /**
  * Class DefaultHeaderMapper
@@ -138,7 +138,7 @@ class DefaultHeaderMapper implements HeaderMapper
      */
     private function isScalarType($headerValue): bool
     {
-        return (TypeDescriptor::createFromVariable($headerValue))->isScalar();
+        return (Type::createFromVariable($headerValue))->isScalar();
     }
 
     /**
@@ -170,32 +170,32 @@ class DefaultHeaderMapper implements HeaderMapper
             $convertedHeaders[$mappedHeader] = $value;
         } elseif (
             $conversionService->canConvert(
-                TypeDescriptor::createFromVariable($value),
+                Type::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
-                UnionTypeDescriptor::createWith([TypeDescriptor::createStringType(), TypeDescriptor::createIntegerType()]),
+                UnionType::createWith([Type::string(), Type::int()]),
                 MediaType::createApplicationXPHP()
             )
         ) {
             $convertedHeaders[$mappedHeader] =  $conversionService->convert(
                 $value,
-                TypeDescriptor::createFromVariable($value),
+                Type::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
-                UnionTypeDescriptor::createWith([TypeDescriptor::createStringType(), TypeDescriptor::createIntegerType()]),
+                UnionType::createWith([Type::string(), Type::int()]),
                 MediaType::createApplicationXPHP()
             );
         } elseif (
             $conversionService->canConvert(
-                TypeDescriptor::createFromVariable($value),
+                Type::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
-                TypeDescriptor::createStringType(),
+                Type::string(),
                 MediaType::parseMediaType(self::FALLBACK_HEADER_CONVERSION_MEDIA_TYPE)
             )
         ) {
             $convertedHeaders[$mappedHeader] =  $conversionService->convert(
                 $value,
-                TypeDescriptor::createFromVariable($value),
+                Type::createFromVariable($value),
                 MediaType::createApplicationXPHP(),
-                TypeDescriptor::createStringType(),
+                Type::string(),
                 MediaType::parseMediaType(self::FALLBACK_HEADER_CONVERSION_MEDIA_TYPE)
             );
         }

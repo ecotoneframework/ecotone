@@ -12,6 +12,7 @@ use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\FetchAggregate\ComplexCommand;
 use Test\Ecotone\Messaging\Fixture\FetchAggregate\ComplexService;
 use Test\Ecotone\Messaging\Fixture\FetchAggregate\IdentifierMapper;
+use Test\Ecotone\Messaging\Fixture\FetchAggregate\IncorrectService;
 use Test\Ecotone\Messaging\Fixture\FetchAggregate\OrderService;
 use Test\Ecotone\Messaging\Fixture\FetchAggregate\PlaceOrder;
 use Test\Ecotone\Messaging\Fixture\FetchAggregate\User;
@@ -262,26 +263,18 @@ class FetchAggregateTest extends TestCase
 
     public function test_throwing_exception_when_using_fetch_with_non_aggregate(): void
     {
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            [User::class, ComplexService::class, UserRepository::class],
+        $this->expectException(ConfigurationException::class);
+
+        EcotoneLite::bootstrapFlowTesting(
+            [User::class, IncorrectService::class, UserRepository::class],
             [
                 UserRepository::class => new UserRepository([]),
-                ComplexService::class => new ComplexService(),
+                IncorrectService::class => new IncorrectService(),
                 'identifierMapper' => new IdentifierMapper([
                     'johny@wp.pl' => 'user-1',
                 ]),
             ],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
-
-        $this->expectException(MethodInvocationException::class);
-
-        try {
-            $ecotoneLite->sendCommandWithRoutingKey('incorrectFetchAggregate', new ComplexCommand('johny@wp.pl'));
-        } catch (MethodInvocationException $e) {
-            $this->assertInstanceOf(ConfigurationException::class, $e->getPrevious());
-
-            throw $e;
-        }
     }
 }

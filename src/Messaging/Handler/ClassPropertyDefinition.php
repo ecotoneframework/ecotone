@@ -90,7 +90,7 @@ final class ClassPropertyDefinition
     public function hasAnnotation(Type $annotationClass): bool
     {
         foreach ($this->annotations as $annotation) {
-            if (TypeDescriptor::createFromVariable($annotation)->isCompatibleWith($annotationClass)) {
+            if ($annotationClass->accepts($annotation)) {
                 return true;
             }
         }
@@ -101,7 +101,7 @@ final class ClassPropertyDefinition
     public function getAnnotation(Type $annotationClass): object
     {
         foreach ($this->annotations as $annotation) {
-            if (TypeDescriptor::createFromVariable($annotation)->isCompatibleWith($annotationClass)) {
+            if ($annotationClass->accepts($annotation)) {
                 return $annotation;
             }
         }

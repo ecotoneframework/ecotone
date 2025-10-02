@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Gateway\Converter;
 
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 
 /**
  * licence Apache-2.0
@@ -29,9 +29,9 @@ class SerializerHandler
 
         return $this->conversionService->convert(
             $data,
-            TypeDescriptor::createFromVariable($data),
+            Type::createFromVariable($data),
             MediaType::createApplicationXPHP(),
-            $targetMediaType->hasTypeParameter() ? $targetMediaType->getTypeParameter() : TypeDescriptor::createAnythingType(),
+            $targetMediaType->hasTypeParameter() ? $targetMediaType->getTypeParameter() : Type::anything(),
             $targetMediaType
         );
     }
@@ -42,9 +42,9 @@ class SerializerHandler
 
         return $this->conversionService->convert(
             $data,
-            $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : TypeDescriptor::createFromVariable($data),
+            $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : Type::createFromVariable($data),
             $sourceMediaType,
-            TypeDescriptor::create($metadata[self::TARGET_TYPE]),
+            Type::create($metadata[self::TARGET_TYPE]),
             MediaType::createApplicationXPHP()
         );
     }

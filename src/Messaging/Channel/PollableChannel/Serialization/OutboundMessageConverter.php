@@ -7,7 +7,6 @@ use Ecotone\Messaging\Conversion\ConversionException;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\MessageHeaders;
@@ -44,21 +43,21 @@ class OutboundMessageConverter
 
         $sourceMediaType             = $messageToConvert->getHeaders()->hasContentType() ? $messageToConvert->getHeaders()->getContentType() : null;
         if (! is_string($messagePayload)) {
-            if (TypeDescriptor::createFromVariable($messagePayload)->isScalar()) {
+            if (Type::createFromVariable($messagePayload)->isScalar()) {
                 $sourceMediaType = MediaType::createApplicationXPHP();
             }
             if (! $sourceMediaType) {
-                throw new ConversionException("Can't send outside of application. Payload has incorrect type, that can't be converted: " . TypeDescriptor::createFromVariable($messagePayload)->toString());
+                throw new ConversionException("Can't send outside of application. Payload has incorrect type, that can't be converted: " . Type::createFromVariable($messagePayload)->toString());
             }
 
-            $sourceType      = $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : TypeDescriptor::createFromVariable($messagePayload);
+            $sourceType      = $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : Type::createFromVariable($messagePayload);
             $sourceMediaType = $sourceMediaType->withoutTypeParameter();
             $targetConversionMediaType = $this->defaultConversionMediaType ?: MediaType::createApplicationXPHPSerialized();
-            $targetType = TypeDescriptor::createStringType();
+            $targetType = Type::string();
             if ($targetConversionMediaType->hasTypeParameter()) {
                 $targetType = $targetConversionMediaType->getTypeParameter();
             } elseif ($targetConversionMediaType->isCompatibleWith(MediaType::createApplicationXPHP())) {
-                $targetType = TypeDescriptor::createAnythingType();
+                $targetType = Type::anything();
             }
 
             if ($this->doesRequireConversion($sourceMediaType, $sourceType, $targetConversionMediaType, $targetType)) {
@@ -69,7 +68,7 @@ class OutboundMessageConverter
                     $targetConversionMediaType
                 )) {
                     if (! isset($applicationHeaders[MessageHeaders::TYPE_ID])) {
-                        $applicationHeaders[MessageHeaders::TYPE_ID] = TypeDescriptor::createFromVariable($messagePayload)->toString();
+                        $applicationHeaders[MessageHeaders::TYPE_ID] = Type::createFromVariable($messagePayload)->toString();
                     }
                     $messagePayload = $conversionService->convert(
                         $messagePayload,

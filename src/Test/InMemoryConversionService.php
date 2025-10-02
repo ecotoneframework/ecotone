@@ -10,7 +10,6 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use InvalidArgumentException;
 use RuntimeException;
 
@@ -32,17 +31,17 @@ class InMemoryConversionService implements ConversionService, Converter, Compila
             [
                 'dataToConvert' => $dataToConvert,
                 'sourceMediaType' => MediaType::parseMediaType((string)$sourceMediaType),
-                'sourceType' => TypeDescriptor::create($sourceType),
+                'sourceType' => Type::create($sourceType),
                 'targetMediaType' => MediaType::parseMediaType((string)$targetMediaType),
-                'targetType' => TypeDescriptor::create($targetType),
+                'targetType' => Type::create($targetType),
                 'result' => $conversionResult,
             ],
             [
                 'dataToConvert' => $conversionResult,
                 'sourceMediaType' => MediaType::parseMediaType((string)$targetMediaType),
-                'sourceType' => TypeDescriptor::create($targetType),
+                'sourceType' => Type::create($targetType),
                 'targetMediaType' => MediaType::parseMediaType((string)$sourceMediaType),
-                'targetType' => TypeDescriptor::create($sourceType),
+                'targetType' => Type::create($sourceType),
                 'result' => $dataToConvert,
             ],
         ]);
@@ -50,7 +49,7 @@ class InMemoryConversionService implements ConversionService, Converter, Compila
 
     public function registerInPHPConversion(mixed $dataToConvert, mixed $conversionResult): static
     {
-        return $this->registerConversion($dataToConvert, MediaType::APPLICATION_X_PHP, TypeDescriptor::createFromVariable($dataToConvert), MediaType::APPLICATION_X_PHP, TypeDescriptor::createFromVariable($conversionResult), $conversionResult);
+        return $this->registerConversion($dataToConvert, MediaType::APPLICATION_X_PHP, Type::createFromVariable($dataToConvert), MediaType::APPLICATION_X_PHP, Type::createFromVariable($conversionResult), $conversionResult);
     }
 
     public function registerConversion(mixed $dataToConvert, string $sourceMediaType, string $sourceType, string $targetMediaType, string $targetType, $conversionResult): static
@@ -59,9 +58,9 @@ class InMemoryConversionService implements ConversionService, Converter, Compila
             [
                 'dataToConvert' => $dataToConvert,
                 'sourceMediaType' => MediaType::parseMediaType($sourceMediaType),
-                'sourceType' => TypeDescriptor::create($sourceType),
+                'sourceType' => Type::create($sourceType),
                 'targetMediaType' => MediaType::parseMediaType($targetMediaType),
-                'targetType' => TypeDescriptor::create($targetType),
+                'targetType' => Type::create($targetType),
                 'result' => $conversionResult,
             ];
 
@@ -73,16 +72,16 @@ class InMemoryConversionService implements ConversionService, Converter, Compila
         return new self([]);
     }
 
-    public function convert($source, Type $sourcePHPType, MediaType $sourceMediaType, Type $targetPHPType, MediaType $targetMediaType)
+    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType)
     {
-        if (! $this->canConvert($sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType)) {
+        if (! $this->canConvert($sourceType, $sourceMediaType, $targetType, $targetMediaType)) {
             throw new RuntimeException("Can't convert");
         }
 
-        $result = $this->getConversionResult($source, $sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
+        $result = $this->getConversionResult($source, $sourceType, $sourceMediaType, $targetType, $targetMediaType);
 
         if (is_null($result)) {
-            throw new InvalidArgumentException("Lack of converter for conversion from {$sourceMediaType}:{$sourcePHPType} to {$targetMediaType}:{$targetPHPType}");
+            throw new InvalidArgumentException("Lack of converter for conversion from {$sourceMediaType}:{$sourceType} to {$targetMediaType}:{$targetType}");
         }
 
         return $result;
@@ -103,7 +102,7 @@ class InMemoryConversionService implements ConversionService, Converter, Compila
         return false;
     }
 
-    public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
+    public function matches(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
     {
         return $this->canConvert($sourceType, $sourceMediaType, $targetType, $targetMediaType);
     }

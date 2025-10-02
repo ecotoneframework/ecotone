@@ -4,7 +4,7 @@ namespace Ecotone\Messaging;
 
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Scheduling\Clock;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
@@ -527,7 +527,7 @@ final class MessageHeaders
         $data = [];
 
         foreach ($dataToConvert as $headerName => $header) {
-            if (TypeDescriptor::createFromVariable($header)->isScalar()) {
+            if (Type::createFromVariable($header)->isScalar()) {
                 $data[$headerName] = $header;
                 continue;
             }

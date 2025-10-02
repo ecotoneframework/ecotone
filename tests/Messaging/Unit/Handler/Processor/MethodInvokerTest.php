@@ -12,7 +12,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\ReferenceNotFoundException;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -325,9 +325,9 @@ class MethodInvokerTest extends MessagingTestCase
                 InMemoryConversionService::createWithConversion(
                     $data = '["893a660c-0208-4140-8be6-95fb2dcd2fdd"]',
                     MediaType::createApplicationJson(),
-                    TypeDescriptor::STRING,
+                    Type::STRING,
                     MediaType::createApplicationXPHP(),
-                    TypeDescriptor::ARRAY,
+                    Type::ARRAY,
                     $result = ['893a660c-0208-4140-8be6-95fb2dcd2fdd']
                 )
             )
@@ -343,7 +343,7 @@ class MethodInvokerTest extends MessagingTestCase
                 $inputChannel,
                 $data,
                 metadata: [
-                    MessageHeaders::TYPE_ID => TypeDescriptor::ARRAY,
+                    MessageHeaders::TYPE_ID => Type::ARRAY,
                     MessageHeaders::CONTENT_TYPE => MediaType::createApplicationJson()->toString(),
                 ]
             )
@@ -357,7 +357,7 @@ class MethodInvokerTest extends MessagingTestCase
                 InMemoryConversionService::createWithConversion(
                     $data = '893a660c-0208-4140-8be6-95fb2dcd2fdd',
                     MediaType::createApplicationJson(),
-                    TypeDescriptor::STRING,
+                    Type::STRING,
                     MediaType::createApplicationXPHP(),
                     stdClass::class,
                     $result = new stdClass()
@@ -389,9 +389,9 @@ class MethodInvokerTest extends MessagingTestCase
                 InMemoryConversionService::createWithConversion(
                     $data = '["893a660c-0208-4140-8be6-95fb2dcd2fdd"]',
                     MediaType::createApplicationJson(),
-                    TypeDescriptor::STRING,
+                    Type::STRING,
                     MediaType::createApplicationXPHP(),
-                    TypeDescriptor::ARRAY,
+                    Type::ARRAY,
                     $result = ['893a660c-0208-4140-8be6-95fb2dcd2fdd']
                 )
             )

@@ -8,7 +8,7 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\MethodArgument;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -23,7 +23,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class GatewayPayloadConverter implements GatewayParameterConverter
 {
-    public function __construct(private string $parameterName, private ?TypeDescriptor $parameterType)
+    public function __construct(private string $parameterName, private ?Type $parameterType)
     {
     }
 
@@ -36,13 +36,13 @@ class GatewayPayloadConverter implements GatewayParameterConverter
         return new self($parameter->getName(), self::getParameterTypeDescriptor($parameter));
     }
 
-    public static function getParameterTypeDescriptor(InterfaceParameter $parameter): ?TypeDescriptor
+    public static function getParameterTypeDescriptor(InterfaceParameter $parameter): ?Type
     {
         $type = $parameter->getTypeDescriptor();
         if ($type->isUnionType() || $type->isCompoundObjectType() || $type->isAnything()) {
             return null;
         } else {
-            /** @var TypeDescriptor $type */
+            /** @var Type $type */
             return $type;
         }
     }
@@ -64,7 +64,7 @@ class GatewayPayloadConverter implements GatewayParameterConverter
 
         $type = $this->parameterType
             ? $this->parameterType->getTypeHint()
-            : TypeDescriptor::createFromVariable($methodArgument->value())->getTypeHint();
+            : Type::createFromVariable($methodArgument->value())->getTypeHint();
 
         $messageBuilder->setContentTypeIfAbsent(MediaType::createApplicationXPHPWithTypeParameter($type));
 

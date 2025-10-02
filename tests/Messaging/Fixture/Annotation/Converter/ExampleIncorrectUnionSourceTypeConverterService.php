@@ -11,7 +11,7 @@ use stdClass;
 class ExampleIncorrectUnionSourceTypeConverterService
 {
     /**
-     * @param string[] $data
+     * @param string[]|string $data
      * @return stdClass[]
      */
     #[Converter]

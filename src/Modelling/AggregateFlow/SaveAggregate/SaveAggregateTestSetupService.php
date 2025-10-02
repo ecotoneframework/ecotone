@@ -8,7 +8,7 @@ use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\MessageProcessor;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\MessageHeaders;
@@ -60,7 +60,7 @@ final class SaveAggregateTestSetupService implements MessageProcessor
 
     private function resolveAggregate(Message $message): ResolvedAggregate
     {
-        $aggregateDefinition = $this->aggregateDefinitionRegistry->getFor(TypeDescriptor::create($message->getHeaders()->get(AggregateMessage::TEST_SETUP_AGGREGATE_CLASS)));
+        $aggregateDefinition = $this->aggregateDefinitionRegistry->getFor(Type::object($message->getHeaders()->get(AggregateMessage::TEST_SETUP_AGGREGATE_CLASS)));
         $calledAggregateInstance = $message->getHeaders()->containsKey(AggregateMessage::TEST_SETUP_AGGREGATE_INSTANCE) ? $message->getHeaders()->get(AggregateMessage::TEST_SETUP_AGGREGATE_INSTANCE) : null;
         $versionBeforeHandling = $message->getHeaders()->containsKey(AggregateMessage::TEST_SETUP_AGGREGATE_VERSION) ? $message->getHeaders()->get(AggregateMessage::TEST_SETUP_AGGREGATE_VERSION) : 0;
 

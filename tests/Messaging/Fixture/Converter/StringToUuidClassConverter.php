@@ -6,7 +6,7 @@ namespace Test\Ecotone\Messaging\Fixture\Converter;
 
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ramsey\Uuid\Uuid;
 
 /**
@@ -17,7 +17,7 @@ class StringToUuidClassConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): \Ramsey\Uuid\UuidInterface
+    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): \Ramsey\Uuid\UuidInterface
     {
         return Uuid::fromString($source);
     }
@@ -25,7 +25,7 @@ class StringToUuidClassConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
+    public function matches(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
     {
         return $sourceType->isString() && $targetType->isClassOfType(Uuid::class);
     }

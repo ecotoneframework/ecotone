@@ -12,7 +12,7 @@ use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
 use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
 use Ecotone\Messaging\Handler\Logger\LoggingLevel;
 use Ecotone\Messaging\Handler\Logger\StubLoggingGateway;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -87,7 +87,7 @@ class LoggingInterceptorTest extends TestCase
 
         $payload = ['some'];
         $message = MessageBuilder::withPayload($payload)
-                    ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::ARRAY))
+                    ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(Type::ARRAY))
                     ->build();
 
         $loggingInterceptor->log($message, new LogAfter(LogLevel::DEBUG, false));

@@ -2,7 +2,7 @@
 
 namespace Ecotone\Modelling\EventSourcingExecutor;
 
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Event;
@@ -34,12 +34,10 @@ final class EventSourcingHandlerExecutor
             $metadata = [];
             if ($event instanceof Event) {
                 $eventPayload = $event->getPayload();
-                Assert::isObject($eventPayload, 'Event returned by repository should be deserialized objects. Got: ' . TypeDescriptor::createFromVariable($eventPayload)->toString());
-                $eventType = TypeDescriptor::createFromVariable($eventPayload);
+                Assert::isObject($eventPayload, 'Event returned by repository should be deserialized objects. Got: ' . Type::createFromVariable($eventPayload)->toString());
                 $metadata  = $event->getMetadata();
             } else {
-                Assert::isObject($event, 'Event returned by repository should be deserialized objects. Got: ' . TypeDescriptor::createFromVariable($event)->toString());
-                $eventType = TypeDescriptor::createFromVariable($event);
+                Assert::isObject($event, 'Event returned by repository should be deserialized objects. Got: ' . Type::createFromVariable($event)->toString());
                 $eventPayload = $event;
             }
 
@@ -47,7 +45,7 @@ final class EventSourcingHandlerExecutor
                 ->setMultipleHeaders($metadata)
                 ->build();
             foreach ($this->eventSourcingHandlerMethods as $eventSourcingHandler) {
-                if ($eventSourcingHandler->canHandle($eventType)) {
+                if ($eventSourcingHandler->canHandle($eventPayload)) {
                     $this->aggregateMethodInvoker->executeMethod($aggregate, $eventSourcingHandler, $message);
                 }
             }

@@ -7,7 +7,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Test\ComponentTestBuilder;
 use Ecotone\Test\InMemoryConversionService;
 use PHPUnit\Framework\TestCase;
@@ -95,7 +95,7 @@ class HeaderBuilderTest extends TestCase
                     ->registerConversion(
                         $data,
                         MediaType::APPLICATION_JSON,
-                        TypeDescriptor::ARRAY,
+                        Type::ARRAY,
                         MediaType::APPLICATION_X_PHP,
                         stdClass::class,
                         '{"name":"johny"}'
@@ -103,7 +103,7 @@ class HeaderBuilderTest extends TestCase
                     ->registerConversion(
                         $data,
                         MediaType::APPLICATION_X_PHP_ARRAY,
-                        TypeDescriptor::ARRAY,
+                        Type::ARRAY,
                         MediaType::APPLICATION_X_PHP,
                         stdClass::class,
                         new stdClass()
@@ -130,7 +130,7 @@ class HeaderBuilderTest extends TestCase
                 InMemoryConversionService::createWithConversion(
                     $data,
                     MediaType::APPLICATION_X_PHP,
-                    TypeDescriptor::STRING,
+                    Type::STRING,
                     MediaType::APPLICATION_X_PHP,
                     Uuid::class,
                     Uuid::fromString($data)

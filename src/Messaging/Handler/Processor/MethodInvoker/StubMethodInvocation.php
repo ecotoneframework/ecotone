@@ -25,6 +25,11 @@ class StubMethodInvocation implements MethodInvocation
         });
     }
 
+    public function cloneCurrentState(): MethodInvocation
+    {
+        return clone $this;
+    }
+
     public static function createWithCalledFunction(Closure $functionToCall)
     {
     }

@@ -23,7 +23,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressionBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodArgumentsFactory;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Modelling\Attribute\IgnorePayload;
 
 /**
@@ -57,7 +57,7 @@ class ParameterConverterAnnotationFactory
             MethodArgumentsFactory::createDefaultMethodParameters(
                 $relatedClassInterface,
                 self::createParameterConverters($relatedClassInterface),
-                $relatedClassInterface->hasMethodAnnotation(TypeDescriptor::create(IgnorePayload::class))
+                $relatedClassInterface->hasMethodAnnotation(Type::object(IgnorePayload::class))
             );
     }
 
@@ -113,8 +113,7 @@ class ParameterConverterAnnotationFactory
                 return ConfigurationVariableBuilder::createFrom($annotation->getName(), $interfaceParameter);
             } elseif ($annotation instanceof Fetch) {
                 return FetchAggregateConverterBuilder::create(
-                    $interfaceParameter->getName(),
-                    $interfaceParameter->getTypeHint(),
+                    $interfaceParameter,
                     $annotation->getExpression()
                 );
             }

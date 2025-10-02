@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Conversion\UuidToString;
 
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\Assert;
 use Ramsey\Uuid\UuidInterface;
 
@@ -23,7 +23,7 @@ class UuidToStringConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): string
+    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): string
     {
         /** @var UuidInterface $source */
         Assert::isSubclassOf($source, UuidInterface::class, 'Passed type to String to Uuid converter is not Uuid');
@@ -34,7 +34,7 @@ class UuidToStringConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
+    public function matches(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
     {
         return $sourceType->isClassOfType(UuidInterface::class)
             && $targetType->isString()

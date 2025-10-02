@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\LicenceDecider;
@@ -11,6 +12,8 @@ use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\Type\ObjectType;
+use Ecotone\Messaging\Handler\Type\UnionType;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\Repository\AllAggregateRepository;
 
@@ -26,9 +29,17 @@ class FetchAggregateConverterBuilder implements ParameterConverterBuilder
     ) {
     }
 
-    public static function create(string $parameterName, string $aggregateClassName, string $expression): self
+    public static function create(InterfaceParameter $parameter, string $expression): self
     {
-        return new self($parameterName, $aggregateClassName, $expression);
+        $type = $parameter->getTypeDescriptor();
+        if ($type instanceof UnionType) {
+            $type = $type->withoutNull();
+        }
+        if (! $type instanceof ObjectType) {
+            throw ConfigurationException::create('FetchAggregate can be used only with object type hint. ' . $parameter->getName() . ' is using ' . $parameter->getTypeDescriptor()->toString());
+        }
+
+        return new self($parameter->getName(), $type->toString(), $expression);
     }
 
     public function isHandling(InterfaceParameter $parameter): bool

@@ -27,8 +27,8 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueConverter;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut\IncorrectPointcutException;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -141,7 +141,7 @@ final class AroundInterceptorBuilder implements InterceptorWithPointCut
                     continue 2;
                 }
             }
-            if ($parameter->canBePassedIn(TypeDescriptor::create(MethodInvocation::class))) {
+            if ($parameter->canBePassedIn(Type::object(MethodInvocation::class))) {
                 $converterDefinitions[] = new Definition(MethodInvocationConverter::class);
                 $hasMethodInvocation = true;
                 continue;
@@ -154,17 +154,17 @@ final class AroundInterceptorBuilder implements InterceptorWithPointCut
                 $converterDefinitions[] = $attributeBuilder->compile($interceptingInterface);
                 continue;
             }
-            if ($parameter->canBePassedIn(TypeDescriptor::create(Message::class))) {
+            if ($parameter->canBePassedIn(Type::object(Message::class))) {
                 $converterDefinitions[] = new Definition(MessageConverter::class);
                 continue;
             }
 
-            if ($parameter->canBePassedIn(TypeDescriptor::create(ReferenceSearchService::class))) {
+            if ($parameter->canBePassedIn(Type::object(ReferenceSearchService::class))) {
                 $converterDefinitions[] = new Definition(ValueConverter::class, [new Reference(ReferenceSearchService::class)]);
                 continue;
             }
 
-            if ($parameter->canBePassedIn(TypeDescriptor::create(PollingMetadata::class))) {
+            if ($parameter->canBePassedIn(Type::object(PollingMetadata::class))) {
                 $converterDefinitions[] = (new PollingMetadataConverterBuilder($parameter->getName()))->compile($interceptingInterface);
                 continue;
             }

@@ -7,6 +7,7 @@ namespace Ecotone\Messaging\Handler;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Future;
+use Ecotone\Messaging\Handler\Type\ObjectType;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -24,8 +25,6 @@ use ReflectionException;
  */
 class InterfaceToCall
 {
-    private ?Type $interfaceType;
-
     /**
      * @param object[]        $classAnnotations
      * @param object[]        $methodAnnotations
@@ -33,7 +32,6 @@ class InterfaceToCall
      */
     public function __construct(private string $interfaceName, private string $methodName, private array $classAnnotations, private array $methodAnnotations, private iterable $parameters, private ?Type $returnType, private bool $doesReturnTypeAllowNulls, private bool $isStaticallyCalled)
     {
-        $this->interfaceType = TypeDescriptor::create($interfaceName);
     }
 
     public static function create(string|object $interfaceOrObjectName, string $methodName): self
@@ -99,13 +97,11 @@ class InterfaceToCall
     }
 
     /**
-     * @param Type|class-string $className
+     * @param ObjectType|class-string $className
      *
      * @return bool
-     * @throws TypeDefinitionException
-     * @throws MessagingException
      */
-    public function hasMethodAnnotation(Type|string $className): bool
+    public function hasMethodAnnotation(ObjectType|string $className): bool
     {
         $className = (string) $className;
         foreach ($this->methodAnnotations as $methodAnnotation) {
@@ -118,13 +114,11 @@ class InterfaceToCall
     }
 
     /**
-     * @param Type|class-string $className
+     * @param ObjectType|class-string $className
      *
      * @return bool
-     * @throws TypeDefinitionException
-     * @throws MessagingException
      */
-    public function hasClassAnnotation(Type|string $className): bool
+    public function hasClassAnnotation(ObjectType|string $className): bool
     {
         $className = (string) $className;
         foreach ($this->getClassAnnotations() as $classAnnotation) {
@@ -139,7 +133,7 @@ class InterfaceToCall
     /**
      * @param Type|class-string $className
      */
-    public function hasAnnotation(Type|string $className): bool
+    public function hasAnnotation(ObjectType|string $className): bool
     {
         return $this->hasMethodAnnotation($className) || $this->hasClassAnnotation($className);
     }
@@ -147,16 +141,17 @@ class InterfaceToCall
     /**
      * @return object[]
      */
-    public function getAnnotationsByImportanceOrder(Type $className): array
+    public function getAnnotationsByImportanceOrder(ObjectType|string $className): array
     {
         $annotations = [];
+        $classNameType = ObjectType::from($className);
         foreach ($this->methodAnnotations as $methodAnnotation) {
-            if (TypeDescriptor::createFromVariable($methodAnnotation)->isCompatibleWith($className)) {
+            if ($classNameType->accepts($methodAnnotation)) {
                 $annotations[] = $methodAnnotation;
             }
         }
         foreach ($this->getClassAnnotations() as $classAnnotation) {
-            if (TypeDescriptor::createFromVariable($classAnnotation)->isCompatibleWith($className)) {
+            if ($classNameType->accepts(($classAnnotation))) {
                 $annotations[] = $classAnnotation;
             }
         }
@@ -164,10 +159,11 @@ class InterfaceToCall
         return $annotations;
     }
 
-    public function getSingleClassAnnotationOf(Type $className): object
+    public function getSingleClassAnnotationOf(ObjectType|string $className): object
     {
+        $classNameType = ObjectType::from($className);
         foreach ($this->getClassAnnotations() as $classAnnotation) {
-            if (TypeDescriptor::createFromVariable($classAnnotation)->isCompatibleWith($className)) {
+            if ($classNameType->accepts($classAnnotation)) {
                 return $classAnnotation;
             }
         }
@@ -178,11 +174,12 @@ class InterfaceToCall
     /**
      * @return object[]
      */
-    public function getClassAnnotationOf(Type $className): array
+    public function getClassAnnotationOf(ObjectType|string $className): array
     {
         $annotations = [];
+        $classNameType = ObjectType::from($className);
         foreach ($this->getClassAnnotations() as $classAnnotation) {
-            if (TypeDescriptor::createFromVariable($classAnnotation)->isCompatibleWith($className)) {
+            if ($classNameType->accepts($classAnnotation)) {
                 $annotations[] = $classAnnotation;
             }
         }
@@ -191,14 +188,13 @@ class InterfaceToCall
     }
 
     /**
-     * @param Type $className
-     *
      * @throws MessagingException
      */
-    public function getSingleMethodAnnotationOf(Type $className): object
+    public function getSingleMethodAnnotationOf(ObjectType|string $className): object
     {
+        $classNameType = ObjectType::from($className);
         foreach ($this->methodAnnotations as $methodAnnotation) {
-            if (TypeDescriptor::createFromVariable($methodAnnotation)->isCompatibleWith($className)) {
+            if ($classNameType->accepts($methodAnnotation)) {
                 return $methodAnnotation;
             }
         }
@@ -209,11 +205,12 @@ class InterfaceToCall
     /**
      * @return object[]
      */
-    public function getMethodAnnotationsOf(Type $className): array
+    public function getMethodAnnotationsOf(ObjectType|string $className): array
     {
         $methodAnnotations = [];
+        $classNameType = ObjectType::from($className);
         foreach ($this->methodAnnotations as $methodAnnotation) {
-            if (TypeDescriptor::createFromVariable($methodAnnotation)->isCompatibleWith($className)) {
+            if ($classNameType->accepts($methodAnnotation)) {
                 $methodAnnotations[] = $methodAnnotation;
             }
         }
@@ -384,9 +381,9 @@ class InterfaceToCall
         return $this->getReturnType()->isClassOfType(Message::class);
     }
 
-    public function getInterfaceType(): ?Type
+    public function getInterfaceType(): ObjectType
     {
-        return $this->interfaceType;
+        return Type::object($this->interfaceName);
     }
 
     public function getMethodName(): ?string
@@ -507,9 +504,9 @@ class InterfaceToCall
     public function isReturningAggregate(InterfaceToCallRegistry $interfaceToCallRegistry): bool
     {
         if ($this->getReturnType()?->isClassNotInterface()) {
-            $returnTypeInterface = $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($this->getReturnType()->toString()));
+            $returnTypeInterface = $interfaceToCallRegistry->getClassDefinitionFor(Type::object($this->getReturnType()->toString()));
 
-            return $returnTypeInterface->hasClassAnnotation(TypeDescriptor::create(Aggregate::class));
+            return $returnTypeInterface->hasClassAnnotation(Type::attribute(Aggregate::class));
         }
 
         return false;

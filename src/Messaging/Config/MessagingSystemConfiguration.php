@@ -56,7 +56,6 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\UninterruptibleServiceActivator;
 use Ecotone\Messaging\Handler\Transformer\RoutingSlipPrepender;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\NullableMessageChannel;
@@ -1023,8 +1022,8 @@ final class MessagingSystemConfiguration implements Configuration
             $priority = PriorityBasedOnType::default();
             if ($messageHandlerBuilder instanceof MessageHandlerBuilderWithOutputChannel) {
                 $interfaceToCall = $messageHandlerBuilder->getInterceptedInterface($this->interfaceToCallRegistry);
-                if ($interfaceToCall->hasAnnotation(TypeDescriptor::create(PriorityBasedOnType::class))) {
-                    $priority = $interfaceToCall->getAnnotationsByImportanceOrder(TypeDescriptor::create(PriorityBasedOnType::class))[0];
+                if ($interfaceToCall->hasAnnotation(PriorityBasedOnType::class)) {
+                    $priority = $interfaceToCall->getAnnotationsByImportanceOrder(PriorityBasedOnType::class)[0];
                 }
             }
             if ($messageHandlerBuilder instanceof InterceptedEndpoint) {

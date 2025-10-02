@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
+use Ecotone\Messaging\Handler\Type\UnionType;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\ErrorMessage;
@@ -108,6 +109,9 @@ final class InterfaceParameter
 
     public function getTypeHint(): string
     {
+        if ($this->typeDescriptor instanceof UnionType) {
+            return $this->typeDescriptor->withoutNull()->toString();
+        }
         return $this->typeDescriptor->toString();
     }
 
@@ -171,7 +175,7 @@ final class InterfaceParameter
      */
     public function isMessage(): bool
     {
-        return $this->typeDescriptor->equals(TypeDescriptor::create(Message::class)) || $this->typeDescriptor->equals(TypeDescriptor::create(ErrorMessage::class));
+        return $this->typeDescriptor->isIdentifiedBy(Message::class, ErrorMessage::class);
     }
 
     /**

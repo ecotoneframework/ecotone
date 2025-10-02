@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Conversion\ObjectToSerialized;
 
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 
 /**
  * Class SerializingConverter
@@ -21,7 +21,7 @@ class SerializingConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): string
+    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): string
     {
         return addslashes(serialize($source));
     }
@@ -29,7 +29,7 @@ class SerializingConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
+    public function matches(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
     {
         return $sourceMediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP)
                 && $targetMediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP_SERIALIZED);

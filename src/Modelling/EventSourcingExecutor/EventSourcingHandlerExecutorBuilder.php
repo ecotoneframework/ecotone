@@ -10,7 +10,7 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\LicenceDecider;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Modelling\Attribute\EventSourcingHandler;
 use Ecotone\Modelling\EventSourcingHandlerMethod;
 use ReflectionClass;
@@ -36,7 +36,7 @@ final class EventSourcingHandlerExecutorBuilder
             }
         }
 
-        $aggregateFactoryAnnotation = TypeDescriptor::create(EventSourcingHandler::class);
+        $aggregateFactoryAnnotation = Type::object(EventSourcingHandler::class);
         $eventSourcingHandlerMethods = [];
         foreach ($classDefinition->getPublicMethodNames() as $method) {
             $methodToCheck = $interfaceToCallRegistry->getFor($classDefinition->getClassType()->toString(), $method);

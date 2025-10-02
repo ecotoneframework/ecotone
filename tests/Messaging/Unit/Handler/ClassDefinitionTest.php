@@ -6,7 +6,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler;
 
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\ClassPropertyDefinition;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\EventSourcingSaga;
@@ -47,199 +47,199 @@ class ClassDefinitionTest extends TestCase
 {
     public function test_retrieving_public_class_property()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderPropertyExample::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(OrderPropertyExample::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate('id', TypeDescriptor::createIntegerType(), true, false, []),
+            ClassPropertyDefinition::createPrivate('id', Type::int(), true, false, []),
             $classDefinition->getProperty('id')
         );
     }
 
     public function test_checking_if_has_annotation()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Logger::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(Logger::class));
 
-        $this->assertTrue($classDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcingAggregate::class)));
-        $this->assertTrue($classDefinition->hasClassAnnotation(TypeDescriptor::create(Aggregate::class)));
-        $this->assertFalse($classDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcingSaga::class)));
+        $this->assertTrue($classDefinition->hasClassAnnotation(Type::create(EventSourcingAggregate::class)));
+        $this->assertTrue($classDefinition->hasClassAnnotation(Type::create(Aggregate::class)));
+        $this->assertFalse($classDefinition->hasClassAnnotation(Type::create(EventSourcingSaga::class)));
     }
 
     public function test_retrieving_property_annotations()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderPropertyExample::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(OrderPropertyExample::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createProtected('reference', TypeDescriptor::createStringType(), true, true, [new PropertyAnnotationExample()]),
+            ClassPropertyDefinition::createProtected('reference', Type::string(), true, true, [new PropertyAnnotationExample()]),
             $classDefinition->getProperty('reference')
         );
     }
 
     public function test_retrieving_class_annotations()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Logger::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(Logger::class));
 
         $this->assertEquals(
             new EventSourcingAggregate(),
-            $classDefinition->getSingleClassAnnotation(TypeDescriptor::create(EventSourcingAggregate::class))
+            $classDefinition->getSingleClassAnnotation(Type::create(EventSourcingAggregate::class))
         );
         $this->assertEquals(
             new EventSourcingAggregate(),
-            $classDefinition->getSingleClassAnnotation(TypeDescriptor::create(Aggregate::class))
+            $classDefinition->getSingleClassAnnotation(Type::create(Aggregate::class))
         );
     }
 
     public function test_retrieving_property_with_annotation()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderPropertyExample::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(OrderPropertyExample::class));
 
         $this->assertEquals(
             [
-                ClassPropertyDefinition::createProtected('reference', TypeDescriptor::createStringType(), true, true, [new PropertyAnnotationExample()]),
+                ClassPropertyDefinition::createProtected('reference', Type::string(), true, true, [new PropertyAnnotationExample()]),
             ],
-            $classDefinition->getPropertiesWithAnnotation(TypeDescriptor::create(PropertyAnnotationExample::class))
+            $classDefinition->getPropertiesWithAnnotation(Type::create(PropertyAnnotationExample::class))
         );
 
         $this->assertEquals(
             [
-                ClassPropertyDefinition::createProtected('reference', TypeDescriptor::createStringType(), true, true, [new PropertyAnnotationExample()]),
-                ClassPropertyDefinition::createPrivate('someClass', TypeDescriptor::create(stdClass::class), true, false, [new PropertyAnnotationExampleBaseClasss()]),
+                ClassPropertyDefinition::createProtected('reference', Type::string(), true, true, [new PropertyAnnotationExample()]),
+                ClassPropertyDefinition::createPrivate('someClass', Type::create(stdClass::class), true, false, [new PropertyAnnotationExampleBaseClasss()]),
             ],
-            $classDefinition->getPropertiesWithAnnotation(TypeDescriptor::create(PropertyAnnotationExampleBaseClasss::class))
+            $classDefinition->getPropertiesWithAnnotation(Type::create(PropertyAnnotationExampleBaseClasss::class))
         );
     }
 
     public function test_retrieving_public_property()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderPropertyExample::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(OrderPropertyExample::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createPublic('extendedName', TypeDescriptor::createAnythingType(), true, false, []),
+            ClassPropertyDefinition::createPublic('extendedName', Type::anything(), true, false, []),
             $classDefinition->getProperty('extendedName')
         );
     }
 
     public function test_retrieving_type_property_if_not_array()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(DifferentTypeAndDocblockProperty::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(DifferentTypeAndDocblockProperty::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate('integer', TypeDescriptor::createIntegerType(), false, false, []),
+            ClassPropertyDefinition::createPrivate('integer', Type::int(), false, false, []),
             $classDefinition->getProperty('integer')
         );
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate('unknown', TypeDescriptor::createAnythingType(), true, false, []),
+            ClassPropertyDefinition::createPrivate('unknown', Type::object(stdClass::class), true, false, []),
             $classDefinition->getProperty('unknown')
         );
     }
 
     public function test_retrieving_type_from_docblock_when_array()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(ArrayTypeWithDocblockProperty::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(ArrayTypeWithDocblockProperty::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate('data', TypeDescriptor::createCollection(stdClass::class), false, false, []),
+            ClassPropertyDefinition::createPrivate('data', Type::createCollection(stdClass::class), false, false, []),
             $classDefinition->getProperty('data')
         );
     }
 
     public function test_retrieving_type_from_inline_docblock_when_array()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(ArrayTypeWithInlineDocblockProperty::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(ArrayTypeWithInlineDocblockProperty::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate('data', TypeDescriptor::createCollection(ExtraObject::class), false, false, []),
+            ClassPropertyDefinition::createPrivate('data', Type::createCollection(ExtraObject::class), false, false, []),
             $classDefinition->getProperty('data')
         );
     }
 
     public function test_retrieving_type_from_docblock_using_group_statement()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(CollectionOfClassesFromDifferentNamespaceUsingGroupAlias::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(CollectionOfClassesFromDifferentNamespaceUsingGroupAlias::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createPublic('productDescriptions', TypeDescriptor::createCollection(Description::class), false, false, []),
+            ClassPropertyDefinition::createPublic('productDescriptions', Type::createCollection(Description::class), false, false, []),
             $classDefinition->getProperty('productDescriptions')
         );
         $this->assertEquals(
-            ClassPropertyDefinition::createPublic('productNames', TypeDescriptor::createCollection(ProductName::class), false, false, []),
+            ClassPropertyDefinition::createPublic('productNames', Type::createCollection(ProductName::class), false, false, []),
             $classDefinition->getProperty('productNames')
         );
     }
 
     public function test_retrieving_annotations_from_parent_class_properties()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(ExtendedOrderPropertyExample::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(ExtendedOrderPropertyExample::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createProtected('reference', TypeDescriptor::createStringType(), true, true, [new PropertyAnnotationExample()]),
+            ClassPropertyDefinition::createProtected('reference', Type::string(), true, true, [new PropertyAnnotationExample()]),
             $classDefinition->getProperty('reference')
         );
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate('someClass', TypeDescriptor::create(stdClass::class), true, false, [new PropertyAnnotationExampleBaseClasss()]),
+            ClassPropertyDefinition::createPrivate('someClass', Type::create(stdClass::class), true, false, [new PropertyAnnotationExampleBaseClasss()]),
             $classDefinition->getProperty('someClass')
         );
     }
 
     public function test_retrieving_private_from_trait()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(OrderWithTraits::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(OrderWithTraits::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate('property', TypeDescriptor::create(ExtraObject::class), true, false, [new Identifier()]),
+            ClassPropertyDefinition::createPrivate('property', Type::create(ExtraObject::class), true, false, [new Identifier()]),
             $classDefinition->getProperty('property')
         );
     }
 
     public function test_retrieving_private_from_trait_inside_trait()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Rocket::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(Rocket::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate('publicDetails', TypeDescriptor::create(PublicDetails::class), true, false, []),
+            ClassPropertyDefinition::createPrivate('publicDetails', Type::create(PublicDetails::class), true, false, []),
             $classDefinition->getProperty('publicDetails')
         );
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate('privateDetails', TypeDescriptor::create(PrivateDetails::class), true, false, []),
+            ClassPropertyDefinition::createPrivate('privateDetails', Type::create(PrivateDetails::class), true, false, []),
             $classDefinition->getProperty('privateDetails')
         );
     }
 
     public function test_retrieving_typed_property()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(Product::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate('name', TypeDescriptor::createStringType(), false, false, []),
+            ClassPropertyDefinition::createPrivate('name', Type::string(), false, false, []),
             $classDefinition->getProperty('name')
         );
     }
 
     public function test_retrieving_nullable_typed_property()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(Product::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate('quantity', TypeDescriptor::createIntegerType(), true, false, []),
+            ClassPropertyDefinition::createPrivate('quantity', Type::int(), true, false, []),
             $classDefinition->getProperty('quantity')
         );
     }
 
     public function test_override_typed_property_with_annotation_type()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(Product::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(Product::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate('owners', TypeDescriptor::create("array<Test\Ecotone\Messaging\Fixture\Conversion\Admin>"), false, false, []),
+            ClassPropertyDefinition::createPrivate('owners', Type::create("array<Test\Ecotone\Messaging\Fixture\Conversion\Admin>"), false, false, []),
             $classDefinition->getProperty('owners')
         );
     }
 
     public function test_ignoring_docblock_when_is_incorrect()
     {
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create(InCorrectArrayDocblock::class));
+        $classDefinition = ClassDefinition::createFor(Type::create(InCorrectArrayDocblock::class));
 
         $this->assertEquals(
-            ClassPropertyDefinition::createPrivate('incorrectProperty', TypeDescriptor::createArrayType(), false, false, []),
+            ClassPropertyDefinition::createPrivate('incorrectProperty', Type::array(), false, false, []),
             $classDefinition->getProperty('incorrectProperty')
         );
     }

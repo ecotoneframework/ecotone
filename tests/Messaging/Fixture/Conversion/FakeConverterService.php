@@ -11,7 +11,6 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 
 /**
  * Class FakeConverterService
@@ -28,7 +27,7 @@ class FakeConverterService implements Converter, CompilableBuilder
      */
     private $data;
     /**
-     * @var TypeDescriptor
+     * @var Type
      */
     private $typeDescriptor;
     /**
@@ -60,13 +59,13 @@ class FakeConverterService implements Converter, CompilableBuilder
      */
     public static function create($data, string $requestTypeDescriptor, string $requestMediaType): self
     {
-        return new self($data, TypeDescriptor::create($requestTypeDescriptor), MediaType::parseMediaType($requestMediaType));
+        return new self($data, Type::create($requestTypeDescriptor), MediaType::parseMediaType($requestMediaType));
     }
 
     /**
      * @inheritDoc
      */
-    public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
+    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType)
     {
         return $this->data;
     }
@@ -74,7 +73,7 @@ class FakeConverterService implements Converter, CompilableBuilder
     /**
      * @inheritDoc
      */
-    public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
+    public function matches(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
     {
         return $sourceType->equals($this->typeDescriptor) && $sourceMediaType->isCompatibleWith($this->mediaType);
     }

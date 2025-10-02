@@ -13,6 +13,7 @@ use Ecotone\Modelling\Config\InstantRetry\InstantRetryConfiguration;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
+use Test\Ecotone\Modelling\Fixture\Retry\InterceptorAfterRetryHandler;
 use Test\Ecotone\Modelling\Fixture\Retry\RetriedCommandHandler;
 
 /**
@@ -207,5 +208,78 @@ final class InstantRetryModuleTest extends TestCase
         $ecotoneLite
             ->sendCommandWithRoutingKey('retried.asynchronous', 4)
             ->run('async', ExecutionPollingMetadata::createWithDefaults()->withTestingSetup());
+    }
+
+    public function test_interceptors_after_instant_retry_are_triggered_with_each_retry_for_command_bus()
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [InterceptorAfterRetryHandler::class],
+            [
+                new InterceptorAfterRetryHandler(),
+            ],
+            ServiceConfiguration::createWithDefaults()
+                ->withExtensionObjects([
+                    InstantRetryConfiguration::createWithDefaults()
+                        ->withCommandBusRetry(true, 3),
+                ])
+        );
+
+        // Send command that will fail 3 times before succeeding (4 total attempts)
+        $ecotoneLite->sendCommandWithRoutingKey('interceptor.after.retry', 3);
+
+        // Verify command was called 4 times
+        $this->assertEquals(
+            [
+                'preRetryInterceptor',
+                'interceptor',
+                'commandHandler',
+                'interceptor',
+                'commandHandler',
+                'interceptor',
+                'commandHandler',
+                'interceptor',
+                'commandHandler',
+            ],
+            $ecotoneLite->sendQueryWithRouting('interceptor.getCalls')
+        );
+    }
+
+    public function test_interceptors_after_instant_retry_are_triggered_with_each_retry_for_asynchronous_handlers()
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [InterceptorAfterRetryHandler::class],
+            [
+                new InterceptorAfterRetryHandler(),
+            ],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withExtensionObjects([
+                    SimpleMessageChannelBuilder::createQueueChannel('async'),
+                    InstantRetryConfiguration::createWithDefaults()
+                        ->withAsynchronousEndpointsRetry(true, 3),
+                ])
+        );
+
+        $ecotoneLite
+            ->sendCommandWithRoutingKey('interceptor.after.retry.async', 3)
+            ->run('async', ExecutionPollingMetadata::createWithDefaults()->withTestingSetup());
+
+        // Verify command was called 4 times
+        $this->assertEquals(
+            [
+                'preRetryInterceptor',
+                'interceptor',
+                'asyncPreRetryInterceptor',
+                'asyncInterceptor',
+                'asyncCommandHandler',
+                'asyncInterceptor',
+                'asyncCommandHandler',
+                'asyncInterceptor',
+                'asyncCommandHandler',
+                'asyncInterceptor',
+                'asyncCommandHandler',
+            ],
+            $ecotoneLite->sendQueryWithRouting('interceptor.getCalls')
+        );
     }
 }

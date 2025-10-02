@@ -15,7 +15,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PollingMetadataConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
@@ -51,7 +51,7 @@ class MethodArgumentsFactory
                 }
                 if ($interfaceParameter->isMessage()) {
                     $passedMethodParameterConverters[] = MessageConverterBuilder::create($interfaceParameter->getName());
-                } elseif ($interfaceParameter->canBePassedIn(TypeDescriptor::create(PollingMetadata::class))) {
+                } elseif ($interfaceParameter->canBePassedIn(Type::object(PollingMetadata::class))) {
                     $passedMethodParameterConverters[] = new PollingMetadataConverterBuilder($interfaceParameter->getName());
                 } elseif ($interfaceParameter->getTypeDescriptor()->isClassOrInterface()) {
                     $passedMethodParameterConverters[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeHint());
@@ -94,39 +94,39 @@ class MethodArgumentsFactory
      */
     public static function getAnnotationValueConverter(InterfaceParameter $interfaceParameter, InterfaceToCall $interceptedInterface, array $endpointAnnotations): AttributeBuilder|AttributeDefinitionBuilder|null
     {
-        $interfaceParameterType = $interfaceParameter->getTypeDescriptor();
+        $interfaceParameterType = $interfaceParameter->getTypeDescriptor()->withoutNull();
         // Endpoint Annotations
         foreach ($endpointAnnotations as $endpointAnnotation) {
-            if (TypeDescriptor::create($endpointAnnotation->getClassName())->equals($interfaceParameterType)) {
+            if (Type::object($endpointAnnotation->getClassName())->equals($interfaceParameterType)) {
                 return new AttributeDefinitionBuilder($interfaceParameter->getName(), $endpointAnnotation);
             }
         }
         foreach ($endpointAnnotations as $endpointAnnotation) {
-            if (TypeDescriptor::create($endpointAnnotation->getClassName())->isCompatibleWith($interfaceParameterType)) {
+            if ($interfaceParameterType->acceptType(Type::attribute($endpointAnnotation->getClassName()))) {
                 return new AttributeDefinitionBuilder($interfaceParameter->getName(), $endpointAnnotation);
             }
         }
 
         // Method
         foreach ($interceptedInterface->getMethodAnnotations() as $endpointAnnotation) {
-            if (TypeDescriptor::createFromVariable($endpointAnnotation)->equals($interfaceParameter->getTypeDescriptor())) {
+            if (Type::createFromVariable($endpointAnnotation)->equals($interfaceParameterType)) {
                 return new AttributeBuilder($interfaceParameter->getName(), $endpointAnnotation, $interceptedInterface->getInterfaceName(), $interceptedInterface->getMethodName());
             }
         }
         foreach ($interceptedInterface->getMethodAnnotations() as $endpointAnnotation) {
-            if (TypeDescriptor::createFromVariable($endpointAnnotation)->isCompatibleWith($interfaceParameter->getTypeDescriptor())) {
+            if ($interfaceParameterType->accepts($endpointAnnotation)) {
                 return new AttributeBuilder($interfaceParameter->getName(), $endpointAnnotation, $interceptedInterface->getInterfaceName(), $interceptedInterface->getMethodName());
             }
         }
 
         // Class
         foreach ($interceptedInterface->getClassAnnotations() as $endpointAnnotation) {
-            if (TypeDescriptor::createFromVariable($endpointAnnotation)->equals($interfaceParameter->getTypeDescriptor())) {
+            if (Type::createFromVariable($endpointAnnotation)->equals($interfaceParameterType)) {
                 return new AttributeBuilder($interfaceParameter->getName(), $endpointAnnotation, $interceptedInterface->getInterfaceName());
             }
         }
         foreach ($interceptedInterface->getClassAnnotations() as $endpointAnnotation) {
-            if (TypeDescriptor::createFromVariable($endpointAnnotation)->isCompatibleWith($interfaceParameter->getTypeDescriptor())) {
+            if ($interfaceParameterType->accepts($endpointAnnotation)) {
                 return new AttributeBuilder($interfaceParameter->getName(), $endpointAnnotation, $interceptedInterface->getInterfaceName());
             }
         }

@@ -32,7 +32,7 @@ use Ecotone\Messaging\Handler\Router\RouterProcessorBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerProcessorBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\AggregateFlow\AggregateIdMetadataConverter;
@@ -282,9 +282,9 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
 
         $relatedClassInterface    = $this->interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName());
         $parameterConverters      = $parameterConverterAnnotationFactory->createParameterWithDefaults($relatedClassInterface);
-        $aggregateClassDefinition = $this->interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($registration->getClassName()));
+        $aggregateClassDefinition = $this->interfaceToCallRegistry->getClassDefinitionFor(Type::object($registration->getClassName()));
         $handledPayloadType       = MessageHandlerRoutingModule::getFirstParameterClassIfAny($registration, $this->interfaceToCallRegistry);
-        $handledPayloadType       = $handledPayloadType ? $this->interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($handledPayloadType)) : null;
+        $handledPayloadType       = $handledPayloadType ? $this->interfaceToCallRegistry->getClassDefinitionFor(Type::object($handledPayloadType)) : null;
 
         $configuration->registerMessageHandler(
             MessageProcessorActivatorBuilder::create()
@@ -350,7 +350,7 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
         foreach ($this->aggregateClassDefinitions as $aggregateClassDefinition) {
             if ($aggregateClassDefinition->isEventSourced()) {
                 $eventSourcingExecutors[$aggregateClassDefinition->getClassName()] = EventSourcingHandlerExecutorBuilder::createFor(
-                    $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($aggregateClassDefinition->getClassName())),
+                    $interfaceToCallRegistry->getClassDefinitionFor(Type::object($aggregateClassDefinition->getClassName())),
                     $interfaceToCallRegistry
                 );
             }
@@ -404,7 +404,7 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
     public function registerForDirectLoadAndSaveOfAggregate(InterfaceToCallRegistry $interfaceToCallRegistry, Configuration $messagingConfiguration): void
     {
         foreach ($this->aggregateClasses as $aggregateClass) {
-            $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($aggregateClass));
+            $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor(Type::object($aggregateClass));
 
             $this->registerLoadAggregate(
                 $aggregateClassDefinition,
@@ -451,15 +451,15 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
             if ($interface->getReturnType()->isVoid()) {
                 Assert::isTrue($interface->hasFirstParameter(), 'Saving repository should have at least one parameter for aggregate: ' . $repositoryGateway);
 
-                if ($interface->hasMethodAnnotation(TypeDescriptor::create(RelatedAggregate::class))) {
+                if ($interface->hasMethodAnnotation(Type::attribute(RelatedAggregate::class))) {
                     Assert::isTrue($interface->hasSecondParameter(), 'Saving repository should have first parameter as identifier and second as array of events in: ' . $repositoryGateway);
 
                     /** @var RelatedAggregate $relatedAggregate */
-                    $relatedAggregate = $interface->getSingleMethodAnnotationOf(TypeDescriptor::create(RelatedAggregate::class));
+                    $relatedAggregate = $interface->getSingleMethodAnnotationOf(Type::attribute(RelatedAggregate::class));
                     Assert::isTrue(in_array($relatedAggregate->getClassName(), $this->aggregateClasses), sprintf('Repository for aggregate %s:%s is registered for unknown Aggregate: %s. Have you forgot to add Class or register specific Namespaces?', $repositoryGateway->getClassName(), $repositoryGateway->getMethodName(), $relatedAggregate->getClassName()));
                     $requestChannel = self::getRegisterAggregateSaveRepositoryInputChannel($relatedAggregate->getClassName());
 
-                    $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($relatedAggregate->getClassName()));
+                    $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor(Type::object($relatedAggregate->getClassName()));
 
                     $gatewayParameterConverters = [
                         GatewayHeaderBuilder::create($interface->getFirstParameterName(), AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER),
@@ -549,9 +549,9 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
         $relatedClassInterface = $this->interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName());
         $isFactoryMethod       = $relatedClassInterface->isFactoryMethod();
         $parameterConverters   = $parameterConverterAnnotationFactory->createParameterWithDefaults($relatedClassInterface);
-        $aggregateClassDefinition = $this->interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($registration->getClassName()));
+        $aggregateClassDefinition = $this->interfaceToCallRegistry->getClassDefinitionFor(Type::object($registration->getClassName()));
         $handledPayloadType = MessageHandlerRoutingModule::getFirstParameterClassIfAny($registration, $this->interfaceToCallRegistry);
-        $handledPayloadType = $handledPayloadType ? $this->interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($handledPayloadType)) : null;
+        $handledPayloadType = $handledPayloadType ? $this->interfaceToCallRegistry->getClassDefinitionFor(Type::object($handledPayloadType)) : null;
 
         // This is executed before sending to async channel
         $aggregateIdentifierHandlerPreCheck = MessageProcessorActivatorBuilder::create()
@@ -597,7 +597,7 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
     {
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
 
-        $aggregateClassDefinition = $this->interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($factoryRegistration->getClassName()));
+        $aggregateClassDefinition = $this->interfaceToCallRegistry->getClassDefinitionFor(Type::object($factoryRegistration->getClassName()));
 
         // factory processor
         /** @var CommandHandler|EventHandler $factoryAnnotation */
@@ -605,7 +605,7 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
 
         $factoryInterface = $this->interfaceToCallRegistry->getFor($factoryRegistration->getClassName(), $factoryRegistration->getMethodName());
         $factoryHandledPayloadType        = MessageHandlerRoutingModule::getFirstParameterClassIfAny($factoryRegistration, $this->interfaceToCallRegistry);
-        $factoryHandledPayloadType        = $factoryHandledPayloadType ? $this->interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($factoryHandledPayloadType)) : null;
+        $factoryHandledPayloadType        = $factoryHandledPayloadType ? $this->interfaceToCallRegistry->getClassDefinitionFor(Type::object($factoryHandledPayloadType)) : null;
         $factoryIdentifierMetadataMapping = $factoryAnnotation->identifierMetadataMapping;
         $factoryIdentifierMapping = $factoryAnnotation->identifierMapping;
         $factoryParameterConverters   = $parameterConverterAnnotationFactory->createParameterWithDefaults($factoryInterface);

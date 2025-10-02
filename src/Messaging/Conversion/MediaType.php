@@ -7,7 +7,6 @@ namespace Ecotone\Messaging\Conversion;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
@@ -143,7 +142,7 @@ final class MediaType implements DefinedObject
      */
     public static function createApplicationXPHPWithTypeParameter(string $type): self
     {
-        if ($type === TypeDescriptor::ANYTHING) {
+        if ($type === 'mixed') {
             return self::parseMediaType(self::APPLICATION_X_PHP);
         }
 
@@ -303,7 +302,7 @@ final class MediaType implements DefinedObject
      */
     public function getTypeParameter(): Type
     {
-        return TypeDescriptor::create($this->getParameter(self::TYPE_PARAMETER));
+        return Type::create($this->getParameter(self::TYPE_PARAMETER));
     }
 
     /**

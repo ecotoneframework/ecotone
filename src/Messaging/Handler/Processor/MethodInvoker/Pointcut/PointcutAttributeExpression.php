@@ -4,23 +4,21 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut;
 
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\PointcutExpression;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 
 /**
  * licence Apache-2.0
  */
 class PointcutAttributeExpression implements PointcutExpression
 {
-    public function __construct(private TypeDescriptor $typeDescriptor)
+    public function __construct(private Type $typeDescriptor)
     {
     }
 
     public function doesItCutWith(array $endpointAnnotations, InterfaceToCall $interfaceToCall): bool
     {
         foreach ($endpointAnnotations as $endpointAnnotation) {
-            $endpointType = TypeDescriptor::createFromVariable($endpointAnnotation);
-
-            if ($endpointType->equals($this->typeDescriptor)) {
+            if ($this->typeDescriptor->accepts($endpointAnnotation)) {
                 return true;
             }
         }

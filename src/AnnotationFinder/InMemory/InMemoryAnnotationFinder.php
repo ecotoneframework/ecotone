@@ -9,7 +9,7 @@ use Ecotone\AnnotationFinder\AnnotatedMethod;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationResolver\AttributeResolver;
 use Ecotone\AnnotationFinder\TypeResolver;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use ReflectionClass;
 
 /**
@@ -223,8 +223,9 @@ class InMemoryAnnotationFinder implements AnnotationFinder
     public function getAttributeForClass(string $className, string $attributeClassName): object
     {
         $attributes = $this->getAnnotationsForClass($className);
+        $attributeClassNameType = Type::object($attributeClassName);
         foreach ($attributes as $attributeToVerify) {
-            if (TypeDescriptor::create($attributeToVerify)->isCompatibleWith(TypeDescriptor::create($attributeClassName))) {
+            if ($attributeClassNameType->accepts($attributeToVerify)) {
                 return $attributeToVerify;
             }
         }

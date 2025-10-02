@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut\PointcutParser;
-use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\Handler\UnionTypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Handler\Type\UnionType;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
 use function is_null;
@@ -51,18 +50,17 @@ class Pointcut
                 continue;
             }
 
-            /** @var UnionTypeDescriptor|TypeDescriptor $type */
-            $type = $interfaceParameter->getTypeDescriptor();
-            if ($type->isUnionType()) {
+            $type = $interfaceParameter->getTypeDescriptor()->withoutNull();
+            if ($type instanceof UnionType) {
                 if (! self::doesContainAnnotation($type)) {
                     continue;
                 }
 
-                foreach ($type->getUnionTypes() as $unionType) {
+                foreach ($type->withoutNull()->getUnionTypes() as $unionType) {
                     if ($interfaceParameter->doesAllowNulls()) {
                         throw InvalidArgumentException::create("Error during initialization of pointcut. Union types can only be non nullable for expressions in {$interfaceToCall} parameter: {$interfaceParameter}");
                     }
-                    if (! $unionType->isClassOrInterface() || ! ClassDefinition::createFor($unionType)->isAnnotation()) {
+                    if (! $unionType->isAttribute()) {
                         throw InvalidArgumentException::create("Error during initialization of pointcut. Union types can only combined from attributes, non attribute type given {$unionType->toString()} in {$interfaceToCall} parameter: {$interfaceParameter}");
                     }
 
@@ -72,7 +70,7 @@ class Pointcut
                 if (! $type->isClassNotInterface()) {
                     continue;
                 }
-                if (! ClassDefinition::createFor($type)->isAnnotation()) {
+                if (! $type->isAttribute()) {
                     continue;
                 }
 
@@ -129,10 +127,10 @@ class Pointcut
         return false;
     }
 
-    private static function doesContainAnnotation(TypeDescriptor|UnionTypeDescriptor $type): bool
+    private static function doesContainAnnotation(Type|UnionType $type): bool
     {
         foreach ($type->getUnionTypes() as $unionType) {
-            if ($unionType->isClassOrInterface() && ClassDefinition::createFor($unionType)->isAnnotation()) {
+            if ($unionType->isAttribute()) {
                 return true;
             }
         }

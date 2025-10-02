@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Conversion;
 
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use ReflectionMethod;
@@ -51,12 +50,12 @@ class ReferenceServiceConverter implements Converter
     /**
      * @param $object
      * @param string $method
-     * @param TypeDescriptor $sourceType
-     * @param TypeDescriptor $targetType
+     * @param Type $sourceType
+     * @param Type $targetType
      * @return ReferenceServiceConverter
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function create($object, string $method, TypeDescriptor $sourceType, TypeDescriptor $targetType): self
+    public static function create($object, string $method, Type $sourceType, Type $targetType): self
     {
         return new self($object, $method, $sourceType, $targetType);
     }
@@ -64,7 +63,7 @@ class ReferenceServiceConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
+    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType)
     {
         return call_user_func([$this->object, $this->method], $source);
     }
@@ -72,7 +71,7 @@ class ReferenceServiceConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
+    public function matches(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
     {
         return $sourceMediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP)
             && $targetMediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP)

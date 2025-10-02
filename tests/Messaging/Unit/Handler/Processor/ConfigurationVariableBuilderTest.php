@@ -5,7 +5,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ConfigurationVariableBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Test\ComponentTestBuilder;
 use PHPUnit\Framework\TestCase;
@@ -29,7 +29,7 @@ class ConfigurationVariableBuilderTest extends TestCase
                     ->withMethodParameterConverters([
                         ConfigurationVariableBuilder::createFrom(
                             'name',
-                            InterfaceParameter::createNotNullable('value', TypeDescriptor::createIntegerType())
+                            InterfaceParameter::createNotNullable('value', Type::int())
                         ),
                     ])
             )
@@ -50,7 +50,7 @@ class ConfigurationVariableBuilderTest extends TestCase
                     ->withMethodParameterConverters([
                         ConfigurationVariableBuilder::createFrom(
                             null,
-                            InterfaceParameter::createNotNullable('value', TypeDescriptor::createIntegerType())
+                            InterfaceParameter::createNotNullable('value', Type::int())
                         ),
                     ])
             )
@@ -71,7 +71,7 @@ class ConfigurationVariableBuilderTest extends TestCase
                     ->withMethodParameterConverters([
                         ConfigurationVariableBuilder::createFrom(
                             'name',
-                            InterfaceParameter::createNullable('value', TypeDescriptor::createIntegerType())
+                            InterfaceParameter::createNullable('value', Type::int())
                         ),
                     ])
             )
@@ -91,7 +91,7 @@ class ConfigurationVariableBuilderTest extends TestCase
                     ->withMethodParameterConverters([
                         ConfigurationVariableBuilder::create(
                             'value',
-                            InterfaceParameter::createNotNullable('name', TypeDescriptor::createIntegerType()),
+                            InterfaceParameter::createNotNullable('name', Type::int()),
                             false,
                             100,
                         ),
@@ -116,7 +116,7 @@ class ConfigurationVariableBuilderTest extends TestCase
                     ->withMethodParameterConverters([
                         ConfigurationVariableBuilder::create(
                             'value',
-                            InterfaceParameter::createNotNullable('name', TypeDescriptor::createIntegerType()),
+                            InterfaceParameter::createNotNullable('name', Type::int()),
                             true,
                             null,
                         ),

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\EventSourcing\Mapping;
 
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Modelling\Event;
 
 /**
@@ -34,8 +34,8 @@ final class EventMapper
 
     public function mapNameToEventType(string $name): string
     {
-        if ($name === TypeDescriptor::ARRAY) {
-            return TypeDescriptor::ARRAY;
+        if ($name === Type::ARRAY) {
+            return Type::ARRAY;
         }
 
         if (array_key_exists($name, $this->nameToEventMapping)) {

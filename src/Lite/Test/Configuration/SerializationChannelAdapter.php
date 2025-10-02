@@ -7,7 +7,7 @@ namespace Ecotone\Lite\Test\Configuration;
 use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -27,9 +27,9 @@ final class SerializationChannelAdapter implements ChannelInterceptor
         return MessageBuilder::fromMessage($message)
                 ->setPayload($this->conversionService->convert(
                     $message->getPayload(),
-                    TypeDescriptor::createFromVariable($message->getPayload()),
+                    Type::createFromVariable($message->getPayload()),
                     $message->getHeaders()->getContentType(),
-                    $this->targetMediaType->hasTypeParameter() ? $this->targetMediaType->getTypeParameter() : TypeDescriptor::createStringType(),
+                    $this->targetMediaType->hasTypeParameter() ? $this->targetMediaType->getTypeParameter() : Type::string(),
                     $this->targetMediaType
                 ))
                 ->setContentType($this->targetMediaType)

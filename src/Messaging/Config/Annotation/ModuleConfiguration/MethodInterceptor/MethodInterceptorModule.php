@@ -22,7 +22,7 @@ use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 
 #[ModuleAnnotation]
 /**
@@ -60,10 +60,10 @@ class MethodInterceptorModule extends NoExternalConfigurationModule implements A
             $annotationRegistrationService->findAnnotatedMethods(After::class)
         );
 
-        $beforeSendAnnotation = TypeDescriptor::create(Presend::class);
-        $beforeAnnotation     = TypeDescriptor::create(Before::class);
-        $aroundAnnotation     = TypeDescriptor::create(Around::class);
-        $afterAnnotation      = TypeDescriptor::create(After::class);
+        $beforeSendAnnotation = Type::attribute(Presend::class);
+        $beforeAnnotation     = Type::attribute(Before::class);
+        $aroundAnnotation     = Type::attribute(Around::class);
+        $afterAnnotation      = Type::attribute(After::class);
 
         $beforeSendInterceptors = [];
         $preCallInterceptors    = [];

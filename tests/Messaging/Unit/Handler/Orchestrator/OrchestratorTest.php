@@ -279,7 +279,7 @@ class OrchestratorTest extends TestCase
     public function test_throwing_exception_when_orchestrator_has_no_return_type(): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Orchestrator method Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Orchestrator\Incorrect\NoReturnTypeOrchestrator::noReturnType must return array of strings, but returns nullable type anything');
+        $this->expectExceptionMessage('Orchestrator method Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Orchestrator\Incorrect\NoReturnTypeOrchestrator::noReturnType must return array of strings, but returns nullable type mixed');
 
         EcotoneLite::bootstrapFlowTesting(
             [NoReturnTypeOrchestrator::class],

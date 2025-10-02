@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Modelling;
 
 use Ecotone\Messaging\Handler\ClassDefinition;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Modelling\Attribute\Aggregate;
 use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\Attribute\Saga;
@@ -48,8 +48,8 @@ class InMemoryStandardRepository implements StandardRepository
             return true;
         }
 
-        $classDefinition = ClassDefinition::createFor(TypeDescriptor::create($aggregateClassName));
-        return $classDefinition->hasClassAnnotationOfPreciseType(TypeDescriptor::create(Aggregate::class)) || $classDefinition->hasClassAnnotationOfPreciseType(TypeDescriptor::create(Saga::class));
+        $classDefinition = ClassDefinition::createFor(Type::object($aggregateClassName));
+        return $classDefinition->hasClassAnnotationOfPreciseType(Type::attribute(Aggregate::class)) || $classDefinition->hasClassAnnotationOfPreciseType(Type::attribute(Saga::class));
     }
 
     /**

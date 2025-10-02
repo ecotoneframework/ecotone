@@ -12,7 +12,7 @@ use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
@@ -28,7 +28,7 @@ use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
  */
 class AggregateIdentifierRetrevingServiceBuilder implements CompilableBuilder
 {
-    private TypeDescriptor $typeToConvertTo;
+    private Type $typeToConvertTo;
     private array $messageIdentifierMapping;
 
     private function __construct(
@@ -77,11 +77,11 @@ class AggregateIdentifierRetrevingServiceBuilder implements CompilableBuilder
     private function hasAccordingIdentifier(InterfaceToCallRegistry $interfaceToCallRegistry, ClassDefinition $aggregateClassName, $propertyName): bool
     {
         foreach ($aggregateClassName->getProperties() as $property) {
-            if ($property->hasAnnotation(TypeDescriptor::create(AggregateIdentifier::class)) && ($propertyName === $property->getName())) {
+            if ($property->hasAnnotation(Type::attribute(AggregateIdentifier::class)) && ($propertyName === $property->getName())) {
                 return true;
             }
         }
-        $aggregateIdentifierMethod = TypeDescriptor::create(AggregateIdentifierMethod::class);
+        $aggregateIdentifierMethod = Type::attribute(AggregateIdentifierMethod::class);
 
         foreach ($aggregateClassName->getPublicMethodNames() as $method) {
             $methodToCheck = $interfaceToCallRegistry->getFor($aggregateClassName->getClassType()->toString(), $method);
@@ -108,8 +108,8 @@ class AggregateIdentifierRetrevingServiceBuilder implements CompilableBuilder
     ): void {
         $messageIdentifiersMapping = [];
 
-        $aggregateIdentifierAnnotation = TypeDescriptor::create(AggregateIdentifier::class);
-        $aggregateIdentifierMethod = TypeDescriptor::create(AggregateIdentifierMethod::class);
+        $aggregateIdentifierAnnotation = Type::attribute(AggregateIdentifier::class);
+        $aggregateIdentifierMethod = Type::attribute(AggregateIdentifierMethod::class);
         foreach ($aggregateClassDefinition->getProperties() as $property) {
             if ($property->hasAnnotation($aggregateIdentifierAnnotation)) {
                 $messageIdentifiersMapping[$property->getName()] = null;
@@ -142,7 +142,7 @@ class AggregateIdentifierRetrevingServiceBuilder implements CompilableBuilder
 
         $messageProperties = [];
         if ($handledMessageClassNameDefinition) {
-            $targetAggregateIdentifierAnnotation = TypeDescriptor::create(TargetAggregateIdentifier::class);
+            $targetAggregateIdentifierAnnotation = Type::attribute(TargetAggregateIdentifier::class);
             foreach ($handledMessageClassNameDefinition->getProperties() as $property) {
                 if ($property->hasAnnotation($targetAggregateIdentifierAnnotation)) {
                     /** @var TargetAggregateIdentifier $annotation */
@@ -179,7 +179,7 @@ class AggregateIdentifierRetrevingServiceBuilder implements CompilableBuilder
         }
 
         $this->messageIdentifierMapping = $messageIdentifiersMapping;
-        $this->typeToConvertTo          = $handledMessageClassNameDefinition ? $handledMessageClassNameDefinition->getClassType() : TypeDescriptor::createArrayType();
+        $this->typeToConvertTo          = $handledMessageClassNameDefinition ? $handledMessageClassNameDefinition->getClassType() : Type::array();
     }
 
     private function hasRuntimeIdentifierMapping(array $metadataIdentifierMapping, $aggregateIdentifierName): bool

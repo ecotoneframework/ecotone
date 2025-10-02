@@ -7,7 +7,7 @@ namespace Test\Ecotone\Messaging\Unit\Config;
 use Ecotone\Messaging\Config\LicenceDecider;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\EnterpriseMode\EnterpriseClassInterface;
 use Test\Ecotone\Messaging\Fixture\EnterpriseMode\EnterpriseMethodInterface;
@@ -77,7 +77,7 @@ final class EnterpriseModeDeciderTest extends TestCase
         $enterpriseModeDecider = new LicenceDecider(true);
 
         $this->assertFalse($enterpriseModeDecider->isEnabledSpecificallyFor(
-            ClassDefinition::createFor(TypeDescriptor::create(EnterpriseMethodInterface::class))
+            ClassDefinition::createFor(Type::create(EnterpriseMethodInterface::class))
         ));
     }
 
@@ -86,7 +86,7 @@ final class EnterpriseModeDeciderTest extends TestCase
         $enterpriseModeDecider = new LicenceDecider(true);
 
         $this->assertTrue($enterpriseModeDecider->isEnabledSpecificallyFor(
-            ClassDefinition::createFor(TypeDescriptor::create(EnterpriseClassInterface::class))
+            ClassDefinition::createFor(Type::create(EnterpriseClassInterface::class))
         ));
     }
 

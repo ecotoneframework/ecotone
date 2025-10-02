@@ -7,7 +7,7 @@ namespace Test\Ecotone\Messaging\Fixture\Handler\HeaderConversion;
 use Ecotone\Messaging\Attribute\MediaTypeConverter;
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\Assert;
 
 #[MediaTypeConverter]
@@ -16,7 +16,7 @@ use Ecotone\Messaging\Support\Assert;
  */
 final class JsonConverter implements Converter
 {
-    public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
+    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType)
     {
         Assert::isTrue($sourceType->isString() || $sourceType->isIterable(), "Json converter can only convert string or array, given {$sourceType}");
 
@@ -27,7 +27,7 @@ final class JsonConverter implements Converter
         return json_encode($source, JSON_THROW_ON_ERROR);
     }
 
-    public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
+    public function matches(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
     {
         return $targetMediaType->isCompatibleWith(MediaType::createApplicationJson()) || $sourceMediaType->isCompatibleWith(MediaType::createApplicationJson());
     }

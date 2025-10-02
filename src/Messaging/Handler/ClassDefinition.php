@@ -7,6 +7,7 @@ namespace Ecotone\Messaging\Handler;
 use Attribute;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
+use Ecotone\Messaging\Handler\Type\ObjectType;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use ReflectionClass;
@@ -22,7 +23,7 @@ use ReflectionMethod;
  */
 class ClassDefinition
 {
-    private TypeDescriptor $classDescriptor;
+    private Type $classDescriptor;
     /**
      * @var ClassPropertyDefinition[]
      */
@@ -37,7 +38,7 @@ class ClassDefinition
     private array $publicMethodNames;
     private bool $isAnnotation;
 
-    private function __construct(TypeDescriptor $classDescriptor, array $properties, array $annotations, array $publicMethodNames, bool $isAnnotation)
+    private function __construct(Type $classDescriptor, array $properties, array $annotations, array $publicMethodNames, bool $isAnnotation)
     {
         Assert::isTrue($classDescriptor->isClassOrInterface(), 'Cannot create class definition from non class ' . $classDescriptor->toString());
 
@@ -48,7 +49,7 @@ class ClassDefinition
         $this->isAnnotation = $isAnnotation;
     }
 
-    public static function createFor(TypeDescriptor $classType): self
+    public static function createFor(Type $classType): self
     {
         $annotationParser = InMemoryAnnotationFinder::createFrom([$classType->toString()]);
         $typeResolver = TypeResolver::create();
@@ -66,7 +67,7 @@ class ClassDefinition
         );
     }
 
-    public static function createUsingAnnotationParser(TypeDescriptor $classType, AnnotationResolver $annotationParser): ClassDefinition
+    public static function createUsingAnnotationParser(Type $classType, AnnotationResolver $annotationParser): ClassDefinition
     {
         $typeResolver = TypeResolver::createWithAnnotationParser($annotationParser);
 
@@ -116,7 +117,7 @@ class ClassDefinition
         throw InvalidArgumentException::create("There is no property with name {$name} in {$this->classDescriptor->toString()}");
     }
 
-    public function getClassType(): TypeDescriptor
+    public function getClassType(): Type
     {
         return $this->classDescriptor;
     }
@@ -155,11 +156,11 @@ class ClassDefinition
         return $this->classAnnotations;
     }
 
-    public function getSingleClassAnnotation(TypeDescriptor $annotationType): object
+    public function getSingleClassAnnotation(ObjectType $annotationType): object
     {
         $foundAnnotations = [];
         foreach ($this->classAnnotations as $classAnnotation) {
-            if (TypeDescriptor::createFromVariable($classAnnotation)->isCompatibleWith($annotationType)) {
+            if ($annotationType->accepts($classAnnotation)) {
                 $foundAnnotations[] = $classAnnotation;
             }
         }
@@ -182,7 +183,7 @@ class ClassDefinition
     public function hasClassAnnotation(Type $type): bool
     {
         foreach ($this->getClassAnnotations() as $classAnnotation) {
-            if (TypeDescriptor::createFromVariable($classAnnotation)->isCompatibleWith($type)) {
+            if (Type::createFromVariable($classAnnotation)->isCompatibleWith($type)) {
                 return true;
             }
         }
@@ -193,7 +194,7 @@ class ClassDefinition
     public function hasClassAnnotationOfPreciseType(Type $type): bool
     {
         foreach ($this->getClassAnnotations() as $classAnnotation) {
-            if (TypeDescriptor::createFromVariable($classAnnotation)->equals($type)) {
+            if (Type::createFromVariable($classAnnotation)->equals($type)) {
                 return true;
             }
         }

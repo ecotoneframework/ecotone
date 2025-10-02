@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
 
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 
 /**
  * Class CollectionConverter
@@ -39,15 +39,18 @@ class CollectionConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): array
+    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): array
     {
+        if (! $sourceType instanceof Type\GenericType || ! $targetType instanceof Type\GenericType) {
+            throw new ConversionException("Source and target type must be generic types, {$sourceType} and {$targetType} given.");
+        }
         $collection = [];
         foreach ($source as $element) {
             $collection[] = $this->converterForSingleType->convert(
                 $element,
-                $sourceType->resolveGenericTypes()[0],
+                $sourceType->genericTypes[0],
                 MediaType::createApplicationXPHP(),
-                $targetType->resolveGenericTypes()[0],
+                $targetType->genericTypes[0],
                 MediaType::createApplicationXPHP(),
             );
         }
@@ -58,14 +61,14 @@ class CollectionConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
+    public function matches(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
     {
-        return $sourceType->isCollection() && $targetType->isCollection()
-            && $sourceType->isSingleTypeCollection() && $targetType->isSingleTypeCollection()
+        return $sourceType instanceof Type\GenericType && $targetType instanceof Type\GenericType
+            && $sourceType->isCollection() && $targetType->isCollection()
             && $this->converterForSingleType->matches(
-                $sourceType->resolveGenericTypes()[0],
+                $sourceType->genericTypes[0],
                 MediaType::createApplicationXPHP(),
-                $targetType->resolveGenericTypes()[0],
+                $targetType->genericTypes[0],
                 MediaType::createApplicationXPHP(),
             );
     }

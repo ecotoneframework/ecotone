@@ -9,7 +9,7 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\MessageHeaders;
@@ -139,7 +139,7 @@ class SaveAggregateServiceTemplate
         Assert::isIterable($events, "Return value Event Sourced Aggregate {$calledInterface} must return array of events");
         return array_map(static function ($event) use ($message, $calledInterface, $headerMapper, $conversionService, $eventMapper): Event {
             if (! is_object($event)) {
-                $typeDescriptor = TypeDescriptor::createFromVariable($event);
+                $typeDescriptor = Type::createFromVariable($event);
                 throw InvalidArgumentException::create("Events return by after calling {$calledInterface} must all be objects, {$typeDescriptor->toString()} given");
             }
             $eventMetadata = $message->getHeaders()->headers();

@@ -10,7 +10,7 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 
 /**
  * licence Enterprise
@@ -37,9 +37,9 @@ final class LicenceDecider
             return false;
         }
 
-        $type = TypeDescriptor::create(Enterprise::class);
+        $type = Type::attribute(Enterprise::class);
         if ($interfaceToCall instanceof ClassDefinition) {
-            return $interfaceToCall->hasClassAnnotation(TypeDescriptor::create(Enterprise::class));
+            return $interfaceToCall->hasClassAnnotation($type);
         }
 
         return $interfaceToCall->hasAnnotation($type);

@@ -8,8 +8,8 @@ use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverter;
 use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverter;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -47,9 +47,9 @@ class ConversionServiceTest extends TestCase
 
         $result = $conversionService->convert(
             $serializedObject,
-            TypeDescriptor::create(TypeDescriptor::OBJECT),
+            Type::create(Type::OBJECT),
             MediaType::createApplicationXPHP(),
-            TypeDescriptor::create(TypeDescriptor::STRING),
+            Type::create(Type::STRING),
             MediaType::createApplicationXPHPSerialized()
         );
 
@@ -57,9 +57,9 @@ class ConversionServiceTest extends TestCase
             $serializedObject,
             $conversionService->convert(
                 $result,
-                TypeDescriptor::create(TypeDescriptor::STRING),
+                Type::create(Type::STRING),
                 MediaType::createApplicationXPHPSerialized(),
-                TypeDescriptor::create(stdClass::class),
+                Type::create(stdClass::class),
                 MediaType::createApplicationXPHP()
             )
         );
@@ -73,9 +73,9 @@ class ConversionServiceTest extends TestCase
             null,
             $conversionService->convert(
                 null,
-                TypeDescriptor::create(TypeDescriptor::OBJECT),
+                Type::create(Type::OBJECT),
                 MediaType::createApplicationXPHP(),
-                TypeDescriptor::create(TypeDescriptor::STRING),
+                Type::create(Type::STRING),
                 MediaType::createApplicationXPHPSerialized()
             )
         );

@@ -7,14 +7,14 @@ namespace Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\Receive
 use Ecotone\Messaging\Attribute\MediaTypeConverter;
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 
 #[MediaTypeConverter]
 final class UserChangedAddressConverter implements Converter
 {
-    public function convert($source, TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType)
+    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType)
     {
-        if ($targetType->equals(TypeDescriptor::create(UserChangedAddress::class))) {
+        if ($targetType->equals(Type::create(UserChangedAddress::class))) {
             return new UserChangedAddress($source['userId']);
         }
 
@@ -23,7 +23,7 @@ final class UserChangedAddressConverter implements Converter
         ];
     }
 
-    public function matches(TypeDescriptor $sourceType, MediaType $sourceMediaType, TypeDescriptor $targetType, MediaType $targetMediaType): bool
+    public function matches(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
     {
         return true;
     }

@@ -15,8 +15,8 @@ use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\Handler\UnionTypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Handler\Type\UnionType;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Scheduling\TimeSpan;
@@ -61,11 +61,11 @@ class EndpointHeadersInterceptor implements DefinedObject
                 ]);
             }
 
-            $type = TypeDescriptor::createFromVariable($metadata[MessageHeaders::DELIVERY_DELAY]);
-            if (! $type->isCompatibleWith(UnionTypeDescriptor::createWith([
-                TypeDescriptor::createIntegerType(),
-                TypeDescriptor::create(TimeSpan::class),
-                TypeDescriptor::create(DateTimeInterface::class),
+            $type = Type::createFromVariable($metadata[MessageHeaders::DELIVERY_DELAY]);
+            if (! $type->isCompatibleWith(UnionType::createWith([
+                Type::int(),
+                Type::object(TimeSpan::class),
+                Type::object(DateTimeInterface::class),
             ]))) {
                 throw ConfigurationException::create("Delivery delay should be either integer, TimeSpan or DateTimeInterface, but got {$type->toString()}");
             }
@@ -92,10 +92,10 @@ class EndpointHeadersInterceptor implements DefinedObject
                 ]);
             }
 
-            $type = TypeDescriptor::createFromVariable($metadata[MessageHeaders::TIME_TO_LIVE]);
-            if (! $type->isCompatibleWith(UnionTypeDescriptor::createWith([
-                TypeDescriptor::createIntegerType(),
-                TypeDescriptor::create(TimeSpan::class),
+            $type = Type::createFromVariable($metadata[MessageHeaders::TIME_TO_LIVE]);
+            if (! $type->isCompatibleWith(UnionType::createWith([
+                Type::int(),
+                Type::object(TimeSpan::class),
             ]))) {
                 throw ConfigurationException::create("Delivery delay should be either integer or TimeSpan, but got {$type->toString()}");
             }

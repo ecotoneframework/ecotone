@@ -9,7 +9,7 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\Support\Assert;
@@ -72,7 +72,7 @@ final class AggregateResolver
             ) {
                 return [];
             }
-            $returnType = TypeDescriptor::createFromVariable($message->getPayload());
+            $returnType = Type::createFromVariable($message->getPayload());
             if ($this->isNewAggregateInstanceReturned($returnType)) {
                 return [];
             }
@@ -98,7 +98,7 @@ final class AggregateResolver
         $calledAggregateInstance = $message->getHeaders()->containsKey(AggregateMessage::CALLED_AGGREGATE_INSTANCE) ? $message->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_INSTANCE) : null;
 
         Assert::isTrue($message->getHeaders()->containsKey(AggregateMessage::CALLED_AGGREGATE_CLASS), 'No aggregate class name was found in headers');
-        $aggregateDefinition = $this->aggregateDefinitionRegistry->getFor(TypeDescriptor::create($message->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_CLASS)));
+        $aggregateDefinition = $this->aggregateDefinitionRegistry->getFor($message->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_CLASS));
 
         if ($calledAggregateInstance || (is_null($calledAggregateInstance) && $aggregateDefinition->isPureEventSourcedAggregate())) {
             $resolvedAggregate = $this->resolveSingleAggregate($aggregateDefinition, $calledAggregateInstance, $message, $isNewInstance);
@@ -108,7 +108,7 @@ final class AggregateResolver
             }
         }
 
-        $returnType = TypeDescriptor::createFromVariable($message->getPayload());
+        $returnType = Type::createFromVariable($message->getPayload());
         if ($this->isNewAggregateInstanceReturned($returnType)) {
             $returnedResolvedAggregates = $this->resolveMultipleAggregates(
                 MessageBuilder::fromMessage($message)
@@ -185,7 +185,7 @@ final class AggregateResolver
         );
     }
 
-    public function isNewAggregateInstanceReturned(TypeDescriptor $returnType): bool
+    public function isNewAggregateInstanceReturned(Type $returnType): bool
     {
         return $this->aggregateDefinitionRegistry->has($returnType);
     }

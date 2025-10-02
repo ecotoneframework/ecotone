@@ -24,7 +24,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
@@ -115,7 +115,7 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
         $parameterConverterAnnotationFactory = ParameterConverterAnnotationFactory::create();
         $interfaceToCall = $interfaceToCallRegistry->getFor($className, $methodName);
 
-        if ($interfaceToCall->canReturnValue() && ! $interfaceToCall->getReturnType()->equals(TypeDescriptor::create(ConsoleCommandResultSet::class))) {
+        if ($interfaceToCall->canReturnValue() && ! $interfaceToCall->getReturnType()->equals(Type::object(ConsoleCommandResultSet::class))) {
             throw InvalidArgumentException::create("One Time Command {$interfaceToCall} must have void or " . ConsoleCommandResultSet::class . ' return type');
         }
 

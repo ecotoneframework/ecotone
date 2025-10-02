@@ -33,7 +33,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Handler\Router\RouterProcessor;
 use Ecotone\Messaging\Handler\Router\RouteToChannelResolver;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Modelling\Attribute\CommandHandler;
@@ -80,9 +80,9 @@ class MessageHandlerRoutingModule implements AnnotationModule
 
     public static function getFirstParameterClassIfAny(AnnotatedFinding $registration, InterfaceToCallRegistry $interfaceToCallRegistry): ?string
     {
-        $type = TypeDescriptor::create(self::getFirstParameterTypeFor($registration, $interfaceToCallRegistry));
+        $type = Type::create(self::getFirstParameterTypeFor($registration, $interfaceToCallRegistry));
 
-        if ($type->isClassOrInterface() && ! $type->isClassOfType(TypeDescriptor::create(Message::class))) {
+        if ($type->isClassOrInterface() && ! $type->isIdentifiedBy(Message::class)) {
             return $type->toString();
         }
 
@@ -93,25 +93,25 @@ class MessageHandlerRoutingModule implements AnnotationModule
     {
         $interfaceToCall = $interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName());
 
-        if ($interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(IgnorePayload::class)) || $interfaceToCall->hasNoParameters()) {
-            return TypeDescriptor::ARRAY;
+        if ($interfaceToCall->hasMethodAnnotation(Type::attribute(IgnorePayload::class)) || $interfaceToCall->hasNoParameters()) {
+            return Type::ARRAY;
         }
 
         $firstParameterType = $interfaceToCall->getFirstParameter()->getTypeDescriptor();
 
-        if ($firstParameterType->isClassOrInterface() && ! $firstParameterType->isClassOfType(TypeDescriptor::create(Message::class))) {
+        if ($firstParameterType->isClassOrInterface() && ! $firstParameterType->isClassOfType(Message::class)) {
             $reflectionParameter = new ReflectionParameter([$registration->getClassName(), $registration->getMethodName()], 0);
 
             foreach ($reflectionParameter->getAttributes() as $attribute) {
                 if (in_array($attribute->getName(), [ConfigurationVariable::class, Header::class, Headers::class, \Ecotone\Messaging\Attribute\Parameter\Reference::class])) {
-                    return TypeDescriptor::ARRAY;
+                    return Type::ARRAY;
                 }
             }
 
             return $firstParameterType;
         }
 
-        return TypeDescriptor::ARRAY;
+        return Type::ARRAY;
     }
 
     /**

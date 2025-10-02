@@ -21,6 +21,8 @@ interface MethodInvocation
      */
     public function proceed(): mixed;
 
+    public function cloneCurrentState(): self;
+
     public function getObjectToInvokeOn(): string|object;
 
     public function getMethodName(): string;

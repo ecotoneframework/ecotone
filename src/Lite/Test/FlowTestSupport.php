@@ -11,7 +11,7 @@ use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
@@ -184,7 +184,7 @@ final class FlowTestSupport
      */
     public function withEventsFor(string|object|array $identifiers, string $aggregateClass, array $events, int $aggregateVersion = 0): self
     {
-        $aggregateDefinition = $this->aggregateDefinitionRegistry->getFor(TypeDescriptor::create($aggregateClass));
+        $aggregateDefinition = $this->aggregateDefinitionRegistry->getFor(Type::object($aggregateClass));
         Assert::isTrue($aggregateDefinition->isEventSourced(), "Aggregate {$aggregateClass} is not event sourced. Can't store events for it.");
 
         $this->messagingEntrypoint->sendWithHeaders(
@@ -235,13 +235,13 @@ final class FlowTestSupport
         return $this;
     }
 
-    public function initializeProjection(string $projectionName): self
+    public function initializeProjection(string $projectionName, array $metadata = []): self
     {
         $projectionRegistry = $this->getGateway(ProjectionRegistry::class);
         if ($projectionRegistry->has($projectionName)) {
             $projectionRegistry->get($projectionName)->init();
         } else {
-            $this->getGateway(ProjectionManager::class)->initializeProjection($projectionName);
+            $this->getGateway(ProjectionManager::class)->initializeProjection($projectionName, $metadata);
         }
 
         return $this;

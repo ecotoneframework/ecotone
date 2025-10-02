@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Conversion;
 
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Support\Assert;
 
 /**
@@ -63,7 +62,7 @@ class AutoCollectionConversionService implements ConversionService
         }
 
         $converted = $converter->convert($source, $sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
-        $convertedType = TypeDescriptor::createFromVariable($converted);
+        $convertedType = Type::createFromVariable($converted);
         // Some converters (eg. DeserializingConverter) may return a value that is not compatible with the target type,
         // so we try to convert it again, from the new media type and PHP type.
         if (! $convertedType->isCompatibleWith($targetPHPType) && $targetMediaType->isCompatibleWith(MediaType::createApplicationXPHP())) {
@@ -105,10 +104,10 @@ class AutoCollectionConversionService implements ConversionService
         return null;
     }
 
-    private function getTargetType(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): TypeDescriptor
+    private function getTargetType(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): Type
     {
         foreach ($this->converters as $converter) {
-            /** @var TypeDescriptor[] $targetTypesToCheck */
+            /** @var Type[] $targetTypesToCheck */
             $targetTypesToCheck = [];
             if (! $targetType->isUnionType()) {
                 $targetTypesToCheck[] = $targetType;

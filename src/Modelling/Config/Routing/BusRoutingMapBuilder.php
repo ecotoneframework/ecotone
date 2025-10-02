@@ -17,7 +17,6 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\PriorityBasedOnType;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\NamedEvent;
 use RuntimeException;
@@ -92,9 +91,9 @@ class BusRoutingMapBuilder extends BusRoutingMap
             foreach ($type->getUnionTypes() as $unionType) {
                 $className = (string) $unionType;
                 if (class_exists($className)) {
-                    $classDefinition = $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($className));
-                    if ($classDefinition->hasClassAnnotation(TypeDescriptor::create(NamedEvent::class))) {
-                        $namedEvent = $classDefinition->getSingleClassAnnotation(TypeDescriptor::create(NamedEvent::class));
+                    $classDefinition = $interfaceToCallRegistry->getClassDefinitionFor(Type::object($className));
+                    if ($classDefinition->hasClassAnnotation(Type::attribute(NamedEvent::class))) {
+                        $namedEvent = $classDefinition->getSingleClassAnnotation(Type::attribute(NamedEvent::class));
                         $this->addObjectAlias($className, $namedEvent->getName());
                     }
                 }

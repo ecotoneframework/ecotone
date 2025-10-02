@@ -8,7 +8,7 @@ use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\RequestReplyProducer;
 use Ecotone\Messaging\Handler\Splitter\SplitterHandler;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageDeliveryException;
@@ -326,7 +326,7 @@ class RequestReplyProducerTest extends MessagingTestCase
                 MessageBuilder::fromMessage($requestMessage)
                     ->setPayload($replyData[$sequenceNumber])
                     ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $correlationHeader)
-                    ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::createFromVariable($replyData[$sequenceNumber])->toString()))
+                    ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(Type::createFromVariable($replyData[$sequenceNumber])->toString()))
                     ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
                     ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber + 1)
                     ->build(),

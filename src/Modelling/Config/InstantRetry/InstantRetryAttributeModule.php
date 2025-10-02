@@ -16,7 +16,7 @@ use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Modelling\Attribute\InstantRetry;
@@ -102,7 +102,7 @@ final class InstantRetryAttributeModule implements AnnotationModule
                 $interfaceToCallRegistry,
                 $instantRetryAttribute->retryTimes,
                 $instantRetryAttribute->exceptions,
-                TypeDescriptor::create($commandBusInterface)->toString(),
+                Type::object($commandBusInterface)->toString(),
                 Precedence::CUSTOM_INSTANT_RETRY_PRECEDENCE,
                 null,
             );

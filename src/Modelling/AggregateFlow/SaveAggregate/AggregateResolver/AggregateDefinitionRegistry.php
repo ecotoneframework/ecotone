@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver;
 
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 
 /**
  * licence Apache-2.0
@@ -22,9 +22,9 @@ final class AggregateDefinitionRegistry
     }
 
     /**
-     * @param TypeDescriptor|class-string $className
+     * @param Type|class-string $className
      */
-    public function getFor(TypeDescriptor|string $className): AggregateClassDefinition
+    public function getFor(Type|string $className): AggregateClassDefinition
     {
         if (isset($this->aggregateDefinitions[(string) $className])) {
             return $this->aggregateDefinitions[(string) $className];
@@ -34,9 +34,9 @@ final class AggregateDefinitionRegistry
     }
 
     /**
-     * @param TypeDescriptor|class-string $className
+     * @param Type|class-string $className
      */
-    public function has(TypeDescriptor|string $className): bool
+    public function has(Type|string $className): bool
     {
         return isset($this->aggregateDefinitions[(string) $className]);
     }

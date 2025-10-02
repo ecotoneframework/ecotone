@@ -112,7 +112,7 @@ class InterfaceToCallRegistry
         return $interfaceToCall;
     }
 
-    public function getClassDefinitionFor(TypeDescriptor $classType): ClassDefinition
+    public function getClassDefinitionFor(Type $classType): ClassDefinition
     {
         if (array_key_exists($classType->toString(), $this->classDefinitions)) {
             return $this->classDefinitions[$classType->toString()];

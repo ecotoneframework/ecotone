@@ -9,7 +9,6 @@ use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\ResultToMessageConverter;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
@@ -32,7 +31,7 @@ final class CallAggregateResultToMessageConverter implements ResultToMessageConv
     {
         $resultMessage = MessageBuilder::fromMessage($requestMessage);
 
-        $resultType = TypeDescriptor::createFromVariable($result);
+        $resultType = Type::createFromVariable($result);
         if ($resultType->isIterable() && $this->returnType?->isCollection()) {
             $resultType = $this->returnType;
         }

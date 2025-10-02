@@ -2,9 +2,8 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Pointcut;
 
-use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\PointcutExpression;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 
 /**
  * licence Apache-2.0
@@ -111,12 +110,12 @@ class PointcutParser
             if (strpos($token, '*') !== false) {
                 return new PointcutRegexExpression($token);
             }
-            if (TypeDescriptor::isItTypeOfExistingClassOrInterface($token)) {
-                $classDefinition = ClassDefinition::createFor(TypeDescriptor::create($token));
-                if ($classDefinition->isAnnotation()) {
-                    return new PointcutAttributeExpression($classDefinition->getClassType());
+            $type = Type::object($token);
+            if ($type->exists()) {
+                if ($type->isAttribute()) {
+                    return new PointcutAttributeExpression($type);
                 } else {
-                    return new PointcutInterfaceExpression($classDefinition);
+                    return new PointcutInterfaceExpression($type);
                 }
             }
         }

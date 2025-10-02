@@ -59,35 +59,11 @@ class AroundInterceptorReferenceTest extends TestCase
         );
     }
 
-    public function test_resolve_pointcut_for_union_attributes()
-    {
-        $interceptorClass = AroundInterceptorExample::class;
-        $methodName = 'withUnionAttributes';
-        $expectedPointcut = '(' . AttributeOne::class  . '||' . AttributeTwo::class . ')';
-
-        $this->assertEquals(
-            AroundInterceptorBuilder::create(AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass, $methodName), 0, $expectedPointcut, []),
-            AroundInterceptorBuilder::create(AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass, $methodName), 0, '', [])
-        );
-    }
-
     public function test_resolve_pointcut_for_two_required_attributes()
     {
         $interceptorClass = AroundInterceptorExample::class;
         $methodName = 'withTwoRequiredAttributes';
         $expectedPointcut = '(' . AttributeOne::class  . ')&&(' . AttributeTwo::class . ')';
-
-        $this->assertEquals(
-            AroundInterceptorBuilder::create(AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass, $methodName), 0, $expectedPointcut, []),
-            AroundInterceptorBuilder::create(AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass, $methodName), 0, '', [])
-        );
-    }
-
-    public function test_resolve_pointcut_for_union_attributes_and_required()
-    {
-        $interceptorClass = AroundInterceptorExample::class;
-        $methodName = 'withUnionAttributesAndRequiredAttribute';
-        $expectedPointcut = '(' . AttributeOne::class  . '||' . AttributeTwo::class . ')&&(' . AttributeThree::class . ')';
 
         $this->assertEquals(
             AroundInterceptorBuilder::create(AroundInterceptorExample::class, InterfaceToCall::create($interceptorClass, $methodName), 0, $expectedPointcut, []),

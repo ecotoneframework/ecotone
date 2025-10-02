@@ -36,17 +36,6 @@ class ComplexService
         ];
     }
 
-    #[CommandHandler('incorrectFetchAggregate')]
-    public function handleIncorrectFetchAggregate(
-        ComplexCommand $command,
-        #[Fetch('payload.email')] int $user
-    ): void {
-        $this->results[] = [
-            'command' => $command,
-            'user' => $user,
-        ];
-    }
-
     public function getResults(): array
     {
         return $this->results;

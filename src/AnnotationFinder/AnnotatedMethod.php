@@ -3,7 +3,7 @@
 namespace Ecotone\AnnotationFinder;
 
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use InvalidArgumentException;
 
 /**
@@ -90,9 +90,9 @@ class AnnotatedMethod implements AnnotatedFinding
         return $annotations;
     }
 
-    public function hasMethodAnnotation(string|TypeDescriptor $type): bool
+    public function hasMethodAnnotation(string|Type $type): bool
     {
-        $type = $type instanceof TypeDescriptor ? $type->toString() : $type;
+        $type = $type instanceof Type ? $type->toString() : $type;
 
         foreach ($this->methodAnnotations as $methodAnnotation) {
             if ($methodAnnotation instanceof $type) {
@@ -151,9 +151,9 @@ class AnnotatedMethod implements AnnotatedFinding
         return $annotations;
     }
 
-    public function getAnnotationsByImportanceOrder(string|TypeDescriptor $type): array
+    public function getAnnotationsByImportanceOrder(string|Type $type): array
     {
-        $type = $type instanceof TypeDescriptor ? $type->toString() : $type;
+        $type = $type instanceof Type ? $type->toString() : $type;
 
         if ($this->hasMethodAnnotation($type)) {
             return $this->getMethodAnnotationsWithType($type);
@@ -162,9 +162,9 @@ class AnnotatedMethod implements AnnotatedFinding
         return $this->getClassAnnotationsWithType($type);
     }
 
-    public function hasClassAnnotation(string|TypeDescriptor $type): bool
+    public function hasClassAnnotation(string|Type $type): bool
     {
-        $type = $type instanceof TypeDescriptor ? $type->toString() : $type;
+        $type = $type instanceof Type ? $type->toString() : $type;
 
         foreach ($this->classAnnotations as $classAnnotation) {
             if ($classAnnotation instanceof $type) {
@@ -175,7 +175,7 @@ class AnnotatedMethod implements AnnotatedFinding
         return false;
     }
 
-    public function hasAnnotation(string|TypeDescriptor $type): bool
+    public function hasAnnotation(string|Type $type): bool
     {
         return $this->hasClassAnnotation($type) || $this->hasMethodAnnotation($type);
     }

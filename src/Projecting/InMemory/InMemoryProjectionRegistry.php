@@ -36,4 +36,9 @@ class InMemoryProjectionRegistry implements ProjectionRegistry
 
         return $this->projectionManagers[$id];
     }
+
+    public function projectionNames(): iterable
+    {
+        return array_keys($this->projectionManagers);
+    }
 }

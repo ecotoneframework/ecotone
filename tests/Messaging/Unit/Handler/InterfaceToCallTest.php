@@ -10,8 +10,8 @@ use Ecotone\Messaging\Attribute\ClassReference;
 use Ecotone\Messaging\Attribute\Converter;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -57,7 +57,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('name', TypeDescriptor::create(TypeDescriptor::STRING)),
+            InterfaceParameter::createNotNullable('name', Type::create(Type::STRING)),
             $interfaceToCall->getParameterWithName('name')
         );
     }
@@ -74,7 +74,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('password', TypeDescriptor::create(Password::class)),
+            InterfaceParameter::createNotNullable('password', Type::create(Password::class)),
             $interfaceToCall->getParameterWithName('password')
         );
     }
@@ -92,7 +92,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable('details', TypeDescriptor::create('\\stdClass')),
+            InterfaceParameter::createNullable('details', Type::object('\\stdClass')->nullable()),
             $interfaceToCall->getParameterWithName('details')
         );
     }
@@ -109,7 +109,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('favourites', TypeDescriptor::create("array<Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite>")),
+            InterfaceParameter::createNotNullable('favourites', Type::create("array<Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite>")),
             $interfaceToCall->getParameterWithName('favourites')
         );
     }
@@ -122,12 +122,12 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('data', TypeDescriptor::create('array')),
+            InterfaceParameter::createNotNullable('data', Type::create('array')),
             $interfaceToCall->getParameterWithName('data')
         );
 
         $this->assertEquals(
-            TypeDescriptor::create('array<mixed>'),
+            Type::create('array<mixed>'),
             $interfaceToCall->getReturnType()
         );
     }
@@ -140,7 +140,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            TypeDescriptor::create('array|string|int'),
+            Type::create('array|string|int'),
             $interfaceToCall->getReturnType()
         );
     }
@@ -153,7 +153,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            TypeDescriptor::create("\stdClass[]|int"),
+            Type::array(Type::object(stdClass::class)),
             $interfaceToCall->getReturnType()
         );
     }
@@ -166,7 +166,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            TypeDescriptor::create('array<int, array>'),
+            Type::array(Type::int(), Type::arrayShape(['person_id' => Type::string()])),
             $interfaceToCall->getParameterWithName('param')->getTypeDescriptor()
         );
     }
@@ -179,7 +179,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            TypeDescriptor::create('array<int, array>'),
+            Type::array(Type::int(), Type::arrayShape(['person_id' => Type::string()])),
             $interfaceToCall->getReturnType()
         );
     }
@@ -196,7 +196,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('favourite', TypeDescriptor::create("\Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite")),
+            InterfaceParameter::createNotNullable('favourite', Type::create("\Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite")),
             $interfaceToCall->getParameterWithName('favourite')
         );
     }
@@ -213,7 +213,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('favourites', TypeDescriptor::create("array<\Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite>")),
+            InterfaceParameter::createNotNullable('favourites', Type::create("array<\Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite>")),
             $interfaceToCall->getParameterWithName('favourites')
         );
     }
@@ -230,7 +230,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('favourites', TypeDescriptor::create("array<\Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite>")),
+            InterfaceParameter::createNotNullable('favourites', Type::create("array<\Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite>")),
             $interfaceToCall->getParameterWithName('favourites')
         );
     }
@@ -247,7 +247,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('adminPermission', TypeDescriptor::create(Permission::class)),
+            InterfaceParameter::createNotNullable('adminPermission', Type::create(Permission::class)),
             $interfaceToCall->getParameterWithName('adminPermission')
         );
     }
@@ -264,7 +264,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('ratings', TypeDescriptor::create('array<int>')),
+            InterfaceParameter::createNotNullable('ratings', Type::create('array<int>')),
             $interfaceToCall->getParameterWithName('ratings')
         );
     }
@@ -281,7 +281,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('rating', TypeDescriptor::create(TypeDescriptor::INTEGER)),
+            InterfaceParameter::createNotNullable('rating', Type::int()),
             $interfaceToCall->getParameterWithName('rating')
         );
     }
@@ -294,7 +294,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable('random', TypeDescriptor::create(TypeDescriptor::ARRAY . '|' . TypeDescriptor::INTEGER)),
+            InterfaceParameter::createNullable('random', Type::union(Type::array(), Type::int(), Type::null())),
             $interfaceToCall->getParameterWithName('random')
         );
     }
@@ -311,7 +311,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('phones', TypeDescriptor::create('array|array<string>')),
+            InterfaceParameter::createNotNullable('phones', Type::create('array|array<string>')),
             $interfaceToCall->getParameterWithName('phones')
         );
     }
@@ -328,7 +328,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('email', TypeDescriptor::create(Email::class . '|' . Favourite::class)),
+            InterfaceParameter::createNotNullable('email', Type::create(Email::class . '|' . Favourite::class)),
             $interfaceToCall->getParameterWithName('email')
         );
     }
@@ -345,12 +345,12 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('data', TypeDescriptor::createArrayType()),
+            InterfaceParameter::createNotNullable('data', Type::array()),
             $interfaceToCall->getParameterWithName('data')
         );
 
         $this->assertEquals(
-            TypeDescriptor::createArrayType(),
+            Type::array(),
             $interfaceToCall->getReturnType()
         );
     }
@@ -363,7 +363,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            TypeDescriptor::createArrayType(),
+            Type::array(),
             $interfaceToCall->getReturnType()
         );
     }
@@ -381,7 +381,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            TypeDescriptor::create(Admin::class),
+            Type::create(Admin::class),
             $interfaceToCall->getReturnType()
         );
     }
@@ -399,12 +399,12 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('dateTime', TypeDescriptor::create(DateTimeInterface::class)),
+            InterfaceParameter::createNotNullable('dateTime', Type::create(DateTimeInterface::class)),
             $interfaceToCall->getParameterWithName('dateTime')
         );
 
         $this->assertEquals(
-            TypeDescriptor::create(DateTimeInterface::class),
+            Type::create(DateTimeInterface::class),
             $interfaceToCall->getReturnType()
         );
     }
@@ -417,11 +417,11 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('favourite', TypeDescriptor::create(Favourite::class)),
+            InterfaceParameter::createNotNullable('favourite', Type::create(Favourite::class)),
             $interfaceToCall->getParameterWithName('favourite')
         );
         $this->assertEquals(
-            TypeDescriptor::create(Favourite::class),
+            Type::create(Favourite::class),
             $interfaceToCall->getReturnType()
         );
     }
@@ -434,11 +434,11 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('closure', TypeDescriptor::create(TypeDescriptor::CLOSURE)),
+            InterfaceParameter::createNotNullable('closure', Type::callable()),
             $interfaceToCall->getParameterWithName('closure')
         );
         $this->assertEquals(
-            TypeDescriptor::create(TypeDescriptor::CLOSURE),
+            Type::callable(),
             $interfaceToCall->getReturnType()
         );
     }
@@ -451,11 +451,11 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable('favourite', TypeDescriptor::create(Favourite::class)),
+            InterfaceParameter::createNullable('favourite', Type::object(Favourite::class)->nullable()),
             $interfaceToCall->getParameterWithName('favourite')
         );
         $this->assertEquals(
-            TypeDescriptor::create(Favourite::class),
+            Type::create(Favourite::class),
             $interfaceToCall->getReturnType()
         );
     }
@@ -468,11 +468,11 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('user', TypeDescriptor::create(SuperAdmin::class)),
+            InterfaceParameter::createNotNullable('user', Type::create(SuperAdmin::class)),
             $interfaceToCall->getParameterWithName('user')
         );
         $this->assertEquals(
-            TypeDescriptor::create(SuperAdmin::class),
+            Type::create(SuperAdmin::class),
             $interfaceToCall->getReturnType()
         );
     }
@@ -490,7 +490,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNullable('surname', TypeDescriptor::create(TypeDescriptor::ANYTHING)),
+            InterfaceParameter::createNullable('surname', Type::anything()),
             $interfaceToCall->getParameterWithName('surname')
         );
     }
@@ -498,22 +498,22 @@ class InterfaceToCallTest extends TestCase
     public function test_choosing_declaring_class_if_use_this_or_self_or_static()
     {
         $this->assertEquals(
-            TypeDescriptor::create(User::class),
+            Type::create(User::class),
             (InterfaceToCall::create(User::class, 'getSelf'))->getReturnType()
         );
 
         $this->assertEquals(
-            TypeDescriptor::create(User::class),
+            Type::create(User::class),
             (InterfaceToCall::create(User::class, 'getStatic'))->getReturnType()
         );
 
         $this->assertEquals(
-            TypeDescriptor::create('array<' . User::class . '>'),
+            Type::create('array<' . User::class . '>'),
             (InterfaceToCall::create(User::class, 'getSelfArray'))->getReturnType()
         );
 
         $this->assertEquals(
-            TypeDescriptor::create('array<' . User::class . '>'),
+            Type::create('array<' . User::class . '>'),
             (InterfaceToCall::create(User::class, 'getStaticArray'))->getReturnType()
         );
     }
@@ -521,11 +521,11 @@ class InterfaceToCallTest extends TestCase
     public function test_different_different_class_under_same_alias_than_in_declaring_one()
     {
         $this->assertEquals(
-            TypeDescriptor::create(TwoStepPassword::class),
+            Type::create(TwoStepPassword::class),
             (InterfaceToCall::create(SuperAdmin::class, 'getPassword'))->getParameterWithName('password')->getTypeDescriptor()
         );
         $this->assertEquals(
-            TypeDescriptor::create(TwoStepPassword::class),
+            Type::create(TwoStepPassword::class),
             (InterfaceToCall::create(SuperAdmin::class, 'getPassword'))->getReturnType()
         );
     }
@@ -533,7 +533,7 @@ class InterfaceToCallTest extends TestCase
     public function test_ignoring_parameter_docblock_type_hint_if_incorrect()
     {
         $this->assertEquals(
-            TypeDescriptor::createArrayType(),
+            Type::array(),
             (InterfaceToCall::create(InCorrectArrayDocblock::class, 'incorrectParameter'))->getParameterWithName('data')->getTypeDescriptor()
         );
     }
@@ -541,7 +541,7 @@ class InterfaceToCallTest extends TestCase
     public function test_ignoring_return_type_docblock_type_hint_if_incorrect()
     {
         $this->assertEquals(
-            TypeDescriptor::createArrayType(),
+            Type::array(),
             (InterfaceToCall::create(InCorrectArrayDocblock::class, 'incorrectReturnType'))->getReturnType()
         );
     }
@@ -553,7 +553,7 @@ class InterfaceToCallTest extends TestCase
     public function test_guessing_type_hint_with_full_qualified_name()
     {
         $this->assertEquals(
-            TypeDescriptor::create(User::class),
+            Type::create(User::class),
             (InterfaceToCall::create(User::class, 'returnFullUser'))->getReturnType()
         );
     }
@@ -565,7 +565,7 @@ class InterfaceToCallTest extends TestCase
     public function test_guessing_type_hint_from_global_namespace()
     {
         $this->assertEquals(
-            TypeDescriptor::create(stdClass::class),
+            Type::create(stdClass::class),
             (InterfaceToCall::create(User::class, 'returnFromGlobalNamespace'))->getReturnType()
         );
     }
@@ -577,7 +577,7 @@ class InterfaceToCallTest extends TestCase
     public function test_resolving_declaring_class_for_self_type_hint_declared_in_interface()
     {
         $this->assertEquals(
-            TypeDescriptor::createAnythingType(),
+            Type::anything(),
             (InterfaceToCall::create(SuperAdmin::class, 'getAdmin'))->getReturnType()
         );
     }
@@ -589,7 +589,7 @@ class InterfaceToCallTest extends TestCase
     public function test_resolving_declaring_class_for_self_type_hint_declared_in_abstract_class()
     {
         $this->assertEquals(
-            TypeDescriptor::create(AbstractSuperAdmin::class),
+            Type::create(AbstractSuperAdmin::class),
             (InterfaceToCall::create(SuperAdmin::class, 'getInformation'))->getReturnType()
         );
     }
@@ -612,18 +612,18 @@ class InterfaceToCallTest extends TestCase
     {
         $interfaceToCall = InterfaceToCall::create(ExampleConverterService::class, 'convert');
 
-        $this->assertTrue($interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(Converter::class)));
-        $this->assertFalse($interfaceToCall->hasMethodAnnotation(TypeDescriptor::create(ClassReference::class)));
+        $this->assertTrue($interfaceToCall->hasMethodAnnotation(Type::create(Converter::class)));
+        $this->assertFalse($interfaceToCall->hasMethodAnnotation(Type::create(ClassReference::class)));
 
-        $this->assertTrue($interfaceToCall->hasClassAnnotation(TypeDescriptor::create(ClassReference::class)));
+        $this->assertTrue($interfaceToCall->hasClassAnnotation(Type::create(ClassReference::class)));
 
         $this->assertEquals(
             new ClassReference('exampleConverterService'),
-            $interfaceToCall->getSingleClassAnnotationOf(TypeDescriptor::create(ClassReference::class))
+            $interfaceToCall->getSingleClassAnnotationOf(Type::create(ClassReference::class))
         );
         $this->assertEquals(
             new Converter(),
-            $interfaceToCall->getSingleMethodAnnotationOf(TypeDescriptor::create(Converter::class))
+            $interfaceToCall->getSingleMethodAnnotationOf(Type::create(Converter::class))
         );
     }
 
@@ -633,7 +633,7 @@ class InterfaceToCallTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $interfaceToCall->getSingleMethodAnnotationOf(TypeDescriptor::create(ClassReference::class));
+        $interfaceToCall->getSingleMethodAnnotationOf(Type::create(ClassReference::class));
     }
 
     public function test_throwing_exception_when_retrieving_not_existing_class_annotation()
@@ -642,7 +642,7 @@ class InterfaceToCallTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $interfaceToCall->getSingleClassAnnotationOf(TypeDescriptor::create(Asynchronous::class));
+        $interfaceToCall->getSingleClassAnnotationOf(Type::create(Asynchronous::class));
     }
 
     public function test_not_throwing_exception_when_retrieving_constructor_parameter_attributes()

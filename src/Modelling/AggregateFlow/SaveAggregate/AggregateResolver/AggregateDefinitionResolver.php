@@ -7,7 +7,7 @@ namespace Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver;
 use Ecotone\EventSourcing\Attribute\AggregateType;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Modelling\Attribute\AggregateEvents;
 use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
@@ -23,15 +23,15 @@ final class AggregateDefinitionResolver
 {
     public static function resolve(string $aggregateClass, InterfaceToCallRegistry $interfaceToCallRegistry): AggregateClassDefinition
     {
-        $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor(TypeDescriptor::create($aggregateClass));
+        $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor(Type::object($aggregateClass));
 
-        $isAggregateEventSourced = $aggregateClassDefinition->hasClassAnnotation(TypeDescriptor::create(EventSourcingAggregate::class));
+        $isAggregateEventSourced = $aggregateClassDefinition->hasClassAnnotation(Type::attribute(EventSourcingAggregate::class));
 
         [$calledAggregateIdentifierMapping, $calledAggregateIdentifierGetMethods] = self::resolveAggregateIdentifierMapping($aggregateClassDefinition, $interfaceToCallRegistry);
         [$calledAggregateVersionProperty, $isCalledAggregateVersionAutomaticallyIncreased]  = self::resolveAggregateVersionProperty($aggregateClassDefinition);
 
 
-        $aggregateIdentifierAnnotation = TypeDescriptor::create(Identifier::class);
+        $aggregateIdentifierAnnotation = Type::attribute(Identifier::class);
         $aggregateIdentifiers = [];
         foreach ($aggregateClassDefinition->getProperties() as $property) {
             if ($property->hasAnnotation($aggregateIdentifierAnnotation)) {
@@ -39,7 +39,7 @@ final class AggregateDefinitionResolver
             }
         }
 
-        $eventRecorderMethodAnnotation = TypeDescriptor::create(AggregateEvents::class);
+        $eventRecorderMethodAnnotation = Type::attribute(AggregateEvents::class);
         $eventRecorderMethod = null;
         foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
             $methodToCheck = $interfaceToCallRegistry->getFor($aggregateClassDefinition->getClassType()->toString(), $method);
@@ -77,7 +77,7 @@ final class AggregateDefinitionResolver
 
     private static function resolveAggregateIdentifierMapping(ClassDefinition $aggregateClassDefinition, InterfaceToCallRegistry $interfaceToCallRegistry): array
     {
-        $aggregateIdentifierGetMethodAttribute = TypeDescriptor::create(AggregateIdentifierMethod::class);
+        $aggregateIdentifierGetMethodAttribute = Type::attribute(AggregateIdentifierMethod::class);
         $aggregateIdentifiers = [];
         $aggregateIdentifierGetMethods = [];
 
@@ -95,7 +95,7 @@ final class AggregateDefinitionResolver
             }
         }
 
-        $aggregateIdentifierAnnotation = TypeDescriptor::create(AggregateIdentifier::class);
+        $aggregateIdentifierAnnotation = Type::attribute(AggregateIdentifier::class);
         foreach ($aggregateClassDefinition->getProperties() as $property) {
             if ($property->hasAnnotation($aggregateIdentifierAnnotation)) {
                 $aggregateIdentifiers[$property->getName()] = null;
@@ -109,7 +109,7 @@ final class AggregateDefinitionResolver
     {
         $aggregateVersionPropertyName = null;
         $isAggregateVersionAutomaticallyIncreased = false;
-        $versionAnnotation = TypeDescriptor::create(AggregateVersion::class);
+        $versionAnnotation = Type::attribute(AggregateVersion::class);
         foreach ($aggregateClassDefinition->getProperties() as $property) {
             if ($property->hasAnnotation($versionAnnotation)) {
                 $aggregateVersionPropertyName = $property->getName();

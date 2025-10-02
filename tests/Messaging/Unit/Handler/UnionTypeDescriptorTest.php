@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
 use Countable;
-use Ecotone\Messaging\Handler\TypeDescriptor;
-use Ecotone\Messaging\Handler\UnionTypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Handler\Type\UnionType;
 use Iterator;
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -23,15 +23,15 @@ class UnionTypeDescriptorTest extends TestCase
     public function test_union_type_compatibility_between_scalars()
     {
         $this->assertTrue(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::createStringType(), TypeDescriptor::createIntegerType(),
-            ])->isCompatibleWith(TypeDescriptor::createIntegerType())
+            UnionType::createWith([
+                Type::string(), Type::int(),
+            ])->isCompatibleWith(Type::int())
         );
 
         $this->assertTrue(
-            TypeDescriptor::createIntegerType()
-                ->isCompatibleWith(UnionTypeDescriptor::createWith([
-                    TypeDescriptor::createStringType(), TypeDescriptor::createIntegerType(),
+            Type::int()
+                ->isCompatibleWith(UnionType::createWith([
+                    Type::string(), Type::int(),
                 ]))
         );
     }
@@ -39,15 +39,15 @@ class UnionTypeDescriptorTest extends TestCase
     public function test_union_type_compatibility_between_scalar_and_object_type()
     {
         $this->assertFalse(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::createStringType(), TypeDescriptor::createIntegerType(),
-            ])->isCompatibleWith(TypeDescriptor::create(TypeDescriptor::OBJECT))
+            UnionType::createWith([
+                Type::string(), Type::int(),
+            ])->isCompatibleWith(Type::object())
         );
 
         $this->assertFalse(
-            TypeDescriptor::create(TypeDescriptor::OBJECT)
-                ->isCompatibleWith(UnionTypeDescriptor::createWith([
-                    TypeDescriptor::createStringType(), TypeDescriptor::createIntegerType(),
+            Type::object()
+                ->isCompatibleWith(UnionType::createWith([
+                    Type::string(), Type::int(),
                 ]))
         );
     }
@@ -55,24 +55,24 @@ class UnionTypeDescriptorTest extends TestCase
     public function test_union_type_compatibility_between_scalar_and_class()
     {
         $this->assertFalse(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::create(Countable::class), TypeDescriptor::create(stdClass::class),
-            ])->isCompatibleWith(TypeDescriptor::createStringType())
+            UnionType::createWith([
+                Type::create(Countable::class), Type::create(stdClass::class),
+            ])->isCompatibleWith(Type::string())
         );
 
         $this->assertFalse(
-            TypeDescriptor::createStringType()
-                ->isCompatibleWith(UnionTypeDescriptor::createWith([
-                    TypeDescriptor::create(Countable::class), TypeDescriptor::create(stdClass::class),
+            Type::string()
+                ->isCompatibleWith(UnionType::createWith([
+                    Type::create(Countable::class), Type::create(stdClass::class),
                 ]))
         );
 
         $this->assertFalse(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::create(Countable::class), TypeDescriptor::create(stdClass::class),
+            UnionType::createWith([
+                Type::create(Countable::class), Type::create(stdClass::class),
             ])->isCompatibleWith(
-                UnionTypeDescriptor::createWith([
-                    TypeDescriptor::createStringType(), TypeDescriptor::createIntegerType(),
+                UnionType::createWith([
+                    Type::string(), Type::int(),
                 ])
             )
         );
@@ -81,14 +81,14 @@ class UnionTypeDescriptorTest extends TestCase
     public function test_if_is_class_of_type()
     {
         $this->assertTrue(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::create(Countable::class), TypeDescriptor::create(stdClass::class),
+            UnionType::createWith([
+                Type::create(Countable::class), Type::create(stdClass::class),
             ])->isClassOfType(Countable::class)
         );
 
         $this->assertFalse(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::create(Countable::class), TypeDescriptor::create(stdClass::class),
+            UnionType::createWith([
+                Type::create(Countable::class), Type::create(stdClass::class),
             ])->isClassOfType(Iterator::class)
         );
     }
@@ -96,9 +96,9 @@ class UnionTypeDescriptorTest extends TestCase
     public function test_ignoring_duplicated_types()
     {
         $this->assertEquals(
-            TypeDescriptor::create(TypeDescriptor::ARRAY),
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::create(TypeDescriptor::ARRAY), TypeDescriptor::create(TypeDescriptor::ARRAY),
+            Type::create(Type::ARRAY),
+            UnionType::createWith([
+                Type::create(Type::ARRAY), Type::create(Type::ARRAY),
             ])
         );
     }
@@ -106,14 +106,14 @@ class UnionTypeDescriptorTest extends TestCase
     public function test_if_is_iterable()
     {
         $this->assertTrue(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::createArrayType(),
+            UnionType::createWith([
+                Type::array(),
             ])->isIterable()
         );
 
         $this->assertFalse(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::create(Countable::class), TypeDescriptor::create(stdClass::class),
+            UnionType::createWith([
+                Type::create(Countable::class), Type::create(stdClass::class),
             ])->isIterable()
         );
     }
@@ -121,14 +121,14 @@ class UnionTypeDescriptorTest extends TestCase
     public function test_if_is_collection()
     {
         $this->assertTrue(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::createCollection(stdClass::class),
+            UnionType::createWith([
+                Type::createCollection(stdClass::class),
             ])->isCollection()
         );
 
         $this->assertFalse(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::create(Countable::class),
+            UnionType::createWith([
+                Type::create(Countable::class),
             ])->isCollection()
         );
     }
@@ -136,14 +136,14 @@ class UnionTypeDescriptorTest extends TestCase
     public function test_if_is_non_collection_array()
     {
         $this->assertTrue(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::createArrayType(),
+            UnionType::createWith([
+                Type::array(),
             ])->isArrayButNotClassBasedCollection()
         );
 
         $this->assertFalse(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::createCollection(stdClass::class),
+            UnionType::createWith([
+                Type::createCollection(stdClass::class),
             ])->isArrayButNotClassBasedCollection()
         );
     }
@@ -151,14 +151,14 @@ class UnionTypeDescriptorTest extends TestCase
     public function test_if_is_boolean()
     {
         $this->assertTrue(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::createBooleanType(),
+            UnionType::createWith([
+                Type::boolean(),
             ])->isBoolean()
         );
 
         $this->assertFalse(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::createArrayType(),
+            UnionType::createWith([
+                Type::array(),
             ])->isBoolean()
         );
     }
@@ -166,14 +166,14 @@ class UnionTypeDescriptorTest extends TestCase
     public function test_if_is_void()
     {
         $this->assertTrue(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::create(TypeDescriptor::VOID),
+            UnionType::createWith([
+                Type::void(),
             ])->isVoid()
         );
 
         $this->assertFalse(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::createArrayType(),
+            UnionType::createWith([
+                Type::array(),
             ])->isVoid()
         );
     }
@@ -181,14 +181,14 @@ class UnionTypeDescriptorTest extends TestCase
     public function test_if_is_string()
     {
         $this->assertTrue(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::createStringType(),
+            UnionType::createWith([
+                Type::string(),
             ])->isString()
         );
 
         $this->assertFalse(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::createArrayType(),
+            UnionType::createWith([
+                Type::array(),
             ])->isString()
         );
     }
@@ -196,44 +196,29 @@ class UnionTypeDescriptorTest extends TestCase
     public function test_if_is_compound_object_type()
     {
         $this->assertTrue(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::create(TypeDescriptor::OBJECT),
+            UnionType::createWith([
+                Type::object(),
             ])->isCompoundObjectType()
         );
 
         $this->assertFalse(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::createArrayType(),
+            UnionType::createWith([
+                Type::array(),
             ])->isCompoundObjectType()
-        );
-    }
-
-    public function test_if_is_primitive()
-    {
-        $this->assertTrue(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::createStringType(),
-            ])->isPrimitive()
-        );
-
-        $this->assertFalse(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::create(stdClass::class),
-            ])->isPrimitive()
         );
     }
 
     public function test_if_is_interface()
     {
         $this->assertTrue(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::create(Countable::class),
+            UnionType::createWith([
+                Type::object(Countable::class),
             ])->isInterface()
         );
 
         $this->assertFalse(
-            UnionTypeDescriptor::createWith([
-                TypeDescriptor::create(stdClass::class),
+            UnionType::createWith([
+                Type::object(stdClass::class),
             ])->isInterface()
         );
     }
@@ -241,40 +226,40 @@ class UnionTypeDescriptorTest extends TestCase
     public function test_not_equal_when_comparing_with_single_type()
     {
         $this->assertFalse(
-            UnionTypeDescriptor::createWith([TypeDescriptor::createIntegerType(), TypeDescriptor::createStringType()])
-                ->equals(TypeDescriptor::createStringType())
+            UnionType::createWith([Type::int(), Type::string()])
+                ->equals(Type::string())
         );
     }
 
     public function test_equality_when_unordered_types()
     {
         $this->assertTrue(
-            TypeDescriptor::create('string|int')
-                ->equals(TypeDescriptor::create('int|string'))
+            Type::create('string|int')
+                ->equals(Type::create('int|string'))
         );
     }
 
     public function test_not_equality_when_this_contains_more_types_than_compared_one()
     {
         $this->assertFalse(
-            TypeDescriptor::create('string|int|float')
-                ->equals(TypeDescriptor::create('string|int'))
+            Type::create('string|int|float')
+                ->equals(Type::create('string|int'))
         );
     }
 
     public function test_not_equality_when_compared_contains_more_than_this()
     {
         $this->assertFalse(
-            TypeDescriptor::create('string|int')
-                ->equals(TypeDescriptor::create('string|int|float'))
+            Type::create('string|int')
+                ->equals(Type::create('string|int|float'))
         );
     }
 
     public function test_creating_with_one_type_result_in_type_descriptor()
     {
         $this->assertEquals(
-            TypeDescriptor::createStringType(),
-            UnionTypeDescriptor::createWith([TypeDescriptor::createStringType()])
+            Type::string(),
+            UnionType::createWith([Type::string()])
         );
     }
 }

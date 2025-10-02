@@ -5,7 +5,7 @@ namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
 use Ecotone\Messaging\Handler\MethodArgument;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -34,7 +34,7 @@ class GatewayHeadersConverter implements GatewayParameterConverter
 
         $headers = $methodArgument->value();
 
-        if (! TypeDescriptor::createFromVariable($headers)->isIterable()) {
+        if (! Type::createFromVariable($headers)->isIterable()) {
             throw InvalidArgumentException::create("Gateway @Headers expect parameter to be iterable. Given non iterable value for parameter with name {$this->parameterName}");
         }
 
@@ -47,7 +47,7 @@ class GatewayHeadersConverter implements GatewayParameterConverter
                 continue;
             }
             if ($headerName === MessageHeaders::CONTENT_TYPE) {
-                $messagePayloadType = TypeDescriptor::createFromVariable($messageBuilder->getPayload());
+                $messagePayloadType = Type::createFromVariable($messageBuilder->getPayload());
                 $mediaType = MediaType::parseMediaType($headerValue);
                 if (! $messagePayloadType->isScalar() && ! $mediaType->isCompatibleWith(MediaType::createApplicationXPHP())) {
                     continue;

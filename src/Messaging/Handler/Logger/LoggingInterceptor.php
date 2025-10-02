@@ -8,7 +8,7 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Psr\Log\LogLevel;
 use Throwable;
@@ -57,15 +57,15 @@ class LoggingInterceptor
     {
         $data = $message->getPayload();
         $sourceMediaType = $message->getHeaders()->hasContentType() ? $message->getHeaders()->getContentType() : MediaType::createApplicationXPHP();
-        $sourceTypeDescriptor = $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : TypeDescriptor::createFromVariable($message->getPayload());
+        $sourceTypeDescriptor = $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : Type::createFromVariable($message->getPayload());
 
         if (is_object($data) && method_exists($data, '__toString')) {
             $data = (string)$data;
-        } elseif (! TypeDescriptor::createFromVariable($data)->isScalar()) {
-            if ($this->conversionService->canConvert($sourceTypeDescriptor, $sourceMediaType, TypeDescriptor::createStringType(), MediaType::createApplicationJson())) {
-                $data = $this->conversionService->convert($data, $sourceTypeDescriptor, $sourceMediaType, TypeDescriptor::createStringType(), MediaType::createApplicationJson());
+        } elseif (! Type::createFromVariable($data)->isScalar()) {
+            if ($this->conversionService->canConvert($sourceTypeDescriptor, $sourceMediaType, Type::string(), MediaType::createApplicationJson())) {
+                $data = $this->conversionService->convert($data, $sourceTypeDescriptor, $sourceMediaType, Type::string(), MediaType::createApplicationJson());
             } else {
-                $data = $this->conversionService->convert($data, $sourceTypeDescriptor, $sourceMediaType, TypeDescriptor::createStringType(), MediaType::createApplicationXPHPSerialized());
+                $data = $this->conversionService->convert($data, $sourceTypeDescriptor, $sourceMediaType, Type::string(), MediaType::createApplicationXPHPSerialized());
             }
         }
 

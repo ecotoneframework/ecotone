@@ -8,7 +8,7 @@ use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\MessageProcessor;
-use Ecotone\Messaging\Handler\TypeDescriptor;
+use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -27,7 +27,7 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
         private string $aggregateClassName,
         private ConversionService $conversionService,
         private PropertyReaderAccessor $propertyReaderAccessor,
-        private TypeDescriptor $typeToConvertTo,
+        private Type $typeToConvertTo,
         private array $metadataIdentifierMapping,
         private array $messageIdentifierMapping,
         private array $identifierMapping,
@@ -56,9 +56,9 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
         $payload   = $message->getPayload();
         $mediaType = $message->getHeaders()->containsKey(MessageHeaders::CONTENT_TYPE)
             ? MediaType::parseMediaType($message->getHeaders()->get(MessageHeaders::CONTENT_TYPE))
-            : MediaType::createApplicationXPHPWithTypeParameter(TypeDescriptor::createFromVariable($payload)->toString());
+            : MediaType::createApplicationXPHPWithTypeParameter(Type::createFromVariable($payload)->toString());
         if ($this->conversionService->canConvert(
-            TypeDescriptor::createFromVariable($payload),
+            Type::createFromVariable($payload),
             $mediaType,
             $this->typeToConvertTo,
             MediaType::createApplicationXPHPWithTypeParameter($this->typeToConvertTo->toString())
@@ -66,7 +66,7 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
             $payload = $this->conversionService
                 ->convert(
                     $payload,
-                    TypeDescriptor::createFromVariable($payload),
+                    Type::createFromVariable($payload),
                     $mediaType,
                     $this->typeToConvertTo,
                     MediaType::createApplicationXPHPWithTypeParameter($this->typeToConvertTo->toString())

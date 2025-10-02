@@ -9,7 +9,6 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\TypeDescriptor;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 
@@ -47,7 +46,7 @@ class HeaderConverter implements ParameterConverter
 
         $targetType = $this->parameterType;
 
-        $sourceValueType = TypeDescriptor::createFromVariable($headerValue);
+        $sourceValueType = Type::createFromVariable($headerValue);
         if (! $sourceValueType->isCompatibleWith($targetType)) {
             if ($this->canConvertTo($headerValue, MediaType::APPLICATION_X_PHP, $targetType)) {
                 $headerValue = $this->doConversion($headerValue, MediaType::APPLICATION_X_PHP, $targetType);
@@ -64,7 +63,7 @@ class HeaderConverter implements ParameterConverter
     private function canConvertTo(mixed $headerValue, string $sourceMediaType, Type $targetType): bool
     {
         return $this->conversionService->canConvert(
-            TypeDescriptor::createFromVariable($headerValue),
+            Type::createFromVariable($headerValue),
             MediaType::parseMediaType($sourceMediaType),
             $targetType,
             MediaType::createApplicationXPHP()
@@ -75,7 +74,7 @@ class HeaderConverter implements ParameterConverter
     {
         $headerValue = $this->conversionService->convert(
             $headerValue,
-            TypeDescriptor::createFromVariable($headerValue),
+            Type::createFromVariable($headerValue),
             MediaType::parseMediaType($sourceMediaType),
             $targetType,
             MediaType::createApplicationXPHP()

@@ -729,4 +729,12 @@ class TypeDescriptorTest extends TestCase
             Type::createWithDocBlock('array|int', 'stdClass[]')
         );
     }
+
+    public function test_it_ignores_incomplete_array_shapes(): void
+    {
+        $this->assertEquals(Type::array(), Type::create('array{'));
+        $this->assertEquals(Type::array(), Type::create('array{0'));
+        $this->assertEquals(Type::array(), Type::create('array{0:'));
+        $this->assertEquals(Type::array(), Type::create('array{0:i'));
+    }
 }

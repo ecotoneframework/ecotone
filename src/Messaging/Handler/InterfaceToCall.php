@@ -218,7 +218,7 @@ class InterfaceToCall
         return $methodAnnotations;
     }
 
-    public function isStaticallyCalled(): ?bool
+    public function isStaticallyCalled(): bool
     {
         return $this->isStaticallyCalled;
     }

@@ -11,12 +11,16 @@ use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\Container\CompilableBuilder;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Conversion\ConverterBuilder;
 use Ecotone\Messaging\Conversion\ConverterReferenceBuilder;
-use Ecotone\Messaging\Conversion\ReferenceServiceConverterBuilder;
+use Ecotone\Messaging\Conversion\ReferenceServiceConverter;
+use Ecotone\Messaging\Conversion\StaticCallConverter;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 
 #[ModuleAnnotation]
 /**
@@ -25,18 +29,12 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 class ConverterModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
-     * @var ConverterBuilder[]
-     */
-    private array $converterBuilders = [];
-
-    /**
      * ConverterModule constructor.
      *
-     * @param array $converterBuilders
+     * @param CompilableBuilder[] $converterBuilders
      */
-    private function __construct(array $converterBuilders)
+    private function __construct(private array $converterBuilders)
     {
-        $this->converterBuilders = $converterBuilders;
     }
 
     /**
@@ -50,12 +48,31 @@ class ConverterModule extends NoExternalConfigurationModule implements Annotatio
 
         foreach ($registrations as $registration) {
             $interfaceToCall     = $interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName());
-            $converterBuilders[] = ReferenceServiceConverterBuilder::create(
-                AnnotatedDefinitionReference::getReferenceFor($registration),
-                $registration->getMethodName(),
-                $interfaceToCall->getFirstParameter()->getTypeDescriptor(),
-                $interfaceToCall->getReturnType()
-            );
+
+            if (! $interfaceToCall->hasSingleParameter()) {
+                throw InvalidArgumentException::create("Converter should have only single parameter: {$interfaceToCall}");
+            }
+            if ($interfaceToCall->getReturnType()->isVoid()) {
+                throw InvalidArgumentException::create("Converter cannot have void return type: {$interfaceToCall}");
+            }
+            if ($interfaceToCall->getReturnType()->isUnionType()) {
+                throw InvalidArgumentException::create("Converter cannot have union type as parameter: {$interfaceToCall}");
+            }
+            if ($interfaceToCall->isStaticallyCalled()) {
+                $converterBuilders[] = new Definition(StaticCallConverter::class, [
+                    $interfaceToCall->getInterfaceName(),
+                    $interfaceToCall->getMethodName(),
+                    $interfaceToCall->getFirstParameter()->getTypeDescriptor(),
+                    $interfaceToCall->getReturnType(),
+                ]);
+            } else {
+                $converterBuilders[] = new Definition(ReferenceServiceConverter::class, [
+                    new Reference(AnnotatedDefinitionReference::getReferenceFor($registration)),
+                    $registration->getMethodName(),
+                    $interfaceToCall->getFirstParameter()->getTypeDescriptor(),
+                    $interfaceToCall->getReturnType(),
+                ]);
+            }
         }
 
         $registrations = $annotationRegistrationService->findAnnotatedClasses(MediaTypeConverter::class);

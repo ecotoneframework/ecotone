@@ -11,7 +11,6 @@ use function class_exists;
 
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 
 use function interface_exists;
 
@@ -104,8 +103,18 @@ class TypeParser
         // Check if this is an array shape (array{...})
         if ($token === 'array' && $this->peekToken() === self::OPEN_BRACE) {
             $this->nextToken(); // consume the '{'
-            $shape = $this->parseArrayShape();
-            $this->expect(self::CLOSE_BRACE);
+            try {
+                $shape = $this->parseArrayShape();
+                $this->expect(self::CLOSE_BRACE);
+            } catch (TypeDefinitionException $e) {
+                if ($this->peekToken() === null) {
+                    // We are at the end of the expression, probably a multiline type that is not handled by TypeResolver
+                    // for backward compatibility, we ignore and return an array
+                    return new BuiltinType(TypeIdentifier::ARRAY);
+                } else {
+                    throw $e;
+                }
+            }
 
             return new ArrayShapeType($shape);
         }
@@ -261,7 +270,7 @@ class TypeParser
             // Parse field name
             $fieldName = $this->nextToken();
             if ($fieldName === null) {
-                throw InvalidArgumentException::create("Error while parsing '{$this->originalExpression}'. Expected field name in array shape");
+                throw TypeDefinitionException::create("Error while parsing '{$this->originalExpression}'. Expected field name in array shape");
             }
 
             // Expect colon

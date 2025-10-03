@@ -36,8 +36,9 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
 {
     /**
      * @param array<string, array<string>> $asyncEndpoints
+     * @param array<string, array<string>> $streamSourcesAsyncEndpoints
      */
-    private function __construct(private array $asyncEndpoints)
+    private function __construct(private array $asyncEndpoints, private array $streamSourcesAsyncEndpoints)
     {
     }
 
@@ -55,6 +56,7 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
         );
 
         $registeredAsyncEndpoints = [];
+        $streamSourcesAsyncEndpoints = [];
         foreach ($asynchronousClasses as $asynchronousClass) {
             /** @var Asynchronous $asyncClass */
             $asyncClass = AnnotatedDefinitionReference::getSingleAnnotationForClass($annotationRegistrationService, $asynchronousClass, Asynchronous::class);
@@ -65,16 +67,18 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
                     if ($annotationForMethod instanceof QueryHandler) {
                         continue;
                     }
-                    if ($endpoint->hasClassAnnotation(StreamBasedSource::class)) {
-                        continue;
-                    }
-                    if (in_array(get_class($annotationForMethod), [CommandHandler::class, EventHandler::class])) {
-                        if ($annotationForMethod->isEndpointIdGenerated()) {
-                            throw ConfigurationException::create("{$endpoint} should have endpointId defined for handling asynchronously");
-                        }
-                    }
 
-                    $registeredAsyncEndpoints[$annotationForMethod->getEndpointId()] = $asyncClass->getChannelName();
+                    if ($endpoint->hasClassAnnotation(StreamBasedSource::class)) {
+                        $streamSourcesAsyncEndpoints[$annotationForMethod->getEndpointId()] = $asyncClass->getChannelName();
+                    } else {
+                        if (in_array(get_class($annotationForMethod), [CommandHandler::class, EventHandler::class])) {
+                            if ($annotationForMethod->isEndpointIdGenerated()) {
+                                throw ConfigurationException::create("{$endpoint} should have endpointId defined for handling asynchronously");
+                            }
+                        }
+
+                        $registeredAsyncEndpoints[$annotationForMethod->getEndpointId()] = $asyncClass->getChannelName();
+                    }
                 }
             }
         }
@@ -100,7 +104,7 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
             }
         }
 
-        return new self($registeredAsyncEndpoints);
+        return new self($registeredAsyncEndpoints, $streamSourcesAsyncEndpoints);
     }
 
     public function getSynchronousChannelFor(string $handlerChannelName, string $endpointIdToLookFor): ?string
@@ -141,28 +145,10 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
 
         foreach ($endpointChannels as $endpointChannel => $asyncChannels) {
             $messagingConfiguration->registerAsynchronousEndpoint($asyncChannels, $endpointChannel);
-
-            /** Default polling metadata for tests */
-            if ($serviceConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
-                foreach ($asyncChannels as $asyncEndpointChannel) {
-                    if (! $this->hasPollingMetadata($pollingMetadata, $asyncEndpointChannel)) {
-                        if ($this->isInMemoryPollableChannel($polingChannelBuilders, $asyncEndpointChannel)) {
-                            $messagingConfiguration->registerPollingMetadata(
-                                PollingMetadata::create($asyncEndpointChannel)
-                                    ->setStopOnError(true)
-                                    ->setFinishWhenNoMessages(true)
-                            );
-
-                            continue;
-                        }
-
-                        $messagingConfiguration->registerPollingMetadata(
-                            PollingMetadata::create($asyncEndpointChannel)
-                                ->withTestingSetup(100, 100, true)
-                        );
-                    }
-                }
-            }
+            $this->registerDefaultPollingMetadata($serviceConfiguration, $asyncChannels, $pollingMetadata, $polingChannelBuilders, $messagingConfiguration);
+        }
+        foreach ($this->streamSourcesAsyncEndpoints as $endpointChannel => $asyncChannels) {
+            $this->registerDefaultPollingMetadata($serviceConfiguration, $asyncChannels, $pollingMetadata, $polingChannelBuilders, $messagingConfiguration);
         }
     }
 
@@ -269,6 +255,31 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
             Assert::isTrue(! in_array($annotationForMethod->getInputChannelName(), $asynchronous->getChannelName()), "Command Handler routing key can't be equal to asynchronous channel name in {$registration}");
         } elseif ($annotationForMethod instanceof EventHandler) {
             Assert::isTrue(! in_array($annotationForMethod->getListenTo(), $asynchronous->getChannelName()), "Event Handler listen to routing can't be equal to asynchronous channel name in {$registration}");
+        }
+    }
+
+    public function registerDefaultPollingMetadata(ServiceConfiguration $serviceConfiguration, array $asyncChannels, array $pollingMetadata, array $polingChannelBuilders, Configuration $messagingConfiguration): void
+    {
+        /** Default polling metadata for tests */
+        if ($serviceConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
+            foreach ($asyncChannels as $asyncEndpointChannel) {
+                if (! $this->hasPollingMetadata($pollingMetadata, $asyncEndpointChannel)) {
+                    if ($this->isInMemoryPollableChannel($polingChannelBuilders, $asyncEndpointChannel)) {
+                        $messagingConfiguration->registerPollingMetadata(
+                            PollingMetadata::create($asyncEndpointChannel)
+                                ->setStopOnError(true)
+                                ->setFinishWhenNoMessages(true)
+                        );
+
+                        continue;
+                    }
+
+                    $messagingConfiguration->registerPollingMetadata(
+                        PollingMetadata::create($asyncEndpointChannel)
+                            ->withTestingSetup(100, 100, true)
+                    );
+                }
+            }
         }
     }
 }

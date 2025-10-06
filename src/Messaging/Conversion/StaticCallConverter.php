@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Ecotone\Messaging\Conversion;
 
 use Ecotone\Messaging\Handler\Type;

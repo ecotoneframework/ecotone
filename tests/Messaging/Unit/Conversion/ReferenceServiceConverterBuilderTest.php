@@ -9,6 +9,7 @@ use Ecotone\Messaging\Attribute\Converter;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Modelling\Attribute\CommandHandler;
 use Ecotone\Test\ComponentTestBuilder;
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -135,7 +136,6 @@ class ReferenceServiceConverterBuilderTest extends TestCase
 
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$staticConverter::class],
-            [$staticConverter],
             configuration: ServiceConfiguration::createWithDefaults()
                 ->addExtensionObject(
                     ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withArrayStdClasses')
@@ -149,6 +149,43 @@ class ReferenceServiceConverterBuilderTest extends TestCase
                 $inputChannel,
                 ['some']
             )
+        );
+    }
+
+    public function test_static_converter_stringable_conversion(): void
+    {
+        $staticConverter = new class () {
+            #[Converter]
+            public static function convert(string $data): stdClass
+            {
+                return new stdClass();
+            }
+        };
+        $handler = new class () {
+            public stdClass $handled;
+
+            #[CommandHandler('test')]
+            public function handler(stdClass $data): void
+            {
+                $this->handled = $data;
+            }
+        };
+
+        $stringableObject = new class () {
+            public function __toString(): string
+            {
+                return 'some';
+            }
+        };
+
+        EcotoneLite::bootstrapFlowTesting(
+            [$staticConverter::class, $handler::class],
+            [$handler],
+        )->sendCommandWithRoutingKey('test', $stringableObject);
+
+        $this->assertEquals(
+            new stdClass(),
+            $handler->handled
         );
     }
 }

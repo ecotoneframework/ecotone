@@ -12,6 +12,7 @@ use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\AggregateFlow\AggregateIdMetadata;
 
 /**
  * Class AggregateMessageConversionService
@@ -39,7 +40,7 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
     public function process(Message $message): Message
     {
         /** @TODO Ecotone 2.0 (remove) this. For backward compatibility because it's ran again when message is consumed from Queue e*/
-        if ($message->getHeaders()->containsKey(AggregateMessage::AGGREGATE_ID)) {
+        if ($this->messageContainsCorrectAggregateId($message)) {
             return $message;
         }
 
@@ -108,5 +109,20 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
         return MessageBuilder::fromMessage($message)
             ->setHeader(AggregateMessage::AGGREGATE_ID, AggregateIdResolver::resolveArrayOfIdentifiers($this->aggregateClassName, $aggregateIdentifiers))
             ->build();
+    }
+
+    private function messageContainsCorrectAggregateId(Message $message): bool
+    {
+        if (! $message->getHeaders()->containsKey(AggregateMessage::AGGREGATE_ID)) {
+            return false;
+        }
+
+        $aggregateIdentifiers = AggregateIdMetadata::createFrom($message->getHeaders()->get(AggregateMessage::AGGREGATE_ID))->getIdentifiers();
+
+        if ($this->metadataIdentifierMapping !== []) {
+            return array_keys($this->metadataIdentifierMapping) === array_keys($aggregateIdentifiers);
+        }
+
+        return array_keys($this->messageIdentifierMapping) === array_keys($aggregateIdentifiers);
     }
 }

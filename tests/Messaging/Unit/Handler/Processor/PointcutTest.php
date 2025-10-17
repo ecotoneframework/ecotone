@@ -218,6 +218,210 @@ class PointcutTest extends TestCase
         );
     }
 
+    public function test_simple_negation_should_not_cut_when_annotation_present()
+    {
+        $this->assertFalse(
+            Pointcut::createWith('not(' . AttributeOne::class . ')')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [new AttributeOne()],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+    }
+
+    public function test_simple_negation_should_cut_when_annotation_not_present()
+    {
+        $this->assertTrue(
+            Pointcut::createWith('not(' . AttributeOne::class . ')')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [new AttributeTwo()],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+    }
+
+    public function test_double_negation_should_work_like_original()
+    {
+        $this->assertTrue(
+            Pointcut::createWith('not(not(' . AttributeOne::class . '))')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [new AttributeOne()],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+
+        $this->assertFalse(
+            Pointcut::createWith('not(not(' . AttributeOne::class . '))')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [new AttributeTwo()],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+    }
+
+    public function test_negation_with_and_operator()
+    {
+        $this->assertTrue(
+            Pointcut::createWith('not(' . AttributeOne::class . ') && ' . AttributeTwo::class)->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [new AttributeTwo()],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+
+        $this->assertFalse(
+            Pointcut::createWith('not(' . AttributeOne::class . ') && ' . AttributeTwo::class)->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [new AttributeOne()],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+    }
+
+    public function test_negation_with_or_operator()
+    {
+        $this->assertTrue(
+            Pointcut::createWith('not(' . AttributeOne::class . ') || ' . AttributeTwo::class)->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [new AttributeTwo()],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+
+        $this->assertTrue(
+            Pointcut::createWith('not(' . AttributeOne::class . ') || ' . AttributeTwo::class)->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+
+        $this->assertFalse(
+            Pointcut::createWith('not(' . AttributeOne::class . ') || ' . AttributeTwo::class)->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [new AttributeOne()],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+    }
+
+    public function test_negation_with_nested_parentheses()
+    {
+        $this->assertFalse(
+            Pointcut::createWith('not((' . AttributeOne::class . ' && ' . AttributeTwo::class . '))')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [new AttributeOne(), new AttributeTwo()],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+
+        $this->assertTrue(
+            Pointcut::createWith('not((' . AttributeOne::class . ' && ' . AttributeTwo::class . '))')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [new AttributeOne()],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+    }
+
+    public function test_negation_with_complex_expression()
+    {
+        $this->assertTrue(
+            Pointcut::createWith('not(' . AttributeOne::class . ' || ' . AttributeTwo::class . ')')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+
+        $this->assertFalse(
+            Pointcut::createWith('not(' . AttributeOne::class . ' || ' . AttributeTwo::class . ')')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [new AttributeOne()],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+
+        $this->assertFalse(
+            Pointcut::createWith('not(' . AttributeOne::class . ' || ' . AttributeTwo::class . ')')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [new AttributeTwo()],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+    }
+
+    public function test_negation_with_class_expression()
+    {
+        $this->assertFalse(
+            Pointcut::createWith('not(' . MethodInterceptorWithoutAspectExample::class . ')')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+
+        $this->assertTrue(
+            Pointcut::createWith('not(' . MethodInterceptorWithoutAspectExample::class . ')')->doesItCut(
+                InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, 'callMultipleUnorderedArgumentsInvocation'),
+                [],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+    }
+
+    public function test_negation_with_method_expression()
+    {
+        $this->assertFalse(
+            Pointcut::createWith('not(' . MethodInterceptorWithoutAspectExample::class . '::doSomething)')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+
+        $this->assertTrue(
+            Pointcut::createWith('not(' . MethodInterceptorWithoutAspectExample::class . '::doSomething)')->doesItCut(
+                InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, 'callMultipleUnorderedArgumentsInvocation'),
+                [],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+    }
+
+    public function test_negation_with_regex_expression()
+    {
+        $this->assertFalse(
+            Pointcut::createWith('not(Test\Ecotone\Messaging\Fixture\Handler\Processor\*)')->doesItCut(
+                InterfaceToCall::create(MethodInterceptorWithoutAspectExample::class, 'doSomething'),
+                [],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+
+        // Test that negation works with regex - the regex should match the class, so negation should return false
+        // This test verifies that the regex matching is working correctly within the negation
+        $this->assertFalse(
+            Pointcut::createWith('not(Test\Ecotone\Messaging\Fixture\Handler\Processor\*)')->doesItCut(
+                InterfaceToCall::create(CallMultipleUnorderedArgumentsInvocationInterceptorExample::class, 'callMultipleUnorderedArgumentsInvocation'),
+                [],
+                InterfaceToCallRegistry::createEmpty()
+            )
+        );
+    }
+
+    public function test_negation_error_cases()
+    {
+        $this->expectException(Pointcut\IncorrectPointcutException::class);
+        Pointcut::createWith('not()');
+
+        $this->expectException(Pointcut\IncorrectPointcutException::class);
+        Pointcut::createWith('not(' . AttributeOne::class);
+
+        $this->expectException(Pointcut\IncorrectPointcutException::class);
+        Pointcut::createWith('not(' . AttributeOne::class . '))');
+    }
+
 
     private function itShouldCut(string $expression, InterfaceToCall $doesItCut): void
     {

@@ -157,8 +157,12 @@ class GenericType extends Type implements DefinedObject
 
     public function __toString(): string
     {
-        $genericTypesString = implode(',', array_map(fn (Type $type) => $type->toString(), $this->genericTypes));
-        return "{$this->type->toString()}<{$genericTypesString}>";
+        $result = $this->type->__toString() . '<' . $this->genericTypes[0];
+        for ($i = 1; $i < count($this->genericTypes); $i++) {
+            $result .= ',' . $this->genericTypes[$i];
+        }
+        $result .= '>';
+        return $result;
     }
 
     public function getDefinition(): Definition

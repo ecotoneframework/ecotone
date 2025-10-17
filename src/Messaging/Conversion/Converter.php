@@ -16,7 +16,7 @@ use Ecotone\Messaging\Handler\Type;
  */
 interface Converter
 {
-    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType);
+    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType /* ConversionService $conversionService */);
 
 
     public function matches(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool;

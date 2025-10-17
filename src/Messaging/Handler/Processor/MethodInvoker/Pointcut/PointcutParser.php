@@ -14,6 +14,7 @@ class PointcutParser
     private const OR = '||';
     private const OPEN_PAREN = '(';
     private const CLOSE_PAREN = ')';
+    private const NOT = 'not(';
     private array $tokens;
     private int $currentTokenIndex;
 
@@ -85,12 +86,24 @@ class PointcutParser
         return $left;
     }
 
+    private function parseNot(): PointcutExpression
+    {
+        $inner = $this->parseAnd();
+        return new PointcutNotExpression($inner);
+    }
+
     private function parsePrimary(): PointcutExpression
     {
         $token = $this->nextToken();
 
         if ($token === self::OPEN_PAREN) {
             $expr = $this->parseAnd();
+            $this->expect(self::CLOSE_PAREN);
+            return $expr;
+        }
+
+        if ($token === self::NOT) {
+            $expr = $this->parseNot();
             $this->expect(self::CLOSE_PAREN);
             return $expr;
         }
@@ -133,8 +146,8 @@ class PointcutParser
 
     private function getTokens(string $expression): array
     {
-        // Match "||", "&&", "(" or ")"
-        $pattern = '/(\|\||&&|\(|\))/';
+        // Match "||", "&&", "not(" "(" or ")"
+        $pattern = '/(\|\||&&|not\(|\(|\))/';
 
         $parts = preg_split($pattern, $expression, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
 

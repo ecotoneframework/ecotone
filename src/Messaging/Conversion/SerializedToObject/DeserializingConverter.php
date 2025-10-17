@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion\SerializedToObject;
 
+use Ecotone\Messaging\Conversion\ConversionException;
+use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\Converter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Type;
@@ -21,9 +23,17 @@ class DeserializingConverter implements Converter
     /**
      * @inheritDoc
      */
-    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType)
+    public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType, ?ConversionService $conversionService = null)
     {
-        return unserialize(stripslashes($source));
+        $phpVar = unserialize(stripslashes($source));
+        if (! $targetType->accepts($phpVar)) {
+            if ($conversionService === null) {
+                throw ConversionException::create('To convert serialized data to different type than original, you need to set conversion service in ' . self::class);
+            }
+            return $conversionService->convert($phpVar, Type::createFromVariable($phpVar), MediaType::createApplicationXPHP(), $targetType, MediaType::createApplicationXPHP());
+        }
+
+        return $phpVar;
     }
 
     /**

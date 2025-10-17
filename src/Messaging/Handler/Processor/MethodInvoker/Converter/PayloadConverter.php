@@ -38,9 +38,6 @@ class PayloadConverter implements ParameterConverter
             ? MediaType::parseMediaType($message->getHeaders()->get(MessageHeaders::CONTENT_TYPE))
             : MediaType::createApplicationXPHP();
         $parameterMediaType = MediaType::createApplicationXPHP();
-        $sourceTypeDescriptor = $sourceMediaType->hasTypeParameter()
-            ? Type::create($sourceMediaType->getParameter('type'))
-            : Type::createFromVariable($data);
 
         $parameterType = $this->targetType;
 
@@ -54,6 +51,10 @@ class PayloadConverter implements ParameterConverter
         ) {
             return $data;
         }
+
+        $sourceTypeDescriptor = $sourceMediaType->hasTypeParameter()
+            ? Type::create($sourceMediaType->getParameter('type'))
+            : Type::createFromVariable($data);
 
         $convertedData = null;
         if (! $parameterType->isCompoundObjectType() && ! $parameterType->isAnything() && $this->canConvertParameter(

@@ -895,7 +895,7 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->converterBuilders as $converterBuilder) {
             $converters[] = $converterBuilder->compile($messagingBuilder);
         }
-        $messagingBuilder->register(ConversionService::REFERENCE_NAME, new Definition(AutoCollectionConversionService::class, ['converters' => $converters], 'createWith'));
+        $messagingBuilder->register(ConversionService::REFERENCE_NAME, new Definition(AutoCollectionConversionService::class, ['converters' => $converters]));
 
         $channelInterceptorsByImportance = $this->channelInterceptorBuilders;
         $channelInterceptorsByChannelName = [];

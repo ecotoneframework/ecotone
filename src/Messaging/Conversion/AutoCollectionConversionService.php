@@ -5,30 +5,20 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Conversion;
 
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Support\Assert;
 
-/**
- * Class ConversionService
- * @package Ecotone\Messaging\Conversion
- * @author Dariusz Gafka <support@simplycodedsoftware.com>
- */
+use function is_iterable;
+
 /**
  * licence Apache-2.0
  */
 class AutoCollectionConversionService implements ConversionService
 {
     /**
-     * @var Converter[]
-     */
-    private ?array $converters;
-
-    /**
-     * ConversionService constructor.
      * @param Converter[] $converters
+     * @param array<string, int|false> $convertersCache value is index of converter in $this->converters or false if not found
      */
-    private function __construct(array $converters)
+    public function __construct(private array $converters, private array $convertersCache = [])
     {
-        $this->initialize($converters);
     }
 
     /**
@@ -50,35 +40,50 @@ class AutoCollectionConversionService implements ConversionService
 
     public function convert($source, Type $sourcePHPType, MediaType $sourceMediaType, Type $targetPHPType, MediaType $targetMediaType)
     {
-        Assert::isFalse($sourcePHPType->isUnionType(), "Can't convert from Union source type {$sourceMediaType}:{$sourcePHPType} to {$targetMediaType}:{$targetPHPType}");
         if (is_null($source)) {
             return $source;
         }
 
-        $targetPHPType = $this->getTargetType($sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
-        $converter = $this->getConverter($sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
-        if (! is_object($converter)) {
-            throw ConversionException::create("Converter was not found for {$sourceMediaType}:{$sourcePHPType} to {$targetMediaType}:{$targetPHPType};");
+        if ($converter = $this->getConverter($sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType)) {
+            return $converter->convert($source, $sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType, $this);
         }
 
-        $converted = $converter->convert($source, $sourcePHPType, $sourceMediaType, $targetPHPType, $targetMediaType);
-        $convertedType = Type::createFromVariable($converted);
-        // Some converters (eg. DeserializingConverter) may return a value that is not compatible with the target type,
-        // so we try to convert it again, from the new media type and PHP type.
-        if (! $convertedType->isCompatibleWith($targetPHPType) && $targetMediaType->isCompatibleWith(MediaType::createApplicationXPHP())) {
-            $sourceMediaType = MediaType::createApplicationXPHPWithTypeParameter($convertedType->getTypeHint());
-            $converter = $this->getConverter($convertedType, $sourceMediaType, $targetPHPType, $targetMediaType);
-            if (is_object($converter)) {
-                $converted = $converter->convert($converted, $convertedType, $sourceMediaType, $targetPHPType, $targetMediaType);
+        if (is_iterable($source) && $targetPHPType->isIterable() && $targetPHPType instanceof Type\GenericType) {
+            $converted = [];
+            $targetValueType = $this->getValueTypeFromCollectionType($targetPHPType);
+            foreach ($source as $k => $v) {
+                $converted[$k] = $this->convert($v, Type::createFromVariable($v), MediaType::createApplicationXPHP(), $targetValueType, $targetMediaType);
             }
+            return $converted;
         }
 
-        return $converted;
+        throw ConversionException::create("Converter was not found for {$sourceMediaType}:{$sourcePHPType} to {$targetMediaType}:{$targetPHPType};");
     }
 
     public function canConvert(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
     {
-        return (bool)$this->getConverter($sourceType, $sourceMediaType, $targetType, $targetMediaType);
+        if ($this->getConverter($sourceType, $sourceMediaType, $targetType, $targetMediaType)) {
+            ;
+            return true;
+        }
+        if ($sourceType->isIterable() && $sourceType instanceof Type\GenericType
+            && $targetType->isIterable() && $targetType instanceof Type\GenericType) {
+            return (bool) $this->getConverter(
+                $this->getValueTypeFromCollectionType($sourceType),
+                $sourceMediaType,
+                $this->getValueTypeFromCollectionType($targetType),
+                $targetMediaType
+            );
+        }
+        return false;
+    }
+
+    private function getValueTypeFromCollectionType(Type\GenericType $collectionType): Type
+    {
+        return match (count($collectionType->genericTypes)) {
+            1 => $collectionType->genericTypes[0],
+            default => $collectionType->genericTypes[1],
+        };
     }
 
     /**
@@ -90,54 +95,23 @@ class AutoCollectionConversionService implements ConversionService
      */
     private function getConverter(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): ?Converter
     {
-        $targetType = $this->getTargetType($sourceType, $sourceMediaType, $targetType, $targetMediaType);
-        if (! $targetType) {
-            return null;
+        $cacheKey = $sourceType->toString() . '|' . $sourceMediaType->toString() . '->' . $targetType->toString() . '|' . $targetMediaType->toString();
+        if (isset($this->convertersCache[$cacheKey])) {
+            if ($this->convertersCache[$cacheKey] === false) {
+                return null;
+            }
+            return $this->converters[$this->convertersCache[$cacheKey]];
         }
 
-        foreach ($this->converters as $converter) {
+        foreach ($this->converters as $index => $converter) {
             if ($converter->matches($sourceType, $sourceMediaType, $targetType, $targetMediaType)) {
+                $this->convertersCache[$cacheKey] = $index;
                 return $converter;
             }
         }
 
+        $this->convertersCache[$cacheKey] = false;
+
         return null;
-    }
-
-    private function getTargetType(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): Type
-    {
-        foreach ($this->converters as $converter) {
-            /** @var Type[] $targetTypesToCheck */
-            $targetTypesToCheck = [];
-            if (! $targetType->isUnionType()) {
-                $targetTypesToCheck[] = $targetType;
-            } else {
-                $targetTypesToCheck = $targetType->getUnionTypes();
-            }
-
-            foreach ($targetTypesToCheck as $targetTypeToCheck) {
-                if ($targetTypeToCheck->isNullType()) {
-                    continue;
-                }
-
-                if ($converter->matches($sourceType, $sourceMediaType, $targetTypeToCheck, $targetMediaType)) {
-                    return $targetTypeToCheck;
-                }
-            }
-        }
-
-        return $targetType->isUnionType() ? $targetType->getUnionTypes()[0] : $targetType;
-    }
-
-    /**
-     * @param Converter[] $converters
-     */
-    private function initialize(array $converters): void
-    {
-        $this->converters = $converters;
-
-        foreach ($converters as $converter) {
-            $this->converters[] = CollectionConverter::createForConverter($converter);
-        }
     }
 }

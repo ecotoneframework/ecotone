@@ -14,10 +14,11 @@ use Ecotone\Messaging\Handler\Type;
 /**
  * licence Apache-2.0
  */
-class ReferenceServiceConverter implements Converter
+class ReferenceServiceConverter extends CustomConverter
 {
-    public function __construct(private object $object, private string $method, private Type $sourceType, private Type $targetType)
+    public function __construct(private object $object, private string $method, Type $sourceType, Type $targetType)
     {
+        parent::__construct($sourceType, $targetType);
     }
 
     /**
@@ -26,16 +27,5 @@ class ReferenceServiceConverter implements Converter
     public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType)
     {
         return $this->object->{$this->method}($source);
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function matches(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
-    {
-        return $sourceMediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP)
-            && $targetMediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP)
-            && $sourceType->isCompatibleWith($this->sourceType)
-            && $targetType->acceptType($this->targetType);
     }
 }

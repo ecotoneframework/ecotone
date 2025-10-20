@@ -139,6 +139,17 @@ class UnionType extends Type implements DefinedObject
         return $this->typeDescriptors;
     }
 
+    public function containsType(Type $targetType): bool
+    {
+        foreach ($this->typeDescriptors as $typeDescriptor) {
+            if ($typeDescriptor->equals($targetType)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * @inheritDoc
      */

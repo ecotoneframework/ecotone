@@ -210,6 +210,63 @@ class ConversionServiceTest extends TestCase
             )
         );
     }
+
+    /**
+     * @dataProvider provideConvertors
+     */
+    public function test_it_wrong_conversion_calling(array $convertors): void
+    {
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            classesToResolve: $convertors,
+            containerOrAvailableServices: [],
+        );
+
+        /** @var ConversionService $conversionService */
+        $conversionService = $ecotone->getGateway(ConversionService::class);
+
+        $data = 'some-data';
+
+        $this->assertEquals(
+            $data,
+            $conversionService->convert(
+                new SomeStringableDataTwo($data),
+                Type::create(SomeStringableDataTwo::class),
+                MediaType::createApplicationXPHP(),
+                Type::string(),
+                MediaType::createApplicationXPHP()
+            )
+        );
+    }
+
+    public static function provideConvertors(): iterable
+    {
+        $converterOne = new class () {
+            #[Converter]
+            public static function convert(string $value): SomeStringableDataOne
+            {
+                // Should not be called
+                return new SomeStringableDataOne('other-value');
+            }
+        };
+
+        $converterTwo = new class () {
+            #[Converter]
+            public static function convertToString(SomeStringableDataTwo $value): string
+            {
+                return $value->value;
+            }
+        };
+
+        yield 'Passed' => [[
+            $converterTwo::class,
+            $converterOne::class,
+        ]];
+
+        yield 'Failed' => [[
+            $converterOne::class,
+            $converterTwo::class,
+        ]];
+    }
 }
 
 class SomeStringableDataOne implements Stringable

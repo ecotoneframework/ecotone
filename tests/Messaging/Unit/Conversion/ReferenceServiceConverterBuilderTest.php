@@ -7,6 +7,7 @@ namespace Test\Ecotone\Messaging\Unit\Conversion;
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Attribute\Converter;
 use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Handler\MethodInvocationException;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Attribute\CommandHandler;
@@ -152,7 +153,7 @@ class ReferenceServiceConverterBuilderTest extends TestCase
         );
     }
 
-    public function test_static_converter_stringable_conversion(): void
+    public function test_static_converter_stringable_conversion_do_not_resolve(): void
     {
         $staticConverter = new class () {
             #[Converter]
@@ -178,14 +179,14 @@ class ReferenceServiceConverterBuilderTest extends TestCase
             }
         };
 
-        EcotoneLite::bootstrapFlowTesting(
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$staticConverter::class, $handler::class],
             [$handler],
-        )->sendCommandWithRoutingKey('test', $stringableObject);
-
-        $this->assertEquals(
-            new stdClass(),
-            $handler->handled
         );
+
+        $this->expectException(MethodInvocationException::class);
+        $this->expectExceptionMessage("Cannot resolve parameter 'data'");
+
+        $ecotone->sendCommandWithRoutingKey('test', $stringableObject);
     }
 }

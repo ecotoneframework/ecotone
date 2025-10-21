@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Ecotone\Projecting\InMemory;
 
 use Ecotone\Projecting\NoOpTransaction;
+use Ecotone\Projecting\ProjectionInitializationStatus;
 use Ecotone\Projecting\ProjectionPartitionState;
 use Ecotone\Projecting\ProjectionStateStorage;
 use Ecotone\Projecting\Transaction;
@@ -19,10 +20,22 @@ class InMemoryProjectionStateStorage implements ProjectionStateStorage
      */
     private array $projectionStates = [];
 
-    public function loadPartition(string $projectionName, ?string $partitionKey = null, bool $lock = true): ProjectionPartitionState
+    public function loadPartition(string $projectionName, ?string $partitionKey = null, bool $lock = true): ?ProjectionPartitionState
     {
         $key = $this->getKey($projectionName, $partitionKey);
-        return $this->projectionStates[$key] ?? new ProjectionPartitionState($projectionName, $partitionKey);
+        return $this->projectionStates[$key] ?? null;
+    }
+
+    public function initPartition(string $projectionName, ?string $partitionKey = null): ?ProjectionPartitionState
+    {
+        $key = $this->getKey($projectionName, $partitionKey);
+
+        if (! isset($this->projectionStates[$key])) {
+            $this->projectionStates[$key] = new ProjectionPartitionState($projectionName, $partitionKey, null, null, ProjectionInitializationStatus::UNINITIALIZED);
+            return $this->projectionStates[$key];
+        }
+
+        return null; // Already exists
     }
 
     public function savePartition(ProjectionPartitionState $projectionState): void

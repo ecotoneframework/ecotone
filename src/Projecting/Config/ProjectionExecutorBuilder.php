@@ -14,4 +14,5 @@ interface ProjectionExecutorBuilder extends CompilableBuilder
     public function projectionName(): string;
     public function asyncChannelName(): ?string;
     public function partitionHeader(): ?string;
+    public function automaticInitialization(): bool;
 }

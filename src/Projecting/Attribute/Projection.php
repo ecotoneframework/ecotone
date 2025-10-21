@@ -16,6 +16,7 @@ class Projection extends StreamBasedSource
     public function __construct(
         public readonly string  $name,
         public readonly ?string $partitionHeaderName = null,
+        public readonly bool    $automaticInitialization = true,
     ) {
     }
 }

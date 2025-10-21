@@ -28,6 +28,7 @@ use Ecotone\Projecting\InMemory\InMemoryProjectionRegistry;
 use Ecotone\Projecting\InMemory\InMemoryProjectionStateStorage;
 use Ecotone\Projecting\NullPartitionProvider;
 use Ecotone\Projecting\PartitionProvider;
+use Ecotone\Projecting\ProjectingHeaders;
 use Ecotone\Projecting\ProjectingManager;
 use Ecotone\Projecting\ProjectionRegistry;
 use Ecotone\Projecting\ProjectionStateStorage;
@@ -92,6 +93,8 @@ class ProjectingModule implements AnnotationModule
                     $components[$projectionName][StreamSource::class] ?? throw ConfigurationException::create("Projection with name {$projectionName} does not have stream source configured. Please check your configuration."),
                     $components[$projectionName][PartitionProvider::class] ?? new Definition(NullPartitionProvider::class),
                     $projectionName,
+                    1000, // batchSize
+                    $projectionBuilder->automaticInitialization(),
                 ])
             );
             $projectionRegistryMap[$projectionName] = new Reference($projectingManagerReference);
@@ -106,6 +109,7 @@ class ProjectingModule implements AnnotationModule
                                 $projectionBuilder->partitionHeader()
                                     ? HeaderBuilder::create('partitionKey', $projectionBuilder->partitionHeader())
                                     : ValueBuilder::create('partitionKey', null),
+                                HeaderBuilder::createOptional('manualInitialization', ProjectingHeaders::MANUAL_INITIALIZATION),
                             ],
                         )
                     )

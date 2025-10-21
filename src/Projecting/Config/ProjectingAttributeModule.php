@@ -58,7 +58,7 @@ class ProjectingAttributeModule implements AnnotationModule
         $projectionBuilders = [];
         foreach ($annotationRegistrationService->findAnnotatedClasses(Projection::class) as $projectionClassName) {
             $projectionAttribute = $annotationRegistrationService->getAttributeForClass($projectionClassName, Projection::class);
-            $projectionBuilder = new EcotoneProjectionExecutorBuilder($projectionAttribute->name, $projectionAttribute->partitionHeaderName, $namedEvents);
+            $projectionBuilder = new EcotoneProjectionExecutorBuilder($projectionAttribute->name, $projectionAttribute->partitionHeaderName, $projectionAttribute->automaticInitialization, $namedEvents);
 
             $asynchronousChannelName = self::getProjectionAsynchronousChannel($annotationRegistrationService, $projectionClassName);
             if ($asynchronousChannelName !== null) {

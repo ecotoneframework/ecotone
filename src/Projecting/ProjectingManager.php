@@ -29,10 +29,11 @@ class ProjectingManager
     // This is the method that is linked to the event bus routing channel
     public function execute(?string $partitionKey = null, bool $manualInitialization = false): void
     {
+        $canInitialize = $manualInitialization || $this->automaticInitialization;
         do {
             $transaction = $this->projectionStateStorage->beginTransaction();
             try {
-                $projectionState = $this->loadOrInitializePartitionState($partitionKey, $manualInitialization);
+                $projectionState = $this->loadOrInitializePartitionState($partitionKey, $canInitialize);
                 if ($projectionState === null) {
                     $transaction->commit();
                     return;
@@ -48,7 +49,7 @@ class ProjectingManager
                     ->withLastPosition($streamPage->lastPosition)
                     ->withUserState($userState);
 
-                if (count($streamPage->events) === 0 && $manualInitialization) {
+                if (count($streamPage->events) === 0 && $canInitialize) {
                     // If we are forcing execution and there are no new events, we still want to enable the projection if it was uninitialized
                     $projectionState = $projectionState->withStatus(ProjectionInitializationStatus::INITIALIZED);
                 }
@@ -88,15 +89,19 @@ class ProjectingManager
         }
     }
 
-    private function loadOrInitializePartitionState(?string $partitionKey, bool $manualInitialization): ?ProjectionPartitionState
+    private function loadOrInitializePartitionState(?string $partitionKey, bool $canInitialize): ?ProjectionPartitionState
     {
         $projectionState = $this->projectionStateStorage->loadPartition($this->projectionName, $partitionKey);
 
+        if (! $canInitialize && $projectionState?->status === ProjectionInitializationStatus::UNINITIALIZED) {
+            // Projection is being initialized by another process
+            return null;
+        }
         if ($projectionState) {
             return $projectionState;
         }
 
-        if ($manualInitialization || $this->automaticInitialization) {
+        if ($canInitialize) {
             $projectionState = $this->projectionStateStorage->initPartition($this->projectionName, $partitionKey);
             if ($projectionState) {
                 $this->projectorExecutor->init();

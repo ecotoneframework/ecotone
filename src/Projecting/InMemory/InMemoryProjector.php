@@ -39,4 +39,8 @@ class InMemoryProjector implements ProjectorExecutor, Countable
     {
         $this->projectedEvents = [];
     }
+
+    public function flush(): void
+    {
+    }
 }

@@ -93,7 +93,7 @@ class ProjectingModule implements AnnotationModule
                     $components[$projectionName][StreamSource::class] ?? throw ConfigurationException::create("Projection with name {$projectionName} does not have stream source configured. Please check your configuration."),
                     $components[$projectionName][PartitionProvider::class] ?? new Definition(NullPartitionProvider::class),
                     $projectionName,
-                    1000, // batchSize
+                    $projectionBuilder->batchSize(), // batchSize
                     $projectionBuilder->automaticInitialization(),
                 ])
             );

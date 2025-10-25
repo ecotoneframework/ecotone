@@ -7,7 +7,6 @@
 namespace Ecotone\Messaging\Scheduling;
 
 use DateInterval;
-use DateMalformedStringException;
 use DateTime;
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -18,6 +17,8 @@ use function is_int;
 
 use const PHP_INT_MAX;
 use const PHP_INT_MIN;
+
+use RuntimeException;
 
 use function sprintf;
 
@@ -40,11 +41,11 @@ class DatePoint extends DateTimeImmutable
     }
 
     /**
-     * @throws DateMalformedStringException When $format or $datetime are invalid
+     * @throws RuntimeException When $format or $datetime are invalid
      */
     public static function createFromFormat(string $format, string $datetime, ?DateTimeZone $timezone = null): static
     {
-        return parent::createFromFormat($format, $datetime, $timezone);
+        return parent::createFromFormat($format, $datetime, $timezone) ?: throw new RuntimeException(static::getLastErrors()['errors'][0] ?? 'Invalid date string or format.');
     }
 
     public static function createFromInterface(DateTimeInterface $object): static

@@ -12,6 +12,8 @@ use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 
+use function is_scalar;
+
 /**
  * Class HeaderArgument
  * @package Ecotone\Messaging\Handler\ServiceActivator
@@ -46,12 +48,13 @@ class HeaderConverter implements ParameterConverter
 
         $targetType = $this->parameterType;
 
-        $sourceValueType = Type::createFromVariable($headerValue);
-        if (! $sourceValueType->isCompatibleWith($targetType)) {
-            if ($this->canConvertTo($headerValue, MediaType::APPLICATION_X_PHP, $targetType)) {
-                $headerValue = $this->doConversion($headerValue, MediaType::APPLICATION_X_PHP, $targetType);
-            } elseif ($sourceValueType->isScalar() && $this->canConvertTo($headerValue, DefaultHeaderMapper::FALLBACK_HEADER_CONVERSION_MEDIA_TYPE, $targetType)) {
-                $headerValue = $this->doConversion($headerValue, DefaultHeaderMapper::FALLBACK_HEADER_CONVERSION_MEDIA_TYPE, $targetType);
+        if (! $targetType->accepts($headerValue)) {
+            $sourceValueType = Type::createFromVariable($headerValue);
+            $sourceMediaType = MediaType::createApplicationXPHP();
+            if ($this->canConvertTo($sourceValueType, $sourceMediaType, $targetType)) {
+                $headerValue = $this->doConversion($headerValue, $sourceValueType, $sourceMediaType, $targetType);
+            } elseif (is_scalar($headerValue) && $this->canConvertTo($sourceValueType, MediaType::parseMediaType(DefaultHeaderMapper::FALLBACK_HEADER_CONVERSION_MEDIA_TYPE), $targetType)) {
+                $headerValue = $this->doConversion($headerValue, $sourceValueType, MediaType::parseMediaType(DefaultHeaderMapper::FALLBACK_HEADER_CONVERSION_MEDIA_TYPE), $targetType);
             } else {
                 throw ConversionException::create("Can't convert {$this->headerName} from {$sourceValueType} to {$targetType}. Lack of PHP Converter or JSON Media Type Converter available.");
             }
@@ -60,22 +63,22 @@ class HeaderConverter implements ParameterConverter
         return $headerValue;
     }
 
-    private function canConvertTo(mixed $headerValue, string $sourceMediaType, Type $targetType): bool
+    private function canConvertTo(Type $sourceType, MediaType $sourceMediaType, Type $targetType): bool
     {
         return $this->conversionService->canConvert(
-            Type::createFromVariable($headerValue),
-            MediaType::parseMediaType($sourceMediaType),
+            $sourceType,
+            $sourceMediaType,
             $targetType,
             MediaType::createApplicationXPHP()
         );
     }
 
-    private function doConversion(mixed $headerValue, string $sourceMediaType, Type $targetType)
+    private function doConversion(mixed $headerValue, Type $sourceValueType, MediaType $sourceMediaType, Type $targetType)
     {
         $headerValue = $this->conversionService->convert(
             $headerValue,
-            Type::createFromVariable($headerValue),
-            MediaType::parseMediaType($sourceMediaType),
+            $sourceValueType,
+            $sourceMediaType,
             $targetType,
             MediaType::createApplicationXPHP()
         );

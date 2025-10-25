@@ -29,6 +29,8 @@ use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\NamedEvent;
 use Ecotone\Projecting\Attribute\Projection;
+use Ecotone\Projecting\Attribute\ProjectionBatchSize;
+use Ecotone\Projecting\Attribute\ProjectionFlush;
 use LogicException;
 
 /**
@@ -55,10 +57,12 @@ class ProjectingAttributeModule implements AnnotationModule
             $namedEvents[$className] = $attribute->getName();
         }
 
+        /** @var array<string, EcotoneProjectionExecutorBuilder> $projectionBuilders */
         $projectionBuilders = [];
         foreach ($annotationRegistrationService->findAnnotatedClasses(Projection::class) as $projectionClassName) {
             $projectionAttribute = $annotationRegistrationService->getAttributeForClass($projectionClassName, Projection::class);
-            $projectionBuilder = new EcotoneProjectionExecutorBuilder($projectionAttribute->name, $projectionAttribute->partitionHeaderName, $projectionAttribute->automaticInitialization, $namedEvents);
+            $batchSizeAttribute = $annotationRegistrationService->findAttributeForClass($projectionClassName, ProjectionBatchSize::class);
+            $projectionBuilder = new EcotoneProjectionExecutorBuilder($projectionAttribute->name, $projectionAttribute->partitionHeaderName, $projectionAttribute->automaticInitialization, $namedEvents, batchSize: $batchSizeAttribute?->batchSize);
 
             $asynchronousChannelName = self::getProjectionAsynchronousChannel($annotationRegistrationService, $projectionClassName);
             if ($asynchronousChannelName !== null) {
@@ -79,6 +83,7 @@ class ProjectingAttributeModule implements AnnotationModule
         $lifecycleAnnotations = array_merge(
             $annotationRegistrationService->findCombined(Projection::class, ProjectionInitialization::class),
             $annotationRegistrationService->findCombined(Projection::class, ProjectionDelete::class),
+            $annotationRegistrationService->findCombined(Projection::class, ProjectionFlush::class),
         );
         foreach ($lifecycleAnnotations as $lifecycleAnnotation) {
             /** @var Projection $projectionAttribute */
@@ -90,6 +95,8 @@ class ProjectingAttributeModule implements AnnotationModule
                 $projectionBuilder->setInitChannel($inputChannel);
             } elseif ($lifecycleAnnotation->getAnnotationForMethod() instanceof ProjectionDelete) {
                 $projectionBuilder->setDeleteChannel($inputChannel);
+            } elseif ($lifecycleAnnotation->getAnnotationForMethod() instanceof ProjectionFlush) {
+                $projectionBuilder->setFlushChannel($inputChannel);
             }
 
 

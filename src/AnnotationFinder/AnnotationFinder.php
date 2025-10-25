@@ -31,4 +31,5 @@ interface AnnotationFinder extends AnnotationResolver
      * @throws InvalidArgumentException
      */
     public function getAttributeForClass(string $className, string $attributeClassName): object;
+    public function findAttributeForClass(string $className, string $attributeClassName): ?object;
 }

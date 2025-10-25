@@ -32,6 +32,7 @@ class ProjectingManager
         $canInitialize = $manualInitialization || $this->automaticInitialization;
         do {
             $transaction = $this->projectionStateStorage->beginTransaction();
+            $processedEvents = 0;
             try {
                 $projectionState = $this->loadOrInitializePartitionState($partitionKey, $canInitialize);
                 if ($projectionState === null) {
@@ -44,12 +45,17 @@ class ProjectingManager
                 $userState = $projectionState->userState;
                 foreach ($streamPage->events as $event) {
                     $userState = $this->projectorExecutor->project($event, $userState);
+                    $processedEvents++;
                 }
+                if ($processedEvents > 0) {
+                    $this->projectorExecutor->flush();
+                }
+
                 $projectionState = $projectionState
                     ->withLastPosition($streamPage->lastPosition)
                     ->withUserState($userState);
 
-                if (count($streamPage->events) === 0 && $canInitialize) {
+                if ($processedEvents === 0 && $canInitialize) {
                     // If we are forcing execution and there are no new events, we still want to enable the projection if it was uninitialized
                     $projectionState = $projectionState->withStatus(ProjectionInitializationStatus::INITIALIZED);
                 }
@@ -60,7 +66,7 @@ class ProjectingManager
                 $transaction->rollBack();
                 throw $e;
             }
-        } while (count($streamPage->events) > 0);
+        } while ($processedEvents > 0);
     }
 
     public function loadState(?string $partitionKey = null): ProjectionPartitionState

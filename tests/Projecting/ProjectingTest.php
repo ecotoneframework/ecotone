@@ -20,6 +20,7 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Event;
 use Ecotone\Projecting\Attribute\Projection;
+use Ecotone\Projecting\Attribute\ProjectionFlush;
 use Ecotone\Projecting\InMemory\InMemoryStreamSourceBuilder;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\TestCase;
@@ -580,5 +581,49 @@ class ProjectingTest extends TestCase
         );
         $ecotone->publishEventWithRoutingKey('with-priority');
         self::assertEquals(['projectionB-with-priority', 'projectionA-with-priority'], $db);
+    }
+
+    public function test_it_can_flush_by_batches(): void
+    {
+        $projection = new #[Projection('batch_projection')] class () {
+            public array $processingEvents = [];
+            public array $flushedEvents = [];
+            public function __construct()
+            {
+            }
+
+            #[EventHandler('*')]
+            public function handle(array $event): void
+            {
+                $this->processingEvents[] = $event;
+            }
+
+            #[ProjectionFlush]
+            public function flush(): void
+            {
+                $this->flushedEvents[] = $this->processingEvents;
+                $this->processingEvents = [];
+            }
+        };
+
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [$projection::class],
+            [$projection],
+            ServiceConfiguration::createWithDefaults()
+                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder())
+        );
+        $streamSource->append(
+            Event::createWithType('event1', []),
+            Event::createWithType('event2', []),
+            Event::createWithType('event3', []),
+            Event::createWithType('event4', []),
+            Event::createWithType('event5', []),
+        );
+
+        $ecotone->triggerProjection('batch_projection');
+        self::assertCount(1, $projection->flushedEvents);
+        self::assertCount(5, $projection->flushedEvents[0]);
+        self::assertCount(0, $projection->processingEvents);
     }
 }

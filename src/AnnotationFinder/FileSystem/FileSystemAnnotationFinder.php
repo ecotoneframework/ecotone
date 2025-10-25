@@ -325,6 +325,11 @@ class FileSystemAnnotationFinder implements AnnotationFinder
 
     public function getAttributeForClass(string $className, string $attributeClassName): object
     {
+        return $this->findAttributeForClass($className, $attributeClassName) ?? throw InvalidArgumentException::create("Can't find attribute {$attributeClassName} for {$className}");
+    }
+
+    public function findAttributeForClass(string $className, string $attributeClassName): ?object
+    {
         $attributes = $this->getAnnotationsForClass($className);
         foreach ($attributes as $attributeToVerify) {
             if ($attributeToVerify instanceof $attributeClassName) {
@@ -332,7 +337,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
             }
         }
 
-        throw InvalidArgumentException::create("Can't find attribute {$attributeClassName} for {$className}");
+        return null;
     }
 
     /**

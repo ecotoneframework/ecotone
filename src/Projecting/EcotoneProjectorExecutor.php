@@ -24,6 +24,7 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
         private MessageProcessor $routerProcessor,
         private ?string $initChannel = null,
         private ?string $deleteChannel = null,
+        private ?string $flushChannel = null,
     ) {
     }
 
@@ -64,6 +65,13 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
     {
         if ($this->deleteChannel) {
             $this->messagingEntrypoint->send([], $this->deleteChannel);
+        }
+    }
+
+    public function flush(): void
+    {
+        if ($this->flushChannel) {
+            $this->messagingEntrypoint->send([], $this->flushChannel);
         }
     }
 }

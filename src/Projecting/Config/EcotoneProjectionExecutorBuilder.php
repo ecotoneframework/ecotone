@@ -24,6 +24,8 @@ use Ecotone\Projecting\ProjectingHeaders;
 
 class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
 {
+    private const DEFAULT_BATCH_SIZE = 1_000;
+
     /**
      * @param AnnotatedDefinition[] $projectionEventHandlers
      */
@@ -34,8 +36,10 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         private array   $namedEvents = [],
         private ?string $initChannel = null,
         private ?string $deleteChannel = null,
+        private ?string $flushChannel = null,
         private array   $projectionEventHandlers = [],
         private ?string $asyncChannelName = null,
+        private ?int    $batchSize = null,
     ) {
         if ($this->partitionHeader && ! $this->automaticInitialization) {
             throw new ConfigurationException("Cannot set partition header for projection {$this->projectionName} with automatic initialization disabled");
@@ -72,6 +76,11 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         $this->deleteChannel = $deleteChannel;
     }
 
+    public function setFlushChannel(string $inputChannel): void
+    {
+        $this->flushChannel = $inputChannel;
+    }
+
     public function setAsyncChannel(string $asynchronousChannelName): void
     {
         $this->asyncChannelName = $asynchronousChannelName;
@@ -80,6 +89,11 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
     public function automaticInitialization(): bool
     {
         return $this->automaticInitialization;
+    }
+
+    public function batchSize(): int
+    {
+        return $this->batchSize ?? self::DEFAULT_BATCH_SIZE;
     }
 
     public function compile(MessagingContainerBuilder $builder): Definition|Reference
@@ -91,6 +105,7 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
             $routerProcessor,
             $this->initChannel,
             $this->deleteChannel,
+            $this->flushChannel,
         ]);
     }
 

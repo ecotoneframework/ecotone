@@ -18,4 +18,5 @@ interface ProjectorExecutor
     public function project(Event $event, mixed $userState = null): mixed;
     public function init(): void;
     public function delete(): void;
+    public function flush(): void;
 }

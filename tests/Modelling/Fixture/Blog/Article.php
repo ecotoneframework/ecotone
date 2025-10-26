@@ -15,7 +15,7 @@ class Article
     #[Identifier]
     private string $author;
     #[Identifier]
-    private string $title;
+    private ?string $title;
     /**
      * @var string
      */
@@ -28,10 +28,10 @@ class Article
     /**
      * Article constructor.
      * @param string $author
-     * @param string $title
+     * @param string|null $title
      * @param string $content
      */
-    private function __construct(string $author, string $title, string $content)
+    private function __construct(string $author, ?string $title, string $content)
     {
         $this->author = $author;
         $this->title = $title;
@@ -48,6 +48,31 @@ class Article
     public static function createWithoutContent(PublishArticleWithTitleOnlyCommand $command): self
     {
         return new self($command->getAuthor(), $command->getTitle(), '');
+    }
+
+    #[CommandHandler]
+    public static function createWithoutIdentifiers(CreateArticleWithoutIdentifiersCommand $command): self
+    {
+        return new self('generated-author', 'generated-title', $command->getContent());
+    }
+
+    #[CommandHandler]
+    public static function createWithSingleIdentifier(CreateArticleWithSingleIdentifierCommand $command): self
+    {
+        return new self($command->getAuthor(), 'generated-title', $command->getContent());
+    }
+
+    #[CommandHandler]
+    public static function createWithNullIdentifier(CreateArticleWithNullIdentifierCommand $command): self
+    {
+        return new self($command->getAuthor(), $command->getTitle(), $command->getContent());
+    }
+
+    #[CommandHandler]
+    public static function createWithFactoryAssignedNull(CreateArticleWithFactoryAssignedNullCommand $command): self
+    {
+        // Factory method internally assigns null to title, regardless of command content
+        return new self($command->getAuthor(), null, $command->getContent());
     }
 
     #[CommandHandler]
@@ -81,9 +106,9 @@ class Article
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getTitle(): string
+    public function getTitle(): ?string
     {
         return $this->title;
     }

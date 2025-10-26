@@ -21,12 +21,13 @@ final class TestConfiguration
         private ?MediaType $pollableChannelMediaTypeConversion,
         private string $channelToConvertOn,
         private array $spiedChannelNames,
+        private bool $inMemoryConsumerPositionTracker,
     ) {
     }
 
     public static function createWithDefaults(): self
     {
-        return new self(true, true, null, '', []);
+        return new self(true, true, null, '', [], true);
     }
 
     public function withFailOnCommandHandlerNotFound(bool $shouldFail): self
@@ -91,5 +92,18 @@ final class TestConfiguration
     public function getSpiedChannels(): array
     {
         return $this->spiedChannelNames;
+    }
+
+    public function withInMemoryConsumerPositionTracker(bool $enabled): self
+    {
+        $self = clone $this;
+        $self->inMemoryConsumerPositionTracker = $enabled;
+
+        return $self;
+    }
+
+    public function isInMemoryConsumerPositionTrackerEnabled(): bool
+    {
+        return $this->inMemoryConsumerPositionTracker;
     }
 }

@@ -59,6 +59,9 @@ class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuil
         return self::create($messageChannelName, PublishSubscribeChannel::create($messageChannelName), null);
     }
 
+    /**
+     * @TODO Ecotone 2.0 make delayable default
+     */
     public static function createQueueChannel(string $messageChannelName, bool $delayable = false, string|MediaType|null $conversionMediaType = null, FinalFailureStrategy $finalFailureStrategy = FinalFailureStrategy::RESEND, bool $isAutoAcked = true): self
     {
         $messageChannel = $delayable ? DelayableQueueChannel::create($messageChannelName) : QueueChannel::create($messageChannelName);

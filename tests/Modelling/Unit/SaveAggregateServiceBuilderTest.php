@@ -24,6 +24,9 @@ use Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder\EventSourcingAggregat
 use Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder\Something;
 use Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder\SomethingWasCreated;
 use Test\Ecotone\Modelling\Fixture\Blog\Article;
+use Test\Ecotone\Modelling\Fixture\Blog\CreateArticleWithFactoryAssignedNullCommand;
+use Test\Ecotone\Modelling\Fixture\Blog\CreateArticleWithoutIdentifiersCommand;
+use Test\Ecotone\Modelling\Fixture\Blog\CreateArticleWithSingleIdentifierCommand;
 use Test\Ecotone\Modelling\Fixture\Blog\PublishArticleCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\Order;
@@ -250,6 +253,57 @@ class SaveAggregateServiceBuilderTest extends TestCase
                 ->getGateway(CommandBus::class)
                 ->send(PublishArticleCommand::createWith('johny', 'Cat book', 'Good content'))
         );
+    }
+
+    public function test_returning_all_identifiers_when_command_provides_no_identifiers()
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            classesToResolve: [Article::class]
+        );
+
+        $result = $ecotoneLite
+            ->getGateway(CommandBus::class)
+            ->send(new CreateArticleWithoutIdentifiersCommand('Some content'));
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('author', $result);
+        $this->assertArrayHasKey('title', $result);
+        $this->assertEquals('generated-author', $result['author']);
+        $this->assertEquals('generated-title', $result['title']);
+    }
+
+    public function test_returning_all_identifiers_when_command_provides_single_identifier()
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            classesToResolve: [Article::class]
+        );
+
+        $result = $ecotoneLite
+            ->getGateway(CommandBus::class)
+            ->send(new CreateArticleWithSingleIdentifierCommand('johny', 'Some content'));
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('author', $result);
+        $this->assertArrayHasKey('title', $result);
+        $this->assertEquals('johny', $result['author']);
+        $this->assertEquals('generated-title', $result['title']);
+    }
+
+    public function test_returning_all_identifiers_when_factory_method_assigns_null_to_identifier()
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            classesToResolve: [Article::class]
+        );
+
+        $result = $ecotoneLite
+            ->getGateway(CommandBus::class)
+            ->send(new CreateArticleWithFactoryAssignedNullCommand('johny', null, 'Some content'));
+
+        $this->assertIsArray($result);
+        $this->assertArrayHasKey('author', $result);
+        $this->assertArrayHasKey('title', $result);
+        $this->assertEquals('johny', $result['author']);
+        $this->assertNull($result['title']);
     }
 
     public function test_calling_save_method_with_automatic_increasing_version()

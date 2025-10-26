@@ -25,6 +25,8 @@ final class ExecutionPollingMetadata
     }
 
     /**
+     * @TODO Ecotone 2.0 amountMessageToHandle increase to 100
+     *
      * @param int $amountOfMessagesToHandle how many messages should this consumer handle before exiting
      * @param int $maxExecutionTimeInMilliseconds Maximum execution of running consumer. Take under that while debugging with xdebug it should be set to 0 to avoid exiting consumer to early.
      * @param bool $failAtError Should consumer stop when error occurs, if not message will be requeued and consumer will continue

@@ -34,6 +34,11 @@ class QueueChannel implements PollableChannel, DefinedObject
         $this->queue[] = $message;
     }
 
+    public function sendToBeginning(Message $message): void
+    {
+        $this->queue = array_merge([$message], $this->queue);
+    }
+
     /**
      * @inheritDoc
      */

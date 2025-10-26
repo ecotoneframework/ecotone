@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\PollableChannel\InMemory;
 
+use Ecotone\Messaging\Channel\DelayableQueueChannel;
+use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Endpoint\AcknowledgementCallback;
 use Ecotone\Messaging\Endpoint\FinalFailureStrategy;
 use Ecotone\Messaging\Message;
-use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\Assert;
 use RuntimeException;
 
@@ -17,7 +18,7 @@ use RuntimeException;
 final class InMemoryAcknowledgeCallback implements AcknowledgementCallback
 {
     public function __construct(
-        private PollableChannel           $queueChannel,
+        private QueueChannel|DelayableQueueChannel $queueChannel,
         private Message                   $message,
         private FinalFailureStrategy      $failureStrategy = FinalFailureStrategy::RESEND,
         private bool                      $isAutoAcked = true,
@@ -97,7 +98,7 @@ final class InMemoryAcknowledgeCallback implements AcknowledgementCallback
             throw new RuntimeException('Requeue loop was detected');
         }
 
-        $this->queueChannel->send($this->message);
+        $this->queueChannel->sendToBeginning($this->message);
     }
 
     /**

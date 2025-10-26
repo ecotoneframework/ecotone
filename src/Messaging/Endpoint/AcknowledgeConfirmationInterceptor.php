@@ -77,6 +77,8 @@ class AcknowledgeConfirmationInterceptor
             return;
         } catch (Throwable $exception) {
             if ($acknowledgementCallback->getFailureStrategy() === FinalFailureStrategy::STOP || $pollingMetadata->isStoppedOnError()) {
+                $acknowledgementCallback->release();
+
                 $logger->critical(
                     sprintf(
                         'Acknowledgment mode is set to stop on failure. Stopping Message Consumer without acknowledgment to avoid Message loss.  Error: %s',

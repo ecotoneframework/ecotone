@@ -39,7 +39,7 @@ interface ConsumerInterceptor
     /**
      * Called after each run
      */
-    public function postRun(): void;
+    public function postRun(?Throwable $unhandledFailure): void;
 
     /**
      * Called after each sending message to request channel

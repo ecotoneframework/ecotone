@@ -67,7 +67,7 @@ class LimitExecutionAmountInterceptor implements ConsumerInterceptor
     /**
      * @inheritDoc
      */
-    public function postRun(): void
+    public function postRun(?Throwable $unhandledFailure): void
     {
         $this->currentExecutionAmount++;
         $this->shouldBeStopped = $this->currentExecutionAmount >= $this->executionLimit;

@@ -1,0 +1,48 @@
+namespace Ecotone\__Proxy__;
+
+class GeneratedClass implements \Test\Ecotone\Messaging\Unit\Handler\Gateway\InterfaceForProxyGeneration
+{
+    private $messagingSystem;
+
+    private $gatewayProxyReference;
+
+    public function __construct(\Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem, \Ecotone\Messaging\Config\Container\GatewayProxyReference $gatewayProxyReference)
+    {
+        $this->messagingSystem = $messagingSystem; $this->gatewayProxyReference = $gatewayProxyReference;
+    }
+
+    public function doSomething(): void
+    {
+        $this->messagingSystem->getNonProxyGatewayByName($this->gatewayProxyReference->gatewayReferenceForMethod('doSomething'))->execute([]);
+    }
+
+    public function doSomethingAndReturnSomething(): mixed
+    {
+        return $this->messagingSystem->getNonProxyGatewayByName($this->gatewayProxyReference->gatewayReferenceForMethod('doSomethingAndReturnSomething'))->execute([]);
+    }
+
+    public function doSomethingWithDefaultParameter(array $param = []): mixed
+    {
+        return $this->messagingSystem->getNonProxyGatewayByName($this->gatewayProxyReference->gatewayReferenceForMethod('doSomethingWithDefaultParameter'))->execute([$param]);
+    }
+
+    public function doSomethingWithNullableParameter(?string $param): void
+    {
+        $this->messagingSystem->getNonProxyGatewayByName($this->gatewayProxyReference->gatewayReferenceForMethod('doSomethingWithNullableParameter'))->execute([$param]);
+    }
+
+    public function doSomethingWithNoType($param): void
+    {
+        $this->messagingSystem->getNonProxyGatewayByName($this->gatewayProxyReference->gatewayReferenceForMethod('doSomethingWithNoType'))->execute([$param]);
+    }
+
+    public function nullableDefaultParameter(?string $param = null): void
+    {
+        $this->messagingSystem->getNonProxyGatewayByName($this->gatewayProxyReference->gatewayReferenceForMethod('nullableDefaultParameter'))->execute([$param]);
+    }
+
+    public function unionReturnType(?string $param = null): int|string
+    {
+        return $this->messagingSystem->getNonProxyGatewayByName($this->gatewayProxyReference->gatewayReferenceForMethod('unionReturnType'))->execute([$param]);
+    }
+}

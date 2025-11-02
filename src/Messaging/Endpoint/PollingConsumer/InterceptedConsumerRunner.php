@@ -53,7 +53,13 @@ class InterceptedConsumerRunner implements EndpointRunner
         );
 
         if ($interceptors) {
-            return new InterceptedConsumer($interceptedConsumer, $interceptors);
+            return new InterceptedConsumer(
+                $interceptedConsumer,
+                $interceptors,
+                $this->messagingEntrypoint,
+                $pollingMetadata->getEndpointId(),
+                $this->messagePoller
+            );
         } else {
             return $interceptedConsumer;
         }

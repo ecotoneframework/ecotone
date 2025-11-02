@@ -2,6 +2,7 @@
 
 namespace Ecotone\Messaging\Channel;
 
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\PollableChannel;
@@ -44,15 +45,20 @@ class PollableChannelInterceptorAdapter extends SendingInterceptorAdapter implem
     /**
      * @inheritDoc
      */
-    public function receiveWithTimeout(int $timeoutInMilliseconds): ?Message
+    public function receiveWithTimeout(PollingMetadata $pollingMetadata): ?Message
     {
-        return $this->receiveFor($timeoutInMilliseconds);
+        return $this->receiveFor($pollingMetadata);
+    }
+
+    public function onConsumerStop(): void
+    {
+        $this->messageChannel->onConsumerStop();
     }
 
     /**
-     * @param int|null $timeout
+     * @param PollingMetadata|null $pollingMetadata
      */
-    private function receiveFor(?int $timeout): ?Message
+    private function receiveFor(?PollingMetadata $pollingMetadata): ?Message
     {
         foreach ($this->sortedChannelInterceptors as $channelInterceptor) {
             if (! $channelInterceptor->preReceive($this->messageChannel)) {
@@ -61,10 +67,10 @@ class PollableChannelInterceptorAdapter extends SendingInterceptorAdapter implem
         }
 
         try {
-            if (is_null($timeout)) {
+            if (is_null($pollingMetadata)) {
                 $message = $this->messageChannel->receive();
             } else {
-                $message = $this->messageChannel->receiveWithTimeout($timeout);
+                $message = $this->messageChannel->receiveWithTimeout($pollingMetadata);
             }
         } catch (Throwable $e) {
             foreach ($this->sortedChannelInterceptors as $channelInterceptor) {

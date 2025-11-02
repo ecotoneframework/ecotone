@@ -79,8 +79,12 @@ class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
     /**
      * @inheritDoc
      */
-    public function postRun(): void
+    public function postRun(?Throwable $unhandledFailure): void
     {
+        if ($unhandledFailure) {
+            return;
+        }
+
         $this->currentNumberOfRetries = 0;
     }
 

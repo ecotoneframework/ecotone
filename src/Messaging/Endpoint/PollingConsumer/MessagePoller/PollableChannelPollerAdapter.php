@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer\MessagePoller;
 
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagePoller;
@@ -24,10 +25,11 @@ class PollableChannelPollerAdapter implements MessagePoller
     {
     }
 
-    public function receiveWithTimeout(int $timeoutInMilliseconds): ?Message
+    public function receiveWithTimeout(PollingMetadata $pollingMetadata): ?Message
     {
+        $timeoutInMilliseconds = $pollingMetadata->getFixedRateInMilliseconds();
         $message = $timeoutInMilliseconds
-            ? $this->pollableChannel->receiveWithTimeout($timeoutInMilliseconds)
+            ? $this->pollableChannel->receiveWithTimeout($pollingMetadata)
             : $this->pollableChannel->receive();
 
         if ($message) {
@@ -36,5 +38,10 @@ class PollableChannelPollerAdapter implements MessagePoller
                 ->build();
         }
         return $message;
+    }
+
+    public function onConsumerStop(): void
+    {
+        $this->pollableChannel->onConsumerStop();
     }
 }

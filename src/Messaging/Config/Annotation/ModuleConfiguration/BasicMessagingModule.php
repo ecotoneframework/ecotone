@@ -4,6 +4,7 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Messaging\Attribute\OnConsumerStop;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\PollableChannel\Serialization\OutboundMessageConverter;
@@ -88,6 +89,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
         $messagingConfiguration->registerConsumerFactory(new PollingConsumerBuilder());
 
         $messagingConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
+        $messagingConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(OnConsumerStop::CONSUMER_STOP_CHANNEL_NAME));
         $messagingConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
         $messagingConfiguration->registerConverter(new Definition(UuidToStringConverter::class));
         $messagingConfiguration->registerConverter(new Definition(StringToUuidConverter::class));

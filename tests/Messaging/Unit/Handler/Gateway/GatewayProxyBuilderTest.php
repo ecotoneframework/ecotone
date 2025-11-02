@@ -9,6 +9,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MethodInterceptor\Be
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
@@ -173,12 +174,12 @@ class GatewayProxyBuilderTest extends MessagingTestCase
             {
                 parent::__construct('');
             }
-            public function receiveWithTimeout(int $timeoutInMilliseconds): ?Message
+            public function receiveWithTimeout(PollingMetadata $pollingMetadata): ?Message
             {
-                if ($timeoutInMilliseconds === 1) {
+                if ($pollingMetadata->getFixedRateInMilliseconds() === 1) {
                     return $this->replyMessage;
                 }
-                throw InvalidArgumentException::create("Timeout should be 1, but got {$timeoutInMilliseconds}");
+                throw InvalidArgumentException::create("Timeout should be 1, but got {$pollingMetadata->getFixedRateInMilliseconds()}");
             }
         };
 

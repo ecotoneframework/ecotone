@@ -7,6 +7,7 @@ namespace Ecotone\Messaging\Channel;
 use DateTimeInterface;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\PollableChannel;
@@ -74,9 +75,14 @@ final class DelayableQueueChannel implements PollableChannel, DefinedObject
     /**
      * @inheritDoc
      */
-    public function receiveWithTimeout(int $timeoutInMilliseconds): ?Message
+    public function receiveWithTimeout(PollingMetadata $pollingMetadata): ?Message
     {
         return $this->receive();
+    }
+
+    public function onConsumerStop(): void
+    {
+        // No cleanup needed for delayable queue channels
     }
 
     public function releaseMessagesAwaitingFor(int|TimeSpan|DateTimeInterface $time): void

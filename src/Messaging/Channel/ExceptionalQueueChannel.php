@@ -9,6 +9,7 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\PollingConsumer\ConnectionException;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
@@ -77,9 +78,14 @@ class ExceptionalQueueChannel implements PollableChannel, MessageChannelWithSeri
     /**
      * @inheritDoc
      */
-    public function receiveWithTimeout(int $timeoutInMilliseconds): ?Message
+    public function receiveWithTimeout(PollingMetadata $pollingMetadata): ?Message
     {
         return $this->receive();
+    }
+
+    public function onConsumerStop(): void
+    {
+        // No cleanup needed for exceptional queue channels
     }
 
     public function getExceptionCount(): int

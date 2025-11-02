@@ -4,6 +4,7 @@ namespace Ecotone\Messaging;
 
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 /**
  * Class NullableMessageChannel
@@ -51,9 +52,14 @@ final class NullableMessageChannel implements SubscribableChannel, PollableChann
         return null;
     }
 
-    public function receiveWithTimeout(int $timeoutInMilliseconds): ?Message
+    public function receiveWithTimeout(PollingMetadata $pollingMetadata): ?Message
     {
         return null;
+    }
+
+    public function onConsumerStop(): void
+    {
+        // No cleanup needed for null channels
     }
 
     /**

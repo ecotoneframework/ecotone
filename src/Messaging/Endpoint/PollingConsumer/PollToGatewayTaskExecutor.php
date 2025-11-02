@@ -28,7 +28,7 @@ class PollToGatewayTaskExecutor implements TaskExecutor
         try {
             $this->messagingEntrypoint->send([], MessageHeadersPropagatorInterceptor::ENABLE_POLLING_CONSUMER_PROPAGATION_CONTEXT);
 
-            $message = $this->messagePoller->receiveWithTimeout($pollingMetadata->getExecutionTimeLimitInMilliseconds());
+            $message = $this->messagePoller->receiveWithTimeout($pollingMetadata);
         } finally {
             $this->messagingEntrypoint->send([], MessageHeadersPropagatorInterceptor::DISABLE_POLLING_CONSUMER_PROPAGATION_CONTEXT);
         }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\DynamicChannel;
 
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
@@ -39,13 +40,13 @@ final class DynamicMessageChannel implements PollableChannel
         $channel->send($message);
     }
 
-    public function receiveWithTimeout(int $timeoutInMilliseconds): ?Message
+    public function receiveWithTimeout(PollingMetadata $pollingMetadata): ?Message
     {
         $channelName = $this->receivingStrategy->decide();
         Assert::notNullAndEmpty($channelName, "Channel name to poll message from cannot be null. If you want to skip message receiving, return 'nullChannel' instead.");
 
         $channel = $this->resolveMessageChannel($channelName);
-        $message = $channel->receiveWithTimeout($timeoutInMilliseconds);
+        $message = $channel->receiveWithTimeout($pollingMetadata);
         $this->loggingGateway->info("Decided to received message from `{$channelName}` for `{$this->channelName}`", $message, ['channel_name' => $this->channelName, 'chosen_channel_name' => $channelName]);
 
         return $message;
@@ -62,6 +63,11 @@ final class DynamicMessageChannel implements PollableChannel
         $this->loggingGateway->info("Decided to received message from `{$channelName}` for `{$this->channelName}`", $message, ['channel_name' => $this->channelName, 'chosen_channel_name' => $channelName]);
 
         return $message;
+    }
+
+    public function onConsumerStop(): void
+    {
+        // No cleanup needed for dynamic channels
     }
 
     private function resolveMessageChannel(string $channelName): MessageChannel

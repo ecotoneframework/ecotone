@@ -19,7 +19,7 @@ class LimitConsumedMessagesInterceptor implements ConsumerInterceptor
 {
     private bool $shouldBeStopped = false;
 
-    private int $currentSentMessages = 0;
+    private int $currentConsumedMessages = 0;
 
     private int $messageLimit;
 
@@ -37,7 +37,7 @@ class LimitConsumedMessagesInterceptor implements ConsumerInterceptor
      */
     public function onStartup(): void
     {
-        $this->currentSentMessages = 0;
+        $this->currentConsumedMessages = 0;
         $this->shouldBeStopped = false;
     }
 
@@ -67,8 +67,11 @@ class LimitConsumedMessagesInterceptor implements ConsumerInterceptor
     /**
      * @inheritDoc
      */
-    public function postRun(): void
+    public function postRun(?Throwable $unhandledFailure): void
     {
+        if ($unhandledFailure) {
+            $this->currentConsumedMessages--;
+        }
     }
 
     /**
@@ -76,7 +79,7 @@ class LimitConsumedMessagesInterceptor implements ConsumerInterceptor
      */
     public function postSend(): void
     {
-        $this->currentSentMessages++;
-        $this->shouldBeStopped = $this->currentSentMessages >= $this->messageLimit;
+        $this->currentConsumedMessages++;
+        $this->shouldBeStopped = $this->currentConsumedMessages >= $this->messageLimit;
     }
 }

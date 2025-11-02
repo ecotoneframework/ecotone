@@ -2,6 +2,7 @@
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
+use Ecotone\Messaging\Attribute\OnConsumerStop;
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 use Ecotone\Messaging\Endpoint\Interceptor\ConnectionExceptionRetryInterceptor;
@@ -12,8 +13,11 @@ use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\TimeLimitInterceptor;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\MessagePoller;
 use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Psr\Log\LoggerInterface;
+use Throwable;
 
 /**
  * Class ContinuouslyRunningConsumer
@@ -31,8 +35,13 @@ class InterceptedConsumer implements ConsumerLifecycle
      * @param ConsumerLifecycle $interceptedConsumer
      * @param ConsumerInterceptor[] $consumerInterceptors
      */
-    public function __construct(private ConsumerLifecycle $interceptedConsumer, private array $consumerInterceptors)
-    {
+    public function __construct(
+        private ConsumerLifecycle $interceptedConsumer,
+        private array $consumerInterceptors,
+        private MessagingEntrypoint $messagingEntrypoint,
+        private string $endpointId,
+        private MessagePoller $messagePoller,
+    ) {
     }
 
     /**
@@ -44,26 +53,38 @@ class InterceptedConsumer implements ConsumerLifecycle
             $consumerInterceptor->onStartup();
         }
 
-        while ($this->shouldBeRunning()) {
-            foreach ($this->consumerInterceptors as $consumerInterceptor) {
-                $consumerInterceptor->preRun();
-            }
-            $runResultedInConnectionException = false;
-            try {
-                $this->interceptedConsumer->run();
-            } catch (ConnectionException $exception) {
-                $runResultedInConnectionException = true;
+        try {
+            while ($this->shouldBeRunning()) {
+                $exception = null;
                 foreach ($this->consumerInterceptors as $consumerInterceptor) {
-                    if ($consumerInterceptor->shouldBeThrown($exception)) {
-                        throw $exception->getPrevious() ?? $exception;
+                    $consumerInterceptor->preRun();
+                }
+                try {
+                    $this->interceptedConsumer->run();
+                } catch (ConnectionException $exception) {
+                    foreach ($this->consumerInterceptors as $consumerInterceptor) {
+                        if ($consumerInterceptor->shouldBeThrown($exception)) {
+                            throw $exception->getPrevious() ?? $exception;
+                        }
+                    }
+                } catch (Throwable $exception) {
+                    throw $exception;
+                } finally {
+                    foreach ($this->consumerInterceptors as $consumerInterceptor) {
+                        $consumerInterceptor->postRun($exception);
                     }
                 }
             }
-            if (! $runResultedInConnectionException) {
-                foreach ($this->consumerInterceptors as $consumerInterceptor) {
-                    $consumerInterceptor->postRun();
-                }
-            }
+        } finally {
+            // @TODO Message Poller for same class may have multiple definitions, therefore onConsumer attribute wont work
+            // Needed some more sophisticated way to use attributes in that case
+            $this->messagePoller->onConsumerStop();
+
+            $this->messagingEntrypoint->sendWithHeaders(
+                $this->endpointId,
+                [],
+                OnConsumerStop::CONSUMER_STOP_CHANNEL_NAME
+            );
         }
     }
 

@@ -461,4 +461,12 @@ final class FlowTestSupport
     {
         return $this->configuredMessagingSystem->getServiceFromContainer($serviceName);
     }
+
+    /**
+     * @return string[] List of registered consumer endpoint IDs
+     */
+    public function list(): array
+    {
+        return $this->configuredMessagingSystem->list();
+    }
 }

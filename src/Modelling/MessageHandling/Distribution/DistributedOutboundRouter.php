@@ -15,8 +15,10 @@ use Ecotone\Modelling\Api\Distribution\DistributedServiceMap;
  */
 final class DistributedOutboundRouter
 {
-    public function __construct(private DistributedServiceMap $distributedServiceMap, private string $thisServiceName)
-    {
+    public function __construct(
+        private DistributedServiceMap $distributedServiceMap,
+        private string $thisServiceName
+    ) {
 
     }
 
@@ -31,7 +33,10 @@ final class DistributedOutboundRouter
         if ($payloadType === 'event') {
             return $this->distributedServiceMap->getAllChannelNamesBesides($this->thisServiceName, $routingKey);
         } elseif (in_array($payloadType, ['command', 'message'])) {
-            Assert::isTrue($targetedServiceName !== null, 'Trying to send command without targeted service name');
+            Assert::isTrue($targetedServiceName !== null, sprintf('
+                Cannot send commands to shared channel - `%s`. Commands follow point-to-point semantics, and shared channels are reserved for events only.
+                Change your channel to standard pollable channel.
+            ', $targetedServiceName));
 
             return [$this->distributedServiceMap->getChannelNameFor($targetedServiceName)];
         } else {

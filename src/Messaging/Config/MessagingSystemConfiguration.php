@@ -448,7 +448,8 @@ final class MessagingSystemConfiguration implements Configuration
             fn (MessageChannelBuilder $channel) => $channel->getMessageChannelName(),
             array_filter(
                 $this->channelBuilders,
-                fn (MessageChannelBuilder $channel) => $channel->isPollable() && $channel->getMessageChannelName() !== NullableMessageChannel::CHANNEL_NAME
+                fn (MessageChannelBuilder $channel) => $channel->isPollable()
+                    && $channel->getMessageChannelName() !== NullableMessageChannel::CHANNEL_NAME
             )
         );
 

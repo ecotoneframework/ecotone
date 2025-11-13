@@ -100,11 +100,16 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
     {
         $testConfiguration = ExtensionObjectResolver::resolveUnique(TestConfiguration::class, $extensionObjects, TestConfiguration::createWithDefaults());
 
-        // Register in-memory consumer position tracker if enabled
+        // In memory consumer position tracker
+        $messagingConfiguration->registerServiceDefinition(
+            InMemoryConsumerPositionTracker::class,
+            new Definition(InMemoryConsumerPositionTracker::class)
+        );
+        // Register in-memory consumer position tracker as default one
         if ($testConfiguration->isInMemoryConsumerPositionTrackerEnabled()) {
             $messagingConfiguration->registerServiceDefinition(
                 ConsumerPositionTracker::class,
-                new Definition(InMemoryConsumerPositionTracker::class)
+                new Reference(InMemoryConsumerPositionTracker::class)
             );
         }
 

@@ -161,7 +161,7 @@ class ProjectingModule implements AnnotationModule
         return 'projecting_manager_endpoint:' . $projectionName;
     }
 
-    private static function inputChannelForProjectingManager(string $projectionName): string
+    public static function inputChannelForProjectingManager(string $projectionName): string
     {
         return 'projecting_manager_handler:' . $projectionName;
     }

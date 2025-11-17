@@ -64,6 +64,7 @@ use Ecotone\OpenTelemetry\Configuration\OpenTelemetryModule;
 use Ecotone\Projecting\Config\ProjectingAttributeModule;
 use Ecotone\Projecting\Config\ProjectingConsoleCommands;
 use Ecotone\Projecting\Config\ProjectingModule;
+use Ecotone\Projecting\EventStoreAdapter\EventStoreAdapterModule;
 use Ecotone\Redis\Configuration\RedisMessageConsumerModule;
 use Ecotone\Redis\Configuration\RedisMessagePublisherModule;
 use Ecotone\Sqs\Configuration\SqsMessageConsumerModule;
@@ -107,6 +108,7 @@ class ModuleClassList
         EventSourcedRepositoryModule::class,
         ProjectingModule::class,
         ProjectingAttributeModule::class,
+        EventStoreAdapterModule::class,
 
         /** Attribute based configurations */
         MessageHeadersPropagatorInterceptor::class,

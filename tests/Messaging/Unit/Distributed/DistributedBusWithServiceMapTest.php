@@ -12,6 +12,8 @@ use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Consumer\ConsumerPositionTracker;
+use Ecotone\Messaging\Consumer\InMemory\InMemoryConsumerPositionTracker;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\MessageHeaders;
@@ -19,6 +21,10 @@ use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
 use Ecotone\Modelling\Api\Distribution\DistributedServiceMap;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\Distributed;
+use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\MessageHandling\Distribution\UnknownDistributedDestination;
 use Ecotone\Test\LicenceTesting;
@@ -650,5 +656,119 @@ final class DistributedBusWithServiceMapTest extends TestCase
             pathToRootCatalog: __DIR__ . '/../../',
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
+    }
+
+
+    /**
+     * This test verifies that streaming channels can be used for distributed event publishing,
+     * where one service publishes events and multiple consuming services each have their own
+     * consumer group to track their position independently.
+     */
+    public function test_streaming_channel_with_distributed_bus_using_service_map(): void
+    {
+        $positionTracker = new InMemoryConsumerPositionTracker();
+
+        // Publisher service
+        $publisher = new class () {
+            #[CommandHandler('publish.event')]
+            public function publish(string $payload, \Ecotone\Modelling\EventBus $eventBus): void
+            {
+                $eventBus->publish($payload);
+            }
+        };
+
+        // Consumer 1 in service 1
+        $consumer1 = new class () {
+            private array $consumed = [];
+
+            #[Distributed]
+            #[EventHandler('distributed.event', endpointId: 'consumer1')]
+            public function handle(string $payload): void
+            {
+                $this->consumed[] = $payload;
+            }
+
+            #[QueryHandler('getConsumed1')]
+            public function getConsumed(): array
+            {
+                return $this->consumed;
+            }
+        };
+
+        // Consumer 2 in service 2
+        $consumer2 = new class () {
+            private array $consumed = [];
+
+            #[Distributed]
+            #[EventHandler('distributed.event', endpointId: 'consumer2')]
+            public function handle(string $payload): void
+            {
+                $this->consumed[] = $payload;
+            }
+
+            #[QueryHandler('getConsumed2')]
+            public function getConsumed(): array
+            {
+                return $this->consumed;
+            }
+        };
+
+        $publisherStreamingChannel = SimpleMessageChannelBuilder::createStreamingChannel($channelName = 'distributed_events');
+
+        // Publisher service
+        $publisherService = EcotoneLite::bootstrapFlowTesting(
+            [$publisher::class],
+            [$publisher, ConsumerPositionTracker::class => $positionTracker],
+            ServiceConfiguration::createWithDefaults()
+                ->withServiceName('publisher-service')
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withExtensionObjects([
+                    $publisherStreamingChannel,
+                    DistributedServiceMap::initialize()
+                        ->withServiceMapping(serviceName: 'distributed_events_channel', channelName: 'distributed_events'),
+                ]),
+            pathToRootCatalog: __DIR__ . '/../../',
+            licenceKey: LicenceTesting::VALID_LICENCE
+        );
+
+        // Consumer service 1
+        $consumerService1 = EcotoneLite::bootstrapFlowTesting(
+            [$consumer1::class],
+            [$consumer1, ConsumerPositionTracker::class => $positionTracker],
+            ServiceConfiguration::createWithDefaults()
+                ->withServiceName('service1')
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withExtensionObjects([
+                    $publisherStreamingChannel,
+                ]),
+            pathToRootCatalog: __DIR__ . '/../../',
+            licenceKey: LicenceTesting::VALID_LICENCE
+        );
+
+        // Consumer service 2
+        $consumerService2 = EcotoneLite::bootstrapFlowTesting(
+            [$consumer2::class],
+            [$consumer2, ConsumerPositionTracker::class => $positionTracker],
+            ServiceConfiguration::createWithDefaults()
+                ->withServiceName('service2')
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withExtensionObjects([
+                    $publisherStreamingChannel,
+                ]),
+            pathToRootCatalog: __DIR__ . '/../../',
+            licenceKey: LicenceTesting::VALID_LICENCE
+        );
+
+        // Publish events
+        $publisherService->getDistributedBus()->publishEvent('distributed.event', 'event1');
+        $publisherService->getDistributedBus()->publishEvent('distributed.event', 'event2');
+        $publisherService->getDistributedBus()->publishEvent('distributed.event', 'event3');
+
+        // Both consumers should receive all events independently
+        $consumerService1->run($channelName, ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 10));
+        $consumerService2->run($channelName, ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 10));
+
+        $this->assertEquals(['event1', 'event2', 'event3'], $consumerService1->sendQueryWithRouting('getConsumed1'));
+        $this->assertEquals(['event1', 'event2', 'event3'], $consumerService2->sendQueryWithRouting('getConsumed2'));
     }
 }

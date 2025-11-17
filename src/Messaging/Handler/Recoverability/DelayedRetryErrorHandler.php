@@ -64,8 +64,7 @@ class DelayedRetryErrorHandler
             if (! $this->hasDeadLetterOutput) {
                 $logger->error(
                     sprintf(
-                        'Discarding message %s as no dead letter channel was defined. Retried maximum number of `%s` times. Due to: %s',
-                        $failedMessage->getHeaders()->getMessageId(),
+                        'No dead letter channel defined. Retried maximum number of `%s` times. Passing to final failure strategy. Due to: %s',
                         $retryNumber,
                         $errorMessage->getExceptionMessage()
                     ),
@@ -73,7 +72,13 @@ class DelayedRetryErrorHandler
                     $errorMessage->getErrorContext()->toArray(),
                 );
 
-                return null;
+                throw MessageHandlingException::create(
+                    sprintf(
+                        'Message handling failed after %d retry attempts. %s',
+                        $retryNumber,
+                        $errorMessage->getExceptionMessage()
+                    )
+                );
             }
 
             $logger->error(

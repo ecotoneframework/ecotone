@@ -123,7 +123,7 @@ class ErrorHandlerTest extends TestCase
         $this->assertCount(1, $logger->getError());
     }
 
-    public function test_if_exceeded_retries_and_no_dead_letter_defined_drop_message()
+    public function test_if_exceeded_retries_and_no_dead_letter_defined_throw_exception()
     {
         $retryTemplate = RetryTemplateBuilder::exponentialBackoff(10, 2)
             ->maxRetryAttempts(1)
@@ -133,7 +133,10 @@ class ErrorHandlerTest extends TestCase
         $logger = StubLoggingGateway::create();
         $errorHandler = new DelayedRetryErrorHandler($retryTemplate, false, StubLoggingGateway::create());
 
-        $resultMessage = $errorHandler->handle(
+        $this->expectException(MessageHandlingException::class);
+        $this->expectExceptionMessage('Message handling failed after 3 retry attempts');
+
+        $errorHandler->handle(
             $this->createFailedMessage(
                 MessageBuilder::withPayload('payload')
                     ->setHeader(MessageHeaders::POLLED_CHANNEL_NAME, 'errorChannel')
@@ -144,9 +147,6 @@ class ErrorHandlerTest extends TestCase
             InMemoryChannelResolver::createFromAssociativeArray(['errorChannel' => $consumedChannel]),
             $logger
         );
-
-        $this->assertNull($resultMessage);
-        $this->assertCount(1, $logger->getError());
     }
 
     public function test_if_exceeded_retries_returning_message_with_causation_exception_if_exists()

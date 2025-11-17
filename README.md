@@ -39,7 +39,7 @@ If you want to talk or ask questions about Ecotone
 
 - [**Twitter**](https://twitter.com/EcotonePHP)
 - **support@simplycodedsoftware.com**
-- [**Community Channel**](https://discord.gg/CctGMcrYnV)
+- [**Community Channel**](https://discord.gg/Zm8V76FX)
 
 ## Support Ecotone
 

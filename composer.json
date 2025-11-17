@@ -5,7 +5,7 @@
         "proprietary"
     ],
     "homepage": "https://docs.ecotone.tech",
-    "forum": "https://discord.gg/CctGMcrYnV",
+    "forum": "https://discord.gg/Zm8V76FX",
     "type": "library",
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -67,7 +67,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "1.276.0-dev"
+            "dev-main": "1.276.1-dev"
         },
         "ecotone": {
             "repository": "ecotone"
@@ -88,7 +88,7 @@
                 "description": "Allows to use Enterprise features of Ecotone. For more information please write to support@simplycodedsoftware.com"
             }
         },
-        "release-time": "2025-11-17 19:32:16"
+        "release-time": "2025-11-17 20:36:28"
     },
     "config": {
         "sort-packages": true,

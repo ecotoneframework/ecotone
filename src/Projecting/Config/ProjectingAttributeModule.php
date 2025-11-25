@@ -17,20 +17,26 @@ use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\NamedEvent;
 use Ecotone\Projecting\Attribute\Projection;
 use Ecotone\Projecting\Attribute\ProjectionBatchSize;
 use Ecotone\Projecting\Attribute\ProjectionFlush;
+use Ecotone\Projecting\EventStoreAdapter\PollingProjectionChannelAdapter;
+use Ecotone\Projecting\EventStoreAdapter\StreamingProjectionMessageHandler;
 use LogicException;
 
 /**
@@ -42,10 +48,14 @@ class ProjectingAttributeModule implements AnnotationModule
     /**
      * @param EcotoneProjectionExecutorBuilder[] $projectionBuilders
      * @param MessageProcessorActivatorBuilder[] $lifecycleHandlers
+     * @param array<string, string> $pollingProjections Map of projection name to endpoint ID
+     * @param array<string, array{streamingChannelName: string, endpointId: string, projectionBuilder: EcotoneProjectionExecutorBuilder}> $eventStreamingProjections
      */
     public function __construct(
         private array $projectionBuilders = [],
-        private array $lifecycleHandlers = []
+        private array $lifecycleHandlers = [],
+        private array $pollingProjections = [],
+        private array $eventStreamingProjections = []
     ) {
     }
 
@@ -59,15 +69,45 @@ class ProjectingAttributeModule implements AnnotationModule
 
         /** @var array<string, EcotoneProjectionExecutorBuilder> $projectionBuilders */
         $projectionBuilders = [];
+        $pollingProjections = [];
+        $eventStreamingProjections = [];
         foreach ($annotationRegistrationService->findAnnotatedClasses(Projection::class) as $projectionClassName) {
             $projectionAttribute = $annotationRegistrationService->getAttributeForClass($projectionClassName, Projection::class);
             $batchSizeAttribute = $annotationRegistrationService->findAttributeForClass($projectionClassName, ProjectionBatchSize::class);
             $projectionBuilder = new EcotoneProjectionExecutorBuilder($projectionAttribute->name, $projectionAttribute->partitionHeaderName, $projectionAttribute->automaticInitialization, $namedEvents, batchSize: $batchSizeAttribute?->batchSize);
 
             $asynchronousChannelName = self::getProjectionAsynchronousChannel($annotationRegistrationService, $projectionClassName);
+
+            if ($projectionAttribute->isPolling() && $asynchronousChannelName !== null) {
+                throw ConfigurationException::create(
+                    "Projection '{$projectionAttribute->name}' cannot use both PollingProjection and #[Asynchronous] attributes. " .
+                    'A projection must be either polling-based or event-driven (synchronous/asynchronous), not both.'
+                );
+            }
+
+            if ($projectionAttribute->isEventStreaming() && $asynchronousChannelName !== null) {
+                throw ConfigurationException::create(
+                    "Projection '{$projectionAttribute->name}' cannot use both EventStreamingProjection and #[Asynchronous] attributes. " .
+                    'Event streaming projections consume directly from streaming channels.'
+                );
+            }
+
             if ($asynchronousChannelName !== null) {
                 $projectionBuilder->setAsyncChannel($asynchronousChannelName);
             }
+
+            if ($projectionAttribute->isPolling()) {
+                $pollingProjections[$projectionAttribute->name] = $projectionAttribute->getEndpointId();
+            }
+
+            if ($projectionAttribute->isEventStreaming()) {
+                $eventStreamingProjections[$projectionAttribute->name] = [
+                    'streamingChannelName' => $projectionAttribute->streamingChannelName,
+                    'endpointId' => $projectionAttribute->name,
+                    'projectionBuilder' => $projectionBuilder,
+                ];
+            }
+
             $projectionBuilders[$projectionAttribute->name] = $projectionBuilder;
         }
 
@@ -110,13 +150,53 @@ class ProjectingAttributeModule implements AnnotationModule
                 ->withInputChannelName($inputChannel);
         }
 
-        return new self(array_values($projectionBuilders), $lifecycleHandlers);
+        return new self(array_values($projectionBuilders), $lifecycleHandlers, $pollingProjections, $eventStreamingProjections);
     }
 
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         foreach ($this->lifecycleHandlers as $lifecycleHandler) {
             $messagingConfiguration->registerMessageHandler($lifecycleHandler);
+        }
+
+        foreach ($this->pollingProjections as $projectionName => $endpointId) {
+            $messagingConfiguration->registerConsumer(
+                InboundChannelAdapterBuilder::createWithDirectObject(
+                    ProjectingModule::inputChannelForProjectingManager($projectionName),
+                    new PollingProjectionChannelAdapter(),
+                    $interfaceToCallRegistry->getFor(PollingProjectionChannelAdapter::class, 'execute')
+                )
+                    ->withEndpointId($endpointId)
+            );
+        }
+
+        foreach ($this->eventStreamingProjections as $projectionName => $config) {
+            $projectorExecutorReference = ProjectingModule::getProjectorExecutorReference($projectionName);
+            $projectionBuilder = $config['projectionBuilder'];
+            $moduleReferenceSearchService->store(
+                $projectorExecutorReference,
+                $projectionBuilder
+            );
+
+            $handlerReference = StreamingProjectionMessageHandler::class . ':' . $projectionName;
+
+            // Register the handler service
+            $messagingConfiguration->registerServiceDefinition(
+                $handlerReference,
+                new Definition(StreamingProjectionMessageHandler::class, [
+                    new Reference($projectorExecutorReference),
+                    $projectionName,
+                ])
+            );
+
+            $messagingConfiguration->registerMessageHandler(
+                ServiceActivatorBuilder::create(
+                    $handlerReference,
+                    InterfaceToCallReference::create(StreamingProjectionMessageHandler::class, 'handle')
+                )
+                    ->withEndpointId($config['endpointId'])
+                    ->withInputChannelName($config['streamingChannelName'])
+            );
         }
     }
 
@@ -127,7 +207,12 @@ class ProjectingAttributeModule implements AnnotationModule
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
     {
-        return $this->projectionBuilders;
+        // Filter out event streaming projections - they don't need ProjectingManager
+        $eventStreamingProjectionNames = array_keys($this->eventStreamingProjections);
+        return array_filter(
+            $this->projectionBuilders,
+            fn ($builder) => ! in_array($builder->projectionName(), $eventStreamingProjectionNames, true)
+        );
     }
 
     public function getModulePackageName(): string

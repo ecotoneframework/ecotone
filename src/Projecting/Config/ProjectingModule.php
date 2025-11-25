@@ -43,6 +43,11 @@ use Ramsey\Uuid\Uuid;
 #[ModuleAnnotation]
 class ProjectingModule implements AnnotationModule
 {
+    public static function getProjectorExecutorReference(string $projectionName): string
+    {
+        return 'projection_executor:' . $projectionName;
+    }
+
     public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
         return new self();
@@ -82,7 +87,7 @@ class ProjectingModule implements AnnotationModule
         $projectionRegistryMap = [];
         foreach ($projectionBuilders as $projectionBuilder) {
             $projectionName = $projectionBuilder->projectionName();
-            $reference = 'projection_executor:' . $projectionName;
+            $reference = self::getProjectorExecutorReference($projectionName);
             $moduleReferenceSearchService->store($reference, $projectionBuilder);
 
             $messagingConfiguration->registerServiceDefinition(

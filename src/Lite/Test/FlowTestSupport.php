@@ -159,6 +159,17 @@ final class FlowTestSupport
         return $this;
     }
 
+    /**
+     * Append events to the default event stream for testing.
+     * This is a convenience method for tests that don't need to specify a stream name.
+     *
+     * @param Event[]|object[]|array[] $events
+     */
+    public function withEvents(array $events): self
+    {
+        return $this->withEventStream('default', $events);
+    }
+
     public function deleteEventStream(string $streamName): self
     {
         $gateway = $this->getGateway(EventStore::class);

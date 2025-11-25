@@ -35,7 +35,11 @@ class ProjectingModuleRoutingExtension implements RoutingEventHandler
             /** @var Projection $projectionAttribute */
             $projectionAttribute = $event->getRegistration()->getClassAnnotationsWithType(Projection::class)[0];
 
-            $event->setDestinationChannel($this->projectionTriggeringInputChannelFactory->__invoke($projectionAttribute->name));
+            if ($projectionAttribute->isEventDriven()) {
+                $event->setDestinationChannel($this->projectionTriggeringInputChannelFactory->__invoke($projectionAttribute->name));
+            } else {
+                $event->cancel();
+            }
         }
     }
 }

@@ -48,11 +48,10 @@ class ProjectingTest extends TestCase
             configuration: ServiceConfiguration::createWithDefaults()
                 ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder())
                 ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
         );
 
-        $streamSource->append(Event::createWithType('test-event', ['name' => 'Test']));
+        $ecotone->withEvents([Event::createWithType('test-event', ['name' => 'Test'])]);
 
         // When event is published, triggering the projection
         $ecotone->publishEventWithRoutingKey('trigger', []);
@@ -163,13 +162,12 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder())
         );
 
-        $streamSource->append(
+        $ecotone->withEvents([
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']),
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-4']),
-        );
+        ]);
         self::assertEquals([], $projection->projectedEvents);
 
         $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
@@ -194,12 +192,11 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder())
         );
 
-        $streamSource->append(
+        $ecotone->withEvents([
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']),
-        );
+        ]);
 
         // Event trigger should be skipped when not initialized
         $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
@@ -209,10 +206,10 @@ class ProjectingTest extends TestCase
         self::assertCount(1, $projection->projectedEvents, 'Projection should have processed previous events after manual initialization');
 
         // Now events should be processed since projection is initialized
-        $streamSource->append(
+        $ecotone->withEvents([
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']),
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-3']),
-        );
+        ]);
         $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']);
         self::assertCount(3, $projection->projectedEvents, 'Projection should process events after manual initialization');
     }
@@ -242,15 +239,14 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder())
         );
 
         // Add all events to the stream first
-        $streamSource->append(
+        $ecotone->withEvents([
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']),
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']),
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-3']),
-        );
+        ]);
 
         // Trigger the first event which should initialize the projection and process all events
         $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
@@ -286,14 +282,13 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder())
         );
 
         // Add events to stream
-        $streamSource->append(
+        $ecotone->withEvents([
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']),
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']),
-        );
+        ]);
 
         // Trigger event - should auto-initialize and process events
         $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
@@ -327,14 +322,13 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder())
         );
 
         // Add events to stream
-        $streamSource->append(
+        $ecotone->withEvents([
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']),
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']),
-        );
+        ]);
 
         // Trigger event - should skip processing since not initialized
         $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
@@ -368,15 +362,14 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder())
         );
 
         // Add multiple events to stream
-        $streamSource->append(
+        $ecotone->withEvents([
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']),
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']),
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-3']),
-        );
+        ]);
 
         // Trigger multiple events - all should be skipped
         $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
@@ -412,15 +405,14 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder())
         );
 
         // Add multiple events to stream
-        $streamSource->append(
+        $ecotone->withEvents([
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']),
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']),
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-3']),
-        );
+        ]);
 
         // Trigger first event - should auto-initialize and process all events
         $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
@@ -455,14 +447,13 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder())
         );
 
         // Add events for different partitions
-        $streamSource->append(
+        $ecotone->withEvents([
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1', 'tenantId' => 'tenant-1']),
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2', 'tenantId' => 'tenant-2']),
-        );
+        ]);
 
         // Trigger event for first partition - should initialize and process all events
         $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1', 'tenantId' => 'tenant-1']);
@@ -499,7 +490,6 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder())
         );
     }
 
@@ -565,20 +555,19 @@ class ProjectingTest extends TestCase
             configuration: ServiceConfiguration::createWithDefaults()
                 ->withSkippedModulePackageNames(ModulePackageList::allPackages())
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder())
         );
 
-        $streamSource->append(
+        $ecotone->withEvents([
             Event::createWithType('no-priority', []),
-        );
+        ]);
 
         $ecotone->publishEventWithRoutingKey('no-priority');
         self::assertEquals(['projectionA-no-priority', 'projectionB-no-priority'], $db);
 
         $db = [];
-        $streamSource->append(
+        $ecotone->withEvents([
             Event::createWithType('with-priority', []),
-        );
+        ]);
         $ecotone->publishEventWithRoutingKey('with-priority');
         self::assertEquals(['projectionB-with-priority', 'projectionA-with-priority'], $db);
     }
@@ -611,15 +600,14 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder())
         );
-        $streamSource->append(
+        $ecotone->withEvents([
             Event::createWithType('event1', []),
             Event::createWithType('event2', []),
             Event::createWithType('event3', []),
             Event::createWithType('event4', []),
             Event::createWithType('event5', []),
-        );
+        ]);
 
         $ecotone->triggerProjection('batch_projection');
         self::assertCount(1, $projection->flushedEvents);

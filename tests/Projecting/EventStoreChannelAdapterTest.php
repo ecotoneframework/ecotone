@@ -18,7 +18,6 @@ use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\Event;
 use Ecotone\Projecting\EventStoreAdapter\EventStoreChannelAdapter;
-use Ecotone\Projecting\InMemory\InMemoryStreamSourceBuilder;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\TestCase;
 
@@ -59,7 +58,6 @@ final class EventStoreChannelAdapterTest extends TestCase
                 ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
                 ->withExtensionObjects([
-                    $streamSource = new InMemoryStreamSourceBuilder(),
                     SimpleMessageChannelBuilder::createStreamingChannel('event_stream'),
                     EventStoreChannelAdapter::create(
                         streamChannelName: 'event_stream',
@@ -71,10 +69,10 @@ final class EventStoreChannelAdapterTest extends TestCase
         );
 
         // When events are appended to the stream source
-        $streamSource->append(
+        $ecotone->withEventStream('test_stream', [
             Event::createWithType('ticket.registered', ['ticketId' => 'ticket-1', 'assignedPerson' => 'John'], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']),
             Event::createWithType('ticket.registered', ['ticketId' => 'ticket-2', 'assignedPerson' => 'Jane'], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']),
-        );
+        ]);
 
         // When feeder runs (polls event store and pushes to streaming channel)
         $ecotone->run('event_store_feeder', ExecutionPollingMetadata::createWithTestingSetup());
@@ -120,7 +118,6 @@ final class EventStoreChannelAdapterTest extends TestCase
                 ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
                 ->withExtensionObjects([
-                    $streamSource = new InMemoryStreamSourceBuilder(),
                     SimpleMessageChannelBuilder::createStreamingChannel('event_stream'),
                     EventStoreChannelAdapter::create(
                         streamChannelName: 'event_stream',
@@ -132,11 +129,11 @@ final class EventStoreChannelAdapterTest extends TestCase
         );
 
         // When events are appended to the stream source
-        $streamSource->append(
+        $ecotone->withEventStream('test_stream', [
             Event::createWithType('ticket.registered', ['ticketId' => 'ticket-1'], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']),
             Event::createWithType('ticket.closed', ['ticketId' => 'ticket-1'], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']),
             Event::createWithType('ticket.registered', ['ticketId' => 'ticket-2'], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']),
-        );
+        ]);
 
         // When feeder runs
         $ecotone->run('event_store_feeder', ExecutionPollingMetadata::createWithTestingSetup());
@@ -211,7 +208,6 @@ final class EventStoreChannelAdapterTest extends TestCase
                 ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
                 ->withExtensionObjects([
-                    $streamSource = new InMemoryStreamSourceBuilder(),
                     SimpleMessageChannelBuilder::createStreamingChannel('event_stream'),
                     EventStoreChannelAdapter::create(
                         streamChannelName: 'event_stream',
@@ -233,11 +229,11 @@ final class EventStoreChannelAdapterTest extends TestCase
         $this->assertEquals(1, $counts['closed'], 'Event handler should have processed 1 ticket.closed event');
 
         // And events are also stored in stream source (for polling projection to consume)
-        $streamSource->append(
+        $ecotone->withEventStream('test_stream', [
             Event::createWithType('ticket.registered', ['ticketId' => 'ticket-1'], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']),
             Event::createWithType('ticket.registered', ['ticketId' => 'ticket-2'], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']),
             Event::createWithType('ticket.closed', ['ticketId' => 'ticket-1'], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']),
-        );
+        ]);
 
         // When feeder runs (polls event store and pushes to streaming channel)
         $ecotone->run('event_store_feeder', ExecutionPollingMetadata::createWithTestingSetup());

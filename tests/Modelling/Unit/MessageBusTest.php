@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit;
 
+use Ecotone\AnnotationFinder\ConfigurationException;
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingGatewayModule;
@@ -24,6 +25,11 @@ use Test\Ecotone\Modelling\Fixture\CommandEventFlow\MerchantSubscriber;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\User;
 use Test\Ecotone\Modelling\Fixture\EmailNotifier\ANotification;
 use Test\Ecotone\Modelling\Fixture\EmailNotifier\EmailNotifier;
+use Test\Ecotone\Modelling\Fixture\EventRouting\OrderEventService;
+use Test\Ecotone\Modelling\Fixture\EventRouting\OrderEventServiceWithPrivateHandler;
+use Test\Ecotone\Modelling\Fixture\EventRouting\PlaceOrder;
+use Test\Ecotone\Modelling\Fixture\EventRouting\ServiceWithPrivateCommandHandler;
+use Test\Ecotone\Modelling\Fixture\EventRouting\ServiceWithPrivateQueryHandler;
 use Test\Ecotone\Modelling\Fixture\EventSourcedSaga\OrderDispatch;
 use Test\Ecotone\Modelling\Fixture\EventSourcedSaga\OrderWasCreated;
 use Test\Ecotone\Modelling\Fixture\EventSourcedSaga\PaymentWasDoneEvent;
@@ -352,6 +358,66 @@ final class MessageBusTest extends TestCase
         $this->assertEquals(
             $notification,
             $emailNotifier->getEmails()[0]
+        );
+    }
+
+    public function test_routing_events_to_multiple_handlers_in_same_class(): void
+    {
+        $service = new OrderEventService();
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [OrderEventService::class],
+            [$service],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+        );
+
+        $ecotoneTestSupport->sendCommand(new PlaceOrder('order-123'));
+
+        $this->assertSame(
+            ['handler1', 'handler2'],
+            $ecotoneTestSupport->sendQueryWithRouting('getHandlersCalled')
+        );
+    }
+
+    public function test_throws_configuration_exception_when_event_handler_is_private(): void
+    {
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage(OrderEventServiceWithPrivateHandler::class . '::whenOrderWasPlacedSecond');
+        $this->expectExceptionMessage('should be placed on public method');
+
+        EcotoneLite::bootstrapFlowTesting(
+            [OrderEventServiceWithPrivateHandler::class],
+            [new OrderEventServiceWithPrivateHandler()],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+        );
+    }
+
+    public function test_throws_configuration_exception_when_command_handler_is_private(): void
+    {
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage(ServiceWithPrivateCommandHandler::class . '::handle');
+        $this->expectExceptionMessage('should be placed on public method');
+
+        EcotoneLite::bootstrapFlowTesting(
+            [ServiceWithPrivateCommandHandler::class],
+            [new ServiceWithPrivateCommandHandler()],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+        );
+    }
+
+    public function test_throws_configuration_exception_when_query_handler_is_private(): void
+    {
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage(ServiceWithPrivateQueryHandler::class . '::getOrder');
+        $this->expectExceptionMessage('should be placed on public method');
+
+        EcotoneLite::bootstrapFlowTesting(
+            [ServiceWithPrivateQueryHandler::class],
+            [new ServiceWithPrivateQueryHandler()],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
         );
     }
 }

@@ -12,10 +12,15 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\Attribute\Environment;
 use Ecotone\AnnotationFinder\ConfigurationException;
+use Ecotone\Messaging\Attribute\IdentifiedAnnotation;
 use Ecotone\Messaging\Attribute\IsAbstract;
+use Ecotone\Messaging\Attribute\MessageConsumer;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\QueryHandler;
 use ReflectionClass;
 
 /**
@@ -288,7 +293,9 @@ class FileSystemAnnotationFinder implements AnnotationFinder
     {
         $registrations = [];
         foreach ($this->findAnnotatedClasses('*') as $className) {
-            foreach (get_class_methods($className) as $method) {
+            $reflectionClass = new ReflectionClass($className);
+            foreach ($reflectionClass->getMethods() as $reflectionMethod) {
+                $method = $reflectionMethod->getName();
                 if ($this->isMethodBannedFromCurrentEnvironment($className, $method)) {
                     continue;
                 }
@@ -301,6 +308,26 @@ class FileSystemAnnotationFinder implements AnnotationFinder
                 $methodAnnotations = $this->getCachedMethodAnnotations($className, $method);
                 foreach ($methodAnnotations as $methodAnnotation) {
                     if (get_class($methodAnnotation) === $methodAnnotationClassName || $methodAnnotation instanceof $methodAnnotationClassName) {
+                        // Validate that endpoint annotations are on public methods
+                        if (
+                            ($methodAnnotation instanceof IdentifiedAnnotation
+                                || $methodAnnotation instanceof MessageConsumer)
+                            && ! $reflectionMethod->isPublic()
+                        ) {
+                            $handlerType = match (true) {
+                                $methodAnnotation instanceof CommandHandler => 'Command handler',
+                                $methodAnnotation instanceof EventHandler => 'Event handler',
+                                $methodAnnotation instanceof QueryHandler => 'Query handler',
+                                $methodAnnotation instanceof MessageConsumer => 'Message consumer',
+                                default => 'Handler',
+                            };
+                            throw ConfigurationException::create(sprintf('%s attribute on %s::%s should be placed on public method, to be available for execution.', $handlerType, $className, $method));
+                        }
+
+                        if (! $reflectionMethod->isPublic()) {
+                            continue;
+                        }
+
                         $annotationRegistration = AnnotatedMethod::create(
                             $methodAnnotation,
                             $className,

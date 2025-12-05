@@ -156,7 +156,7 @@ class PointcutParser
             fn ($token) => $token !== ''
         );
 
-        $parts = $this->groupParenthesesAtEndOfExpression($parts);
+        $parts = $this->groupParenthesesAtEndOfExpression(array_values($parts));
 
         return array_values($parts);
     }

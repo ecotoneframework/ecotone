@@ -49,7 +49,7 @@
         "phpunit/phpunit": "^10.5|^11.0",
         "behat/behat": "^3.10",
         "phpstan/phpstan": "^1.8",
-        "symfony/expression-language": "^6.0|^7.0"
+        "symfony/expression-language": "^6.4|^7.0|^8.0"
     },
     "scripts": {
         "tests:phpstan": "vendor/bin/phpstan",
@@ -67,7 +67,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "1.277.3-dev"
+            "dev-main": "1.278.0-dev"
         },
         "ecotone": {
             "repository": "ecotone"
@@ -88,7 +88,7 @@
                 "description": "Allows to use Enterprise features of Ecotone. For more information please write to support@simplycodedsoftware.com"
             }
         },
-        "release-time": "2025-11-28 17:13:43"
+        "release-time": "2025-12-05 08:28:36"
     },
     "config": {
         "sort-packages": true,

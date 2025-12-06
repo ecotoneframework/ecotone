@@ -85,6 +85,10 @@ class InterceptedConsumer implements ConsumerLifecycle
                 [],
                 OnConsumerStop::CONSUMER_STOP_CHANNEL_NAME
             );
+
+            foreach ($this->consumerInterceptors as $consumerInterceptor) {
+                $consumerInterceptor->onShutdown();
+            }
         }
     }
 

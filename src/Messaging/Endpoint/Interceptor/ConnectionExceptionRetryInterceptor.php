@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Endpoint\Interceptor;
 
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
+use Ecotone\Messaging\Endpoint\ConsumerInterceptorTrait;
 use Ecotone\Messaging\Endpoint\PollingConsumer\ConnectionException;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Messaging\Scheduling\Duration;
@@ -17,6 +18,7 @@ use Throwable;
  */
 class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
 {
+    use ConsumerInterceptorTrait;
     private int $currentNumberOfRetries = 0;
     private ?\Ecotone\Messaging\Handler\Recoverability\RetryTemplate $retryTemplate;
 
@@ -31,14 +33,6 @@ class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
     public function onStartup(): void
     {
         $this->currentNumberOfRetries = 0;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function shouldBeStopped(): bool
-    {
-        return false;
     }
 
     /**
@@ -86,12 +80,5 @@ class ConnectionExceptionRetryInterceptor implements ConsumerInterceptor
         }
 
         $this->currentNumberOfRetries = 0;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function postSend(): void
-    {
     }
 }

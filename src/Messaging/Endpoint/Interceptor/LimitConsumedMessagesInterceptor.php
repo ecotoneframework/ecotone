@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Endpoint\Interceptor;
 
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
+use Ecotone\Messaging\Endpoint\ConsumerInterceptorTrait;
 use Throwable;
 
 /**
@@ -17,6 +18,7 @@ use Throwable;
  */
 class LimitConsumedMessagesInterceptor implements ConsumerInterceptor
 {
+    use ConsumerInterceptorTrait;
     private bool $shouldBeStopped = false;
 
     private int $currentConsumedMessages = 0;
@@ -39,21 +41,6 @@ class LimitConsumedMessagesInterceptor implements ConsumerInterceptor
     {
         $this->currentConsumedMessages = 0;
         $this->shouldBeStopped = false;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function preRun(): void
-    {
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function shouldBeThrown(Throwable $exception): bool
-    {
-        return false;
     }
 
     /**

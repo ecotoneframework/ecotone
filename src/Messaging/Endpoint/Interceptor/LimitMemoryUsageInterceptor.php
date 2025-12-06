@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Endpoint\Interceptor;
 
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
-use Throwable;
+use Ecotone\Messaging\Endpoint\ConsumerInterceptorTrait;
 
 /**
  * Class LimitMemoryUsageInterceptor
@@ -18,6 +18,7 @@ use Throwable;
  */
 class LimitMemoryUsageInterceptor implements ConsumerInterceptor
 {
+    use ConsumerInterceptorTrait;
     private int $memoryLimitInMegaBytes;
 
     /**
@@ -37,13 +38,6 @@ class LimitMemoryUsageInterceptor implements ConsumerInterceptor
     /**
      * @inheritDoc
      */
-    public function onStartup(): void
-    {
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function shouldBeStopped(): bool
     {
         if ($this->memoryLimitInMegaBytes === 0) {
@@ -51,34 +45,5 @@ class LimitMemoryUsageInterceptor implements ConsumerInterceptor
         }
 
         return memory_get_usage(true) >= $this->memoryLimitInMegaBytes;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function shouldBeThrown(Throwable $exception): bool
-    {
-        return false;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function preRun(): void
-    {
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function postRun(?Throwable $unhandledFailure): void
-    {
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function postSend(): void
-    {
     }
 }

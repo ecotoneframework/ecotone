@@ -5,16 +5,17 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Endpoint\Interceptor;
 
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
+use Ecotone\Messaging\Endpoint\ConsumerInterceptorTrait;
 use Ecotone\Messaging\Scheduling\DatePoint;
 use Ecotone\Messaging\Scheduling\Duration;
 use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
-use Throwable;
 
 /**
  * licence Apache-2.0
  */
 class FinishWhenNoMessagesInterceptor implements ConsumerInterceptor
 {
+    use ConsumerInterceptorTrait;
     private bool $shouldBeStopped = false;
     private ?DatePoint $lastTimeMessageWasReceived;
 
@@ -41,14 +42,6 @@ class FinishWhenNoMessagesInterceptor implements ConsumerInterceptor
     /**
      * @inheritDoc
      */
-    public function shouldBeThrown(Throwable $exception): bool
-    {
-        return false;
-    }
-
-    /**
-     * @inheritDoc
-     */
     public function shouldBeStopped(): bool
     {
         /**
@@ -60,13 +53,6 @@ class FinishWhenNoMessagesInterceptor implements ConsumerInterceptor
         }
 
         return $this->shouldBeStopped;
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function postRun(?Throwable $unhandledFailure): void
-    {
     }
 
     /**

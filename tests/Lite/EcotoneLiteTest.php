@@ -8,6 +8,7 @@ use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConsoleCommandResultSet;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Order\ChannelConfiguration;
 use Test\Ecotone\Modelling\Fixture\Order\OrderService;
@@ -82,6 +83,29 @@ class EcotoneLiteTest extends TestCase
         $this->assertEquals(
             ConsoleCommandResultSet::create(['Name'], []),
             $ecotone->runConsoleCommand('ecotone:list', [])
+        );
+    }
+
+    public function test_not_overriding_pcntl_handler_during_tests(): void
+    {
+        if (! extension_loaded('pcntl')) {
+            $this->markTestSkipped('pcntl extension is not loaded');
+        }
+
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ],
+        );
+
+        $handler = pcntl_signal_get_handler(SIGINT);
+
+        $ecotone->run('async', ExecutionPollingMetadata::createWithTestingSetup());
+
+        $this->assertSame(
+            $handler,
+            pcntl_signal_get_handler(SIGINT),
+            'PCNTL signal handler was changed during test execution after running consumer'
         );
     }
 }

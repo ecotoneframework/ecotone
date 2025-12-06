@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Endpoint\Interceptor;
 
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
-use Throwable;
+use Ecotone\Messaging\Endpoint\ConsumerInterceptorTrait;
 
 /**
  * Class SignalInterceptor
@@ -18,14 +18,13 @@ use Throwable;
  */
 class SignalInterceptor implements ConsumerInterceptor
 {
-    /** @var int supervisor default stop */
-    private const SIGNAL_TERMINATE = 15;
-    /** @var int kill -s */
-    private const SIGNAL_QUIT = 3;
-    /** @var int ctrl+c */
-    private const SIGNAL_INTERRUPT = 2;
-
+    use ConsumerInterceptorTrait;
     private bool $shouldBeStopped = false;
+    private ?bool $pcntlAsyncSignalsOriginalState = null;
+    /**
+     * @var array<int, callable|int>|null
+     */
+    private ?array $beforeHandlers = null;
 
     /**
      * @inheritDoc
@@ -36,11 +35,33 @@ class SignalInterceptor implements ConsumerInterceptor
             throw ConfigurationException::create('pcntl extension need to be loaded in order to catch system signals');
         }
 
+        $this->pcntlAsyncSignalsOriginalState = pcntl_async_signals();
         pcntl_async_signals(true);
 
-        pcntl_signal(SIGTERM, [$this, 'stopConsumer']);
-        pcntl_signal(SIGQUIT, [$this, 'stopConsumer']);
-        pcntl_signal(SIGINT, [$this, 'stopConsumer']);
+        $this->beforeHandlers = [
+            SIGTERM => pcntl_signal_get_handler(SIGTERM),
+            SIGQUIT => pcntl_signal_get_handler(SIGQUIT),
+            SIGINT => pcntl_signal_get_handler(SIGINT),
+        ];
+
+        pcntl_signal(SIGTERM, $this->stopConsumer(...));
+        pcntl_signal(SIGQUIT, $this->stopConsumer(...));
+        pcntl_signal(SIGINT, $this->stopConsumer(...));
+    }
+
+    public function onShutdown(): void
+    {
+        if ($this->beforeHandlers !== null) {
+            foreach ($this->beforeHandlers as $signal => $handler) {
+                pcntl_signal($signal, $handler);
+            }
+            $this->beforeHandlers = null;
+        }
+
+        if ($this->pcntlAsyncSignalsOriginalState !== null) {
+            pcntl_async_signals($this->pcntlAsyncSignalsOriginalState);
+            $this->pcntlAsyncSignalsOriginalState = null;
+        }
     }
 
     /**
@@ -52,41 +73,10 @@ class SignalInterceptor implements ConsumerInterceptor
     }
 
     /**
-     * @inheritDoc
-     */
-    public function preRun(): void
-    {
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function postRun(?Throwable $unhandledFailure): void
-    {
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function shouldBeThrown(Throwable $exception): bool
-    {
-        return false;
-    }
-
-    /**
      * @param int $signal
      */
     public function stopConsumer(int $signal): void
     {
-        if (in_array($signal, [self::SIGNAL_INTERRUPT, self::SIGNAL_QUIT, self::SIGNAL_TERMINATE])) {
-            $this->shouldBeStopped = true;
-        }
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function postSend(): void
-    {
+        $this->shouldBeStopped = true;
     }
 }

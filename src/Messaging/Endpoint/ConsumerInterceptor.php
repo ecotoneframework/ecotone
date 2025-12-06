@@ -22,6 +22,11 @@ interface ConsumerInterceptor
     public function onStartup(): void;
 
     /**
+     * Do some one time action when the consumer is shutting down
+     */
+    public function onShutdown(): void;
+
+    /**
      * should this consumer be stopped before next run
      */
     public function shouldBeStopped(): bool;

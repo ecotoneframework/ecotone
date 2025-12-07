@@ -150,7 +150,9 @@ final class EcotoneLite
         ?TestConfiguration        $testConfiguration = null,
         ?string                  $licenceKey = null,
     ): FlowTestSupport {
-        $configuration = self::prepareForFlowTesting($configuration, ModulePackageList::allPackagesExcept([ModulePackageList::EVENT_SOURCING_PACKAGE, ModulePackageList::DBAL_PACKAGE, ModulePackageList::JMS_CONVERTER_PACKAGE]), $classesToResolve, $addInMemoryStateStoredRepository, $enableAsynchronousProcessing, $testConfiguration, $licenceKey);
+        $modulePackageNames = [ModulePackageList::EVENT_SOURCING_PACKAGE, ModulePackageList::DBAL_PACKAGE, ModulePackageList::JMS_CONVERTER_PACKAGE];
+
+        $configuration = self::prepareForFlowTesting($configuration, ModulePackageList::allPackagesExcept($modulePackageNames), $classesToResolve, $addInMemoryStateStoredRepository, $enableAsynchronousProcessing, $testConfiguration, $licenceKey);
 
         if (! $configuration->hasExtensionObject(BaseEventSourcingConfiguration::class) && ! $runForProductionEventStore) {
             Assert::isTrue(class_exists(EventSourcingConfiguration::class), 'To use Flow Testing with Event Store you need to add event sourcing module.');
@@ -231,6 +233,9 @@ final class EcotoneLite
                 $serviceConfiguration,
                 $enableTesting
             );
+
+            $messagingConfiguration->withExternalContainer($externalContainer);
+
             $definitionHolder = ContainerConfig::buildDefinitionHolder($messagingConfiguration);
 
             if ($serviceCacheConfiguration->shouldUseCache()) {

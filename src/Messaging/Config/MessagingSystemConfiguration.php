@@ -163,6 +163,13 @@ final class MessagingSystemConfiguration implements Configuration
     private bool $isRunningForTest = false;
 
     /**
+     * @var array<string, string> $requiredReferences Map of referenceId => errorMessage
+     */
+    private array $requiredReferences = [];
+
+    private ?ContainerInterface $externalContainer = null;
+
+    /**
      * @param object[] $extensionObjects
      */
     private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, InterfaceToCallRegistry $preparationInterfaceRegistry, ServiceConfiguration $serviceConfiguration)
@@ -593,6 +600,20 @@ final class MessagingSystemConfiguration implements Configuration
         return $this;
     }
 
+    public function requireReference(string $referenceId, string $errorMessage): Configuration
+    {
+        $this->requiredReferences[$referenceId] = $errorMessage;
+
+        return $this;
+    }
+
+    public function withExternalContainer(?ContainerInterface $externalContainer): Configuration
+    {
+        $this->externalContainer = $externalContainer;
+
+        return $this;
+    }
+
     /**
      * @param PollingMetadata $pollingMetadata
      *
@@ -972,6 +993,24 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->compilerPasses as $compilerPass) {
             $compilerPass->process($builder);
         }
+
+        (new Container\Compiler\ValidateRequiredReferencesPass(
+            $this->requiredReferences,
+            $this->applicationConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE),
+            $this->externalContainer
+        ))->process($builder);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getRequiredReferencesForValidation(): array
+    {
+        if ($this->applicationConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
+            return [];
+        }
+
+        return $this->requiredReferences;
     }
 
     /**

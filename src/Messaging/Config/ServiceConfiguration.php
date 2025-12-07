@@ -246,6 +246,8 @@ class ServiceConfiguration
 
     /**
      * List which packages should be skipped. The core package can't be skipped.
+     * @TODO Ecotone 2.0 change to which packages should be loaded
+     *
      * @link ModulePackageList list of available packages
      * @param string[] $modulePackageNames
      */

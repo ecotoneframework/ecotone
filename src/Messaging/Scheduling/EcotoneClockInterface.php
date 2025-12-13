@@ -14,9 +14,7 @@ use Psr\Clock\ClockInterface as PsrClockInterface;
 /**
  * licence Apache-2.0
  */
-interface EcotoneClockInterface extends PsrClockInterface
+interface EcotoneClockInterface extends PsrClockInterface, SleepInterface
 {
     public function now(): DatePoint;
-
-    public function sleep(Duration $duration): void;
 }

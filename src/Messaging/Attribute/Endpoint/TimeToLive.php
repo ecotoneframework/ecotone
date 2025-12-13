@@ -17,8 +17,16 @@ class TimeToLive extends AddHeader
     /**
      * @param int|TimeSpan $time if integer is provided it is treated as milliseconds
      */
-    public function __construct(int|TimeSpan|null $time = null, ?string $expression = null)
-    {
+    public function __construct(
+        int|TimeSpan|null $time = null,
+        ?string $expression = null,
+        private readonly bool $shouldReplaceExistingHeader = true
+    ) {
         parent::__construct(MessageHeaders::TIME_TO_LIVE, $time instanceof TimeSpan ? $time->toMilliseconds() : $time, $expression);
+    }
+
+    public function shouldReplaceExistingHeader(): bool
+    {
+        return $this->shouldReplaceExistingHeader;
     }
 }

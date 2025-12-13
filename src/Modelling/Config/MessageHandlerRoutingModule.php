@@ -78,15 +78,21 @@ class MessageHandlerRoutingModule implements AnnotationModule
         );
     }
 
-    public static function getFirstParameterClassIfAny(AnnotatedFinding $registration, InterfaceToCallRegistry $interfaceToCallRegistry): ?string
+    /**
+     * @return string[] Array of class names for the first parameter. Empty if no class/interface type.
+     */
+    public static function getFirstParameterClassesIfAny(AnnotatedFinding $registration, InterfaceToCallRegistry $interfaceToCallRegistry): array
     {
         $type = Type::create(self::getFirstParameterTypeFor($registration, $interfaceToCallRegistry));
 
-        if ($type->isClassOrInterface() && ! $type->isIdentifiedBy(Message::class)) {
-            return $type->toString();
+        $classes = [];
+        foreach ($type->getUnionTypes() as $unionType) {
+            if ($unionType->isClassOrInterface() && ! $unionType->isIdentifiedBy(Message::class)) {
+                $classes[] = $unionType->toString();
+            }
         }
 
-        return null;
+        return $classes;
     }
 
     private static function getFirstParameterTypeFor(AnnotatedFinding $registration, InterfaceToCallRegistry $interfaceToCallRegistry): string

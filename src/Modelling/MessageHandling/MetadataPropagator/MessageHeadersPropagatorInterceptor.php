@@ -28,6 +28,7 @@ class MessageHeadersPropagatorInterceptor
         } else {
             $userlandHeaders = MessageHeaders::unsetAllFrameworkHeaders($message->getHeaders()->headers());
             unset(
+                $userlandHeaders[AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER],
                 $userlandHeaders[AggregateMessage::AGGREGATE_ID],
                 $userlandHeaders[AggregateMessage::CALLED_AGGREGATE_CLASS],
                 $userlandHeaders[AggregateMessage::CALLED_AGGREGATE_INSTANCE],

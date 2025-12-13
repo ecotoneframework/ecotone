@@ -4,20 +4,35 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\AnnotationFinder\ConfigurationException;
+use Ecotone\AnnotationFinder\ConfigurationException as AnnotationConfigurationException;
 use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingGatewayModule;
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\AggregateMessage;
+use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\Identifier;
+use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\MessageBusChannel;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use stdClass;
+use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\EventHandlerForUnionType;
+use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlaced as UnionOrderWasPlaced;
+use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlacedWithIdentifier;
+use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasPlacedWithIdentifierWithTarget;
+use Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\OrderWasRemovedWithIdentifier;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\CreateMerchant;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\Merchant;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\MerchantConversion;
@@ -39,7 +54,7 @@ use Test\Ecotone\Modelling\Fixture\HandlerWithAbstractClass\TestHandler;
 use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestViewer;
 use Test\Ecotone\Modelling\Fixture\NamedEvent\GuestWasAddedToBook;
 use Test\Ecotone\Modelling\Fixture\NamedEventAsyncSubscriber\GuestNotifier;
-use Test\Ecotone\Modelling\Fixture\NoEventsReturnedFromFactoryMethod\Aggregate;
+use Test\Ecotone\Modelling\Fixture\NoEventsReturnedFromFactoryMethod\Aggregate as NoEventsAggregate;
 use Test\Ecotone\Modelling\Fixture\Outbox\OutboxWithMultipleChannels;
 use Test\Ecotone\Modelling\Fixture\PriorityEventHandler\AggregateSynchronousPriorityWithHigherPriorityHandler;
 use Test\Ecotone\Modelling\Fixture\PriorityEventHandler\AggregateSynchronousPriorityWithLowerPriorityHandler;
@@ -254,7 +269,7 @@ final class MessageBusTest extends TestCase
     public function test_factory_method_of_event_sourced_aggregate_can_return_no_events(): void
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            classesToResolve: [Aggregate::class],
+            classesToResolve: [NoEventsAggregate::class],
             configuration: ServiceConfiguration::createWithDefaults()
                 ->withSkippedModulePackageNames(ModulePackageList::allPackages())
         );
@@ -381,7 +396,7 @@ final class MessageBusTest extends TestCase
 
     public function test_throws_configuration_exception_when_event_handler_is_private(): void
     {
-        $this->expectException(ConfigurationException::class);
+        $this->expectException(AnnotationConfigurationException::class);
         $this->expectExceptionMessage(OrderEventServiceWithPrivateHandler::class . '::whenOrderWasPlacedSecond');
         $this->expectExceptionMessage('should be placed on public method');
 
@@ -395,7 +410,7 @@ final class MessageBusTest extends TestCase
 
     public function test_throws_configuration_exception_when_command_handler_is_private(): void
     {
-        $this->expectException(ConfigurationException::class);
+        $this->expectException(AnnotationConfigurationException::class);
         $this->expectExceptionMessage(ServiceWithPrivateCommandHandler::class . '::handle');
         $this->expectExceptionMessage('should be placed on public method');
 
@@ -409,13 +424,254 @@ final class MessageBusTest extends TestCase
 
     public function test_throws_configuration_exception_when_query_handler_is_private(): void
     {
-        $this->expectException(ConfigurationException::class);
+        $this->expectException(AnnotationConfigurationException::class);
         $this->expectExceptionMessage(ServiceWithPrivateQueryHandler::class . '::getOrder');
         $this->expectExceptionMessage('should be placed on public method');
 
         EcotoneLite::bootstrapFlowTesting(
             [ServiceWithPrivateQueryHandler::class],
             [new ServiceWithPrivateQueryHandler()],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+        );
+    }
+
+    public function test_event_handler_with_union_type_parameter(): void
+    {
+        $handler = new EventHandlerForUnionType();
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [EventHandlerForUnionType::class],
+            [$handler],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+        );
+
+        $orderEvent = new UnionOrderWasPlaced();
+        $stdClassEvent = new stdClass();
+
+        $ecotoneTestSupport->publishEvent($orderEvent);
+        $ecotoneTestSupport->publishEvent($stdClassEvent);
+
+        $handledEvents = $ecotoneTestSupport->sendQueryWithRouting('getHandledEvents');
+
+        $this->assertCount(2, $handledEvents);
+        $this->assertSame($orderEvent, $handledEvents[0]);
+        $this->assertSame($stdClassEvent, $handledEvents[1]);
+    }
+
+    public function test_aggregate_event_handler_with_union_type_parameter_with_aggregate_id_in_payload(): void
+    {
+        $aggregate = new #[Aggregate] class () {
+            #[Identifier]
+            private string $id = '';
+
+            /** @var array<object> */
+            private array $handledEvents = [];
+
+            #[CommandHandler('aggregate.create')]
+            public static function create(string $id): static
+            {
+                $self = new static();
+                $self->id = $id;
+                return $self;
+            }
+
+            #[EventHandler]
+            public function onEvent(OrderWasPlacedWithIdentifier|OrderWasRemovedWithIdentifier $event): void
+            {
+                $this->handledEvents[] = $event;
+            }
+
+            /** @return array<object> */
+            #[QueryHandler('aggregate.getHandledEvents')]
+            public function getHandledEvents(): array
+            {
+                return $this->handledEvents;
+            }
+        };
+
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [$aggregate::class],
+            [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+        );
+
+        $ecotoneTestSupport->sendCommandWithRoutingKey('aggregate.create', 'test-id');
+
+        $orderEventOne = new OrderWasPlacedWithIdentifier('test-id');
+        $orderEventTwo = new OrderWasRemovedWithIdentifier('test-id');
+
+        // When using union types, aggregate.id must be provided in metadata
+        $ecotoneTestSupport->publishEvent($orderEventOne);
+        $ecotoneTestSupport->publishEvent($orderEventTwo);
+
+        $handledEvents = $ecotoneTestSupport->sendQueryWithRouting('aggregate.getHandledEvents', metadata: ['aggregate.id' => 'test-id']);
+
+        $this->assertCount(2, $handledEvents);
+        $this->assertEquals($orderEventOne, $handledEvents[0]);
+        $this->assertEquals($orderEventTwo, $handledEvents[1]);
+    }
+
+    public function test_aggregate_event_handler_with_union_type_and_using_target_identifier(): void
+    {
+        $aggregate = new #[Aggregate] class () {
+            #[Identifier]
+            private string $id = '';
+
+            /** @var array<object> */
+            private array $handledEvents = [];
+
+            #[CommandHandler('aggregate.create')]
+            public static function create(string $id): static
+            {
+                $self = new static();
+                $self->id = $id;
+                return $self;
+            }
+
+            #[EventHandler]
+            public function onEvent(OrderWasPlacedWithIdentifierWithTarget|OrderWasRemovedWithIdentifier $event): void
+            {
+                $this->handledEvents[] = $event;
+            }
+
+            /** @return array<object> */
+            #[QueryHandler('aggregate.getHandledEvents')]
+            public function getHandledEvents(): array
+            {
+                return $this->handledEvents;
+            }
+        };
+
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [$aggregate::class],
+            [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+        );
+
+        $ecotoneTestSupport->sendCommandWithRoutingKey('aggregate.create', 'test-id');
+
+        $orderEventOne = new OrderWasPlacedWithIdentifierWithTarget('test-id');
+        $orderEventTwo = new OrderWasRemovedWithIdentifier('test-id');
+
+        // When using union types, aggregate.id must be provided in metadata
+        $ecotoneTestSupport->publishEvent($orderEventOne);
+        $ecotoneTestSupport->publishEvent($orderEventTwo);
+
+        $handledEvents = $ecotoneTestSupport->sendQueryWithRouting('aggregate.getHandledEvents', metadata: ['aggregate.id' => 'test-id']);
+
+        $this->assertCount(2, $handledEvents);
+        $this->assertEquals($orderEventOne, $handledEvents[0]);
+        $this->assertEquals($orderEventTwo, $handledEvents[1]);
+    }
+
+    public function test_aggregate_event_handler_with_union_type_and_using_target_identifier_being_asynchronous(): void
+    {
+        $aggregate = new #[Aggregate] class () {
+            #[Identifier]
+            private string $id = '';
+
+            /** @var array<object> */
+            private array $handledEvents = [];
+
+            #[CommandHandler('aggregate.create')]
+            public static function create(string $id): static
+            {
+                $self = new static();
+                $self->id = $id;
+                return $self;
+            }
+
+            #[Asynchronous('async')]
+            #[EventHandler(endpointId: 'aggregate.onEvent')]
+            public function onEvent(OrderWasPlacedWithIdentifierWithTarget|OrderWasRemovedWithIdentifier $event): void
+            {
+                $this->handledEvents[] = $event;
+            }
+
+            /** @return array<object> */
+            #[QueryHandler('aggregate.getHandledEvents')]
+            public function getHandledEvents(): array
+            {
+                return $this->handledEvents;
+            }
+        };
+
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [$aggregate::class],
+            [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE])),
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async', conversionMediaType: MediaType::createApplicationXPHPSerialized()),
+            ]
+        );
+
+        $ecotoneTestSupport->sendCommandWithRoutingKey('aggregate.create', 'test-id');
+
+        $orderEventOne = new OrderWasPlacedWithIdentifierWithTarget('test-id');
+
+        $ecotoneTestSupport
+            ->publishEvent($orderEventOne);
+
+        $messageChannel = $ecotoneTestSupport->getMessageChannel('async');
+        $message = $messageChannel->receive();
+        /** Remove information about aggregate id, so it has to be resolved from payload */
+        $messageChannel->send(MessageBuilder::fromMessage($message)
+            ->removeHeader(AggregateMessage::AGGREGATE_ID)
+            ->build());
+
+        $ecotoneTestSupport
+            ->run('async');
+
+        $handledEvents = $ecotoneTestSupport->sendQueryWithRouting('aggregate.getHandledEvents', metadata: ['aggregate.id' => 'test-id']);
+
+        $this->assertCount(1, $handledEvents);
+        $this->assertEquals($orderEventOne, $handledEvents[0]);
+    }
+
+    public function test_aggregate_query_handler_with_union_type_throws_exception(): void
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $aggregate = new #[Aggregate] class () {
+            #[Identifier]
+            private string $id = 'test-id';
+
+            #[QueryHandler('test.query')]
+            public function query(stdClass|UnionOrderWasPlaced $query): array
+            {
+                return [];
+            }
+        };
+
+        EcotoneLite::bootstrapFlowTesting(
+            [$aggregate::class],
+            [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+        );
+    }
+
+    public function test_aggregate_command_handler_with_union_type_throws_exception(): void
+    {
+        $this->expectException(ConfigurationException::class);
+
+        $aggregate = new #[Aggregate] class () {
+            #[Identifier]
+            private string $id = 'test-id';
+
+            #[CommandHandler('test.command')]
+            public function handle(stdClass|UnionOrderWasPlaced $command): void
+            {
+            }
+        };
+
+        EcotoneLite::bootstrapFlowTesting(
+            [$aggregate::class],
+            [],
             ServiceConfiguration::createWithDefaults()
                 ->withSkippedModulePackageNames(ModulePackageList::allPackages())
         );

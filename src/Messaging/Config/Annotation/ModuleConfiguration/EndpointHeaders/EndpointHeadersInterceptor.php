@@ -51,7 +51,8 @@ class EndpointHeadersInterceptor implements DefinedObject
             }
         }
 
-        if ($delayed) {
+        $isDeliveryDelayHeaderExists = $message->getHeaders()->containsKey(MessageHeaders::DELIVERY_DELAY);
+        if ($delayed && ($delayed->shouldReplaceExistingHeader() || ! $isDeliveryDelayHeaderExists)) {
             $metadata[MessageHeaders::DELIVERY_DELAY] = $delayed->getHeaderValue();
 
             if ($delayed->getExpression()) {
@@ -69,6 +70,8 @@ class EndpointHeadersInterceptor implements DefinedObject
             ]))) {
                 throw ConfigurationException::create("Delivery delay should be either integer, TimeSpan or DateTimeInterface, but got {$type->toString()}");
             }
+        } elseif ($isDeliveryDelayHeaderExists) {
+            $metadata[MessageHeaders::DELIVERY_DELAY] = $message->getHeaders()->get(MessageHeaders::DELIVERY_DELAY);
         }
 
         if ($priority) {
@@ -82,7 +85,8 @@ class EndpointHeadersInterceptor implements DefinedObject
             }
         }
 
-        if ($timeToLive) {
+        $isTtlHeaderExists = $message->getHeaders()->containsKey(MessageHeaders::TIME_TO_LIVE);
+        if ($timeToLive && ($timeToLive->shouldReplaceExistingHeader() || ! $isTtlHeaderExists)) {
             $metadata[MessageHeaders::TIME_TO_LIVE] = $timeToLive->getHeaderValue();
 
             if ($timeToLive->getExpression()) {
@@ -99,6 +103,8 @@ class EndpointHeadersInterceptor implements DefinedObject
             ]))) {
                 throw ConfigurationException::create("Delivery delay should be either integer or TimeSpan, but got {$type->toString()}");
             }
+        } elseif ($isTtlHeaderExists) {
+            $metadata[MessageHeaders::TIME_TO_LIVE] = $message->getHeaders()->get(MessageHeaders::TIME_TO_LIVE);
         }
 
         if ($removeHeader) {

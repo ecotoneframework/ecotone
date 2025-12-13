@@ -2,6 +2,8 @@
 
 namespace Ecotone\Modelling\Config;
 
+use function array_map;
+
 use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\EventSourcing\Mapping\EventMapper;
@@ -283,14 +285,21 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
         $relatedClassInterface    = $this->interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName());
         $parameterConverters      = $parameterConverterAnnotationFactory->createParameterWithDefaults($relatedClassInterface);
         $aggregateClassDefinition = $this->interfaceToCallRegistry->getClassDefinitionFor(Type::object($registration->getClassName()));
-        $handledPayloadType       = MessageHandlerRoutingModule::getFirstParameterClassIfAny($registration, $this->interfaceToCallRegistry);
-        $handledPayloadType       = $handledPayloadType ? $this->interfaceToCallRegistry->getClassDefinitionFor(Type::object($handledPayloadType)) : null;
+        $handledPayloadTypes      = MessageHandlerRoutingModule::getFirstParameterClassesIfAny($registration, $this->interfaceToCallRegistry);
+
+        if (count($handledPayloadTypes) > 1) {
+            throw ConfigurationException::create(sprintf('Aggregate Query Handler %s::%s cannot use union type for first parameter. Use separate handlers for each type.', $registration->getClassName(), $registration->getMethodName()));
+        }
+
+        $handledPayloadType       = count($handledPayloadTypes) === 1
+            ? $this->interfaceToCallRegistry->getClassDefinitionFor(Type::object($handledPayloadTypes[0]))
+            : null;
 
         $configuration->registerMessageHandler(
             MessageProcessorActivatorBuilder::create()
                 ->withInputChannelName($destinationChannel)
                 ->withOutputMessageChannel($annotationForMethod->getOutputChannelName())
-                ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], [], $handledPayloadType, $this->interfaceToCallRegistry))
+                ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], [], $this->getClassDefinitionsForTypes($handledPayloadTypes), $this->interfaceToCallRegistry))
                 ->chain(
                     LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $handledPayloadType, LoadAggregateMode::createThrowOnNotFound())
                 )
@@ -310,7 +319,7 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
 
         $configuration->registerMessageHandler(
             $chainMessageHandlerBuilder
-                ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], [], null, $interfaceToCallRegistry))
+                ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], [], [], $interfaceToCallRegistry))
                 ->chain(
                     LoadAggregateServiceBuilder::create($aggregateClassDefinition, $methodName, null, $canReturnNull ? LoadAggregateMode::createContinueOnNotFound() : LoadAggregateMode::createThrowOnNotFound())
                 )
@@ -427,7 +436,7 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
             $messagingConfiguration->registerMessageHandler(
                 MessageProcessorActivatorBuilder::create()
                     ->withInputChannelName(self::getRegisterAggregateSaveRepositoryInputChannel($aggregateClass))
-                    ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], [], null, $interfaceToCallRegistry))
+                    ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], [], [], $interfaceToCallRegistry))
                     ->chain(SaveAggregateServiceBuilder::create())
             );
 
@@ -435,7 +444,7 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
                 $messagingConfiguration->registerMessageHandler(
                     MessageProcessorActivatorBuilder::create()
                         ->withInputChannelName(self::getRegisterAggregateSaveRepositoryInputChannel($aggregateClass, forTesting: true))
-                        ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], [], null, $interfaceToCallRegistry))
+                        ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, [], [], [], $interfaceToCallRegistry))
                         ->chain(SaveAggregateTestSetupServiceBuilder::create())
                 );
             }
@@ -550,14 +559,22 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
         $isFactoryMethod       = $relatedClassInterface->isFactoryMethod();
         $parameterConverters   = $parameterConverterAnnotationFactory->createParameterWithDefaults($relatedClassInterface);
         $aggregateClassDefinition = $this->interfaceToCallRegistry->getClassDefinitionFor(Type::object($registration->getClassName()));
-        $handledPayloadType = MessageHandlerRoutingModule::getFirstParameterClassIfAny($registration, $this->interfaceToCallRegistry);
-        $handledPayloadType = $handledPayloadType ? $this->interfaceToCallRegistry->getClassDefinitionFor(Type::object($handledPayloadType)) : null;
+        $handledPayloadTypes = MessageHandlerRoutingModule::getFirstParameterClassesIfAny($registration, $this->interfaceToCallRegistry);
+
+        if (count($handledPayloadTypes) > 1 && $annotation instanceof CommandHandler) {
+            throw ConfigurationException::create(sprintf('Aggregate Command Handler %s::%s cannot use union type for first parameter. Use separate handlers for each type.', $registration->getClassName(), $registration->getMethodName()));
+        }
+
+        $handledPayloadType = count($handledPayloadTypes) === 1
+            ? $this->interfaceToCallRegistry->getClassDefinitionFor(Type::object($handledPayloadTypes[0]))
+            : null;
+        $handledPayloadTypeDefinitions = $this->getClassDefinitionsForTypes($handledPayloadTypes);
 
         // This is executed before sending to async channel
         $aggregateIdentifierHandlerPreCheck = MessageProcessorActivatorBuilder::create()
             ->withInputChannelName($destinationChannel)
             ->withOutputMessageChannel($connectionChannel = $destinationChannel . '-connection')
-            ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $annotation->getIdentifierMetadataMapping(), $annotation->getIdentifierMapping(), $handledPayloadType, $this->interfaceToCallRegistry))
+            ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $annotation->getIdentifierMetadataMapping(), $annotation->getIdentifierMapping(), $handledPayloadTypeDefinitions, $this->interfaceToCallRegistry))
         ;
         $messagingConfiguration->registerMessageHandler($aggregateIdentifierHandlerPreCheck);
 
@@ -575,7 +592,7 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
         if (! $isFactoryMethod) {
             $serviceActivatorHandler
                 /** @TODO Ecotone 2.0 (remove) this. For backward compatibility when messages without AggregateMessage::AGGREGATE_ID is not available*/
-                ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $annotation->getIdentifierMetadataMapping(), $annotation->getIdentifierMapping(), $handledPayloadType, $this->interfaceToCallRegistry))
+                ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $annotation->getIdentifierMetadataMapping(), $annotation->getIdentifierMapping(), $handledPayloadTypeDefinitions, $this->interfaceToCallRegistry))
                 ->chain(
                     LoadAggregateServiceBuilder::create($aggregateClassDefinition, $registration->getMethodName(), $handledPayloadType, $dropMessageOnNotFound ? LoadAggregateMode::createDropMessageOnNotFound() : LoadAggregateMode::createThrowOnNotFound())
                 );
@@ -604,8 +621,11 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
         $factoryAnnotation = $factoryRegistration->getAnnotationForMethod();
 
         $factoryInterface = $this->interfaceToCallRegistry->getFor($factoryRegistration->getClassName(), $factoryRegistration->getMethodName());
-        $factoryHandledPayloadType        = MessageHandlerRoutingModule::getFirstParameterClassIfAny($factoryRegistration, $this->interfaceToCallRegistry);
-        $factoryHandledPayloadType        = $factoryHandledPayloadType ? $this->interfaceToCallRegistry->getClassDefinitionFor(Type::object($factoryHandledPayloadType)) : null;
+        $factoryHandledPayloadTypes       = MessageHandlerRoutingModule::getFirstParameterClassesIfAny($factoryRegistration, $this->interfaceToCallRegistry);
+        $factoryHandledPayloadType        = \count($factoryHandledPayloadTypes) === 1
+            ? $this->interfaceToCallRegistry->getClassDefinitionFor(Type::object($factoryHandledPayloadTypes[0]))
+            : null;
+        $factoryHandledPayloadTypeDefinitions = $this->getClassDefinitionsForTypes($factoryHandledPayloadTypes);
         $factoryIdentifierMetadataMapping = $factoryAnnotation->identifierMetadataMapping;
         $factoryIdentifierMapping = $factoryAnnotation->identifierMapping;
         $factoryParameterConverters   = $parameterConverterAnnotationFactory->createParameterWithDefaults($factoryInterface);
@@ -631,7 +651,7 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
         $aggregateIdentifierHandlerPreCheck = MessageProcessorActivatorBuilder::create()
             ->withInputChannelName($destinationChannel)
             ->withOutputMessageChannel($connectionChannel = $destinationChannel . '-connection')
-            ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $factoryIdentifierMetadataMapping, $factoryIdentifierMapping, $factoryHandledPayloadType, $this->interfaceToCallRegistry))
+            ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $factoryIdentifierMetadataMapping, $factoryIdentifierMapping, $factoryHandledPayloadTypeDefinitions, $this->interfaceToCallRegistry))
         ;
         $messagingConfiguration->registerMessageHandler($aggregateIdentifierHandlerPreCheck);
 
@@ -647,7 +667,7 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
                         AggregateMessage::CALLED_AGGREGATE_CLASS => $factoryRegistration->getClassName(),
                     ])
                 ))
-                ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $factoryIdentifierMetadataMapping, $factoryIdentifierMapping, $factoryHandledPayloadType, $this->interfaceToCallRegistry))
+                ->chain(AggregateIdentifierRetrevingServiceBuilder::createWith($aggregateClassDefinition, $factoryIdentifierMetadataMapping, $factoryIdentifierMapping, $factoryHandledPayloadTypeDefinitions, $this->interfaceToCallRegistry))
                 ->chainInterceptedProcessor(
                     // Registering this processor as intercepted causes before and after interceptors to be executed twice, once for loading aggregate and once for calling action or factory method.
                     // This is required to avoid B/C breaks where before interceptor could add identifier metadata to the message.
@@ -685,5 +705,17 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
                     ->withEndpointAnnotations([PriorityBasedOnType::fromAnnotatedFinding($actionRegistration)->toAttributeDefinition()])
             );
         }
+    }
+
+    /**
+     * @param string[] $classNames
+     * @return ClassDefinition[]
+     */
+    private function getClassDefinitionsForTypes(array $classNames): array
+    {
+        return array_map(
+            fn (string $className) => $this->interfaceToCallRegistry->getClassDefinitionFor(Type::object($className)),
+            $classNames
+        );
     }
 }

@@ -18,6 +18,8 @@ use Ecotone\Modelling\Attribute\AggregateIdentifier;
 use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
 use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
 
+use function is_null;
+
 /**
  * Class AggregateMessageConversionServiceBuilder
  * @package Ecotone\Modelling
@@ -28,22 +30,28 @@ use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
  */
 class AggregateIdentifierRetrevingServiceBuilder implements CompilableBuilder
 {
-    private Type $typeToConvertTo;
-    private array $messageIdentifierMapping;
+    /** @var array<string, array<string, string|null>> Per-class identifier mappings */
+    private array $perClassIdentifierMappings = [];
 
+    /**
+     * @param ClassDefinition[] $handledMessageClassDefinitions
+     */
     private function __construct(
         private ClassDefinition $aggregateClassName,
         private array $metadataIdentifierMapping,
         private array $identifierMapping,
-        ?ClassDefinition $messageClassNameToConvertTo,
+        array $handledMessageClassDefinitions,
         InterfaceToCallRegistry $interfaceToCallRegistry
     ) {
-        $this->initialize($interfaceToCallRegistry, $aggregateClassName, $messageClassNameToConvertTo, $metadataIdentifierMapping, $identifierMapping);
+        $this->initialize($interfaceToCallRegistry, $aggregateClassName, $handledMessageClassDefinitions, $metadataIdentifierMapping, $identifierMapping);
     }
 
-    public static function createWith(ClassDefinition $aggregateClassName, array $metadataIdentifierMapping, array $identifierMapping, ?ClassDefinition $messageClassNameToConvertTo, InterfaceToCallRegistry $interfaceToCallRegistry): self
+    /**
+     * @param ClassDefinition[] $handledMessageClassDefinitions
+     */
+    public static function createWith(ClassDefinition $aggregateClassName, array $metadataIdentifierMapping, array $identifierMapping, array $handledMessageClassDefinitions, InterfaceToCallRegistry $interfaceToCallRegistry): self
     {
-        return new self($aggregateClassName, $metadataIdentifierMapping, $identifierMapping, $messageClassNameToConvertTo, $interfaceToCallRegistry);
+        return new self($aggregateClassName, $metadataIdentifierMapping, $identifierMapping, $handledMessageClassDefinitions, $interfaceToCallRegistry);
     }
 
     /**
@@ -57,11 +65,10 @@ class AggregateIdentifierRetrevingServiceBuilder implements CompilableBuilder
                 $this->aggregateClassName->getClassType()->toString(),
                 Reference::to(ConversionService::REFERENCE_NAME),
                 Reference::to(PropertyReaderAccessor::class),
-                $this->typeToConvertTo,
                 $this->metadataIdentifierMapping,
-                $this->messageIdentifierMapping,
                 $this->identifierMapping,
                 Reference::to(ExpressionEvaluationService::REFERENCE),
+                $this->perClassIdentifierMappings,
             ]
         );
     }
@@ -99,20 +106,23 @@ class AggregateIdentifierRetrevingServiceBuilder implements CompilableBuilder
         return false;
     }
 
+    /**
+     * @param ClassDefinition[] $handledMessageClassDefinitions
+     */
     private function initialize(
         InterfaceToCallRegistry $interfaceToCallRegistry,
         ClassDefinition $aggregateClassDefinition,
-        ?ClassDefinition $handledMessageClassNameDefinition,
+        array $handledMessageClassDefinitions,
         array $metadataIdentifierMapping,
         array $identifierMapping
     ): void {
-        $messageIdentifiersMapping = [];
-
         $aggregateIdentifierAnnotation = Type::attribute(AggregateIdentifier::class);
         $aggregateIdentifierMethod = Type::attribute(AggregateIdentifierMethod::class);
+
+        $baseMessageIdentifiersMapping = [];
         foreach ($aggregateClassDefinition->getProperties() as $property) {
             if ($property->hasAnnotation($aggregateIdentifierAnnotation)) {
-                $messageIdentifiersMapping[$property->getName()] = null;
+                $baseMessageIdentifiersMapping[$property->getName()] = null;
             }
         }
         foreach ($aggregateClassDefinition->getPublicMethodNames() as $method) {
@@ -121,11 +131,11 @@ class AggregateIdentifierRetrevingServiceBuilder implements CompilableBuilder
             if ($methodToCheck->hasMethodAnnotation($aggregateIdentifierMethod)) {
                 /** @var AggregateIdentifierMethod $attribute */
                 $attribute = $methodToCheck->getSingleMethodAnnotationOf($aggregateIdentifierMethod);
-                $messageIdentifiersMapping[$attribute->getIdentifierPropertyName()] = null;
+                $baseMessageIdentifiersMapping[$attribute->getIdentifierPropertyName()] = null;
             }
         }
 
-        if (empty($messageIdentifiersMapping)) {
+        if (empty($baseMessageIdentifiersMapping)) {
             throw InvalidArgumentException::create("Aggregate {$aggregateClassDefinition} has no identifiers defined. Have you forgot to add #[Identifier]?");
         }
 
@@ -140,10 +150,44 @@ class AggregateIdentifierRetrevingServiceBuilder implements CompilableBuilder
             }
         }
 
+        foreach ($handledMessageClassDefinitions as $handledMessageClassDefinition) {
+            $className = $handledMessageClassDefinition->getClassType()->toString();
+            $this->perClassIdentifierMappings[$className] = $this->buildIdentifierMappingForClass(
+                $aggregateClassDefinition,
+                $handledMessageClassDefinition,
+                $baseMessageIdentifiersMapping,
+                $metadataIdentifierMapping,
+                $identifierMapping,
+                $aggregateIdentifierAnnotation
+            );
+        }
+
+        if ($handledMessageClassDefinitions === []) {
+            $this->perClassIdentifierMappings[''] = $this->buildIdentifierMappingForClass(
+                $aggregateClassDefinition,
+                null,
+                $baseMessageIdentifiersMapping,
+                $metadataIdentifierMapping,
+                $identifierMapping,
+                $aggregateIdentifierAnnotation
+            );
+        }
+    }
+
+    private function buildIdentifierMappingForClass(
+        ClassDefinition $aggregateClassDefinition,
+        ?ClassDefinition $handledMessageClassDefinition,
+        array $baseMessageIdentifiersMapping,
+        array $metadataIdentifierMapping,
+        array $identifierMapping,
+        Type $aggregateIdentifierAnnotation
+    ): array {
+        $messageIdentifiersMapping = $baseMessageIdentifiersMapping;
         $messageProperties = [];
-        if ($handledMessageClassNameDefinition) {
+
+        if ($handledMessageClassDefinition) {
             $targetAggregateIdentifierAnnotation = Type::attribute(TargetAggregateIdentifier::class);
-            foreach ($handledMessageClassNameDefinition->getProperties() as $property) {
+            foreach ($handledMessageClassDefinition->getProperties() as $property) {
                 if ($property->hasAnnotation($targetAggregateIdentifierAnnotation)) {
                     /** @var TargetAggregateIdentifier $annotation */
                     $annotation  = $property->getAnnotation($targetAggregateIdentifierAnnotation);
@@ -155,7 +199,7 @@ class AggregateIdentifierRetrevingServiceBuilder implements CompilableBuilder
                 }
             }
 
-            $messageProperties = $handledMessageClassNameDefinition->getProperties();
+            $messageProperties = $handledMessageClassDefinition->getProperties();
         }
 
         foreach ($messageIdentifiersMapping as $aggregateIdentifierName => $aggregateIdentifierMappingKey) {
@@ -167,7 +211,7 @@ class AggregateIdentifierRetrevingServiceBuilder implements CompilableBuilder
                     }
                 }
 
-                if (is_null($handledMessageClassNameDefinition) && is_null($mappingKey)) {
+                if (is_null($handledMessageClassDefinition) && is_null($mappingKey)) {
                     $messageIdentifiersMapping[$aggregateIdentifierName] = $aggregateIdentifierName;
                 } elseif (is_null($mappingKey) && ! $this->hasRuntimeIdentifierMapping($metadataIdentifierMapping, $aggregateIdentifierName) && ! $this->hasRuntimeIdentifierMapping($identifierMapping, $aggregateIdentifierName)) {
                     /** NO mapping available, identifier should come from message headers under "aggregate.id" */
@@ -178,8 +222,7 @@ class AggregateIdentifierRetrevingServiceBuilder implements CompilableBuilder
             }
         }
 
-        $this->messageIdentifierMapping = $messageIdentifiersMapping;
-        $this->typeToConvertTo          = $handledMessageClassNameDefinition ? $handledMessageClassNameDefinition->getClassType() : Type::array();
+        return $messageIdentifiersMapping;
     }
 
     private function hasRuntimeIdentifierMapping(array $metadataIdentifierMapping, $aggregateIdentifierName): bool

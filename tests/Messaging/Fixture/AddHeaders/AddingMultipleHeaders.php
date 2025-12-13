@@ -38,4 +38,29 @@ final class AddingMultipleHeaders
     {
 
     }
+
+    #[Delayed(1000, shouldReplaceExistingHeader: false)]
+    #[TimeToLive(1001, shouldReplaceExistingHeader: false)]
+    #[Asynchronous('async')]
+    #[CommandHandler('keepHeaders', endpointId: 'keepHeadersEndpoint')]
+    public function testKeepHeaders(): void
+    {
+
+    }
+
+    #[TimeToLive(1001)]
+    #[Asynchronous('async')]
+    #[CommandHandler('keepDeliveryDelayHeader', endpointId: 'keepDeliveryDelayHeaderEndpoint')]
+    public function testKeepDeliveryDelayHeader(): void
+    {
+
+    }
+
+    #[Delayed(1000)]
+    #[Asynchronous('async')]
+    #[CommandHandler('keepTtlHeader', endpointId: 'keepTtlHeaderEndpoint')]
+    public function testKeepTtlHeader(): void
+    {
+
+    }
 }

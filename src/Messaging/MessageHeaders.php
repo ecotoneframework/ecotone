@@ -286,7 +286,6 @@ final class MessageHeaders
     public static function unsetAggregateKeys(array $metadata): array
     {
         unset(
-            $metadata[AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER],
             $metadata[AggregateMessage::CALLED_AGGREGATE_INSTANCE],
             $metadata[AggregateMessage::CALLED_AGGREGATE_CLASS],
             $metadata[AggregateMessage::RECORDED_AGGREGATE_EVENTS],

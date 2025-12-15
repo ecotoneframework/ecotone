@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
+use Ecotone\Messaging\ConfigurationVariableService;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
@@ -93,6 +94,19 @@ class SymfonyExpressionEvaluationAdapter implements ExpressionEvaluationService
             },
             function ($arguments, string $referenceName) use ($expressionLanguage) {
                 return $expressionLanguage->evaluate("referenceService.get('{$referenceName}')", $arguments);
+            }
+        );
+
+        $expressionLanguage->register(
+            'parameter',
+            function ($str) {
+                return $str;
+            },
+            function ($arguments, string $parameterName) use ($referenceSearchService) {
+                /** @var ConfigurationVariableService $configurationVariableService */
+                $configurationVariableService = $referenceSearchService->get(ConfigurationVariableService::REFERENCE_NAME);
+
+                return $configurationVariableService->getByName($parameterName);
             }
         );
 

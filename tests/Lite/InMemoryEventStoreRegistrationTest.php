@@ -11,8 +11,8 @@ use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Event;
-use Ecotone\Projecting\Attribute\PollingProjection;
-use Ecotone\Projecting\Attribute\Projection;
+use Ecotone\Projecting\Attribute\Polling;
+use Ecotone\Projecting\Attribute\ProjectionV2;
 use Ecotone\Projecting\InMemory\InMemoryStreamSourceBuilder;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\TestCase;
@@ -32,7 +32,7 @@ class InMemoryEventStoreRegistrationTest extends TestCase
         };
 
         // Given a polling projection (polling projections read from stream sources)
-        $projection = new #[PollingProjection('test_projection', endpointId: 'test_projection_poller')] class ($testEvent) {
+        $projection = new #[ProjectionV2('test_projection'), Polling('test_projection_poller')] class ($testEvent) {
             public array $events = [];
             public int $callCount = 0;
             private string $eventClass;
@@ -87,7 +87,7 @@ class InMemoryEventStoreRegistrationTest extends TestCase
         };
 
         // Given a polling projection
-        $projection = new #[PollingProjection('test_projection', endpointId: 'test_projection_poller')] class {
+        $projection = new #[ProjectionV2('test_projection'), Polling('test_projection_poller')] class {
             public array $events = [];
             public int $callCount = 0;
 

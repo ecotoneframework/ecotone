@@ -11,6 +11,7 @@ namespace Ecotone\Messaging\Scheduling;
  */
 /**
  * licence Apache-2.0
+ * @TODO Ecotone 2.0 Think about testing delayed messages based on Clock and Sleep
  */
 interface SleepInterface
 {

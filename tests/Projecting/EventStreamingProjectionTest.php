@@ -20,8 +20,8 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Event;
-use Ecotone\Projecting\Attribute\EventStreamingProjection;
-use Ecotone\Projecting\Attribute\Projection;
+use Ecotone\Projecting\Attribute\ProjectionV2;
+use Ecotone\Projecting\Attribute\Streaming;
 use Ecotone\Projecting\EventStoreAdapter\EventStoreChannelAdapter;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\TestCase;
@@ -36,7 +36,7 @@ class EventStreamingProjectionTest extends TestCase
         $positionTracker = new InMemoryConsumerPositionTracker();
 
         // Given a projection that consumes from streaming channel
-        $projection = new #[EventStreamingProjection('user_projection', 'streaming_channel')] class {
+        $projection = new #[ProjectionV2('user_projection'), Streaming('streaming_channel')] class {
             public array $projectedUsers = [];
 
             #[EventHandler]
@@ -86,7 +86,7 @@ class EventStreamingProjectionTest extends TestCase
         $positionTracker = new InMemoryConsumerPositionTracker();
 
         // Given a projection with two event handlers routed by event names
-        $projection = new #[EventStreamingProjection('order_projection', 'streaming_channel')] class {
+        $projection = new #[ProjectionV2('order_projection'), Streaming('streaming_channel')] class {
             public array $createdOrders = [];
             public array $completedOrders = [];
 
@@ -150,7 +150,7 @@ class EventStreamingProjectionTest extends TestCase
         $positionTracker = new InMemoryConsumerPositionTracker();
 
         // Given a projection that consumes from streaming channel
-        $projection = new #[EventStreamingProjection('product_projection', 'event_stream')] class {
+        $projection = new #[ProjectionV2('product_projection'), Streaming('event_stream')] class {
             public array $projectedProducts = [];
 
             #[EventHandler]
@@ -211,7 +211,7 @@ class EventStreamingProjectionTest extends TestCase
         $positionTracker = new InMemoryConsumerPositionTracker();
 
         // Given two projections consuming from the same streaming channel
-        $productListProjection = new #[EventStreamingProjection('product_list_projection', 'event_stream')] class {
+        $productListProjection = new #[ProjectionV2('product_list_projection'), Streaming('event_stream')] class {
             public array $productList = [];
 
             #[EventHandler]
@@ -221,7 +221,7 @@ class EventStreamingProjectionTest extends TestCase
             }
         };
 
-        $productPriceProjection = new #[EventStreamingProjection('product_price_projection', 'event_stream')] class {
+        $productPriceProjection = new #[ProjectionV2('product_price_projection'), Streaming('event_stream')] class {
             public array $productPrices = [];
 
             #[EventHandler]
@@ -293,7 +293,7 @@ class EventStreamingProjectionTest extends TestCase
         $positionTracker = new InMemoryConsumerPositionTracker();
 
         // Given an event-driven projection (catches up from stream when triggered)
-        $eventDrivenProjection = new #[Projection('event_driven_product_count', automaticInitialization: true)] class {
+        $eventDrivenProjection = new #[ProjectionV2('event_driven_product_count')] class {
             public int $productCount = 0;
 
             #[EventHandler]
@@ -304,7 +304,7 @@ class EventStreamingProjectionTest extends TestCase
         };
 
         // Given an event streaming projection (processes events in polling mode from streaming channel)
-        $eventStreamingProjection = new #[EventStreamingProjection('streaming_product_list', 'event_stream')] class {
+        $eventStreamingProjection = new #[ProjectionV2('streaming_product_list'), Streaming('event_stream')] class {
             public array $productList = [];
 
             #[EventHandler]

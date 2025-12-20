@@ -26,7 +26,7 @@ class RouterProcessor implements MessageProcessor
             if (count($routes) === 0) {
                 return null;
             } elseif (count($routes) > 1) {
-                throw new InvalidArgumentException('Expected only one route to be selected, but got more');
+                throw new InvalidArgumentException('Expected only one endpoint to route, but got more. Please verify your Message Handlers for possible duplication.');
             }
             $path = $this->routeResolver->resolve($routes[0]);
             return $path->process($message);

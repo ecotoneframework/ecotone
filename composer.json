@@ -38,7 +38,7 @@
         }
     },
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "laminas/laminas-code": "^4",
         "psr/clock": "^1.0",
         "psr/container": "^1.1.1|^2.0.1",
@@ -67,7 +67,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "1.282.0-dev"
+            "dev-main": "1.283.0-dev"
         },
         "ecotone": {
             "repository": "ecotone"
@@ -88,7 +88,7 @@
                 "description": "Allows to use Enterprise features of Ecotone. For more information please write to support@simplycodedsoftware.com"
             }
         },
-        "release-time": "2025-12-15 08:09:24"
+        "release-time": "2025-12-20 16:06:24"
     },
     "config": {
         "sort-packages": true,

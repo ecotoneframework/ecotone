@@ -19,6 +19,7 @@ use Ecotone\Messaging\Handler\Router\RouteToChannelResolver;
 use Ecotone\Modelling\Config\Routing\BusRouteSelector;
 use Ecotone\Modelling\Config\Routing\BusRoutingKeyResolver;
 use Ecotone\Modelling\Config\Routing\BusRoutingMapBuilder;
+use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Ecotone\Projecting\EcotoneProjectorExecutor;
 use Ecotone\Projecting\ProjectingHeaders;
 
@@ -33,6 +34,7 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         private string  $projectionName,
         private ?string $partitionHeader = null,
         private bool    $automaticInitialization = true,
+        private bool    $isLive = true,
         private array   $namedEvents = [],
         private ?string $initChannel = null,
         private ?string $deleteChannel = null,
@@ -100,12 +102,14 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
     {
         $routerProcessor = $this->buildExecutionRouter($builder);
         return new Definition(EcotoneProjectorExecutor::class, [
-            new Reference(MessagingEntrypoint::class), // Headers propagation is required for EventStreamEmitter
+            new Reference(MessagingEntrypoint::class),
+            new Reference(MessageHeadersPropagatorInterceptor::class),
             $this->projectionName,
             $routerProcessor,
             $this->initChannel,
             $this->deleteChannel,
             $this->flushChannel,
+            $this->isLive,
         ]);
     }
 

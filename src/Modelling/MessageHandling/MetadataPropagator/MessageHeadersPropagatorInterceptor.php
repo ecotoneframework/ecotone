@@ -2,6 +2,7 @@
 
 namespace Ecotone\Modelling\MessageHandling\MetadataPropagator;
 
+use Closure;
 use Ecotone\Messaging\Attribute\PropagateHeaders;
 use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
@@ -21,7 +22,7 @@ class MessageHeadersPropagatorInterceptor
     private array $currentlyPropagatedHeaders = [];
     private bool $isPollingConsumer = false;
 
-    public function storeHeaders(MethodInvocation $methodInvocation, Message $message, ?PropagateHeaders $propagateHeaders = null)
+    public function storeHeaders(MethodInvocation|Closure $methodInvocation, Message $message, ?PropagateHeaders $propagateHeaders = null)
     {
         if ($propagateHeaders !== null && ! $propagateHeaders->doPropagation()) {
             $userlandHeaders = [];
@@ -40,7 +41,11 @@ class MessageHeadersPropagatorInterceptor
 
         $this->currentlyPropagatedHeaders[] = $userlandHeaders;
         try {
-            $reply = $methodInvocation->proceed();
+            if ($methodInvocation instanceof MethodInvocation) {
+                $reply = $methodInvocation->proceed();
+            } else {
+                $reply = $methodInvocation();
+            }
         } finally {
             array_pop($this->currentlyPropagatedHeaders);
         }

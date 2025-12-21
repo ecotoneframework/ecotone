@@ -35,7 +35,7 @@ use Ecotone\Modelling\Attribute\NamedEvent;
 use Ecotone\Projecting\Attribute\Partitioned;
 use Ecotone\Projecting\Attribute\Polling;
 use Ecotone\Projecting\Attribute\ProjectionBatchSize;
-use Ecotone\Projecting\Attribute\ProjectionConfiguration;
+use Ecotone\Projecting\Attribute\ProjectionDeployment;
 use Ecotone\Projecting\Attribute\ProjectionFlush;
 use Ecotone\Projecting\Attribute\ProjectionV2;
 use Ecotone\Projecting\Attribute\Streaming;
@@ -80,13 +80,15 @@ class ProjectingAttributeModule implements AnnotationModule
             $batchSizeAttribute = $annotationRegistrationService->findAttributeForClass($projectionClassName, ProjectionBatchSize::class);
             $pollingAttribute = $annotationRegistrationService->findAttributeForClass($projectionClassName, Polling::class);
             $streamingAttribute = $annotationRegistrationService->findAttributeForClass($projectionClassName, Streaming::class);
-            $projectionConfiguration = $annotationRegistrationService->findAttributeForClass($projectionClassName, ProjectionConfiguration::class) ?? new ProjectionConfiguration();
+            $projectionDeployment = $annotationRegistrationService->findAttributeForClass($projectionClassName, ProjectionDeployment::class);
             $partitionAttribute = $annotationRegistrationService->findAttributeForClass($projectionClassName, Partitioned::class);
 
             $partitionHeaderName = $partitionAttribute?->partitionHeaderName;
-            $automaticInitialization = $partitionAttribute ? true : $projectionConfiguration->automaticInitialization;
+            // Resolve automatic initialization: manualKickOff: true means automaticInitialization: false
+            $automaticInitialization = self::resolveAutomaticInitialization($partitionAttribute, $projectionDeployment);
+            $isLive = $projectionDeployment?->live ?? true;
 
-            $projectionBuilder = new EcotoneProjectionExecutorBuilder($projectionAttribute->name, $partitionHeaderName, $automaticInitialization, $namedEvents, batchSize: $batchSizeAttribute?->batchSize);
+            $projectionBuilder = new EcotoneProjectionExecutorBuilder($projectionAttribute->name, $partitionHeaderName, $automaticInitialization, $isLive, $namedEvents, batchSize: $batchSizeAttribute?->batchSize);
 
             $asynchronousChannelName = self::getProjectionAsynchronousChannel($annotationRegistrationService, $projectionClassName);
             $isPolling = $pollingAttribute !== null;
@@ -275,5 +277,23 @@ class ProjectingAttributeModule implements AnnotationModule
                 'Partitioned projections cannot use streaming.'
             );
         }
+    }
+
+    private static function resolveAutomaticInitialization(
+        ?Partitioned $partitionAttribute,
+        ?ProjectionDeployment $projectionDeployment,
+    ): bool {
+        // Partitioned projections always require automatic initialization
+        if ($partitionAttribute !== null) {
+            return true;
+        }
+
+        // ProjectionDeployment: manualKickOff: true means automaticInitialization: false
+        if ($projectionDeployment !== null) {
+            return ! $projectionDeployment->manualKickOff;
+        }
+
+        // Default: automatic initialization is enabled
+        return true;
     }
 }

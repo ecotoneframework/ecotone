@@ -20,7 +20,7 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Event;
 use Ecotone\Projecting\Attribute\Partitioned;
-use Ecotone\Projecting\Attribute\ProjectionConfiguration;
+use Ecotone\Projecting\Attribute\ProjectionDeployment;
 use Ecotone\Projecting\Attribute\ProjectionFlush;
 use Ecotone\Projecting\Attribute\ProjectionV2;
 use Ecotone\Projecting\InMemory\InMemoryStreamSourceBuilder;
@@ -178,7 +178,7 @@ class ProjectingTest extends TestCase
 
     public function test_it_skips_execution_when_automatic_initialization_is_off_and_not_initialized(): void
     {
-        $projection = new #[ProjectionV2('projection_with_manual_initialization'), ProjectionConfiguration(automaticInitialization: false)] class {
+        $projection = new #[ProjectionV2('projection_with_manual_initialization'), ProjectionDeployment(manualKickOff: true)] class {
             public const TICKET_CREATED = 'ticket.created';
             public array $projectedEvents = [];
 
@@ -261,7 +261,7 @@ class ProjectingTest extends TestCase
 
     public function test_auto_initialization_mode_processes_events(): void
     {
-        $projection = new #[ProjectionV2('auto_projection'), ProjectionConfiguration(automaticInitialization: true)] class {
+        $projection = new #[ProjectionV2('auto_projection'), ProjectionDeployment(manualKickOff: false)] class {
             public const TICKET_CREATED = 'ticket.created';
             public array $projectedEvents = [];
             public int $initCallCount = 0;
@@ -301,7 +301,7 @@ class ProjectingTest extends TestCase
 
     public function test_skip_initialization_mode_skips_events_when_not_initialized(): void
     {
-        $projection = new #[ProjectionV2('skip_projection'), ProjectionConfiguration(automaticInitialization: false)] class {
+        $projection = new #[ProjectionV2('skip_projection'), ProjectionDeployment(manualKickOff: true)] class {
             public const TICKET_CREATED = 'ticket.created';
             public array $projectedEvents = [];
             public int $initCallCount = 0;
@@ -341,7 +341,7 @@ class ProjectingTest extends TestCase
 
     public function test_skip_mode_with_multiple_events(): void
     {
-        $projection = new #[ProjectionV2('skip_multiple_events'), ProjectionConfiguration(automaticInitialization: false)] class {
+        $projection = new #[ProjectionV2('skip_multiple_events'), ProjectionDeployment(manualKickOff: true)] class {
             public const TICKET_CREATED = 'ticket.created';
             public array $projectedEvents = [];
             public int $initCallCount = 0;
@@ -384,7 +384,7 @@ class ProjectingTest extends TestCase
 
     public function test_auto_mode_with_multiple_events(): void
     {
-        $projection = new #[ProjectionV2('auto_multiple_events'), ProjectionConfiguration(automaticInitialization: true)] class {
+        $projection = new #[ProjectionV2('auto_multiple_events'), ProjectionDeployment(manualKickOff: false)] class {
             public const TICKET_CREATED = 'ticket.created';
             public array $projectedEvents = [];
             public int $initCallCount = 0;

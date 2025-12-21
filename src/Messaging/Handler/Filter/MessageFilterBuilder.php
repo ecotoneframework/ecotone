@@ -55,6 +55,21 @@ class MessageFilterBuilder implements InterceptedMessageProcessorBuilder
     }
 
     /**
+     * Creates a filter that returns the NEGATED value of a boolean header.
+     * When header is true, the message PASSES through.
+     * When header is false, the message is DISCARDED.
+     *
+     * @param bool|null $defaultResultWhenHeaderIsMissing When no presented exception will be thrown on missing header
+     */
+    public static function createNotBoolHeaderFilter(string $headerName, ?bool $defaultResultWhenHeaderIsMissing = null): self
+    {
+        return new self(
+            new NotBoolHeaderBasedFilter($headerName, $defaultResultWhenHeaderIsMissing),
+            InterfaceToCallReference::create(NotBoolHeaderBasedFilter::class, 'filter')
+        );
+    }
+
+    /**
      * @inheritDoc
      */
     public function getInterceptedInterface(): InterfaceToCallReference

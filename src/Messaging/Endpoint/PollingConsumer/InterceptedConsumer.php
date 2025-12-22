@@ -10,6 +10,7 @@ use Ecotone\Messaging\Endpoint\Interceptor\FinishWhenNoMessagesInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitConsumedMessagesInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitExecutionAmountInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
+use Ecotone\Messaging\Endpoint\Interceptor\PcntlTerminationListener;
 use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\TimeLimitInterceptor;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
@@ -104,7 +105,7 @@ class InterceptedConsumer implements ConsumerLifecycle
      * @return ConsumerInterceptor[]
      * @throws \Ecotone\Messaging\MessagingException
      */
-    public static function createInterceptorsForPollingMetadata(PollingMetadata $pollingMetadata, LoggerInterface $logger, EcotoneClockInterface $clock): array
+    public static function createInterceptorsForPollingMetadata(PollingMetadata $pollingMetadata, LoggerInterface $logger, EcotoneClockInterface $clock, PcntlTerminationListener $pcntlTerminationListener): array
     {
         $interceptors = [];
         if ($pollingMetadata->getHandledMessageLimit() > 0) {
@@ -114,7 +115,7 @@ class InterceptedConsumer implements ConsumerLifecycle
             $interceptors[] = new LimitMemoryUsageInterceptor($pollingMetadata->getMemoryLimitInMegabytes());
         }
         if ($pollingMetadata->isWithSignalInterceptors()) {
-            $interceptors[] = new SignalInterceptor();
+            $interceptors[] = new SignalInterceptor($pcntlTerminationListener);
         }
         if ($pollingMetadata->getExecutionAmountLimit() > 0) {
             $interceptors[] = new LimitExecutionAmountInterceptor($pollingMetadata->getExecutionAmountLimit());

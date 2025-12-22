@@ -16,15 +16,18 @@ use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
+use Ecotone\Messaging\Endpoint\Interceptor\PcntlTerminationListener;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Event;
 use Ecotone\Projecting\Attribute\Partitioned;
+use Ecotone\Projecting\Attribute\ProjectionBatchSize;
 use Ecotone\Projecting\Attribute\ProjectionDeployment;
 use Ecotone\Projecting\Attribute\ProjectionFlush;
 use Ecotone\Projecting\Attribute\ProjectionV2;
 use Ecotone\Projecting\InMemory\InMemoryStreamSourceBuilder;
 use Ecotone\Test\LicenceTesting;
+use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 
@@ -548,10 +551,6 @@ class ProjectingTest extends TestCase
         $projection = new #[ProjectionV2('batch_projection')] class () {
             public array $processingEvents = [];
             public array $flushedEvents = [];
-            public function __construct()
-            {
-            }
-
             #[EventHandler('*')]
             public function handle(array $event): void
             {
@@ -584,5 +583,43 @@ class ProjectingTest extends TestCase
         self::assertCount(1, $projection->flushedEvents);
         self::assertCount(5, $projection->flushedEvents[0]);
         self::assertCount(0, $projection->processingEvents);
+    }
+
+    #[RequiresPhpExtension('pcntl')]
+    #[RequiresPhpExtension('posix')]
+    public function test_pcntl_signals_handling(): void
+    {
+        $projection = new #[ProjectionV2('signals_projection'), ProjectionBatchSize(2)] class () {
+            public array $processedEvents = [];
+            #[EventHandler('*')]
+            public function handle(array $event): void
+            {
+                posix_kill(posix_getpid(), SIGTERM);
+                $this->processedEvents[] = $event;
+            }
+        };
+
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [$projection::class],
+            [$projection],
+            ServiceConfiguration::createWithDefaults()
+                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+        );
+        $ecotone->withEvents([
+            Event::createWithType('event1', []),
+            Event::createWithType('event2', []),
+            Event::createWithType('event3', []),
+            Event::createWithType('event4', []),
+            Event::createWithType('event5', []),
+        ]);
+        /** @var PcntlTerminationListener $pcntlTerminationFlag */
+        $pcntlTerminationFlag = $ecotone->getServiceFromContainer(PcntlTerminationListener::class);
+        $pcntlTerminationFlag->enable();
+        try {
+            $ecotone->triggerProjection('signals_projection');
+            self::assertCount(2, $projection->processedEvents, 'Expect projection to process a single batch of events (2 events)');
+        } finally {
+            $pcntlTerminationFlag->disable();
+        }
     }
 }

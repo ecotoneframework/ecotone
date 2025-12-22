@@ -11,6 +11,7 @@ use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\PollingMetadataReference;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Endpoint\Interceptor\PcntlTerminationListener;
 use Ecotone\Messaging\Endpoint\PollingConsumer\InterceptedConsumerRunner;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerErrorChannelInterceptor;
 use Ecotone\Messaging\Gateway\MessagingEntrypoint;
@@ -66,6 +67,7 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
             $messagePoller,
             new PollingMetadataReference($this->endpointId),
             new Reference(EcotoneClockInterface::class),
+            new Reference(PcntlTerminationListener::class),
             new Reference(LoggingGateway::class),
             new Reference(MessagingEntrypoint::class),
             new Reference(ExpressionEvaluationService::REFERENCE),

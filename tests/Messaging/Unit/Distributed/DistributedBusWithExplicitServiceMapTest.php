@@ -43,7 +43,7 @@ use Test\Ecotone\Messaging\Fixture\Distributed\TestServiceName;
  * licence Enterprise
  * @internal
  */
-final class DistributedBusWithServiceMapTest extends TestCase
+final class DistributedBusWithExplicitServiceMapTest extends TestCase
 {
     public const SERVICE_NAME = 'ticket_service';
 
@@ -56,7 +56,7 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [],
             $sharedQueueChannel,
             DistributedServiceMap::initialize()
-                ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
+                ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
         );
         $ticketService = $this->bootstrapEcotone(TestServiceName::TICKET_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedCommandBus\Receiver'], [new TicketServiceReceiver()], $sharedQueueChannel);
 
@@ -93,7 +93,7 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [new RegisterTicketConverter()],
             $sharedQueueChannel,
             DistributedServiceMap::initialize()
-                ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
+                ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
         );
         $ticketService = $this->bootstrapEcotone(TestServiceName::TICKET_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedCommandBus\Receiver', 'Test\Ecotone\Messaging\Fixture\Distributed\DistributedCommandBus\CommandConverter'], [new TicketServiceReceiver(), new RegisterTicketConverter()], $sharedQueueChannel);
 
@@ -123,7 +123,7 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [new UserService()],
             $sharedQueueChannel,
             DistributedServiceMap::initialize()
-                ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
+                ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
         );
         $ticketService = $this->bootstrapEcotone(TestServiceName::TICKET_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedCommandBus\Receiver'], [new TicketServiceReceiver()], $sharedQueueChannel);
 
@@ -170,7 +170,7 @@ final class DistributedBusWithServiceMapTest extends TestCase
             ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedCommandBus\Publisher'],
             [new UserService()],
             extensionObjects: DistributedServiceMap::initialize()
-                                            ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: 'not_existing_channel')
+                                            ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: 'not_existing_channel')
         );
     }
 
@@ -183,7 +183,8 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [],
             $sharedQueueChannel,
             DistributedServiceMap::initialize()
-                ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
+                ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
+                ->withEventMapping(channelName: $channelName, subscriptionKeys: ['*'])
         );
         $ticketService = $this->bootstrapEcotone(TestServiceName::TICKET_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket'], [new \Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket\TicketServiceReceiver()], $sharedQueueChannel);
 
@@ -217,7 +218,8 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [new UserChangedAddressConverter()],
             $sharedQueueChannel,
             DistributedServiceMap::initialize()
-                ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
+                ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
+                ->withEventMapping(channelName: $channelName, subscriptionKeys: ['*'])
         );
         $ticketService = $this->bootstrapEcotone(TestServiceName::TICKET_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicketWithConversion'], [new \Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicketWithConversion\TicketServiceReceiver(), new UserChangedAddressConverter()], $sharedQueueChannel);
 
@@ -247,8 +249,10 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [],
             [$distributedTicketQueue, $distributedOrderQueue],
             DistributedServiceMap::initialize()
-                ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: $ticketChannelName)
-                ->withServiceMapping(serviceName: TestServiceName::ORDER_SERVICE, channelName: $orderChannelName)
+                ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $ticketChannelName)
+                ->withCommandMapping(targetServiceName: TestServiceName::ORDER_SERVICE, channelName: $orderChannelName)
+                ->withEventMapping(channelName: $ticketChannelName, subscriptionKeys: ['*'])
+                ->withEventMapping(channelName: $orderChannelName, subscriptionKeys: ['*'])
         );
         $ticketService = $this->bootstrapEcotone(TestServiceName::TICKET_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket'], [new \Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket\TicketServiceReceiver()], $distributedTicketQueue);
         $orderService = $this->bootstrapEcotone(TestServiceName::ORDER_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverOrder'], [new OrderServiceReceiver()], $distributedOrderQueue);
@@ -273,7 +277,7 @@ final class DistributedBusWithServiceMapTest extends TestCase
         self::assertEquals(1, $orderService->sendQueryWithRouting(OrderServiceReceiver::GET_ORDERS_COUNT));
     }
 
-    public function test_it_does_not_publish_event_to_publishing_service_when_in_service_map(): void
+    public function test_it_does_not_publish_event_to_publishing_service_when_excluded(): void
     {
         $distributedTicketQueue = SimpleMessageChannelBuilder::createQueueChannel($ticketChannelName = 'distributed_ticket_channel');
         $distributedUserQueue = SimpleMessageChannelBuilder::createQueueChannel($userChannelName = 'distributed_order_channel');
@@ -283,8 +287,10 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [],
             [$distributedTicketQueue, $distributedUserQueue],
             DistributedServiceMap::initialize()
-                ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: $ticketChannelName)
-                ->withServiceMapping(serviceName: TestServiceName::USER_SERVICE, channelName: $userChannelName)
+                ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $ticketChannelName)
+                ->withCommandMapping(targetServiceName: TestServiceName::USER_SERVICE, channelName: $userChannelName)
+                ->withEventMapping(channelName: $ticketChannelName, subscriptionKeys: ['*'])
+                ->withEventMapping(channelName: $userChannelName, subscriptionKeys: ['*'], excludeEventsFromServices: [TestServiceName::USER_SERVICE])
         );
         $ticketService = $this->bootstrapEcotone(TestServiceName::TICKET_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket'], [new \Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket\TicketServiceReceiver()], $distributedTicketQueue);
 
@@ -308,8 +314,10 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [],
             [$distributedTicketQueue, $distributedOrderQueue],
             DistributedServiceMap::initialize()
-                ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: $ticketChannelName, subscriptionRoutingKeys: ['userService.*'])
-                ->withServiceMapping(serviceName: TestServiceName::ORDER_SERVICE, channelName: $orderChannelName, subscriptionRoutingKeys: ['ticketService.*'])
+                ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $ticketChannelName)
+                ->withCommandMapping(targetServiceName: TestServiceName::ORDER_SERVICE, channelName: $orderChannelName)
+                ->withEventMapping(channelName: $ticketChannelName, subscriptionKeys: ['userService.*'])
+                ->withEventMapping(channelName: $orderChannelName, subscriptionKeys: ['ticketService.*'])
         );
         $ticketService = $this->bootstrapEcotone(TestServiceName::TICKET_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket'], [new \Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket\TicketServiceReceiver()], $distributedTicketQueue);
         $orderService = $this->bootstrapEcotone(TestServiceName::ORDER_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverOrder'], [new OrderServiceReceiver()], $distributedOrderQueue);
@@ -333,7 +341,8 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [],
             [$distributedTicketQueue],
             DistributedServiceMap::initialize()
-                ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: $ticketChannelName, subscriptionRoutingKeys: ['userService.*', '*'])
+                ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $ticketChannelName)
+                ->withEventMapping(channelName: $ticketChannelName, subscriptionKeys: ['userService.*', '*'])
         );
         $ticketService = $this->bootstrapEcotone(TestServiceName::TICKET_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket'], [new \Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket\TicketServiceReceiver()], $distributedTicketQueue);
 
@@ -347,7 +356,7 @@ final class DistributedBusWithServiceMapTest extends TestCase
         self::assertNull($ticketService->getMessageChannel($ticketChannelName)->receive());
     }
 
-    public function test_not_receiving_for_empty_array(): void
+    public function test_not_receiving_when_no_event_mapping(): void
     {
         $distributedTicketQueue = SimpleMessageChannelBuilder::createQueueChannel($ticketChannelName = 'distributed_ticket_channel');
         $userService = $this->bootstrapEcotone(
@@ -356,7 +365,8 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [],
             [$distributedTicketQueue],
             DistributedServiceMap::initialize()
-                ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: $ticketChannelName, subscriptionRoutingKeys: [])
+                ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $ticketChannelName)
+            // No event mapping - so no events should be received
         );
         $ticketService = $this->bootstrapEcotone(TestServiceName::TICKET_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket'], [new \Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket\TicketServiceReceiver()], $distributedTicketQueue);
 
@@ -382,7 +392,7 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [],
             [$sharedQueueChannel, $outboxChannel],
             DistributedServiceMap::initialize()
-                ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
+                ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
                 ->withAsynchronousChannel('outbox')
         );
         $ticketService = $this->bootstrapEcotone(TestServiceName::TICKET_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedCommandBus\Receiver'], [new TicketServiceReceiver()], $sharedQueueChannel);
@@ -431,9 +441,10 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [$distributedTicketQueue, $distributedOrderQueue],
             [
                 DistributedServiceMap::initialize(referenceName: $internalDistributedBus = DistributedBus::class . '-internal')
-                   ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: $ticketChannelName),
+                   ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $ticketChannelName),
                 DistributedServiceMap::initialize(referenceName: $externalDistributedBus = DistributedBus::class . '-external')
-                    ->withServiceMapping(serviceName: TestServiceName::ORDER_SERVICE, channelName: $orderChannelName),
+                    ->withCommandMapping(targetServiceName: TestServiceName::ORDER_SERVICE, channelName: $orderChannelName)
+                    ->withEventMapping(channelName: $orderChannelName, subscriptionKeys: ['*']),
             ],
         );
         $ticketService = $this->bootstrapEcotone(TestServiceName::TICKET_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedCommandBus\Receiver'], [new TicketServiceReceiver()], $distributedTicketQueue);
@@ -487,7 +498,8 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [$dynamicMessageChannel],
             [
                 DistributedServiceMap::initialize()
-                    ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: $dynamicMessageChannel->getMessageChannelName()),
+                    ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $dynamicMessageChannel->getMessageChannelName())
+                    ->withEventMapping(channelName: $dynamicMessageChannel->getMessageChannelName(), subscriptionKeys: ['*']),
             ],
         );
 
@@ -588,7 +600,7 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [new DistributedSendInterceptor()],
             $sharedQueueChannel,
             DistributedServiceMap::initialize()
-                ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
+                ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
         );
         $ticketService = $this->bootstrapEcotone(TestServiceName::TICKET_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedCommandBus\Receiver'], [new TicketServiceReceiver()], $sharedQueueChannel);
 
@@ -615,7 +627,8 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [],
             $sharedChannel,
             DistributedServiceMap::initialize()
-                ->withServiceMapping(serviceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
+                ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $channelName)
+                ->withEventMapping(channelName: $channelName, subscriptionKeys: ['*'])
         );
         $ticketService = $this->bootstrapEcotone(
             TestServiceName::TICKET_SERVICE,
@@ -623,7 +636,8 @@ final class DistributedBusWithServiceMapTest extends TestCase
             [new \Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket\TicketServiceReceiver()],
             $sharedChannel,
             DistributedServiceMap::initialize()
-                ->withServiceMapping(serviceName: TestServiceName::USER_SERVICE, channelName: $channelName)
+                ->withCommandMapping(targetServiceName: TestServiceName::USER_SERVICE, channelName: $channelName)
+                ->withEventMapping(channelName: $channelName, subscriptionKeys: ['*'])
         );
 
         self::assertEquals(0, $ticketService->sendQueryWithRouting(\Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket\TicketServiceReceiver::GET_TICKETS_COUNT));
@@ -721,10 +735,12 @@ final class DistributedBusWithServiceMapTest extends TestCase
         $queueChannelService1 = SimpleMessageChannelBuilder::createQueueChannel($service1Name);
         $queueChannelService2 = SimpleMessageChannelBuilder::createQueueChannel($service2Name);
         $sharedDistributedMap = DistributedServiceMap::initialize()
-            ->withServiceMapping(serviceName: 'service0_distributed_events', channelName: $publisherStreamingChannel->getMessageChannelName())
-            ->withServiceMapping(serviceName: $service0Name, channelName: $queueChannelService0->getMessageChannelName())
-            ->withServiceMapping(serviceName: $service1Name, channelName: $queueChannelService1->getMessageChannelName())
-            ->withServiceMapping(serviceName: $service2Name, channelName: $queueChannelService2->getMessageChannelName());
+            ->withCommandMapping(targetServiceName: 'service0_distributed_events', channelName: $publisherStreamingChannel->getMessageChannelName())
+            ->withCommandMapping(targetServiceName: $service0Name, channelName: $queueChannelService0->getMessageChannelName())
+            ->withCommandMapping(targetServiceName: $service1Name, channelName: $queueChannelService1->getMessageChannelName())
+            ->withCommandMapping(targetServiceName: $service2Name, channelName: $queueChannelService2->getMessageChannelName())
+            // Events are published to the streaming channel for all services to consume
+            ->withEventMapping(channelName: $publisherStreamingChannel->getMessageChannelName(), subscriptionKeys: ['*']);
 
         // Publisher service
         $publisherService = EcotoneLite::bootstrapFlowTesting(
@@ -791,5 +807,48 @@ final class DistributedBusWithServiceMapTest extends TestCase
 
         $this->assertEquals(['event1', 'event2', 'event3'], $consumerService1->sendQueryWithRouting('getConsumed1'));
         $this->assertEquals(['event1', 'event2', 'event3'], $consumerService2->sendQueryWithRouting('getConsumed2'));
+        $this->assertNull($publisherService->getMessageChannel($service0Name)->receive());
+        $this->assertNull($consumerService1->getMessageChannel($service1Name)->receive());
+        $this->assertNull($consumerService2->getMessageChannel($service2Name)->receive());
+    }
+
+    public function test_cannot_use_legacy_with_service_mapping_after_with_command_mapping(): void
+    {
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage('Cannot use withServiceMapping() after withCommandMapping() or withEventMapping()');
+
+        DistributedServiceMap::initialize()
+            ->withCommandMapping('service1', 'channel1')
+            ->withServiceMapping('service2', 'channel2');
+    }
+
+    public function test_cannot_use_legacy_with_service_mapping_after_with_event_mapping(): void
+    {
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage('Cannot use withServiceMapping() after withCommandMapping() or withEventMapping()');
+
+        DistributedServiceMap::initialize()
+            ->withEventMapping('channel1', ['*'])
+            ->withServiceMapping('service2', 'channel2');
+    }
+
+    public function test_cannot_use_with_command_mapping_after_legacy_with_service_mapping(): void
+    {
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage('Cannot use withCommandMapping() after withServiceMapping()');
+
+        DistributedServiceMap::initialize()
+            ->withServiceMapping('service1', 'channel1')
+            ->withCommandMapping('service2', 'channel2');
+    }
+
+    public function test_cannot_use_with_event_mapping_after_legacy_with_service_mapping(): void
+    {
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage('Cannot use withEventMapping() after withServiceMapping()');
+
+        DistributedServiceMap::initialize()
+            ->withServiceMapping('service1', 'channel1')
+            ->withEventMapping('channel2', ['*']);
     }
 }

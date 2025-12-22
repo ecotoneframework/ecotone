@@ -10,6 +10,9 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
 use Ecotone\Modelling\Api\Distribution\DistributedServiceMap;
 
+use function in_array;
+use function sprintf;
+
 /**
  * licence Enterprise
  */
@@ -31,7 +34,11 @@ final class DistributedOutboundRouter
         $routingKey,
     ): array {
         if ($payloadType === 'event') {
-            return $this->distributedServiceMap->getAllChannelNamesBesides($this->thisServiceName, $routingKey);
+            if ($this->distributedServiceMap->isLegacyMode()) {
+                return $this->distributedServiceMap->getAllChannelNamesBesides($this->thisServiceName, $routingKey);
+            } else {
+                return $this->distributedServiceMap->getAllSubscriptionChannels($this->thisServiceName, $routingKey);
+            }
         } elseif (in_array($payloadType, ['command', 'message'])) {
             Assert::isTrue($targetedServiceName !== null, sprintf('
                 Cannot send commands to shared channel - `%s`. Commands follow point-to-point semantics, and shared channels are reserved for events only.

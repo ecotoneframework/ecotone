@@ -290,7 +290,7 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
                 ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $ticketChannelName)
                 ->withCommandMapping(targetServiceName: TestServiceName::USER_SERVICE, channelName: $userChannelName)
                 ->withEventMapping(channelName: $ticketChannelName, subscriptionKeys: ['*'])
-                ->withEventMapping(channelName: $userChannelName, subscriptionKeys: ['*'], excludeEventsFromServices: [TestServiceName::USER_SERVICE])
+                ->withEventMapping(channelName: $userChannelName, subscriptionKeys: ['*'], excludePublishingServices: [TestServiceName::USER_SERVICE])
         );
         $ticketService = $this->bootstrapEcotone(TestServiceName::TICKET_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket'], [new \Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket\TicketServiceReceiver()], $distributedTicketQueue);
 
@@ -850,5 +850,41 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
         DistributedServiceMap::initialize()
             ->withServiceMapping('service1', 'channel1')
             ->withEventMapping('channel2', ['*']);
+    }
+
+    public function test_it_publishes_event_only_to_channel_when_source_service_is_in_include_list(): void
+    {
+        $distributedTicketQueue = SimpleMessageChannelBuilder::createQueueChannel($ticketChannelName = 'distributed_ticket_channel');
+        $distributedUserQueue = SimpleMessageChannelBuilder::createQueueChannel($userChannelName = 'distributed_user_channel');
+        $userService = $this->bootstrapEcotone(
+            TestServiceName::USER_SERVICE,
+            [],
+            [],
+            [$distributedTicketQueue, $distributedUserQueue],
+            DistributedServiceMap::initialize()
+                ->withCommandMapping(targetServiceName: TestServiceName::TICKET_SERVICE, channelName: $ticketChannelName)
+                ->withCommandMapping(targetServiceName: TestServiceName::USER_SERVICE, channelName: $userChannelName)
+                ->withEventMapping(channelName: $ticketChannelName, subscriptionKeys: ['*'], includePublishingServices: [TestServiceName::TICKET_SERVICE])
+                ->withEventMapping(channelName: $userChannelName, subscriptionKeys: ['*'])
+        );
+        $ticketService = $this->bootstrapEcotone(TestServiceName::TICKET_SERVICE, ['Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket'], [new \Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverTicket\TicketServiceReceiver()], $distributedTicketQueue);
+
+        $userService->getDistributedBus()->publishEvent(
+            'userService.billing.DetailsWereChanged',
+            'User changed billing address',
+            metadata: ['token' => '123']
+        );
+
+        self::assertNull($ticketService->getMessageChannel($ticketChannelName)->receive());
+        self::assertNotNull($userService->getMessageChannel($userChannelName)->receive());
+    }
+
+    public function test_cannot_use_both_exclude_and_include_publishing_services(): void
+    {
+        $this->expectException(ConfigurationException::class);
+        $this->expectExceptionMessage("Cannot use both 'excludePublishingServices' and 'includePublishingServices' in the same event mapping for channel 'channel1'. These parameters are mutually exclusive - use either exclude (blacklist) or include (whitelist), not both.");
+
+        DistributedServiceMap::initialize()
+            ->withEventMapping('channel1', ['*'], excludePublishingServices: ['service1'], includePublishingServices: ['service2']);
     }
 }

@@ -25,7 +25,7 @@ final class DistributedServiceMap implements DefinedObject
 {
     /**
      * @param array<string, string> $commandMapping - service name -> channel name (for command routing)
-     * @param array<string, array{keys: ?array<string>, exclude: array<string>}> $eventSubscriptions - channel name -> ['keys' => [...] or null, 'exclude' => [...]]
+     * @param array<string, array{keys: ?array<string>, exclude: array<string>, include: array<string>}> $eventSubscriptions - channel name -> ['keys' => [...] or null, 'exclude' => [...], 'include' => [...]]
      * @param array<object> $distributedBusAnnotations
      * @param bool|null $legacyMode - null = not set, true = legacy (withServiceMapping), false = new API (withCommandMapping/withEventMapping)
      */
@@ -58,6 +58,7 @@ final class DistributedServiceMap implements DefinedObject
         $self->eventSubscriptions[$channelName] = [
             'keys' => $subscriptionRoutingKeys,
             'exclude' => [],
+            'include' => [],
         ];
 
         return $self;
@@ -83,17 +84,26 @@ final class DistributedServiceMap implements DefinedObject
      *
      * @param string $channelName Target channel to send events to
      * @param array<string> $subscriptionKeys Routing key patterns to match
-     * @param array<string> $excludeEventsFromServices Service names whose events should NOT be sent to this channel
+     * @param array<string> $excludePublishingServices Service names whose events should NOT be sent to this channel
+     * @param array<string> $includePublishingServices Service names whose events should ONLY be sent to this channel (whitelist)
      */
-    public function withEventMapping(string $channelName, array $subscriptionKeys, array $excludeEventsFromServices = []): self
+    public function withEventMapping(string $channelName, array $subscriptionKeys, array $excludePublishingServices = [], array $includePublishingServices = []): self
     {
+        if ($excludePublishingServices !== [] && $includePublishingServices !== []) {
+            throw ConfigurationException::create(
+                "Cannot use both 'excludePublishingServices' and 'includePublishingServices' in the same event mapping for channel '{$channelName}'. " .
+                'These parameters are mutually exclusive - use either exclude (blacklist) or include (whitelist), not both.'
+            );
+        }
+
         $self = clone $this;
         $self->assertNotInLegacyMode('withEventMapping');
         $self->legacyMode = false;
 
         $self->eventSubscriptions[$channelName] = [
             'keys' => $subscriptionKeys,
-            'exclude' => $excludeEventsFromServices,
+            'exclude' => $excludePublishingServices,
+            'include' => $includePublishingServices,
         ];
 
         return $self;
@@ -153,7 +163,7 @@ final class DistributedServiceMap implements DefinedObject
 
     /**
      * NEW MODE ONLY - Get all subscription channels for an event.
-     * Uses explicit exclude list from eventSubscriptions config.
+     * Uses explicit exclude/include list from eventSubscriptions config.
      *
      * @param string $sourceServiceName The service publishing the event
      * @param string $routingKey The event routing key
@@ -166,8 +176,13 @@ final class DistributedServiceMap implements DefinedObject
         foreach ($this->eventSubscriptions as $channel => $config) {
             $keys = $config['keys'];
             $exclude = $config['exclude'];
+            $include = $config['include'];
 
             if (in_array($sourceServiceName, $exclude, true)) {
+                continue;
+            }
+
+            if ($include !== [] && ! in_array($sourceServiceName, $include, true)) {
                 continue;
             }
 

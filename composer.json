@@ -67,7 +67,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "1.286.1-dev"
+            "dev-main": "1.287.0-dev"
         },
         "ecotone": {
             "repository": "ecotone"
@@ -88,7 +88,7 @@
                 "description": "Allows to use Enterprise features of Ecotone. For more information please write to support@simplycodedsoftware.com"
             }
         },
-        "release-time": "2025-12-23 19:28:33"
+        "release-time": "2025-12-28 19:34:39"
     },
     "config": {
         "sort-packages": true,

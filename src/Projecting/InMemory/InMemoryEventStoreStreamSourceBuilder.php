@@ -14,12 +14,18 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Projecting\Config\ProjectionComponentBuilder;
 use Ecotone\Projecting\StreamSource;
 
+use function in_array;
+
 class InMemoryEventStoreStreamSourceBuilder implements ProjectionComponentBuilder
 {
+    /**
+     * @param array<string> $eventNames Event names to filter by, empty array means no filtering
+     */
     public function __construct(
         private ?array $projectionNames = null,
         private ?string $streamName = null,
-        private ?string $partitionHeader = null
+        private ?string $partitionHeader = null,
+        private array $eventNames = [],
     ) {
     }
 
@@ -37,6 +43,7 @@ class InMemoryEventStoreStreamSourceBuilder implements ProjectionComponentBuilde
                 Reference::to(InMemoryEventStore::class),
                 $this->streamName,
                 $this->partitionHeader,
+                $this->eventNames,
             ]
         );
     }

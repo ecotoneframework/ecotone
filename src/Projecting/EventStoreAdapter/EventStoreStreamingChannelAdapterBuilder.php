@@ -18,7 +18,7 @@ use Ecotone\Projecting\Config\ProjectionExecutorBuilder;
  *
  * @internal
  */
-class EventStoreChannelAdapterProjectionBuilder implements ProjectionExecutorBuilder
+class EventStoreStreamingChannelAdapterBuilder implements ProjectionExecutorBuilder
 {
     public function __construct(
         private EventStoreChannelAdapter $channelAdapter

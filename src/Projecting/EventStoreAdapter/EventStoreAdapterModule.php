@@ -72,7 +72,7 @@ class EventStoreAdapterModule implements AnnotationModule
                 continue;
             }
 
-            $extensions[] = new EventStoreChannelAdapterProjectionBuilder($extensionObject);
+            $extensions[] = new EventStoreStreamingChannelAdapterBuilder($extensionObject);
         }
 
         return $extensions;

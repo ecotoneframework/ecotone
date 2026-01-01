@@ -67,8 +67,6 @@ class ProjectingModule implements AnnotationModule
         /** @var array<string, array<string, string>> $components [projection name][component name][reference] */
         $components = [];
         foreach ($componentBuilders as $componentBuilder) {
-            $reference = Uuid::uuid4()->toString();
-            $moduleReferenceSearchService->store($reference, $componentBuilder);
             foreach ($projectionBuilders as $projectionBuilder) {
                 $projectionName = $projectionBuilder->projectionName();
                 foreach ([StreamSource::class, PartitionProvider::class, ProjectionStateStorage::class] as $component) {
@@ -79,6 +77,9 @@ class ProjectingModule implements AnnotationModule
                                 . ' You can only register one component of each type per projection. Please check your configuration.'
                             );
                         }
+
+                        $reference = Uuid::uuid4()->toString();
+                        $moduleReferenceSearchService->store($reference, $componentBuilder);
                         $components[$projectionName][$component] = new Reference($reference);
                     }
                 }

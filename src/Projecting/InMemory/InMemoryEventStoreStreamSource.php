@@ -7,19 +7,29 @@ declare(strict_types=1);
 
 namespace Ecotone\Projecting\InMemory;
 
+use function count;
+
+use Ecotone\EventSourcing\EventStore\FieldType;
 use Ecotone\EventSourcing\EventStore\InMemoryEventStore;
 use Ecotone\EventSourcing\EventStore\MetadataMatcher;
 use Ecotone\EventSourcing\EventStore\Operator;
 use Ecotone\Projecting\StreamPage;
 use Ecotone\Projecting\StreamSource;
+
+use function is_array;
+
 use ReflectionProperty;
 
 class InMemoryEventStoreStreamSource implements StreamSource
 {
+    /**
+     * @param array<string> $eventNames Event names to filter by, empty array means no filtering
+     */
     public function __construct(
         private InMemoryEventStore $eventStore,
         private ?string $streamName = null,
-        private ?string $partitionHeader = null
+        private ?string $partitionHeader = null,
+        private array $eventNames = [],
     ) {
     }
 
@@ -38,10 +48,16 @@ class InMemoryEventStoreStreamSource implements StreamSource
                 continue;
             }
 
-            $metadataMatcher = null;
+            $metadataMatcher = new MetadataMatcher();
             if ($partitionKey !== null && $this->partitionHeader !== null) {
-                $metadataMatcher = (new MetadataMatcher())
+                $metadataMatcher = $metadataMatcher
                     ->withMetadataMatch($this->partitionHeader, Operator::EQUALS, $partitionKey);
+            }
+
+            // Filter by event names if specified (optimization for partitioned projections)
+            if ($this->eventNames !== []) {
+                $metadataMatcher = $metadataMatcher
+                    ->withMetadataMatch('event_name', Operator::IN, $this->eventNames, FieldType::MESSAGE_PROPERTY);
             }
 
             // Load all events from this stream (starting from position 1)

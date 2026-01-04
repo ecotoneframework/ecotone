@@ -2,6 +2,7 @@
 
 namespace Ecotone\Messaging\Config;
 
+use Ecotone\Amqp\Configuration\AmqpChannelManagerModule;
 use Ecotone\Amqp\Configuration\AmqpMessageConsumerModule;
 use Ecotone\Amqp\Configuration\AmqpModule;
 use Ecotone\Amqp\Configuration\RabbitConsumerModule;
@@ -26,6 +27,7 @@ use Ecotone\Laravel\Config\LaravelConnectionModule;
 use Ecotone\Lite\Test\Configuration\EcotoneTestSupportModule;
 use Ecotone\Messaging\Channel\Collector\Config\CollectorModule;
 use Ecotone\Messaging\Channel\DynamicChannel\Config\DynamicMessageChannelModule;
+use Ecotone\Messaging\Channel\Manager\ChannelSetupModule;
 use Ecotone\Messaging\Channel\PollableChannel\InMemory\InMemoryQueueAcknowledgeModule;
 use Ecotone\Messaging\Channel\PollableChannel\SendRetries\PollableChannelSendRetriesModule;
 use Ecotone\Messaging\Channel\PollableChannel\Serialization\PollableChannelSerializationModule;
@@ -69,8 +71,10 @@ use Ecotone\Projecting\Config\ProjectingModule;
 use Ecotone\Projecting\EventStoreAdapter\EventStoreAdapterModule;
 use Ecotone\Redis\Configuration\RedisMessageConsumerModule;
 use Ecotone\Redis\Configuration\RedisMessagePublisherModule;
+use Ecotone\Sqs\Configuration\SqsChannelManagerModule;
 use Ecotone\Sqs\Configuration\SqsMessageConsumerModule;
 use Ecotone\Sqs\Configuration\SqsMessagePublisherModule;
+use Ecotone\Sqs\Configuration\SqsModule;
 use Ecotone\SymfonyBundle\Config\SymfonyConnectionModule;
 
 /**
@@ -98,6 +102,7 @@ class ModuleClassList
         RouterModule::class,
         ScheduledModule::class,
         CollectorModule::class,
+        ChannelSetupModule::class,
         SerializerModule::class,
         ServiceActivatorModule::class,
         SplitterModule::class,
@@ -132,6 +137,7 @@ class ModuleClassList
         AmqpTransactionModule::class,
         AmqpMessagePublisherModule::class,
         AmqpModule::class,
+        AmqpChannelManagerModule::class,
         AmqpMessageConsumerModule::class,
         RabbitConsumerModule::class,
     ];
@@ -155,6 +161,8 @@ class ModuleClassList
     ];
 
     public const SQS_MODULES = [
+        SqsModule::class,
+        SqsChannelManagerModule::class,
         SqsMessageConsumerModule::class,
         SqsMessagePublisherModule::class,
     ];

@@ -107,7 +107,7 @@ class ChannelSetupManager implements DefinedObject
 
     /**
      * Returns initialization status for each channel
-     * @return array<string, bool|string> Map of channel name to initialization status (bool for managed, 'Not managed by migration' for non-managed)
+     * @return array<string, bool|string> Map of channel name to initialization status (bool for managed, 'Not managed by channel migration' for non-managed)
      */
     public function getInitializationStatus(): array
     {
@@ -119,7 +119,7 @@ class ChannelSetupManager implements DefinedObject
 
         foreach ($this->allPollableChannelNames as $channelName) {
             if (! isset($status[$channelName])) {
-                $status[$channelName] = 'Not managed by migration';
+                $status[$channelName] = 'Not managed by channel migration';
             }
         }
 

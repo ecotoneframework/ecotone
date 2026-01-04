@@ -41,7 +41,7 @@ final class ChannelSetupCommandTest extends TestCase
         }
 
         self::assertNotNull($inMemoryChannelRow, 'In-memory channel should be listed');
-        self::assertEquals([self::IN_MEMORY_CHANNEL, 'Not managed by migration'], $inMemoryChannelRow);
+        self::assertEquals([self::IN_MEMORY_CHANNEL, 'Not managed by channel migration'], $inMemoryChannelRow);
     }
 
     public function test_throwing_exception_when_trying_to_setup_non_managed_channel(): void
@@ -54,7 +54,7 @@ final class ChannelSetupCommandTest extends TestCase
         $this->expectExceptionMessage("Channel 'in_memory_test_channel' is not managed by the migration system");
 
         $runner->execute('ecotone:migration:channel:setup', [
-            'channels' => [self::IN_MEMORY_CHANNEL],
+            'channel' => [self::IN_MEMORY_CHANNEL],
             'initialize' => true,
         ]);
     }
@@ -69,9 +69,37 @@ final class ChannelSetupCommandTest extends TestCase
         $this->expectExceptionMessage("Channel 'in_memory_test_channel' is not managed by the migration system");
 
         $runner->execute('ecotone:migration:channel:delete', [
-            'channels' => [self::IN_MEMORY_CHANNEL],
+            'channel' => [self::IN_MEMORY_CHANNEL],
             'force' => true,
         ]);
+    }
+
+    public function test_channel_setup_respects_string_false_for_initialize(): void
+    {
+        $ecotone = $this->bootstrapEcotone();
+
+        $runner = $ecotone->getGateway(ConsoleCommandRunner::class);
+
+        // Pass "false" as a string for initialize parameter
+        $result = $runner->execute('ecotone:migration:channel:setup', ['initialize' => 'false']);
+
+        // Should show status, not initialize
+        self::assertNotNull($result);
+        self::assertEquals(['Channel', 'Initialized'], $result->getColumnHeaders());
+    }
+
+    public function test_channel_delete_respects_string_false_for_force(): void
+    {
+        $ecotone = $this->bootstrapEcotone();
+
+        $runner = $ecotone->getGateway(ConsoleCommandRunner::class);
+
+        // Pass "false" as a string for force parameter
+        $result = $runner->execute('ecotone:migration:channel:delete', ['force' => 'false']);
+
+        // Should show warning, not delete
+        self::assertNotNull($result);
+        self::assertEquals(['Channel', 'Warning'], $result->getColumnHeaders());
     }
 
     private function bootstrapEcotone(): \Ecotone\Lite\Test\FlowTestSupport

@@ -8,6 +8,8 @@ use Ecotone\Messaging\Attribute\ConsoleCommand;
 use Ecotone\Messaging\Attribute\ConsoleParameterOption;
 use Ecotone\Messaging\Config\ConsoleCommandResultSet;
 
+use function is_bool;
+
 /**
  * Console command for setting up message channels.
  *
@@ -22,15 +24,18 @@ class ChannelSetupCommand
 
     #[ConsoleCommand('ecotone:migration:channel:setup')]
     public function setup(
-        #[ConsoleParameterOption] array $channels = [],
-        #[ConsoleParameterOption] bool $initialize = false,
+        #[ConsoleParameterOption] array $channel = [],
+        #[ConsoleParameterOption] bool|string $initialize = false,
     ): ?ConsoleCommandResultSet {
+        // Normalize boolean parameters from CLI strings
+        $initialize = $this->normalizeBoolean($initialize);
+
         // If specific channel names provided
-        if (count($channels) > 0) {
+        if (count($channel) > 0) {
             $rows = [];
 
             if ($initialize) {
-                foreach ($channels as $channelName) {
+                foreach ($channel as $channelName) {
                     $this->channelSetupManager->initialize($channelName);
                     $rows[] = [$channelName, 'Initialized'];
                 }
@@ -38,7 +43,7 @@ class ChannelSetupCommand
             }
 
             $status = $this->channelSetupManager->getInitializationStatus();
-            foreach ($channels as $channelName) {
+            foreach ($channel as $channelName) {
                 $channelStatus = $status[$channelName] ?? false;
                 $rows[] = [$channelName, $this->formatStatus($channelStatus)];
             }
@@ -72,6 +77,20 @@ class ChannelSetupCommand
         }
 
         return ConsoleCommandResultSet::create(['Channel', 'Initialized'], $rows);
+    }
+
+    /**
+     * Normalize boolean parameter from CLI string to actual boolean.
+     * Handles cases where CLI passes "false" as a string.
+     */
+    private function normalizeBoolean(bool|string $value): bool
+    {
+        if (is_bool($value)) {
+            return $value;
+        }
+
+        // Handle string values from CLI
+        return $value !== 'false' && $value !== '0' && $value !== '';
     }
 
     /**

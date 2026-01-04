@@ -17,7 +17,7 @@ namespace Ecotone\Projecting\EventStoreAdapter;
  * #[ServiceContext]
  * public function eventStoreFeeder(): EventStoreChannelAdapter
  * {
- *     return EventStoreChannelAdapter::create(
+ *     return EventStreamingChannelAdapter::create(
  *         streamChannelName: 'event_stream',
  *         endpointId: 'event_store_feeder',
  *         fromStream: Ticket::class
@@ -26,15 +26,15 @@ namespace Ecotone\Projecting\EventStoreAdapter;
  *
  * licence Enterprise
  */
-class EventStoreChannelAdapter
+readonly class EventStreamingChannelAdapter
 {
     private function __construct(
-        public readonly string $streamChannelName,
-        public readonly string $endpointId,
-        public readonly string $fromStream,
-        public readonly ?string $aggregateType = null,
-        public readonly int $batchSize = 100,
-        public readonly array $eventNames = [],
+        public string  $streamChannelName,
+        public string  $endpointId,
+        public string  $fromStream,
+        public ?string $aggregateType = null,
+        public int     $batchSize = 100,
+        public array   $eventNames = [],
     ) {
     }
 
@@ -80,6 +80,6 @@ class EventStoreChannelAdapter
      */
     public function getProjectionName(): string
     {
-        return 'event_store_channel_adapter_' . $this->endpointId;
+        return 'event_streaming_channel_adapter_' . $this->endpointId;
     }
 }

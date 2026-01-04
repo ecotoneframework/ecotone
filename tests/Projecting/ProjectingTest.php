@@ -25,6 +25,7 @@ use Ecotone\Projecting\Attribute\ProjectionBatchSize;
 use Ecotone\Projecting\Attribute\ProjectionDeployment;
 use Ecotone\Projecting\Attribute\ProjectionFlush;
 use Ecotone\Projecting\Attribute\ProjectionV2;
+use Ecotone\Projecting\InMemory\InMemoryProjectionStateStorageBuilder;
 use Ecotone\Projecting\InMemory\InMemoryStreamSourceBuilder;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
@@ -85,6 +86,7 @@ class ProjectingTest extends TestCase
                 ->withSkippedModulePackageNames(ModulePackageList::allPackages())
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
                 ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder(partitionField: 'id'))
+                ->addExtensionObject(new InMemoryProjectionStateStorageBuilder())
         );
 
         $streamSource->append(
@@ -119,6 +121,7 @@ class ProjectingTest extends TestCase
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
                 ->addExtensionObject($streamSource = new InMemoryStreamSourceBuilder(partitionField: 'id'))
                 ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->addExtensionObject(new InMemoryProjectionStateStorageBuilder())
         );
 
         $streamSource->append(

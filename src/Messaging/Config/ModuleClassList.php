@@ -9,6 +9,7 @@ use Ecotone\Amqp\Publisher\AmqpMessagePublisherModule;
 use Ecotone\Amqp\Transaction\AmqpTransactionModule;
 use Ecotone\Dbal\Configuration\DbalConnectionModule;
 use Ecotone\Dbal\Configuration\DbalPublisherModule;
+use Ecotone\Dbal\Database\DatabaseSetupModule;
 use Ecotone\Dbal\DbaBusinessMethod\DbaBusinessMethodModule;
 use Ecotone\Dbal\DbalTransaction\DbalTransactionModule;
 use Ecotone\Dbal\Deduplication\DeduplicationModule;
@@ -145,6 +146,7 @@ class ModuleClassList
         DbalPublisherModule::class,
         DbaBusinessMethodModule::class,
         MultiTenantConnectionFactoryModule::class,
+        DatabaseSetupModule::class,
     ];
 
     public const REDIS_MODULES = [

@@ -22,7 +22,7 @@ use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Event;
 use Ecotone\Projecting\Attribute\ProjectionV2;
 use Ecotone\Projecting\Attribute\Streaming;
-use Ecotone\Projecting\EventStoreAdapter\EventStoreChannelAdapter;
+use Ecotone\Projecting\EventStoreAdapter\EventStreamingChannelAdapter;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\TestCase;
 
@@ -175,7 +175,7 @@ class EventStreamingProjectionTest extends TestCase
                 ->withNamespaces(['Test\Ecotone\Projecting'])
                 ->withExtensionObjects([
                     SimpleMessageChannelBuilder::createStreamingChannel('event_stream', conversionMediaType: MediaType::createApplicationXPHP()),
-                    EventStoreChannelAdapter::create(
+                    EventStreamingChannelAdapter::create(
                         streamChannelName: 'event_stream',
                         endpointId: 'event_store_feeder',
                         fromStream: 'product_stream'
@@ -246,7 +246,7 @@ class EventStreamingProjectionTest extends TestCase
                 ->withNamespaces(['Test\Ecotone\Projecting'])
                 ->withExtensionObjects([
                     SimpleMessageChannelBuilder::createStreamingChannel('event_stream', conversionMediaType: MediaType::createApplicationXPHP()),
-                    EventStoreChannelAdapter::create(
+                    EventStreamingChannelAdapter::create(
                         streamChannelName: 'event_stream',
                         endpointId: 'event_store_feeder',
                         fromStream: 'product_stream'
@@ -323,7 +323,7 @@ class EventStreamingProjectionTest extends TestCase
                 ->withNamespaces(['Test\Ecotone\Projecting'])
                 ->withExtensionObjects([
                     SimpleMessageChannelBuilder::createStreamingChannel('event_stream', conversionMediaType: MediaType::createApplicationXPHP()),
-                    EventStoreChannelAdapter::create(
+                    EventStreamingChannelAdapter::create(
                         streamChannelName: 'event_stream',
                         endpointId: 'event_store_feeder',
                         fromStream: 'product_stream'

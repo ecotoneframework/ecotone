@@ -17,7 +17,7 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\QueryHandler;
 use Ecotone\Modelling\Event;
-use Ecotone\Projecting\EventStoreAdapter\EventStoreChannelAdapter;
+use Ecotone\Projecting\EventStoreAdapter\EventStreamingChannelAdapter;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\TestCase;
 
@@ -59,7 +59,7 @@ final class EventStoreChannelAdapterTest extends TestCase
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
                 ->withExtensionObjects([
                     SimpleMessageChannelBuilder::createStreamingChannel('event_stream'),
-                    EventStoreChannelAdapter::create(
+                    EventStreamingChannelAdapter::create(
                         streamChannelName: 'event_stream',
                         endpointId: 'event_store_feeder',
                         fromStream: 'test_stream'
@@ -119,7 +119,7 @@ final class EventStoreChannelAdapterTest extends TestCase
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
                 ->withExtensionObjects([
                     SimpleMessageChannelBuilder::createStreamingChannel('event_stream'),
-                    EventStoreChannelAdapter::create(
+                    EventStreamingChannelAdapter::create(
                         streamChannelName: 'event_stream',
                         endpointId: 'event_store_feeder',
                         fromStream: 'test_stream'
@@ -209,7 +209,7 @@ final class EventStoreChannelAdapterTest extends TestCase
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
                 ->withExtensionObjects([
                     SimpleMessageChannelBuilder::createStreamingChannel('event_stream'),
-                    EventStoreChannelAdapter::create(
+                    EventStreamingChannelAdapter::create(
                         streamChannelName: 'event_stream',
                         endpointId: 'event_store_feeder',
                         fromStream: 'test_stream'

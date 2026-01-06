@@ -6,11 +6,19 @@ use Ecotone\Messaging\Handler\Type;
 
 /**
  * licence Apache-2.0
+ *
+ * @template TMethodAttribute of object
  */
 interface AnnotatedFinding
 {
+    /**
+     * @return TMethodAttribute
+     */
     public function getAnnotationForMethod(): object;
 
+    /**
+     * @return class-string
+     */
     public function getClassName(): string;
 
     public function getMethodName(): string;

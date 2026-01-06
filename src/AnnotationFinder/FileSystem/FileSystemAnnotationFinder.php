@@ -208,14 +208,23 @@ class FileSystemAnnotationFinder implements AnnotationFinder
 
         $classesWithAnnotations = [];
         foreach ($this->registeredClasses as $class) {
-            $classAnnotation = $this->getAnnotationForClass($class, $annotationClassName);
-
-            if ($classAnnotation) {
+            if ($this->hasAnnotation($class, $annotationClassName)) {
                 $classesWithAnnotations[] = $class;
             }
         }
 
         return $classesWithAnnotations;
+    }
+
+    private function hasAnnotation(string $className, string $annotationClassNameToFind): bool
+    {
+        $annotationsForClass = $this->getAnnotationsForClass($className);
+        foreach ($annotationsForClass as $annotationForClass) {
+            if (is_a($annotationForClass, $annotationClassNameToFind)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private function getAnnotationForClass(string $className, string $annotationClassNameToFind): ?object
@@ -236,11 +245,18 @@ class FileSystemAnnotationFinder implements AnnotationFinder
     }
 
     /**
+     * @param string $className
+     * @param string|null $attributeClassName
      * @inheritDoc
      */
-    public function getAnnotationsForClass(string $className): array
+    public function getAnnotationsForClass(string $className, ?string $attributeClassName = null): array
     {
-        return $this->getCachedAnnotationsForClass($className);
+        $attributes = $this->getCachedAnnotationsForClass($className);
+        if ($attributeClassName) {
+            return array_values(array_filter($attributes, fn (object $attribute) => $attribute instanceof $attributeClassName));
+        } else {
+            return $attributes;
+        }
     }
 
     /**
@@ -345,7 +361,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         return $registrations;
     }
 
-    private function isMethodBannedFromCurrentEnvironment(string $className, string $methodName)
+    private function isMethodBannedFromCurrentEnvironment(string $className, string $methodName): bool
     {
         return isset($this->bannedEnvironmentClassMethods[$className][$methodName]);
     }

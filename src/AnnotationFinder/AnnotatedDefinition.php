@@ -9,12 +9,23 @@ use InvalidArgumentException;
 
 /**
  * licence Apache-2.0
+ *
+ * @template TClassAttribute of object
+ * @template TMethodAttribute of object
+ * @implements AnnotatedFinding<TMethodAttribute>
  */
 class AnnotatedDefinition implements AnnotatedFinding
 {
     private string $className;
     private string $methodName;
+    /**
+     * @var TClassAttribute
+     */
     private object $annotationForClass;
+
+    /**
+     * @var TMethodAttribute
+     */
     private object $annotationForMethod;
     /**
      * @var object[]
@@ -25,6 +36,13 @@ class AnnotatedDefinition implements AnnotatedFinding
      */
     private array $classAnnotations;
 
+    /**
+     * @param TClassAttribute $annotationForClass
+     * @param TMethodAttribute $annotationForMethod
+     * @param class-string $className
+     * @param object[] $classAnnotations
+     * @param object[] $methodAnnotations
+     */
     private function __construct(object $annotationForClass, object $annotationForMethod, string $className, string $methodName, array $classAnnotations, array $methodAnnotations)
     {
         $this->annotationForClass = $annotationForClass;
@@ -36,6 +54,9 @@ class AnnotatedDefinition implements AnnotatedFinding
     }
 
     /**
+     * @param TClassAttribute $annotationForClass
+     * @param TMethodAttribute $annotationForMethod
+     * @param class-string $className
      * @param object[] $classAnnotations
      * @param object[] $methodAnnotations
      */
@@ -44,16 +65,25 @@ class AnnotatedDefinition implements AnnotatedFinding
         return new self($annotationForClass, $annotationForMethod, $className, $methodName, $classAnnotations, $methodAnnotations);
     }
 
+    /**
+     * @return TClassAttribute
+     */
     public function getAnnotationForClass(): object
     {
         return $this->annotationForClass;
     }
 
+    /**
+     * @return TMethodAttribute
+     */
     public function getAnnotationForMethod(): object
     {
         return $this->annotationForMethod;
     }
 
+    /**
+     * @return class-string
+     */
     public function getClassName(): string
     {
         return $this->className;

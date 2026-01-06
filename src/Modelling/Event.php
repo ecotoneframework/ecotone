@@ -9,7 +9,7 @@ use Ecotone\Messaging\Support\Assert;
  */
 class Event
 {
-    private function __construct(
+    protected function __construct(
         private string $eventName,
         private array|object $payload,
         private array $metadata

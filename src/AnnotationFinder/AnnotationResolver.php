@@ -13,9 +13,12 @@ interface AnnotationResolver
     public function getAnnotationsForMethod(string $className, string $methodName): array;
 
     /**
-     * @return object[]
+     * @template T of object
+     * @param class-string $className
+     * @param class-string<T>|null $attributeClassName
+     * @return ($attributeClassName is null ? list<object> : list<T>)
      */
-    public function getAnnotationsForClass(string $className): array;
+    public function getAnnotationsForClass(string $className, ?string $attributeClassName = null): array;
 
     /**
      * @return object[]

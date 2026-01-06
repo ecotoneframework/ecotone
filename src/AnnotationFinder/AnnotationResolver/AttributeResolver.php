@@ -46,7 +46,7 @@ class AttributeResolver implements AnnotationResolver
     /**
      * @inheritDoc
      */
-    public function getAnnotationsForClass(string $className): array
+    public function getAnnotationsForClass(string $className, ?string $attributeClassName = null): array
     {
         $attributes = [];
         $currentClass = new ReflectionClass($className);
@@ -56,6 +56,9 @@ class AttributeResolver implements AnnotationResolver
             $currentLevelAttributes = [];
             foreach ($currentClass->getAttributes() as $attribute) {
                 if (! class_exists($attribute->getName())) {
+                    continue;
+                }
+                if ($attributeClassName && ! ($attribute instanceof $attributeClassName)) {
                     continue;
                 }
                 if (in_array($attribute->getName(), array_map(fn ($attr) => $attr::class, $attributes))) {

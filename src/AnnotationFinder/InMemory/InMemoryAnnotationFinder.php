@@ -105,13 +105,17 @@ class InMemoryAnnotationFinder implements AnnotationFinder
     /**
      * @inheritDoc
      */
-    public function getAnnotationsForClass(string $classNameToFind): array
+    public function getAnnotationsForClass(string $className, ?string $attributeClassName = null): array
     {
-        if (! isset($this->annotationsForClass[self::CLASS_ANNOTATIONS][$classNameToFind])) {
+        if (! isset($this->annotationsForClass[self::CLASS_ANNOTATIONS][$className])) {
             return [];
         }
+        $attributes = $this->annotationsForClass[self::CLASS_ANNOTATIONS][$className];
+        if ($attributeClassName) {
+            $attributes = array_filter($attributes, fn ($attribute) => $attribute instanceof $attributeClassName);
+        }
 
-        return array_values($this->annotationsForClass[self::CLASS_ANNOTATIONS][$classNameToFind]);
+        return array_values($attributes);
     }
 
     /**

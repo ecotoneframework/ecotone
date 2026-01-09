@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Lite;
 
+use Ecotone\EventSourcing\Attribute\FromStream;
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Attribute\Converter;
 use Ecotone\Messaging\Config\ModulePackageList;
@@ -25,15 +26,13 @@ class InMemoryEventStoreRegistrationTest extends TestCase
 {
     public function test_registers_in_memory_event_store_stream_source_when_pdo_event_sourcing_is_disabled(): void
     {
-        // Given a test event class
         $testEvent = new class () {
             public function __construct(public int $id = 0, public string $name = '')
             {
             }
         };
 
-        // Given a polling projection (polling projections read from stream sources)
-        $projection = new #[ProjectionV2('test_projection'), Polling('test_projection_poller')] class ($testEvent) {
+        $projection = new #[ProjectionV2('test_projection'), Polling('test_projection_poller'), FromStream('test_stream')] class ($testEvent) {
             public array $events = [];
             public int $callCount = 0;
             private string $eventClass;
@@ -77,18 +76,13 @@ class InMemoryEventStoreRegistrationTest extends TestCase
 
     public function test_does_not_register_in_memory_stream_source_when_custom_stream_source_is_provided(): void
     {
-        // This test verifies that when a custom stream source is provided,
-        // the InMemoryEventStoreStreamSourceBuilder is NOT registered
-
-        // Given a test event class
         $testEvent = new class () {
             public function __construct(public int $id = 0, public string $name = '')
             {
             }
         };
 
-        // Given a polling projection
-        $projection = new #[ProjectionV2('test_projection'), Polling('test_projection_poller')] class {
+        $projection = new #[ProjectionV2('test_projection'), Polling('test_projection_poller'), FromStream('test_stream')] class {
             public array $events = [];
             public int $callCount = 0;
 

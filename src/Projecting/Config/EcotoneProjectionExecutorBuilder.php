@@ -25,7 +25,8 @@ use Ecotone\Projecting\ProjectingHeaders;
 
 class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
 {
-    private const DEFAULT_BATCH_SIZE = 1_000;
+    private const DEFAULT_EVENT_LOADING_BATCH_SIZE = 1_000;
+    private const DEFAULT_BACKFILL_PARTITION_BATCH_SIZE = 100;
 
     /**
      * @param AnnotatedDefinition[] $projectionEventHandlers
@@ -41,7 +42,9 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         private ?string $flushChannel = null,
         private array   $projectionEventHandlers = [],
         private ?string $asyncChannelName = null,
-        private ?int    $batchSize = null,
+        private ?int    $eventLoadingBatchSize = null,
+        private ?int    $backfillPartitionBatchSize = null,
+        private ?string $backfillAsyncChannelName = null,
     ) {
         if ($this->partitionHeader && ! $this->automaticInitialization) {
             throw new ConfigurationException("Cannot set partition header for projection {$this->projectionName} with automatic initialization disabled");
@@ -93,9 +96,19 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         return $this->automaticInitialization;
     }
 
-    public function batchSize(): int
+    public function eventLoadingBatchSize(): int
     {
-        return $this->batchSize ?? self::DEFAULT_BATCH_SIZE;
+        return $this->eventLoadingBatchSize ?? self::DEFAULT_EVENT_LOADING_BATCH_SIZE;
+    }
+
+    public function backfillPartitionBatchSize(): int
+    {
+        return $this->backfillPartitionBatchSize ?? self::DEFAULT_BACKFILL_PARTITION_BATCH_SIZE;
+    }
+
+    public function backfillAsyncChannelName(): ?string
+    {
+        return $this->backfillAsyncChannelName;
     }
 
     public function compile(MessagingContainerBuilder $builder): Definition|Reference

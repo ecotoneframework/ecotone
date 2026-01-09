@@ -42,7 +42,7 @@ class ProjectingConsoleCommands
         if (! $this->registry->has($name)) {
             throw new InvalidArgumentException("There is no projection with name {$name}");
         }
-        $this->registry->get($name)->backfill();
+        $this->registry->get($name)->prepareBackfill();
     }
 
     #[ConsoleCommand('ecotone:projection:delete')]

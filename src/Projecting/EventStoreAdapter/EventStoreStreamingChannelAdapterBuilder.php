@@ -45,9 +45,19 @@ class EventStoreStreamingChannelAdapterBuilder implements ProjectionExecutorBuil
         return true;
     }
 
-    public function batchSize(): int
+    public function eventLoadingBatchSize(): int
     {
         return $this->channelAdapter->batchSize;
+    }
+
+    public function backfillPartitionBatchSize(): int
+    {
+        return 100; // Default value, streaming channel adapters don't support partitioned backfill
+    }
+
+    public function backfillAsyncChannelName(): ?string
+    {
+        return null; // Streaming channel adapters don't support async backfill
     }
 
     public function compile(MessagingContainerBuilder $builder): Definition|Reference

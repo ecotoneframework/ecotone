@@ -8,23 +8,33 @@ declare(strict_types=1);
 namespace Ecotone\Projecting;
 
 use Ecotone\Messaging\Endpoint\Interceptor\TerminationListener;
+use Ecotone\Messaging\Gateway\MessagingEntrypoint;
 use InvalidArgumentException;
 use Throwable;
 
 class ProjectingManager
 {
+    private const DEFAULT_BACKFILL_PARTITION_BATCH_SIZE = 100;
+
     public function __construct(
         private ProjectionStateStorage $projectionStateStorage,
         private ProjectorExecutor      $projectorExecutor,
         private StreamSource           $streamSource,
         private PartitionProvider      $partitionProvider,
+        private StreamFilterRegistry   $streamFilterRegistry,
         private string                 $projectionName,
         private TerminationListener    $terminationListener,
-        private int                    $batchSize = 1000,
+        private MessagingEntrypoint    $messagingEntrypoint,
+        private int                    $eventLoadingBatchSize = 1000,
         private bool                   $automaticInitialization = true,
+        private int                    $backfillPartitionBatchSize = self::DEFAULT_BACKFILL_PARTITION_BATCH_SIZE,
+        private ?string                $backfillAsyncChannelName = null,
     ) {
-        if ($batchSize < 1) {
-            throw new InvalidArgumentException('Batch size must be at least 1');
+        if ($eventLoadingBatchSize < 1) {
+            throw new InvalidArgumentException('Event loading batch size must be at least 1');
+        }
+        if ($backfillPartitionBatchSize < 1) {
+            throw new InvalidArgumentException('Backfill partition batch size must be at least 1');
         }
     }
 
@@ -48,7 +58,7 @@ class ProjectingManager
                 return 0;
             }
 
-            $streamPage = $this->streamSource->load($projectionState->lastPosition, $this->batchSize, $partitionKeyValue);
+            $streamPage = $this->streamSource->load($projectionState->lastPosition, $this->eventLoadingBatchSize, $partitionKeyValue);
 
             $userState = $projectionState->userState;
             $processedEvents = 0;
@@ -83,6 +93,16 @@ class ProjectingManager
         return $this->projectionStateStorage->loadPartition($this->projectionName, $partitionKey);
     }
 
+    public function getPartitionProvider(): PartitionProvider
+    {
+        return $this->partitionProvider;
+    }
+
+    public function getProjectionName(): string
+    {
+        return $this->projectionName;
+    }
+
     public function init(): void
     {
         $this->projectionStateStorage->init($this->projectionName);
@@ -97,14 +117,69 @@ class ProjectingManager
         $this->projectorExecutor->delete();
     }
 
+    /**
+     * Prepares backfill by calculating batches and sending messages to BackfillExecutorHandler.
+     * Each batch message contains a limit and offset for processing a subset of partitions.
+     * This enables the backfill to be executed synchronously or asynchronously depending on configuration.
+     */
+    public function prepareBackfill(): void
+    {
+        $streamFilters = $this->streamFilterRegistry->provide($this->projectionName);
+
+        foreach ($streamFilters as $streamFilter) {
+            $this->prepareBackfillForFilter($streamFilter);
+        }
+    }
+
+    private function prepareBackfillForFilter(StreamFilter $streamFilter): void
+    {
+        $totalPartitions = $this->partitionProvider->count($streamFilter);
+
+        if ($totalPartitions === 0) {
+            return;
+        }
+
+        $numberOfBatches = (int) ceil($totalPartitions / $this->backfillPartitionBatchSize);
+
+        for ($batch = 0; $batch < $numberOfBatches; $batch++) {
+            $offset = $batch * $this->backfillPartitionBatchSize;
+
+            $headers = [
+                'backfill.limit' => $this->backfillPartitionBatchSize,
+                'backfill.offset' => $offset,
+                'backfill.streamName' => $streamFilter->streamName,
+                'backfill.aggregateType' => $streamFilter->aggregateType,
+                'backfill.eventStoreReferenceName' => $streamFilter->eventStoreReferenceName,
+            ];
+
+            $this->sendBackfillMessage($headers);
+        }
+    }
+
+    private function sendBackfillMessage(array $headers): void
+    {
+        if ($this->backfillAsyncChannelName !== null) {
+            $this->messagingEntrypoint->sendWithHeaders(
+                $this->projectionName,
+                $headers,
+                $this->backfillAsyncChannelName,
+                BackfillExecutorHandler::BACKFILL_EXECUTOR_CHANNEL
+            );
+        } else {
+            $this->messagingEntrypoint->sendWithHeaders(
+                $this->projectionName,
+                $headers,
+                BackfillExecutorHandler::BACKFILL_EXECUTOR_CHANNEL
+            );
+        }
+    }
+
+    /**
+     * @deprecated Use prepareBackfill() instead. This method is kept for backward compatibility.
+     */
     public function backfill(): void
     {
-        foreach ($this->partitionProvider->partitions() as $partition) {
-            $this->execute($partition, true);
-            if ($this->terminationListener->shouldTerminate()) {
-                break;
-            }
-        }
+        $this->prepareBackfill();
     }
 
     private function loadOrInitializePartitionState(?string $partitionKey, bool $canInitialize): ?ProjectionPartitionState

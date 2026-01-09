@@ -15,5 +15,7 @@ interface ProjectionExecutorBuilder extends CompilableBuilder
     public function asyncChannelName(): ?string;
     public function partitionHeader(): ?string;
     public function automaticInitialization(): bool;
-    public function batchSize(): int;
+    public function eventLoadingBatchSize(): int;
+    public function backfillPartitionBatchSize(): int;
+    public function backfillAsyncChannelName(): ?string;
 }

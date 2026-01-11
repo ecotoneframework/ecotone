@@ -65,10 +65,13 @@ use Ecotone\Modelling\MessageHandling\Distribution\Module\DistributedHandlerModu
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Ecotone\Modelling\QueryBus;
 use Ecotone\OpenTelemetry\Configuration\OpenTelemetryModule;
+use Ecotone\Projecting\Config\PartitionProviderRegistryModule;
 use Ecotone\Projecting\Config\ProjectingAttributeModule;
 use Ecotone\Projecting\Config\ProjectingConsoleCommands;
 use Ecotone\Projecting\Config\ProjectingModule;
+use Ecotone\Projecting\Config\ProjectionStateStorageRegistryModule;
 use Ecotone\Projecting\Config\StreamFilterRegistryModule;
+use Ecotone\Projecting\Config\StreamSourceRegistryModule;
 use Ecotone\Projecting\EventStoreAdapter\EventStoreAdapterModule;
 use Ecotone\Redis\Configuration\RedisMessageConsumerModule;
 use Ecotone\Redis\Configuration\RedisMessagePublisherModule;
@@ -114,9 +117,12 @@ class ModuleClassList
         InstantRetryAttributeModule::class,
         DynamicMessageChannelModule::class,
         EventSourcedRepositoryModule::class,
+        PartitionProviderRegistryModule::class,
         ProjectingModule::class,
         ProjectingAttributeModule::class,
+        ProjectionStateStorageRegistryModule::class,
         StreamFilterRegistryModule::class,
+        StreamSourceRegistryModule::class,
         EventStoreAdapterModule::class,
 
         /** Attribute based configurations */

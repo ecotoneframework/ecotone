@@ -42,9 +42,10 @@ use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
-use Ecotone\Projecting\InMemory\InMemoryEventStoreStreamSourceBuilder;
-use Ecotone\Projecting\InMemory\InMemoryProjectionStateStorageBuilder;
-use Ecotone\Projecting\InMemory\InMemoryStreamSourceBuilder;
+use Ecotone\Projecting\InMemory\InMemoryEventStoreStreamSource;
+use Ecotone\Projecting\InMemory\InMemoryProjectionStateStorage;
+use Ecotone\Projecting\ProjectionStateStorageReference;
+use Ecotone\Projecting\StreamSourceReference;
 
 #[ModuleAnnotation]
 /**
@@ -197,6 +198,13 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                     GatewayHeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
                 ]));
         }
+
+        $messagingConfiguration->registerServiceDefinition(
+            InMemoryEventStoreStreamSource::class,
+            new Definition(InMemoryEventStoreStreamSource::class, [
+                new Reference(InMemoryEventStore::class),
+            ])
+        );
     }
 
     public function canHandle($extensionObject): bool
@@ -229,8 +237,6 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                 }
             }
 
-            // If EVENT_SOURCING_PACKAGE is enabled but no EventSourcingConfiguration is provided,
-            // it means DBAL mode is being used, so don't register InMemoryEventStoreStreamSource
             if (! $hasEventSourcingConfiguration) {
                 $shouldRegisterInMemoryStreamSource = false;
             }
@@ -240,15 +246,7 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
             return [];
         }
 
-        // Check if user has registered a custom InMemoryStreamSourceBuilder
-        // If so, don't register InMemoryEventStoreStreamSourceBuilder to avoid conflicts
-        foreach ($serviceExtensions as $extensionObject) {
-            if ($extensionObject instanceof InMemoryStreamSourceBuilder) {
-                return [];
-            }
-        }
-
-        return [new InMemoryEventStoreStreamSourceBuilder(), new InMemoryProjectionStateStorageBuilder()];
+        return [new StreamSourceReference(InMemoryEventStoreStreamSource::class), new ProjectionStateStorageReference(InMemoryProjectionStateStorage::class)];
     }
 
     public function getModulePackageName(): string

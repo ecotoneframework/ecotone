@@ -29,15 +29,14 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Projecting\BackfillExecutorHandler;
 use Ecotone\Projecting\InMemory\InMemoryProjectionRegistry;
-use Ecotone\Projecting\PartitionProvider;
+use Ecotone\Projecting\PartitionProviderRegistry;
 use Ecotone\Projecting\ProjectingHeaders;
 use Ecotone\Projecting\ProjectingManager;
 use Ecotone\Projecting\ProjectionRegistry;
-use Ecotone\Projecting\ProjectionStateStorage;
+use Ecotone\Projecting\ProjectionStateStorageRegistry;
 use Ecotone\Projecting\SinglePartitionProvider;
 use Ecotone\Projecting\StreamFilterRegistry;
-use Ecotone\Projecting\StreamSource;
-use Ramsey\Uuid\Uuid;
+use Ecotone\Projecting\StreamSourceRegistry;
 
 /**
  * This module allows to configure projections in a standard way
@@ -61,33 +60,15 @@ class ProjectingModule implements AnnotationModule
     {
         $serviceConfiguration = ExtensionObjectResolver::resolveUnique(ServiceConfiguration::class, $extensionObjects, ServiceConfiguration::createWithDefaults());
         $projectionBuilders = ExtensionObjectResolver::resolve(ProjectionExecutorBuilder::class, $extensionObjects);
-        $componentBuilders = ExtensionObjectResolver::resolve(ProjectionComponentBuilder::class, $extensionObjects);
 
         if (! empty($projectionBuilders) && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
             throw ConfigurationException::create('Projections are part of Ecotone Enterprise. To use projections, please acquire an enterprise licence.');
         }
 
-        /** @var array<string, array<string, string>> $components [projection name][component name][reference] */
-        $components = [];
-        foreach ($componentBuilders as $componentBuilder) {
-            foreach ($projectionBuilders as $projectionBuilder) {
-                $projectionName = $projectionBuilder->projectionName();
-                foreach ([StreamSource::class, PartitionProvider::class, ProjectionStateStorage::class] as $component) {
-                    if ($componentBuilder->canHandle($projectionName, $component)) {
-                        if (isset($components[$projectionName][$component])) {
-                            throw ConfigurationException::create(
-                                "Projection with name {$projectionName} is already registered for component {$component} with reference {$components[$projectionName][$component]}."
-                                . ' You can only register one component of each type per projection. Please check your configuration.'
-                            );
-                        }
-
-                        $reference = Uuid::uuid4()->toString();
-                        $moduleReferenceSearchService->store($reference, $componentBuilder);
-                        $components[$projectionName][$component] = new Reference($reference);
-                    }
-                }
-            }
-        }
+        $messagingConfiguration->registerServiceDefinition(
+            SinglePartitionProvider::class,
+            new Definition(SinglePartitionProvider::class)
+        );
 
         $projectionRegistryMap = [];
         foreach ($projectionBuilders as $projectionBuilder) {
@@ -98,10 +79,10 @@ class ProjectingModule implements AnnotationModule
             $messagingConfiguration->registerServiceDefinition(
                 $projectingManagerReference = ProjectingManager::class . ':' . $projectionName,
                 new Definition(ProjectingManager::class, [
-                    $components[$projectionName][ProjectionStateStorage::class] ?? throw ConfigurationException::create("Projection with name {$projectionName} does not have projection state storage configured. Please check your configuration."),
+                    new Reference(ProjectionStateStorageRegistry::class),
                     new Reference($reference),
-                    $components[$projectionName][StreamSource::class] ?? throw ConfigurationException::create("Projection with name {$projectionName} does not have stream source configured. Please check your configuration."),
-                    $components[$projectionName][PartitionProvider::class] ?? new Definition(SinglePartitionProvider::class),
+                    new Reference(StreamSourceRegistry::class),
+                    new Reference(PartitionProviderRegistry::class),
                     new Reference(StreamFilterRegistry::class),
                     $projectionName,
                     new Reference(TerminationListener::class),
@@ -186,8 +167,7 @@ class ProjectingModule implements AnnotationModule
     public function canHandle($extensionObject): bool
     {
         return $extensionObject instanceof ServiceConfiguration
-            || $extensionObject instanceof ProjectionExecutorBuilder
-            || $extensionObject instanceof ProjectionComponentBuilder;
+            || $extensionObject instanceof ProjectionExecutorBuilder;
     }
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions, ?InterfaceToCallRegistry $interfaceToCallRegistry = null): array

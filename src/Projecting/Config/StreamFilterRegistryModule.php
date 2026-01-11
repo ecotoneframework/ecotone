@@ -12,6 +12,7 @@ use Ecotone\EventSourcing\Attribute\AggregateType;
 use Ecotone\EventSourcing\Attribute\FromAggregateStream;
 use Ecotone\EventSourcing\Attribute\FromStream;
 use Ecotone\EventSourcing\Attribute\Stream;
+use Ecotone\EventSourcing\EventStore;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
@@ -26,6 +27,8 @@ use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\NamedEvent;
 use Ecotone\Modelling\Config\Routing\BusRoutingMapBuilder;
 use Ecotone\Projecting\Attribute\ProjectionV2;
+use Ecotone\Projecting\Attribute\Streaming;
+use Ecotone\Projecting\EventStoreAdapter\EventStreamingChannelAdapter;
 use Ecotone\Projecting\StreamFilter;
 use Ecotone\Projecting\StreamFilterRegistry;
 
@@ -71,7 +74,8 @@ class StreamFilterRegistryModule implements AnnotationModule
                 $streamFilters[$projectionName][] = self::resolveFromAggregateStream($annotationFinder, $aggregateStreamAttribute, $projectionName, $eventNames);
             }
 
-            if (! isset($streamFilters[$projectionName]) || $streamFilters[$projectionName] === []) {
+            $isStreamingProjection = $annotationFinder->findAttributeForClass($classname, Streaming::class) !== null;
+            if (! $isStreamingProjection && (! isset($streamFilters[$projectionName]) || $streamFilters[$projectionName] === [])) {
                 throw ConfigurationException::create(
                     "Projection '{$projectionName}' must have at least one #[FromStream] or #[FromAggregateStream] attribute defined on class {$classname}."
                 );
@@ -185,6 +189,20 @@ class StreamFilterRegistryModule implements AnnotationModule
             }
         }
 
+        foreach ($extensionObjects as $extensionObject) {
+            if ($extensionObject instanceof EventStreamingChannelAdapter) {
+                $projectionName = $extensionObject->getProjectionName();
+                $filtersDefinition[$projectionName] = [
+                    new Definition(StreamFilter::class, [
+                        $extensionObject->fromStream,
+                        $extensionObject->aggregateType,
+                        EventStore::class,
+                        $extensionObject->eventNames,
+                    ]),
+                ];
+            }
+        }
+
         $messagingConfiguration->registerServiceDefinition(
             StreamFilterRegistry::class,
             new Definition(StreamFilterRegistry::class, [$filtersDefinition])
@@ -193,7 +211,7 @@ class StreamFilterRegistryModule implements AnnotationModule
 
     public function canHandle($extensionObject): bool
     {
-        return false;
+        return $extensionObject instanceof EventStreamingChannelAdapter;
     }
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions, ?InterfaceToCallRegistry $interfaceToCallRegistry = null): array

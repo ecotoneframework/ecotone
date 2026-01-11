@@ -16,19 +16,21 @@ class ProjectingManager
 {
     private const DEFAULT_BACKFILL_PARTITION_BATCH_SIZE = 100;
 
+    private ?ProjectionStateStorage $projectionStateStorage = null;
+
     public function __construct(
-        private ProjectionStateStorage $projectionStateStorage,
-        private ProjectorExecutor      $projectorExecutor,
-        private StreamSource           $streamSource,
-        private PartitionProvider      $partitionProvider,
-        private StreamFilterRegistry   $streamFilterRegistry,
-        private string                 $projectionName,
-        private TerminationListener    $terminationListener,
-        private MessagingEntrypoint    $messagingEntrypoint,
-        private int                    $eventLoadingBatchSize = 1000,
-        private bool                   $automaticInitialization = true,
-        private int                    $backfillPartitionBatchSize = self::DEFAULT_BACKFILL_PARTITION_BATCH_SIZE,
-        private ?string                $backfillAsyncChannelName = null,
+        private ProjectionStateStorageRegistry $projectionStateStorageRegistry,
+        private ProjectorExecutor              $projectorExecutor,
+        private StreamSourceRegistry           $streamSourceRegistry,
+        private PartitionProviderRegistry      $partitionProviderRegistry,
+        private StreamFilterRegistry           $streamFilterRegistry,
+        private string                         $projectionName,
+        private TerminationListener            $terminationListener,
+        private MessagingEntrypoint            $messagingEntrypoint,
+        private int                            $eventLoadingBatchSize = 1000,
+        private bool                           $automaticInitialization = true,
+        private int                            $backfillPartitionBatchSize = self::DEFAULT_BACKFILL_PARTITION_BATCH_SIZE,
+        private ?string                        $backfillAsyncChannelName = null,
     ) {
         if ($eventLoadingBatchSize < 1) {
             throw new InvalidArgumentException('Event loading batch size must be at least 1');
@@ -36,6 +38,14 @@ class ProjectingManager
         if ($backfillPartitionBatchSize < 1) {
             throw new InvalidArgumentException('Backfill partition batch size must be at least 1');
         }
+    }
+
+    private function getProjectionStateStorage(): ProjectionStateStorage
+    {
+        if ($this->projectionStateStorage === null) {
+            $this->projectionStateStorage = $this->projectionStateStorageRegistry->getFor($this->projectionName);
+        }
+        return $this->projectionStateStorage;
     }
 
     public function execute(?string $partitionKeyValue = null, bool $manualInitialization = false): void
@@ -50,7 +60,7 @@ class ProjectingManager
      */
     private function executeSingleBatch(?string $partitionKeyValue, bool $canInitialize): int
     {
-        $transaction = $this->projectionStateStorage->beginTransaction();
+        $transaction = $this->getProjectionStateStorage()->beginTransaction();
         try {
             $projectionState = $this->loadOrInitializePartitionState($partitionKeyValue, $canInitialize);
             if ($projectionState === null) {
@@ -58,7 +68,8 @@ class ProjectingManager
                 return 0;
             }
 
-            $streamPage = $this->streamSource->load($projectionState->lastPosition, $this->eventLoadingBatchSize, $partitionKeyValue);
+            $streamSource = $this->streamSourceRegistry->getFor($this->projectionName);
+            $streamPage = $streamSource->load($this->projectionName, $projectionState->lastPosition, $this->eventLoadingBatchSize, $partitionKeyValue);
 
             $userState = $projectionState->userState;
             $processedEvents = 0;
@@ -79,7 +90,7 @@ class ProjectingManager
                 $projectionState = $projectionState->withStatus(ProjectionInitializationStatus::INITIALIZED);
             }
 
-            $this->projectionStateStorage->savePartition($projectionState);
+            $this->getProjectionStateStorage()->savePartition($projectionState);
             $transaction->commit();
             return $processedEvents;
         } catch (Throwable $e) {
@@ -90,12 +101,12 @@ class ProjectingManager
 
     public function loadState(?string $partitionKey = null): ProjectionPartitionState
     {
-        return $this->projectionStateStorage->loadPartition($this->projectionName, $partitionKey);
+        return $this->getProjectionStateStorage()->loadPartition($this->projectionName, $partitionKey);
     }
 
     public function getPartitionProvider(): PartitionProvider
     {
-        return $this->partitionProvider;
+        return $this->partitionProviderRegistry->getPartitionProviderFor($this->projectionName);
     }
 
     public function getProjectionName(): string
@@ -105,14 +116,14 @@ class ProjectingManager
 
     public function init(): void
     {
-        $this->projectionStateStorage->init($this->projectionName);
+        $this->getProjectionStateStorage()->init($this->projectionName);
 
         $this->projectorExecutor->init();
     }
 
     public function delete(): void
     {
-        $this->projectionStateStorage->delete($this->projectionName);
+        $this->getProjectionStateStorage()->delete($this->projectionName);
 
         $this->projectorExecutor->delete();
     }
@@ -133,7 +144,7 @@ class ProjectingManager
 
     private function prepareBackfillForFilter(StreamFilter $streamFilter): void
     {
-        $totalPartitions = $this->partitionProvider->count($streamFilter);
+        $totalPartitions = $this->getPartitionProvider()->count($streamFilter);
 
         if ($totalPartitions === 0) {
             return;
@@ -184,10 +195,10 @@ class ProjectingManager
 
     private function loadOrInitializePartitionState(?string $partitionKey, bool $canInitialize): ?ProjectionPartitionState
     {
-        $projectionState = $this->projectionStateStorage->loadPartition($this->projectionName, $partitionKey);
+        $storage = $this->getProjectionStateStorage();
+        $projectionState = $storage->loadPartition($this->projectionName, $partitionKey);
 
         if (! $canInitialize && $projectionState?->status === ProjectionInitializationStatus::UNINITIALIZED) {
-            // Projection is being initialized by another process
             return null;
         }
         if ($projectionState) {
@@ -195,12 +206,11 @@ class ProjectingManager
         }
 
         if ($canInitialize) {
-            $projectionState = $this->projectionStateStorage->initPartition($this->projectionName, $partitionKey);
+            $projectionState = $storage->initPartition($this->projectionName, $partitionKey);
             if ($projectionState) {
                 $this->projectorExecutor->init();
             } else {
-                // Someone else initialized it in the meantime, reload the state
-                $projectionState = $this->projectionStateStorage->loadPartition($this->projectionName, $partitionKey);
+                $projectionState = $storage->loadPartition($this->projectionName, $partitionKey);
             }
             return $projectionState;
         }

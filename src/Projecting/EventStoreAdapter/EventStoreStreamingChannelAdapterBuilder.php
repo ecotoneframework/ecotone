@@ -32,12 +32,12 @@ class EventStoreStreamingChannelAdapterBuilder implements ProjectionExecutorBuil
 
     public function asyncChannelName(): ?string
     {
-        return null; // Channel adapters are always polling-based
+        return null;
     }
 
     public function partitionHeader(): ?string
     {
-        return null; // Channel adapters don't support partitioning
+        return null;
     }
 
     public function automaticInitialization(): bool
@@ -52,17 +52,16 @@ class EventStoreStreamingChannelAdapterBuilder implements ProjectionExecutorBuil
 
     public function backfillPartitionBatchSize(): int
     {
-        return 100; // Default value, streaming channel adapters don't support partitioned backfill
+        return 100;
     }
 
     public function backfillAsyncChannelName(): ?string
     {
-        return null; // Streaming channel adapters don't support async backfill
+        return null;
     }
 
     public function compile(MessagingContainerBuilder $builder): Definition|Reference
     {
-        // Create the projection executor that forwards events to the streaming channel
         return new Definition(
             EventStoreChannelAdapterProjection::class,
             [

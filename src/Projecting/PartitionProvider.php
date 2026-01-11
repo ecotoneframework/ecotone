@@ -10,6 +10,14 @@ namespace Ecotone\Projecting;
 interface PartitionProvider
 {
     /**
+     * Returns whether this provider can handle the given projection.
+     *
+     * @param string $projectionName The name of the projection
+     * @return bool True if this provider can handle the projection
+     */
+    public function canHandle(string $projectionName): bool;
+
+    /**
      * Returns the total count of partitions for the given stream filter.
      * For non-partitioned projections, returns 1.
      *

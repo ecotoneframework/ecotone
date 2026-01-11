@@ -12,10 +12,11 @@ use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Event;
+use Ecotone\Projecting\Attribute;
 use Ecotone\Projecting\Attribute\Polling;
 use Ecotone\Projecting\Attribute\ProjectionV2;
-use Ecotone\Projecting\InMemory\InMemoryProjectionStateStorageBuilder;
-use Ecotone\Projecting\InMemory\InMemoryStreamSourceBuilder;
+use Ecotone\Projecting\StreamPage;
+use Ecotone\Projecting\StreamSource;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\TestCase;
 
@@ -74,7 +75,7 @@ class InMemoryEventStoreRegistrationTest extends TestCase
         $this->assertEquals(['id' => 2, 'name' => 'Event 2'], $projection->events[1]);
     }
 
-    public function test_does_not_register_in_memory_stream_source_when_custom_stream_source_is_provided(): void
+    public function test_custom_userland_stream_source_is_used_when_provided(): void
     {
         $testEvent = new class () {
             public function __construct(public int $id = 0, public string $name = '')
@@ -94,29 +95,45 @@ class InMemoryEventStoreRegistrationTest extends TestCase
             }
         };
 
-        // And a custom stream source
-        $customStreamSource = new InMemoryStreamSourceBuilder();
+        $customStreamSource = new #[Attribute\StreamSource] class () implements StreamSource {
+            private array $events = [];
 
-        // When bootstrapping with a custom stream source
+            public function append(Event ...$events): void
+            {
+                foreach ($events as $event) {
+                    $this->events[] = $event;
+                }
+            }
+
+            public function canHandle(string $projectionName): bool
+            {
+                return true;
+            }
+
+            public function load(string $projectionName, ?string $lastPosition, int $count, ?string $partitionKey = null): StreamPage
+            {
+                $from = $lastPosition !== null ? (int) $lastPosition : 0;
+                $events = array_slice($this->events, $from, $count);
+                $to = $from + count($events);
+                return new StreamPage($events, (string) $to);
+            }
+        };
+
         $ecotone = EcotoneLite::bootstrapFlowTesting(
-            [$projection::class, $testEvent::class],
-            [$projection],
+            [$projection::class, $testEvent::class, $customStreamSource::class],
+            [$projection, $customStreamSource],
             configuration: ServiceConfiguration::createWithDefaults()
                 ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
-                ->withExtensionObjects([$customStreamSource, new InMemoryProjectionStateStorageBuilder()])
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
         );
 
-        // And adding events to the custom stream source
         $customStreamSource->append(
             Event::create(new ($testEvent::class)(1, 'Event 1')),
             Event::create(new ($testEvent::class)(2, 'Event 2')),
         );
 
-        // When running the polling projection
         $ecotone->run('test_projection_poller', ExecutionPollingMetadata::createWithTestingSetup());
 
-        // Then the projection should have consumed events from the custom stream source
         $this->assertEquals(2, $projection->callCount, 'Event handler should have been called 2 times');
         $this->assertCount(2, $projection->events, 'Projection should have consumed 2 events');
         $this->assertEquals(['id' => 1, 'name' => 'Event 1'], $projection->events[0]);

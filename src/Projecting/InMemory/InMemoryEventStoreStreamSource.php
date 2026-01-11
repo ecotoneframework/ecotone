@@ -16,6 +16,7 @@ use Ecotone\EventSourcing\EventStore\Operator;
 use Ecotone\Projecting\StreamPage;
 use Ecotone\Projecting\StreamSource;
 
+use function in_array;
 use function is_array;
 
 use ReflectionProperty;
@@ -23,17 +24,24 @@ use ReflectionProperty;
 class InMemoryEventStoreStreamSource implements StreamSource
 {
     /**
+     * @param array<string>|null $projectionNames Projection names this source handles, null means all projections
      * @param array<string> $eventNames Event names to filter by, empty array means no filtering
      */
     public function __construct(
         private InMemoryEventStore $eventStore,
+        private ?array $projectionNames = null,
         private ?string $streamName = null,
         private ?string $partitionHeader = null,
         private array $eventNames = [],
     ) {
     }
 
-    public function load(?string $lastPosition, int $count, ?string $partitionKey = null): StreamPage
+    public function canHandle(string $projectionName): bool
+    {
+        return $this->projectionNames === null || in_array($projectionName, $this->projectionNames, true);
+    }
+
+    public function load(string $projectionName, ?string $lastPosition, int $count, ?string $partitionKey = null): StreamPage
     {
         // Position is 0-based index into the global event array (like InMemoryStreamSource)
         $from = $lastPosition !== null ? (int) $lastPosition : 0;

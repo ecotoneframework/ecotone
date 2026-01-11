@@ -21,7 +21,7 @@ final class StreamFilter
     public function __construct(
         public readonly string $streamName,
         public readonly ?string $aggregateType = null,
-        public readonly string $eventStoreReferenceName = EventStore::class,
+        public readonly ?string $eventStoreReferenceName = EventStore::class,
         public readonly array $eventNames = [],
     ) {
     }

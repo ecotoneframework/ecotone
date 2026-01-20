@@ -198,13 +198,6 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                     GatewayHeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
                 ]));
         }
-
-        $messagingConfiguration->registerServiceDefinition(
-            InMemoryEventStoreStreamSource::class,
-            new Definition(InMemoryEventStoreStreamSource::class, [
-                new Reference(InMemoryEventStore::class),
-            ])
-        );
     }
 
     public function canHandle($extensionObject): bool
@@ -401,6 +394,7 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
 
     private function registerInMemoryEventStoreIfNeeded(Configuration $messagingConfiguration, array $extensionObjects, ServiceConfiguration $serviceConfiguration): void
     {
+        $registerInMemoryEventStoreStreamSource = false;
         if (! $serviceConfiguration->isModulePackageEnabled(ModulePackageList::EVENT_SOURCING_PACKAGE)) {
             // Register InMemoryEventStore as the primary definition
             $messagingConfiguration->registerServiceDefinition(
@@ -412,27 +406,36 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                 EventStore::class,
                 new Reference(InMemoryEventStore::class),
             );
-
-            return;
+            $registerInMemoryEventStoreStreamSource = true;
+        } else {
+            /**
+             * This is to honour current PdoEventSourcing implementation, as current one is initializing In Memory in EventSourcingConfiguration.
+             * We register the InMemoryEventStore by getting it from the EventSourcingConfiguration service,
+             * which ensures we use the same instance that's used by LazyProophEventStore.
+             */
+            foreach ($extensionObjects as $extensionObject) {
+                if (class_exists(EventSourcingConfiguration::class) && $extensionObject instanceof EventSourcingConfiguration) {
+                    if ($extensionObject->isInMemory()) {
+                        // Register InMemoryEventStore by calling getInMemoryEventStore() on the EventSourcingConfiguration service
+                        // This ensures we use the same instance that's used by LazyProophEventStore
+                        $messagingConfiguration->registerServiceDefinition(
+                            InMemoryEventStore::class,
+                            new Definition(InMemoryEventStore::class, [], [EventSourcingConfiguration::class, 'getInMemoryEventStore'])
+                        );
+                        $registerInMemoryEventStoreStreamSource = true;
+                    }
+                    break;
+                }
+            }
         }
 
-        /**
-         * This is to honour current PdoEventSourcing implementation, as current one is initializing In Memory in EventSourcingConfiguration.
-         * We register the InMemoryEventStore by getting it from the EventSourcingConfiguration service,
-         * which ensures we use the same instance that's used by LazyProophEventStore.
-         */
-        foreach ($extensionObjects as $extensionObject) {
-            if (class_exists(EventSourcingConfiguration::class) && $extensionObject instanceof EventSourcingConfiguration) {
-                if ($extensionObject->isInMemory()) {
-                    // Register InMemoryEventStore by calling getInMemoryEventStore() on the EventSourcingConfiguration service
-                    // This ensures we use the same instance that's used by LazyProophEventStore
-                    $messagingConfiguration->registerServiceDefinition(
-                        InMemoryEventStore::class,
-                        new Definition(InMemoryEventStore::class, [], [EventSourcingConfiguration::class, 'getInMemoryEventStore'])
-                    );
-                }
-                break;
-            }
+        if ($registerInMemoryEventStoreStreamSource) {
+            $messagingConfiguration->registerServiceDefinition(
+                InMemoryEventStoreStreamSource::class,
+                new Definition(InMemoryEventStoreStreamSource::class, [
+                    new Reference(InMemoryEventStore::class),
+                ])
+            );
         }
     }
 }

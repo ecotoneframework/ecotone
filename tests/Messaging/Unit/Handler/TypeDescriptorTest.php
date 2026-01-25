@@ -607,7 +607,8 @@ class TypeDescriptorTest extends TestCase
         $this->assertEquals(Type::createCollection(stdClass::class), Type::createFromVariable([new stdClass(), new stdClass()]));
         $this->assertEquals(Type::resource(), Type::createFromVariable(fopen('file', 'w+')));
         $this->assertEquals(Type::null(), Type::createFromVariable(null));
-        $this->assertEquals(Closure::class, Type::createFromVariable(function () {})->toString());
+        $this->assertEquals(Closure::class, Type::createFromVariable(function () {
+        })->toString());
         $this->assertEquals('array<array<string,int>>', Type::createFromVariable([['bla' => 1, 'bla2' => 2, 'bla3' => 3]])->toString());
         $this->assertEquals('array<string,null>', Type::createFromVariable(['test' => null])->toString());
         $this->assertEquals('array<string,mixed>', Type::createFromVariable(['test' => null, 'test2' => '123'])->toString());

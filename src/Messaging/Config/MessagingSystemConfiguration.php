@@ -989,7 +989,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         $messagingBuilder->register(ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), $messagingBuilder->getPollingEndpoints(), $gatewayListReferences]));
-        (new RegisterSingletonMessagingServices())->process($builder);
+        (new RegisterSingletonMessagingServices($this->applicationConfiguration))->process($builder);
         foreach ($this->compilerPasses as $compilerPass) {
             $compilerPass->process($builder);
         }

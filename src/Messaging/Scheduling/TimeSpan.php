@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
 
+use DateInterval;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 
@@ -20,6 +21,17 @@ final class TimeSpan implements DefinedObject
         public int $days = 0,
     ) {
 
+    }
+
+    public static function fromDateInterval(DateInterval $dateInterval): self
+    {
+        return new self(
+            milliseconds: (int)($dateInterval->f * 1000),
+            seconds: $dateInterval->s,
+            minutes: $dateInterval->i,
+            hours: $dateInterval->h,
+            days: $dateInterval->d,
+        );
     }
 
     public static function withMilliseconds(int $milliseconds): self
@@ -50,6 +62,11 @@ final class TimeSpan implements DefinedObject
     public function toMilliseconds(): int
     {
         return $this->milliseconds + $this->seconds * 1000 + $this->minutes * 60 * 1000 + $this->hours * 60 * 60 * 1000 + $this->days * 24 * 60 * 60 * 1000;
+    }
+
+    public function toDuration(): Duration
+    {
+        return Duration::milliseconds($this->toMilliseconds());
     }
 
     public function getDefinition(): Definition

@@ -12,6 +12,7 @@ use Ecotone\Messaging\Handler\Gateway\Gateway;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagePublisher;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\DistributedBus;
@@ -89,6 +90,7 @@ final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessag
             $this->getServiceFromContainer(AggregateDefinitionRegistry::class),
             $this->getMessagingTestSupport(),
             $this->getGatewayByName(MessagingEntrypoint::class),
+            $this->getServiceFromContainer(EcotoneClockInterface::class),
             $this->configuredMessagingSystem
         );
     }

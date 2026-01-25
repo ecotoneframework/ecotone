@@ -25,6 +25,7 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
+use Ecotone\Messaging\Scheduling\Clock;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\EventBus;
@@ -175,6 +176,7 @@ class ComponentTestBuilder
             $configuredMessagingSystem->getServiceFromContainer(AggregateDefinitionRegistry::class),
             $configuredMessagingSystem->getGatewayByName(MessagingTestSupport::class),
             $configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class),
+            new Clock(new StaticPsrClock('now')),
             $configuredMessagingSystem
         );
     }

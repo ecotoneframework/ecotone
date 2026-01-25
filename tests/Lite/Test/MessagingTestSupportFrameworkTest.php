@@ -476,16 +476,16 @@ final class MessagingTestSupportFrameworkTest extends TestCase
 
         $orderId = 'someId';
         $ecotoneTestSupport->sendCommandWithRoutingKey('order.register', new PlaceOrder($orderId), metadata: [
-            MessageHeaders::DELIVERY_DELAY => new TimeSpan(100),
+            MessageHeaders::DELIVERY_DELAY => TimeSpan::withHours(1),
         ]);
 
         $ecotoneTestSupport->run('orders');
         $this->assertEquals([], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
 
-        $ecotoneTestSupport->run('orders', releaseAwaitingFor: new TimeSpan(milliseconds: 10));
+        $ecotoneTestSupport->run('orders', releaseAwaitingFor: TimeSpan::withMinutes(59));
         $this->assertEquals([], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
 
-        $ecotoneTestSupport->run('orders', releaseAwaitingFor: new TimeSpan(100));
+        $ecotoneTestSupport->run('orders', releaseAwaitingFor: TimeSpan::withHours(1));
         $this->assertEquals([$orderId], $ecotoneTestSupport->sendQueryWithRouting('order.getNotifiedOrders'));
     }
 

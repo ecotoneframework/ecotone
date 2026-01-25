@@ -17,6 +17,8 @@ use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Scheduling\Clock;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Ecotone\Messaging\Scheduling\TimeSpan;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -46,6 +48,7 @@ final class FlowTestSupport
         private AggregateDefinitionRegistry $aggregateDefinitionRegistry,
         private MessagingTestSupport $testSupportGateway,
         private MessagingEntrypoint $messagingEntrypoint,
+        private EcotoneClockInterface $clock,
         private ConfiguredMessagingSystem $configuredMessagingSystem
     ) {
     }
@@ -141,9 +144,7 @@ final class FlowTestSupport
      */
     public function run(string $name, ?ExecutionPollingMetadata $executionPollingMetadata = null, TimeSpan|DateTimeInterface|null $releaseAwaitingFor = null): self
     {
-        if ($releaseAwaitingFor) {
-            $this->testSupportGateway->releaseMessagesAwaitingFor($name, $releaseAwaitingFor);
-        }
+        $this->testSupportGateway->releaseMessagesAwaitingFor($name, $releaseAwaitingFor ?? Clock::get()->now());
         $this->configuredMessagingSystem->run($name, $executionPollingMetadata);
 
         return $this;
@@ -188,6 +189,23 @@ final class FlowTestSupport
     public function getEventStreamEvents(string $streamName): array
     {
         return $this->getGateway(EventStore::class)->load($streamName);
+    }
+
+    public function waitTill(TimeSpan|DateTimeInterface $time): self
+    {
+        if ($time instanceof DateTimeInterface) {
+            if ($time < $this->clock->now()) {
+                throw new MessagingException("Time to wait is in the past. Now: {$this->clock->now()}, time to wait: {$time}");
+            }
+        }
+
+        $this->clock->sleep(
+            $time instanceof TimeSpan
+            ? $time->toDuration()
+            : TimeSpan::fromDateInterval($time->diff($this->clock->now()))->toDuration()
+        );
+
+        return $this;
     }
 
     /**

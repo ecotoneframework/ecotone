@@ -10,7 +10,9 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\Container\ReferenceSearchServiceWithContainer;
 use Ecotone\Messaging\Config\MessagingSystemContainer;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\Bridge\Bridge;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
@@ -30,11 +32,23 @@ use Psr\Container\ContainerInterface;
  */
 class RegisterSingletonMessagingServices implements CompilerPass
 {
+    public function __construct(
+        private ServiceConfiguration $serviceConfiguration,
+    ) {
+    }
+
     public function process(ContainerBuilder $builder): void
     {
         $this->registerDefault($builder, Bridge::class, new Definition(Bridge::class));
         $this->registerDefault($builder, Reference::toChannel(NullableMessageChannel::CHANNEL_NAME), new Definition(NullableMessageChannel::class));
-        $this->registerDefault($builder, EcotoneClockInterface::class, new Definition(Clock::class, [new Reference(ClockInterface::class, ContainerImplementation::NULL_ON_INVALID_REFERENCE)]));
+        $this->registerDefault($builder, EcotoneClockInterface::class, new Definition(
+            Clock::class,
+            [
+                new Reference(ClockInterface::class, ContainerImplementation::NULL_ON_INVALID_REFERENCE),
+                $this->serviceConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE),
+            ],
+            factory: [Clock::class, 'createBasedOnConfig']
+        ));
         $this->registerDefault($builder, ChannelResolver::class, new Definition(ChannelResolverWithContainer::class, [new Reference(ContainerInterface::class)]));
         $this->registerDefault($builder, ReferenceSearchService::class, new Definition(ReferenceSearchServiceWithContainer::class, [new Reference(ContainerInterface::class)]));
         $this->registerDefault($builder, ExpressionEvaluationService::REFERENCE, new Definition(SymfonyExpressionEvaluationAdapter::class, [new Reference(ReferenceSearchService::class)], 'create'));

@@ -36,6 +36,11 @@ class Clock implements EcotoneClockInterface
         return self::$globalClock ?? new self(self::defaultClock());
     }
 
+    public function internalClock(): PsrClockInterface
+    {
+        return $this->clock;
+    }
+
     public function now(): DatePoint
     {
         $now = $this->clock->now();

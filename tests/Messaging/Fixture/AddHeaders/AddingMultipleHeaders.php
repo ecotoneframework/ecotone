@@ -63,4 +63,12 @@ final class AddingMultipleHeaders
     {
 
     }
+
+    #[Delayed(expression: 'payload.delay')]
+    #[Asynchronous('async')]
+    #[CommandHandler('addHeadersWithStringDelayExpression', endpointId: 'addHeadersWithStringDelayExpressionEndpoint')]
+    public function withStringDelayExpression(): void
+    {
+
+    }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite\Test;
 
+use DateTimeImmutable;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\Container\GatewayProxyMethodReference;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
@@ -12,12 +13,17 @@ use Ecotone\Messaging\Handler\Gateway\Gateway;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagePublisher;
+use Ecotone\Messaging\Scheduling\Duration;
 use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
+use Ecotone\Test\StaticPsrClock;
+use InvalidArgumentException;
+use Psr\Clock\ClockInterface;
+use Throwable;
 
 /**
  * licence Apache-2.0
@@ -128,5 +134,52 @@ final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessag
     public function replaceWith(ConfiguredMessagingSystem $messagingSystem): void
     {
         $this->configuredMessagingSystem->replaceWith($messagingSystem);
+    }
+
+    public function changeTime(DateTimeImmutable|Duration $time): self
+    {
+        $psrClock = $this->getStaticPsrClockFromContainer();
+
+        if ($time instanceof Duration) {
+            $psrClock->setCurrentTime(
+                DateTimeImmutable::createFromInterface($psrClock->now())->modify("+{$time->inMicroseconds()} microseconds")
+            );
+            return $this;
+        }
+
+        if ($psrClock->hasBeenChanged() && $time <= $psrClock->now()) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Cannot move time backwards. Current clock time: %s, requested time: %s',
+                    $psrClock->now()->format('Y-m-d H:i:s.u'),
+                    $time->format('Y-m-d H:i:s.u')
+                )
+            );
+        }
+
+        $psrClock->setCurrentTime($time);
+
+        return $this;
+    }
+
+    private function getStaticPsrClockFromContainer(): StaticPsrClock
+    {
+        try {
+            $psrClock = $this->configuredMessagingSystem->getServiceFromContainer(ClockInterface::class);
+        } catch (Throwable) {
+            throw new InvalidArgumentException(
+                'Changing time is only possible when using StaticPsrClock as the ClockInterface. ' .
+                'Register ClockInterface::class => new StaticPsrClock() in your container services.'
+            );
+        }
+
+        if (! $psrClock instanceof StaticPsrClock) {
+            throw new InvalidArgumentException(
+                'Changing time is only possible when using StaticPsrClock as the ClockInterface. ' .
+                'Register ClockInterface::class => new StaticPsrClock() in your container services.'
+            );
+        }
+
+        return $psrClock;
     }
 }

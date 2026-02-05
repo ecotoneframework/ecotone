@@ -14,22 +14,46 @@ use Psr\Clock\ClockInterface;
  */
 final class StaticPsrClock implements ClockInterface, SleepInterface
 {
-    private Duration $sleepDuration;
+    private bool $hasBeenChanged = false;
+    private ?DateTimeImmutable $now = null;
 
-    public function __construct(private ?string $now = null)
+    public function __construct(?string $now = null)
     {
-        $this->sleepDuration = Duration::zero();
+        $this->now = ($now === null || $now === 'now') ? null : new DateTimeImmutable($now);
     }
 
     public function now(): DateTimeImmutable
     {
-        $now = $this->now === null ? new DateTimeImmutable() : new DateTimeImmutable($this->now);
+        if ($this->now !== null) {
+            return $this->now;
+        }
 
-        return $now->modify("+{$this->sleepDuration->zeroIfNegative()->inMicroseconds()} microseconds");
+        return new DateTimeImmutable('now');
     }
 
     public function sleep(Duration $duration): void
     {
-        $this->sleepDuration = $this->sleepDuration->add($duration);
+        if ($duration->isNegativeOrZero()) {
+            return;
+        }
+
+        if ($this->now === null) {
+
+            usleep($duration->inMicroseconds());
+            return;
+        }
+
+        $this->now = $this->now()->modify("+{$duration->inMicroseconds()} microseconds");
+    }
+
+    public function hasBeenChanged(): bool
+    {
+        return $this->hasBeenChanged;
+    }
+
+    public function setCurrentTime(DateTimeImmutable $time): void
+    {
+        $this->now = $time;
+        $this->hasBeenChanged = true;
     }
 }

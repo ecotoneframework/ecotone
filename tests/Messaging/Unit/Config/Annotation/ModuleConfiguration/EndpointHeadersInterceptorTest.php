@@ -250,4 +250,56 @@ class EndpointHeadersInterceptorTest extends TestCase
         $this->assertEquals(1000, $headers[MessageHeaders::DELIVERY_DELAY]);
         $this->assertEquals($timeToLive, $headers[MessageHeaders::TIME_TO_LIVE]);
     }
+
+    public function test_delayed_attribute_with_string_containing_utc_offset(): void
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [
+                AddingMultipleHeaders::class,
+            ],
+            [
+                AddingMultipleHeaders::class => new AddingMultipleHeaders(),
+            ],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ],
+            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async')
+        );
+
+        $command = new stdClass();
+        $command->delay = '2030-01-01 12:00:00+02:00';
+        $command->timeToLive = 1001;
+
+        $headers = $ecotoneLite
+            ->sendCommandWithRoutingKey(
+                'addHeadersWithExpression',
+                command: $command,
+                metadata: [
+                    'token' => 123,
+                ]
+            )
+            ->getRecordedEcotoneMessagesFrom('async')[0]->getHeaders()->headers();
+
+        $this->assertIsInt($headers[MessageHeaders::DELIVERY_DELAY]);
+        $this->assertGreaterThan(0, $headers[MessageHeaders::DELIVERY_DELAY]);
+    }
+
+    public function test_throwing_exception_when_string_without_utc_offset_passed_to_delivery_delay(): void
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [AddingMultipleHeaders::class],
+            [AddingMultipleHeaders::class => new AddingMultipleHeaders()],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ],
+            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async')
+        );
+
+        $command = new stdClass();
+        $command->delay = '2025-01-01 12:00:00';
+
+        $this->expectException(ConfigurationException::class);
+
+        $ecotoneLite->sendCommandWithRoutingKey('addHeadersWithStringDelayExpression', command: $command);
+    }
 }

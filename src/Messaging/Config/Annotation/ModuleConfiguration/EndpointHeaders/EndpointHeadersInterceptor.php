@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeaders;
 
+use DateTimeImmutable;
 use DateTimeInterface;
 use Ecotone\Messaging\Attribute\Endpoint\AddHeader;
 use Ecotone\Messaging\Attribute\Endpoint\Delayed;
@@ -20,6 +21,10 @@ use Ecotone\Messaging\Handler\Type\UnionType;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Scheduling\TimeSpan;
+
+use function is_string;
+use function preg_match;
+use function str_ends_with;
 
 /**
  * Class EndpointHeadersInterceptor
@@ -60,6 +65,10 @@ class EndpointHeadersInterceptor implements DefinedObject
                     'payload' => $message->getPayload(),
                     'headers' => $message->getHeaders()->headers(),
                 ]);
+            }
+
+            if (is_string($metadata[MessageHeaders::DELIVERY_DELAY])) {
+                $metadata[MessageHeaders::DELIVERY_DELAY] = $this->parseDateTimeStringWithRequiredOffset($metadata[MessageHeaders::DELIVERY_DELAY]);
             }
 
             $type = Type::createFromVariable($metadata[MessageHeaders::DELIVERY_DELAY]);
@@ -119,5 +128,21 @@ class EndpointHeadersInterceptor implements DefinedObject
         return new Definition(self::class, [
             Reference::to(ExpressionEvaluationService::REFERENCE),
         ]);
+    }
+
+    private function parseDateTimeStringWithRequiredOffset(string $dateTimeString): DateTimeImmutable
+    {
+        if (! $this->hasUtcOffset($dateTimeString)) {
+            throw ConfigurationException::create("Delivery delay string '{$dateTimeString}' must contain a UTC offset (e.g., '+02:00' or 'Z'). Dates without timezone information are ambiguous.");
+        }
+
+        return new DateTimeImmutable($dateTimeString);
+    }
+
+    private function hasUtcOffset(string $dateTimeString): bool
+    {
+        return preg_match('/[+-]\d{2}:\d{2}$/', $dateTimeString) === 1
+            || preg_match('/[+-]\d{4}$/', $dateTimeString) === 1
+            || str_ends_with($dateTimeString, 'Z');
     }
 }

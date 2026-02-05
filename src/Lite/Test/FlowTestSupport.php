@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite\Test;
 
+use DateTimeImmutable;
 use DateTimeInterface;
 use Ecotone\EventSourcing\EventStore;
 use Ecotone\EventSourcing\ProjectionManager;
@@ -18,6 +19,7 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Scheduling\Clock;
+use Ecotone\Messaging\Scheduling\Duration;
 use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Ecotone\Messaging\Scheduling\TimeSpan;
 use Ecotone\Messaging\Support\Assert;
@@ -32,6 +34,12 @@ use Ecotone\Modelling\Event;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
 use Ecotone\Projecting\ProjectionRegistry;
+use Ecotone\Test\StaticPsrClock;
+use InvalidArgumentException;
+
+use function sprintf;
+
+use Throwable;
 
 /**
  * @template T
@@ -191,21 +199,63 @@ final class FlowTestSupport
         return $this->getGateway(EventStore::class)->load($streamName);
     }
 
-    public function waitTill(TimeSpan|DateTimeInterface $time): self
+    public function changeTimeTo(DateTimeImmutable $time): self
     {
-        if ($time instanceof DateTimeInterface) {
-            if ($time < $this->clock->now()) {
-                throw new MessagingException("Time to wait is in the past. Now: {$this->clock->now()}, time to wait: {$time}");
-            }
+        $psrClock = $this->getStaticPsrClockFromContainer();
+
+        if ($psrClock->hasBeenChanged() && $time <= $psrClock->now()) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    'Cannot move time backwards. Current clock time: %s, requested time: %s',
+                    $psrClock->now()->format('Y-m-d H:i:s.u'),
+                    $time->format('Y-m-d H:i:s.u')
+                )
+            );
         }
 
-        $this->clock->sleep(
-            $time instanceof TimeSpan
-            ? $time->toDuration()
-            : TimeSpan::fromDateInterval($time->diff($this->clock->now()))->toDuration()
+        $psrClock->setCurrentTime($time);
+
+        return $this;
+    }
+
+    public function advanceTimeTo(Duration $duration): self
+    {
+        $psrClock = $this->getStaticPsrClockFromContainer();
+        $psrClock->setCurrentTime(
+            DateTimeImmutable::createFromInterface($psrClock->now())->modify("+{$duration->inMicroseconds()} microseconds")
         );
 
         return $this;
+    }
+
+    private function getStaticPsrClockFromContainer(): StaticPsrClock
+    {
+        try {
+            /** @var Clock $clock */
+            $clock = $this->configuredMessagingSystem->getServiceFromContainer(EcotoneClockInterface::class);
+        } catch (Throwable) {
+            throw new InvalidArgumentException(
+                'Changing time is only possible when using StaticPsrClock as the ClockInterface. ' .
+                'Register ClockInterface::class => new StaticPsrClock() in your container services.'
+            );
+        }
+
+        if (! $clock instanceof Clock) {
+            throw new InvalidArgumentException(
+                'Changing time is only possible when using Clock as the EcotoneClockInterface. ' .
+                'Register EcotoneClockInterface::class => new Clock(new StaticPsrClock()) in your container services.'
+            );
+        }
+
+        $clock = $clock->internalClock();
+        if (! $clock instanceof StaticPsrClock) {
+            throw new InvalidArgumentException(
+                'Changing time is only possible when using StaticPsrClock as the ClockInterface. ' .
+                'Register ClockInterface::class => new StaticPsrClock() in your container services.'
+            );
+        }
+
+        return $clock;
     }
 
     /**

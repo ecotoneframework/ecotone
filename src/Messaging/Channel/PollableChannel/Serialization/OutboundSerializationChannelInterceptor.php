@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Channel\PollableChannel\Serialization;
 
 use Ecotone\Messaging\Channel\AbstractChannelInterceptor;
-use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
@@ -16,7 +15,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
 /**
  * licence Apache-2.0
  */
-final class OutboundSerializationChannelInterceptor extends AbstractChannelInterceptor implements ChannelInterceptor
+final class OutboundSerializationChannelInterceptor extends AbstractChannelInterceptor
 {
     public function __construct(
         private OutboundMessageConverter $outboundMessageConverter,
@@ -27,13 +26,13 @@ final class OutboundSerializationChannelInterceptor extends AbstractChannelInter
     /**
      * @inheritDoc
      */
-    public function preSend(Message $messageToConvert, MessageChannel $messageChannel): ?Message
+    public function preSend(Message $message, MessageChannel $messageChannel): ?Message
     {
-        if ($messageToConvert instanceof ErrorMessage) {
-            return $messageToConvert;
+        if ($message instanceof ErrorMessage) {
+            return $message;
         }
 
-        $outboundMessage = $this->outboundMessageConverter->prepare($messageToConvert, $this->conversionService);
+        $outboundMessage = $this->outboundMessageConverter->prepare($message, $this->conversionService);
         $preparedMessage = MessageBuilder::withPayload($outboundMessage->getPayload())
             ->setMultipleHeaders($outboundMessage->getHeaders());
 

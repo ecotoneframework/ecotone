@@ -139,6 +139,35 @@ class InterfaceToCall
     }
 
     /**
+     * @return class-string|null
+     */
+    public function findSingleAnnotation(Type $className): ?object
+    {
+        $annotation = $this->findSingleMethodAnnotation($className);
+
+        if ($annotation === null) {
+            $annotation = $this->findSingleClassAnnotation($className);
+        }
+
+        return $annotation;
+    }
+
+    public function getSingleAnnotation(Type $className): object
+    {
+        $annotation = $this->findSingleMethodAnnotation($className);
+
+        if ($annotation === null) {
+            $annotation = $this->findSingleClassAnnotation($className);
+        }
+
+        if ($annotation !== null) {
+            return $annotation;
+        }
+
+        throw InvalidArgumentException::create("Trying to retrieve not existing annotation {$className} for {$this}");
+    }
+
+    /**
      * @return object[]
      */
     public function getAnnotationsByImportanceOrder(ObjectType|string $className): array
@@ -161,11 +190,9 @@ class InterfaceToCall
 
     public function getSingleClassAnnotationOf(ObjectType|string $className): object
     {
-        $classNameType = ObjectType::from($className);
-        foreach ($this->getClassAnnotations() as $classAnnotation) {
-            if ($classNameType->accepts($classAnnotation)) {
-                return $classAnnotation;
-            }
+        $classAnnotation = $this->findSingleClassAnnotation($className);
+        if ($classAnnotation !== null) {
+            return $classAnnotation;
         }
 
         throw InvalidArgumentException::create("Trying to retrieve not existing class annotation {$className} for {$this}");
@@ -192,14 +219,31 @@ class InterfaceToCall
      */
     public function getSingleMethodAnnotationOf(ObjectType|string $className): object
     {
-        $classNameType = ObjectType::from($className);
-        foreach ($this->methodAnnotations as $methodAnnotation) {
-            if ($classNameType->accepts($methodAnnotation)) {
-                return $methodAnnotation;
-            }
+        $foundAnnotations = $this->getMethodAnnotationsOf($className);
+
+        if (count($foundAnnotations) < 1) {
+            throw InvalidArgumentException::create("Attribute {$className} was not found for {$this}");
         }
 
-        throw InvalidArgumentException::create("Trying to retrieve not existing method annotation {$className} for {$this}");
+        if (count($foundAnnotations) > 1) {
+            throw InvalidArgumentException::create("Looking for single attribute {$className}, however found more than one");
+        }
+
+        return $foundAnnotations[0];
+    }
+
+    public function findSingleMethodAnnotation(ObjectType|string $className): ?object
+    {
+        $foundAnnotations = $this->getMethodAnnotationsOf($className);
+
+        return $foundAnnotations[0] ?? null;
+    }
+
+    public function findSingleClassAnnotation(ObjectType|string $className): ?object
+    {
+        $foundAnnotations = $this->getClassAnnotationOf($className);
+
+        return $foundAnnotations[0] ?? null;
     }
 
     /**

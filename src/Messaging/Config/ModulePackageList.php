@@ -15,6 +15,7 @@ final class ModulePackageList
      */
     public const ASYNCHRONOUS_PACKAGE = 'asynchronous';
     public const AMQP_PACKAGE = 'amqp';
+    public const DATA_PROTECTION_PACKAGE = 'dataProtection';
     public const DBAL_PACKAGE = 'dbal';
     public const REDIS_PACKAGE = 'redis';
     public const SQS_PACKAGE = 'sqs';
@@ -42,6 +43,7 @@ final class ModulePackageList
             ModulePackageList::TEST_PACKAGE => ModuleClassList::TEST_MODULES,
             ModulePackageList::LARAVEL_PACKAGE => ModuleClassList::LARAVEL_MODULES,
             ModulePackageList::SYMFONY_PACKAGE => ModuleClassList::SYMFONY_MODULES,
+            ModulePackageList::DATA_PROTECTION_PACKAGE => ModuleClassList::DATA_PROTECTION_MODULES,
             default => throw ConfigurationException::create(sprintf('Given unknown package name %s. Available packages name are: %s', $packageName, implode(',', self::allPackages())))
         };
     }
@@ -64,6 +66,7 @@ final class ModulePackageList
             self::TRACING_PACKAGE,
             self::LARAVEL_PACKAGE,
             self::SYMFONY_PACKAGE,
+            self::DATA_PROTECTION_PACKAGE,
         ];
     }
 

@@ -166,4 +166,12 @@ interface Configuration extends CompilerPass
      * @return array<string, string> Map of referenceId => errorMessage
      */
     public function getRequiredReferencesForValidation(): array;
+
+    /**
+     * Checks if the channel is pollable.
+     *
+     * @param string $channelName
+     * @return bool
+     */
+    public function isPollableChannel(string $channelName): bool;
 }

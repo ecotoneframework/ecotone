@@ -8,6 +8,7 @@ use Ecotone\Amqp\Configuration\AmqpModule;
 use Ecotone\Amqp\Configuration\RabbitConsumerModule;
 use Ecotone\Amqp\Publisher\AmqpMessagePublisherModule;
 use Ecotone\Amqp\Transaction\AmqpTransactionModule;
+use Ecotone\DataProtection\Configuration\DataProtectionModule;
 use Ecotone\Dbal\Configuration\DbalConnectionModule;
 use Ecotone\Dbal\Configuration\DbalPublisherModule;
 use Ecotone\Dbal\Database\DatabaseSetupModule;
@@ -203,5 +204,9 @@ class ModuleClassList
 
     public const KAFKA_MODULES = [
         KafkaModule::class,
+    ];
+
+    public const DATA_PROTECTION_MODULES = [
+        DataProtectionModule::class,
     ];
 }

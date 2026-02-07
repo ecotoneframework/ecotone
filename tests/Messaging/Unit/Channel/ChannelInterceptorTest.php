@@ -108,13 +108,18 @@ class ChannelInterceptorTest extends TestCase
         $queueChannel = QueueChannel::create();
         $queueChannel->send($message);
 
-        $channelInterceptor = new TestChannelInterceptor(null, true, false, null);
+        $channelInterceptor = new TestChannelInterceptor(
+            returnMessageOnPreSend: null,
+            returnValueOnPreReceive: true,
+            returnValueOnAfterSendCompletion: false,
+            returnMessageOnPostReceive: $expectedReceivedMessage = MessageBuilder::withPayload('some2')->build()
+        );
 
         $pollableChannel = new PollableChannelInterceptorAdapter(
             $queueChannel,
             [$channelInterceptor]
         );
-        $pollableChannel->receive();
+        $receivedMessage = $pollableChannel->receive();
 
         $this->assertTrue($channelInterceptor->wasPreReceiveCalled());
         $this->assertTrue($channelInterceptor->wasPostReceiveCalled());
@@ -122,6 +127,7 @@ class ChannelInterceptorTest extends TestCase
         $this->assertSame($message, $channelInterceptor->getCapturedMessage());
         $this->assertSame($queueChannel, $channelInterceptor->getCapturedChannel());
         $this->assertNull($channelInterceptor->getCapturedException());
+        $this->assertEquals($expectedReceivedMessage, $receivedMessage);
     }
 
     public function test_stopping_message_receiving()

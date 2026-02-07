@@ -151,19 +151,25 @@ class ClassDefinition
     /**
      * @return object[]
      */
-    public function getClassAnnotations(): array
+    public function getClassAnnotations(?ObjectType $annotationType = null): array
     {
-        return $this->classAnnotations;
-    }
+        if ($annotationType === null) {
+            return $this->classAnnotations;
+        }
 
-    public function getSingleClassAnnotation(ObjectType $annotationType): object
-    {
         $foundAnnotations = [];
         foreach ($this->classAnnotations as $classAnnotation) {
             if ($annotationType->accepts($classAnnotation)) {
                 $foundAnnotations[] = $classAnnotation;
             }
         }
+
+        return $foundAnnotations;
+    }
+
+    public function getSingleClassAnnotation(ObjectType $annotationType): object
+    {
+        $foundAnnotations = $this->getClassAnnotations($annotationType);
 
         if (count($foundAnnotations) < 1) {
             throw InvalidArgumentException::create("Attribute {$annotationType} was not found for {$this}");
@@ -173,6 +179,13 @@ class ClassDefinition
         }
 
         return $foundAnnotations[0];
+    }
+
+    public function findSingleClassAnnotation(ObjectType $annotationType): ?object
+    {
+        $foundAnnotations = $this->getClassAnnotations($annotationType);
+
+        return $foundAnnotations[0] ?? null;
     }
 
     public function isAnnotation(): bool

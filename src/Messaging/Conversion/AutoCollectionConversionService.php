@@ -63,7 +63,6 @@ class AutoCollectionConversionService implements ConversionService
     public function canConvert(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
     {
         if ($this->getConverter($sourceType, $sourceMediaType, $targetType, $targetMediaType)) {
-            ;
             return true;
         }
         if ($sourceType->isIterable() && $sourceType instanceof Type\GenericType

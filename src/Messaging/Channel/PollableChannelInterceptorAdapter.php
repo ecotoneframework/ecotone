@@ -89,7 +89,7 @@ class PollableChannelInterceptorAdapter extends SendingInterceptorAdapter implem
         }
 
         foreach ($this->sortedChannelInterceptors as $channelInterceptor) {
-            $channelInterceptor->postReceive($message, $this->messageChannel);
+            $message = $channelInterceptor->postReceive($message, $this->messageChannel);
         }
 
         return $message;

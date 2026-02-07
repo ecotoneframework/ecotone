@@ -147,6 +147,17 @@ final class InterfaceParameter
         return $foundAnnotations;
     }
 
+    public function findSingleAnnotation(Type $annotationType): ?object
+    {
+        foreach ($this->annotations as $annotation) {
+            if ($annotationType->accepts($annotation)) {
+                return $annotation;
+            }
+        }
+        return null;
+
+    }
+
     /**
      * @return mixed|null
      */

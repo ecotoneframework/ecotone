@@ -1129,4 +1129,9 @@ final class MessagingSystemConfiguration implements Configuration
 
         return false;
     }
+
+    public function isPollableChannel(string $channelName): bool
+    {
+        return $this->channelBuilders[$channelName]?->isPollable();
+    }
 }

@@ -20,9 +20,6 @@ use Ecotone\Messaging\Handler\Type;
  */
 class DeserializingConverter implements Converter
 {
-    /**
-     * @inheritDoc
-     */
     public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType, ?ConversionService $conversionService = null)
     {
         $phpVar = unserialize(stripslashes($source));
@@ -36,9 +33,6 @@ class DeserializingConverter implements Converter
         return $phpVar;
     }
 
-    /**
-     * @inheritDoc
-     */
     public function matches(Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType): bool
     {
         return $sourceMediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP_SERIALIZED)

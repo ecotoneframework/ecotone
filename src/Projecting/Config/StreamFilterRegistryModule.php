@@ -8,10 +8,8 @@ declare(strict_types=1);
 namespace Ecotone\Projecting\Config;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\EventSourcing\Attribute\AggregateType;
 use Ecotone\EventSourcing\Attribute\FromAggregateStream;
 use Ecotone\EventSourcing\Attribute\FromStream;
-use Ecotone\EventSourcing\Attribute\Stream;
 use Ecotone\EventSourcing\EventStore;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
@@ -22,6 +20,7 @@ use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionResolver;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Attribute\EventSourcingAggregate;
 use Ecotone\Modelling\Attribute\NamedEvent;
@@ -161,15 +160,8 @@ class StreamFilterRegistryModule implements AnnotationModule
             throw ConfigurationException::create("Class {$aggregateClass} referenced in #[FromAggregateStream] for projection {$projectionName} must be an EventSourcingAggregate.");
         }
 
-        $streamName = $aggregateClass;
-        if (class_exists(Stream::class)) {
-            $streamAttribute = $annotationFinder->findAttributeForClass($aggregateClass, Stream::class);
-            $streamName = $streamAttribute?->getName() ?? $aggregateClass;
-        }
-
-        $aggregateType = $aggregateClass;
-        $aggregateTypeAttribute = $annotationFinder->findAttributeForClass($aggregateClass, AggregateType::class);
-        $aggregateType = $aggregateTypeAttribute?->getName() ?? $aggregateClass;
+        $streamName = AggregateDefinitionResolver::resolveStreamNameFromFinder($annotationFinder, $aggregateClass);
+        $aggregateType = AggregateDefinitionResolver::resolveAggregateTypeFromFinder($annotationFinder, $aggregateClass);
 
         return new StreamFilter($streamName, $aggregateType, $attribute->eventStoreReferenceName, $eventNames);
     }

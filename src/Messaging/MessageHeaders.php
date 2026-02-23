@@ -121,6 +121,8 @@ final class MessageHeaders
 
     public const EVENT_AGGREGATE_VERSION = '_aggregate_version';
 
+    public const EVENT_STREAM_NAME = '_stream_name';
+
     private array $headers;
 
     /**

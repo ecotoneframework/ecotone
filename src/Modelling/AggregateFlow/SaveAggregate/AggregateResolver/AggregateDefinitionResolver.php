@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver;
 
+use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\EventSourcing\Attribute\AggregateType;
+use Ecotone\EventSourcing\Attribute\Stream;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Type;
@@ -61,10 +63,11 @@ final class AggregateDefinitionResolver
             $calledAggregateIdentifierMapping,
             $calledAggregateIdentifierGetMethods,
             self::getAggregateType($aggregateClassDefinition),
+            self::getAggregateStreamName($aggregateClassDefinition),
         );
     }
 
-    private static function getAggregateType(ClassDefinition $classDefinition): string
+    public static function getAggregateType(ClassDefinition $classDefinition): string
     {
         foreach ($classDefinition->getClassAnnotations() as $annotation) {
             if ($annotation instanceof AggregateType) {
@@ -73,6 +76,38 @@ final class AggregateDefinitionResolver
         }
 
         return $classDefinition->getClassType()->toString();
+    }
+
+    public static function getAggregateStreamName(ClassDefinition $classDefinition): string
+    {
+        if (class_exists(Stream::class)) {
+            foreach ($classDefinition->getClassAnnotations() as $annotation) {
+                if ($annotation instanceof Stream) {
+                    return $annotation->getName();
+                }
+            }
+        }
+
+        return $classDefinition->getClassType()->toString();
+    }
+
+    public static function resolveStreamNameFromFinder(AnnotationFinder $finder, string $aggregateClass): string
+    {
+        if (class_exists(Stream::class)) {
+            $streamAttribute = $finder->findAttributeForClass($aggregateClass, Stream::class);
+            if ($streamAttribute !== null) {
+                return $streamAttribute->getName();
+            }
+        }
+
+        return $aggregateClass;
+    }
+
+    public static function resolveAggregateTypeFromFinder(AnnotationFinder $finder, string $aggregateClass): string
+    {
+        $aggregateTypeAttribute = $finder->findAttributeForClass($aggregateClass, AggregateType::class);
+
+        return $aggregateTypeAttribute?->getName() ?? $aggregateClass;
     }
 
     private static function resolveAggregateIdentifierMapping(ClassDefinition $aggregateClassDefinition, InterfaceToCallRegistry $interfaceToCallRegistry): array

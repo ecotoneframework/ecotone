@@ -104,7 +104,9 @@ class ProjectingModule implements AnnotationModule
                             [
                                 $projectionBuilder->partitionHeader()
                                     ? HeaderBuilder::create('partitionKeyValue', $projectionBuilder->partitionHeader())
-                                    : ValueBuilder::create('partitionKeyValue', null),
+                                    : ($projectionBuilder->isPartitioned()
+                                        ? new PartitionHeaderBuilder('partitionKeyValue')
+                                        : ValueBuilder::create('partitionKeyValue', null)),
                                 HeaderBuilder::createOptional('manualInitialization', ProjectingHeaders::MANUAL_INITIALIZATION),
                             ],
                         )

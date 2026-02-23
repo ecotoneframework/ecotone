@@ -99,13 +99,14 @@ class ProjectingAttributeModule implements AnnotationModule
                 eventLoadingBatchSize: $batchSizeAttribute?->eventLoadingBatchSize,
                 backfillPartitionBatchSize: $backfillAttribute?->backfillPartitionBatchSize,
                 backfillAsyncChannelName: $backfillAttribute?->asyncChannelName,
+                partitioned: $partitionAttribute !== null,
             );
 
             $asynchronousChannelName = self::getProjectionAsynchronousChannel($annotationRegistrationService, $projectionClassName);
             $isPolling = $pollingAttribute !== null;
             $isEventStreaming = $streamingAttribute !== null;
 
-            self::verifyCorrectApiUsage($isPolling, $asynchronousChannelName, $projectionAttribute, $isEventStreaming, $partitionHeaderName);
+            self::verifyCorrectApiUsage($isPolling, $asynchronousChannelName, $projectionAttribute, $isEventStreaming, $partitionAttribute !== null);
 
             if ($asynchronousChannelName !== null) {
                 $projectionBuilder->setAsyncChannel($asynchronousChannelName);
@@ -251,7 +252,7 @@ class ProjectingAttributeModule implements AnnotationModule
         return null;
     }
 
-    private static function verifyCorrectApiUsage(bool $isPolling, ?string $asynchronousChannelName, ProjectionV2 $projectionAttribute, bool $isEventStreaming, null|string $partitionHeaderName): void
+    private static function verifyCorrectApiUsage(bool $isPolling, ?string $asynchronousChannelName, ProjectionV2 $projectionAttribute, bool $isEventStreaming, bool $isPartitioned): void
     {
         if ($isPolling && $asynchronousChannelName !== null) {
             throw ConfigurationException::create(
@@ -273,8 +274,6 @@ class ProjectingAttributeModule implements AnnotationModule
                 'A projection must be either polling-based or streaming-based, not both.'
             );
         }
-
-        $isPartitioned = $partitionHeaderName !== null;
         if ($isPolling && $isPartitioned) {
             throw ConfigurationException::create(
                 "Projection '{$projectionAttribute->name}' cannot use both #[Polling] and #[Partitioned] attributes. " .

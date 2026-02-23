@@ -26,8 +26,8 @@ final class AggregateClassDefinition implements DefinedObject
         private array   $aggregateIdentifierMapping,
         private array   $aggregateIdentifierGetMethods,
         private string  $aggregateClassType,
+        private string  $aggregateStreamName,
     ) {
-
     }
 
     public function getClassName(): string
@@ -91,6 +91,11 @@ final class AggregateClassDefinition implements DefinedObject
         return $this->aggregateClassType;
     }
 
+    public function getAggregateStreamName(): string
+    {
+        return $this->aggregateStreamName;
+    }
+
     public function getDefinition(): Definition
     {
         return new Definition(self::class, [
@@ -102,6 +107,7 @@ final class AggregateClassDefinition implements DefinedObject
             $this->aggregateIdentifierMapping,
             $this->aggregateIdentifierGetMethods,
             $this->aggregateClassType,
+            $this->aggregateStreamName,
         ]);
     }
 }

@@ -88,7 +88,6 @@ class InMemoryEventStoreStreamSource implements StreamSource
 
         // Read from all streams (global stream)
         $reflection = new ReflectionProperty($this->eventStore, 'streams');
-        $reflection->setAccessible(true);
         $allStreams = array_keys($reflection->getValue($this->eventStore));
 
         // Filter out internal streams (starting with $)

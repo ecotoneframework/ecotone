@@ -129,6 +129,7 @@ final class MessagingSystemConfiguration implements Configuration
      * @var CompilableBuilder[]
      */
     private array $converterBuilders = [];
+    private ?Definition $conversionServiceDecoratorBuilder = null;
     /**
      * @var string[]
      */
@@ -831,6 +832,13 @@ final class MessagingSystemConfiguration implements Configuration
         return $this;
     }
 
+    public function registerConversionServiceDecorator(Definition $conversionServiceDecoratorBuilder): Configuration
+    {
+        $this->conversionServiceDecoratorBuilder = $conversionServiceDecoratorBuilder;
+
+        return $this;
+    }
+
     /**
      * @inheritDoc
      */
@@ -917,7 +925,14 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->converterBuilders as $converterBuilder) {
             $converters[] = $converterBuilder->compile($messagingBuilder);
         }
-        $messagingBuilder->register(ConversionService::REFERENCE_NAME, new Definition(AutoCollectionConversionService::class, ['converters' => $converters]));
+
+        $messagingBuilder->register(ConversionService::REFERENCE_NAME, $conversionService = new Definition(AutoCollectionConversionService::class, ['converters' => $converters]));
+        if ($this->conversionServiceDecoratorBuilder !== null) {
+            $this->conversionServiceDecoratorBuilder->addMethodCall('decorate', [$conversionService]);
+
+            $messagingBuilder->replace(ConversionService::REFERENCE_NAME, $this->conversionServiceDecoratorBuilder);
+        }
+
 
         $channelInterceptorsByImportance = $this->channelInterceptorBuilders;
         $channelInterceptorsByChannelName = [];

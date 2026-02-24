@@ -85,19 +85,20 @@ class PropertyReaderAccessor
             }
 
             return $fromData[$currentAccessProperty];
-        } elseif (is_object($fromData)) {
+        }
+
+        if (is_object($fromData)) {
             $getterMethod = 'get' . ucfirst($currentAccessProperty);
 
             if (method_exists($fromData, $getterMethod)) {
                 return call_user_func([$fromData, $getterMethod]);
-            } else {
-                $objectReflection = new ReflectionClass($fromData);
-                $classProperty = $objectReflection->getProperty($currentAccessProperty);
+            }
 
-                if ($classProperty->isInitialized($fromData)) {
-                    $classProperty->setAccessible(true);
-                    return $classProperty->getValue($fromData);
-                }
+            $objectReflection = new ReflectionClass($fromData);
+            $classProperty = $objectReflection->getProperty($currentAccessProperty);
+
+            if ($classProperty->isInitialized($fromData)) {
+                return $classProperty->getValue($fromData);
             }
         }
 

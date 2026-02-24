@@ -8,6 +8,7 @@ use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
 use Ecotone\Messaging\Config\Container\Compiler\CompilerPass;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
@@ -129,6 +130,8 @@ interface Configuration extends CompilerPass
      */
     public function registerConverter(CompilableBuilder $converterBuilder): Configuration;
 
+    public function registerConversionServiceDecorator(Definition $conversionServiceDecoratorBuilder): Configuration;
+
     /**
      * @param string $referenceName
      * @return Configuration
@@ -137,7 +140,7 @@ interface Configuration extends CompilerPass
 
     public function buildMessagingSystemFromConfiguration(?ContainerInterface $externalReferenceSearchService = null): ConfiguredMessagingSystem;
 
-    public function registerServiceDefinition(string|Reference $id, Container\Definition|Reference $definition): Configuration;
+    public function registerServiceDefinition(string|Reference $id, Definition|Reference $definition): Configuration;
 
     public function isRunningForEnterpriseLicence(): bool;
 

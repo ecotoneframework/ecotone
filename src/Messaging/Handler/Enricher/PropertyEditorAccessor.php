@@ -144,12 +144,11 @@ class PropertyEditorAccessor
             }
 
             $classProperty = $objectReflection->getProperty($propertyName);
-
-            $classProperty->setAccessible(true);
             $classProperty->setValue($dataToEnrich, $dataToEnrichWith);
 
-            return $dataToEnrich;
         }
+
+        return $dataToEnrich;
     }
 
     /**

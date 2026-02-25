@@ -59,7 +59,7 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
 
         if ($message->getHeaders()->containsKey(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER)) {
             $aggregateIds = $message->getHeaders()->get(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER);
-            $aggregateIds = is_array($aggregateIds) ? $aggregateIds : [\array_key_first($messageIdentifierMapping) => $aggregateIds];
+            $aggregateIds = is_array($aggregateIds) ? $aggregateIds : [\array_key_first($messageIdentifierMapping) ?? '' => $aggregateIds];
 
             return MessageBuilder::fromMessage($message)
                 ->setHeader(AggregateMessage::AGGREGATE_ID, AggregateIdResolver::resolveArrayOfIdentifiers($this->aggregateClassName, $aggregateIds))

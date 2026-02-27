@@ -40,7 +40,7 @@ class InMemoryProjector implements ProjectorExecutor, Countable
         $this->projectedEvents = [];
     }
 
-    public function flush(): void
+    public function flush(mixed $userState = null): void
     {
     }
 }

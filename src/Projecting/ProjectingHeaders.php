@@ -18,4 +18,6 @@ class ProjectingHeaders
      */
     public const PROJECTION_LIVE = 'projection.live';
     public const MANUAL_INITIALIZATION = 'projection.manual_initialization';
+    public const PROJECTION_PARTITION_KEY = 'projection.partitionKey';
+    public const PROJECTION_CAN_INITIALIZE = 'projection.canInitialize';
 }

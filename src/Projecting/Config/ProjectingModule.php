@@ -13,6 +13,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\Reference;
@@ -27,6 +28,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
+use Ecotone\Projecting\Attribute\ProjectionFlush;
 use Ecotone\Projecting\BackfillExecutorHandler;
 use Ecotone\Projecting\InMemory\InMemoryProjectionRegistry;
 use Ecotone\Projecting\PartitionProviderRegistry;
@@ -113,6 +115,22 @@ class ProjectingModule implements AnnotationModule
                     )
                     ->withEndpointId(self::endpointIdForProjection($projectionName))
                     ->withInputChannelName(self::inputChannelForProjectingManager($projectionName))
+            );
+
+            $messagingConfiguration->registerMessageHandler(
+                MessageProcessorActivatorBuilder::create()
+                    ->chainInterceptedProcessor(
+                        MethodInvokerBuilder::create(
+                            $projectingManagerReference,
+                            InterfaceToCallReference::create(ProjectingManager::class, 'executeSingleBatch'),
+                            [
+                                HeaderBuilder::createOptional('partitionKeyValue', ProjectingHeaders::PROJECTION_PARTITION_KEY),
+                                HeaderBuilder::create('canInitialize', ProjectingHeaders::PROJECTION_CAN_INITIALIZE),
+                            ],
+                        )
+                    )
+                    ->withInputChannelName(ProjectingManager::batchChannelFor($projectionName))
+                    ->withEndpointAnnotations([AttributeDefinition::fromObject(new ProjectionFlush())])
             );
 
             // Should the projection be triggered asynchronously?

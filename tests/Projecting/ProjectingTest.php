@@ -12,12 +12,14 @@ use Ecotone\EventSourcing\Attribute\ProjectionInitialization;
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Attribute\Endpoint\Priority;
+use Ecotone\Messaging\Attribute\Interceptor\Around;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\Interceptor\PcntlTerminationListener;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Event;
@@ -861,6 +863,51 @@ class ProjectingTest extends TestCase
 
         $messages = $ecotone->getRecordedMessagePayloadsFrom('backfill_async');
         self::assertCount(1, $messages, 'SinglePartitionProvider should produce exactly 1 batch');
+    }
+
+    public function test_interceptor_can_hook_into_flush_via_pointcut(): void
+    {
+        $interceptor = new class () {
+            public int $invocationCount = 0;
+
+            #[Around(pointcut: ProjectionFlush::class)]
+            public function intercept(MethodInvocation $methodInvocation): mixed
+            {
+                $this->invocationCount++;
+                return $methodInvocation->proceed();
+            }
+        };
+
+        $projection = new #[ProjectionV2('intercepted_batch_projection'), FromStream('test_stream'), ProjectionExecution(eventLoadingBatchSize: 3)] class () {
+            public array $processedEvents = [];
+            #[EventHandler('*')]
+            public function handle(array $event): void
+            {
+                $this->processedEvents[] = $event;
+            }
+        };
+
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [$projection::class, $interceptor::class],
+            [$projection, $interceptor],
+            ServiceConfiguration::createWithDefaults()
+                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+        );
+
+        $ecotone->withEvents([
+            Event::createWithType('event1', []),
+            Event::createWithType('event2', []),
+            Event::createWithType('event3', []),
+            Event::createWithType('event4', []),
+            Event::createWithType('event5', []),
+            Event::createWithType('event6', []),
+            Event::createWithType('event7', []),
+        ]);
+
+        $ecotone->triggerProjection('intercepted_batch_projection');
+
+        self::assertCount(7, $projection->processedEvents);
+        self::assertEquals(4, $interceptor->invocationCount, 'Interceptor should be called once per batch (3+3+1 events + 1 empty batch check)');
     }
 
     public function test_userland_state_storage_is_prioritized_over_built_in(): void

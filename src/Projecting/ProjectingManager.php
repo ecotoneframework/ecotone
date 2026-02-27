@@ -51,14 +51,18 @@ class ProjectingManager
     public function execute(?string $partitionKeyValue = null, bool $manualInitialization = false): void
     {
         do {
-            $processedEvents = $this->executeSingleBatch($partitionKeyValue, $manualInitialization || $this->automaticInitialization);
+            $processedEvents = $this->messagingEntrypoint->sendWithHeaders(
+                [],
+                [
+                    ProjectingHeaders::PROJECTION_PARTITION_KEY => $partitionKeyValue,
+                    ProjectingHeaders::PROJECTION_CAN_INITIALIZE => $manualInitialization || $this->automaticInitialization,
+                ],
+                self::batchChannelFor($this->projectionName)
+            );
         } while ($processedEvents > 0 && $this->terminationListener->shouldTerminate() !== true);
     }
 
-    /**
-     * @return int Number of processed events
-     */
-    private function executeSingleBatch(?string $partitionKeyValue, bool $canInitialize): int
+    public function executeSingleBatch(?string $partitionKeyValue = null, bool $canInitialize = false): int
     {
         $transaction = $this->getProjectionStateStorage()->beginTransaction();
         try {
@@ -78,7 +82,7 @@ class ProjectingManager
                 $processedEvents++;
             }
             if ($processedEvents > 0) {
-                $this->projectorExecutor->flush();
+                $this->projectorExecutor->flush($userState);
             }
 
             $projectionState = $projectionState
@@ -97,6 +101,11 @@ class ProjectingManager
             $transaction->rollBack();
             throw $e;
         }
+    }
+
+    public static function batchChannelFor(string $projectionName): string
+    {
+        return 'projecting_manager_batch:' . $projectionName;
     }
 
     public function loadState(?string $partitionKey = null): ProjectionPartitionState

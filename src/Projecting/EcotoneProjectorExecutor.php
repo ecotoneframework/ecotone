@@ -64,21 +64,28 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
     public function init(): void
     {
         if ($this->initChannel) {
-            $this->messagingEntrypoint->send([], $this->initChannel);
+            $this->messagingEntrypoint->sendWithHeaders([], [
+                ProjectingHeaders::PROJECTION_NAME => $this->projectionName,
+            ], $this->initChannel);
         }
     }
 
     public function delete(): void
     {
         if ($this->deleteChannel) {
-            $this->messagingEntrypoint->send([], $this->deleteChannel);
+            $this->messagingEntrypoint->sendWithHeaders([], [
+                ProjectingHeaders::PROJECTION_NAME => $this->projectionName,
+            ], $this->deleteChannel);
         }
     }
 
-    public function flush(): void
+    public function flush(mixed $userState = null): void
     {
         if ($this->flushChannel) {
-            $this->messagingEntrypoint->send([], $this->flushChannel);
+            $this->messagingEntrypoint->sendWithHeaders([], [
+                ProjectingHeaders::PROJECTION_NAME => $this->projectionName,
+                ProjectingHeaders::PROJECTION_STATE => $userState,
+            ], $this->flushChannel);
         }
     }
 }

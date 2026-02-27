@@ -21,7 +21,6 @@ use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\PriorityBasedOnType;
 use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -202,7 +201,6 @@ class MessageHandlerRoutingModule implements AnnotationModule
             QueryBus::class . '||' .
             AsynchronousRunningEndpoint::class . '||' .
             PropagateHeaders::class . '||' .
-            MessagingEntrypointWithHeadersPropagation::class . '||' .
             MessageGateway::class;
 
         $messagingConfiguration

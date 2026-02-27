@@ -19,7 +19,7 @@ use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Endpoint\InterceptedChannelAdapterBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
@@ -175,7 +175,7 @@ class ComponentTestBuilder
             $configuredMessagingSystem->getGatewayByName(QueryBus::class),
             $configuredMessagingSystem->getServiceFromContainer(AggregateDefinitionRegistry::class),
             $configuredMessagingSystem->getGatewayByName(MessagingTestSupport::class),
-            $configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class),
+            $configuredMessagingSystem->getServiceFromContainer(MessagingEntrypointService::class),
             new Clock(new StaticPsrClock('now')),
             $configuredMessagingSystem
         );

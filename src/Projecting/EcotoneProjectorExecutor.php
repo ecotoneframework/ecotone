@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Ecotone\Projecting;
 
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -20,7 +20,7 @@ use function is_null;
 class EcotoneProjectorExecutor implements ProjectorExecutor
 {
     public function __construct(
-        private MessagingEntrypoint $messagingEntrypoint,
+        private MessagingEntrypointService $messagingEntrypoint,
         private MessageHeadersPropagatorInterceptor $messageHeadersPropagatorInterceptor,
         private string $projectionName, // this is required for event stream emitter so it can create a stream with this name
         private MessageProcessor $routerProcessor,

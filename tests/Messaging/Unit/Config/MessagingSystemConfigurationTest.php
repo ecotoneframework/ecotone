@@ -30,7 +30,7 @@ use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilde
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -2087,7 +2087,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
     public function test_calling_console_command_with_default()
     {
         $consoleCommandName = 'someName';
-        $channelName = MessagingEntrypoint::ENTRYPOINT;
+        $channelName = MessagingEntrypointService::ENTRYPOINT;
         $queueChannel = QueueChannel::create();
         $consoleCommand = ConsoleCommandConfiguration::create($channelName, $consoleCommandName, [
             ConsoleCommandParameter::create('id', 'header.id', false),
@@ -2109,7 +2109,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
     public function test_calling_console_command_overriding_default_parameter()
     {
         $consoleCommandName = 'someName';
-        $channelName = MessagingEntrypoint::ENTRYPOINT;
+        $channelName = MessagingEntrypointService::ENTRYPOINT;
         $queueChannel = QueueChannel::create();
         $consoleCommand = ConsoleCommandConfiguration::create($channelName, $consoleCommandName, [
             ConsoleCommandParameter::create('id', 'header.id', false),

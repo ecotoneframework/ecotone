@@ -40,7 +40,7 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InterceptedEndpoint;
@@ -998,7 +998,7 @@ final class MessagingSystemConfiguration implements Configuration
 
         foreach ($this->consoleCommands as $consoleCommandConfiguration) {
             $builder->register("console.{$consoleCommandConfiguration->getName()}", new Definition(ConsoleCommandRunner::class, [
-                Reference::to(MessagingEntrypointWithHeadersPropagation::class),
+                Reference::to(MessagingEntrypointService::class),
                 $consoleCommandConfiguration,
             ]));
         }

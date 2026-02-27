@@ -8,13 +8,15 @@ use DateTimeImmutable;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\Container\GatewayProxyMethodReference;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Gateway\Gateway;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagePublisher;
 use Ecotone\Messaging\Scheduling\Duration;
 use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\DistributedBus;
@@ -71,8 +73,17 @@ final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessag
 
     public function sendMessage(string $targetChannel, mixed $payload = '', array $metadata = []): mixed
     {
-        /** @var MessagingEntrypoint $messagingEntrypoint */
-        $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
+        /** @var MessagingEntrypointService $messagingEntrypoint */
+        $messagingEntrypoint = $this->configuredMessagingSystem->getServiceFromContainer(MessagingEntrypointService::class);
+
+        if ($payload instanceof Message) {
+            return $messagingEntrypoint->sendMessage(
+                MessageBuilder::fromMessage($payload)
+                    ->setMultipleHeaders($metadata)
+                    ->setHeader(MessagingEntrypointService::ENTRYPOINT, $targetChannel)
+                    ->build()
+            );
+        }
 
         return $messagingEntrypoint->sendWithHeaders($payload, $metadata, $targetChannel, $metadata[MessageHeaders::ROUTING_SLIP] ?? null);
     }
@@ -95,7 +106,7 @@ final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessag
             $this->getQueryBus(),
             $this->getServiceFromContainer(AggregateDefinitionRegistry::class),
             $this->getMessagingTestSupport(),
-            $this->getGatewayByName(MessagingEntrypoint::class),
+            $this->getServiceFromContainer(MessagingEntrypointService::class),
             $this->getServiceFromContainer(EcotoneClockInterface::class),
             $this->configuredMessagingSystem
         );

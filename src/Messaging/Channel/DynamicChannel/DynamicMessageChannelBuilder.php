@@ -16,7 +16,7 @@ use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Support\Assert;
@@ -143,7 +143,7 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
             $thisMessageChannelName,
             new Definition(RoundRobinSendingStrategy::class, [$channelNames]),
             new Definition(SkippingReceivingStrategy::class, [
-                Reference::to(MessagingEntrypoint::class),
+                Reference::to(MessagingEntrypointService::class),
                 $thisMessageChannelName,
                 new Definition(RoundRobinReceivingStrategy::class, [$channelNames]),
                 $requestChannelName,
@@ -169,7 +169,7 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
     public function withCustomSendingStrategy(string $requestChannelName): self
     {
         $this->channelSendingStrategy = new Definition(CustomSendingStrategy::class, [
-            Reference::to(MessagingEntrypoint::class),
+            Reference::to(MessagingEntrypointService::class),
             $requestChannelName,
         ]);
 
@@ -198,7 +198,7 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
     public function withCustomReceivingStrategy(string $requestChannelName): self
     {
         $this->channelReceivingStrategy = new Definition(CustomReceivingStrategy::class, [
-            Reference::to(MessagingEntrypoint::class),
+            Reference::to(MessagingEntrypointService::class),
             $requestChannelName,
         ]);
 

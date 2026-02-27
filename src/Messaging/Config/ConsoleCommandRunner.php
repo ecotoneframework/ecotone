@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Config;
 
-use Ecotone\Messaging\Gateway\MessagingEntrypointWithHeadersPropagation;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
@@ -11,7 +11,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class ConsoleCommandRunner
 {
-    public function __construct(private MessagingEntrypointWithHeadersPropagation $entrypoint, private ConsoleCommandConfiguration $commandConfiguration)
+    public function __construct(private MessagingEntrypointService $entrypoint, private ConsoleCommandConfiguration $commandConfiguration)
     {
     }
 

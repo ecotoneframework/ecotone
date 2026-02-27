@@ -11,7 +11,7 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
@@ -118,7 +118,7 @@ class DistributedHandlerModule implements AnnotationModule
                     HeaderBuilder::createOptional('targetedServiceName', DistributedBusHeader::DISTRIBUTED_TARGET_SERVICE_NAME),
                     ReferenceBuilder::create('commandBus', CommandBus::class),
                     ReferenceBuilder::create('eventBus', EventBus::class),
-                    ReferenceBuilder::create('messagingEntrypoint', MessagingEntrypoint::class),
+                    ReferenceBuilder::create('messagingEntrypoint', MessagingEntrypointService::class),
                 ])
         );
     }

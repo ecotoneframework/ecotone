@@ -11,7 +11,7 @@ use Ecotone\Messaging\Endpoint\Interceptor\TerminationListener;
 
 /**
  * Handles execution of projection backfill batches.
- * This handler is invoked via MessagingEntrypoint to execute backfill operations
+ * This handler is invoked via MessagingEntrypointService to execute backfill operations
  * for a given projection with specified limit and offset parameters.
  */
 class BackfillExecutorHandler

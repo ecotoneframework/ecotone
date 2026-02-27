@@ -6,8 +6,6 @@ use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
-use Ecotone\Messaging\Gateway\StorageMessagingEntrypoint;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\Assert;
 use Psr\Container\ContainerInterface;
@@ -47,9 +45,6 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
                 $serviceConfiguration->getCacheDirectoryPath(),
                 false
             );
-        }
-        if (! self::hasInOriginalReferenceService(MessagingEntrypoint::class, $referenceSearchService)) {
-            $objectsToResolve[MessagingEntrypoint::class] = StorageMessagingEntrypoint::create();
         }
         $this->referenceSearchService = $referenceSearchService;
 

@@ -7,7 +7,7 @@ use Ecotone\Messaging\Endpoint\EndpointRunner;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\Interceptor\PcntlTerminationListener;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\NonProxyGateway;
@@ -29,7 +29,7 @@ class InterceptedConsumerRunner implements EndpointRunner
         private EcotoneClockInterface       $clock,
         private PcntlTerminationListener    $pcntlTerminationListener,
         private LoggingGateway              $logger,
-        private MessagingEntrypoint         $messagingEntrypoint,
+        private MessagingEntrypointService   $messagingEntrypoint,
         private ExpressionEvaluationService $expressionEvaluationService,
     ) {
     }

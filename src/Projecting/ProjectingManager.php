@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Ecotone\Projecting;
 
 use Ecotone\Messaging\Endpoint\Interceptor\TerminationListener;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use InvalidArgumentException;
 use Throwable;
 
@@ -26,7 +26,7 @@ class ProjectingManager
         private StreamFilterRegistry           $streamFilterRegistry,
         private string                         $projectionName,
         private TerminationListener            $terminationListener,
-        private MessagingEntrypoint            $messagingEntrypoint,
+        private MessagingEntrypointService      $messagingEntrypoint,
         private int                            $eventLoadingBatchSize = 1000,
         private bool                           $automaticInitialization = true,
         private int                            $backfillPartitionBatchSize = self::DEFAULT_BACKFILL_PARTITION_BATCH_SIZE,

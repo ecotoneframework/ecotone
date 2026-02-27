@@ -3,7 +3,7 @@
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
 use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagePoller;
@@ -19,7 +19,7 @@ class PollToGatewayTaskExecutor implements TaskExecutor
     public function __construct(
         private MessagePoller $messagePoller,
         private NonProxyGateway $gateway,
-        private MessagingEntrypoint $messagingEntrypoint
+        private MessagingEntrypointService $messagingEntrypoint
     ) {
     }
 

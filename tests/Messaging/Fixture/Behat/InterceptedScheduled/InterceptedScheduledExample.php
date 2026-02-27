@@ -9,7 +9,7 @@ use Ecotone\Messaging\Attribute\Interceptor\Presend;
 use Ecotone\Messaging\Attribute\Poller;
 use Ecotone\Messaging\Attribute\Scheduled;
 use Ecotone\Messaging\Attribute\ServiceActivator;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 
 /**
  * licence Apache-2.0
@@ -26,7 +26,7 @@ class InterceptedScheduledExample
     }
 
     #[ServiceActivator('handle')]
-    public function handle(int $payload, array $metadata, MessagingEntrypoint $messagingEntrypoint): void
+    public function handle(int $payload, array $metadata, MessagingEntrypointService $messagingEntrypoint): void
     {
         if (isset($metadata['entrypoint'])) {
             $this->requestData = $payload;

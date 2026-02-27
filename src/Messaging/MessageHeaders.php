@@ -3,7 +3,7 @@
 namespace Ecotone\Messaging;
 
 use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Scheduling\Clock;
 use Ecotone\Modelling\AggregateMessage;
@@ -178,7 +178,7 @@ final class MessageHeaders
             self::POLLED_CHANNEL_NAME,
             self::REPLY_CONTENT_TYPE,
             self::STREAM_BASED_SOURCED,
-            MessagingEntrypoint::ENTRYPOINT,
+            MessagingEntrypointService::ENTRYPOINT,
             self::CHANNEL_SEND_RETRY_NUMBER,
         ];
     }
@@ -501,7 +501,7 @@ final class MessageHeaders
             }
         }
         if (! array_key_exists(self::MESSAGE_CORRELATION_ID, $headers)) {
-            $headers[self::MESSAGE_CORRELATION_ID] = Uuid::uuid4()->toString();
+            $headers[self::MESSAGE_CORRELATION_ID] = $headers[self::MESSAGE_ID];
         }
 
         return new static($headers);

@@ -21,7 +21,7 @@ use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\Interceptor\TerminationListener;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
@@ -88,7 +88,7 @@ class ProjectingModule implements AnnotationModule
                     new Reference(StreamFilterRegistry::class),
                     $projectionName,
                     new Reference(TerminationListener::class),
-                    new Reference(MessagingEntrypoint::class),
+                    new Reference(MessagingEntrypointService::class),
                     $projectionBuilder->eventLoadingBatchSize(),
                     $projectionBuilder->automaticInitialization(),
                     $projectionBuilder->backfillPartitionBatchSize(),

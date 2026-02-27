@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Channel\DynamicChannel\ReceivingStrategy;
 
 use Ecotone\Messaging\Channel\DynamicChannel\ChannelReceivingStrategy;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Support\Assert;
 
 /**
@@ -14,7 +14,7 @@ use Ecotone\Messaging\Support\Assert;
 final class CustomReceivingStrategy implements ChannelReceivingStrategy
 {
     public function __construct(
-        private MessagingEntrypoint $messagingEntrypoint,
+        private MessagingEntrypointService $messagingEntrypoint,
         private string $channelNameToResolveReceivingMessageChannel
     ) {
     }

@@ -11,7 +11,7 @@ use Ecotone\EventSourcing\ProjectionManager;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageChannel;
@@ -55,7 +55,7 @@ final class FlowTestSupport
         private QueryBus $queryBus,
         private AggregateDefinitionRegistry $aggregateDefinitionRegistry,
         private MessagingTestSupport $testSupportGateway,
-        private MessagingEntrypoint $messagingEntrypoint,
+        private MessagingEntrypointService $messagingEntrypoint,
         private EcotoneClockInterface $clock,
         private ConfiguredMessagingSystem $configuredMessagingSystem
     ) {
@@ -470,40 +470,30 @@ final class FlowTestSupport
 
     public function sendDirectToChannel(string $targetChannel, mixed $payload = '', array $metadata = []): mixed
     {
-        /** @var MessagingEntrypoint $messagingEntrypoint */
-        $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
-
-        return $messagingEntrypoint->sendWithHeaders($payload, $metadata, $targetChannel, $metadata[MessageHeaders::ROUTING_SLIP] ?? null);
+        return $this->messagingEntrypoint->sendWithHeaders($payload, $metadata, $targetChannel, $metadata[MessageHeaders::ROUTING_SLIP] ?? null);
     }
 
     public function sendDirectToChannelWithMessageReply(string $targetChannel, mixed $payload = '', array $metadata = []): Message
     {
-        /** @var MessagingEntrypoint $messagingEntrypoint */
-        $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
-
-        return $messagingEntrypoint->sendWithHeadersWithMessageReply($payload, $metadata, $targetChannel, $metadata[MessageHeaders::ROUTING_SLIP] ?? null);
+        return $this->messagingEntrypoint->sendWithHeadersWithMessageReply($payload, $metadata, $targetChannel, $metadata[MessageHeaders::ROUTING_SLIP] ?? null);
     }
 
     public function sendMessageDirectToChannel(string $targetChannel, Message $message): mixed
     {
-        Assert::isFalse($message->getHeaders()->containsKey(MessagingEntrypoint::ENTRYPOINT), 'Message must not contain entrypoint header. Make use of first argument in sendDirectToChannel method');
-        /** @var MessagingEntrypoint $messagingEntrypoint */
-        $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
+        Assert::isFalse($message->getHeaders()->containsKey(MessagingEntrypointService::ENTRYPOINT), 'Message must not contain entrypoint header. Make use of first argument in sendDirectToChannel method');
 
-        return $messagingEntrypoint->sendMessage(
+        return $this->messagingEntrypoint->sendMessage(
             MessageBuilder::fromMessage($message)
-                ->setHeader(MessagingEntrypoint::ENTRYPOINT, $targetChannel)
+                ->setHeader(MessagingEntrypointService::ENTRYPOINT, $targetChannel)
                 ->build()
         );
     }
 
     public function sendMessageDirectToChannelWithMessageReply(string $targetChannel, Message $message): Message
     {
-        Assert::isFalse($message->getHeaders()->containsKey(MessagingEntrypoint::ENTRYPOINT), 'Message must not contain entrypoint header. Make use of first argument in sendDirectToChannel method');
-        /** @var MessagingEntrypoint $messagingEntrypoint */
-        $messagingEntrypoint = $this->configuredMessagingSystem->getGatewayByName(MessagingEntrypoint::class);
+        Assert::isFalse($message->getHeaders()->containsKey(MessagingEntrypointService::ENTRYPOINT), 'Message must not contain entrypoint header. Make use of first argument in sendDirectToChannel method');
 
-        return $messagingEntrypoint->sendWithHeadersWithMessageReply(
+        return $this->messagingEntrypoint->sendWithHeadersWithMessageReply(
             $message->getPayload(),
             $message->getHeaders()->headers(),
             $targetChannel,

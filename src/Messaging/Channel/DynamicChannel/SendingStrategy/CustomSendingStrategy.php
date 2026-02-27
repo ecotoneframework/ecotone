@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Channel\DynamicChannel\SendingStrategy;
 
 use Ecotone\Messaging\Channel\DynamicChannel\ChannelSendingStrategy;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
@@ -17,7 +17,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
 final class CustomSendingStrategy implements ChannelSendingStrategy
 {
     public function __construct(
-        private MessagingEntrypoint $messagingEntrypoint,
+        private MessagingEntrypointService $messagingEntrypoint,
         private string $channelNameToResolveSendingMessageChannel
     ) {
     }

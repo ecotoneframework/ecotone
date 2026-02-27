@@ -17,7 +17,7 @@ use Ecotone\Messaging\Endpoint\AcknowledgeConfirmationInterceptor;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapterEntrypoint;
 use Ecotone\Messaging\Endpoint\Interceptor\PcntlTerminationListener;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\ErrorChannelService;
@@ -111,7 +111,7 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
             new Reference(EcotoneClockInterface::class),
             new Reference(PcntlTerminationListener::class),
             new Reference(LoggingGateway::class),
-            new Reference(MessagingEntrypoint::class),
+            new Reference(MessagingEntrypointService::class),
             new Reference(ExpressionEvaluationService::REFERENCE),
         ]);
         $builder->registerPollingEndpoint($endpointId, $consumerRunner, $this->withContinuesPolling());

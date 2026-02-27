@@ -3,7 +3,7 @@
 namespace Ecotone\Modelling\MessageHandling\Distribution;
 
 use Ecotone\Messaging\Attribute\Parameter\Header;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
@@ -36,7 +36,7 @@ class DistributedMessageHandler
         ?string             $targetedServiceName,
         CommandBus          $commandBus,
         EventBus            $eventBus,
-        MessagingEntrypoint $messagingEntrypoint
+        MessagingEntrypointService $messagingEntrypoint
     ) {
         if ($payloadType === 'event') {
             if (! empty($this->distributedEventHandlerRoutingKeys->get($routingKey))) {

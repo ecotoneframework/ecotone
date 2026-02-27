@@ -14,7 +14,7 @@ use Ecotone\Messaging\Endpoint\Interceptor\PcntlTerminationListener;
 use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\TimeLimitInterceptor;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\MessagePoller;
 use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Psr\Log\LoggerInterface;
@@ -39,7 +39,7 @@ class InterceptedConsumer implements ConsumerLifecycle
     public function __construct(
         private ConsumerLifecycle $interceptedConsumer,
         private array $consumerInterceptors,
-        private MessagingEntrypoint $messagingEntrypoint,
+        private MessagingEntrypointService $messagingEntrypoint,
         private string $endpointId,
         private MessagePoller $messagePoller,
     ) {

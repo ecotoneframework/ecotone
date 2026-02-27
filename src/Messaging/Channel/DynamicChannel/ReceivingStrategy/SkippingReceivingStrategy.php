@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Channel\DynamicChannel\ReceivingStrategy;
 
 use Ecotone\Messaging\Channel\DynamicChannel\ChannelReceivingStrategy;
-use Ecotone\Messaging\Gateway\MessagingEntrypoint;
+use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\Assert;
 
@@ -15,7 +15,7 @@ use Ecotone\Messaging\Support\Assert;
 final class SkippingReceivingStrategy implements ChannelReceivingStrategy
 {
     public function __construct(
-        private MessagingEntrypoint         $messagingEntrypoint,
+        private MessagingEntrypointService   $messagingEntrypoint,
         private string                      $dynamicChannelName,
         private RoundRobinReceivingStrategy $robinReceivingStrategy,
         private string $channelNameToDecideOnTheConsumption

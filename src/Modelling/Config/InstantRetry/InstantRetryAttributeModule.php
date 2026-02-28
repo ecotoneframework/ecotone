@@ -21,7 +21,7 @@ use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Modelling\Attribute\InstantRetry;
 use Ecotone\Modelling\CommandBus;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 #[ModuleAnnotation]
 /**
@@ -151,7 +151,7 @@ final class InstantRetryAttributeModule implements AnnotationModule
         int $precedence,
         ?string $relatedEndpointId,
     ): void {
-        $instantRetryId = Uuid::uuid4()->toString();
+        $instantRetryId = Uuid::v7()->toRfc4122();
         $messagingConfiguration->registerServiceDefinition($instantRetryId, Definition::createFor(InstantRetryInterceptor::class, [$retryAttempt, $exceptions, Reference::to(RetryStatusTracker::class), $relatedEndpointId]));
 
         $messagingConfiguration

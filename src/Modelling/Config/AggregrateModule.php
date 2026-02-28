@@ -67,7 +67,7 @@ use Ecotone\Modelling\FetchAggregate;
 use Ecotone\Modelling\Repository\AggregateRepositoryBuilder;
 use Ecotone\Modelling\Repository\StandardRepositoryAdapterBuilder;
 use Ecotone\Modelling\RepositoryBuilder;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 #[ModuleAnnotation]
 /**
@@ -260,7 +260,7 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
                 $aggregateRepositoryBuilders[] = $aggregateRepositoryBuilder;
             }
             if ($aggregateRepositoryBuilder instanceof RepositoryBuilder) {
-                $referenceId = Uuid::uuid4()->toString();
+                $referenceId = Uuid::v7()->toRfc4122();
                 $moduleReferenceSearchService->store($referenceId, $aggregateRepositoryBuilder);
                 $repositories[$referenceId] = $referenceId;
             }
@@ -693,7 +693,7 @@ class AggregrateModule implements AnnotationModule, RoutingEventHandler
         };
         if (! $actionInputChannelName) {
             // this is a fake channel to avoid B/C break when action handler has an Asynchronous attribute (only the factory method should have the attribute)
-            $actionInputChannelName = Uuid::uuid4();
+            $actionInputChannelName = Uuid::v7()->toRfc4122();
         }
         // Add a bridge from the action channel to the factory+action channel
         if (! ($factoryAnnotation instanceof CommandHandler && $actionInputChannelName === $factoryAnnotation->getInputChannelName())) {

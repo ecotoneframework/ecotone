@@ -67,7 +67,7 @@ use Exception;
 use function is_a;
 
 use Psr\Container\ContainerInterface;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Class Configuration
@@ -421,7 +421,7 @@ final class MessagingSystemConfiguration implements Configuration
                      * Then when message is consumed it's routed by routing slip
                      * to target handler
                      */
-                    $generatedEndpointId = Uuid::uuid4()->toString();
+                    $generatedEndpointId = Uuid::v7()->toRfc4122();
                     $this->registerMessageHandler(
                         UninterruptibleServiceActivator::create(
                             RoutingSlipPrepender::create(
@@ -707,7 +707,7 @@ final class MessagingSystemConfiguration implements Configuration
     {
         Assert::notNullAndEmpty($messageHandlerBuilder->getInputMessageChannelName(), "Lack information about input message channel for {$messageHandlerBuilder}");
         if (is_null($messageHandlerBuilder->getEndpointId()) || $messageHandlerBuilder->getEndpointId() === '') {
-            $messageHandlerBuilder->withEndpointId(Uuid::uuid4()->toString());
+            $messageHandlerBuilder->withEndpointId(Uuid::v7()->toRfc4122());
         }
         if (array_key_exists($messageHandlerBuilder->getEndpointId(), $this->messageHandlerBuilders)) {
             throw ConfigurationException::create("Trying to register endpoints with same id {$messageHandlerBuilder->getEndpointId()}. {$messageHandlerBuilder} and {$this->messageHandlerBuilders[$messageHandlerBuilder->getEndpointId()]}");

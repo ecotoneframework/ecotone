@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Attribute;
 
 use Attribute;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 #[Attribute()]
 /**
@@ -21,7 +21,7 @@ class IdentifiedAnnotation
         $this->endpointId = $endpointId;
 
         if (! $this->endpointId) {
-            $this->endpointId = Uuid::uuid4()->toString();
+            $this->endpointId = Uuid::v7()->toRfc4122();
             $this->isGenerated = true;
         }
     }

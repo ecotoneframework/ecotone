@@ -17,7 +17,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\Assert;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Class PayloadEnricherBuilder
@@ -135,7 +135,7 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
 
         $gateway = null;
         if ($this->requestChannelName) {
-            $gatewayBuilder = GatewayProxyBuilder::create(Uuid::uuid4()->toString(), EnrichGateway::class, 'execute', $this->requestChannelName);
+            $gatewayBuilder = GatewayProxyBuilder::create(Uuid::v7()->toRfc4122(), EnrichGateway::class, 'execute', $this->requestChannelName);
             $gatewayBuilder->compile($builder);
             $gateway = $gatewayBuilder->registerProxy($builder);
         }

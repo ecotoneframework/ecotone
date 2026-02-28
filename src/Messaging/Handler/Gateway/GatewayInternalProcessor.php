@@ -17,7 +17,7 @@ use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\ErrorMessage;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Class GatewayInternalHandler
@@ -57,7 +57,7 @@ class GatewayInternalProcessor implements MessageProcessor, AroundInterceptable
         $canReturnValue = $this->returnType?->isVoid() === false;
 
         $requestMessage = MessageBuilder::fromMessage($requestMessage);
-        $replyChannel = $this->replyChannel ?: ($canReturnValue ? QueueChannel::create(Uuid::uuid4() . '-replyChannel') : null);
+        $replyChannel = $this->replyChannel ?: ($canReturnValue ? QueueChannel::create(Uuid::v7()->toRfc4122() . '-replyChannel') : null);
         if ($replyChannel) {
             $requestMessage = $requestMessage
                 ->setReplyChannel($replyChannel);

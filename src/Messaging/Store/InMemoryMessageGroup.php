@@ -3,7 +3,7 @@
 namespace Ecotone\Messaging\Store;
 
 use Ecotone\Messaging\Message;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Class InMemoryMessageGroup
@@ -31,7 +31,7 @@ final class InMemoryMessageGroup implements MessageGroup
 
     public static function createEmpty(): InMemoryMessageGroup
     {
-        return new self(Uuid::uuid4()->toString(), []);
+        return new self(Uuid::v7()->toRfc4122(), []);
     }
 
     /**

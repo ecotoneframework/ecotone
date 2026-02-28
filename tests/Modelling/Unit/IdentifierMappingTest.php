@@ -12,6 +12,7 @@ use Exception;
 
 use function get_class;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Blog\Article;
 use Test\Ecotone\Modelling\Fixture\Blog\PublishArticleCommand;
@@ -31,9 +32,7 @@ use Test\Ecotone\Modelling\Fixture\IdentifierMapping\TargetIdentifier\OrderStart
  */
 final class IdentifierMappingTest extends TestCase
 {
-    /**
-     * @dataProvider sagasTypes
-     */
+    #[DataProvider('sagasTypes')]
     public function test_mapping_using_target_identifier_for_events(string $sagaClass): void
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
@@ -49,9 +48,7 @@ final class IdentifierMappingTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider sagasTypes
-     */
+    #[DataProvider('sagasTypes')]
     public function test_mapping_using_target_identifier_for_events_when_endpoint_is_asynchronous(string $sagaClass): void
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(

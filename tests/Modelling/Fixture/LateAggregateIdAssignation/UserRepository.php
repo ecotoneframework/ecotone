@@ -4,7 +4,7 @@ namespace Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignation;
 
 use Ecotone\Modelling\Attribute\Repository;
 use Ecotone\Modelling\StandardRepository;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 #[Repository]
 /**
@@ -26,7 +26,7 @@ class UserRepository implements StandardRepository
 
     public function save(array $identifiers, object $aggregate, array $metadata, ?int $versionBeforeHandling): void
     {
-        $aggregate->id = Uuid::uuid4()->toString();
+        $aggregate->id = Uuid::v7()->toRfc4122();
         $this->users[$aggregate->id] = $aggregate;
     }
 }

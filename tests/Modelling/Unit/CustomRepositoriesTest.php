@@ -8,6 +8,7 @@ use Ecotone\Lite\EcotoneLite;
 use Ecotone\Lite\Test\FlowTestSupport;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Test\LicenceTesting;
+use PHPUnit\Framework\Attributes\DataProvider;
 use Test\Ecotone\Messaging\BaseEcotoneTestCase;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CustomRepositories\EventSourcing\Comment;
@@ -90,9 +91,7 @@ final class CustomRepositoriesTest extends BaseEcotoneTestCase
         $this->verify(Author::create('123'), $ecotoneLite, 'create.author', Author::class, null);
     }
 
-    /**
-     * @dataProvider enterpriseMode
-     */
+    #[DataProvider('enterpriseMode')]
     public function test_default_repository_is_used_when_multiple_repositories_are_registered_for_different_type(
         bool $isEnterprise
     ) {

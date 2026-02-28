@@ -12,7 +12,7 @@ use Ecotone\Modelling\Config\MessageBusChannel;
 
 use function json_encode;
 
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Class MessageHeaders
@@ -490,7 +490,7 @@ final class MessageHeaders
     private static function createMessageHeadersWith(array $headers): MessageHeaders
     {
         if (! array_key_exists(self::MESSAGE_ID, $headers)) {
-            $headers[self::MESSAGE_ID] = Uuid::uuid4()->toString();
+            $headers[self::MESSAGE_ID] = Uuid::v7()->toRfc4122();
         }
         if (! array_key_exists(self::TIMESTAMP, $headers)) {
             $headers[self::TIMESTAMP] = Clock::get()->now()->unixTime()->inSeconds();

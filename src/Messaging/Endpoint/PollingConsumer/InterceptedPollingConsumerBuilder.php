@@ -28,7 +28,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Recoverability\RetryRunner;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * licence Apache-2.0
@@ -82,7 +82,7 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
     public function registerConsumer(MessagingContainerBuilder $builder, MessageHandlerBuilder $messageHandlerBuilder): void
     {
         $endpointId = $messageHandlerBuilder->getEndpointId();
-        $requestChannelName = 'internal_inbound_gateway_channel.'.Uuid::uuid4()->toString();
+        $requestChannelName = 'internal_inbound_gateway_channel.'.Uuid::v7()->toRfc4122();
         $connectionChannel = new Definition(DirectChannel::class, [
             $requestChannelName,
             $messageHandlerBuilder->compile($builder),

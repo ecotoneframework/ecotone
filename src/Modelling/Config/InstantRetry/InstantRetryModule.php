@@ -17,7 +17,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Precedence;
 use Ecotone\Modelling\CommandBus;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 #[ModuleAnnotation]
 /**
@@ -82,7 +82,7 @@ final class InstantRetryModule implements AnnotationModule
         string $pointcut,
         int $precedence,
     ): void {
-        $instantRetryId = Uuid::uuid4()->toString();
+        $instantRetryId = Uuid::v7()->toRfc4122();
         $messagingConfiguration->registerServiceDefinition($instantRetryId, Definition::createFor(InstantRetryInterceptor::class, [$retryAttempt, $exceptions, Reference::to(RetryStatusTracker::class)]));
 
         $messagingConfiguration

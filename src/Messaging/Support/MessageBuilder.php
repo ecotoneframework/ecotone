@@ -8,7 +8,7 @@ use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Class MessageBuilder
@@ -61,7 +61,7 @@ final class MessageBuilder
     public static function fromParentMessage(Message $message): self
     {
         return (new self($message->getPayload(), HeaderAccessor::createFrom($message->getHeaders())))
-            ->setHeader(MessageHeaders::MESSAGE_ID, Uuid::uuid4()->toString())
+            ->setHeader(MessageHeaders::MESSAGE_ID, Uuid::v7()->toRfc4122())
             ->removeHeader(MessageHeaders::TIMESTAMP);
     }
 

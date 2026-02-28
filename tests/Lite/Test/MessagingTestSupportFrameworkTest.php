@@ -19,8 +19,8 @@ use Ecotone\Messaging\Scheduling\DatePoint;
 use Ecotone\Messaging\Scheduling\TimeSpan;
 use Ecotone\Modelling\CommandBus;
 use PHPUnit\Framework\TestCase;
-use Ramsey\Uuid\Uuid;
 use stdClass;
+use Symfony\Component\Uid\Uuid;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\Notification;
@@ -433,7 +433,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
 
     public function test_making_use_of_cache()
     {
-        $cacheDirectoryPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::uuid4()->toString();
+        $cacheDirectoryPath = sys_get_temp_dir() . DIRECTORY_SEPARATOR . Uuid::v7()->toRfc4122();
         $inMemoryPSRContainer = InMemoryPSRContainer::createFromAssociativeArray([
             OrderService::class => new OrderService(),
         ]);

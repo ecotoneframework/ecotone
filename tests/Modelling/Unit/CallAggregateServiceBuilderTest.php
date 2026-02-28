@@ -7,7 +7,7 @@ use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\Type\UnionType;
 use Ecotone\Modelling\CommandBus;
 use PHPUnit\Framework\TestCase;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 use Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder\CreateAggregate;
 use Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder\DoSomething;
 use Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder\EventSourcingAggregateWithInternalRecorder;
@@ -70,7 +70,7 @@ class CallAggregateServiceBuilderTest extends TestCase
 
     public function test_providing_correct_result_type_for_reply_message_when_result_is_collection(): void
     {
-        $storageId = Uuid::uuid4()->toString();
+        $storageId = Uuid::v7()->toRfc4122();
 
         $this->assertEquals(
             Type::createCollection(SmallBox::class),
@@ -86,7 +86,7 @@ class CallAggregateServiceBuilderTest extends TestCase
 
     public function test_providing_correct_result_type_for_reply_message_when_result_is_collection_of_unions(): void
     {
-        $storageId = Uuid::uuid4()->toString();
+        $storageId = Uuid::v7()->toRfc4122();
 
         $this->assertEqualsCanonicalizing(
             new UnionType([

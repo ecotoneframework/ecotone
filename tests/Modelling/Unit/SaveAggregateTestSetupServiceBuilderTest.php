@@ -6,7 +6,7 @@ namespace Modelling\Unit;
 
 use Ecotone\Lite\EcotoneLite;
 use PHPUnit\Framework\TestCase;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 use Test\Ecotone\Modelling\Fixture\SimplifiedAggregate\SimplifiedAggregate;
 use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
 use Test\Ecotone\Modelling\Fixture\Ticket\TicketWasStartedEvent;
@@ -22,7 +22,7 @@ final class SaveAggregateTestSetupServiceBuilderTest extends TestCase
     {
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting([Ticket::class]);
 
-        $ticketId = Uuid::uuid4()->toString();
+        $ticketId = Uuid::v7()->toRfc4122();
 
         $this->assertEquals(
             'Elvis',

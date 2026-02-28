@@ -2,25 +2,16 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Booking;
 
-/**
- * Interface BookingService
- * @package Test\Ecotone\Messaging\Fixture\Behat\Booking
- * @author Dariusz Gafka <support@simplycodedsoftware.com>
- */
+use Ecotone\Messaging\Attribute\MessageGateway;
+
 /**
  * licence Apache-2.0
  */
 interface BookingService
 {
-    /**
-     * @param string $flatNumber
-     * @return bool
-     */
+    #[MessageGateway('bookingConfirmation')]
     public function checkIfIsBooked(string $flatNumber): bool;
 
-    /**
-     * @param string $flatNumber
-     * @return void
-     */
+    #[MessageGateway('bookingRequest')]
     public function bookFlat(string $flatNumber): void;
 }

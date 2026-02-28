@@ -15,6 +15,7 @@ use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Stringable;
@@ -211,9 +212,7 @@ class ConversionServiceTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider provideConvertors
-     */
+    #[DataProvider('provideConvertors')]
     public function test_it_wrong_conversion_calling(array $convertors): void
     {
         $ecotone = EcotoneLite::bootstrapFlowTesting(

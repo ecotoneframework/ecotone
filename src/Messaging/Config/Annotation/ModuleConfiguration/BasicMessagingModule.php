@@ -93,8 +93,10 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
         $messagingConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
         $messagingConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(OnConsumerStop::CONSUMER_STOP_CHANNEL_NAME));
         $messagingConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
-        $messagingConfiguration->registerConverter(new Definition(UuidToStringConverter::class));
-        $messagingConfiguration->registerConverter(new Definition(StringToUuidConverter::class));
+        if (interface_exists(\Ramsey\Uuid\UuidInterface::class)) {
+            $messagingConfiguration->registerConverter(new Definition(UuidToStringConverter::class));
+            $messagingConfiguration->registerConverter(new Definition(StringToUuidConverter::class));
+        }
         $messagingConfiguration->registerConverter(new Definition(SerializingConverter::class));
         $messagingConfiguration->registerConverter(new Definition(DeserializingConverter::class));
         $messagingConfiguration->registerConverter(new Definition(EnumToScalarConverter::class));

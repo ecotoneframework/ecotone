@@ -13,6 +13,7 @@ use Ecotone\Messaging\Support\LicensingException;
 
 use function json_encode;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\EventRevision\Person;
 
@@ -31,9 +32,7 @@ final class LicencingTest extends TestCase
         ], licenceKey: 'incorrect');
     }
 
-    /**
-     * @dataProvider licenceWithMissingField
-     */
+    #[DataProvider('licenceWithMissingField')]
     public function test_failing_on_licence_data_not_having_required_fields(string $licenceKey): void
     {
         $this->expectException(LicensingException::class);

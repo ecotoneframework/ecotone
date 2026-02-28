@@ -24,7 +24,7 @@ use Ecotone\Modelling\AggregateIdResolver;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\Event;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * licence Apache-2.0
@@ -153,7 +153,7 @@ class SaveAggregateServiceTemplate
             $eventMetadata = $headerMapper->mapFromMessageHeaders($eventMetadata, $conversionService);
 
             $eventMetadata = RevisionMetadataEnricher::enrich($eventMetadata, $event);
-            $eventMetadata[MessageHeaders::MESSAGE_ID] ??= Uuid::uuid4()->toString();
+            $eventMetadata[MessageHeaders::MESSAGE_ID] ??= Uuid::v7()->toRfc4122();
             $eventMetadata[MessageHeaders::TIMESTAMP] ??= Clock::get()->now()->unixTime()->inSeconds();
             $eventMetadata = MessageHeaders::propagateContextHeaders([
                 MessageHeaders::MESSAGE_ID => $message->getHeaders()->getMessageId(),

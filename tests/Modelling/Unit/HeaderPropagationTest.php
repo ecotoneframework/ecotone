@@ -7,7 +7,7 @@ namespace Test\Ecotone\Modelling\Unit;
 use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\MessageHeaders;
 use PHPUnit\Framework\TestCase;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 use Test\Ecotone\Modelling\Fixture\MetadataPropagating\FakeLoggingGateway;
 use Test\Ecotone\Modelling\Fixture\MetadataPropagating\FakeLoggingService;
 use Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService;
@@ -31,8 +31,8 @@ final class HeaderPropagationTest extends TestCase
             [new OrderService()],
         );
 
-        $messageId = Uuid::uuid4()->toString();
-        $correlationId = Uuid::uuid4()->toString();
+        $messageId = Uuid::v7()->toRfc4122();
+        $correlationId = Uuid::v7()->toRfc4122();
 
         $headers = $ecotoneTestSupport
             ->sendCommandWithRoutingKey(
@@ -55,7 +55,7 @@ final class HeaderPropagationTest extends TestCase
             [new OrderService()],
         );
 
-        $messageId = Uuid::uuid4()->toString();
+        $messageId = Uuid::v7()->toRfc4122();
         $headers = $ecotoneTestSupport
             ->sendCommandWithRoutingKey(
                 'placeOrder',
@@ -76,7 +76,7 @@ final class HeaderPropagationTest extends TestCase
             [new OrderService()],
         );
 
-        $messageId = Uuid::uuid4()->toString();
+        $messageId = Uuid::v7()->toRfc4122();
         $headers = $ecotoneTestSupport
             ->sendCommandWithRoutingKey(
                 'placeOrderAndPropagateMetadata',

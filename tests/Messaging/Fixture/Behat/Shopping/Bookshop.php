@@ -2,25 +2,16 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Shopping;
 
-/**
- * Class Bookshop
- * @package Test\Ecotone\Messaging\Fixture\Behat\Shopping
- * @author Dariusz Gafka <support@simplycodedsoftware.com>
- */
+use Ecotone\Messaging\Attribute\ServiceActivator;
+
 /**
  * licence Apache-2.0
  */
 class Bookshop
 {
-    /**
-     * @var ReserveRequest[]|array
-     */
-    private $reservationRequests = [];
+    private array $reservationRequests = [];
 
-    /**
-     * @param ReserveRequest $reservationRequest
-     * @return BookWasReserved
-     */
+    #[ServiceActivator('reserveRequestTransformer')]
     public function reserve(ReserveRequest $reservationRequest): BookWasReserved
     {
         $this->reservationRequests[] = $reservationRequest;

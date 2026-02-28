@@ -8,6 +8,7 @@ use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Conversion\MediaType;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 use Test\Ecotone\Messaging\Fixture\Handler\HeaderConversion\ConvertedHeaderEndpoint;
@@ -22,9 +23,7 @@ use Test\Ecotone\Messaging\Fixture\Handler\HeaderConversion\JsonConverter;
  */
 final class HeaderConversionTest extends TestCase
 {
-    /**
-     * @dataProvider differentDefaultSerializations
-     */
+    #[DataProvider('differentDefaultSerializations')]
     public function test_using_scalar_in_metadata_for_conversion(ServiceConfiguration $serviceConfiguration): void
     {
         $convertedHeaderEndpoint = new ConvertedHeaderEndpoint();
@@ -51,9 +50,7 @@ final class HeaderConversionTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider differentDefaultSerializations
-     */
+    #[DataProvider('differentDefaultSerializations')]
     public function test_using_object_in_metadata_for_conversion(ServiceConfiguration $serviceConfiguration): void
     {
         $convertedHeaderEndpoint = new ConvertedHeaderEndpoint();
@@ -80,9 +77,7 @@ final class HeaderConversionTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider differentDefaultSerializations
-     */
+    #[DataProvider('differentDefaultSerializations')]
     public function test_using_fallback_conversion_to_json(ServiceConfiguration $serviceConfiguration): void
     {
         $convertedHeaderEndpoint = new ConvertedHeaderEndpoint();

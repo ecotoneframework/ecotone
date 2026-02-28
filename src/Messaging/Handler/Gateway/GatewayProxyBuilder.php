@@ -39,7 +39,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 
 use function is_a;
 
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * Class GatewayProxySpec
@@ -382,7 +382,7 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
             $errorChannelRoutingSlip = $errorChannelResolver->getErrorChannelRoutingSlip($interfaceToCall, $this->endpointAnnotations, $this->requestChannelName);
 
             $interceptorReference = $builder->register(
-                Uuid::uuid4()->toString(),
+                Uuid::v7()->toRfc4122(),
                 new Definition(ErrorChannelInterceptor::class, [
                     Reference::to(ErrorChannelService::class),
                     new ChannelReference($errorChannelName),

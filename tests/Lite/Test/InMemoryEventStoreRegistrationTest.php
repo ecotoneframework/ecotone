@@ -10,7 +10,7 @@ use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Modelling\Event;
 use PHPUnit\Framework\TestCase;
-use Ramsey\Uuid\Uuid;
+use Symfony\Component\Uid\Uuid;
 
 /**
  * @internal
@@ -34,7 +34,7 @@ final class InMemoryEventStoreRegistrationTest extends TestCase
         /** @var \Ecotone\EventSourcing\EventStore $eventStore */
         $eventStore = $ecotoneTestSupport->getGatewayByName(\Ecotone\EventSourcing\EventStore::class);
 
-        $streamName = Uuid::uuid4()->toString();
+        $streamName = Uuid::v7()->toRfc4122();
         $eventStore->appendTo(
             $streamName,
             [

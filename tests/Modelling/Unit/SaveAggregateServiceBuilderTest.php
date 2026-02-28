@@ -15,8 +15,8 @@ use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
 use Ecotone\Test\StubLogger;
 use PHPUnit\Framework\TestCase;
-use Ramsey\Uuid\Uuid;
 use stdClass;
+use Symfony\Component\Uid\Uuid;
 use Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder\AggregateCreated;
 use Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder\CreateAggregate;
 use Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder\CreateSomething;
@@ -357,8 +357,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
             classesToResolve: [Job::class]
         );
 
-        $jobId = Uuid::uuid4()->toString();
-        $newJobId = Uuid::uuid4()->toString();
+        $jobId = Uuid::v7()->toRfc4122();
+        $newJobId = Uuid::v7()->toRfc4122();
 
         self::assertEquals(
             [
@@ -404,7 +404,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
             [EventSourcingAggregateWithInternalRecorder::class, Something::class],
         )
             ->sendCommand(new CreateAggregate($id = 1000), metadata: [
-                MessageHeaders::MESSAGE_ID => $messageId = Uuid::uuid4()->toString(),
+                MessageHeaders::MESSAGE_ID => $messageId = Uuid::v7()->toRfc4122(),
                 'userland' => '123',
             ]);
 
@@ -417,7 +417,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
         $ecotoneLite
             ->sendCommand(new CreateSomething($id, $newInstanceId = 2000), metadata: [
-                MessageHeaders::MESSAGE_ID => $messageId = Uuid::uuid4()->toString(),
+                MessageHeaders::MESSAGE_ID => $messageId = Uuid::v7()->toRfc4122(),
                 'userland' => '1234',
             ]);
 

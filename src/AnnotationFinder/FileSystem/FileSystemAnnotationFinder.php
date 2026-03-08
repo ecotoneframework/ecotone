@@ -53,6 +53,11 @@ class FileSystemAnnotationFinder implements AnnotationFinder
      * @var object[][]
      */
     private array $cachedClassAnnotations = [];
+
+    /**
+     * @var array<string, array<string>>
+     */
+    private array $cachedClassesWithAnnotatedProperties = [];
     private AnnotationResolver $annotationResolver;
     private IsAbstract $isAbstractAnnotation;
 
@@ -214,6 +219,29 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         }
 
         return $classesWithAnnotations;
+    }
+
+    public function findClassesWithAnnotatedProperties(string $annotationClassName): array
+    {
+        if (isset($this->cachedClassesWithAnnotatedProperties[$annotationClassName])) {
+            return $this->cachedClassesWithAnnotatedProperties[$annotationClassName];
+        }
+
+        $this->cachedClassesWithAnnotatedProperties[$annotationClassName] = [];
+        foreach ($this->registeredClasses as $class) {
+            $reflection = new ReflectionClass($class);
+            foreach ($reflection->getProperties() as $property) {
+                $propertyAnnotations = $this->annotationResolver->getAnnotationsForProperty($class, $property->getName());
+
+                foreach ($propertyAnnotations as $propertyAnnotation) {
+                    if ($propertyAnnotation instanceof $annotationClassName) {
+                        $this->cachedClassesWithAnnotatedProperties[$annotationClassName][] = $class;
+                    }
+                }
+            }
+        }
+
+        return $this->cachedClassesWithAnnotatedProperties[$annotationClassName];
     }
 
     private function hasAnnotation(string $className, string $annotationClassNameToFind): bool

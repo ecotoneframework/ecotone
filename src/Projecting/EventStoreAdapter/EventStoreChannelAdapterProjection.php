@@ -77,4 +77,9 @@ class EventStoreChannelAdapterProjection implements ProjectorExecutor
     {
         // No flushing needed
     }
+
+    public function reset(?string $partitionKey = null): void
+    {
+        // No reset needed
+    }
 }

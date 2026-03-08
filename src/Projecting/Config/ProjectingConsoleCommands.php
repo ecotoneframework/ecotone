@@ -45,6 +45,15 @@ class ProjectingConsoleCommands
         $this->registry->get($name)->prepareBackfill();
     }
 
+    #[ConsoleCommand('ecotone:projection:rebuild')]
+    public function rebuildProjection(string $name): void
+    {
+        if (! $this->registry->has($name)) {
+            throw new InvalidArgumentException("There is no projection with name {$name}");
+        }
+        $this->registry->get($name)->prepareRebuild();
+    }
+
     #[ConsoleCommand('ecotone:projection:delete')]
     public function deleteProjection(string $name): void
     {

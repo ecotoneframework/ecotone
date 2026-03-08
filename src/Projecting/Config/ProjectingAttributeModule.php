@@ -12,6 +12,7 @@ use function array_merge;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\EventSourcing\Attribute\ProjectionDelete;
 use Ecotone\EventSourcing\Attribute\ProjectionInitialization;
+use Ecotone\EventSourcing\Attribute\ProjectionReset;
 use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
@@ -38,6 +39,7 @@ use Ecotone\Projecting\Attribute\ProjectionBackfill;
 use Ecotone\Projecting\Attribute\ProjectionDeployment;
 use Ecotone\Projecting\Attribute\ProjectionExecution;
 use Ecotone\Projecting\Attribute\ProjectionFlush;
+use Ecotone\Projecting\Attribute\ProjectionRebuild;
 use Ecotone\Projecting\Attribute\ProjectionV2;
 use Ecotone\Projecting\Attribute\Streaming;
 use Ecotone\Projecting\EventStoreAdapter\PollingProjectionChannelAdapter;
@@ -80,6 +82,7 @@ class ProjectingAttributeModule implements AnnotationModule
             $projectionAttribute = $annotationRegistrationService->getAttributeForClass($projectionClassName, ProjectionV2::class);
             $batchSizeAttribute = $annotationRegistrationService->findAttributeForClass($projectionClassName, ProjectionExecution::class);
             $backfillAttribute = $annotationRegistrationService->findAttributeForClass($projectionClassName, ProjectionBackfill::class);
+            $rebuildAttribute = $annotationRegistrationService->findAttributeForClass($projectionClassName, ProjectionRebuild::class);
             $pollingAttribute = $annotationRegistrationService->findAttributeForClass($projectionClassName, Polling::class);
             $streamingAttribute = $annotationRegistrationService->findAttributeForClass($projectionClassName, Streaming::class);
             $projectionDeployment = $annotationRegistrationService->findAttributeForClass($projectionClassName, ProjectionDeployment::class);
@@ -100,6 +103,8 @@ class ProjectingAttributeModule implements AnnotationModule
                 backfillPartitionBatchSize: $backfillAttribute?->backfillPartitionBatchSize,
                 backfillAsyncChannelName: $backfillAttribute?->asyncChannelName,
                 partitioned: $partitionAttribute !== null,
+                rebuildPartitionBatchSize: $rebuildAttribute?->partitionBatchSize,
+                rebuildAsyncChannelName: $rebuildAttribute?->asyncChannelName,
             );
 
             $asynchronousChannelName = self::getProjectionAsynchronousChannel($annotationRegistrationService, $projectionClassName);
@@ -140,6 +145,7 @@ class ProjectingAttributeModule implements AnnotationModule
             $annotationRegistrationService->findCombined(ProjectionV2::class, ProjectionInitialization::class),
             $annotationRegistrationService->findCombined(ProjectionV2::class, ProjectionDelete::class),
             $annotationRegistrationService->findCombined(ProjectionV2::class, ProjectionFlush::class),
+            $annotationRegistrationService->findCombined(ProjectionV2::class, ProjectionReset::class),
         );
         foreach ($lifecycleAnnotations as $lifecycleAnnotation) {
             /** @var ProjectionV2 $projectionAttribute */
@@ -153,6 +159,8 @@ class ProjectingAttributeModule implements AnnotationModule
                 $projectionBuilder->setDeleteChannel($inputChannel);
             } elseif ($lifecycleAnnotation->getAnnotationForMethod() instanceof ProjectionFlush) {
                 $projectionBuilder->setFlushChannel($inputChannel);
+            } elseif ($lifecycleAnnotation->getAnnotationForMethod() instanceof ProjectionReset) {
+                $projectionBuilder->setResetChannel($inputChannel);
             }
 
 

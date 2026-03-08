@@ -49,6 +49,7 @@ use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
+use Ramsey\Uuid\UuidInterface;
 
 #[ModuleAnnotation]
 /**
@@ -93,7 +94,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
         $messagingConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(MessageHeaders::ERROR_CHANNEL));
         $messagingConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::createPublishSubscribeChannel(OnConsumerStop::CONSUMER_STOP_CHANNEL_NAME));
         $messagingConfiguration->registerMessageChannel(SimpleMessageChannelBuilder::create(NullableMessageChannel::CHANNEL_NAME, NullableMessageChannel::create()));
-        if (interface_exists(\Ramsey\Uuid\UuidInterface::class)) {
+        if (interface_exists(UuidInterface::class)) {
             $messagingConfiguration->registerConverter(new Definition(UuidToStringConverter::class));
             $messagingConfiguration->registerConverter(new Definition(StringToUuidConverter::class));
         }

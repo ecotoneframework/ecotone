@@ -19,4 +19,5 @@ interface ProjectorExecutor
     public function init(): void;
     public function delete(): void;
     public function flush(mixed $userState = null): void;
+    public function reset(?string $partitionKey = null): void;
 }

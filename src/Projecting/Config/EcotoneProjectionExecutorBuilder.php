@@ -27,6 +27,7 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
 {
     private const DEFAULT_EVENT_LOADING_BATCH_SIZE = 1_000;
     private const DEFAULT_BACKFILL_PARTITION_BATCH_SIZE = 100;
+    private const DEFAULT_REBUILD_PARTITION_BATCH_SIZE = 100;
 
     /**
      * @param AnnotatedDefinition[] $projectionEventHandlers
@@ -46,6 +47,9 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         private ?int    $backfillPartitionBatchSize = null,
         private ?string $backfillAsyncChannelName = null,
         private bool    $partitioned = false,
+        private ?string $resetChannel = null,
+        private ?int    $rebuildPartitionBatchSize = null,
+        private ?string $rebuildAsyncChannelName = null,
     ) {
         if ($this->partitionHeader && ! $this->automaticInitialization) {
             throw new ConfigurationException("Cannot set partition header for projection {$this->projectionName} with automatic initialization disabled");
@@ -92,6 +96,11 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         $this->flushChannel = $inputChannel;
     }
 
+    public function setResetChannel(string $inputChannel): void
+    {
+        $this->resetChannel = $inputChannel;
+    }
+
     public function setAsyncChannel(string $asynchronousChannelName): void
     {
         $this->asyncChannelName = $asynchronousChannelName;
@@ -117,6 +126,16 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         return $this->backfillAsyncChannelName;
     }
 
+    public function rebuildPartitionBatchSize(): int
+    {
+        return $this->rebuildPartitionBatchSize ?? self::DEFAULT_REBUILD_PARTITION_BATCH_SIZE;
+    }
+
+    public function rebuildAsyncChannelName(): ?string
+    {
+        return $this->rebuildAsyncChannelName;
+    }
+
     public function compile(MessagingContainerBuilder $builder): Definition|Reference
     {
         $routerProcessor = $this->buildExecutionRouter($builder);
@@ -129,6 +148,7 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
             $this->deleteChannel,
             $this->flushChannel,
             $this->isLive,
+            $this->resetChannel,
         ]);
     }
 

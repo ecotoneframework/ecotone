@@ -19,4 +19,6 @@ interface ProjectionExecutorBuilder extends CompilableBuilder
     public function eventLoadingBatchSize(): int;
     public function backfillPartitionBatchSize(): int;
     public function backfillAsyncChannelName(): ?string;
+    public function rebuildPartitionBatchSize(): int;
+    public function rebuildAsyncChannelName(): ?string;
 }

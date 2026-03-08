@@ -20,4 +20,5 @@ class ProjectingHeaders
     public const MANUAL_INITIALIZATION = 'projection.manual_initialization';
     public const PROJECTION_PARTITION_KEY = 'projection.partitionKey';
     public const PROJECTION_CAN_INITIALIZE = 'projection.canInitialize';
+    public const REBUILD_PARTITION_KEY = 'projection.rebuild.partitionKey';
 }

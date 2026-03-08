@@ -199,6 +199,11 @@ class InMemoryAnnotationFinder implements AnnotationFinder
         return $classes;
     }
 
+    public function findClassesWithAnnotatedProperties(string $annotationClassName): array
+    {
+        return [];
+    }
+
     /**
      * @inheritDoc
      */

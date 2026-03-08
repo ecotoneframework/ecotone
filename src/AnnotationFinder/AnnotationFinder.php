@@ -36,4 +36,9 @@ interface AnnotationFinder extends AnnotationResolver
      */
     public function getAttributeForClass(string $className, string $attributeClassName): object;
     public function findAttributeForClass(string $className, string $attributeClassName): ?object;
+
+    /**
+     * @return class-string[]
+     */
+    public function findClassesWithAnnotatedProperties(string $annotationClassName): array;
 }

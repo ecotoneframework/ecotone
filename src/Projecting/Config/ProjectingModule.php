@@ -29,8 +29,8 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Projecting\Attribute\ProjectionFlush;
-use Ecotone\Projecting\BackfillExecutorHandler;
 use Ecotone\Projecting\InMemory\InMemoryProjectionRegistry;
+use Ecotone\Projecting\PartitionBatchExecutorHandler;
 use Ecotone\Projecting\PartitionProviderRegistry;
 use Ecotone\Projecting\ProjectingHeaders;
 use Ecotone\Projecting\ProjectingManager;
@@ -93,6 +93,8 @@ class ProjectingModule implements AnnotationModule
                     $projectionBuilder->automaticInitialization(),
                     $projectionBuilder->backfillPartitionBatchSize(),
                     $projectionBuilder->backfillAsyncChannelName(),
+                    $projectionBuilder->rebuildPartitionBatchSize(),
+                    $projectionBuilder->rebuildAsyncChannelName(),
                 ])
             );
             $projectionRegistryMap[$projectionName] = new Reference($projectingManagerReference);
@@ -122,10 +124,11 @@ class ProjectingModule implements AnnotationModule
                     ->chainInterceptedProcessor(
                         MethodInvokerBuilder::create(
                             $projectingManagerReference,
-                            InterfaceToCallReference::create(ProjectingManager::class, 'executeSingleBatch'),
+                            InterfaceToCallReference::create(ProjectingManager::class, 'executePartitionBatch'),
                             [
                                 HeaderBuilder::createOptional('partitionKeyValue', ProjectingHeaders::PROJECTION_PARTITION_KEY),
                                 HeaderBuilder::create('canInitialize', ProjectingHeaders::PROJECTION_CAN_INITIALIZE),
+                                HeaderBuilder::createOptional('shouldReset', 'projection.shouldReset'),
                             ],
                         )
                     )
@@ -151,10 +154,10 @@ class ProjectingModule implements AnnotationModule
             new Definition(InMemoryProjectionRegistry::class, [$projectionRegistryMap])
         );
 
-        // Register BackfillExecutorHandler and its message handler
+        // Register PartitionBatchExecutorHandler and its message handler
         $messagingConfiguration->registerServiceDefinition(
-            BackfillExecutorHandler::class,
-            new Definition(BackfillExecutorHandler::class, [
+            PartitionBatchExecutorHandler::class,
+            new Definition(PartitionBatchExecutorHandler::class, [
                 new Reference(ProjectionRegistry::class),
                 new Reference(TerminationListener::class),
             ])
@@ -164,20 +167,21 @@ class ProjectingModule implements AnnotationModule
             MessageProcessorActivatorBuilder::create()
                 ->chainInterceptedProcessor(
                     MethodInvokerBuilder::create(
-                        BackfillExecutorHandler::class,
-                        InterfaceToCallReference::create(BackfillExecutorHandler::class, 'executeBackfillBatch'),
+                        PartitionBatchExecutorHandler::class,
+                        InterfaceToCallReference::create(PartitionBatchExecutorHandler::class, 'executeBatch'),
                         [
                             PayloadBuilder::create('projectionName'),
-                            HeaderBuilder::createOptional('limit', 'backfill.limit'),
-                            HeaderBuilder::createOptional('offset', 'backfill.offset'),
-                            HeaderBuilder::createOptional('streamName', 'backfill.streamName'),
-                            HeaderBuilder::createOptional('aggregateType', 'backfill.aggregateType'),
-                            HeaderBuilder::createOptional('eventStoreReferenceName', 'backfill.eventStoreReferenceName'),
+                            HeaderBuilder::createOptional('limit', 'partitionBatch.limit'),
+                            HeaderBuilder::createOptional('offset', 'partitionBatch.offset'),
+                            HeaderBuilder::createOptional('streamName', 'partitionBatch.streamName'),
+                            HeaderBuilder::createOptional('aggregateType', 'partitionBatch.aggregateType'),
+                            HeaderBuilder::createOptional('eventStoreReferenceName', 'partitionBatch.eventStoreReferenceName'),
+                            HeaderBuilder::createOptional('shouldReset', 'partitionBatch.shouldReset'),
                         ],
                     )
                 )
-                ->withEndpointId('backfill_executor_handler')
-                ->withInputChannelName(BackfillExecutorHandler::BACKFILL_EXECUTOR_CHANNEL)
+                ->withEndpointId('partition_batch_executor_handler')
+                ->withInputChannelName(PartitionBatchExecutorHandler::PARTITION_BATCH_EXECUTOR_CHANNEL)
         );
 
         // Register console commands

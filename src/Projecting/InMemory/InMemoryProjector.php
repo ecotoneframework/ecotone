@@ -43,4 +43,9 @@ class InMemoryProjector implements ProjectorExecutor, Countable
     public function flush(mixed $userState = null): void
     {
     }
+
+    public function reset(?string $partitionKey = null): void
+    {
+        $this->projectedEvents = [];
+    }
 }

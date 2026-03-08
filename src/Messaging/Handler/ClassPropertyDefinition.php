@@ -109,6 +109,17 @@ final class ClassPropertyDefinition
         throw InvalidArgumentException::create("Annotation {$annotationClass} was not found for property {$this}");
     }
 
+    public function findAnnotation(Type $annotationClass): ?object
+    {
+        foreach ($this->annotations as $annotation) {
+            if ($annotationClass->accepts($annotation)) {
+                return $annotation;
+            }
+        }
+
+        return null;
+    }
+
     /**
      * @return string
      */

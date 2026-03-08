@@ -65,6 +65,16 @@ class EventStoreStreamingChannelAdapterBuilder implements ProjectionExecutorBuil
         return null;
     }
 
+    public function rebuildPartitionBatchSize(): int
+    {
+        return 100;
+    }
+
+    public function rebuildAsyncChannelName(): ?string
+    {
+        return null;
+    }
+
     public function compile(MessagingContainerBuilder $builder): Definition|Reference
     {
         return new Definition(

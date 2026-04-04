@@ -26,6 +26,7 @@ final class PollingMetadata implements DefinedObject
     public const DEFAULT_FINISH_WHEN_NO_MESSAGES = false;
 
     private bool $withSignalInterceptors;
+    private ?string $polledChannelName = null;
 
 
     /**
@@ -440,6 +441,19 @@ final class PollingMetadata implements DefinedObject
     public function getCronExpression(): ?string
     {
         return $this->cronExpression;
+    }
+
+    public function getPolledChannelName(): ?string
+    {
+        return $this->polledChannelName;
+    }
+
+    public function setPolledChannelName(string $polledChannelName): self
+    {
+        $copy = $this->createCopy();
+        $copy->polledChannelName = $polledChannelName;
+
+        return $copy;
     }
 
     public function hasFixedRateExpression(): bool

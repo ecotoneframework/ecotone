@@ -46,7 +46,9 @@ final class DynamicMessageChannel implements PollableChannel
         Assert::notNullAndEmpty($channelName, "Channel name to poll message from cannot be null. If you want to skip message receiving, return 'nullChannel' instead.");
 
         $channel = $this->resolveMessageChannel($channelName);
-        $message = $channel->receiveWithTimeout($pollingMetadata);
+        $message = $channel->receiveWithTimeout(
+            $pollingMetadata->setPolledChannelName($channelName)
+        );
         $this->loggingGateway->info("Decided to received message from `{$channelName}` for `{$this->channelName}`", $message, ['channel_name' => $this->channelName, 'chosen_channel_name' => $channelName]);
 
         return $message;

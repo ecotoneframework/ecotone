@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Ecotone\Projecting\Config;
 
 use Ecotone\AnnotationFinder\AnnotatedDefinition;
+use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
@@ -101,9 +102,22 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         $this->resetChannel = $inputChannel;
     }
 
+    private ?Asynchronous $asyncAttribute = null;
+
     public function setAsyncChannel(string $asynchronousChannelName): void
     {
         $this->asyncChannelName = $asynchronousChannelName;
+    }
+
+    public function setAsyncAttribute(Asynchronous $asyncAttribute): void
+    {
+        $this->asyncAttribute = $asyncAttribute;
+        $this->asyncChannelName = $asyncAttribute->getChannelName()[0];
+    }
+
+    public function getAsyncAttribute(): ?Asynchronous
+    {
+        return $this->asyncAttribute;
     }
 
     public function automaticInitialization(): bool

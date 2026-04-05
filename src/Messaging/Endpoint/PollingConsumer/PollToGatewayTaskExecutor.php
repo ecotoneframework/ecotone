@@ -5,6 +5,7 @@ namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\NonProxyGateway;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagePoller;
 use Ecotone\Messaging\Scheduling\TaskExecutor;
@@ -19,7 +20,9 @@ class PollToGatewayTaskExecutor implements TaskExecutor
     public function __construct(
         private MessagePoller $messagePoller,
         private NonProxyGateway $gateway,
-        private MessagingEntrypointService $messagingEntrypoint
+        private MessagingEntrypointService $messagingEntrypoint,
+        private AsyncHandlerAnnotationRegistry $asyncHandlerAnnotationRegistry,
+        private AsyncEndpointAnnotationContext $asyncEndpointAnnotationContext,
     ) {
     }
 
@@ -34,12 +37,36 @@ class PollToGatewayTaskExecutor implements TaskExecutor
         }
 
         if ($message) {
-            $this->gateway->execute([
-                MessageBuilder::fromMessage($message)
-                    ->setHeader(MessageHeaders::CONSUMER_POLLING_METADATA, $pollingMetadata)
-                    ->build(),
-            ]);
+            $routingSlip = $this->resolveRoutingSlip($message);
+            if ($routingSlip !== []) {
+                $this->asyncEndpointAnnotationContext->setAnnotations(
+                    $this->asyncHandlerAnnotationRegistry->getAnnotationsForChannel($routingSlip[0])
+                );
+            }
+            try {
+                $this->gateway->execute([
+                    MessageBuilder::fromMessage($message)
+                        ->setHeader(MessageHeaders::CONSUMER_POLLING_METADATA, $pollingMetadata)
+                        ->build(),
+                ]);
+            } finally {
+                $this->asyncEndpointAnnotationContext->clear();
+            }
             gc_collect_cycles();
         }
+    }
+
+    /**
+     * @return string[]
+     */
+    private function resolveRoutingSlip(Message $message): array
+    {
+        if (! $message->getHeaders()->containsKey(MessageHeaders::ROUTING_SLIP)) {
+            return [];
+        }
+
+        $routingSlip = $message->getHeaders()->get(MessageHeaders::ROUTING_SLIP);
+
+        return $routingSlip ? explode(',', $routingSlip) : [];
     }
 }

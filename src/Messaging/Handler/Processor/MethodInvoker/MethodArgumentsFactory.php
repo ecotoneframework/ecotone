@@ -2,6 +2,8 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
+use Ecotone\Messaging\Attribute\AsynchronousEndpointAttribute;
+use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\InterfaceParameter;
@@ -92,7 +94,7 @@ class MethodArgumentsFactory
     /**
      * @param AttributeDefinition[] $endpointAnnotations
      */
-    public static function getAnnotationValueConverter(InterfaceParameter $interfaceParameter, InterfaceToCall $interceptedInterface, array $endpointAnnotations): AttributeBuilder|AttributeDefinitionBuilder|null
+    public static function getAnnotationValueConverter(InterfaceParameter $interfaceParameter, InterfaceToCall $interceptedInterface, array $endpointAnnotations): AttributeBuilder|AttributeDefinitionBuilder|Converter\AsyncEndpointAnnotationBuilder|null
     {
         $interfaceParameterType = $interfaceParameter->getTypeDescriptor()->withoutNull();
         // Endpoint Annotations
@@ -131,7 +133,32 @@ class MethodArgumentsFactory
             }
         }
 
+        // Async Endpoint - resolve at runtime from handler annotations via routing slip
+        if ($interfaceParameter->isAnnotation()
+            && $interfaceParameterType->isClassOrInterface()
+            && is_a($interfaceParameterType->toString(), AsynchronousEndpointAttribute::class, true)
+            && self::hasAsynchronousRunningEndpoint($endpointAnnotations)) {
+            return new Converter\AsyncEndpointAnnotationBuilder(
+                $interfaceParameter->getName(),
+                $interfaceParameterType->toString(),
+            );
+        }
+
         return null;
+    }
+
+    /**
+     * @param AttributeDefinition[] $endpointAnnotations
+     */
+    public static function hasAsynchronousRunningEndpoint(array $endpointAnnotations): bool
+    {
+        foreach ($endpointAnnotations as $annotation) {
+            if ($annotation instanceof AttributeDefinition && $annotation->getClassName() === AsynchronousRunningEndpoint::class) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

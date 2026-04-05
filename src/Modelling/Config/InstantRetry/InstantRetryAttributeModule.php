@@ -21,6 +21,7 @@ use Ecotone\Messaging\Precedence;
 use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Modelling\Attribute\InstantRetry;
 use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\Config\DatabaseTransaction\TransactionStatusTracker;
 use Symfony\Component\Uid\Uuid;
 
 #[ModuleAnnotation]
@@ -152,7 +153,7 @@ final class InstantRetryAttributeModule implements AnnotationModule
         ?string $relatedEndpointId,
     ): void {
         $instantRetryId = Uuid::v7()->toRfc4122();
-        $messagingConfiguration->registerServiceDefinition($instantRetryId, Definition::createFor(InstantRetryInterceptor::class, [$retryAttempt, $exceptions, Reference::to(RetryStatusTracker::class), $relatedEndpointId]));
+        $messagingConfiguration->registerServiceDefinition($instantRetryId, Definition::createFor(InstantRetryInterceptor::class, [$retryAttempt, $exceptions, Reference::to(RetryStatusTracker::class), Reference::to(TransactionStatusTracker::class), $relatedEndpointId]));
 
         $messagingConfiguration
             ->registerAroundMethodInterceptor(

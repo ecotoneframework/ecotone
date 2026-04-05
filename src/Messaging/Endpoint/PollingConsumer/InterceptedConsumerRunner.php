@@ -31,6 +31,8 @@ class InterceptedConsumerRunner implements EndpointRunner
         private LoggingGateway              $logger,
         private MessagingEntrypointService   $messagingEntrypoint,
         private ExpressionEvaluationService $expressionEvaluationService,
+        private AsyncHandlerAnnotationRegistry $asyncHandlerAnnotationRegistry,
+        private AsyncEndpointAnnotationContext $asyncEndpointAnnotationContext,
     ) {
     }
 
@@ -51,7 +53,7 @@ class InterceptedConsumerRunner implements EndpointRunner
         $interceptedConsumer = new ScheduledTaskConsumer(
             SyncTaskScheduler::createWithEmptyTriggerContext($this->clock, $pollingMetadata),
             $trigger,
-            new PollToGatewayTaskExecutor($this->messagePoller, $interceptedGateway, $this->messagingEntrypoint),
+            new PollToGatewayTaskExecutor($this->messagePoller, $interceptedGateway, $this->messagingEntrypoint, $this->asyncHandlerAnnotationRegistry, $this->asyncEndpointAnnotationContext),
         );
 
         if ($interceptors) {

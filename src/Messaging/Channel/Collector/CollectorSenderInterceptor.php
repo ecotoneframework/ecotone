@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Channel\Collector;
 
 use Ecotone\Messaging\Attribute\Parameter\Reference;
+use Ecotone\Messaging\Attribute\WithoutMessageCollector;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
@@ -24,8 +25,12 @@ final class CollectorSenderInterceptor
         MethodInvocation $methodInvocation,
         Message $message,
         #[Reference] ConfiguredMessagingSystem $configuredMessagingSystem,
-        #[Reference] LoggingGateway $logger
+        #[Reference] LoggingGateway $logger,
+        ?WithoutMessageCollector $withoutMessageCollector = null,
     ): mixed {
+        if ($withoutMessageCollector !== null) {
+            return $methodInvocation->proceed();
+        }
         /** For example Command Bus inside Command Bus */
         if ($this->collectorStorage->isEnabled()) {
             return $methodInvocation->proceed();

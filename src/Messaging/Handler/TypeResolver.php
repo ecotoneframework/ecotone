@@ -10,6 +10,7 @@ use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\AttributeReference;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\DefinitionHelper;
 use Ecotone\Messaging\Config\Container\InterfaceParameterReference;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\Reference;
@@ -216,7 +217,7 @@ class TypeResolver
     {
         $reference = new AttributeReference($attributeDefinition->getClassName(), $className, $methodName);
         if (! $builder->has($reference)) {
-            $builder->register($reference, $attributeDefinition);
+            $builder->register($reference, DefinitionHelper::resolvePotentialComplexAttribute($attributeDefinition));
         }
         return $attributeDefinition;
     }

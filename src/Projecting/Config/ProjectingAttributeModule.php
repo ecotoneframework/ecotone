@@ -107,14 +107,15 @@ class ProjectingAttributeModule implements AnnotationModule
                 rebuildAsyncChannelName: $rebuildAttribute?->asyncChannelName,
             );
 
-            $asynchronousChannelName = self::getProjectionAsynchronousChannel($annotationRegistrationService, $projectionClassName);
+            $asyncAttribute = self::getProjectionAsynchronousAttribute($annotationRegistrationService, $projectionClassName);
+            $asynchronousChannelName = $asyncAttribute ? $asyncAttribute->getChannelName()[0] : null;
             $isPolling = $pollingAttribute !== null;
             $isEventStreaming = $streamingAttribute !== null;
 
             self::verifyCorrectApiUsage($isPolling, $asynchronousChannelName, $projectionAttribute, $isEventStreaming, $partitionAttribute !== null);
 
-            if ($asynchronousChannelName !== null) {
-                $projectionBuilder->setAsyncChannel($asynchronousChannelName);
+            if ($asyncAttribute !== null) {
+                $projectionBuilder->setAsyncAttribute($asyncAttribute);
             }
 
             if ($isPolling) {
@@ -247,14 +248,14 @@ class ProjectingAttributeModule implements AnnotationModule
     /**
      * @param class-string $projectionClassName
      */
-    private static function getProjectionAsynchronousChannel(AnnotationFinder $annotationRegistrationService, string $projectionClassName): ?string
+    private static function getProjectionAsynchronousAttribute(AnnotationFinder $annotationRegistrationService, string $projectionClassName): ?Asynchronous
     {
         $attributes = $annotationRegistrationService->getAnnotationsForClass($projectionClassName);
         foreach ($attributes as $attribute) {
             if ($attribute instanceof Asynchronous) {
                 $asynchronousChannelName = $attribute->getChannelName();
                 Assert::isTrue(count($asynchronousChannelName) === 1, "Make use of single channel name in Asynchronous annotation for Projection: {$projectionClassName}");
-                return array_pop($asynchronousChannelName);
+                return $attribute;
             }
         }
         return null;

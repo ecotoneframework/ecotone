@@ -8,7 +8,10 @@ declare(strict_types=1);
 namespace Ecotone\Projecting\Config;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Messaging\Attribute\WithoutDatabaseTransaction;
+use Ecotone\Messaging\Attribute\WithoutMessageCollector;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Configuration;
@@ -99,25 +102,35 @@ class ProjectingModule implements AnnotationModule
             );
             $projectionRegistryMap[$projectionName] = new Reference($projectingManagerReference);
 
-            $messagingConfiguration->registerMessageHandler(
-                MessageProcessorActivatorBuilder::create()
-                    ->chainInterceptedProcessor(
-                        MethodInvokerBuilder::create(
-                            $projectingManagerReference,
-                            InterfaceToCallReference::create(ProjectingManager::class, 'execute'),
-                            [
-                                $projectionBuilder->partitionHeader()
-                                    ? HeaderBuilder::create('partitionKeyValue', $projectionBuilder->partitionHeader())
-                                    : ($projectionBuilder->isPartitioned()
-                                        ? new PartitionHeaderBuilder('partitionKeyValue')
-                                        : ValueBuilder::create('partitionKeyValue', null)),
-                                HeaderBuilder::createOptional('manualInitialization', ProjectingHeaders::MANUAL_INITIALIZATION),
-                            ],
-                        )
+            $handlerBuilder = MessageProcessorActivatorBuilder::create()
+                ->chainInterceptedProcessor(
+                    MethodInvokerBuilder::create(
+                        $projectingManagerReference,
+                        InterfaceToCallReference::create(ProjectingManager::class, 'execute'),
+                        [
+                            $projectionBuilder->partitionHeader()
+                                ? HeaderBuilder::create('partitionKeyValue', $projectionBuilder->partitionHeader())
+                                : ($projectionBuilder->isPartitioned()
+                                    ? new PartitionHeaderBuilder('partitionKeyValue')
+                                    : ValueBuilder::create('partitionKeyValue', null)),
+                            HeaderBuilder::createOptional('manualInitialization', ProjectingHeaders::MANUAL_INITIALIZATION),
+                        ],
                     )
-                    ->withEndpointId(self::endpointIdForProjection($projectionName))
-                    ->withInputChannelName(self::inputChannelForProjectingManager($projectionName))
-            );
+                )
+                ->withEndpointId(self::endpointIdForProjection($projectionName))
+                ->withInputChannelName(self::inputChannelForProjectingManager($projectionName));
+
+            $asyncAttribute = $projectionBuilder instanceof EcotoneProjectionExecutorBuilder ? $projectionBuilder->getAsyncAttribute() : null;
+            if ($asyncAttribute !== null) {
+                $handlerBuilder = $handlerBuilder->withEndpointAnnotations([
+                    AttributeDefinition::fromObject(new Asynchronous(
+                        $asyncAttribute->getChannelName(),
+                        array_merge($asyncAttribute->getEndpointAnnotations(), [new WithoutDatabaseTransaction(), new WithoutMessageCollector()]),
+                    )),
+                ]);
+            }
+
+            $messagingConfiguration->registerMessageHandler($handlerBuilder);
 
             $messagingConfiguration->registerMessageHandler(
                 MessageProcessorActivatorBuilder::create()

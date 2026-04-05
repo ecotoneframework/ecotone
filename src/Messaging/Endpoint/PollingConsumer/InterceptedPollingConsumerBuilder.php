@@ -113,6 +113,8 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
             new Reference(LoggingGateway::class),
             new Reference(MessagingEntrypointService::class),
             new Reference(ExpressionEvaluationService::REFERENCE),
+            new Reference(AsyncHandlerAnnotationRegistry::class),
+            new Reference(AsyncEndpointAnnotationContext::class),
         ]);
         $builder->registerPollingEndpoint($endpointId, $consumerRunner, $this->withContinuesPolling());
     }

@@ -7,6 +7,7 @@ use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Message;
+use Ecotone\Modelling\Config\DatabaseTransaction\TransactionStatusTracker;
 use Exception;
 
 /**
@@ -15,10 +16,11 @@ use Exception;
 class InstantRetryInterceptor
 {
     public function __construct(
-        private int                $maxRetryAttempts,
-        private array              $exceptions,
-        private RetryStatusTracker $retryStatusTracker,
-        private ?string            $relatedEndpointId = null,
+        private int                      $maxRetryAttempts,
+        private array                    $exceptions,
+        private RetryStatusTracker       $retryStatusTracker,
+        private TransactionStatusTracker $transactionStatusTracker,
+        private ?string                  $relatedEndpointId = null,
     ) {
     }
 
@@ -31,6 +33,10 @@ class InstantRetryInterceptor
         }
 
         if ($this->retryStatusTracker->isCurrentlyWrappedByRetry()) {
+            return $methodInvocation->proceed();
+        }
+
+        if ($this->transactionStatusTracker->isInsideTransaction()) {
             return $methodInvocation->proceed();
         }
 

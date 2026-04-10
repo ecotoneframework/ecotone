@@ -1,7 +1,7 @@
 <?php
 
 /*
- * licence Enterprise
+ * licence Apache-2.0
  */
 declare(strict_types=1);
 
@@ -98,7 +98,7 @@ class ProjectingManager
 
                 $batchProcessedEvents = 0;
                 foreach ($streamPage->events as $event) {
-                    $userState = $this->projectorExecutor->project($event, $userState);
+                    $userState = $this->projectorExecutor->project($event, $userState, $shouldReset);
                     $batchProcessedEvents++;
                 }
                 if ($batchProcessedEvents > 0) {

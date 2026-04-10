@@ -1,7 +1,7 @@
 <?php
 
 /*
- * licence Enterprise
+ * licence Apache-2.0
  */
 declare(strict_types=1);
 
@@ -147,7 +147,7 @@ class StreamFilterRegistryModule implements AnnotationModule
         return $projectionEventNames;
     }
 
-    private static function resolveFromAggregateStream(
+    public static function resolveFromAggregateStream(
         AnnotationFinder $annotationFinder,
         FromAggregateStream $attribute,
         string $projectionName,

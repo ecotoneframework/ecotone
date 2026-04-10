@@ -1,7 +1,7 @@
 <?php
 
 /*
- * licence Enterprise
+ * licence Apache-2.0
  */
 declare(strict_types=1);
 
@@ -20,6 +20,7 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Projecting\Attribute\StreamSource as StreamSourceAttribute;
 use Ecotone\Projecting\StreamSource;
 use Ecotone\Projecting\StreamSourceReference;
@@ -48,6 +49,10 @@ class StreamSourceRegistryModule extends NoExternalConfigurationModule implement
 
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
+        if (! empty($this->userlandStreamSourceReferences) && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
+            throw LicensingException::create('Custom #[StreamSource] implementations require Ecotone Enterprise licence.');
+        }
+
         $streamSourceReferences = ExtensionObjectResolver::resolve(
             StreamSourceReference::class,
             $extensionObjects

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * licence Enterprise
+ * licence Apache-2.0
  */
 declare(strict_types=1);
 
@@ -15,7 +15,6 @@ use Ecotone\Messaging\Attribute\WithoutMessageCollector;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Configuration;
-use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
@@ -31,6 +30,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
+use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Projecting\Attribute\ProjectionFlush;
 use Ecotone\Projecting\InMemory\InMemoryProjectionRegistry;
 use Ecotone\Projecting\PartitionBatchExecutorHandler;
@@ -67,7 +67,11 @@ class ProjectingModule implements AnnotationModule
         $projectionBuilders = ExtensionObjectResolver::resolve(ProjectionExecutorBuilder::class, $extensionObjects);
 
         if (! empty($projectionBuilders) && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
-            throw ConfigurationException::create('Projections are part of Ecotone Enterprise. To use projections, please acquire an enterprise licence.');
+            foreach ($projectionBuilders as $builder) {
+                if (! $builder instanceof EcotoneProjectionExecutorBuilder || ! $builder->isOpenSourceEligible()) {
+                    throw LicensingException::create('Projections with enterprise features (Partitioned, Streaming, Polling, ProjectionRebuild, ProjectionDeployment, async backfill) require Ecotone Enterprise licence.');
+                }
+            }
         }
 
         $messagingConfiguration->registerServiceDefinition(
@@ -122,10 +126,14 @@ class ProjectingModule implements AnnotationModule
 
             $asyncAttribute = $projectionBuilder instanceof EcotoneProjectionExecutorBuilder ? $projectionBuilder->getAsyncAttribute() : null;
             if ($asyncAttribute !== null) {
+                $endpointAnnotations = $asyncAttribute->getEndpointAnnotations();
+                if ($messagingConfiguration->isRunningForEnterpriseLicence()) {
+                    $endpointAnnotations = array_merge($endpointAnnotations, [new WithoutDatabaseTransaction(), new WithoutMessageCollector()]);
+                }
                 $handlerBuilder = $handlerBuilder->withEndpointAnnotations([
                     AttributeDefinition::fromObject(new Asynchronous(
                         $asyncAttribute->getChannelName(),
-                        array_merge($asyncAttribute->getEndpointAnnotations(), [new WithoutDatabaseTransaction(), new WithoutMessageCollector()]),
+                        $endpointAnnotations,
                     )),
                 ]);
             }

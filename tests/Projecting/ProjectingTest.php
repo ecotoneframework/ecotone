@@ -21,6 +21,7 @@ use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\Interceptor\PcntlTerminationListener;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Modelling\Attribute\EventHandler;
 use Ecotone\Modelling\Event;
 use Ecotone\Projecting\Attribute;
@@ -537,8 +538,7 @@ class ProjectingTest extends TestCase
 
     public function test_it_throws_exception_when_no_licence(): void
     {
-        $this->expectException(ConfigurationException::class);
-        $this->expectExceptionMessage('Projections are part of Ecotone Enterprise. To use projections, please acquire an enterprise licence.');
+        $this->expectException(LicensingException::class);
 
         $projection = new #[ProjectionV2('test'), FromStream('test_stream')] class {
             #[EventHandler('*')]

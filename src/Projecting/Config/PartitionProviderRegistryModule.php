@@ -1,7 +1,7 @@
 <?php
 
 /*
- * licence Enterprise
+ * licence Apache-2.0
  */
 declare(strict_types=1);
 
@@ -19,6 +19,7 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Projecting\Attribute\PartitionProvider as PartitionProviderAttribute;
 use Ecotone\Projecting\Attribute\ProjectionV2;
 use Ecotone\Projecting\PartitionProviderReference;
@@ -56,6 +57,10 @@ class PartitionProviderRegistryModule extends NoExternalConfigurationModule impl
 
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
+        if (! empty($this->userlandPartitionProviderReferences) && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
+            throw LicensingException::create('Custom #[PartitionProvider] implementations require Ecotone Enterprise licence.');
+        }
+
         $partitionProviderReferences = ExtensionObjectResolver::resolve(
             PartitionProviderReference::class,
             $extensionObjects

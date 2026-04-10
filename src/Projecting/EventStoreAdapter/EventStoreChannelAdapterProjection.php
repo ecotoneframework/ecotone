@@ -29,7 +29,7 @@ class EventStoreChannelAdapterProjection implements ProjectorExecutor
     ) {
     }
 
-    public function project(Event $event, mixed $userState = null): mixed
+    public function project(Event $event, mixed $userState = null, bool $isRebuilding = false): mixed
     {
         if (! empty($this->eventNames)) {
             $eventName = $event->getEventName();

@@ -1,13 +1,14 @@
 <?php
 
 /*
- * licence Enterprise
+ * licence Apache-2.0
  */
 declare(strict_types=1);
 
 namespace Ecotone\Projecting;
 
 use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\LicenceDecider;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\MessageHeaders;
@@ -22,8 +23,9 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
     public function __construct(
         private MessagingEntrypointService $messagingEntrypoint,
         private MessageHeadersPropagatorInterceptor $messageHeadersPropagatorInterceptor,
-        private string $projectionName, // this is required for event stream emitter so it can create a stream with this name
+        private string $projectionName,
         private MessageProcessor $routerProcessor,
+        private LicenceDecider $licenceDecider,
         private ?string $initChannel = null,
         private ?string $deleteChannel = null,
         private ?string $flushChannel = null,
@@ -32,13 +34,15 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
     ) {
     }
 
-    public function project(Event $event, mixed $userState = null): mixed
+    public function project(Event $event, mixed $userState = null, bool $isRebuilding = false): mixed
     {
         $metadata = $event->getMetadata();
         $metadata[ProjectingHeaders::PROJECTION_STATE] = $userState ?? null;
         $metadata[ProjectingHeaders::PROJECTION_EVENT_NAME] = $event->getEventName();
-        $metadata[ProjectingHeaders::PROJECTION_NAME] = $this->projectionName;
-        $metadata[ProjectingHeaders::PROJECTION_LIVE] = $this->isLive;
+        if ($this->licenceDecider->hasEnterpriseLicence()) {
+            $metadata[ProjectingHeaders::PROJECTION_NAME] = $this->projectionName;
+        }
+        $metadata[ProjectingHeaders::PROJECTION_LIVE] = $this->isLive && ! $isRebuilding;
         $metadata[MessageHeaders::STREAM_BASED_SOURCED] = true; // this one is required for correct header propagation in EventStreamEmitter...
         $metadata[MessageHeaders::REPLY_CHANNEL] = $responseQueue = new QueueChannel('response_channel');
 
@@ -65,37 +69,30 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
     public function init(): void
     {
         if ($this->initChannel) {
-            $this->messagingEntrypoint->sendWithHeaders([], [
-                ProjectingHeaders::PROJECTION_NAME => $this->projectionName,
-            ], $this->initChannel);
+            $this->messagingEntrypoint->sendWithHeaders([], $this->withProjectionName([]), $this->initChannel);
         }
     }
 
     public function delete(): void
     {
         if ($this->deleteChannel) {
-            $this->messagingEntrypoint->sendWithHeaders([], [
-                ProjectingHeaders::PROJECTION_NAME => $this->projectionName,
-            ], $this->deleteChannel);
+            $this->messagingEntrypoint->sendWithHeaders([], $this->withProjectionName([]), $this->deleteChannel);
         }
     }
 
     public function flush(mixed $userState = null): void
     {
         if ($this->flushChannel) {
-            $this->messagingEntrypoint->sendWithHeaders([], [
-                ProjectingHeaders::PROJECTION_NAME => $this->projectionName,
+            $this->messagingEntrypoint->sendWithHeaders([], $this->withProjectionName([
                 ProjectingHeaders::PROJECTION_STATE => $userState,
-            ], $this->flushChannel);
+            ]), $this->flushChannel);
         }
     }
 
     public function reset(?string $partitionKey = null): void
     {
         if ($this->resetChannel) {
-            $headers = [
-                ProjectingHeaders::PROJECTION_NAME => $this->projectionName,
-            ];
+            $headers = $this->withProjectionName([]);
 
             if ($partitionKey !== null) {
                 $headers[ProjectingHeaders::REBUILD_PARTITION_KEY] = $partitionKey;
@@ -109,5 +106,13 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
 
             $this->messagingEntrypoint->sendWithHeaders([], $headers, $this->resetChannel);
         }
+    }
+
+    private function withProjectionName(array $headers): array
+    {
+        if ($this->licenceDecider->hasEnterpriseLicence()) {
+            $headers[ProjectingHeaders::PROJECTION_NAME] = $this->projectionName;
+        }
+        return $headers;
     }
 }

@@ -1,7 +1,7 @@
 <?php
 
 /*
- * licence Enterprise
+ * licence Apache-2.0
  */
 declare(strict_types=1);
 
@@ -13,6 +13,7 @@ use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Config\LicenceDecider;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Router\RouterProcessor;
@@ -51,6 +52,8 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         private ?string $resetChannel = null,
         private ?int    $rebuildPartitionBatchSize = null,
         private ?string $rebuildAsyncChannelName = null,
+        private bool    $hasRebuild = false,
+        private bool    $hasDeployment = false,
     ) {
         if ($this->partitionHeader && ! $this->automaticInitialization) {
             throw new ConfigurationException("Cannot set partition header for projection {$this->projectionName} with automatic initialization disabled");
@@ -150,6 +153,14 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         return $this->rebuildAsyncChannelName;
     }
 
+    public function isOpenSourceEligible(): bool
+    {
+        return ! $this->isPartitioned()
+            && $this->backfillAsyncChannelName === null
+            && ! $this->hasRebuild
+            && ! $this->hasDeployment;
+    }
+
     public function compile(MessagingContainerBuilder $builder): Definition|Reference
     {
         $routerProcessor = $this->buildExecutionRouter($builder);
@@ -158,6 +169,7 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
             new Reference(MessageHeadersPropagatorInterceptor::class),
             $this->projectionName,
             $routerProcessor,
+            Reference::to(LicenceDecider::class),
             $this->initChannel,
             $this->deleteChannel,
             $this->flushChannel,

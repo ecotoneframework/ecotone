@@ -11,9 +11,11 @@ To contribute make use of [Ecotone-Dev repository](https://github.com/ecotonefra
 [![Total Downloads](https://img.shields.io/packagist/dt/ecotone/ecotone)](https://packagist.org/packages/ecotone/ecotone)
 [![PHP Version Require](https://img.shields.io/packagist/dependency-v/ecotone/ecotone/php.svg)](https://packagist.org/packages/ecotone/ecotone)
 
-# Ecotone — the enterprise architecture layer for Laravel and Symfony
+# Ecotone — the PHP architecture layer that grows with your system, without rewrites
 
-One Composer package adds CQRS, Event Sourcing, Sagas, Projections, Workflows, and Outbox messaging to your existing application — all via declarative PHP 8 attributes on the classes you already have. No base classes, no bus wiring, no retry config. The same patterns proven in Java's Spring/Axon and .NET's NServiceBus/MassTransit, brought to PHP without giving up the development speed PHP is known for.
+From `#[CommandHandler]` on day one, to event sourcing, sagas, outbox, and distributed messaging at scale — one package, same codebase, no forced migrations between growth stages. Declarative PHP 8 attributes on the classes you already have. No base classes, no bus wiring, no retry config.
+
+Built on Enterprise Integration Patterns — the same pattern language behind Spring Integration, Axon, NServiceBus, and Apache Camel — brought to PHP as attribute-driven code.
 
 Visit [ecotone.tech](https://ecotone.tech) for the full overview.
 

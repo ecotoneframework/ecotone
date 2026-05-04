@@ -102,7 +102,7 @@ class ProjectingManager
                     $batchProcessedEvents++;
                 }
                 if ($batchProcessedEvents > 0) {
-                    $this->projectorExecutor->flush($userState);
+                    $this->projectorExecutor->flush($userState, $shouldReset);
                 }
 
                 $totalProcessedEvents += $batchProcessedEvents;

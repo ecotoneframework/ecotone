@@ -18,6 +18,6 @@ interface ProjectorExecutor
     public function project(Event $event, mixed $userState = null, bool $isRebuilding = false): mixed;
     public function init(): void;
     public function delete(): void;
-    public function flush(mixed $userState = null): void;
+    public function flush(mixed $userState, bool $isRebuilding): void;
     public function reset(?string $partitionKey = null): void;
 }

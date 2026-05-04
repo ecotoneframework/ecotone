@@ -80,13 +80,29 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
         }
     }
 
-    public function flush(mixed $userState = null): void
+    public function flush(mixed $userState, bool $isRebuilding): void
     {
-        if ($this->flushChannel) {
-            $this->messagingEntrypoint->sendWithHeaders([], $this->withProjectionName([
-                ProjectingHeaders::PROJECTION_STATE => $userState,
-            ]), $this->flushChannel);
+        if (! $this->flushChannel) {
+            return;
         }
+
+        $headers = $this->withProjectionName([
+            ProjectingHeaders::PROJECTION_STATE => $userState,
+            ProjectingHeaders::PROJECTION_LIVE => $this->isLive && ! $isRebuilding,
+            MessageHeaders::STREAM_BASED_SOURCED => true,
+        ]);
+
+        $requestMessage = MessageBuilder::withPayload([])
+            ->setMultipleHeaders($headers)
+            ->build();
+
+        $flushChannel = $this->flushChannel;
+        $this->messageHeadersPropagatorInterceptor->storeHeaders(
+            function () use ($headers, $flushChannel): void {
+                $this->messagingEntrypoint->sendWithHeaders([], $headers, $flushChannel);
+            },
+            $requestMessage
+        );
     }
 
     public function reset(?string $partitionKey = null): void

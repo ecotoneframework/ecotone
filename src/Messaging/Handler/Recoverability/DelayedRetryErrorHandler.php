@@ -43,7 +43,7 @@ class DelayedRetryErrorHandler
                 $failedMessage,
             );
 
-            throw MessageHandlingException::create('Failed to handle Error Message via Retry Configuration, as it does not contain information about origination channel from which it was polled. Original error message: ' . $failedMessage->getExceptionMessage());
+            throw MessageHandlingException::create(\Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ErrorChannelExceptionMessages::delayedRetryRequiresPolledChannelName($failedMessage->getExceptionMessage()));
         }
         /** @var MessageChannel $messageChannel */
         $messageChannel = $channelResolver->resolve($failedMessage->getHeaders()->get(MessageHeaders::POLLED_CHANNEL_NAME));

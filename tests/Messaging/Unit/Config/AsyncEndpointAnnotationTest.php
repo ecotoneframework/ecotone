@@ -45,7 +45,7 @@ final class AsyncEndpointAnnotationTest extends TestCase
         $collector->receivedAttribute = null;
 
         $handler = new class () {
-            #[Asynchronous('async', endpointAnnotations: [new CustomAsyncAttribute('test-value')])]
+            #[Asynchronous('async', asynchronousExecution: [new CustomAsyncAttribute('test-value')])]
             #[CommandHandler('doWork', endpointId: 'doWork.endpoint')]
             public function handle(string $payload): void
             {
@@ -89,7 +89,7 @@ final class AsyncEndpointAnnotationTest extends TestCase
         $collector->receivedAttribute = null;
 
         $handler = new class () {
-            #[Asynchronous('async', endpointAnnotations: [new CustomAsyncAttribute('before-value')])]
+            #[Asynchronous('async', asynchronousExecution: [new CustomAsyncAttribute('before-value')])]
             #[CommandHandler('doWork', endpointId: 'doWork.endpoint')]
             public function handle(string $payload): void
             {
@@ -133,13 +133,13 @@ final class AsyncEndpointAnnotationTest extends TestCase
         $collector->receivedAttributes = [];
 
         $handler = new class () {
-            #[Asynchronous('async', endpointAnnotations: [new CustomAsyncAttribute('handler-one')])]
+            #[Asynchronous('async', asynchronousExecution: [new CustomAsyncAttribute('handler-one')])]
             #[CommandHandler('doWorkOne', endpointId: 'doWorkOne.endpoint')]
             public function handleOne(string $payload): void
             {
             }
 
-            #[Asynchronous('async', endpointAnnotations: [new CustomAsyncAttribute('handler-two')])]
+            #[Asynchronous('async', asynchronousExecution: [new CustomAsyncAttribute('handler-two')])]
             #[CommandHandler('doWorkTwo', endpointId: 'doWorkTwo.endpoint')]
             public function handleTwo(string $payload): void
             {
@@ -226,7 +226,7 @@ final class AsyncEndpointAnnotationTest extends TestCase
         $this->expectException(LicensingException::class);
 
         $handler = new class () {
-            #[Asynchronous('async', endpointAnnotations: [new CustomAsyncAttribute('test')])]
+            #[Asynchronous('async', asynchronousExecution: [new CustomAsyncAttribute('test')])]
             #[CommandHandler('doWork', endpointId: 'doWork.endpoint')]
             public function handle(string $payload): void
             {
@@ -289,7 +289,7 @@ final class AsyncEndpointAnnotationTest extends TestCase
     public function test_without_message_collector_events_are_sent_directly_and_survive_handler_failure(): void
     {
         $handler = new class () {
-            #[Asynchronous('async', endpointAnnotations: [new WithoutMessageCollector()])]
+            #[Asynchronous('async', asynchronousExecution: [new WithoutMessageCollector()])]
             #[CommandHandler('doWork', endpointId: 'doWork.endpoint')]
             public function handle(string $payload, EventBus $eventBus): void
             {

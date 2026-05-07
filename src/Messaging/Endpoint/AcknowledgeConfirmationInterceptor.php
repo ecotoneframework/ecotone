@@ -36,7 +36,11 @@ class AcknowledgeConfirmationInterceptor
      */
     public function ack(MethodInvocation $methodInvocation, Message $message)
     {
-        $messageChannelName = $message->getHeaders()->containsKey(MessageHeaders::POLLED_CHANNEL_NAME) ? $message->getHeaders()->get(MessageHeaders::POLLED_CHANNEL_NAME) : 'unknown';
+        $messageChannelName = $message->getHeaders()->containsKey(MessageHeaders::POLLED_CHANNEL_NAME)
+            ? $message->getHeaders()->get(MessageHeaders::POLLED_CHANNEL_NAME)
+            : ($message->getHeaders()->containsKey(MessageHeaders::INBOUND_REQUEST_CHANNEL)
+                ? $message->getHeaders()->get(MessageHeaders::INBOUND_REQUEST_CHANNEL)
+                : 'unknown');
 
         $this->logger->info(
             sprintf(

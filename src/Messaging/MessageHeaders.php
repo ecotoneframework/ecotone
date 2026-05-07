@@ -93,9 +93,15 @@ final class MessageHeaders
      */
     public const CONSUMER_ACK_HEADER_LOCATION = 'consumerAcknowledgeCallbackHeader';
     /**
-     * Consumed channel name
+     * Consumed channel name (set when the Message originates from a pollable Message Channel)
      */
     public const POLLED_CHANNEL_NAME = 'polledChannelName';
+    /**
+     * Inbound Channel Adapter request channel name (set when the Message originates from an Inbound Channel Adapter
+     * such as #[KafkaConsumer], AMQP inbound, #[Scheduled]). Carries the user-facing request channel where the Message
+     * is dispatched after polling, so it can be replayed back to the same handler.
+     */
+    public const INBOUND_REQUEST_CHANNEL = 'inboundRequestChannel';
     /**
      * Current polling metadata
      */
@@ -176,6 +182,7 @@ final class MessageHeaders
             self::TIME_TO_LIVE,
             self::DELIVERY_DELAY,
             self::POLLED_CHANNEL_NAME,
+            self::INBOUND_REQUEST_CHANNEL,
             self::REPLY_CONTENT_TYPE,
             self::STREAM_BASED_SOURCED,
             MessagingEntrypointService::ENTRYPOINT,
@@ -251,6 +258,7 @@ final class MessageHeaders
             $metadata[self::CONTENT_TYPE],
             $metadata[self::CONSUMER_ACK_HEADER_LOCATION],
             $metadata[self::POLLED_CHANNEL_NAME],
+            $metadata[self::INBOUND_REQUEST_CHANNEL],
             $metadata[self::CONSUMER_POLLING_METADATA],
             $metadata[self::REPLY_CHANNEL],
             $metadata[self::TEMPORARY_SPAN_CONTEXT_HEADER],

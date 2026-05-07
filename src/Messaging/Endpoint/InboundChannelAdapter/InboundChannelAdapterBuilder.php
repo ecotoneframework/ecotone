@@ -142,6 +142,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
         return new Definition(InvocationPollerAdapter::class, [
             $objectReference,
             $methodName,
+            $this->requestChannelName,
         ]);
     }
 }

@@ -15,17 +15,17 @@ class Asynchronous
 {
     private string|array $channelName;
     /** @var AsynchronousEndpointAttribute[] */
-    private array $endpointAnnotations;
+    private array $asynchronousExecution;
 
     /**
-     * @param AsynchronousEndpointAttribute[] $endpointAnnotations
+     * @param AsynchronousEndpointAttribute[] $asynchronousExecution Attributes scoped to the asynchronous execution context — applied when the polling consumer processes the Message, not at the synchronous bus call.
      */
-    public function __construct(string|array $channelName, array $endpointAnnotations = [])
+    public function __construct(string|array $channelName, array $asynchronousExecution = [])
     {
         Assert::notNullAndEmpty($channelName, 'Channel name can not be empty string');
-        Assert::allInstanceOfType($endpointAnnotations, AsynchronousEndpointAttribute::class);
+        Assert::allInstanceOfType($asynchronousExecution, AsynchronousEndpointAttribute::class);
         $this->channelName = $channelName;
-        $this->endpointAnnotations = $endpointAnnotations;
+        $this->asynchronousExecution = $asynchronousExecution;
     }
 
     public function getChannelName(): array
@@ -36,8 +36,8 @@ class Asynchronous
     /**
      * @return AsynchronousEndpointAttribute[]
      */
-    public function getEndpointAnnotations(): array
+    public function getAsynchronousExecution(): array
     {
-        return $this->endpointAnnotations;
+        return $this->asynchronousExecution;
     }
 }

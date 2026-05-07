@@ -7,6 +7,6 @@ namespace Ecotone\Messaging\Attribute;
 /**
  * licence Apache-2.0
  */
-abstract class ChannelAdapter extends IdentifiedAnnotation
+abstract class ChannelAdapter extends MessageConsumer
 {
 }

@@ -134,7 +134,11 @@ class MessagingGatewayModule extends NoExternalConfigurationModule implements An
             }
             $errorChannel = $interfaceToCallRegistry->getFor($gatewayBuilder->getInterfaceName(), $gatewayBuilder->getRelatedMethodName())->getAnnotationsByImportanceOrder(Type::attribute(ErrorChannel::class));
             if ($errorChannel && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
-                throw LicensingException::create("Gateway {$gatewayBuilder->getInterfaceName()}::{$gatewayBuilder->getRelatedMethodName()} is marked with synchronous Error Channel. This functionality is available as part of Ecotone Enterprise.");
+                throw LicensingException::create(ErrorChannelExceptionMessages::gatewayErrorChannelRequiresEnterprise($gatewayBuilder->getInterfaceName(), $gatewayBuilder->getRelatedMethodName()));
+            }
+            $delayedRetry = $interfaceToCallRegistry->getFor($gatewayBuilder->getInterfaceName(), $gatewayBuilder->getRelatedMethodName())->getAnnotationsByImportanceOrder(Type::attribute(\Ecotone\Messaging\Attribute\DelayedRetry::class));
+            if ($delayedRetry && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
+                throw LicensingException::create(ErrorChannelExceptionMessages::gatewayDelayedRetryRequiresEnterprise($gatewayBuilder->getInterfaceName(), $gatewayBuilder->getRelatedMethodName()));
             }
 
             $messagingConfiguration->registerGatewayBuilder($gatewayBuilder);

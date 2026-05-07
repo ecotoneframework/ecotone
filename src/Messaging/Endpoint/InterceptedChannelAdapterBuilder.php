@@ -85,6 +85,7 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
             $builder->register(PollingConsumerErrorChannelInterceptor::class, new Definition(PollingConsumerErrorChannelInterceptor::class, [
                 Reference::to(ErrorChannelService::class),
                 Reference::to(ChannelResolver::class),
+                Reference::to(AsyncEndpointAnnotationContext::class),
             ]));
         }
         return AroundInterceptorBuilder::create(

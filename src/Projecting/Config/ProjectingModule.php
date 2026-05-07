@@ -126,7 +126,7 @@ class ProjectingModule implements AnnotationModule
 
             $asyncAttribute = $projectionBuilder instanceof EcotoneProjectionExecutorBuilder ? $projectionBuilder->getAsyncAttribute() : null;
             if ($asyncAttribute !== null) {
-                $endpointAnnotations = $asyncAttribute->getEndpointAnnotations();
+                $endpointAnnotations = $asyncAttribute->getAsynchronousExecution();
                 if ($messagingConfiguration->isRunningForEnterpriseLicence()) {
                     $endpointAnnotations = array_merge($endpointAnnotations, [new WithoutDatabaseTransaction(), new WithoutMessageCollector()]);
                 }

@@ -41,7 +41,8 @@ class ScheduledModule extends ConsumerRegisterConfiguration
             $interfaceToCallRegistry->getFor($annotationRegistration->getClassName(), $annotationRegistration->getMethodName())
         )
             ->withEndpointId($annotation->getEndpointId())
-            ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames());
+            ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames())
+            ->withEndpointAnnotations($annotationRegistration->getAllAnnotationDefinitions());
     }
 
     public function getModulePackageName(): string

@@ -102,17 +102,20 @@ Swap the in-memory channel for DBAL, RabbitMQ, or Kafka in production — the te
 
 ## What's in the box
 
-| Area | What you get |
-|---|---|
-| **Messaging** | Command / Query / Event buses, routing, interceptors, business interfaces (gateways) |
-| **Domain modelling** | Aggregates, Sagas, state-stored or event-sourced — all via attributes |
-| **Event Sourcing** | Event Store, Projections (catch-up, partitioned, streaming), event versioning and upcasting, DCB |
-| **Workflows** | Stateless workflows, orchestrators (routing slip), saga-based process managers |
-| **Async & resiliency** | `#[Asynchronous]`, retries, error channels, dead letter queue with replay, Outbox pattern |
-| **Observability** | OpenTelemetry tracing, Service Map (Enterprise) |
-| **Multi-tenancy** | Per-tenant connections, event stores, and async channels |
-| **Distribution** | Distributed Bus for cross-service events and commands |
-| **Data protection** | Field-level encryption and PII masking for messages |
+| Area | What you get | Deep dive |
+|---|---|---|
+| **Messaging** | Command / Query / Event buses, routing, interceptors, business interfaces (gateways) | [docs](https://docs.ecotone.tech/modelling/command-handling) |
+| **Domain modelling** | Aggregates, Sagas, state-stored or event-sourced — all via attributes | [ecotone.tech/domain-driven-design](https://ecotone.tech/domain-driven-design) |
+| **Event Sourcing** | Event Store, Projections (catch-up, partitioned, streaming), event versioning and upcasting, snapshots | [ecotone.tech/event-sourcing](https://ecotone.tech/event-sourcing) |
+| **Durable Workflows** | Stateless workflows, sagas, orchestrators (routing slip), event-sourced sagas with full replay — long-running processes that survive crashes, deploys, and restarts on the DB + broker you already run | [ecotone.tech/durable-workflows](https://ecotone.tech/durable-workflows) |
+| **Asynchronous communication** | `#[Asynchronous]`, message channels, delayed messages, scheduling, priority, TTL, dynamic channels | [ecotone.tech/asynchronous-communication](https://ecotone.tech/asynchronous-communication) |
+| **Resiliency** | Retries, error channels, dead letter queue with replay, Outbox pattern, deduplication | [docs](https://docs.ecotone.tech/solutions/unreliable-async-processing) |
+| **Orchestration** | EIP routing, splitters, filters, transformers, multi-step orchestrators (Enterprise) | [ecotone.tech/orchestration-layer](https://ecotone.tech/orchestration-layer) |
+| **Observability** | OpenTelemetry tracing, Service Map (Enterprise) | [docs](https://docs.ecotone.tech/modules/opentelemetry-tracing-and-metrics) |
+| **Multi-tenancy** | Per-tenant connections, event stores, and async channels | [docs](https://docs.ecotone.tech/messaging/multi-tenancy-support) |
+| **Distribution** | Distributed Bus for cross-service events and commands | [ecotone.tech/microservices](https://ecotone.tech/microservices) |
+| **Data protection** | Field-level encryption and PII masking for messages | [docs](https://docs.ecotone.tech/modules/data-protection) |
+| **Testing** | `EcotoneLite::bootstrapFlowTesting` — full flows in-process, no broker required | [docs](https://docs.ecotone.tech/modelling/testing-support) |
 
 ---
 
@@ -181,4 +184,4 @@ If you want to help building and improving Ecotone consider becoming a sponsor:
 
 ## Tags
 
-PHP, DDD, CQRS, Event Sourcing, Sagas, Projections, Workflows, Outbox, Symfony, Laravel, Service Bus, Event Driven Architecture
+PHP, DDD, CQRS, Event Sourcing, Sagas, Projections, Durable Workflows, Durable Execution, Workflows, Orchestrator, Outbox, Symfony, Laravel, Service Bus, Event Driven Architecture

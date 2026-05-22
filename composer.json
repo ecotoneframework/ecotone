@@ -18,14 +18,19 @@
     "keywords": [
         "ddd",
         "cqrs",
-        "EventSourcing",
+        "event-sourcing",
+        "sagas",
+        "durable-workflows",
+        "durable-execution",
+        "workflow",
+        "outbox",
+        "projections",
         "ecotone",
         "service-bus",
         "message-driven",
-        "event",
         "event-driven"
     ],
-    "description": "Enterprise architecture layer for Laravel and Symfony — CQRS, Event Sourcing, Sagas, Projections, Workflows, and Outbox messaging via PHP attributes.",
+    "description": "Enterprise architecture layer for Laravel and Symfony — CQRS, Event Sourcing, Durable Workflows (Sagas, Orchestrators), Projections, and Outbox messaging via PHP attributes.",
     "autoload": {
         "psr-4": {
             "Ecotone\\": "src"
@@ -63,7 +68,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "1.313.1-dev"
+            "dev-main": "1.313.2-dev"
         },
         "ecotone": {
             "repository": "ecotone"
@@ -79,7 +84,7 @@
                 "description": "Allows to use Enterprise features of Ecotone. For more information please write to support@simplycodedsoftware.com"
             }
         },
-        "release-time": "2026-05-18 19:18:46"
+        "release-time": "2026-05-22 17:45:28"
     },
     "config": {
         "sort-packages": true

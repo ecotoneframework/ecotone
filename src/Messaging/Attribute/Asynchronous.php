@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Attribute;
 
 use Attribute;
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Support\Assert;
 
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS)]
 /**
  * licence Apache-2.0
  */
-class Asynchronous
+class Asynchronous implements DefinedObject
 {
     private string|array $channelName;
     /** @var AsynchronousEndpointAttribute[] */
@@ -39,5 +41,10 @@ class Asynchronous
     public function getAsynchronousExecution(): array
     {
         return $this->asynchronousExecution;
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [$this->channelName, $this->asynchronousExecution]);
     }
 }

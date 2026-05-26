@@ -5,13 +5,15 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Attribute;
 
 use Attribute;
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Support\Assert;
 
 /**
  * licence Enterprise
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::TARGET_METHOD)]
-final class DelayedRetry implements AsynchronousEndpointAttribute
+final class DelayedRetry implements AsynchronousEndpointAttribute, DefinedObject
 {
     public function __construct(
         public readonly int     $initialDelayMs,
@@ -24,6 +26,17 @@ final class DelayedRetry implements AsynchronousEndpointAttribute
         Assert::isTrue($multiplier > 0, 'DelayedRetry multiplier must be greater than 0');
         Assert::isTrue($maxAttempts === null || $maxAttempts > 0, 'DelayedRetry maxAttempts must be null (unlimited) or greater than 0');
         Assert::isTrue($deadLetterChannel === null || $deadLetterChannel !== '', 'DelayedRetry deadLetterChannel must be null or a non-empty channel name');
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [
+            $this->initialDelayMs,
+            $this->multiplier,
+            $this->maxDelayMs,
+            $this->maxAttempts,
+            $this->deadLetterChannel,
+        ]);
     }
 
     public static function generateChannelName(string $handlerEndpointId): string

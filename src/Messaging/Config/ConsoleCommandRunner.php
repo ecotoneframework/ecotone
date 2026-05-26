@@ -54,7 +54,7 @@ class ConsoleCommandRunner
             }
         }
 
-        return $this->entrypoint->sendWithHeaders([], $arguments, $this->commandConfiguration->getChannelName());
+        return $this->entrypoint->sendWithHeadersPropagation([], $arguments, $this->commandConfiguration->getChannelName());
     }
 
     private function hasParameterWithGivenName(int|string $argumentName): bool

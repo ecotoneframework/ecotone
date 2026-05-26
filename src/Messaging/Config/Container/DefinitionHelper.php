@@ -25,6 +25,16 @@ class DefinitionHelper
 
     public static function buildAttributeDefinitionFromInstance(object $object): AttributeDefinition
     {
+        if ($object instanceof DefinedObject) {
+            $definition = $object->getDefinition();
+
+            return new AttributeDefinition(
+                $definition->getClassName(),
+                $definition->getArguments(),
+                $definition->hasFactory() ? $definition->getFactory() : '',
+            );
+        }
+
         return new AttributeDefinition(get_class($object), [serialize($object)], [self::class, 'unserializeSerializedObject']);
     }
 
@@ -37,7 +47,12 @@ class DefinitionHelper
     {
         $attributeArguments = $attributeDefinition->getArguments();
         if (self::isComplexArgument($attributeArguments)) {
-            return DefinitionHelper::buildDefinitionFromInstance($attributeDefinition->instance());
+            $instance = $attributeDefinition->instance();
+            if ($instance instanceof DefinedObject) {
+                return $instance->getDefinition();
+            }
+
+            return DefinitionHelper::buildDefinitionFromInstance($instance);
         } else {
             return $attributeDefinition;
         }

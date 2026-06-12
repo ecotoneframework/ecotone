@@ -283,11 +283,8 @@ final class MessageHeaders
     {
         unset(
             $metadata[MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME],
-            $metadata[MessageBusChannel::COMMAND_CHANNEL_NAME_BY_OBJECT],
             $metadata[MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME],
-            $metadata[MessageBusChannel::EVENT_CHANNEL_NAME_BY_OBJECT],
-            $metadata[MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME],
-            $metadata[MessageBusChannel::QUERY_CHANNEL_NAME_BY_OBJECT]
+            $metadata[MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME]
         );
 
         return $metadata;

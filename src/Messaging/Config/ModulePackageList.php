@@ -25,6 +25,7 @@ final class ModulePackageList
     public const TRACING_PACKAGE = 'tracing';
     public const LARAVEL_PACKAGE = 'laravel';
     public const SYMFONY_PACKAGE = 'symfony';
+    public const TEMPEST_PACKAGE = 'tempest';
     public const TEST_PACKAGE = 'test';
 
     public static function getModuleClassesForPackage(string $packageName): array
@@ -43,6 +44,7 @@ final class ModulePackageList
             ModulePackageList::TEST_PACKAGE => ModuleClassList::TEST_MODULES,
             ModulePackageList::LARAVEL_PACKAGE => ModuleClassList::LARAVEL_MODULES,
             ModulePackageList::SYMFONY_PACKAGE => ModuleClassList::SYMFONY_MODULES,
+            ModulePackageList::TEMPEST_PACKAGE => ModuleClassList::TEMPEST_MODULES,
             ModulePackageList::DATA_PROTECTION_PACKAGE => ModuleClassList::DATA_PROTECTION_MODULES,
             default => throw ConfigurationException::create(sprintf('Given unknown package name %s. Available packages name are: %s', $packageName, implode(',', self::allPackages())))
         };
@@ -66,6 +68,7 @@ final class ModulePackageList
             self::TRACING_PACKAGE,
             self::LARAVEL_PACKAGE,
             self::SYMFONY_PACKAGE,
+            self::TEMPEST_PACKAGE,
             self::DATA_PROTECTION_PACKAGE,
         ];
     }

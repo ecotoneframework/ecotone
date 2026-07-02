@@ -3,7 +3,6 @@
 namespace Ecotone\Test;
 
 use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
-use Ecotone\Lite\InMemoryContainerImplementation;
 use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Lite\Test\FlowTestSupport;
 use Ecotone\Lite\Test\MessagingTestSupport;
@@ -30,12 +29,16 @@ use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDef
 use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\QueryBus;
+use Ecotone\SymfonyContainer\EcotoneContainer;
+use Ecotone\SymfonyContainer\EcotoneSymfonyContainerFactory;
 
 /**
  * licence Apache-2.0
  */
 class ComponentTestBuilder
 {
+    private ?EcotoneContainer $builtContainer = null;
+
     private function __construct(
         private InMemoryPSRContainer $container,
         private MessagingSystemConfiguration $messagingSystemConfiguration
@@ -163,11 +166,13 @@ class ComponentTestBuilder
         $containerBuilder = new ContainerBuilder();
         $containerBuilder->addCompilerPass($this->messagingSystemConfiguration);
         $containerBuilder->addCompilerPass(new RegisterInterfaceToCallReferences());
-        $containerBuilder->addCompilerPass(new InMemoryContainerImplementation($this->container));
-        $containerBuilder->compile();
+        $this->builtContainer = EcotoneSymfonyContainerFactory::build($containerBuilder, ServiceCacheConfiguration::noCache(), $this->container);
+        foreach ($this->builtContainer->getServiceIds() as $serviceId) {
+            $this->builtContainer->get($serviceId);
+        }
 
         /** @var ConfiguredMessagingSystem $configuredMessagingSystem */
-        $configuredMessagingSystem = $this->container->get(ConfiguredMessagingSystem::class);
+        $configuredMessagingSystem = $this->builtContainer->get(ConfiguredMessagingSystem::class);
 
         return new FlowTestSupport(
             $configuredMessagingSystem->getGatewayByName(CommandBus::class),
@@ -183,6 +188,6 @@ class ComponentTestBuilder
 
     public function getGatewayByName(string $name)
     {
-        return $this->container->get($name);
+        return ($this->builtContainer ?? $this->container)->get($name);
     }
 }

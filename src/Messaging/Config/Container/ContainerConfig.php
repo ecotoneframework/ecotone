@@ -2,7 +2,6 @@
 
 namespace Ecotone\Messaging\Config\Container;
 
-use Ecotone\Lite\LazyInMemoryContainer;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\Container\Compiler\ContainerDefinitionsHolder;
@@ -12,6 +11,7 @@ use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
+use Ecotone\SymfonyContainer\EcotoneSymfonyContainerFactory;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -29,10 +29,15 @@ class ContainerConfig
         $containerBuilder->addCompilerPass($configuration);
         $containerBuilder->addCompilerPass(new RegisterInterfaceToCallReferences());
         $containerBuilder->addCompilerPass(new ValidityCheckPass());
-        $containerBuilder->compile();
-        $container = new LazyInMemoryContainer($containerBuilder->getDefinitions(), $externalContainer);
-        $container->set(ConfigurationVariableService::REFERENCE_NAME, $configurationVariableService ?? InMemoryConfigurationVariableService::createEmpty());
-        $container->set(ProxyFactory::class, $proxyFactory ?? new ProxyFactory(ServiceCacheConfiguration::noCache()));
+        $container = EcotoneSymfonyContainerFactory::build(
+            $containerBuilder,
+            ServiceCacheConfiguration::noCache(),
+            $externalContainer,
+            [
+                ConfigurationVariableService::REFERENCE_NAME => $configurationVariableService ?? InMemoryConfigurationVariableService::createEmpty(),
+                ProxyFactory::class => $proxyFactory ?? new ProxyFactory(ServiceCacheConfiguration::noCache()),
+            ],
+        );
         return $container->get(ConfiguredMessagingSystem::class);
     }
 

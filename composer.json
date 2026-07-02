@@ -48,6 +48,7 @@
         "psr/clock": "^1.0",
         "psr/container": "^1.1.1|^2.0.1",
         "psr/log": "^2.0|^3.0",
+        "symfony/dependency-injection": "^6.4|^7.0|^8.0",
         "symfony/uid": "^6.4|^7.0|^8.0"
     },
     "require-dev": {
@@ -68,7 +69,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "1.316.1-dev"
+            "dev-main": "1.317.0-dev"
         },
         "ecotone": {
             "repository": "ecotone"
@@ -84,7 +85,7 @@
                 "description": "Allows to use Enterprise features of Ecotone. For more information please write to support@simplycodedsoftware.com"
             }
         },
-        "release-time": "2026-06-12 04:51:25"
+        "release-time": "2026-07-02 15:45:11"
     },
     "config": {
         "sort-packages": true

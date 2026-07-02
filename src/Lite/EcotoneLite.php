@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite;
 
-use Ecotone\AnnotationFinder\AnnotationFinderFactory;
 use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
 use Ecotone\AnnotationFinder\FileSystem\RootCatalogNotFound;
 use Ecotone\Dbal\Configuration\DbalConfiguration;
@@ -15,15 +14,14 @@ use Ecotone\Lite\Test\FlowTestSupport;
 use Ecotone\Lite\Test\TestConfiguration;
 use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
-use Ecotone\Messaging\Config\Container\ContainerConfig;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModulePackageList;
-use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
+use Ecotone\SymfonyContainer\ContainerCacheLayout;
+use Ecotone\SymfonyContainer\EcotoneSymfonyContainerFactory;
 
 use function json_decode;
 
@@ -202,63 +200,46 @@ final class EcotoneLite
         $externalContainer = $containerOrAvailableServices instanceof ContainerInterface ? $containerOrAvailableServices : InMemoryPSRContainer::createFromAssociativeArray($containerOrAvailableServices);
         $serviceConfiguration = MessagingSystemConfiguration::addCorePackage($serviceConfiguration, $enableTesting);
 
-        $annotationFinder = AnnotationFinderFactory::createForAttributes(
-            realpath($pathToRootCatalog),
-            $serviceConfiguration->getNamespaces(),
-            $serviceConfiguration->getEnvironment(),
-            $serviceConfiguration->getLoadedCatalog() ?? '',
-            MessagingSystemConfiguration::getModuleClassesFor($serviceConfiguration),
-            $classesToResolve,
-            $enableTesting
-        );
-        $cacheHash = $annotationFinder->getCacheMessagingFileNameBasedOnConfig($pathToRootCatalog, $serviceConfiguration, $configurationVariables, $enableTesting);
-        $serviceCacheConfiguration = new ServiceCacheConfiguration(
-            $serviceConfiguration->getCacheDirectoryPath() . DIRECTORY_SEPARATOR . $cacheHash,
+        $cacheLayout = ContainerCacheLayout::resolve(
+            $pathToRootCatalog,
+            $serviceConfiguration,
+            $serviceConfiguration->getCacheDirectoryPath(),
             self::shouldUseAutomaticCache($useCachedVersion, $pathToRootCatalog),
+            configurationVariables: $configurationVariables,
+            classesToResolve: $classesToResolve,
+            enableTesting: $enableTesting,
         );
+        $annotationFinder = $cacheLayout->annotationFinder;
+        $serviceCacheConfiguration = $cacheLayout->serviceCacheConfiguration;
+        $cacheHash = $cacheLayout->configHash;
 
         $configurationVariableService = InMemoryConfigurationVariableService::create($configurationVariables);
-        $definitionHolder = null;
-        $messagingSystemCachePath = $serviceCacheConfiguration->getPath() . DIRECTORY_SEPARATOR . 'messaging';
 
-        if ($serviceCacheConfiguration->shouldUseCache() && file_exists($messagingSystemCachePath)) {
-            /** It may fail on deserialization, then return `false` and we can build new one */
-            $definitionHolder = unserialize(file_get_contents($messagingSystemCachePath));
-        }
+        $container = EcotoneSymfonyContainerFactory::bootstrap(
+            $serviceCacheConfiguration,
+            $configurationVariableService,
+            $externalContainer,
+            function () use ($annotationFinder, $configurationVariableService, $serviceConfiguration, $enableTesting, $externalContainer) {
+                $messagingConfiguration = MessagingSystemConfiguration::prepareWithAnnotationFinder(
+                    $annotationFinder,
+                    $configurationVariableService,
+                    $serviceConfiguration,
+                    $enableTesting
+                );
+                $messagingConfiguration->withExternalContainer($externalContainer);
 
-        if (! $definitionHolder) {
-            $messagingConfiguration = MessagingSystemConfiguration::prepareWithAnnotationFinder(
-                $annotationFinder,
-                $configurationVariableService,
-                $serviceConfiguration,
-                $enableTesting
-            );
-
-            $messagingConfiguration->withExternalContainer($externalContainer);
-
-            $definitionHolder = ContainerConfig::buildDefinitionHolder($messagingConfiguration);
-
-            if ($serviceCacheConfiguration->shouldUseCache()) {
-                Assert::notNull($messagingSystemCachePath, 'Cache path should be defined');
-
-                MessagingSystemConfiguration::prepareCacheDirectory($serviceCacheConfiguration);
-                file_put_contents($messagingSystemCachePath, serialize($definitionHolder));
-            }
-        }
-
-        $container = new LazyInMemoryContainer($definitionHolder->getDefinitions(), $externalContainer);
-        $container->set(ServiceCacheConfiguration::class, $serviceCacheConfiguration);
-        $container->set(ConfigurationVariableService::REFERENCE_NAME, $configurationVariableService);
+                return $messagingConfiguration;
+            },
+            $cacheHash,
+        );
 
         $messagingSystem = $container->get(ConfiguredMessagingSystem::class);
 
         if ($allowGatewaysToBeRegisteredInContainer) {
             Assert::isTrue(method_exists($externalContainer, 'set'), 'Gateways registration was enabled however given container has no `set` method. Please add it or turn off the option.');
-            $externalContainer->set(ConfiguredMessagingSystem::class, $messagingSystem);
-            foreach ($messagingSystem->getGatewayList() as $gatewayReference) {
-                $gatewayReferenceName = $gatewayReference->getReferenceName();
-                $externalContainer->set($gatewayReferenceName, $messagingSystem->getGatewayByName($gatewayReferenceName));
-            }
+            $container->registerBridgesInto(
+                fn (string $referenceName, string $interfaceName, callable $factory) => $externalContainer->set($referenceName, $factory()),
+            );
         } elseif ($externalContainer->has(ConfiguredMessagingSystem::class)) {
             /** @var ConfiguredMessagingSystem $alreadyConfiguredMessaging */
             $alreadyConfiguredMessaging = $externalContainer->get(ConfiguredMessagingSystem::class);

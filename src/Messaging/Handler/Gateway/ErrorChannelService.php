@@ -12,6 +12,7 @@ use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\ErrorMessage;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Throwable;
 
 /**
@@ -23,6 +24,7 @@ final class ErrorChannelService
         private LoggingGateway $loggingGateway,
         private OutboundMessageConverter $outboundMessageConverter,
         private ConversionService $conversionService,
+        private MessageHeadersPropagatorInterceptor $messageHeadersPropagator,
     ) {
     }
 
@@ -51,11 +53,14 @@ final class ErrorChannelService
             $messageBuilder = $messageBuilder->prependRoutingSlip([$routingSlip]);
         }
 
-        $errorChannel->send(
-            ErrorMessage::create(
-                $messageBuilder->build(),
-                $cause
-            )
+        $this->messageHeadersPropagator->storeHeaders(
+            fn () => $errorChannel->send(
+                ErrorMessage::create(
+                    $messageBuilder->build(),
+                    $cause
+                )
+            ),
+            $requestMessage,
         );
 
         $this->loggingGateway->info(

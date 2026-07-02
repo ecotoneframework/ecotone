@@ -133,6 +133,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
                     MediaType::parseMediaType($serviceConfiguration->getDefaultSerializationMediaType()),
                 ]),
                 Reference::to(ConversionService::REFERENCE_NAME),
+                Reference::to(MessageHeadersPropagatorInterceptor::class),
             ])
         );
 

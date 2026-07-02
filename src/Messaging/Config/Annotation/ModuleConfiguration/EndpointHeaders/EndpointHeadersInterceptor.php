@@ -7,6 +7,7 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeader
 use DateTimeImmutable;
 use DateTimeInterface;
 use Ecotone\Messaging\Attribute\Endpoint\AddHeader;
+use Ecotone\Messaging\Attribute\Endpoint\ContentType;
 use Ecotone\Messaging\Attribute\Endpoint\Delayed;
 use Ecotone\Messaging\Attribute\Endpoint\Priority;
 use Ecotone\Messaging\Attribute\Endpoint\RemoveHeader;
@@ -41,7 +42,7 @@ class EndpointHeadersInterceptor implements DefinedObject
 
     }
 
-    public function addMetadata(Message $message, ?AddHeader $addHeader, ?Delayed $delayed, ?Priority $priority, ?TimeToLive $timeToLive, ?RemoveHeader $removeHeader): array
+    public function addMetadata(Message $message, ?AddHeader $addHeader, ?Delayed $delayed, ?Priority $priority, ?TimeToLive $timeToLive, ?RemoveHeader $removeHeader, ?ContentType $contentType): array
     {
         $metadata = [];
 
@@ -53,6 +54,15 @@ class EndpointHeadersInterceptor implements DefinedObject
                     'payload' => $message->getPayload(),
                     'headers' => $message->getHeaders()->headers(),
                 ]);
+            }
+        }
+
+        $isContentTypeHeaderExists = $message->getHeaders()->containsKey(MessageHeaders::CONTENT_TYPE);
+        if ($contentType) {
+            if ($contentType->shouldReplaceExistingHeader() || ! $isContentTypeHeaderExists) {
+                $metadata[MessageHeaders::CONTENT_TYPE] = $contentType->getHeaderValue();
+            } else {
+                $metadata[MessageHeaders::CONTENT_TYPE] = $message->getHeaders()->get(MessageHeaders::CONTENT_TYPE);
             }
         }
 

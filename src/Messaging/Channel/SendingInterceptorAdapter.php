@@ -49,32 +49,74 @@ abstract class SendingInterceptorAdapter implements MessageChannelInterceptorAda
     public function send(Message $message): void
     {
         $messageToSend = $message;
-        foreach ($this->sortedChannelInterceptors as $channelInterceptor) {
-            $messageToSend = $channelInterceptor->preSend($messageToSend, $this->messageChannel);
-
-            if ($messageToSend === null) {
-                return;
-            }
-        }
-
-        $exception = null;
+        $executedInterceptors = [];
+        $isMessageDropped = false;
         try {
-            $this->messageChannel->send($messageToSend);
-        } catch (Throwable $exception) {
-        } finally {
-            $shouldThrow = $exception !== null;
             foreach ($this->sortedChannelInterceptors as $channelInterceptor) {
-                if ($channelInterceptor->afterSendCompletion($messageToSend, $this->messageChannel, $exception)) {
-                    $shouldThrow = false;
+                $transformedMessage = $channelInterceptor->preSend($messageToSend, $this->messageChannel);
+
+                if ($transformedMessage === null) {
+                    $isMessageDropped = true;
+
+                    break;
+                }
+
+                $messageToSend = $transformedMessage;
+                $executedInterceptors[] = $channelInterceptor;
+            }
+
+            if (! $isMessageDropped) {
+                $this->messageChannel->send($messageToSend);
+            }
+        } catch (Throwable $exception) {
+            $shouldThrow = true;
+            $firstCleanupFailure = null;
+            foreach ($executedInterceptors as $channelInterceptor) {
+                try {
+                    if ($channelInterceptor->afterSendCompletion($messageToSend, $this->messageChannel, $exception)) {
+                        $shouldThrow = false;
+                    }
+                } catch (Throwable $cleanupFailure) {
+                    $firstCleanupFailure ??= $cleanupFailure;
                 }
             }
 
             if ($shouldThrow) {
                 throw $exception;
             }
+
+            $this->executePostSend($messageToSend, $executedInterceptors, $firstCleanupFailure);
+
+            return;
         }
-        foreach ($this->sortedChannelInterceptors as $channelInterceptor) {
-            $channelInterceptor->postSend($messageToSend, $this->messageChannel);
+
+        $firstCleanupFailure = null;
+        foreach ($executedInterceptors as $channelInterceptor) {
+            try {
+                $channelInterceptor->afterSendCompletion($messageToSend, $this->messageChannel, null);
+            } catch (Throwable $cleanupFailure) {
+                $firstCleanupFailure ??= $cleanupFailure;
+            }
+        }
+
+        $this->executePostSend($messageToSend, $executedInterceptors, $firstCleanupFailure);
+    }
+
+    /**
+     * @param ChannelInterceptor[] $executedInterceptors
+     */
+    private function executePostSend(Message $messageToSend, array $executedInterceptors, ?Throwable $firstCleanupFailure): void
+    {
+        foreach ($executedInterceptors as $channelInterceptor) {
+            try {
+                $channelInterceptor->postSend($messageToSend, $this->messageChannel);
+            } catch (Throwable $cleanupFailure) {
+                $firstCleanupFailure ??= $cleanupFailure;
+            }
+        }
+
+        if ($firstCleanupFailure !== null) {
+            throw $firstCleanupFailure;
         }
     }
 

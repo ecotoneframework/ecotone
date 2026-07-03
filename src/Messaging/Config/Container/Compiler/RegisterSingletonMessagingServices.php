@@ -9,6 +9,7 @@ use Ecotone\Messaging\Config\Container\ContainerBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\Container\ReferenceSearchServiceWithContainer;
+use Ecotone\Messaging\Config\LicenceDecider;
 use Ecotone\Messaging\Config\MessagingSystemContainer;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
@@ -57,6 +58,7 @@ class RegisterSingletonMessagingServices implements CompilerPass
         $this->registerDefault($builder, PropertyReaderAccessor::class, new Definition(PropertyReaderAccessor::class));
         $this->registerDefault($builder, ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), [], []]));
         $this->registerDefault($builder, EventMapper::class, new Definition(EventMapper::class, factory: 'createEmpty'));
+        $this->registerDefault($builder, LicenceDecider::class, new Definition(LicenceDecider::class, [$this->serviceConfiguration->isRunningForEnterprise()]));
     }
 
     private function registerDefault(ContainerBuilder $builder, string $id, Definition|Reference $definition): void

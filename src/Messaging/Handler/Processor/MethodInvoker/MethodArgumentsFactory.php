@@ -6,6 +6,7 @@ use Ecotone\Messaging\Attribute\AsynchronousEndpointAttribute;
 use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Handler\ClosureExpression\AttributeExpressionExecutorCompiler;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
@@ -83,7 +84,15 @@ class MethodArgumentsFactory
         InterfaceToCall $interceptedInterface
     ): array {
         foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
-            if (! self::hasParameterConverter($passedMethodParameterConverters, $interfaceParameter) && $interfaceParameter->isAnnotation()) {
+            if (self::hasParameterConverter($passedMethodParameterConverters, $interfaceParameter)) {
+                continue;
+            }
+            if ($closureExpressionInvokerConverter = AttributeExpressionExecutorCompiler::interceptorParameterConverterFor($interfaceParameter, $interceptedInterface, $endpointAnnotations)) {
+                $passedMethodParameterConverters[] = $closureExpressionInvokerConverter;
+
+                continue;
+            }
+            if ($interfaceParameter->isAnnotation()) {
                 $passedMethodParameterConverters[] = self::getAnnotationValueConverter($interfaceParameter, $interceptedInterface, $endpointAnnotations) ?? new ValueBuilder($interfaceParameter->getName(), null);
             }
         }

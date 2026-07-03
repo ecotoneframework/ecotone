@@ -116,7 +116,7 @@ class MethodInvokerBuilder implements InterceptedMessageProcessorBuilder
         $parameterConverterBuilders = $this->methodParametersConverterBuilders;
         foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
             if (! $this->hasConverterFor($interfaceParameter)) {
-                $converter = ParameterConverterAnnotationFactory::getConverterFor($interfaceParameter);
+                $converter = ParameterConverterAnnotationFactory::getConverterFor($interfaceParameter, $interfaceToCall);
                 if ($converter) {
                     $parameterConverterBuilders[] = $converter;
                 }

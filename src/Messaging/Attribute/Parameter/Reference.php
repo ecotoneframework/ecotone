@@ -5,20 +5,22 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Attribute\Parameter;
 
 use Attribute;
+use Closure;
+use Ecotone\Messaging\Attribute\WithExpression;
 
 #[Attribute(Attribute::TARGET_PARAMETER)]
 /**
  * licence Apache-2.0
  */
-class Reference
+class Reference implements WithExpression
 {
     public string $referenceName;
 
-    private ?string $expression;
+    private string|Closure|null $expression;
 
     public function __construct(
         string $referenceName = '',
-        ?string $expression = null,
+        string|Closure|null $expression = null,
     ) {
         $this->referenceName = $referenceName;
         $this->expression    = $expression;
@@ -29,7 +31,7 @@ class Reference
         return $this->referenceName;
     }
 
-    public function getExpression(): ?string
+    public function getExpression(): string|Closure|null
     {
         return $this->expression;
     }

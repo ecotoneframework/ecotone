@@ -121,7 +121,7 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
 
         foreach ($interfaceToCall->getInterfaceParameters() as $interfaceParameter) {
             Assert::isFalse($interfaceParameter->getName() === ConsoleCommandConfiguration::HEADER_PARAMETER_NAME, "Parameter name 'header' is reserved for headers and cannot be used as a parameter name");
-            if ($parameterConverter = $parameterConverterAnnotationFactory->getConverterFor($interfaceParameter)) {
+            if ($parameterConverter = $parameterConverterAnnotationFactory->getConverterFor($interfaceParameter, $interfaceToCall)) {
                 $parameterConverters[] = $parameterConverter;
             } elseif ($interfaceParameter->getTypeDescriptor()->isClassOrInterface()) {
                 $parameterConverters[] = ReferenceBuilder::create($interfaceParameter->getName(), $interfaceParameter->getTypeDescriptor()->toString());

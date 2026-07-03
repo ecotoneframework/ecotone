@@ -5,15 +5,16 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Attribute;
 
 use Attribute;
+use Closure;
 use Ecotone\Messaging\Support\Assert;
 
 #[Attribute(Attribute::TARGET_METHOD | Attribute::TARGET_CLASS)]
 /**
  * licence Apache-2.0
  */
-final class Deduplicated
+final class Deduplicated implements WithExpression
 {
-    public function __construct(private string $deduplicationHeaderName = '', private ?string $expression = null, private ?string $trackingName = null)
+    public function __construct(private string $deduplicationHeaderName = '', private string|Closure|null $expression = null, private ?string $trackingName = null)
     {
         Assert::isTrue(
             ($this->deduplicationHeaderName === '' && $this->expression !== null)
@@ -28,7 +29,7 @@ final class Deduplicated
         return $this->deduplicationHeaderName;
     }
 
-    public function getExpression(): ?string
+    public function getExpression(): string|Closure|null
     {
         return $this->expression;
     }

@@ -27,13 +27,10 @@ class PayloadExpressionConverter implements ParameterConverter
      */
     public function getArgumentFrom(Message $message)
     {
-        return $this->expressionEvaluationService->evaluate(
+        return $this->expressionEvaluationService->evaluateWithMessage(
             $this->expression,
-            [
-                'value' => $message->getPayload(),
-                'headers' => $message->getHeaders()->headers(),
-                'payload' => $message->getPayload(),
-            ],
+            $message,
+            ['value' => $message->getPayload()],
         );
     }
 }

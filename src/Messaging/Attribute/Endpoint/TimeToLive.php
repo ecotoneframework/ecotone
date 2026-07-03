@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Attribute\Endpoint;
 
 use Attribute;
+use Closure;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Scheduling\TimeSpan;
 
@@ -19,7 +20,7 @@ class TimeToLive extends AddHeader
      */
     public function __construct(
         int|TimeSpan|null $time = null,
-        ?string $expression = null,
+        string|Closure|null $expression = null,
         private readonly bool $shouldReplaceExistingHeader = true
     ) {
         parent::__construct(MessageHeaders::TIME_TO_LIVE, $time instanceof TimeSpan ? $time->toMilliseconds() : $time, $expression);

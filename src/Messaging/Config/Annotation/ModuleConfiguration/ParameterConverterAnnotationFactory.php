@@ -4,12 +4,16 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
+use Closure;
 use Ecotone\Messaging\Attribute\Parameter\ConfigurationVariable;
 use Ecotone\Messaging\Attribute\Parameter\Fetch;
 use Ecotone\Messaging\Attribute\Parameter\Header;
 use Ecotone\Messaging\Attribute\Parameter\Headers;
 use Ecotone\Messaging\Attribute\Parameter\Payload;
 use Ecotone\Messaging\Attribute\Parameter\Reference;
+use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\Container\AttributeDeclaration;
+use Ecotone\Messaging\Handler\ClosureExpression\ClosureExpressionParameterConverterBuilder;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
@@ -69,7 +73,7 @@ class ParameterConverterAnnotationFactory
         $parameterConverters = [];
 
         foreach ($relatedClassInterface->getInterfaceParameters() as $interfaceParameter) {
-            $converter = self::getConverterFor($interfaceParameter);
+            $converter = self::getConverterFor($interfaceParameter, $relatedClassInterface);
 
             if ($converter) {
                 $parameterConverters[] = $converter;
@@ -79,10 +83,13 @@ class ParameterConverterAnnotationFactory
         return $parameterConverters;
     }
 
-    public static function getConverterFor(InterfaceParameter $interfaceParameter): ParameterConverterBuilder|null
+    public static function getConverterFor(InterfaceParameter $interfaceParameter, ?InterfaceToCall $relatedClassInterface = null): ParameterConverterBuilder|null
     {
         foreach ($interfaceParameter->getAnnotations() as $annotation) {
             if ($annotation instanceof Header) {
+                if ($annotation->expression instanceof Closure) {
+                    return self::closureExpressionConverterFor($interfaceParameter, $annotation, $relatedClassInterface);
+                }
                 if ($annotation->expression) {
                     return HeaderExpressionBuilder::create(
                         $interfaceParameter->getName(),
@@ -96,12 +103,19 @@ class ParameterConverterAnnotationFactory
                     return HeaderBuilder::create($interfaceParameter->getName(), $annotation->getHeaderName());
                 }
             } elseif ($annotation instanceof Payload) {
+                if ($annotation->expression instanceof Closure) {
+                    return self::closureExpressionConverterFor($interfaceParameter, $annotation, $relatedClassInterface);
+                }
                 if ($annotation->expression) {
                     return PayloadExpressionBuilder::create($interfaceParameter->getName(), $annotation->getExpression());
                 } else {
                     return PayloadBuilder::create($interfaceParameter->getName());
                 }
             } elseif ($annotation instanceof Reference) {
+                if ($annotation->getExpression() instanceof Closure) {
+                    return self::closureExpressionConverterFor($interfaceParameter, $annotation, $relatedClassInterface);
+                }
+
                 return ReferenceBuilder::create(
                     $interfaceParameter->getName(),
                     $annotation->getReferenceName() ?: $interfaceParameter->getTypeHint(),
@@ -112,13 +126,30 @@ class ParameterConverterAnnotationFactory
             } elseif ($annotation instanceof ConfigurationVariable) {
                 return ConfigurationVariableBuilder::createFrom($annotation->getName(), $interfaceParameter);
             } elseif ($annotation instanceof Fetch) {
+                $expression = $annotation->getExpression();
+                if ($expression instanceof Closure && $relatedClassInterface === null) {
+                    throw ConfigurationException::create(sprintf('Closure expression inside %s attribute is not supported for parameter `%s` in this context.', get_class($annotation), $interfaceParameter->getName()));
+                }
+
                 return FetchAggregateConverterBuilder::create(
                     $interfaceParameter,
-                    $annotation->getExpression()
+                    $expression,
+                    $expression instanceof Closure
+                        ? new AttributeDeclaration(get_class($annotation), $relatedClassInterface->getInterfaceName(), $relatedClassInterface->getMethodName(), $interfaceParameter->getName())
+                        : null,
                 );
             }
         }
 
         return $interfaceParameter->isMessage() ? MessageConverterBuilder::create($interfaceParameter->getName()) : null;
+    }
+
+    private static function closureExpressionConverterFor(InterfaceParameter $interfaceParameter, object $annotation, ?InterfaceToCall $relatedClassInterface): ClosureExpressionParameterConverterBuilder
+    {
+        if ($relatedClassInterface === null) {
+            throw ConfigurationException::create(sprintf('Closure expression inside %s attribute is not supported for parameter `%s` in this context.', get_class($annotation), $interfaceParameter->getName()));
+        }
+
+        return ClosureExpressionParameterConverterBuilder::create($interfaceParameter->getName(), $annotation, $relatedClassInterface);
     }
 }

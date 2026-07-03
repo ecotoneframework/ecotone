@@ -5,21 +5,23 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Attribute\Parameter;
 
 use Attribute;
+use Closure;
+use Ecotone\Messaging\Attribute\WithExpression;
 
 #[Attribute(Attribute::TARGET_PARAMETER)]
 /**
  * licence Apache-2.0
  */
-class Payload
+class Payload implements WithExpression
 {
-    public string $expression = '';
+    public string|Closure $expression = '';
 
-    public function __construct(string $expression = '')
+    public function __construct(string|Closure $expression = '')
     {
         $this->expression = $expression;
     }
 
-    public function getExpression(): string
+    public function getExpression(): string|Closure
     {
         return $this->expression;
     }

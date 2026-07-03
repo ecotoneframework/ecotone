@@ -2,6 +2,9 @@
 
 namespace Ecotone\Messaging\Config\Container;
 
+use Ecotone\Messaging\Support\InvalidArgumentException;
+use Exception;
+
 use function get_class;
 use function is_object;
 use function serialize;
@@ -23,7 +26,7 @@ class DefinitionHelper
         return new Definition(get_class($object), [serialize($object)], [self::class, 'unserializeSerializedObject']);
     }
 
-    public static function buildAttributeDefinitionFromInstance(object $object): AttributeDefinition
+    public static function buildAttributeDefinitionFromInstance(object $object, ?AttributeDeclaration $declaration = null): AttributeDefinition
     {
         if ($object instanceof DefinedObject) {
             $definition = $object->getDefinition();
@@ -32,10 +35,19 @@ class DefinitionHelper
                 $definition->getClassName(),
                 $definition->getArguments(),
                 $definition->hasFactory() ? $definition->getFactory() : '',
+                $declaration,
             );
         }
 
-        return new AttributeDefinition(get_class($object), [serialize($object)], [self::class, 'unserializeSerializedObject']);
+        try {
+            return new AttributeDefinition(get_class($object), [serialize($object)], [self::class, 'unserializeSerializedObject'], $declaration);
+        } catch (Exception $exception) {
+            if ($declaration !== null) {
+                return $declaration->toAttributeDefinition();
+            }
+
+            throw self::nonSerializableAttributeException(get_class($object), $exception);
+        }
     }
 
     public static function unserializeSerializedObject(string $serializedObject): object
@@ -52,10 +64,24 @@ class DefinitionHelper
                 return $instance->getDefinition();
             }
 
-            return DefinitionHelper::buildDefinitionFromInstance($instance);
+            try {
+                return DefinitionHelper::buildDefinitionFromInstance($instance);
+            } catch (Exception $exception) {
+                $declaration = $attributeDefinition->getDeclaration();
+                if ($declaration !== null) {
+                    return $declaration->toAttributeDefinition();
+                }
+
+                throw self::nonSerializableAttributeException($attributeDefinition->getClassName(), $exception);
+            }
         } else {
             return $attributeDefinition;
         }
+    }
+
+    private static function nonSerializableAttributeException(string $attributeClassName, Exception $exception): Exception
+    {
+        return InvalidArgumentException::create("Attribute {$attributeClassName} contains value that cannot be serialized (e.g. Closure). Closures inside attributes are supported only when declared directly on a class, method or parameter. Original error: {$exception->getMessage()}");
     }
 
     private static function isComplexArgument(mixed $attributeArguments): bool

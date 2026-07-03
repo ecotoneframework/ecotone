@@ -32,13 +32,10 @@ class HeaderExpressionConverter implements ParameterConverter
             throw InvalidArgumentException::create("Header with key {$this->headerName} does not exists for Header Parameter Converter");
         }
 
-        return $this->expressionEvaluationService->evaluate(
+        return $this->expressionEvaluationService->evaluateWithMessage(
             $this->expression,
-            [
-                'value' => $message->getHeaders()->containsKey($this->headerName) ? $message->getHeaders()->get($this->headerName) : null,
-                'headers' => $message->getHeaders()->headers(),
-                'payload' => $message->getPayload(),
-            ],
+            $message,
+            ['value' => $message->getHeaders()->containsKey($this->headerName) ? $message->getHeaders()->get($this->headerName) : null],
         );
     }
 }

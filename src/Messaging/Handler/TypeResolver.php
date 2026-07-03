@@ -6,6 +6,7 @@ use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Messaging\Attribute\IgnoreDocblockTypeHint;
 use Ecotone\Messaging\Attribute\IsAbstract;
+use Ecotone\Messaging\Config\Container\AttributeDeclaration;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\AttributeReference;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
@@ -114,18 +115,24 @@ class TypeResolver
             $returnType = $this->getReturnType($reflectionClass, $methodName);
 
             $classAnnotations = [];
+            $classAttributeIndexes = [];
             foreach ($reflectionClass->getAttributes() as $attribute) {
                 if (class_exists($attribute->getName())) {
-                    $classAnnotations[] = self::registerAttributeDefinition($builder, AttributeDefinition::fromReflection($attribute), $interfaceName, null);
+                    $classAttributeIndexes[$attribute->getName()] ??= 0;
+                    $declaration = new AttributeDeclaration($attribute->getName(), $interfaceName, indexAmongSameAttributes: $classAttributeIndexes[$attribute->getName()]++);
+                    $classAnnotations[] = self::registerAttributeDefinition($builder, AttributeDefinition::fromReflection($attribute, $declaration), $interfaceName, null);
                 }
             }
             if ($reflectionClass->isAbstract() && ! $reflectionClass->isInterface()) {
                 $classAnnotations[] = self::registerAttributeDefinition($builder, new AttributeDefinition(IsAbstract::class), $interfaceName, null);
             }
             $methodAnnotations = [];
+            $methodAttributeIndexes = [];
             foreach ($reflectionMethod->getAttributes() as $attribute) {
                 if (class_exists($attribute->getName())) {
-                    $methodAnnotations[] = self::registerAttributeDefinition($builder, AttributeDefinition::fromReflection($attribute), $interfaceName, $methodName);
+                    $methodAttributeIndexes[$attribute->getName()] ??= 0;
+                    $declaration = new AttributeDeclaration($attribute->getName(), $interfaceName, $methodName, indexAmongSameAttributes: $methodAttributeIndexes[$attribute->getName()]++);
+                    $methodAnnotations[] = self::registerAttributeDefinition($builder, AttributeDefinition::fromReflection($attribute, $declaration), $interfaceName, $methodName);
                 }
             }
 
@@ -173,8 +180,11 @@ class TypeResolver
             }
 
             $parameterAttributes = [];
+            $parameterAttributeIndexes = [];
             foreach ($parameter->getAttributes() as $attribute) {
-                $parameterAttributes[] = AttributeDefinition::fromReflection($attribute);
+                $parameterAttributeIndexes[$attribute->getName()] ??= 0;
+                $declaration = new AttributeDeclaration($attribute->getName(), $reflectionClass->getName(), $reflectionMethod->getName(), $parameter->getName(), $parameterAttributeIndexes[$attribute->getName()]++);
+                $parameterAttributes[] = AttributeDefinition::fromReflection($attribute, $declaration);
             }
 
             $parameters[] = $reference = new InterfaceParameterReference($reflectionClass->getName(), $reflectionMethod->getName(), $parameter->getName());
@@ -210,7 +220,7 @@ class TypeResolver
         } elseif ($attributes === 0) {
             throw new InvalidArgumentException("Invalid attribute reference {$attributeReference}");
         }
-        self::registerAttributeDefinition($builder, AttributeDefinition::fromReflection($attributes[0]), $className, $methodName);
+        self::registerAttributeDefinition($builder, AttributeDefinition::fromReflection($attributes[0], new AttributeDeclaration($attributes[0]->getName(), $className, $methodName)), $className, $methodName);
     }
 
     private function registerAttributeDefinition(ContainerBuilder $builder, AttributeDefinition $attributeDefinition, string $className, ?string $methodName = null): Definition|Reference

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler;
 
 use Ecotone\Messaging\ConfigurationVariableService;
+use Ecotone\Messaging\Message;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**
@@ -128,5 +129,21 @@ class SymfonyExpressionEvaluationAdapter implements ExpressionEvaluationService
     public function evaluate(string $expression, array $evaluationContext)
     {
         return $this->language->evaluate($expression, array_merge($evaluationContext, ['referenceService' => $this->referenceSearchService]));
+    }
+
+    public function evaluateWithMessage(string $expression, Message $message, array $additionalContext = []): mixed
+    {
+        return $this->evaluate($expression, array_merge(
+            [
+                'payload' => $message->getPayload(),
+                'headers' => $message->getHeaders()->headers(),
+            ],
+            $additionalContext,
+        ));
+    }
+
+    public function evaluateWithContext(string $expression, array $context): mixed
+    {
+        return $this->evaluate($expression, $context);
     }
 }

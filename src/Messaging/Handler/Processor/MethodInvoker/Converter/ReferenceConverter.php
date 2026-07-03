@@ -32,13 +32,10 @@ class ReferenceConverter implements ParameterConverter
             return $this->service;
         }
 
-        return $this->expressionEvaluationService->evaluate(
+        return $this->expressionEvaluationService->evaluateWithMessage(
             $this->expression,
-            [
-                'service' => $this->service,
-                'headers' => $message->getHeaders()->headers(),
-                'payload' => $message->getPayload(),
-            ],
+            $message,
+            ['service' => $this->service],
         );
     }
 }

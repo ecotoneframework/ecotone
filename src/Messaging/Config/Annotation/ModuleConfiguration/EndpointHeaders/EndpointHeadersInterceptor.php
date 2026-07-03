@@ -15,8 +15,8 @@ use Ecotone\Messaging\Attribute\Endpoint\TimeToLive;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\ClosureExpression\AttributeExpressionExecutor;
+use Ecotone\Messaging\Handler\ClosureExpression\ExecutorFor;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\Type\UnionType;
 use Ecotone\Messaging\Message;
@@ -37,45 +37,39 @@ use function str_ends_with;
  */
 class EndpointHeadersInterceptor implements DefinedObject
 {
-    public function __construct(private ExpressionEvaluationService $expressionEvaluationService)
-    {
-
-    }
-
-    public function addMetadata(Message $message, ?AddHeader $addHeader, ?Delayed $delayed, ?Priority $priority, ?TimeToLive $timeToLive, ?RemoveHeader $removeHeader, ?ContentType $contentType): array
-    {
+    public function addMetadata(
+        Message $message,
+        #[ExecutorFor(AddHeader::class)] ?AttributeExpressionExecutor $addHeader,
+        #[ExecutorFor(Delayed::class)] ?AttributeExpressionExecutor $delayed,
+        #[ExecutorFor(Priority::class)] ?AttributeExpressionExecutor $priority,
+        #[ExecutorFor(TimeToLive::class)] ?AttributeExpressionExecutor $timeToLive,
+        #[ExecutorFor(RemoveHeader::class)] ?AttributeExpressionExecutor $removeHeader,
+        #[ExecutorFor(ContentType::class)] ?AttributeExpressionExecutor $contentType,
+    ): array {
         $metadata = [];
 
         if ($addHeader) {
-            $metadata[$addHeader->getHeaderName()] = $addHeader->getHeaderValue();
-
-            if ($addHeader->getExpression()) {
-                $metadata[$addHeader->getHeaderName()] = $this->expressionEvaluationService->evaluate($addHeader->getExpression(), [
-                    'payload' => $message->getPayload(),
-                    'headers' => $message->getHeaders()->headers(),
-                ]);
-            }
+            /** @var AddHeader $addHeaderAttribute */
+            $addHeaderAttribute = $addHeader->getAttribute();
+            $metadata[$addHeaderAttribute->getHeaderName()] = $this->headerValueOf($addHeader, $message);
         }
 
         $isContentTypeHeaderExists = $message->getHeaders()->containsKey(MessageHeaders::CONTENT_TYPE);
         if ($contentType) {
-            if ($contentType->shouldReplaceExistingHeader() || ! $isContentTypeHeaderExists) {
-                $metadata[MessageHeaders::CONTENT_TYPE] = $contentType->getHeaderValue();
+            /** @var ContentType $contentTypeAttribute */
+            $contentTypeAttribute = $contentType->getAttribute();
+            if ($contentTypeAttribute->shouldReplaceExistingHeader() || ! $isContentTypeHeaderExists) {
+                $metadata[MessageHeaders::CONTENT_TYPE] = $contentTypeAttribute->getHeaderValue();
             } else {
                 $metadata[MessageHeaders::CONTENT_TYPE] = $message->getHeaders()->get(MessageHeaders::CONTENT_TYPE);
             }
         }
 
+        /** @var Delayed|null $delayedAttribute */
+        $delayedAttribute = $delayed?->getAttribute();
         $isDeliveryDelayHeaderExists = $message->getHeaders()->containsKey(MessageHeaders::DELIVERY_DELAY);
-        if ($delayed && ($delayed->shouldReplaceExistingHeader() || ! $isDeliveryDelayHeaderExists)) {
-            $metadata[MessageHeaders::DELIVERY_DELAY] = $delayed->getHeaderValue();
-
-            if ($delayed->getExpression()) {
-                $metadata[MessageHeaders::DELIVERY_DELAY] = $this->expressionEvaluationService->evaluate($delayed->getExpression(), [
-                    'payload' => $message->getPayload(),
-                    'headers' => $message->getHeaders()->headers(),
-                ]);
-            }
+        if ($delayedAttribute && ($delayedAttribute->shouldReplaceExistingHeader() || ! $isDeliveryDelayHeaderExists)) {
+            $metadata[MessageHeaders::DELIVERY_DELAY] = $this->headerValueOf($delayed, $message);
 
             if (is_string($metadata[MessageHeaders::DELIVERY_DELAY])) {
                 $metadata[MessageHeaders::DELIVERY_DELAY] = $this->parseDateTimeStringWithRequiredOffset($metadata[MessageHeaders::DELIVERY_DELAY]);
@@ -94,26 +88,14 @@ class EndpointHeadersInterceptor implements DefinedObject
         }
 
         if ($priority) {
-            $metadata[MessageHeaders::PRIORITY] = $priority->getHeaderValue();
-
-            if ($priority->getExpression()) {
-                $metadata[MessageHeaders::PRIORITY] = $this->expressionEvaluationService->evaluate($priority->getExpression(), [
-                    'payload' => $message->getPayload(),
-                    'headers' => $message->getHeaders()->headers(),
-                ]);
-            }
+            $metadata[MessageHeaders::PRIORITY] = $this->headerValueOf($priority, $message);
         }
 
+        /** @var TimeToLive|null $timeToLiveAttribute */
+        $timeToLiveAttribute = $timeToLive?->getAttribute();
         $isTtlHeaderExists = $message->getHeaders()->containsKey(MessageHeaders::TIME_TO_LIVE);
-        if ($timeToLive && ($timeToLive->shouldReplaceExistingHeader() || ! $isTtlHeaderExists)) {
-            $metadata[MessageHeaders::TIME_TO_LIVE] = $timeToLive->getHeaderValue();
-
-            if ($timeToLive->getExpression()) {
-                $metadata[MessageHeaders::TIME_TO_LIVE] = $this->expressionEvaluationService->evaluate($timeToLive->getExpression(), [
-                    'payload' => $message->getPayload(),
-                    'headers' => $message->getHeaders()->headers(),
-                ]);
-            }
+        if ($timeToLiveAttribute && ($timeToLiveAttribute->shouldReplaceExistingHeader() || ! $isTtlHeaderExists)) {
+            $metadata[MessageHeaders::TIME_TO_LIVE] = $this->headerValueOf($timeToLive, $message);
 
             $type = Type::createFromVariable($metadata[MessageHeaders::TIME_TO_LIVE]);
             if (! $type->isCompatibleWith(UnionType::createWith([
@@ -127,7 +109,9 @@ class EndpointHeadersInterceptor implements DefinedObject
         }
 
         if ($removeHeader) {
-            $metadata[$removeHeader->getHeaderName()] = null;
+            /** @var RemoveHeader $removeHeaderAttribute */
+            $removeHeaderAttribute = $removeHeader->getAttribute();
+            $metadata[$removeHeaderAttribute->getHeaderName()] = null;
         }
 
         return $metadata;
@@ -135,9 +119,19 @@ class EndpointHeadersInterceptor implements DefinedObject
 
     public function getDefinition(): Definition
     {
-        return new Definition(self::class, [
-            Reference::to(ExpressionEvaluationService::REFERENCE),
-        ]);
+        return new Definition(self::class);
+    }
+
+    private function headerValueOf(AttributeExpressionExecutor $executor, Message $message): mixed
+    {
+        if ($executor->hasExpression()) {
+            return $executor->execute($message);
+        }
+
+        /** @var AddHeader $attribute */
+        $attribute = $executor->getAttribute();
+
+        return $attribute->getHeaderValue();
     }
 
     private function parseDateTimeStringWithRequiredOffset(string $dateTimeString): DateTimeImmutable

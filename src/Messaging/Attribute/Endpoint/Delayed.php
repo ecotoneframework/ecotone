@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Attribute\Endpoint;
 
 use Attribute;
+use Closure;
 use DateTimeInterface;
 use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Scheduling\TimeSpan;
@@ -20,7 +21,7 @@ class Delayed extends AddHeader
      */
     public function __construct(
         int|TimeSpan|DateTimeInterface|null $time = null,
-        ?string $expression = null,
+        string|Closure|null $expression = null,
         private readonly bool $shouldReplaceExistingHeader = true
     ) {
         parent::__construct(MessageHeaders::DELIVERY_DELAY, $time, $expression);

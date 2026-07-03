@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
 use Ecotone\Messaging\Config\LicenceDecider;
-use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\ClosureExpression\AttributeExpressionExecutor;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\LicensingException;
@@ -21,9 +21,8 @@ class FetchAggregateConverter implements ParameterConverter
 {
     public function __construct(
         private AllAggregateRepository $aggregateRepository,
-        private ExpressionEvaluationService $expressionEvaluationService,
         private string $aggregateClassName,
-        private string $expression,
+        private AttributeExpressionExecutor $expressionExecutor,
         private bool $doesAllowsNull,
         private LicenceDecider $licenceDecider,
         private AggregateDefinitionRegistry $aggregateDefinitionRegistry,
@@ -37,14 +36,7 @@ class FetchAggregateConverter implements ParameterConverter
         }
 
         /** @var string|string<string, string>|null $identifiers */
-        $identifiers = $this->expressionEvaluationService->evaluate(
-            $this->expression,
-            [
-                'value' => $message->getPayload(),
-                'headers' => $message->getHeaders()->headers(),
-                'payload' => $message->getPayload(),
-            ],
-        );
+        $identifiers = $this->resolveIdentifiers($message);
 
         if ($identifiers === null) {
             if (! $this->doesAllowsNull) {
@@ -74,5 +66,10 @@ class FetchAggregateConverter implements ParameterConverter
         }
 
         return $resolvedAggregate?->getAggregateInstance();
+    }
+
+    private function resolveIdentifiers(Message $message): mixed
+    {
+        return $this->expressionExecutor->execute($message, ['value' => $message->getPayload()]);
     }
 }

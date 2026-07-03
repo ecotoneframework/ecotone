@@ -2,6 +2,8 @@
 
 namespace Ecotone\Messaging\Config\Container;
 
+use function call_user_func_array;
+
 use ReflectionAttribute;
 
 /**
@@ -9,23 +11,35 @@ use ReflectionAttribute;
  */
 class AttributeDefinition extends Definition
 {
-    public static function fromReflection(ReflectionAttribute $reflectionAttribute): self
+    public function __construct(string $className, array $arguments = [], string|array $factory = '', private ?AttributeDeclaration $declaration = null)
+    {
+        parent::__construct($className, $arguments, $factory);
+    }
+
+    public static function fromReflection(ReflectionAttribute $reflectionAttribute, ?AttributeDeclaration $declaration = null): self
     {
         return new self(
             $reflectionAttribute->getName(),
-            $reflectionAttribute->getArguments()
+            $reflectionAttribute->getArguments(),
+            '',
+            $declaration,
         );
     }
 
-    public static function fromObject(object $attribute): self
+    public static function fromObject(object $attribute, ?AttributeDeclaration $declaration = null): self
     {
-        return DefinitionHelper::buildAttributeDefinitionFromInstance($attribute);
+        return DefinitionHelper::buildAttributeDefinitionFromInstance($attribute, $declaration);
+    }
+
+    public function getDeclaration(): ?AttributeDeclaration
+    {
+        return $this->declaration;
     }
 
     public function instance(): object
     {
         if ($this->hasFactory()) {
-            return DefinitionHelper::unserializeSerializedObject($this->arguments[0]);
+            return call_user_func_array($this->getFactory(), $this->arguments);
         }
 
         return new $this->className(...$this->arguments);

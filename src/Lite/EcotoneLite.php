@@ -34,7 +34,7 @@ final class EcotoneLite
 {
     /**
      * @param string[] $classesToResolve
-     * @param array<string,string> $configurationVariables
+     * @param array<string,mixed> $configurationVariables
      * @param ContainerInterface|object[] $containerOrAvailableServices
      * @param bool $allowGatewaysToBeRegisteredInContainer when enabled will add to the container Command/Query/Event and other gateways. Your container must have 'set' method however
      * @param string|null $licenceKey licence key for enterprise version
@@ -69,7 +69,7 @@ final class EcotoneLite
      * In case you want to test flows or stateful classes like Aggregates and Sagas, use "bootstrapFlowTesting" instead
      *
      * @param string[] $classesToResolve
-     * @param array<string,string> $configurationVariables
+     * @param array<string,mixed> $configurationVariables
      * @param ContainerInterface|object[] $containerOrAvailableServices
      * @deprecated Ecotone 2.0 will drop this method, use "bootstrapFlowTesting" instead
      */
@@ -98,7 +98,7 @@ final class EcotoneLite
      * Skips all module package names and registers repositories for aggregates
      *
      * @param string[] $classesToResolve
-     * @param array<string,string> $configurationVariables
+     * @param array<string,mixed> $configurationVariables
      * @param ContainerInterface|object[] $containerOrAvailableServices
      * @param MessageChannelBuilder[] $enableAsynchronousProcessing
      * @param string|null $licenceKey licence key for enterprise version
@@ -131,7 +131,7 @@ final class EcotoneLite
      * Enables eventSourcing, dbal, jmsConverter packages and provides default repositories.
      *
      * @param string[] $classesToResolve
-     * @param array<string,string> $configurationVariables
+     * @param array<string,mixed> $configurationVariables
      * @param ContainerInterface|object[] $containerOrAvailableServices
      * @param string|null $licenceKey licence key for enterprise version
      */
@@ -172,7 +172,7 @@ final class EcotoneLite
      * @param string[] $packagesToEnable
      * @param ContainerInterface|object[] $containerOrAvailableServices
      * @param string[] $classesToResolve
-     * @param array<string,string> $configurationVariables
+     * @param array<string,mixed> $configurationVariables
      */
     private static function prepareConfiguration(ContainerInterface|array $containerOrAvailableServices, ?ServiceConfiguration $serviceConfiguration, array $classesToResolve, array $configurationVariables, ?string $originalPathToRootCatalog, bool $enableTesting, bool $allowGatewaysToBeRegisteredInContainer, bool $useCachedVersion, ?string $enterpriseLicenceKey = null): ConfiguredMessagingSystemWithTestSupport|ConfiguredMessagingSystem
     {

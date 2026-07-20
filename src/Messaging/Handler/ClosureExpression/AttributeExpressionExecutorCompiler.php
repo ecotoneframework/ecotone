@@ -16,13 +16,16 @@ use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AttributeBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\Assert;
+use ReflectionClass;
 use ReflectionFunction;
+use ReflectionMethod;
 use ReflectionParameter;
 
 /**
@@ -156,6 +159,8 @@ final class AttributeExpressionExecutorCompiler
             $closureParameterResolvers = self::parameterResolverDefinitions(
                 $reflectionParameters,
                 self::closureInterfaceToCall($ownerClassName, $ownerMethodName, $reflectionParameters),
+                $ownerClassName,
+                $ownerMethodName,
             );
         }
 
@@ -179,7 +184,7 @@ final class AttributeExpressionExecutorCompiler
      * @param ReflectionParameter[] $reflectionParameters
      * @return Definition[]
      */
-    private static function parameterResolverDefinitions(array $reflectionParameters, InterfaceToCall $interfaceToCall): array
+    private static function parameterResolverDefinitions(array $reflectionParameters, InterfaceToCall $interfaceToCall, string $ownerClassName, ?string $ownerMethodName): array
     {
         $parameterResolvers = [];
         foreach ($reflectionParameters as $index => $reflectionParameter) {
@@ -188,6 +193,12 @@ final class AttributeExpressionExecutorCompiler
 
             $converterBuilder = ParameterConverterAnnotationFactory::getConverterFor($interfaceParameter, $interfaceToCall);
             $resolvesFromAdditionalContext = $converterBuilder === null || $converterBuilder instanceof MessageConverterBuilder;
+            if ($converterBuilder === null) {
+                $converterBuilder = self::declaredAttributeConverterBuilderFor($interfaceParameter, $ownerClassName, $ownerMethodName);
+                if ($converterBuilder !== null) {
+                    $resolvesFromAdditionalContext = false;
+                }
+            }
             if ($converterBuilder === null) {
                 $converterBuilder = self::defaultConverterBuilderFor($interfaceParameter, $index === 0);
             }
@@ -247,6 +258,35 @@ final class AttributeExpressionExecutorCompiler
                 throw ConfigurationException::create(sprintf('Closure expression inside %s attribute cannot be used on closure expression parameter `%s` in %s. Nested closure expressions are not supported.', get_class($annotation), $interfaceParameter->getName(), $interfaceToCall));
             }
         }
+    }
+
+    /**
+     * Resolves closure parameter type hinted with an Attribute declared on the owning method or class,
+     * so expression may adapt its behaviour to configuration declared next to the endpoint.
+     */
+    private static function declaredAttributeConverterBuilderFor(InterfaceParameter $interfaceParameter, string $ownerClassName, ?string $ownerMethodName): ?ParameterConverterBuilder
+    {
+        if (! $interfaceParameter->isAnnotation()) {
+            return null;
+        }
+
+        $parameterType = $interfaceParameter->getTypeDescriptor()->withoutNull();
+
+        if ($ownerMethodName !== null) {
+            foreach ((new ReflectionMethod($ownerClassName, $ownerMethodName))->getAttributes() as $attribute) {
+                if (Type::object($attribute->getName())->equals($parameterType)) {
+                    return new AttributeBuilder($interfaceParameter->getName(), $attribute->newInstance(), $ownerClassName, $ownerMethodName);
+                }
+            }
+        }
+
+        foreach ((new ReflectionClass($ownerClassName))->getAttributes() as $attribute) {
+            if (Type::object($attribute->getName())->equals($parameterType)) {
+                return new AttributeBuilder($interfaceParameter->getName(), $attribute->newInstance(), $ownerClassName, null);
+            }
+        }
+
+        return null;
     }
 
     private static function defaultConverterBuilderFor(InterfaceParameter $interfaceParameter, bool $isFirstParameter): ?ParameterConverterBuilder

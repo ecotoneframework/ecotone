@@ -21,13 +21,16 @@ class ConsoleCommandConfiguration implements DefinedObject
      */
     private array $parameterNames;
 
+    private string $description;
+
     /**
      * @var ConsoleCommandParameter[] $parameterNames
      */
-    private function __construct(string $channelName, string $name, array $parameterNames)
+    private function __construct(string $channelName, string $name, array $parameterNames, string $description)
     {
         $this->name               = $name;
         $this->channelName = $channelName;
+        $this->description = $description;
         $parameterNames[] = ConsoleCommandParameter::createWithDefaultValue(
             self::HEADER_PARAMETER_NAME,
             '',
@@ -53,14 +56,19 @@ class ConsoleCommandConfiguration implements DefinedObject
     /**
      * @var ConsoleCommandParameter[] $parameterNames
      */
-    public static function create(string $channelName, string $name, array $parameterNames): self
+    public static function create(string $channelName, string $name, array $parameterNames, string $description = ''): self
     {
-        return new self($channelName, $name, $parameterNames);
+        return new self($channelName, $name, $parameterNames, $description);
     }
 
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
     }
 
     public function getChannelName(): string
@@ -82,6 +90,7 @@ class ConsoleCommandConfiguration implements DefinedObject
             $this->channelName,
             $this->name,
             $this->parameterNames,
+            $this->description,
         ], [self::class, 'create']);
     }
 }

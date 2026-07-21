@@ -66,8 +66,8 @@ class ChannelSetupModule extends NoExternalConfigurationModule implements Annota
         );
 
         // Register console commands
-        $this->registerConsoleCommand('setup', 'ecotone:migration:channel:setup', ChannelSetupCommand::class, $messagingConfiguration, $interfaceToCallRegistry);
-        $this->registerConsoleCommand('delete', 'ecotone:migration:channel:delete', ChannelDeleteCommand::class, $messagingConfiguration, $interfaceToCallRegistry);
+        $this->registerConsoleCommand('setup', 'ecotone:migration:channel:setup', ChannelSetupCommand::class, $messagingConfiguration, $interfaceToCallRegistry, 'Initializes infrastructure of registered message channels');
+        $this->registerConsoleCommand('delete', 'ecotone:migration:channel:delete', ChannelDeleteCommand::class, $messagingConfiguration, $interfaceToCallRegistry, 'Deletes infrastructure of registered message channels');
     }
 
     public function canHandle($extensionObject): bool
@@ -87,14 +87,16 @@ class ChannelSetupModule extends NoExternalConfigurationModule implements Annota
         string $commandName,
         string $className,
         Configuration $configuration,
-        InterfaceToCallRegistry $interfaceToCallRegistry
+        InterfaceToCallRegistry $interfaceToCallRegistry,
+        string $description = ''
     ): void {
         [$messageHandlerBuilder, $oneTimeCommandConfiguration] = ConsoleCommandModule::prepareConsoleCommandForReference(
             new Reference($className),
             new InterfaceToCallReference($className, $methodName),
             $commandName,
             true,
-            $interfaceToCallRegistry
+            $interfaceToCallRegistry,
+            $description
         );
 
         $configuration

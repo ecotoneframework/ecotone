@@ -18,7 +18,7 @@ class ProjectingConsoleCommands
     {
     }
 
-    #[ConsoleCommand('ecotone:projection:init')]
+    #[ConsoleCommand('ecotone:projection:init', 'Initializes given projection or all projections with --all')]
     public function initProjection(?string $name = null, #[ConsoleParameterOption] bool $all = false): void
     {
         if ($name === null) {
@@ -36,7 +36,7 @@ class ProjectingConsoleCommands
         }
     }
 
-    #[ConsoleCommand('ecotone:projection:backfill')]
+    #[ConsoleCommand('ecotone:projection:backfill', 'Prepares given projection to be backfilled with historical events')]
     public function backfillProjection(string $name): void
     {
         if (! $this->registry->has($name)) {
@@ -45,7 +45,7 @@ class ProjectingConsoleCommands
         $this->registry->get($name)->prepareBackfill();
     }
 
-    #[ConsoleCommand('ecotone:projection:rebuild')]
+    #[ConsoleCommand('ecotone:projection:rebuild', 'Prepares given projection to be rebuilt from scratch')]
     public function rebuildProjection(string $name): void
     {
         if (! $this->registry->has($name)) {
@@ -54,7 +54,7 @@ class ProjectingConsoleCommands
         $this->registry->get($name)->prepareRebuild();
     }
 
-    #[ConsoleCommand('ecotone:projection:delete')]
+    #[ConsoleCommand('ecotone:projection:delete', 'Deletes given projection')]
     public function deleteProjection(string $name): void
     {
         if (! $this->registry->has($name)) {

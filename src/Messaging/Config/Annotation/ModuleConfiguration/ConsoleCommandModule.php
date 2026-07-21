@@ -63,7 +63,7 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
             $className    = $annotationRegistration->getClassName();
             $methodName               = $annotationRegistration->getMethodName();
 
-            [$messageHandlerBuilder, $oneTimeCommandConfiguration] = self::prepareConsoleCommand($interfaceToCallRegistry, $annotationRegistration, $className, $methodName, $commandName);
+            [$messageHandlerBuilder, $oneTimeCommandConfiguration] = self::prepareConsoleCommand($interfaceToCallRegistry, $annotationRegistration, $className, $methodName, $commandName, $annotation->getDescription());
 
             $messageHandlerBuilders[] = $messageHandlerBuilder;
             $oneTimeConfigurations[]     = $oneTimeCommandConfiguration;
@@ -72,7 +72,7 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
         return new static($messageHandlerBuilders, $oneTimeConfigurations);
     }
 
-    public static function prepareConsoleCommand(InterfaceToCallRegistry $interfaceToCallRegistry, AnnotatedMethod $annotatedMethod, string $className, string $methodName, string $commandName): array
+    public static function prepareConsoleCommand(InterfaceToCallRegistry $interfaceToCallRegistry, AnnotatedMethod $annotatedMethod, string $className, string $methodName, string $commandName, string $description = ''): array
     {
         $parameterConverters = [];
         $parameters          = [];
@@ -85,12 +85,12 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
             ->withEndpointId('ecotone.endpoint.' . $commandName)
             ->withInputChannelName($inputChannel)
             ->withMethodParameterConverters($parameterConverters);
-        $oneTimeCommandConfiguration = ConsoleCommandConfiguration::create($inputChannel, $commandName, $parameters);
+        $oneTimeCommandConfiguration = ConsoleCommandConfiguration::create($inputChannel, $commandName, $parameters, $description);
 
         return [$messageHandlerBuilder, $oneTimeCommandConfiguration];
     }
 
-    public static function prepareConsoleCommandForReference(Reference $reference, InterfaceToCallReference $interfaceToCallReference, string $commandName, bool $discoverableByConsoleCommandAttribute, InterfaceToCallRegistry $interfaceToCallRegistry)
+    public static function prepareConsoleCommandForReference(Reference $reference, InterfaceToCallReference $interfaceToCallReference, string $commandName, bool $discoverableByConsoleCommandAttribute, InterfaceToCallRegistry $interfaceToCallRegistry, string $description = '')
     {
         $className = $interfaceToCallReference->getClassName();
         $methodName = $interfaceToCallReference->getMethodName();
@@ -105,7 +105,7 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
             ->withEndpointAnnotations($discoverableByConsoleCommandAttribute ? [new AttributeDefinition(ConsoleCommand::class, [$commandName])] : [])
             ->withInputChannelName($inputChannel)
             ->withMethodParameterConverters($parameterConverters);
-        $oneTimeCommandConfiguration = ConsoleCommandConfiguration::create($inputChannel, $commandName, $parameters);
+        $oneTimeCommandConfiguration = ConsoleCommandConfiguration::create($inputChannel, $commandName, $parameters, $description);
 
         return [$messageHandlerBuilder, $oneTimeCommandConfiguration];
     }

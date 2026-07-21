@@ -23,6 +23,9 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Console\ConsoleWriter;
+use Ecotone\Messaging\Console\DelegatingConsoleWriter;
+use Ecotone\Messaging\Console\InMemoryConsoleWriter;
 use Ecotone\Messaging\Consumer\ConsumerPositionTracker;
 use Ecotone\Messaging\Consumer\InMemory\InMemoryConsumerPositionTracker;
 use Ecotone\Messaging\Handler\ChannelResolver;
@@ -122,6 +125,17 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
         }
 
         $this->registerInMemoryEventStoreIfNeeded($messagingConfiguration, $extensionObjects, $serviceConfiguration);
+
+        $messagingConfiguration->registerServiceDefinition(
+            InMemoryConsoleWriter::class,
+            new Definition(InMemoryConsoleWriter::class)
+        );
+        $messagingConfiguration->registerServiceDefinition(
+            ConsoleWriter::class,
+            new Definition(DelegatingConsoleWriter::class, [
+                new Reference(InMemoryConsoleWriter::class),
+            ])
+        );
 
         $messagingConfiguration->registerServiceDefinition(MessageCollectorHandler::class, new Definition(MessageCollectorHandler::class));
         $this->registerMessageCollector($messagingConfiguration, $interfaceToCallRegistry);

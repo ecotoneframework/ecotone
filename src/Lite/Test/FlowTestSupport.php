@@ -9,6 +9,7 @@ use DateTimeInterface;
 use Ecotone\EventSourcing\EventStore;
 use Ecotone\EventSourcing\ProjectionManager;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
+use Ecotone\Messaging\Console\InMemoryConsoleWriter;
 use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
@@ -529,6 +530,11 @@ final class FlowTestSupport
     public function getServiceFromContainer(string $serviceName): object
     {
         return $this->configuredMessagingSystem->getServiceFromContainer($serviceName);
+    }
+
+    public function getInMemoryConsoleWriter(): InMemoryConsoleWriter
+    {
+        return $this->configuredMessagingSystem->getServiceFromContainer(InMemoryConsoleWriter::class);
     }
 
     /**

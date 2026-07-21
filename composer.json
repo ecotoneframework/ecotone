@@ -55,7 +55,11 @@
         "phpunit/phpunit": "^10.5|^11.0",
         "ramsey/uuid": "^4.0",
         "phpstan/phpstan": "^1.8",
+        "symfony/console": "^6.4|^7.0|^8.0",
         "symfony/expression-language": "^6.4|^7.0|^8.0"
+    },
+    "suggest": {
+        "symfony/console": "Allows using SymfonyConsoleWriter for styled console command output"
     },
     "scripts": {
         "tests:phpstan": "vendor/bin/phpstan",
@@ -69,7 +73,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-main": "1.320.1-dev"
+            "dev-main": "1.321.0-dev"
         },
         "ecotone": {
             "repository": "ecotone"
@@ -85,7 +89,7 @@
                 "description": "Allows to use Enterprise features of Ecotone. For more information please write to support@simplycodedsoftware.com"
             }
         },
-        "release-time": "2026-07-20 19:48:02"
+        "release-time": "2026-07-21 17:59:44"
     },
     "config": {
         "sort-packages": true

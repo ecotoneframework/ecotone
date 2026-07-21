@@ -14,6 +14,9 @@ use Ecotone\Messaging\Config\MessagingSystemContainer;
 use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Console\ConsoleWriter;
+use Ecotone\Messaging\Console\DelegatingConsoleWriter;
+use Ecotone\Messaging\Console\PlainConsoleWriter;
 use Ecotone\Messaging\Handler\Bridge\Bridge;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
@@ -41,6 +44,9 @@ class RegisterSingletonMessagingServices implements CompilerPass
     public function process(ContainerBuilder $builder): void
     {
         $this->registerDefault($builder, Bridge::class, new Definition(Bridge::class));
+        $this->registerDefault($builder, ConsoleWriter::class, new Definition(DelegatingConsoleWriter::class, [
+            new Definition(PlainConsoleWriter::class),
+        ]));
         $this->registerDefault($builder, Reference::toChannel(NullableMessageChannel::CHANNEL_NAME), new Definition(NullableMessageChannel::class));
         $this->registerDefault($builder, EcotoneClockInterface::class, new Definition(
             Clock::class,

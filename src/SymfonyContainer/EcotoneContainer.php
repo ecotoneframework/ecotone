@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Ecotone\SymfonyContainer;
 
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\Container\Compiler\ContainerImplementation;
+use Error;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface as SymfonyContainerInterface;
+use Throwable;
 
 /**
  * licence Apache-2.0
@@ -17,6 +20,7 @@ final class EcotoneContainer implements ContainerInterface
     public function __construct(
         private SymfonyContainerInterface $container,
         private ContainerInterface $externalContainer,
+        private ?string $loadedFromCachePath = null,
     ) {
     }
 
@@ -24,10 +28,40 @@ final class EcotoneContainer implements ContainerInterface
     {
         $normalizedId = ServiceIdNormalizer::normalize($id);
         if ($this->container->has($normalizedId)) {
-            return $this->container->get($normalizedId);
+            try {
+                return $this->container->get($normalizedId);
+            } catch (Error $failure) {
+                throw $this->attributeStaleCacheFailure($failure);
+            }
         }
 
         return ExternalReferenceResolver::resolve($this->externalContainer, $id, ContainerImplementation::EXCEPTION_ON_INVALID_REFERENCE);
+    }
+
+    /**
+     * A production cache is trusted and never rescanned, so after a deploy
+     * removes or renames a class the cached container may still reference it.
+     * The resulting load failure must say so — a bare "Class not found" gives
+     * no hint that clearing the Ecotone cache is the fix.
+     */
+    private function attributeStaleCacheFailure(Error $failure): Throwable
+    {
+        if (
+            $this->loadedFromCachePath === null
+            || preg_match('/(?:Class|Interface|Trait|Enum) "([^"]+)" not found/', $failure->getMessage(), $match) !== 1
+        ) {
+            return $failure;
+        }
+
+        return ConfigurationException::createFromPreviousException(
+            sprintf(
+                'Ecotone\'s cached container references "%s", which can no longer be loaded. If it was removed or renamed since the cache was built, the production cache at "%s" is stale — clear the Ecotone cache (ecotone:cache:clear, or delete that directory) and boot again. If the error persists after clearing, the class is referenced by your own code. Original error: %s',
+                $match[1],
+                $this->loadedFromCachePath,
+                $failure->getMessage(),
+            ),
+            $failure,
+        );
     }
 
     public function has(string $id): bool

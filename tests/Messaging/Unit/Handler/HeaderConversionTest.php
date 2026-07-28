@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
 use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Attribute\Parameter\Header;
 use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Modelling\Attribute\CommandHandler;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
@@ -104,6 +106,31 @@ final class HeaderConversionTest extends TestCase
         );
     }
 
+    public function test_converting_scalar_header_to_nullable_enum(): void
+    {
+        $handler = new class () {
+            public ?DeliveryMethod $deliveryMethod = null;
+
+            #[CommandHandler('withNullableEnumConversion', endpointId: 'withNullableEnumConversionEndpoint')]
+            public function handle(
+                #[Header('deliveryMethod')] ?DeliveryMethod $deliveryMethod = null
+            ): void {
+                $this->deliveryMethod = $deliveryMethod;
+            }
+        };
+
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [$handler::class],
+            [$handler],
+        );
+
+        $ecotoneLite->sendCommandWithRoutingKey('withNullableEnumConversion', metadata: [
+            'deliveryMethod' => DeliveryMethod::Email->value,
+        ]);
+
+        self::assertSame(DeliveryMethod::Email, $handler->deliveryMethod);
+    }
+
     /**
      * This will change nothing, as it's used for payload, not header conversion.
      * However to be sure that it's not affecting header conversion, it's part of the test scenario
@@ -119,4 +146,9 @@ final class HeaderConversionTest extends TestCase
                 ->withDefaultSerializationMediaType(MediaType::APPLICATION_JSON),
         ];
     }
+}
+
+enum DeliveryMethod: string
+{
+    case Email = 'email';
 }

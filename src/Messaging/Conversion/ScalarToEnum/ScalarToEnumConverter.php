@@ -19,6 +19,10 @@ class ScalarToEnumConverter implements Converter
      */
     public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType)
     {
+        if ($targetType instanceof Type\UnionType) {
+            $targetType = $targetType->withoutNull();
+        }
+
         $ref = new ReflectionEnum($targetType->toString());
 
         if ($ref->isBacked()) {

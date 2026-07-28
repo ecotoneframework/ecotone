@@ -142,6 +142,34 @@ class EcotoneSymfonyContainerFactoryCacheTest extends TestCase
         self::assertSame($cacheConfiguration, $loaded->get(ServiceCacheConfiguration::REFERENCE_NAME));
     }
 
+    public function test_it_overrides_dumped_cache_configuration_with_the_one_used_to_load_from(): void
+    {
+        $buildDirectory = $this->uniqueCacheDirectory();
+        $buildCacheConfiguration = new ServiceCacheConfiguration($buildDirectory, true);
+        $builder = new ContainerBuilder();
+        $builder->register(ServiceCacheConfiguration::REFERENCE_NAME, $buildCacheConfiguration);
+        $builder->replace('aService', new Definition(ACachedService::class, ['someName', new Reference(ServiceCacheConfiguration::REFERENCE_NAME)]));
+        EcotoneSymfonyContainerFactory::build($builder, $buildCacheConfiguration);
+
+        $runtimeDirectory = $this->uniqueCacheDirectory();
+        $this->relocate($buildDirectory, $runtimeDirectory);
+        $runtimeCacheConfiguration = new ServiceCacheConfiguration($runtimeDirectory, true);
+
+        $loaded = EcotoneSymfonyContainerFactory::loadCached($runtimeCacheConfiguration);
+
+        self::assertSame($runtimeCacheConfiguration, $loaded->get(ServiceCacheConfiguration::REFERENCE_NAME));
+        self::assertSame($runtimeDirectory, $loaded->get('aService')->dependency->getPath());
+    }
+
+    private function relocate(string $buildDirectory, string $runtimeDirectory): void
+    {
+        mkdir($runtimeDirectory, 0777, true);
+        foreach (glob($buildDirectory . '/*') as $file) {
+            rename($file, $runtimeDirectory . '/' . basename($file));
+        }
+        rmdir($buildDirectory);
+    }
+
     private function uniqueCacheDirectory(): string
     {
         return sys_get_temp_dir() . '/ecotone_container_cache_test/' . uniqid('', true);

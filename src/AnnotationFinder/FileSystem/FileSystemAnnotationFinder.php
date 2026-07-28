@@ -565,11 +565,12 @@ class FileSystemAnnotationFinder implements AnnotationFinder
 
         foreach ($this->registeredClasses() as $class) {
             $filePath = (new ReflectionClass($class))->getFileName();
-            $fileSha .= sha1_file($filePath);
+            $fileSha .= $class . sha1_file($filePath);
         }
 
-        if (file_exists($pathToRootCatalog . 'composer.lock')) {
-            $fileSha .= sha1_file($pathToRootCatalog . 'composer.lock');
+        $composerLockPath = rtrim($pathToRootCatalog, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'composer.lock';
+        if (file_exists($composerLockPath)) {
+            $fileSha .= sha1_file($composerLockPath);
         }
 
         $fileSha .= sha1(serialize($serviceConfiguration));

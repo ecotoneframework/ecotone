@@ -117,6 +117,10 @@ final class EcotoneSymfonyContainerFactory
     }
 
     /**
+     * The dumped container holds the cache path from the machine that built it.
+     * Deployments that warm the cache in one directory and run it from another
+     * must resolve the path from the configuration given here, not from the dump.
+     *
      * @param array<string, object> $runtimeServices
      */
     public static function loadCached(
@@ -133,6 +137,8 @@ final class EcotoneSymfonyContainerFactory
         if (! $container instanceof SymfonyBaseContainer) {
             return null;
         }
+
+        $runtimeServices = [ServiceCacheConfiguration::REFERENCE_NAME => $serviceCacheConfiguration] + $runtimeServices;
 
         return self::wrapWithExternalFallback($container, $externalContainer, $runtimeServices, $serviceCacheConfiguration->getPath());
     }

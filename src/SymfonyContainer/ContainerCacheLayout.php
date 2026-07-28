@@ -61,9 +61,27 @@ final class ContainerCacheLayout
             $annotationFinder,
             new ServiceCacheConfiguration(
                 $useHashSubDirectory ? $cacheDirectory . DIRECTORY_SEPARATOR . $configHash : $cacheDirectory,
-                $shouldUseCache,
+                $shouldUseCache && ! self::containsAnonymousClass($annotationFinder->registeredClasses()),
             ),
             $configHash,
         );
+    }
+
+    /**
+     * An anonymous class is named after the file and a counter that changes
+     * between processes, so a dumped container referencing one can never be
+     * resolved again. Configurations built from them are always rebuilt.
+     *
+     * @param class-string[] $registeredClasses
+     */
+    private static function containsAnonymousClass(array $registeredClasses): bool
+    {
+        foreach ($registeredClasses as $registeredClass) {
+            if (str_contains($registeredClass, '@anonymous')) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

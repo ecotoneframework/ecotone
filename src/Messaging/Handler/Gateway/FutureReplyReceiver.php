@@ -21,6 +21,10 @@ class FutureReplyReceiver implements Future
      */
     private $replyCallable;
 
+    private bool $resolved = false;
+
+    private mixed $resolvedValue = null;
+
     /**
      * FutureReplySender constructor.
      * @param callable $replyCallable
@@ -44,10 +48,24 @@ class FutureReplyReceiver implements Future
      */
     public function resolve()
     {
+        if ($this->resolved) {
+            if ($this->resolvedValue instanceof Future) {
+                return $this->resolvedValue->resolve();
+            }
+
+            return $this->resolvedValue;
+        }
+
         $replyCallable = $this->replyCallable;
         /** @var Message $message */
         $message = $replyCallable();
+        $this->resolvedValue = $message ? $message->getPayload() : null;
+        $this->resolved = true;
 
-        return $message ? $message->getPayload() : null;
+        if ($this->resolvedValue instanceof Future) {
+            return $this->resolvedValue->resolve();
+        }
+
+        return $this->resolvedValue;
     }
 }

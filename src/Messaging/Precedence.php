@@ -59,9 +59,14 @@ interface Precedence
     public const DATABASE_TRANSACTION_PRECEDENCE = -2000;
 
     /**
+     * Awaits delivery confirmations of asynchronously published messages before transaction commits
+     */
+    public const ASYNC_PUBLISHING_AWAIT_PRECEDENCE = self::DATABASE_TRANSACTION_PRECEDENCE + 1;
+
+    /**
      * Collects messages to be sent to asynchronous channels.
      */
-    public const COLLECTOR_SENDER_PRECEDENCE = self::DATABASE_TRANSACTION_PRECEDENCE + 1;
+    public const COLLECTOR_SENDER_PRECEDENCE = self::ASYNC_PUBLISHING_AWAIT_PRECEDENCE + 1;
 
     public const DATABASE_OBJECT_MANAGER_PRECEDENCE = self::COLLECTOR_SENDER_PRECEDENCE + 1;
 

@@ -3,6 +3,7 @@
 namespace Ecotone\Messaging\Config\Container\Compiler;
 
 use Ecotone\EventSourcing\Mapping\EventMapper;
+use Ecotone\Messaging\Channel\AsyncPublishing\AsyncPublishingRegistry;
 use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\Container\ChannelResolverWithContainer;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
@@ -23,6 +24,7 @@ use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Gateway\ProxyFactory;
+use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\NullableMessageChannel;
@@ -65,6 +67,7 @@ class RegisterSingletonMessagingServices implements CompilerPass
         $this->registerDefault($builder, ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), [], []]));
         $this->registerDefault($builder, EventMapper::class, new Definition(EventMapper::class, factory: 'createEmpty'));
         $this->registerDefault($builder, LicenceDecider::class, new Definition(LicenceDecider::class, [$this->serviceConfiguration->isRunningForEnterprise()]));
+        $this->registerDefault($builder, AsyncPublishingRegistry::class, new Definition(AsyncPublishingRegistry::class, [new Reference(LoggingGateway::class)]));
     }
 
     private function registerDefault(ContainerBuilder $builder, string $id, Definition|Reference $definition): void

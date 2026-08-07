@@ -120,6 +120,14 @@ class DefaultHeaderMapper implements HeaderMapper
                 continue;
             }
 
+            if ($mappedHeader === '.*') {
+                foreach ($convertedSourceHeaders as $sourceHeaderName => $value) {
+                    $targetHeaders = $this->convertToStoreableFormat($sourceHeaderName, $value, $targetHeaders, $conversionService);
+                }
+
+                continue;
+            }
+
             foreach ($convertedSourceHeaders as $sourceHeaderName => $value) {
                 if (preg_match("#{$mappedHeader}#", $sourceHeaderName)) {
                     $targetHeaders = $this->convertToStoreableFormat($sourceHeaderName, $value, $targetHeaders, $conversionService);
@@ -138,7 +146,7 @@ class DefaultHeaderMapper implements HeaderMapper
      */
     private function isScalarType($headerValue): bool
     {
-        return (Type::createFromVariable($headerValue))->isScalar();
+        return is_scalar($headerValue) || (Type::createFromVariable($headerValue))->isScalar();
     }
 
     /**

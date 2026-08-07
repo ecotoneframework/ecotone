@@ -9,6 +9,7 @@ use Ecotone\Amqp\Configuration\RabbitConsumerModule;
 use Ecotone\Amqp\Publisher\AmqpMessagePublisherModule;
 use Ecotone\Amqp\Transaction\AmqpTransactionModule;
 use Ecotone\DataProtection\Configuration\DataProtectionModule;
+use Ecotone\Dbal\BatchForwarding\DbalBatchForwardingModule;
 use Ecotone\Dbal\Configuration\DbalConnectionModule;
 use Ecotone\Dbal\Configuration\DbalPublisherModule;
 use Ecotone\Dbal\Database\DatabaseSetupModule;
@@ -26,6 +27,7 @@ use Ecotone\JMSConverter\Configuration\JMSDefaultSerialization;
 use Ecotone\Kafka\Configuration\KafkaModule;
 use Ecotone\Laravel\Config\LaravelConnectionModule;
 use Ecotone\Lite\Test\Configuration\EcotoneTestSupportModule;
+use Ecotone\Messaging\Channel\AsyncPublishing\Config\AsyncPublishingModule;
 use Ecotone\Messaging\Channel\Collector\Config\CollectorModule;
 use Ecotone\Messaging\Channel\DynamicChannel\Config\DynamicMessageChannelModule;
 use Ecotone\Messaging\Channel\Manager\ChannelSetupModule;
@@ -108,6 +110,7 @@ class ModuleClassList
         RouterModule::class,
         ScheduledModule::class,
         CollectorModule::class,
+        AsyncPublishingModule::class,
         ChannelSetupModule::class,
         SerializerModule::class,
         ServiceActivatorModule::class,
@@ -153,6 +156,7 @@ class ModuleClassList
     ];
 
     public const DBAL_MODULES = [
+        DbalBatchForwardingModule::class,
         DbalConnectionModule::class,
         DbalDeadLetterModule::class,
         ObjectManagerModule::class,

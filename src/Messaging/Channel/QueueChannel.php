@@ -2,11 +2,14 @@
 
 namespace Ecotone\Messaging\Channel;
 
+use Ecotone\Messaging\BatchMessage;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Message;
 use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Support\LicensingException;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -18,13 +21,18 @@ class QueueChannel implements PollableChannel, DefinedObject
      */
     private array $queue = [];
 
-    public function __construct(private string $name)
+    public function __construct(private string $name, private bool $batchMessagesSupport = false)
     {
     }
 
-    public static function create(string $name = 'unknown'): self
+    public static function create(string $name = 'unknown', bool $batchMessagesSupport = false): self
     {
-        return new self($name);
+        return new self($name, $batchMessagesSupport);
+    }
+
+    public function enableBatchMessagesSupport(): void
+    {
+        $this->batchMessagesSupport = true;
     }
 
     /**
@@ -32,6 +40,21 @@ class QueueChannel implements PollableChannel, DefinedObject
      */
     public function send(Message $message): void
     {
+        $payload = $message->getPayload();
+        if ($payload instanceof BatchMessage) {
+            if (! $this->batchMessagesSupport) {
+                throw LicensingException::create('Sending BatchMessage is available only with Ecotone Enterprise licence.');
+            }
+
+            foreach ($payload->getEntries() as $entry) {
+                $this->queue[] = MessageBuilder::withPayload($entry['payload'])
+                    ->setMultipleHeaders($entry['headers'])
+                    ->build();
+            }
+
+            return;
+        }
+
         $this->queue[] = $message;
     }
 
@@ -68,6 +91,6 @@ class QueueChannel implements PollableChannel, DefinedObject
 
     public function getDefinition(): Definition
     {
-        return new Definition(self::class, [$this->name]);
+        return new Definition(self::class, [$this->name, $this->batchMessagesSupport]);
     }
 }

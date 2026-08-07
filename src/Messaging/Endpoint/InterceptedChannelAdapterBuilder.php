@@ -44,7 +44,7 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
 
     protected function withContinuesPolling(): bool
     {
-        return true;
+        return false;
     }
 
     abstract protected function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall;
@@ -76,7 +76,7 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
             new Reference(AsyncHandlerAnnotationRegistry::class),
             new Reference(AsyncEndpointAnnotationContext::class),
         ]);
-        $builder->registerPollingEndpoint($this->endpointId, $consumerRunner);
+        $builder->registerPollingEndpoint($this->endpointId, $consumerRunner, $this->withContinuesPolling());
     }
 
     private function getErrorInterceptorReference(MessagingContainerBuilder $builder): AroundInterceptorBuilder

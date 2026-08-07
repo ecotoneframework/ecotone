@@ -9,9 +9,9 @@ use Ecotone\Messaging\Support\Assert;
 /**
  * licence Apache-2.0
  */
-final class CombinedMessageChannel
+class CombinedMessageChannel
 {
-    private function __construct(private string $referenceName, private array $combinedChannels)
+    protected function __construct(private string $referenceName, private array $combinedChannels)
     {
         Assert::notNull($referenceName, 'Reference name can not be null');
         Assert::notNullAndEmpty($this->combinedChannels, 'Combined channels can not be empty');

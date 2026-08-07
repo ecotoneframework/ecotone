@@ -18,4 +18,6 @@ interface MessagePublisher
     public function convertAndSend(object|array $data): void;
 
     public function convertAndSendWithMetadata(object|array $data, array $metadata): void;
+
+    public function asyncPublish(mixed $data, string $sourceMediaType = MediaType::APPLICATION_X_PHP, array $metadata = []): Future;
 }

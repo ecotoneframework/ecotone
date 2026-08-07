@@ -68,6 +68,12 @@ interface Configuration extends CompilerPass
     public function registerAsynchronousEndpoint(array|string $asynchronousChannelNames, string $targetEndpointId): Configuration;
 
     /**
+     * Marks given Message Channel as batched forwarding outbox, which removes its standard Message Channel consumer
+     * and ensures the Channel is not used as execution or output channel.
+     */
+    public function registerBatchForwardingSourceChannel(string $channelName): Configuration;
+
+    /**
      * @param MethodInterceptorBuilder $methodInterceptor
      * @return Configuration
      */

@@ -24,7 +24,7 @@ class TestQueueChannel extends QueueChannel
         $this->messageToReturn = $messageToReturn;
     }
 
-    public static function create(string $name = 'unknown'): self
+    public static function create(string $name = 'unknown', bool $batchMessagesSupport = false): self
     {
         return new self($name);
     }

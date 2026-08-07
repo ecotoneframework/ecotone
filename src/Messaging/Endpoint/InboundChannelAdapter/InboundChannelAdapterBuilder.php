@@ -30,6 +30,7 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
     private string $referenceName;
     private string $requestChannelName;
     private ?object $directObject = null;
+    private bool $continuousPolling = false;
 
     private function __construct(string $requestChannelName, string $referenceName, private InterfaceToCall $interfaceToCall)
     {
@@ -115,9 +116,16 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
         return $this;
     }
 
+    public function withContinuousPolling(bool $continuousPolling = true): self
+    {
+        $this->continuousPolling = $continuousPolling;
+
+        return $this;
+    }
+
     protected function withContinuesPolling(): bool
     {
-        return false;
+        return $this->continuousPolling;
     }
 
     public function compile(MessagingContainerBuilder $builder): Definition

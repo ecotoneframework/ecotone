@@ -13,6 +13,7 @@ use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Scheduling\DatePoint;
 use Ecotone\Messaging\Scheduling\Duration;
 use Ecotone\Messaging\Scheduling\TimeSpan;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -27,6 +28,51 @@ class OutboundMessageConverter
         private ?int $defaultPriority = null,
         private array $staticHeadersToAdd = []
     ) {
+    }
+
+    /**
+     * Behaves identically to preparing a full Message built from the entry: string payloads carrying own
+     * message id and timestamp skip the Message construction, as no payload conversion applies to them.
+     *
+     * @param array{payload: mixed, headers: array<string, mixed>} $batchEntry
+     */
+    public function prepareFromBatchEntry(array $batchEntry, ConversionService $conversionService): OutboundMessage
+    {
+        $payload = $batchEntry['payload'];
+        $headers = $batchEntry['headers'];
+
+        if (! is_string($payload) || ! isset($headers[MessageHeaders::MESSAGE_ID], $headers[MessageHeaders::TIMESTAMP])) {
+            return $this->prepare(
+                MessageBuilder::withPayload($payload)->setMultipleHeaders($headers)->build(),
+                $conversionService,
+            );
+        }
+
+        $applicationHeaders = MessageHeaders::unsetAggregateKeys($headers);
+        $applicationHeaders = MessageHeaders::unsetEnqueueMetadata($applicationHeaders);
+        $applicationHeaders = $this->headerMapper->mapFromMessageHeaders($applicationHeaders, $conversionService);
+        $applicationHeaders[MessageHeaders::MESSAGE_ID] = $headers[MessageHeaders::MESSAGE_ID];
+        $applicationHeaders[MessageHeaders::TIMESTAMP] = $headers[MessageHeaders::TIMESTAMP];
+
+        if (isset($headers[MessageHeaders::ROUTING_SLIP])) {
+            $applicationHeaders[MessageHeaders::ROUTING_SLIP] = $headers[MessageHeaders::ROUTING_SLIP];
+        }
+        $contentType = isset($headers[MessageHeaders::CONTENT_TYPE]) ? MediaType::parseMediaType($headers[MessageHeaders::CONTENT_TYPE])->toString() : null;
+        $applicationHeaders[MessageHeaders::CONTENT_TYPE] = $contentType;
+
+        $deliveryDelay = $this->normalizeDeliveryDelay(
+            array_key_exists(MessageHeaders::DELIVERY_DELAY, $headers) ? $headers[MessageHeaders::DELIVERY_DELAY] : $this->defaultDeliveryDelay,
+            $headers[MessageHeaders::TIMESTAMP],
+        );
+
+        return new OutboundMessage(
+            $payload,
+            array_merge($applicationHeaders, $this->staticHeadersToAdd),
+            $contentType,
+            $deliveryDelay,
+            array_key_exists(MessageHeaders::TIME_TO_LIVE, $headers) ? $headers[MessageHeaders::TIME_TO_LIVE] : $this->defaultTimeToLive,
+            array_key_exists(MessageHeaders::PRIORITY, $headers) ? $headers[MessageHeaders::PRIORITY] : $this->defaultPriority,
+        );
     }
 
     public function prepare(Message $messageToConvert, ConversionService $conversionService): OutboundMessage
@@ -97,10 +143,25 @@ class OutboundMessageConverter
         }
         $applicationHeaders[MessageHeaders::CONTENT_TYPE] = $sourceMediaType?->toString();
 
-        $deliveryDelay = $messageToConvert->getHeaders()->containsKey(MessageHeaders::DELIVERY_DELAY) ? $messageToConvert->getHeaders()->get(MessageHeaders::DELIVERY_DELAY) : $this->defaultDeliveryDelay;
+        $deliveryDelay = $this->normalizeDeliveryDelay(
+            $messageToConvert->getHeaders()->containsKey(MessageHeaders::DELIVERY_DELAY) ? $messageToConvert->getHeaders()->get(MessageHeaders::DELIVERY_DELAY) : $this->defaultDeliveryDelay,
+            $messageToConvert->getHeaders()->getTimestamp(),
+        );
 
+        return new OutboundMessage(
+            $messagePayload,
+            array_merge($applicationHeaders, $this->staticHeadersToAdd),
+            $applicationHeaders[MessageHeaders::CONTENT_TYPE],
+            $deliveryDelay,
+            $messageToConvert->getHeaders()->containsKey(MessageHeaders::TIME_TO_LIVE) ? $messageToConvert->getHeaders()->get(MessageHeaders::TIME_TO_LIVE) : $this->defaultTimeToLive,
+            $messageToConvert->getHeaders()->containsKey(MessageHeaders::PRIORITY) ? $messageToConvert->getHeaders()->get(MessageHeaders::PRIORITY) : $this->defaultPriority,
+        );
+    }
+
+    private function normalizeDeliveryDelay(mixed $deliveryDelay, int $messageTimestamp): ?int
+    {
         if ($deliveryDelay instanceof DateTimeInterface) {
-            $deliveryDelay = DatePoint::createFromInterface($deliveryDelay)->durationSince(DatePoint::createFromTimestamp($messageToConvert->getHeaders()->getTimestamp()));
+            $deliveryDelay = DatePoint::createFromInterface($deliveryDelay)->durationSince(DatePoint::createFromTimestamp($messageTimestamp));
         }
 
         if ($deliveryDelay instanceof Duration) {
@@ -115,14 +176,7 @@ class OutboundMessageConverter
             $deliveryDelay = null;
         }
 
-        return new OutboundMessage(
-            $messagePayload,
-            array_merge($applicationHeaders, $this->staticHeadersToAdd),
-            $applicationHeaders[MessageHeaders::CONTENT_TYPE],
-            $deliveryDelay,
-            $messageToConvert->getHeaders()->containsKey(MessageHeaders::TIME_TO_LIVE) ? $messageToConvert->getHeaders()->get(MessageHeaders::TIME_TO_LIVE) : $this->defaultTimeToLive,
-            $messageToConvert->getHeaders()->containsKey(MessageHeaders::PRIORITY) ? $messageToConvert->getHeaders()->get(MessageHeaders::PRIORITY) : $this->defaultPriority,
-        );
+        return $deliveryDelay;
     }
 
     private function doesRequireConversion(

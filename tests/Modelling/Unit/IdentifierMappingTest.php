@@ -22,6 +22,12 @@ use Test\Ecotone\Modelling\Fixture\IdentifierMapping\TargetIdentifier\OrderProce
 use Test\Ecotone\Modelling\Fixture\IdentifierMapping\TargetIdentifier\OrderProcessWithMethodBasedIdentifier;
 use Test\Ecotone\Modelling\Fixture\IdentifierMapping\TargetIdentifier\OrderStarted;
 use Test\Ecotone\Modelling\Fixture\IdentifierMapping\TargetIdentifier\OrderStartedAsynchronous;
+use Test\Ecotone\Modelling\Fixture\IdentifierMapping\UnionType\CloseTicket;
+use Test\Ecotone\Modelling\Fixture\IdentifierMapping\UnionType\CloseTicketByTargetIdentifier;
+use Test\Ecotone\Modelling\Fixture\IdentifierMapping\UnionType\CreateTicket;
+use Test\Ecotone\Modelling\Fixture\IdentifierMapping\UnionType\CreateTicketAsync;
+use Test\Ecotone\Modelling\Fixture\IdentifierMapping\UnionType\InternalId;
+use Test\Ecotone\Modelling\Fixture\IdentifierMapping\UnionType\Ticket;
 
 /**
  * @internal
@@ -205,6 +211,76 @@ final class IdentifierMappingTest extends TestCase
                 ))
                 ->getAggregate(Article::class, ['author', 'title'])
                 ->getTitle()
+        );
+    }
+
+    public function test_union_type_identifier_works_when_aggregate_is_kept_in_memory(): void
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [Ticket::class],
+        );
+
+        $ecotoneLite->sendCommand(new CreateTicket(new InternalId('123')));
+
+        $this->assertTrue(
+            $ecotoneLite
+                ->sendCommand(new CloseTicket('123'))
+                ->getAggregate(Ticket::class, '123')
+                ->isClosed()
+        );
+    }
+
+    public function test_union_type_identifier_works_through_asynchronous_channel(): void
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [Ticket::class],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ]
+        );
+
+        $ecotoneLite->sendCommand(new CreateTicketAsync(new InternalId('123')));
+
+        $this->assertTrue(
+            $ecotoneLite
+                ->run('async')
+                ->sendCommand(new CloseTicket('123'))
+                ->getAggregate(Ticket::class, '123')
+                ->isClosed()
+        );
+    }
+
+    public function test_union_type_identifier_works_with_aggregate_id_metadata_override(): void
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [Ticket::class],
+        );
+
+        $ecotoneLite->sendCommand(new CreateTicket(new InternalId('123')));
+
+        $this->assertTrue(
+            $ecotoneLite
+                ->sendCommandWithRoutingKey('ticket.closeByMetadataOverride', metadata: [
+                    AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => '123',
+                ])
+                ->getAggregate(Ticket::class, '123')
+                ->isClosed()
+        );
+    }
+
+    public function test_union_type_identifier_works_with_target_identifier_mapping(): void
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [Ticket::class],
+        );
+
+        $ecotoneLite->sendCommand(new CreateTicket(new InternalId('123')));
+
+        $this->assertTrue(
+            $ecotoneLite
+                ->sendCommand(new CloseTicketByTargetIdentifier('123'))
+                ->getAggregate(Ticket::class, '123')
+                ->isClosed()
         );
     }
 

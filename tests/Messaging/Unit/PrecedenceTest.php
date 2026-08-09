@@ -15,8 +15,8 @@ final class PrecedenceTest extends TestCase
 {
     public function test_async_publishing_await_runs_inside_transaction_and_outside_collector_release(): void
     {
-        $this->assertGreaterThan(Precedence::DATABASE_TRANSACTION_PRECEDENCE, Precedence::ASYNC_PUBLISHING_AWAIT_PRECEDENCE);
-        $this->assertGreaterThan(Precedence::ASYNC_PUBLISHING_AWAIT_PRECEDENCE, Precedence::COLLECTOR_SENDER_PRECEDENCE);
+        $this->assertGreaterThan(Precedence::DATABASE_TRANSACTION_PRECEDENCE, Precedence::DELIVERY_CONFIRMATION_PRECEDENCE);
+        $this->assertGreaterThan(Precedence::DELIVERY_CONFIRMATION_PRECEDENCE, Precedence::COLLECTOR_SENDER_PRECEDENCE);
         $this->assertGreaterThan(Precedence::COLLECTOR_SENDER_PRECEDENCE, Precedence::DATABASE_OBJECT_MANAGER_PRECEDENCE);
         $this->assertGreaterThan(Precedence::DATABASE_OBJECT_MANAGER_PRECEDENCE, Precedence::LAZY_EVENT_PUBLICATION_PRECEDENCE);
     }

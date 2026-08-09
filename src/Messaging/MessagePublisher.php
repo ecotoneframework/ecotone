@@ -19,5 +19,10 @@ interface MessagePublisher
 
     public function convertAndSendWithMetadata(object|array $data, array $metadata): void;
 
-    public function asyncPublish(mixed $data, string $sourceMediaType = MediaType::APPLICATION_X_PHP, array $metadata = []): Future;
+    /**
+     * Publishes without blocking on delivery confirmation.
+     * Requires High Throughput Publishing with non blocking confirmation enabled on the publisher.
+     * Confirmation is awaited on Future::resolve(), or at the latest when the surrounding Command Bus or asynchronous endpoint finishes.
+     */
+    public function publishDeferred(mixed $data, string $sourceMediaType = MediaType::APPLICATION_X_PHP, array $metadata = []): Future;
 }

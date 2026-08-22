@@ -18,7 +18,7 @@ use Test\Ecotone\Messaging\Fixture\Handler\ClosureInAttribute\PolicyDrivenTokenS
  * licence Apache-2.0
  * @internal
  */
-#[RequiresPhp('>= 8.5')]
+#[RequiresPhp('>= 8.5.0')]
 final class ClosureInAttributeTest extends TestCase
 {
     public function test_intercepting_handler_with_attribute_containing_closure(): void

@@ -27,7 +27,7 @@ use Test\Ecotone\Messaging\Fixture\Handler\ClosureInAttribute\UpperCaseService;
  * licence Enterprise
  * @internal
  */
-#[RequiresPhp('>= 8.5')]
+#[RequiresPhp('>= 8.5.0')]
 final class ClosureExpressionTest extends TestCase
 {
     public function test_header_closure_expression_resolves_parameters_like_message_handler(): void

@@ -2,11 +2,12 @@
 
 namespace Ecotone\Messaging\Channel;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\SubscribableChannel;
+use Ecotone\Messaging\Support\MessageDescription;
 
 /**
  * Class DirectChannel
@@ -33,7 +34,7 @@ final class DirectChannel implements SubscribableChannel, DefinedObject
     public function send(Message $message): void
     {
         if (! $this->messageHandler) {
-            throw MessageDispatchingException::create("There is no message handler registered for dispatching Message {$message}");
+            throw MessageDispatchingException::create('There is no message handler registered for dispatching Message ' . MessageDescription::of($message));
         }
 
         $this->messageHandler->handle($message);
@@ -45,7 +46,7 @@ final class DirectChannel implements SubscribableChannel, DefinedObject
     public function subscribe(MessageHandler $messageHandler): void
     {
         if ($this->messageHandler) {
-            throw WrongHandlerAmountException::create("Direct channel {$this->messageChannelName} have registered more than one handler. {$messageHandler} can't be registered as second handler for unicasting dispatcher. The first is {$this->messageHandler}");
+            throw WrongHandlerAmountException::forDirectChannelSharedBy($this->messageChannelName, (string) $this->messageHandler, (string) $messageHandler);
         }
 
         $this->messageHandler = $messageHandler;

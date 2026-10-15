@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Conversion;
 
-use Ecotone\Messaging\Attribute\IgnoreDocblockTypeHint;
+use Ecotone\Api\Attribute\IgnoreDocblockTypeHint;
 
 #[IgnoreDocblockTypeHint]
 /**

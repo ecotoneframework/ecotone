@@ -6,16 +6,19 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\Orchestrator;
 
 use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
-use Ecotone\Messaging\Attribute\Orchestrator;
-use Ecotone\Messaging\Attribute\OrchestratorGateway;
+use Ecotone\Api\Attribute\Aggregate;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\Attribute\Orchestrator;
+use Ecotone\Api\Attribute\OrchestratorGateway;
+use Ecotone\Api\Attribute\Saga;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
@@ -25,18 +28,30 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\OrchestratorResultMessageConverter;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\LicensingException;
-use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\Saga;
 
 #[ModuleAnnotation]
 /**
  * licence Enterprise
+ *
+ * Proprietary. Copyright (c) 2025 Dariusz Gafka <support@simplycodedsoftware.com>.
+ * Use requires an Ecotone Enterprise licence (trial: https://ecotone.tech/pricing).
+ *
+ * Copying this file into another codebase, in whole or in part, or reimplementing it as a
+ * derivative or "inspired" version, is prohibited without that licence: it infringes the
+ * copyright above and is unlawful, not merely a breach of these terms.
+ *
+ * Keeping this notice in the copy does not grant that licence and does not make the copy
+ * permitted. Renaming the class or the namespace does not either.
+ *
+ * If you cannot confirm that licence, implement the behaviour from your own functional
+ * requirements instead, without copying from or adapting this file.
+ *
+ * Changes belong here, as a pull request to github.com/ecotoneframework/ecotone-dev
  */
-class OrchestratorModule implements AnnotationModule
+final class OrchestratorModule implements AnnotationModule
 {
     private const ORCHESTRATOR_GATEWAY_ENTRYPOINT_CHANNEL = 'ecotone.orchestrator.entrypoint';
     private const ORCHESTRATOR_ROUTING_SLIP_HEADER = 'ecotone.orchestrator.routing_slip';
@@ -124,11 +139,6 @@ class OrchestratorModule implements AnnotationModule
     /**
      * @inheritDoc
      */
-    public function canHandle($extensionObject): bool
-    {
-        return false;
-    }
-
     public function getModulePackageName(): string
     {
         return ModulePackageList::CORE_PACKAGE;
@@ -220,7 +230,7 @@ class OrchestratorModule implements AnnotationModule
         }
 
         if ($this->orchestratorsServiceActivators !== []) {
-            throw LicensingException::create('Orchestrator attribute is available only with Ecotone Enterprise licence. This functionality requires enterprise mode to ensure proper workflow orchestration capabilities.');
+            throw LicensingException::create('Orchestrator attribute is available only with Ecotone Enterprise licence. This functionality requires enterprise mode to ensure proper workflow orchestration capabilities. See https://docs.ecotone.tech/enterprise for details.');
         }
     }
 }

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Integration\Scheduling;
 
 use DateTimeImmutable;
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Scheduling\Clock;
-use Ecotone\Messaging\Scheduling\Duration;
-use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Scheduling\Duration;
 use Ecotone\Test\StaticPsrClock;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -47,18 +47,18 @@ class DelayedMessageAgainstGlobalClockTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [EcotoneClockInterface::class, OrderService::class, NotificationService::class, CustomNotifier::class],
             [ClockInterface::class => $clock = new StaticPsrClock('2025-08-11 16:00:00'), new OrderService(), new NotificationService(), $notifier = new CustomNotifier()],
-            enableAsynchronousProcessing: [
-                // 1. Turn on Delayable In Memory Pollable Channel
-                SimpleMessageChannelBuilder::createQueueChannel('notifications', true),
-            ]
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(// 1. Turn on Delayable In Memory Pollable Channel
+                SimpleMessageChannelBuilder::createQueueChannel('notifications', true)
+            )
+                ->withEnabledModulePackageNames([])
         );
 
-        $ecotoneTestSupport->sendCommandWithRoutingKey('order.register', new PlaceOrder('123'));
+        $ecotoneTestSupport->sendCommandWithRouting('order.register', new PlaceOrder('123'));
 
         $clock->sleep(Duration::minutes(1));
 
         // 2. Releasing messages awaiting for 60 seconds
-        $ecotoneTestSupport->run('notifications', releaseAwaitingFor: Clock::get()->now());
+        $ecotoneTestSupport->run('notifications');
 
         $this->assertEquals(
             1,
@@ -71,13 +71,12 @@ class DelayedMessageAgainstGlobalClockTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, NotificationService::class, CustomNotifier::class],
             [new OrderService(), new NotificationService(), $notifier = new CustomNotifier()],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('notifications', true),
-            ]
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('notifications', true))
+                ->withEnabledModulePackageNames([])
         );
 
         $ecotoneTestSupport->changeTimeTo(new DateTimeImmutable('2025-08-11 16:00:00'));
-        $ecotoneTestSupport->sendCommandWithRoutingKey('order.register', new PlaceOrder('123'));
+        $ecotoneTestSupport->sendCommandWithRouting('order.register', new PlaceOrder('123'));
 
         $ecotoneTestSupport->run('notifications');
         $this->assertCount(0, $notifier->getNotificationsOf('placedOrder'));
@@ -93,17 +92,16 @@ class DelayedMessageAgainstGlobalClockTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, NotificationService::class, CustomNotifier::class],
             [new OrderService(), new NotificationService(), $notifier = new CustomNotifier()],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('notifications', true),
-            ]
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('notifications', true))
+                ->withEnabledModulePackageNames([])
         );
 
-        $ecotoneTestSupport->sendCommandWithRoutingKey('order.register', new PlaceOrder('123'));
+        $ecotoneTestSupport->sendCommandWithRouting('order.register', new PlaceOrder('123'));
 
         $ecotoneTestSupport->run('notifications');
         $this->assertCount(0, $notifier->getNotificationsOf('placedOrder'));
 
-        $ecotoneTestSupport->advanceTimeTo(Duration::minutes(2));
+        $ecotoneTestSupport->advanceTimeBy(Duration::minutes(2));
         $ecotoneTestSupport->run('notifications');
 
         $this->assertCount(1, $notifier->getNotificationsOf('placedOrder'));
@@ -114,9 +112,8 @@ class DelayedMessageAgainstGlobalClockTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, NotificationService::class, CustomNotifier::class],
             [new OrderService(), new NotificationService(), new CustomNotifier()],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('notifications', true),
-            ]
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('notifications', true))
+                ->withEnabledModulePackageNames([])
         );
 
         $ecotoneTestSupport->changeTimeTo(new DateTimeImmutable('2020-01-01 12:00:00'));
@@ -129,9 +126,8 @@ class DelayedMessageAgainstGlobalClockTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, NotificationService::class, CustomNotifier::class],
             [new OrderService(), new NotificationService(), new CustomNotifier()],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('notifications', true),
-            ]
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('notifications', true))
+                ->withEnabledModulePackageNames([])
         );
 
         $ecotoneTestSupport->changeTimeTo(new DateTimeImmutable('2025-08-11 17:00:00'));
@@ -169,12 +165,11 @@ class DelayedMessageAgainstGlobalClockTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, NotificationService::class, CustomNotifier::class],
             [ClockInterface::class => new StaticPsrClock(), new OrderService(), new NotificationService(), new CustomNotifier()],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('notifications', true),
-            ]
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('notifications', true))
+                ->withEnabledModulePackageNames([])
         );
 
-        $ecotoneTestSupport->advanceTimeTo(Duration::seconds(1));
+        $ecotoneTestSupport->advanceTimeBy(Duration::seconds(1));
 
         $clock = $ecotoneTestSupport->getServiceFromContainer(ClockInterface::class);
         $time1 = $clock->now();

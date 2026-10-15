@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId;
 
-use Ecotone\Messaging\Attribute\Interceptor\Before;
+use Ecotone\Api\Attribute\Before;
 
 /**
  * licence Apache-2.0

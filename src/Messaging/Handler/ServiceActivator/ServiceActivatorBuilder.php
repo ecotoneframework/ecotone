@@ -174,6 +174,6 @@ final class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder imp
 
     public function __toString()
     {
-        return sprintf('Service Activator - %s:%s', $this->interfaceToCallReference->getClassName(), $this->interfaceToCallReference->getMethodName());
+        return sprintf('Service Activator - %s::%s', $this->interfaceToCallReference->getClassName(), $this->interfaceToCallReference->getMethodName());
     }
 }

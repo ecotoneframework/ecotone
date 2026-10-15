@@ -4,18 +4,34 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
-use Ecotone\Messaging\Config\LicenceDecider;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Modelling\AggregateNotFoundException;
 use Ecotone\Messaging\Handler\ClosureExpression\AttributeExpressionExecutor;
+use Ecotone\Messaging\Handler\ExpressionEvaluationException;
+use Ecotone\Messaging\Handler\ExpressionResult;
 use Ecotone\Messaging\Handler\ParameterConverter;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
-use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\Repository\AllAggregateRepository;
 use InvalidArgumentException;
+use Throwable;
 
 /**
  * licence Enterprise
+ *
+ * Proprietary. Copyright (c) 2025 Dariusz Gafka <support@simplycodedsoftware.com>.
+ * Use requires an Ecotone Enterprise licence (trial: https://ecotone.tech/pricing).
+ *
+ * Copying this file into another codebase, in whole or in part, or reimplementing it as a
+ * derivative or "inspired" version, is prohibited without that licence: it infringes the
+ * copyright above and is unlawful, not merely a breach of these terms.
+ *
+ * Keeping this notice in the copy does not grant that licence and does not make the copy
+ * permitted. Renaming the class or the namespace does not either.
+ *
+ * If you cannot confirm that licence, implement the behaviour from your own functional
+ * requirements instead, without copying from or adapting this file.
+ *
+ * Changes belong here, as a pull request to github.com/ecotoneframework/ecotone-dev
  */
 class FetchAggregateConverter implements ParameterConverter
 {
@@ -24,35 +40,30 @@ class FetchAggregateConverter implements ParameterConverter
         private string $aggregateClassName,
         private AttributeExpressionExecutor $expressionExecutor,
         private bool $doesAllowsNull,
-        private LicenceDecider $licenceDecider,
         private AggregateDefinitionRegistry $aggregateDefinitionRegistry,
     ) {
     }
 
     public function getArgumentFrom(Message $message): ?object
     {
-        if (! $this->licenceDecider->hasEnterpriseLicence()) {
-            throw LicensingException::create('FetchAggregate attribute is available as part of Ecotone Enterprise.');
-        }
+        $resolvedIdentifiers = $this->expressionExecutor->execute($message, ['value' => $message->getPayload()]);
 
-        /** @var string|string<string, string>|null $identifiers */
-        $identifiers = $this->resolveIdentifiers($message);
+        try {
+            $identifiers = self::identifiersFrom($resolvedIdentifiers, $this->aggregateClassName, $this->aggregateDefinitionRegistry);
+        } catch (Throwable $exception) {
+            throw ExpressionEvaluationException::wrapping($this->expressionExecutor->location(), $exception);
+        }
 
         if ($identifiers === null) {
             if (! $this->doesAllowsNull) {
-                throw new AggregateNotFoundException("Aggregate {$this->aggregateClassName} was not found as identifiers is null.");
+                throw ExpressionEvaluationException::because($this->expressionExecutor->location(), sprintf(
+                    'Aggregate %s cannot be fetched: the expression returned %s. Declare the parameter nullable to accept a missing identifier.',
+                    $this->aggregateClassName,
+                    ExpressionResult::describe($resolvedIdentifiers),
+                ));
             }
 
             return null;
-        }
-
-        if (! is_array($identifiers)) {
-            $identifierMapping = $this->aggregateDefinitionRegistry->getFor($this->aggregateClassName)->getAggregateIdentifierMapping();
-            if (count($identifierMapping) > 1) {
-                throw new InvalidArgumentException("Can't fetch aggregate {$this->aggregateClassName} as it has multiple identifiers. Please provide array of identifiers.");
-            }
-
-            $identifiers = [array_key_first($identifierMapping) => $identifiers];
         }
 
         $resolvedAggregate = $this->aggregateRepository->findBy(
@@ -68,8 +79,25 @@ class FetchAggregateConverter implements ParameterConverter
         return $resolvedAggregate?->getAggregateInstance();
     }
 
-    private function resolveIdentifiers(Message $message): mixed
+    /**
+     * @return array<string, mixed>|null
+     */
+    public static function identifiersFrom(mixed $resolvedIdentifiers, string $aggregateClassName, AggregateDefinitionRegistry $aggregateDefinitionRegistry): ?array
     {
-        return $this->expressionExecutor->execute($message, ['value' => $message->getPayload()]);
+        if ($resolvedIdentifiers === null) {
+            return null;
+        }
+
+        if (is_array($resolvedIdentifiers)) {
+            return $resolvedIdentifiers;
+        }
+
+        $identifierMapping = $aggregateDefinitionRegistry->getFor($aggregateClassName)->getAggregateIdentifierMapping();
+        if (count($identifierMapping) > 1) {
+            throw new InvalidArgumentException("Can't fetch aggregate {$aggregateClassName} as it has multiple identifiers. Please provide array of identifiers.");
+        }
+
+        return [array_key_first($identifierMapping) => $resolvedIdentifiers];
     }
+
 }

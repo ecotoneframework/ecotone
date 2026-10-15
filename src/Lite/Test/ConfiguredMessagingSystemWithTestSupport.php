@@ -5,27 +5,25 @@ declare(strict_types=1);
 namespace Ecotone\Lite\Test;
 
 use DateTimeImmutable;
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
+use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
+use Ecotone\Api\Gateway\CommandBus;
+use Ecotone\Api\Gateway\DistributedBus;
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Gateway\EventBus;
+use Ecotone\Api\Gateway\MessagePublisher;
+use Ecotone\Api\Gateway\QueryBus;
+use Ecotone\Api\Lite\Test\FlowTestSupport;
+use Ecotone\Api\Lite\Test\MessagingTestSupport;
+use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageChannel;
+use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Api\Scheduling\Duration;
 use Ecotone\Messaging\Config\Container\GatewayProxyMethodReference;
-use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Gateway\Gateway;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageChannel;
-use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\MessagePublisher;
-use Ecotone\Messaging\Scheduling\Duration;
-use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
-use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\DistributedBus;
-use Ecotone\Modelling\EventBus;
-use Ecotone\Modelling\QueryBus;
-use Ecotone\Test\StaticPsrClock;
-use InvalidArgumentException;
-use Psr\Clock\ClockInterface;
-use Throwable;
 
 /**
  * licence Apache-2.0
@@ -113,7 +111,7 @@ final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessag
     }
 
     /**
-     * @template T
+     * @template T of object
      * @param class-string<T> $referenceName
      * @return T
      */
@@ -149,48 +147,14 @@ final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessag
 
     public function changeTime(DateTimeImmutable|Duration $time): self
     {
-        $psrClock = $this->getStaticPsrClockFromContainer();
-
         if ($time instanceof Duration) {
-            $psrClock->setCurrentTime(
-                DateTimeImmutable::createFromInterface($psrClock->now())->modify("+{$time->inMicroseconds()} microseconds")
-            );
+            $this->getFlowTestSupport()->advanceTimeBy($time);
+
             return $this;
         }
 
-        if ($psrClock->hasBeenChanged() && $time <= $psrClock->now()) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Cannot move time backwards. Current clock time: %s, requested time: %s',
-                    $psrClock->now()->format('Y-m-d H:i:s.u'),
-                    $time->format('Y-m-d H:i:s.u')
-                )
-            );
-        }
-
-        $psrClock->setCurrentTime($time);
+        $this->getFlowTestSupport()->changeTimeTo($time);
 
         return $this;
-    }
-
-    private function getStaticPsrClockFromContainer(): StaticPsrClock
-    {
-        try {
-            $psrClock = $this->configuredMessagingSystem->getServiceFromContainer(ClockInterface::class);
-        } catch (Throwable) {
-            throw new InvalidArgumentException(
-                'Changing time is only possible when using StaticPsrClock as the ClockInterface. ' .
-                'Register ClockInterface::class => new StaticPsrClock() in your container services.'
-            );
-        }
-
-        if (! $psrClock instanceof StaticPsrClock) {
-            throw new InvalidArgumentException(
-                'Changing time is only possible when using StaticPsrClock as the ClockInterface. ' .
-                'Register ClockInterface::class => new StaticPsrClock() in your container services.'
-            );
-        }
-
-        return $psrClock;
     }
 }

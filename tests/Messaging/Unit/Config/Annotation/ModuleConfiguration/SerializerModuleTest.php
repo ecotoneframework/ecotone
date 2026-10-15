@@ -5,9 +5,10 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Gateway\Converter\Serializer;
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Gateway\SerializerGateway;
+use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\MessagingException;
 use ReflectionException;
@@ -35,9 +36,9 @@ final class SerializerModuleTest extends AnnotationConfigurationTestCase
      */
     public function test_converting_from_php()
     {
-        $messagingSystem = EcotoneLite::bootstrapFlowTesting([ExampleSingleConverterService::class], [new ExampleSingleConverterService()]);
+        $messagingSystem = EcotoneLite::bootstrapFlowTesting([ExampleSingleConverterService::class], [new ExampleSingleConverterService()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
         /** @var Serializer $gateway */
-        $gateway = $messagingSystem->getGateway(Serializer::class);
+        $gateway = $messagingSystem->getGateway(SerializerGateway::class);
 
         $this->assertEquals(
             new stdClass(),
@@ -47,10 +48,10 @@ final class SerializerModuleTest extends AnnotationConfigurationTestCase
 
     public function test_converting_to_php()
     {
-        $messagingSystem = EcotoneLite::bootstrapFlowTesting([ExampleSingleConverterService::class], [new ExampleSingleConverterService()]);
+        $messagingSystem = EcotoneLite::bootstrapFlowTesting([ExampleSingleConverterService::class], [new ExampleSingleConverterService()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
 
         /** @var Serializer $gateway */
-        $gateway = $messagingSystem->getGateway(Serializer::class);
+        $gateway = $messagingSystem->getGateway(SerializerGateway::class);
 
         $this->assertEquals(
             new stdClass(),

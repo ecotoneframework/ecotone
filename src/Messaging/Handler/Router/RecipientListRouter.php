@@ -2,9 +2,9 @@
 
 namespace Ecotone\Messaging\Handler\Router;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Message;
 
 /**
  * Class RecipientListRouter
@@ -43,5 +43,10 @@ class RecipientListRouter implements RouteSelector, DefinedObject
     public function getDefinition(): Definition
     {
         return new Definition(self::class, [$this->recipientMessageChannels]);
+    }
+
+    public function __toString(): string
+    {
+        return 'recipient list `' . implode('`, `', $this->recipientMessageChannels) . '`';
     }
 }

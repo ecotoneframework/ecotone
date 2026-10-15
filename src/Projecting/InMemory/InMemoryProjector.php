@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Ecotone\Projecting\InMemory;
 
 use Countable;
-use Ecotone\Modelling\Event;
+use Ecotone\Api\EventSourcing\Event;
 use Ecotone\Projecting\ProjectorExecutor;
 
 class InMemoryProjector implements ProjectorExecutor, Countable

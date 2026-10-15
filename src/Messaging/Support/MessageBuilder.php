@@ -2,11 +2,11 @@
 
 namespace Ecotone\Messaging\Support;
 
-use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageChannel;
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageChannel;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Symfony\Component\Uid\Uuid;
 

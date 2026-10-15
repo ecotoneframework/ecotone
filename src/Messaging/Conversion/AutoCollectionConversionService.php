@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion;
 
+use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Messaging\Handler\Type;
 
 use function is_iterable;

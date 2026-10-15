@@ -2,8 +2,8 @@
 
 namespace Ecotone\Messaging\Handler\Router;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\MessageProcessor;
-use Ecotone\Messaging\Message;
 use InvalidArgumentException;
 
 /**

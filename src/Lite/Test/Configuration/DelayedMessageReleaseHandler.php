@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Ecotone\Lite\Test\Configuration;
 
 use DateTimeInterface;
+use Ecotone\Api\Scheduling\TimeSpan;
 use Ecotone\Messaging\Channel\DelayableQueueChannel;
 use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
 use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\Scheduling\TimeSpan;
 
 /**
  * licence Apache-2.0

@@ -4,21 +4,21 @@ namespace Ecotone\Messaging\Config;
 
 use function array_keys;
 
+use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
+use Ecotone\Api\Gateway\CommandBus;
+use Ecotone\Api\Gateway\DistributedBus;
+use Ecotone\Api\Gateway\EventBus;
+use Ecotone\Api\Gateway\MessagePublisher;
+use Ecotone\Api\Gateway\QueryBus;
+use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
+use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Messaging\Config\Container\ChannelReference;
 use Ecotone\Messaging\Config\Container\ConsoleCommandReference;
 use Ecotone\Messaging\Config\Container\EndpointRunnerReference;
 use Ecotone\Messaging\Config\Container\GatewayProxyMethodReference;
 use Ecotone\Messaging\Endpoint\EndpointRunner;
-use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Handler\Gateway\Gateway;
-use Ecotone\Messaging\MessageChannel;
-use Ecotone\Messaging\MessagePublisher;
-use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\DistributedBus;
-use Ecotone\Modelling\EventBus;
-use Ecotone\Modelling\QueryBus;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -109,7 +109,9 @@ class MessagingSystemContainer implements ConfiguredMessagingSystem
 
     public function replaceWith(ConfiguredMessagingSystem $messagingSystem): void
     {
-        Assert::isTrue($messagingSystem instanceof MessagingSystemContainer, 'Can only replace with ' . self::class);
+        if (! $messagingSystem instanceof self) {
+            throw InvalidArgumentException::create('Can only replace with ' . self::class);
+        }
 
         $this->container = $messagingSystem->container;
         $this->pollingEndpoints = $messagingSystem->pollingEndpoints;

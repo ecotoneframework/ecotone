@@ -10,18 +10,20 @@ use Ecotone\AnnotationFinder\AnnotatedDefinition;
 use Ecotone\AnnotationFinder\AnnotatedMethod;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationResolver;
-use Ecotone\AnnotationFinder\Attribute\Environment;
 use Ecotone\AnnotationFinder\ConfigurationException;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\Environment;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\IsAbstract;
+use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Messaging\Attribute\IdentifiedAnnotation;
-use Ecotone\Messaging\Attribute\IsAbstract;
 use Ecotone\Messaging\Attribute\MessageConsumer;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\Attribute\QueryHandler;
+use ReflectionAttribute;
 use ReflectionClass;
+use ReflectionMethod;
 
 /**
  * Class FileSystemAnnotationRegistrationService
@@ -34,6 +36,7 @@ use ReflectionClass;
 class FileSystemAnnotationFinder implements AnnotationFinder
 {
     private const FILE_EXTENSION = 'php';
+    private const FILE_CONTENT_HASH_ALGORITHM = 'xxh128';
     public const         CLASS_NAMESPACE_REGEX = "#namespace[\s]*([^\n\s\(\)\[\]\{\}\$]*);#";
 
     /**
@@ -58,6 +61,10 @@ class FileSystemAnnotationFinder implements AnnotationFinder
      * @var array<string, array<string>>
      */
     private array $cachedClassesWithAnnotatedProperties = [];
+    /**
+     * @var array<int, array{0: class-string, 1: string, 2: bool, 3: object[], 4: object[]}>|null
+     */
+    private ?array $methodsWithAnnotations = null;
     private AnnotationResolver $annotationResolver;
     private IsAbstract $isAbstractAnnotation;
 
@@ -81,7 +88,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
             /** @var Environment $environment */
             $environment = $this->getAnnotationForClass($classNameWithEnvironment, Environment::class);
 
-            if (! in_array($environmentName, $environment->getNames())) {
+            if (! in_array($environmentName, $environment->names)) {
                 $key = array_search($classNameWithEnvironment, $this->registeredClasses);
                 if ($key !== false) {
                     unset($this->registeredClasses[$key]);
@@ -91,40 +98,24 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         }
 
         foreach ($this->registeredClasses as $className) {
-            foreach (get_class_methods($className) as $method) {
-                $classAnnotations = array_values(
-                    array_filter(
-                        array_map(
-                            function (object $annotation) {
-                                if ($annotation instanceof Environment) {
-                                    return $annotation;
-                                }
-                            },
-                            $this->getCachedAnnotationsForClass($className)
-                        )
-                    )
-                );
-                $methodAnnotations = array_values(
-                    array_filter(
-                        array_map(
-                            function (object $annotation) {
-                                if ($annotation instanceof Environment) {
-                                    return $annotation;
-                                }
-                            },
-                            $this->getCachedMethodAnnotations($className, $method)
-                        )
-                    )
-                );
+            $classEnvironment = null;
+            foreach ($this->getCachedAnnotationsForClass($className) as $classAnnotation) {
+                if ($classAnnotation instanceof Environment) {
+                    $classEnvironment = $classAnnotation;
+                    break;
+                }
+            }
+            $isClassBanned = $classEnvironment !== null && ! in_array($environmentName, $classEnvironment->names);
 
-                if ($methodAnnotations) {
-                    if (! in_array($environmentName, $methodAnnotations[0]->getNames())) {
-                        $this->bannedEnvironmentClassMethods[$className][$method] = true;
+            foreach ((new ReflectionClass($className))->getMethods(ReflectionMethod::IS_PUBLIC) as $reflectionMethod) {
+                $methodEnvironments = $reflectionMethod->getAttributes(Environment::class, ReflectionAttribute::IS_INSTANCEOF);
+
+                if ($methodEnvironments !== []) {
+                    if (! in_array($environmentName, $methodEnvironments[0]->newInstance()->names)) {
+                        $this->bannedEnvironmentClassMethods[$className][$reflectionMethod->getName()] = true;
                     }
-                } elseif ($classAnnotations) {
-                    if (! in_array($environmentName, $classAnnotations[0]->getNames())) {
-                        $this->bannedEnvironmentClassMethods[$className][$method] = true;
-                    }
+                } elseif ($isClassBanned) {
+                    $this->bannedEnvironmentClassMethods[$className][$reflectionMethod->getName()] = true;
                 }
             }
         }
@@ -336,57 +327,73 @@ class FileSystemAnnotationFinder implements AnnotationFinder
     public function findAnnotatedMethods(string $methodAnnotationClassName): array
     {
         $registrations = [];
-        foreach ($this->findAnnotatedClasses('*') as $className) {
-            $reflectionClass = new ReflectionClass($className);
-            foreach ($reflectionClass->getMethods() as $reflectionMethod) {
-                $method = $reflectionMethod->getName();
-                if ($this->isMethodBannedFromCurrentEnvironment($className, $method)) {
-                    continue;
-                }
-                $classAnnotations = $this->getCachedAnnotationsForClass($className);
-
-                if ($this->isAbstractClass($classAnnotations)) {
-                    continue;
-                }
-
-                $methodAnnotations = $this->getCachedMethodAnnotations($className, $method);
-                foreach ($methodAnnotations as $methodAnnotation) {
-                    if (get_class($methodAnnotation) === $methodAnnotationClassName || $methodAnnotation instanceof $methodAnnotationClassName) {
-                        // Validate that endpoint annotations are on public methods
-                        if (
-                            ($methodAnnotation instanceof IdentifiedAnnotation
-                                || $methodAnnotation instanceof MessageConsumer)
-                            && ! $reflectionMethod->isPublic()
-                        ) {
-                            $handlerType = match (true) {
-                                $methodAnnotation instanceof CommandHandler => 'Command handler',
-                                $methodAnnotation instanceof EventHandler => 'Event handler',
-                                $methodAnnotation instanceof QueryHandler => 'Query handler',
-                                $methodAnnotation instanceof MessageConsumer => 'Message consumer',
-                                default => 'Handler',
-                            };
-                            throw ConfigurationException::create(sprintf('%s attribute on %s::%s should be placed on public method, to be available for execution.', $handlerType, $className, $method));
-                        }
-
-                        if (! $reflectionMethod->isPublic()) {
-                            continue;
-                        }
-
-                        $annotationRegistration = AnnotatedMethod::create(
-                            $methodAnnotation,
-                            $className,
-                            $method,
-                            $classAnnotations,
-                            $methodAnnotations
-                        );
-
-                        $registrations[] = $annotationRegistration;
+        foreach ($this->getMethodsWithAnnotations() as [$className, $method, $isPublic, $classAnnotations, $methodAnnotations]) {
+            foreach ($methodAnnotations as $methodAnnotation) {
+                if (get_class($methodAnnotation) === $methodAnnotationClassName || $methodAnnotation instanceof $methodAnnotationClassName) {
+                    // Validate that endpoint annotations are on public methods
+                    if (
+                        ($methodAnnotation instanceof IdentifiedAnnotation
+                            || $methodAnnotation instanceof MessageConsumer)
+                        && ! $isPublic
+                    ) {
+                        $handlerType = match (true) {
+                            $methodAnnotation instanceof CommandHandler => 'Command handler',
+                            $methodAnnotation instanceof EventHandler => 'Event handler',
+                            $methodAnnotation instanceof QueryHandler => 'Query handler',
+                            $methodAnnotation instanceof MessageConsumer => 'Message consumer',
+                            default => 'Handler',
+                        };
+                        throw ConfigurationException::create(sprintf('%s attribute on %s::%s should be placed on public method, to be available for execution.', $handlerType, $className, $method));
                     }
+
+                    if (! $isPublic) {
+                        continue;
+                    }
+
+                    $registrations[] = AnnotatedMethod::create(
+                        $methodAnnotation,
+                        $className,
+                        $method,
+                        $classAnnotations,
+                        $methodAnnotations
+                    );
                 }
             }
         }
 
         return $registrations;
+    }
+
+    /**
+     * @return array<int, array{0: class-string, 1: string, 2: bool, 3: object[], 4: object[]}>
+     */
+    private function getMethodsWithAnnotations(): array
+    {
+        if ($this->methodsWithAnnotations !== null) {
+            return $this->methodsWithAnnotations;
+        }
+
+        $this->methodsWithAnnotations = [];
+        foreach ($this->registeredClasses as $className) {
+            $classAnnotations = $this->getCachedAnnotationsForClass($className);
+            if ($this->isAbstractClass($classAnnotations)) {
+                continue;
+            }
+
+            foreach ((new ReflectionClass($className))->getMethods() as $reflectionMethod) {
+                $method = $reflectionMethod->getName();
+                if ($this->isMethodBannedFromCurrentEnvironment($className, $method)) {
+                    continue;
+                }
+
+                $methodAnnotations = $this->getCachedMethodAnnotations($className, $method);
+                if ($methodAnnotations !== []) {
+                    $this->methodsWithAnnotations[] = [$className, $method, $reflectionMethod->isPublic(), $classAnnotations, $methodAnnotations];
+                }
+            }
+        }
+
+        return $this->methodsWithAnnotations;
     }
 
     private function isMethodBannedFromCurrentEnvironment(string $className, string $methodName): bool
@@ -466,7 +473,6 @@ class FileSystemAnnotationFinder implements AnnotationFinder
     /**
      * @param string[] $paths
      * @param string[]|null $namespacesToUse
-     * @param string[] $classes
      */
     private static function getClassesIn(array $paths, ?array $namespacesToUse): array
     {
@@ -565,12 +571,12 @@ class FileSystemAnnotationFinder implements AnnotationFinder
 
         foreach ($this->registeredClasses() as $class) {
             $filePath = (new ReflectionClass($class))->getFileName();
-            $fileSha .= $class . sha1_file($filePath);
+            $fileSha .= $class . hash_file(self::FILE_CONTENT_HASH_ALGORITHM, $filePath);
         }
 
         $composerLockPath = rtrim($pathToRootCatalog, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'composer.lock';
         if (file_exists($composerLockPath)) {
-            $fileSha .= sha1_file($composerLockPath);
+            $fileSha .= hash_file(self::FILE_CONTENT_HASH_ALGORITHM, $composerLockPath);
         }
 
         $fileSha .= sha1(serialize($serviceConfiguration));

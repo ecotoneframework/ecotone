@@ -6,6 +6,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler;
 
 use Closure;
 use Countable;
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
@@ -13,7 +14,6 @@ use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\Type\ArrayShapeType;
 use Ecotone\Messaging\Handler\Type\TypeContext;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
-use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\MessagingException;
 use PHPUnit\Framework\TestCase;
@@ -219,8 +219,8 @@ class TypeDescriptorTest extends TestCase
     public function test_checking_equality()
     {
         $this->assertTrue(
-            Type::create(Type::STRING)
-                ->equals(Type::create(Type::STRING))
+            Type::create('string')
+                ->equals(Type::create('string'))
         );
 
         $this->assertTrue(

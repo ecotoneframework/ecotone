@@ -15,7 +15,6 @@ final class AggregateClassDefinition implements DefinedObject
     /**
      * @param array<string, string> $aggregateIdentifierMapping
      * @param array<string> $aggregateIdentifierGetMethods
-     * @param array<object> $classAnnotations
      */
     public function __construct(
         private string  $className,

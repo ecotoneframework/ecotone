@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Channel\DeliveryConfirmation;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Lite\Test\FlowTestSupport;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Lite\Test\FlowTestSupport;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PublishingFailedException;
 use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
 use PHPUnit\Framework\TestCase;
@@ -26,7 +27,7 @@ final class HighThroughputPublishingChannelTest extends TestCase
         $operationsLog = new OperationsLog();
         $ecotoneLite = $this->bootstrapEcotone($operationsLog);
 
-        $ecotoneLite->sendCommandWithRoutingKey('order.place', 'espresso');
+        $ecotoneLite->sendCommandWithRouting('order.place', 'espresso');
 
         $this->assertSame(
             [
@@ -50,7 +51,7 @@ final class HighThroughputPublishingChannelTest extends TestCase
 
         $commandException = null;
         try {
-            $ecotoneLite->sendCommandWithRoutingKey('order.place', 'espresso');
+            $ecotoneLite->sendCommandWithRouting('order.place', 'espresso');
         } catch (PublishingFailedException $exception) {
             $commandException = $exception;
         }
@@ -74,9 +75,8 @@ final class HighThroughputPublishingChannelTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, AsyncOrderSubscriber::class, FakeTransactionModule::class],
             [new OrderService($operationsLog), new AsyncOrderSubscriber(), OperationsLog::class => $operationsLog],
-            enableAsynchronousProcessing: [
-                InMemoryHighThroughputPublishingChannelBuilder::create('async_orders'),
-            ],
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(InMemoryHighThroughputPublishingChannelBuilder::create('async_orders'))
+                ->withEnabledModulePackageNames([])
         );
     }
 }

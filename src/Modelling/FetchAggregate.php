@@ -2,8 +2,8 @@
 
 namespace Ecotone\Modelling;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\MessageProcessor;
-use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**

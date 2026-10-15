@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Lite\Test;
 
-use Ecotone\Lite\EcotoneLite;
+use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Lite\EcotoneLite;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Order\OrderService;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
@@ -23,30 +26,32 @@ final class FlowTestSupportFrameworkTest extends TestCase
     {
         $flowSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class],
-            [new OrderService()]
+            [new OrderService()],
+            configuration: self::ordersChannelConfiguration()
+                ->withEnabledModulePackageNames([])
         );
 
         $this->assertEquals(
             [['order.register'], ['order.register', '3']],
             $flowSupport
-                ->sendCommandWithRoutingKey('order.register', new PlaceOrder('1'))
-                ->sendCommandWithRoutingKey('order.register', new PlaceOrder('3'), metadata: ['aggregate.id' => '3'])
+                ->sendCommandWithRouting('order.register', new PlaceOrder('1'))
+                ->sendCommandWithRouting('order.register', new PlaceOrder('3'), metadata: ['aggregate.id' => '3'])
                 ->sendCommand(new PlaceOrder('2'))
-                ->getRecordedCommandsWithRouting()
+                ->popRecordedCommandsWithRouting()
         );
     }
 
     public function test_providing_initial_state_in_form_of_state_stored_aggregate(): void
     {
-        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting([Order::class]);
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting([Order::class], configuration: self::ordersChannelConfiguration()->withEnabledModulePackageNames([]));
 
         $orderId = '1';
 
-        /** Setting up initial state for state stored aggregate */
         $this->assertTrue(
             $ecotoneTestSupport
                 ->withStateFor(Order::register(new PlaceOrder($orderId)))
-                ->sendCommandWithRoutingKey('order.cancel', metadata: ['aggregate.id' => $orderId])
+                ->sendCommandWithRouting('order.cancel', metadata: ['aggregate.id' => $orderId])
+                ->run('orders', ExecutionPollingMetadata::createWithTestingSetup())
                 ->getAggregate(Order::class, $orderId)
                 ->isCancelled()
         );
@@ -54,14 +59,22 @@ final class FlowTestSupportFrameworkTest extends TestCase
 
     public function test_state_stored_aggregate(): void
     {
-        $flowSupport = EcotoneLite::bootstrapFlowTesting([Order::class]);
+        $flowSupport = EcotoneLite::bootstrapFlowTesting([Order::class], configuration: self::ordersChannelConfiguration()->withEnabledModulePackageNames([]));
 
         $this->assertEquals(
             1,
             $flowSupport
-                ->sendCommandWithRoutingKey('order.register', new PlaceOrder('1'))
+                ->sendCommandWithRouting('order.register', new PlaceOrder('1'))
+                ->run('orders', ExecutionPollingMetadata::createWithTestingSetup())
+                ->run('orders', ExecutionPollingMetadata::createWithTestingSetup())
                 ->getAggregate(Order::class, '1')
                 ->getIsNotifiedCount()
         );
+    }
+
+    private static function ordersChannelConfiguration(): ServiceConfiguration
+    {
+        return ServiceConfiguration::createWithDefaults()
+            ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders'));
     }
 }

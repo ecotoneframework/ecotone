@@ -5,29 +5,47 @@ declare(strict_types=1);
 namespace Ecotone\Lite\Test\Configuration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\EventSourcing\EventSourcingConfiguration;
-use Ecotone\EventSourcing\EventStore;
+use Ecotone\Api\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\Console\ConsoleWriter;
+use Ecotone\Api\Console\InMemoryConsoleWriter;
+use Ecotone\Api\EventSourcing\EventSourcingConfiguration;
+use Ecotone\Api\EventSourcing\EventStore;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\TestConfiguration;
+use Ecotone\Api\Gateway\CommandBus;
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Gateway\EventBus;
+use Ecotone\Api\Gateway\QueryBus;
+use Ecotone\Api\Interceptor\Precedence;
+use Ecotone\Api\Lite\Test\MessagingTestSupport;
+use Ecotone\EventSourcing\EventStore\AppendStrategy\AppendStrategy;
+use Ecotone\EventSourcing\EventStore\AsGivenRecordedEventFormat;
+use Ecotone\EventSourcing\EventStore\GuardedTagBump;
 use Ecotone\EventSourcing\EventStore\InMemoryEventStore;
-use Ecotone\Lite\Test\MessagingTestSupport;
-use Ecotone\Lite\Test\TestConfiguration;
-use Ecotone\Messaging\Attribute\InternalHandler;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
-use Ecotone\Messaging\Channel\MessageChannelBuilder;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\EventSourcing\EventStore\RecordedEventFormat;
+use Ecotone\EventSourcing\EventStore\Tag\InMemoryTagCollaborator;
+use Ecotone\EventSourcing\Tagging\Config\DynamicConsistencyBoundary;
+use Ecotone\Lite\Test\DatabaseTablesSetUp;
+use Ecotone\Lite\Test\DatabaseTablesSetUpReference;
+use Ecotone\Lite\Test\WithoutDatabaseTables;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\Container\Compiler\ContainerImplementation;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Console\ConsoleWriter;
 use Ecotone\Messaging\Console\DelegatingConsoleWriter;
-use Ecotone\Messaging\Console\InMemoryConsoleWriter;
 use Ecotone\Messaging\Consumer\ConsumerPositionTracker;
 use Ecotone\Messaging\Consumer\InMemory\InMemoryConsumerPositionTracker;
+use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
@@ -39,16 +57,13 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\Precedence;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\EventBus;
-use Ecotone\Modelling\QueryBus;
+use Ecotone\Messaging\Scheduling\Clock;
 use Ecotone\Projecting\InMemory\InMemoryEventStoreStreamSource;
 use Ecotone\Projecting\InMemory\InMemoryProjectionStateStorage;
 use Ecotone\Projecting\ProjectionStateStorageReference;
 use Ecotone\Projecting\StreamSourceReference;
+use Ecotone\Test\StaticPsrClock;
+use Psr\Clock\ClockInterface;
 
 #[ModuleAnnotation]
 /**
@@ -59,16 +74,18 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
     public const RECORD_COMMAND = 'recordCommand';
     public const RECORD_EVENT = 'recordEvent';
     public const RECORD_QUERY = 'recordQuery';
-    public const GET_RECORDED_EVENT_MESSAGES = 'getRecordedEventMessages';
-    public const GET_RECORDED_EVENTS = 'getRecordedEvents';
-    public const GET_RECORDED_COMMANDS = 'getRecordedCommands';
-    public const GET_RECORDED_COMMAND_MESSAGES = 'getRecordedCommandMessages';
-    public const GET_RECORDED_QUERIES = 'getRecordedQueries';
-    public const GET_RECORDED_QUERY_MESSAGES = 'getRecordedQueryMessages';
+    public const POP_RECORDED_EVENT_MESSAGES = 'popRecordedEventMessages';
+    public const POP_RECORDED_EVENTS = 'popRecordedEvents';
+    public const POP_RECORDED_COMMANDS = 'popRecordedCommands';
+    public const POP_RECORDED_EVENT_MESSAGES_OF_TYPE = 'popRecordedEventMessagesOfType';
+    public const POP_RECORDED_COMMAND_MESSAGES_OF_TYPE = 'popRecordedCommandMessagesOfType';
+    public const POP_RECORDED_COMMAND_MESSAGES = 'popRecordedCommandMessages';
+    public const POP_RECORDED_QUERIES = 'popRecordedQueries';
+    public const POP_RECORDED_QUERY_MESSAGES = 'popRecordedQueryMessages';
     public const DISCARD_MESSAGES = 'discardRecordedMessages';
     public const RELEASE_DELAYED_MESSAGES = 'releaseMessagesAwaitingFor';
-    public const GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS = 'getRecordedMessagePayloadsFrom';
-    public const GET_SPIED_CHANNEL_RECORDED_MESSAGES = 'getRecordedEcotoneMessagesFrom';
+    public const POP_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS = 'popRecordedMessagePayloadsFrom';
+    public const POP_SPIED_CHANNEL_RECORDED_MESSAGES = 'popRecordedMessagesFrom';
 
     private function __construct(private array $spiedChannels)
     {
@@ -117,7 +134,7 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
             new Definition(InMemoryConsumerPositionTracker::class)
         );
         // Register in-memory consumer position tracker as default one
-        if ($testConfiguration->isInMemoryConsumerPositionTrackerEnabled()) {
+        if ($testConfiguration->inMemoryConsumerPositionTracker) {
             $messagingConfiguration->registerServiceDefinition(
                 ConsumerPositionTracker::class,
                 new Reference(InMemoryConsumerPositionTracker::class)
@@ -125,6 +142,14 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
         }
 
         $this->registerInMemoryEventStoreIfNeeded($messagingConfiguration, $extensionObjects, $serviceConfiguration);
+
+        $databaseTablesSetUp = ExtensionObjectResolver::resolve(DatabaseTablesSetUpReference::class, $extensionObjects)[0] ?? null;
+        $messagingConfiguration->registerServiceDefinition(
+            DatabaseTablesSetUp::class,
+            $databaseTablesSetUp === null
+                ? new Definition(WithoutDatabaseTables::class)
+                : new Reference($databaseTablesSetUp->referenceName)
+        );
 
         $messagingConfiguration->registerServiceDefinition(
             InMemoryConsoleWriter::class,
@@ -137,14 +162,30 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
             ])
         );
 
+        $messagingConfiguration->registerServiceDefinition(EcotoneClockInterface::class, new Definition(
+            Clock::class,
+            [
+                new Reference(ClockInterface::class, ContainerImplementation::NULL_ON_INVALID_REFERENCE),
+                new Definition(StaticPsrClock::class, ['now']),
+            ],
+            factory: [Clock::class, 'createWithFallback']
+        ));
+        $messagingConfiguration->registerServiceDefinition(PinnedTestClockInterceptor::class, new Definition(PinnedTestClockInterceptor::class, [new Reference(EcotoneClockInterface::class)]));
+        $messagingConfiguration->registerAroundMethodInterceptor(AroundInterceptorBuilder::create(
+            PinnedTestClockInterceptor::class,
+            $interfaceToCallRegistry->getFor(PinnedTestClockInterceptor::class, 'handleAtPinnedTime'),
+            Precedence::TRACING_PRECEDENCE - 1,
+            AsynchronousRunningEndpoint::class,
+        ));
+
         $messagingConfiguration->registerServiceDefinition(MessageCollectorHandler::class, new Definition(MessageCollectorHandler::class));
         $this->registerMessageCollector($messagingConfiguration, $interfaceToCallRegistry);
         $this->registerMessageReleasingHandler($messagingConfiguration);
 
-        $messagingConfiguration->registerServiceDefinition(AllowMissingDestination::class);
+        $messagingConfiguration->registerServiceDefinition(AllowMissingDestination::class, new Definition(AllowMissingDestination::class));
         $allowMissingDestinationInterfaceToCall = $interfaceToCallRegistry->getFor(AllowMissingDestination::class, 'invoke');
         /** @TODO Ecotone 2.0, reconsider if needed */
-        if (! $testConfiguration->isFailingOnCommandHandlerNotFound()) {
+        if (! $testConfiguration->failOnCommandHandlerNotFound) {
             $messagingConfiguration
                 ->registerAroundMethodInterceptor(AroundInterceptorBuilder::create(
                     AllowMissingDestination::class,
@@ -153,7 +194,7 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                     CommandBus::class
                 ));
         }
-        if (! $testConfiguration->isFailingOnQueryHandlerNotFound()) {
+        if (! $testConfiguration->failOnQueryHandlerNotFound) {
             $messagingConfiguration
                 ->registerAroundMethodInterceptor(AroundInterceptorBuilder::create(
                     AllowMissingDestination::class,
@@ -163,64 +204,20 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                 ));
         }
 
-        if ($testConfiguration->getPollableChannelMediaTypeConversion()) {
+        if ($testConfiguration->pollableChannelMediaTypeConversion) {
             $messagingConfiguration
-                ->registerChannelInterceptor(new SerializationChannelAdapterBuilder($testConfiguration->getChannelToConvertOn(), $testConfiguration->getPollableChannelMediaTypeConversion()));
+                ->registerChannelInterceptor(new SerializationChannelAdapterBuilder($testConfiguration->channelToConvertOn, $testConfiguration->pollableChannelMediaTypeConversion));
         }
 
         foreach ($this->spiedChannels as $spiedChannel) {
             $messagingConfiguration->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($spiedChannel));
         }
-        $spiedChannels = array_unique(array_merge($testConfiguration->getSpiedChannels(), $this->spiedChannels));
+        $spiedChannels = array_unique(array_merge($testConfiguration->spiedChannelNames, $this->spiedChannels));
         foreach ($spiedChannels as $spiedChannel) {
             $messagingConfiguration
                 ->registerChannelInterceptor(new SpiedChannelAdapterBuilder($spiedChannel));
         }
 
-        if ($spiedChannels) {
-            $messagingConfiguration
-                ->registerMessageHandler(ServiceActivatorBuilder::create(
-                    MessageCollectorHandler::class,
-                    self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS
-                )
-                    ->withMethodParameterConverters([
-                        HeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
-                    ])
-                    ->withInputChannelName(self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS)))
-                ->registerMessageHandler(ServiceActivatorBuilder::create(
-                    MessageCollectorHandler::class,
-                    self::GET_SPIED_CHANNEL_RECORDED_MESSAGES
-                )
-                    ->withMethodParameterConverters([
-                        HeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
-                    ])
-                    ->withInputChannelName(self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGES)))
-                ->registerGatewayBuilder(GatewayProxyBuilder::create(
-                    MessagingTestSupport::class,
-                    MessagingTestSupport::class,
-                    self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS,
-                    self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS)
-                )->withParameterConverters([
-                    GatewayHeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
-                ]))
-                ->registerGatewayBuilder(GatewayProxyBuilder::create(
-                    MessagingTestSupport::class,
-                    MessagingTestSupport::class,
-                    self::GET_SPIED_CHANNEL_RECORDED_MESSAGES,
-                    self::inputChannelName(self::GET_SPIED_CHANNEL_RECORDED_MESSAGES)
-                )->withParameterConverters([
-                    GatewayHeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
-                ]));
-        }
-    }
-
-    public function canHandle($extensionObject): bool
-    {
-        return
-            $extensionObject instanceof TestConfiguration
-            || ($extensionObject instanceof MessageChannelBuilder && $extensionObject->isPollable())
-            || $extensionObject instanceof ServiceConfiguration
-            || (class_exists(EventSourcingConfiguration::class) && $extensionObject instanceof EventSourcingConfiguration);
     }
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
@@ -311,74 +308,114 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                 ->withInputChannelName(self::inputChannelName(self::RECORD_QUERY)))
             ->registerMessageHandler(ServiceActivatorBuilder::create(
                 MessageCollectorHandler::class,
-                self::GET_RECORDED_EVENTS
+                self::POP_RECORDED_EVENTS
             )
-                ->withInputChannelName(self::inputChannelName(self::GET_RECORDED_EVENTS)))
+                ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_EVENTS)))
             ->registerMessageHandler(ServiceActivatorBuilder::create(
                 MessageCollectorHandler::class,
-                self::GET_RECORDED_EVENT_MESSAGES
+                self::POP_RECORDED_EVENT_MESSAGES
             )
-                ->withInputChannelName(self::inputChannelName(self::GET_RECORDED_EVENT_MESSAGES)))
+                ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_EVENT_MESSAGES)))
             ->registerMessageHandler(ServiceActivatorBuilder::create(
                 MessageCollectorHandler::class,
-                self::GET_RECORDED_COMMANDS
+                self::POP_RECORDED_EVENT_MESSAGES_OF_TYPE
             )
-                ->withInputChannelName(self::inputChannelName(self::GET_RECORDED_COMMANDS)))
+                ->withMethodParameterConverters([PayloadBuilder::create('className')])
+                ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_EVENT_MESSAGES_OF_TYPE)))
             ->registerMessageHandler(ServiceActivatorBuilder::create(
                 MessageCollectorHandler::class,
-                self::GET_RECORDED_COMMAND_MESSAGES
+                self::POP_RECORDED_COMMAND_MESSAGES_OF_TYPE
             )
-                ->withInputChannelName(self::inputChannelName(self::GET_RECORDED_COMMAND_MESSAGES)))
+                ->withMethodParameterConverters([PayloadBuilder::create('className')])
+                ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_COMMAND_MESSAGES_OF_TYPE)))
             ->registerMessageHandler(ServiceActivatorBuilder::create(
                 MessageCollectorHandler::class,
-                self::GET_RECORDED_QUERIES
+                self::POP_RECORDED_COMMANDS
             )
-                ->withInputChannelName(self::inputChannelName(self::GET_RECORDED_QUERIES)))
+                ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_COMMANDS)))
             ->registerMessageHandler(ServiceActivatorBuilder::create(
                 MessageCollectorHandler::class,
-                self::GET_RECORDED_QUERY_MESSAGES
+                self::POP_RECORDED_COMMAND_MESSAGES
             )
-                ->withInputChannelName(self::inputChannelName(self::GET_RECORDED_QUERY_MESSAGES)))
+                ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_COMMAND_MESSAGES)))
+            ->registerMessageHandler(ServiceActivatorBuilder::create(
+                MessageCollectorHandler::class,
+                self::POP_RECORDED_QUERIES
+            )
+                ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_QUERIES)))
+            ->registerMessageHandler(ServiceActivatorBuilder::create(
+                MessageCollectorHandler::class,
+                self::POP_RECORDED_QUERY_MESSAGES
+            )
+                ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_QUERY_MESSAGES)))
             ->registerMessageHandler(ServiceActivatorBuilder::create(
                 MessageCollectorHandler::class,
                 self::DISCARD_MESSAGES
             )
                 ->withInputChannelName(self::inputChannelName(self::DISCARD_MESSAGES)))
+            ->registerMessageHandler(ServiceActivatorBuilder::create(
+                MessageCollectorHandler::class,
+                self::POP_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS
+            )
+                ->withMethodParameterConverters([
+                    HeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
+                ])
+                ->withInputChannelName(self::inputChannelName(self::POP_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS)))
+            ->registerMessageHandler(ServiceActivatorBuilder::create(
+                MessageCollectorHandler::class,
+                self::POP_SPIED_CHANNEL_RECORDED_MESSAGES
+            )
+                ->withMethodParameterConverters([
+                    HeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
+                ])
+                ->withInputChannelName(self::inputChannelName(self::POP_SPIED_CHANNEL_RECORDED_MESSAGES)))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
                 MessagingTestSupport::class,
                 MessagingTestSupport::class,
-                self::GET_RECORDED_EVENTS,
-                self::inputChannelName(self::GET_RECORDED_EVENTS)
+                self::POP_RECORDED_EVENTS,
+                self::inputChannelName(self::POP_RECORDED_EVENTS)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
                 MessagingTestSupport::class,
                 MessagingTestSupport::class,
-                self::GET_RECORDED_EVENT_MESSAGES,
-                self::inputChannelName(self::GET_RECORDED_EVENT_MESSAGES)
+                self::POP_RECORDED_EVENT_MESSAGES,
+                self::inputChannelName(self::POP_RECORDED_EVENT_MESSAGES)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
                 MessagingTestSupport::class,
                 MessagingTestSupport::class,
-                self::GET_RECORDED_COMMANDS,
-                self::inputChannelName(self::GET_RECORDED_COMMANDS)
+                self::POP_RECORDED_EVENT_MESSAGES_OF_TYPE,
+                self::inputChannelName(self::POP_RECORDED_EVENT_MESSAGES_OF_TYPE)
+            )->withParameterConverters([GatewayPayloadBuilder::create('className')]))
+            ->registerGatewayBuilder(GatewayProxyBuilder::create(
+                MessagingTestSupport::class,
+                MessagingTestSupport::class,
+                self::POP_RECORDED_COMMAND_MESSAGES_OF_TYPE,
+                self::inputChannelName(self::POP_RECORDED_COMMAND_MESSAGES_OF_TYPE)
+            )->withParameterConverters([GatewayPayloadBuilder::create('className')]))
+            ->registerGatewayBuilder(GatewayProxyBuilder::create(
+                MessagingTestSupport::class,
+                MessagingTestSupport::class,
+                self::POP_RECORDED_COMMANDS,
+                self::inputChannelName(self::POP_RECORDED_COMMANDS)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
                 MessagingTestSupport::class,
                 MessagingTestSupport::class,
-                self::GET_RECORDED_COMMAND_MESSAGES,
-                self::inputChannelName(self::GET_RECORDED_COMMAND_MESSAGES)
+                self::POP_RECORDED_COMMAND_MESSAGES,
+                self::inputChannelName(self::POP_RECORDED_COMMAND_MESSAGES)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
                 MessagingTestSupport::class,
                 MessagingTestSupport::class,
-                self::GET_RECORDED_QUERIES,
-                self::inputChannelName(self::GET_RECORDED_QUERIES)
+                self::POP_RECORDED_QUERIES,
+                self::inputChannelName(self::POP_RECORDED_QUERIES)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
                 MessagingTestSupport::class,
                 MessagingTestSupport::class,
-                self::GET_RECORDED_QUERY_MESSAGES,
-                self::inputChannelName(self::GET_RECORDED_QUERY_MESSAGES)
+                self::POP_RECORDED_QUERY_MESSAGES,
+                self::inputChannelName(self::POP_RECORDED_QUERY_MESSAGES)
             ))
             ->registerGatewayBuilder(GatewayProxyBuilder::create(
                 MessagingTestSupport::class,
@@ -386,6 +423,22 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                 self::DISCARD_MESSAGES,
                 self::inputChannelName(self::DISCARD_MESSAGES)
             ))
+            ->registerGatewayBuilder(GatewayProxyBuilder::create(
+                MessagingTestSupport::class,
+                MessagingTestSupport::class,
+                self::POP_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS,
+                self::inputChannelName(self::POP_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS)
+            )->withParameterConverters([
+                GatewayHeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
+            ]))
+            ->registerGatewayBuilder(GatewayProxyBuilder::create(
+                MessagingTestSupport::class,
+                MessagingTestSupport::class,
+                self::POP_SPIED_CHANNEL_RECORDED_MESSAGES,
+                self::inputChannelName(self::POP_SPIED_CHANNEL_RECORDED_MESSAGES)
+            )->withParameterConverters([
+                GatewayHeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
+            ]))
             ->registerBeforeMethodInterceptor(MethodInterceptorBuilder::create(
                 Reference::to(MessageCollectorHandler::class),
                 $interfaceToCallRegistry->getFor(MessageCollectorHandler::class, self::RECORD_EVENT),
@@ -410,31 +463,36 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
     {
         $registerInMemoryEventStoreStreamSource = false;
         if (! $serviceConfiguration->isModulePackageEnabled(ModulePackageList::EVENT_SOURCING_PACKAGE)) {
-            // Register InMemoryEventStore as the primary definition
+            DynamicConsistencyBoundary::resolveFrom($extensionObjects)->registerServicesForInMemoryStore($messagingConfiguration);
+
             $messagingConfiguration->registerServiceDefinition(
                 InMemoryEventStore::class,
-                new Definition(InMemoryEventStore::class),
+                new Definition(InMemoryEventStore::class, [Reference::to(AppendStrategy::class), Reference::to(InMemoryTagCollaborator::class), new Definition(AsGivenRecordedEventFormat::class, [Reference::to(ConversionService::REFERENCE_NAME)])]),
             );
-            // Register EventStore as a reference to InMemoryEventStore (same instance)
             $messagingConfiguration->registerServiceDefinition(
                 EventStore::class,
                 new Reference(InMemoryEventStore::class),
             );
+            $messagingConfiguration->registerServiceDefinition(
+                EventStore::RAW_REFERENCE,
+                new Reference(InMemoryEventStore::class),
+            );
+            $messagingConfiguration->registerServiceDefinition(
+                GuardedTagBump::class,
+                new Reference(InMemoryEventStore::class),
+            );
             $registerInMemoryEventStoreStreamSource = true;
         } else {
-            /**
-             * This is to honour current PdoEventSourcing implementation, as current one is initializing In Memory in EventSourcingConfiguration.
-             * We register the InMemoryEventStore by getting it from the EventSourcingConfiguration service,
-             * which ensures we use the same instance that's used by LazyProophEventStore.
-             */
             foreach ($extensionObjects as $extensionObject) {
                 if (class_exists(EventSourcingConfiguration::class) && $extensionObject instanceof EventSourcingConfiguration) {
                     if ($extensionObject->isInMemory()) {
-                        // Register InMemoryEventStore by calling getInMemoryEventStore() on the EventSourcingConfiguration service
-                        // This ensures we use the same instance that's used by LazyProophEventStore
                         $messagingConfiguration->registerServiceDefinition(
                             InMemoryEventStore::class,
-                            new Definition(InMemoryEventStore::class, [], [EventSourcingConfiguration::class, 'getInMemoryEventStore'])
+                            new Definition(InMemoryEventStore::class, [Reference::to(AppendStrategy::class), Reference::to(InMemoryTagCollaborator::class), Reference::to(RecordedEventFormat::class)]),
+                        );
+                        $messagingConfiguration->registerServiceDefinition(
+                            GuardedTagBump::class,
+                            new Reference(InMemoryEventStore::class),
                         );
                         $registerInMemoryEventStoreStreamSource = true;
                     }

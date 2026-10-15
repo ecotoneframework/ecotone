@@ -2,14 +2,14 @@
 
 namespace Ecotone\Modelling\MessageHandling\Distribution;
 
-use Ecotone\Messaging\Attribute\Parameter\Header;
+use Ecotone\Api\Attribute\Header;
+use Ecotone\Api\Gateway\CommandBus;
+use Ecotone\Api\Gateway\DistributedBusHeader;
+use Ecotone\Api\Gateway\EventBus;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
-use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\Routing\BusRoutingMap;
-use Ecotone\Modelling\EventBus;
 
 /**
  * licence Apache-2.0

@@ -2,9 +2,9 @@
 
 namespace Ecotone\Messaging\Handler\Processor;
 
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Messaging\Handler\MessageProcessor;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageChannel;
 
 /**
  * @licence Apache-2.0

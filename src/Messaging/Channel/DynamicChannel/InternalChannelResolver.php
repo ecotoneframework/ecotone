@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\DynamicChannel;
 
+use Ecotone\Api\Messaging\MessageChannel;
+use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\MessageChannel;
-use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\Assert;
 
 /**

@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Recoverability;
 
-use Ecotone\Messaging\Attribute\Parameter\Reference;
+use Ecotone\Api\Attribute\Reference;
+use Ecotone\Api\Messaging\ErrorContext;
+use Ecotone\Api\Messaging\ErrorMessage;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageChannel;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\MessageHandlingException;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageChannel;
-use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\Support\ErrorMessage;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -64,8 +65,8 @@ class DelayedRetryErrorHandler
             if (! $this->hasDeadLetterOutput) {
                 $logger->error(
                     sprintf(
-                        'No dead letter channel defined. Retried maximum number of `%s` times. Passing to final failure strategy. Due to: %s',
-                        $retryNumber,
+                        'No dead letter channel defined. Message failed after %s. Passing to final failure strategy. Due to: %s',
+                        $this->describeFailedDeliveries($retryNumber),
                         $errorMessage->getExceptionMessage()
                     ),
                     $failedMessage,
@@ -74,8 +75,10 @@ class DelayedRetryErrorHandler
 
                 throw MessageHandlingException::create(
                     sprintf(
-                        'Message handling failed after %d retry attempts. %s',
-                        $retryNumber,
+                        'Message handling failed on channel `%s` after %s. %s: %s',
+                        $failedMessage->getHeaders()->get(MessageHeaders::POLLED_CHANNEL_NAME),
+                        $this->describeFailedDeliveries($retryNumber),
+                        $errorMessage->getExceptionClass(),
                         $errorMessage->getExceptionMessage()
                     )
                 );
@@ -83,9 +86,9 @@ class DelayedRetryErrorHandler
 
             $logger->error(
                 sprintf(
-                    'Sending message `%s` to dead letter channel, as retried maximum number of `%s` times. Due to: %s',
+                    'Sending message `%s` to dead letter channel after %s. Due to: %s',
                     $failedMessage->getHeaders()->getMessageId(),
-                    $retryNumber,
+                    $this->describeFailedDeliveries($retryNumber),
                     $errorMessage->getExceptionMessage()
                 ),
                 $failedMessage,
@@ -118,6 +121,13 @@ class DelayedRetryErrorHandler
         );
 
         return null;
+    }
+
+    private function describeFailedDeliveries(int $failedDeliveries): string
+    {
+        $retries = $failedDeliveries - 1;
+
+        return sprintf('%d failed deliveries (1 initial + %d %s)', $failedDeliveries, $retries, $retries === 1 ? 'retry' : 'retries');
     }
 
     private function shouldBeSendToDeadLetter(int $retryNumber): bool

@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Fixture\HighThroughputPublishing;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\Config\DeferredPublishingGatewayRegistration;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
@@ -42,11 +42,6 @@ final class InMemoryHighThroughputPublisherModule extends NoExternalConfiguratio
                     ->withInputChannelName($publisherReference)
                     ->withEndpointId($publisherReference . '.handler')
             );
-    }
-
-    public function canHandle($extensionObject): bool
-    {
-        return false;
     }
 
     public function getModulePackageName(): string

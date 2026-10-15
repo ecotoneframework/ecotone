@@ -7,33 +7,21 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
 
-use Ecotone\Test\StaticPsrClock;
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Scheduling\DatePoint;
+use Ecotone\Api\Scheduling\Duration;
+use Ecotone\Api\Scheduling\SleepInterface;
 use Psr\Clock\ClockInterface as PsrClockInterface;
 
 class Clock implements EcotoneClockInterface
 {
-    private static ?EcotoneClockInterface $globalClock = null;
-
     public function __construct(private PsrClockInterface $clock)
     {
-        self::$globalClock = $this;
     }
 
-    public static function createBasedOnConfig(?PsrClockInterface $clock, bool $isTestingEnabled): EcotoneClockInterface
+    public static function createWithFallback(?PsrClockInterface $clock, PsrClockInterface $fallbackClock): EcotoneClockInterface
     {
-        if ($clock === null) {
-            return new self($isTestingEnabled ? new StaticPsrClock('now') : self::defaultClock());
-        }
-
-        return new self($clock);
-    }
-
-    /**
-     * @deprecated inject Clock interface instead
-     */
-    public static function get(): EcotoneClockInterface
-    {
-        return self::$globalClock ?? new self(self::defaultClock());
+        return new self($clock ?? $fallbackClock);
     }
 
     public function internalClock(): PsrClockInterface

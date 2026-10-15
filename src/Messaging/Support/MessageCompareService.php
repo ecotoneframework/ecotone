@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Support;
 
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageHeaders;
 
 /**
  * Class MessageCompareService

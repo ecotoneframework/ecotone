@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotatedFinding;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
-use Ecotone\Messaging\Attribute\Scheduled;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\Attribute\Scheduled;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycleBuilder;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -36,7 +36,7 @@ class ScheduledModule extends ConsumerRegisterConfiguration
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
         return InboundChannelAdapterBuilder::create(
-            $annotation->getRequestChannelName(),
+            $annotation->requestChannelName,
             AnnotatedDefinitionReference::getReferenceFor($annotationRegistration),
             $interfaceToCallRegistry->getFor($annotationRegistration->getClassName(), $annotationRegistration->getMethodName())
         )

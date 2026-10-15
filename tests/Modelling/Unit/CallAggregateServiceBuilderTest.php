@@ -2,10 +2,10 @@
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Handler\Type\UnionType;
-use Ecotone\Modelling\CommandBus;
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Gateway\CommandBus;
+use Ecotone\Api\Lite\EcotoneLite;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
 use Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder\CreateAggregate;
@@ -15,7 +15,7 @@ use Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder\StateBasedAggregateWi
 use Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Aggregate\AggregateWithoutMessageClassesExample;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
+use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStateStoredRepository;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\Order;
 use Test\Ecotone\Modelling\Fixture\QueryHandlerAggregate\BigBox;
 use Test\Ecotone\Modelling\Fixture\QueryHandlerAggregate\Box;
@@ -40,12 +40,13 @@ class CallAggregateServiceBuilderTest extends TestCase
     public function test_calling_existing_aggregate_method_with_command_class(): void
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            [AggregateWithoutMessageClassesExample::class, InMemoryStandardRepository::class],
-            [InMemoryStandardRepository::createWith([AggregateWithoutMessageClassesExample::create($id = 1)])],
+            [AggregateWithoutMessageClassesExample::class, InMemoryStateStoredRepository::class],
+            [InMemoryStateStoredRepository::createWith([AggregateWithoutMessageClassesExample::create($id = 1)])],
             addInMemoryStateStoredRepository: false,
             addInMemoryEventSourcedRepository: false,
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )
-            ->sendCommandWithRoutingKey('doSomething', metadata: ['aggregate.id' => $id]);
+            ->sendCommandWithRouting('doSomething', metadata: ['aggregate.id' => $id]);
 
         $this->assertTrue(
             $ecotoneLite
@@ -61,7 +62,8 @@ class CallAggregateServiceBuilderTest extends TestCase
         $this->assertEquals(
             $orderAmount,
             EcotoneLite::bootstrapFlowTesting(
-                [Order::class]
+                [Order::class],
+                configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
             )
                 ->sendCommand(CreateOrderCommand::createWith(1, $orderAmount, 'Poland'))
                 ->sendQueryWithRouting('get_order_amount_channel', GetOrderAmountQuery::createWith(1))
@@ -72,15 +74,16 @@ class CallAggregateServiceBuilderTest extends TestCase
     {
         $storageId = Uuid::v7()->toRfc4122();
 
-        $this->assertEquals(
-            Type::createCollection(SmallBox::class),
+        $this->assertSame(
+            'array<' . SmallBox::class . '>',
             EcotoneLite::bootstrapFlowTesting(
                 [Storage::class, StorageService::class],
+                configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
             )
                 ->sendCommand(new CreateStorage($storageId, [SmallBox::create(1)], []))
                 ->getGateway(StorageService::class)
                 ->getSmallBoxes($storageId)
-                ->getHeaders()->getContentType()->getTypeParameter()
+                ->getHeaders()->getContentType()->getParameter(MediaType::TYPE_PARAMETER)
         );
     }
 
@@ -89,17 +92,18 @@ class CallAggregateServiceBuilderTest extends TestCase
         $storageId = Uuid::v7()->toRfc4122();
 
         $this->assertEqualsCanonicalizing(
-            new UnionType([
-                Type::createCollection(Box::class),
-                Type::createCollection(BigBox::class),
-            ]),
-            EcotoneLite::bootstrapFlowTesting(
-                [Storage::class, StorageService::class],
+            ['array<' . Box::class . '>', 'array<' . BigBox::class . '>'],
+            explode(
+                '|',
+                EcotoneLite::bootstrapFlowTesting(
+                    [Storage::class, StorageService::class],
+                    configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+                )
+                    ->sendCommand(new CreateStorage($storageId, [SmallBox::create(1)], []))
+                    ->getGateway(StorageService::class)
+                    ->getBoxes($storageId)
+                    ->getHeaders()->getContentType()->getParameter(MediaType::TYPE_PARAMETER)
             )
-                ->sendCommand(new CreateStorage($storageId, [SmallBox::create(1)], []))
-                ->getGateway(StorageService::class)
-                ->getBoxes($storageId)
-                ->getHeaders()->getContentType()->getTypeParameter()
         );
     }
 
@@ -107,7 +111,8 @@ class CallAggregateServiceBuilderTest extends TestCase
     {
         $this->assertNull(
             EcotoneLite::bootstrapFlowTesting(
-                [Order::class]
+                [Order::class],
+                configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
             )
                 ->sendCommand(CreateOrderCommand::createWith(1, 5, 'Poland'))
                 ->sendQueryWithRouting('get_customer_id', metadata: ['aggregate.id' => 1])
@@ -120,8 +125,9 @@ class CallAggregateServiceBuilderTest extends TestCase
             true,
             EcotoneLite::bootstrapFlowTesting(
                 [AggregateWithoutMessageClassesExample::class],
+                configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
             )
-                ->sendCommandWithRoutingKey('createAggregateNoParams', $id = 1)
+                ->sendCommandWithRouting('createAggregateNoParams', $id = 1)
                 ->sendQueryWithRouting('querySomething', metadata: ['aggregate.id' => $id])
         );
     }
@@ -132,6 +138,7 @@ class CallAggregateServiceBuilderTest extends TestCase
 
         $reply = EcotoneLite::bootstrapFlowTesting(
             [Ticket::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )
             ->getGateway(CommandBus::class)
             ->send($commandToRun);
@@ -145,6 +152,7 @@ class CallAggregateServiceBuilderTest extends TestCase
 
         $reply = EcotoneLite::bootstrapFlowTesting(
             [EventSourcingAggregateWithInternalRecorder::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )
             ->getGateway(CommandBus::class)
             ->send($commandToRun);
@@ -159,6 +167,7 @@ class CallAggregateServiceBuilderTest extends TestCase
 
         $reply = EcotoneLite::bootstrapFlowTesting(
             [Ticket::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )
             ->sendCommand(new StartTicketCommand($ticketId))
             ->getGateway(CommandBus::class)
@@ -173,6 +182,7 @@ class CallAggregateServiceBuilderTest extends TestCase
 
         $reply = EcotoneLite::bootstrapFlowTesting(
             [EventSourcingAggregateWithInternalRecorder::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )
             ->sendCommand(new CreateAggregate(1))
             ->getGateway(CommandBus::class)
@@ -188,6 +198,7 @@ class CallAggregateServiceBuilderTest extends TestCase
 
         $reply = EcotoneLite::bootstrapFlowTesting(
             [StateBasedAggregateWithInternalRecorder::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )
             ->sendCommand(new CreateAggregate(1))
             ->getGateway(CommandBus::class)

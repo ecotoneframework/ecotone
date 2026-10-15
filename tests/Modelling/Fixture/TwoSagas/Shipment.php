@@ -2,10 +2,10 @@
 
 namespace Test\Ecotone\Modelling\Fixture\TwoSagas;
 
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\Attribute\Identifier;
-use Ecotone\Modelling\Attribute\QueryHandler;
-use Ecotone\Modelling\Attribute\Saga;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Api\Attribute\Saga;
 use InvalidArgumentException;
 
 #[Saga]

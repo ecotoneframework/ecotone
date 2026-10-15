@@ -2,9 +2,9 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\MethodInvocationException;
 use Ecotone\Messaging\Handler\ParameterConverter;
-use Ecotone\Messaging\Message;
 use Throwable;
 
 /**

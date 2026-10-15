@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
+use Ecotone\Api\Messaging\ErrorMessage;
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\Type\UnionType;
-use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Messaging\Support\ErrorMessage;
 use ReflectionException;
 
 /**

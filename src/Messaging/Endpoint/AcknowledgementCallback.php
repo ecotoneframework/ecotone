@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
+use Ecotone\Api\ExtensionObject\FinalFailureStrategy;
+
 /**
  * Allows to ack message
  *

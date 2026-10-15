@@ -4,36 +4,91 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Metadata;
 
-use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\Metadata\RevisionMetadataEnricher;
+use Ecotone\Api\Attribute\Aggregate;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Api\Attribute\Revision;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Api\Modelling\WithEvents;
 use PHPUnit\Framework\TestCase;
-use stdClass;
-use Test\Ecotone\Messaging\Unit\MessageWithRevision;
 
 /**
- * @internal
- */
-/**
  * licence Apache-2.0
+ *
  * @internal
  */
 final class MetadataEnricherTest extends TestCase
 {
-    public function test_revision_will_resolved_from_object_attribute(): void
+    public function test_revision_header_is_resolved_from_the_recorded_events_class_attribute(): void
     {
-        $metadata = [MessageHeaders::REVISION => 1];
-        $metadata = RevisionMetadataEnricher::enrich($metadata, new MessageWithRevision());
+        $ecotone = EcotoneLite::bootstrapFlowTesting([RevisionAggregate::class], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
 
-        self::assertArrayHasKey(MessageHeaders::REVISION, $metadata);
-        self::assertEquals(2, $metadata[MessageHeaders::REVISION]);
+        $ecotone->sendCommandWithRouting('revisionAggregate.createWithRevisionedEvent', 'agg-1');
+
+        $this->assertSame(2, $ecotone->popRecordedEventHeaders()[0]->get(MessageHeaders::REVISION));
     }
 
-    public function test_without_attribute_revision_will_have_value_1(): void
+    public function test_revision_header_defaults_to_1_when_the_recorded_events_class_has_no_revision_attribute(): void
     {
-        $metadata = [];
-        $metadata = RevisionMetadataEnricher::enrich($metadata, new stdClass());
+        $ecotone = EcotoneLite::bootstrapFlowTesting([RevisionAggregate::class], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
 
-        self::assertArrayHasKey(MessageHeaders::REVISION, $metadata);
-        self::assertEquals(1, $metadata[MessageHeaders::REVISION]);
+        $ecotone->sendCommandWithRouting('revisionAggregate.createWithUnrevisionedEvent', 'agg-2');
+
+        $this->assertSame(1, $ecotone->popRecordedEventHeaders()[0]->get(MessageHeaders::REVISION));
+    }
+}
+
+/**
+ * licence Apache-2.0
+ *
+ * @internal
+ */
+#[Revision(2)]
+final class RevisionedEvent
+{
+}
+
+/**
+ * licence Apache-2.0
+ *
+ * @internal
+ */
+final class UnrevisionedEvent
+{
+}
+
+/**
+ * licence Apache-2.0
+ *
+ * @internal
+ */
+#[Aggregate]
+final class RevisionAggregate
+{
+    use WithEvents;
+
+    #[Identifier]
+    private string $id;
+
+    #[CommandHandler('revisionAggregate.createWithRevisionedEvent')]
+    public static function createWithRevisionedEvent(string $id): self
+    {
+        $self = new self();
+        $self->id = $id;
+        $self->recordThat(new RevisionedEvent());
+
+        return $self;
+    }
+
+    #[CommandHandler('revisionAggregate.createWithUnrevisionedEvent')]
+    public static function createWithUnrevisionedEvent(string $id): self
+    {
+        $self = new self();
+        $self->id = $id;
+        $self->recordThat(new UnrevisionedEvent());
+
+        return $self;
     }
 }

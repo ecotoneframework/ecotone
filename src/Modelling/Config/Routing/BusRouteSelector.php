@@ -7,8 +7,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\Config\Routing;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\Router\RouteSelector;
-use Ecotone\Messaging\Message;
 
 class BusRouteSelector implements RouteSelector
 {
@@ -24,5 +24,10 @@ class BusRouteSelector implements RouteSelector
         $routingKey = $this->routingKeyResolver->resolve($message);
 
         return $this->busRoutingConfig->get($routingKey);
+    }
+
+    public function __toString(): string
+    {
+        return 'bus routing';
     }
 }

@@ -2,10 +2,10 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Presend;
 
-use Ecotone\Messaging\Attribute\ServiceContext;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Api\Attribute\ServiceContext;
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 
 /**
  * licence Apache-2.0
@@ -18,8 +18,8 @@ class PresendConfiguration
         return [
             SimpleMessageChannelBuilder::createQueueChannel('shop', conversionMediaType: MediaType::createApplicationXPHP()),
             PollingMetadata::create('shop')
-                ->setExecutionAmountLimit(1)
-                ->setHandledMessageLimit(1),
+                ->withExecutionAmountLimit(1)
+                ->withHandledMessageLimit(1),
         ];
     }
 }

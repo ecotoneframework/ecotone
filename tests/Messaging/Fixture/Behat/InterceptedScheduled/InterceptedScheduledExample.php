@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\InterceptedScheduled;
 
-use Ecotone\Messaging\Attribute\Interceptor\Before;
-use Ecotone\Messaging\Attribute\Interceptor\Presend;
-use Ecotone\Messaging\Attribute\Poller;
-use Ecotone\Messaging\Attribute\Scheduled;
-use Ecotone\Messaging\Attribute\ServiceActivator;
+use Ecotone\Api\Attribute\Before;
+use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Api\Attribute\Poller;
+use Ecotone\Api\Attribute\Presend;
+use Ecotone\Api\Attribute\Scheduled;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 
 /**
@@ -25,7 +25,7 @@ class InterceptedScheduledExample
         return 10;
     }
 
-    #[ServiceActivator('handle')]
+    #[InternalHandler('handle')]
     public function handle(int $payload, array $metadata, MessagingEntrypointService $messagingEntrypoint): void
     {
         if (isset($metadata['entrypoint'])) {
@@ -35,7 +35,7 @@ class InterceptedScheduledExample
         }
     }
 
-    #[ServiceActivator('getRequestedData')]
+    #[InternalHandler('getRequestedData')]
     public function getRequestedData(): int
     {
         return $this->requestData;

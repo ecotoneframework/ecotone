@@ -62,21 +62,21 @@ final class ErrorChannelExceptionMessages
 
     public static function instantRetryRequiresEnterprise(): string
     {
-        return 'Instant retry attribute is available only for Ecotone Enterprise.';
+        return 'Instant retry attribute is available only for Ecotone Enterprise. See https://docs.ecotone.tech/enterprise for details.';
     }
 
     public static function asynchronousExecutionRequiresEnterprise(string $endpointId): string
     {
-        return "Endpoint annotations on #[Asynchronous] attribute for endpoint `{$endpointId}` require Ecotone Enterprise licence.";
+        return "Endpoint annotations on #[Asynchronous] attribute for endpoint `{$endpointId}` require Ecotone Enterprise licence. See https://docs.ecotone.tech/enterprise for details.";
     }
 
     public static function gatewayErrorChannelRequiresEnterprise(string $interfaceFqn, string $methodName): string
     {
-        return "Gateway {$interfaceFqn}::{$methodName} is marked with synchronous Error Channel. This functionality is available as part of Ecotone Enterprise.";
+        return "Gateway {$interfaceFqn}::{$methodName} is marked with synchronous Error Channel. This functionality is available as part of Ecotone Enterprise. See https://docs.ecotone.tech/enterprise for details.";
     }
 
     public static function gatewayDelayedRetryRequiresEnterprise(string $interfaceFqn, string $methodName): string
     {
-        return "Gateway {$interfaceFqn}::{$methodName} is marked with #[DelayedRetry]. This functionality is available as part of Ecotone Enterprise.";
+        return "Gateway {$interfaceFqn}::{$methodName} is marked with #[DelayedRetry]. This functionality is available as part of Ecotone Enterprise. See https://docs.ecotone.tech/enterprise for details.";
     }
 }

@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\LateAggregateIdAssignationWithAggregateIdFromMethod;
 
-use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
-use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\Aggregate;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\IdentifierMethod;
 
 #[Aggregate]
 /**
@@ -25,7 +25,7 @@ class User
         return $self;
     }
 
-    #[AggregateIdentifierMethod('id')]
+    #[IdentifierMethod('id')]
     public function getIdentifier()
     {
         return $this->internalId;

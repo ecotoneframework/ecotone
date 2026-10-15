@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
-use Ecotone\Messaging\Scheduling\TaskExecutor;
-use Ecotone\Messaging\Scheduling\TaskScheduler;
+use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
 use Ecotone\Messaging\Scheduling\Trigger;
 
 /**
@@ -19,7 +18,7 @@ use Ecotone\Messaging\Scheduling\Trigger;
  */
 class ScheduledTaskConsumer implements ConsumerLifecycle
 {
-    public function __construct(private TaskScheduler $taskScheduler, private Trigger $trigger, private TaskExecutor $taskExecutor)
+    public function __construct(private SyncTaskScheduler $taskScheduler, private Trigger $trigger, private PollToGatewayTaskExecutor $taskExecutor)
     {
     }
 

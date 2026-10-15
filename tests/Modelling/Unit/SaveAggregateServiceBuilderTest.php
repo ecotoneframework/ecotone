@@ -2,16 +2,17 @@
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Lite\EcotoneLite;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Gateway\CommandBus;
+use Ecotone\Api\Gateway\DocumentStore;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Lite\Test\FlowTestSupport;
+use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Lite\Test\Configuration\InMemoryRepositoryBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Store\Document\DocumentException;
-use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Messaging\Store\Document\InMemoryDocumentStore;
-use Ecotone\Modelling\AggregateFlow\SaveAggregate\SaveAggregateService;
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
-use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
 use Ecotone\Test\StubLogger;
 use PHPUnit\Framework\TestCase;
@@ -63,12 +64,15 @@ use Test\Ecotone\Modelling\Fixture\Ticket\Ticket;
  */
 class SaveAggregateServiceBuilderTest extends TestCase
 {
+    private const TICKET_SNAPSHOTS = 'aggregate_snapshots_' . Ticket::class;
+
     public function test_saving_aggregate_method_with_only_command_as_parameter()
     {
         $this->assertEquals(
             1,
             EcotoneLite::bootstrapFlowTesting(
-                [Order::class]
+                [Order::class],
+                configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
             )
                 ->sendCommand(CreateOrderCommand::createWith(1, 10, 'Poland'))
                 ->getAggregate(Order::class, ['orderId' => 1])
@@ -78,173 +82,131 @@ class SaveAggregateServiceBuilderTest extends TestCase
 
     public function test_snapshoting_aggregate_after_single_event()
     {
-        $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
+        $ecotoneLite = $this->bootstrapTicketsWithSnapshots(
+            (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 1),
+            $stubLogger = StubLogger::create(),
+        );
 
-        $ticket = EcotoneLite::bootstrapFlowTesting(
-            [Ticket::class],
-            [DocumentStore::class => $inMemoryDocumentStore, 'logger' => $stubLogger = StubLogger::create()],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 1),
-                ])
-        )
+        $ticket = $ecotoneLite
             ->sendCommand(new StartTicketCommand($ticketId = 1))
             ->getAggregate(Ticket::class, ['ticketId' => $ticketId]);
 
         $this->assertEquals(
             $ticket,
-            $inMemoryDocumentStore->getDocument(SaveAggregateService::getSnapshotCollectionName(Ticket::class), 1)
+            $ecotoneLite->getGateway(DocumentStore::class)->getDocument(self::TICKET_SNAPSHOTS, '1')
         );
         $this->assertCount(0, $stubLogger->getError());
     }
 
     public function test_recovering_from_undesired_snapshot()
     {
-        $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
-
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            [Ticket::class],
-            [DocumentStore::class => $inMemoryDocumentStore, 'logger' => $stubLogger = StubLogger::create()],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 1),
-                ])
+        $ecotoneLite = $this->bootstrapTicketsWithSnapshots(
+            (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 1),
+            $stubLogger = StubLogger::create(),
         );
 
         $ecotoneLite
             ->sendCommand(new StartTicketCommand($ticketId = 1))
             ->getAggregate(Ticket::class, ['ticketId' => $ticketId]);
 
-        $inMemoryDocumentStore->upsertDocument(SaveAggregateService::getSnapshotCollectionName(Ticket::class), SaveAggregateService::getSnapshotDocumentId(['ticketId' => 1]), new stdClass());
+        $this->replaceTicketSnapshot($ecotoneLite, new stdClass());
 
         $ecotoneLite->sendCommand(new AssignWorkerCommand($ticketId, 'johny'));
 
         $this->assertEquals(
             $ecotoneLite->getAggregate(Ticket::class, ['ticketId' => $ticketId]),
-            $inMemoryDocumentStore->getDocument(SaveAggregateService::getSnapshotCollectionName(Ticket::class), 1)
+            $ecotoneLite->getGateway(DocumentStore::class)->getDocument(self::TICKET_SNAPSHOTS, '1')
         );
         $this->assertCount(1, $stubLogger->getError());
     }
 
     public function test_recovering_from_conversion_exception()
     {
-        $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
-
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            [Ticket::class],
-            [DocumentStore::class => $inMemoryDocumentStore, 'logger' => $stubLogger = StubLogger::create()],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 1),
-                ])
+        $ecotoneLite = $this->bootstrapTicketsWithSnapshots(
+            (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 1),
+            $stubLogger = StubLogger::create(),
         );
 
         $ecotoneLite
             ->sendCommand(new StartTicketCommand($ticketId = 1))
             ->getAggregate(Ticket::class, ['ticketId' => $ticketId]);
 
-        $inMemoryDocumentStore->upsertDocument(SaveAggregateService::getSnapshotCollectionName(Ticket::class), SaveAggregateService::getSnapshotDocumentId(['ticketId' => 1]), DocumentException::create('failure on conversion'));
+        $this->replaceTicketSnapshot($ecotoneLite, DocumentException::create('failure on conversion'));
 
         $ecotoneLite->sendCommand(new AssignWorkerCommand($ticketId, 'johny'));
 
         $this->assertEquals(
             $ecotoneLite->getAggregate(Ticket::class, ['ticketId' => $ticketId]),
-            $inMemoryDocumentStore->getDocument(SaveAggregateService::getSnapshotCollectionName(Ticket::class), 1)
+            $ecotoneLite->getGateway(DocumentStore::class)->getDocument(self::TICKET_SNAPSHOTS, '1')
         );
         $this->assertCount(1, $stubLogger->getError());
     }
 
     public function test_snapshoting_different_aggregate_instances()
     {
-        $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
-
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            [Ticket::class],
-            [DocumentStore::class => $inMemoryDocumentStore],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    BaseEventSourcingConfiguration::withDefaults()
-                        ->withSnapshotsFor(Ticket::class, 1),
-                ])
+        $ecotoneLite = $this->bootstrapTicketsWithSnapshots(
+            BaseEventSourcingConfiguration::withDefaults()
+                ->withSnapshotsFor(Ticket::class, 1),
         )
             ->sendCommand(new StartTicketCommand($ticketOneId = 1))
             ->sendCommand(new StartTicketCommand($ticketTwoId = 2))
         ;
+        $documentStore = $ecotoneLite->getGateway(DocumentStore::class);
 
         /** @var Ticket $ticketOne */
         $ticketOne = $ecotoneLite->getAggregate(Ticket::class, ['ticketId' => $ticketOneId]);
         $this->assertEquals(1, $ticketOne->id());
-        $this->assertEquals(1, $ticketOne->getVersion());
-        $this->assertEquals($ticketOne, $inMemoryDocumentStore->getDocument(SaveAggregateService::getSnapshotCollectionName(Ticket::class), 1));
+        $this->assertEquals(1, $ticketOne->getAggregateVersion());
+        $this->assertEquals($ticketOne, $documentStore->getDocument(self::TICKET_SNAPSHOTS, '1'));
 
         /** @var Ticket $ticketTwo */
         $ticketTwo = $ecotoneLite->getAggregate(Ticket::class, ['ticketId' => $ticketTwoId]);
         $this->assertEquals(2, $ticketTwo->id());
-        $this->assertEquals(1, $ticketTwo->getVersion());
-        $this->assertEquals($ticketTwo, $inMemoryDocumentStore->getDocument(SaveAggregateService::getSnapshotCollectionName(Ticket::class), 2));
+        $this->assertEquals(1, $ticketTwo->getAggregateVersion());
+        $this->assertEquals($ticketTwo, $documentStore->getDocument(self::TICKET_SNAPSHOTS, '2'));
     }
 
     public function test_snapshoting_aggregate_for_further_actions()
     {
-        $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
+        $ecotoneLite = $this->bootstrapTicketsWithSnapshots(
+            (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 1),
+        );
 
-        $ticket = EcotoneLite::bootstrapFlowTesting(
-            [Ticket::class],
-            [DocumentStore::class => $inMemoryDocumentStore],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 1),
-                ])
-        )
+        $ticket = $ecotoneLite
             ->sendCommand(new StartTicketCommand($ticketId = 1))
             ->sendCommand(new AssignWorkerCommand($ticketId, 'johny'))
             ->getAggregate(Ticket::class, ['ticketId' => $ticketId]);
 
-        $this->assertEquals(2, $ticket->getVersion());
+        $this->assertEquals(2, $ticket->getAggregateVersion());
         $this->assertEquals(
             $ticket,
-            $inMemoryDocumentStore->getDocument(SaveAggregateService::getSnapshotCollectionName(Ticket::class), 1)
+            $ecotoneLite->getGateway(DocumentStore::class)->getDocument(self::TICKET_SNAPSHOTS, '1')
         );
     }
 
     public function test_skipping_snapshot_if_aggregate_not_registered_for_snapshoting()
     {
-        $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
-
-        EcotoneLite::bootstrapFlowTesting(
-            [Ticket::class],
-            [DocumentStore::class => $inMemoryDocumentStore],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    (new BaseEventSourcingConfiguration()),
-                ])
-        )
+        $ecotoneLite = $this->bootstrapTicketsWithSnapshots(new BaseEventSourcingConfiguration())
             ->sendCommand(new StartTicketCommand($ticketId = 1));
 
-        $this->assertEquals(0, $inMemoryDocumentStore->countDocuments(SaveAggregateService::getSnapshotCollectionName(Ticket::class)));
+        $this->assertEquals(0, $ecotoneLite->getGateway(DocumentStore::class)->countDocuments(self::TICKET_SNAPSHOTS));
     }
 
     public function test_skipping_snapshot_if_not_desired_version_yet()
     {
-        $inMemoryDocumentStore = InMemoryDocumentStore::createEmpty();
-
-        EcotoneLite::bootstrapFlowTesting(
-            [Ticket::class],
-            [DocumentStore::class => $inMemoryDocumentStore],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 2),
-                ])
+        $ecotoneLite = $this->bootstrapTicketsWithSnapshots(
+            (new BaseEventSourcingConfiguration())->withSnapshotsFor(Ticket::class, 2),
         )
             ->sendCommand(new StartTicketCommand(1));
 
-        $this->assertEquals(0, $inMemoryDocumentStore->countDocuments(SaveAggregateService::getSnapshotCollectionName(Ticket::class)));
+        $this->assertEquals(0, $ecotoneLite->getGateway(DocumentStore::class)->countDocuments(self::TICKET_SNAPSHOTS));
     }
 
     public function test_returning_all_identifiers_assigned_during_aggregate_creation()
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            classesToResolve: [Article::class]
+            classesToResolve: [Article::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $this->assertEquals(
@@ -258,7 +220,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
     public function test_returning_all_identifiers_when_command_provides_no_identifiers()
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            classesToResolve: [Article::class]
+            classesToResolve: [Article::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $result = $ecotoneLite
@@ -275,7 +238,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
     public function test_returning_all_identifiers_when_command_provides_single_identifier()
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            classesToResolve: [Article::class]
+            classesToResolve: [Article::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $result = $ecotoneLite
@@ -292,7 +256,8 @@ class SaveAggregateServiceBuilderTest extends TestCase
     public function test_returning_all_identifiers_when_factory_method_assigns_null_to_identifier()
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            classesToResolve: [Article::class]
+            classesToResolve: [Article::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $result = $ecotoneLite
@@ -309,36 +274,39 @@ class SaveAggregateServiceBuilderTest extends TestCase
     public function test_calling_save_method_with_automatic_increasing_version()
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            classesToResolve: [Order::class]
+            classesToResolve: [Order::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $aggregate = $ecotoneLite
             ->sendCommand(CreateOrderCommand::createWith(1, 1, 'Poland'))
             ->getAggregate(Order::class, ['orderId' => 1]);
 
-        $this->assertEquals(1, $aggregate->getVersion());
+        $this->assertEquals(1, $aggregate->getAggregateVersion());
     }
 
     public function test_calling_save_method_with_manual_increasing_version()
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            classesToResolve: [OrderWithManualVersioning::class]
+            classesToResolve: [OrderWithManualVersioning::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $aggregate = $ecotoneLite
-            ->sendCommandWithRoutingKey('order.create', CreateOrderCommand::createWith(1, 1, 'Poland'))
+            ->sendCommandWithRouting('order.create', CreateOrderCommand::createWith(1, 1, 'Poland'))
             ->getAggregate(OrderWithManualVersioning::class, ['orderId' => 1]);
 
-        $this->assertEquals(0, $aggregate->getVersion());
+        $this->assertEquals(0, $aggregate->getAggregateVersion());
     }
 
     public function test_throwing_exception_if_aggregate_before_saving_has_no_nullable_identifier()
     {
         $this->expectException(ConfigurationException::class);
-        $this->expectExceptionMessage("You must define at least one EventSourcingHandler to provide aggregate's identifier after first event.");
+        $this->expectExceptionMessage("You must define at least one #[Apply] method to provide aggregate's identifier after first event.");
 
         EcotoneLite::bootstrapFlowTesting(
-            classesToResolve: [NoIdDefinedAfterRecordingEvents::class]
+            classesToResolve: [NoIdDefinedAfterRecordingEvents::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
     }
 
@@ -347,14 +315,16 @@ class SaveAggregateServiceBuilderTest extends TestCase
         $this->expectException(NoCorrectIdentifierDefinedException::class);
 
         EcotoneLite::bootstrapFlowTesting(
-            classesToResolve: [PublicIdentifierGetMethodWithParameters::class]
+            classesToResolve: [PublicIdentifierGetMethodWithParameters::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
     }
 
     public function test_result_aggregate_are_published_in_order(): void
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            classesToResolve: [Job::class]
+            classesToResolve: [Job::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $jobId = Uuid::v7()->toRfc4122();
@@ -368,10 +338,10 @@ class SaveAggregateServiceBuilderTest extends TestCase
             $ecotoneLite
                 ->sendCommand(new StartJob($jobId))
                 ->discardRecordedMessages()
-                ->sendCommandWithRoutingKey('job.finish_and_start', new FinishJob($jobId), metadata: [
+                ->sendCommandWithRouting('job.finish_and_start', new FinishJob($jobId), metadata: [
                     'newJobId' => $newJobId,
                 ])
-                ->getRecordedEvents(),
+                ->popRecordedEvents(),
         );
     }
 
@@ -379,6 +349,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [EventSourcingAggregateWithInternalRecorder::class, Something::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )
             ->sendCommand(new CreateAggregate($id = 1))
             ->sendCommand(new CreateSomething($id, $somethingId = 200));
@@ -387,14 +358,14 @@ class SaveAggregateServiceBuilderTest extends TestCase
             2,
             $ecotoneLite
                 ->getAggregate(EventSourcingAggregateWithInternalRecorder::class, ['id' => $id])
-                ->getVersion()
+                ->getAggregateVersion()
         );
 
         $this->assertEquals(
             1,
             $ecotoneLite
                 ->getAggregate(Something::class, ['id' => $somethingId])
-                ->getVersion()
+                ->getAggregateVersion()
         );
     }
 
@@ -402,16 +373,17 @@ class SaveAggregateServiceBuilderTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [EventSourcingAggregateWithInternalRecorder::class, Something::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )
             ->sendCommand(new CreateAggregate($id = 1000), metadata: [
                 MessageHeaders::MESSAGE_ID => $messageId = Uuid::v7()->toRfc4122(),
                 'userland' => '123',
             ]);
 
-        $eventMetadata = $ecotoneLite->getRecordedEventHeaders()[0];
+        $eventMetadata = $ecotoneLite->popRecordedEventHeaders()[0];
         $this->assertNotSame($messageId, $eventMetadata->get(MessageHeaders::MESSAGE_ID));
         $this->assertSame('123', $eventMetadata->get('userland'));
-        $this->assertSame($id, $eventMetadata->get(MessageHeaders::EVENT_AGGREGATE_ID));
+        $this->assertSame((string) $id, $eventMetadata->get(MessageHeaders::EVENT_AGGREGATE_ID));
         $this->assertSame(1, $eventMetadata->get(MessageHeaders::EVENT_AGGREGATE_VERSION));
         $this->assertSame(EventSourcingAggregateWithInternalRecorder::class, $eventMetadata->get(MessageHeaders::EVENT_AGGREGATE_TYPE));
 
@@ -421,18 +393,18 @@ class SaveAggregateServiceBuilderTest extends TestCase
                 'userland' => '1234',
             ]);
 
-        $eventHeaders = $ecotoneLite->getRecordedEventHeaders();
+        $eventHeaders = $ecotoneLite->popRecordedEventHeaders();
         $eventMetadata = $eventHeaders[0];
         $this->assertNotSame($messageId, $eventMetadata->get(MessageHeaders::MESSAGE_ID));
         $this->assertSame('1234', $eventMetadata->get('userland'));
-        $this->assertSame($id, $eventMetadata->get(MessageHeaders::EVENT_AGGREGATE_ID));
+        $this->assertSame((string) $id, $eventMetadata->get(MessageHeaders::EVENT_AGGREGATE_ID));
         $this->assertSame(2, $eventMetadata->get(MessageHeaders::EVENT_AGGREGATE_VERSION));
         $this->assertSame(EventSourcingAggregateWithInternalRecorder::class, $eventMetadata->get(MessageHeaders::EVENT_AGGREGATE_TYPE));
 
         $eventMetadata = $eventHeaders[1];
         $this->assertNotSame($eventHeaders[0]->get(MessageHeaders::MESSAGE_ID), $eventMetadata->get(MessageHeaders::MESSAGE_ID));
         $this->assertSame('1234', $eventMetadata->get('userland'));
-        $this->assertSame($newInstanceId, $eventMetadata->get(MessageHeaders::EVENT_AGGREGATE_ID));
+        $this->assertSame((string) $newInstanceId, $eventMetadata->get(MessageHeaders::EVENT_AGGREGATE_ID));
         $this->assertSame(1, $eventMetadata->get(MessageHeaders::EVENT_AGGREGATE_VERSION));
         $this->assertSame('something', $eventMetadata->get(MessageHeaders::EVENT_AGGREGATE_TYPE));
     }
@@ -444,25 +416,27 @@ class SaveAggregateServiceBuilderTest extends TestCase
             [EventSourcingAggregateWithInternalRecorder::class, Something::class, CustomEventSourcingRepository::class, SomethingWasCreated::class],
             [CustomEventSourcingRepository::class => $repository],
             addInMemoryEventSourcedRepository: false,
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )
             ->sendCommand(new CreateAggregate($id = 1000));
 
         $eventStream = $repository->findBy(EventSourcingAggregateWithInternalRecorder::class, ['id' => $id]);
         $this->assertCount(1, $eventStream->getEvents());
         $this->assertSame($id, $ecotoneLite->getAggregate(EventSourcingAggregateWithInternalRecorder::class, ['id' => $id])->getId());
-        $this->assertSame(AggregateCreated::class, $eventStream->getEvents()[0]->getEventName());
+        $this->assertSame(AggregateCreated::class, $eventStream->getEvents()[0]->eventName);
 
         $ecotoneLite->sendCommand(new CreateSomething($id, 2000));
 
         $eventStream = $repository->findBy(EventSourcingAggregateWithInternalRecorder::class, ['id' => $id]);
         $this->assertCount(2, $eventStream->getEvents());
-        $this->assertSame('something_was_created', $eventStream->getEvents()[1]->getEventName());
+        $this->assertSame('something_was_created', $eventStream->getEvents()[1]->eventName);
     }
 
     public function test_storing_pure_event_sourced_aggregate_via_business_repository_for_first_time(): void
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Twitter::class, TwitterRepository::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         /** @var TwitterRepository $twitterRepository */
@@ -487,6 +461,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Twitter::class, TwitterRepository::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         /** @var TwitterRepository $twitterRepository */
@@ -506,6 +481,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [TwitterWithRecorder::class, TwitterWithRecorderRepository::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         /** @var TwitterWithRecorderRepository $twitterRepository */
@@ -526,6 +502,7 @@ class SaveAggregateServiceBuilderTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [TwitterWithRecorder::class, TwitterWithRecorderRepository::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         /** @var TwitterWithRecorderRepository $twitterRepository */
@@ -542,5 +519,28 @@ class SaveAggregateServiceBuilderTest extends TestCase
             $twitterRepository->getTwitter('1')
                 ->getContent()
         );
+    }
+
+    private function bootstrapTicketsWithSnapshots(BaseEventSourcingConfiguration $eventSourcingConfiguration, ?StubLogger $logger = null): FlowTestSupport
+    {
+        return EcotoneLite::bootstrapFlowTesting(
+            [Ticket::class],
+            [DocumentStore::class => InMemoryDocumentStore::createEmpty(), 'logger' => $logger ?? StubLogger::create()],
+            configuration: ServiceConfiguration::createWithDefaults()
+                ->withExtensionObjects([
+                    InMemoryRepositoryBuilder::createDefaultEventSourcedRepository(),
+                    $eventSourcingConfiguration,
+                ])->withEnabledModulePackageNames([])
+        );
+    }
+
+    private function replaceTicketSnapshot(FlowTestSupport $ecotoneLite, object $snapshot): void
+    {
+        $documentStore = $ecotoneLite->getGateway(DocumentStore::class);
+        $this->assertSame(1, $documentStore->countDocuments(self::TICKET_SNAPSHOTS));
+
+        $documentStore->upsertDocument(self::TICKET_SNAPSHOTS, '1', $snapshot, DocumentStore::LAST_WRITE_WINS);
+
+        $this->assertSame(1, $documentStore->countDocuments(self::TICKET_SNAPSHOTS));
     }
 }

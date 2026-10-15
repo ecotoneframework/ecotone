@@ -2,6 +2,7 @@
 
 namespace Ecotone\Modelling;
 
+use Ecotone\Api\EventSourcing\Event;
 use Ecotone\Messaging\Support\Assert;
 
 /**

@@ -2,9 +2,9 @@
 
 namespace Ecotone\Messaging\Handler\Router;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Message;
 
 /**
  * Class HeaderValueRouter
@@ -66,5 +66,10 @@ final class HeaderMappingRouter implements RouteSelector, DefinedObject
             $this->headerName,
             $this->headerValueToChannelMapping,
         ], 'create');
+    }
+
+    public function __toString(): string
+    {
+        return "header mapping `{$this->headerName}` to `" . implode('`, `', $this->headerValueToChannelMapping) . '`';
     }
 }

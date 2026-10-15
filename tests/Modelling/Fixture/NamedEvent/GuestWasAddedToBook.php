@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\NamedEvent;
 
-use Ecotone\Modelling\Attribute\NamedEvent;
+use Ecotone\Api\Attribute\NamedEvent;
 
 #[NamedEvent(self::EVENT_NAME)]
 /**

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Console;
 
+use Ecotone\Api\Console\ConsoleProgressBar;
+use Ecotone\Api\Console\ConsoleWriter;
 use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\OutputInterface;

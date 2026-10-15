@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite\Test\Configuration;
 
+use Ecotone\Api\EventSourcing\EventStore;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
-use Ecotone\Modelling\InMemoryEventSourcedRepository;
-use Ecotone\Modelling\InMemoryStandardRepository;
+use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Modelling\EventStoreEventSourcedRepository;
+use Ecotone\Modelling\InMemoryStateStoredRepository;
 use Ecotone\Modelling\RepositoryBuilder;
 
 /**
@@ -26,7 +28,7 @@ final class InMemoryRepositoryBuilder implements RepositoryBuilder
 
     public static function createDefaultStateStoredRepository(): self
     {
-        return new self(null, false);
+        return new self([], false);
     }
 
     public static function createForSetOfStateStoredAggregates(array $aggregateClassNames)
@@ -41,7 +43,7 @@ final class InMemoryRepositoryBuilder implements RepositoryBuilder
 
     public static function createDefaultEventSourcedRepository()
     {
-        return new self(null, true);
+        return new self([], true);
     }
 
     public function canHandle(string $aggregateClassName): bool
@@ -57,14 +59,14 @@ final class InMemoryRepositoryBuilder implements RepositoryBuilder
     {
         return match ($this->isEventSourced) {
             true => new Definition(
-                InMemoryEventSourcedRepository::class,
+                EventStoreEventSourcedRepository::class,
                 [
-                    [],
+                    new Reference(EventStore::RAW_REFERENCE),
                     $this->aggregateClassNames,
                 ]
             ),
             false => new Definition(
-                InMemoryStandardRepository::class,
+                InMemoryStateStoredRepository::class,
                 [
                     [],
                     $this->aggregateClassNames,

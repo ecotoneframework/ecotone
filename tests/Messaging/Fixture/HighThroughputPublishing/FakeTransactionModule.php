@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Fixture\HighThroughputPublishing;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Api\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\Gateway\CommandBus;
+use Ecotone\Api\Interceptor\Precedence;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
-use Ecotone\Messaging\Precedence;
-use Ecotone\Modelling\CommandBus;
 
 #[ModuleAnnotation]
 /**
@@ -44,11 +44,6 @@ final class FakeTransactionModule extends NoExternalConfigurationModule implemen
                 CommandBus::class . '||' . AsynchronousRunningEndpoint::class,
             )
         );
-    }
-
-    public function canHandle($extensionObject): bool
-    {
-        return false;
     }
 
     public function getModulePackageName(): string

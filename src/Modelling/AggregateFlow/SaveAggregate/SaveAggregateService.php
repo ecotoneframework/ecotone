@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\AggregateFlow\SaveAggregate;
 
+use Ecotone\Api\EventSourcing\Event;
+use Ecotone\Api\Gateway\EventBus;
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\MessageProcessor;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\FrameworkHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateResolver;
-use Ecotone\Modelling\Event;
-use Ecotone\Modelling\EventBus;
+use Ecotone\Modelling\DecisionModel\DecisionModelLoadedState;
 use Ecotone\Modelling\Repository\AggregateRepository;
 
 /**
@@ -20,7 +21,6 @@ use Ecotone\Modelling\Repository\AggregateRepository;
 final class SaveAggregateService implements MessageProcessor
 {
     public const NO_SNAPSHOT_THRESHOLD = 0;
-    public const SNAPSHOT_COLLECTION = 'aggregate_snapshots_';
 
     public function __construct(
         private AggregateRepository $aggregateRepository,
@@ -34,7 +34,10 @@ final class SaveAggregateService implements MessageProcessor
     public function process(Message $message): Message|null
     {
         $resolvedAggregates = $this->aggregateResolver->resolve($message);
-        $metadata = MessageHeaders::unsetNonUserKeys($message->getHeaders()->headers());
+        $metadata = DecisionModelLoadedState::carryInto(
+            $message,
+            FrameworkHeaders::unsetNonUserKeys($message->getHeaders()->headers()),
+        );
 
         if (! $resolvedAggregates) {
             return MessageBuilder::fromMessage($message)->build();
@@ -73,17 +76,7 @@ final class SaveAggregateService implements MessageProcessor
     private function publishEvents(array $events): void
     {
         foreach ($events as $event) {
-            $this->eventBus->publish($event->getPayload(), $event->getMetadata());
+            $this->eventBus->publish($event->getPayload(), $event->metadata);
         }
-    }
-
-    public static function getSnapshotCollectionName(string $aggregateClassname): string
-    {
-        return self::SNAPSHOT_COLLECTION . $aggregateClassname;
-    }
-
-    public static function getSnapshotDocumentId(array $identifiers): string
-    {
-        return count($identifiers) === 1 ? (string)reset($identifiers) : json_encode($identifiers);
     }
 }

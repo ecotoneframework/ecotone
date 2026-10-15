@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\SymfonyContainer;
 
+use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\Container\Compiler\ContainerImplementation;
 use Error;
 use Psr\Container\ContainerInterface;

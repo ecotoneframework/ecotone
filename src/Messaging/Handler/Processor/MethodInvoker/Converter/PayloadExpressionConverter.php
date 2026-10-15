@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Handler\ExpressionEvaluationException;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\ExpressionLocation;
 use Ecotone\Messaging\Handler\ParameterConverter;
-use Ecotone\Messaging\Message;
+use Throwable;
 
 /**
  * Class MessageToExpressionEvaluationConverter
@@ -18,7 +21,7 @@ use Ecotone\Messaging\Message;
  */
 class PayloadExpressionConverter implements ParameterConverter
 {
-    public function __construct(private ExpressionEvaluationService $expressionEvaluationService, private string $expression)
+    public function __construct(private ExpressionEvaluationService $expressionEvaluationService, private string $expression, private ExpressionLocation $location)
     {
     }
 
@@ -27,10 +30,14 @@ class PayloadExpressionConverter implements ParameterConverter
      */
     public function getArgumentFrom(Message $message)
     {
-        return $this->expressionEvaluationService->evaluateWithMessage(
-            $this->expression,
-            $message,
-            ['value' => $message->getPayload()],
-        );
+        try {
+            return $this->expressionEvaluationService->evaluateWithMessage(
+                $this->expression,
+                $message,
+                ['value' => $message->getPayload()],
+            );
+        } catch (Throwable $exception) {
+            throw ExpressionEvaluationException::wrapping($this->location, $exception);
+        }
     }
 }

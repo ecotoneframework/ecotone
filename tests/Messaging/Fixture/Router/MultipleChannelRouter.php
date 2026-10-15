@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Router;
 
-use Ecotone\Messaging\Message;
+use Ecotone\Api\Messaging\Message;
 
 /**
  * Class MultipleChannelRouter

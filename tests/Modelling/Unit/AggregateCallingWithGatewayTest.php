@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Config\ModulePackageList;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Modelling\AggregateNotFoundException;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Modelling\AggregateNotFoundException;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 use Test\Ecotone\Modelling\Fixture\AggregateWithGateway\Bucket;
@@ -27,12 +26,12 @@ final class AggregateCallingWithGatewayTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [Bucket::class, BucketGateway::class],
             configuration: ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+                ->withEnabledModulePackageNames([])
         );
 
         $bucketId = Uuid::uuid4();
 
-        $ecotone->sendCommandWithRoutingKey(Bucket::CREATE, $bucketId);
+        $ecotone->sendCommandWithRouting(Bucket::CREATE, $bucketId);
 
         $gateway = $ecotone->getGateway(BucketGateway::class);
 
@@ -53,7 +52,7 @@ final class AggregateCallingWithGatewayTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [Bucket::class, BucketGateway::class],
             configuration: ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+                ->withEnabledModulePackageNames([])
         );
 
         $gateway = $ecotone->getGateway(BucketGateway::class);

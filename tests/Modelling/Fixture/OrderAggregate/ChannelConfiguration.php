@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\OrderAggregate;
 
-use Ecotone\Messaging\Attribute\ServiceContext;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Api\Attribute\ServiceContext;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 
 /**
  * licence Apache-2.0
@@ -19,9 +19,9 @@ class ChannelConfiguration
         return [
             SimpleMessageChannelBuilder::createQueueChannel('orders'),
             PollingMetadata::create('orders')
-                ->setExecutionTimeLimitInMilliseconds(1)
-                ->setHandledMessageLimit(1)
-                ->setErrorChannelName(self::ERROR_CHANNEL),
+                ->withExecutionTimeLimitInMilliseconds(1)
+                ->withHandledMessageLimit(1)
+                ->withErrorChannelName(self::ERROR_CHANNEL),
         ];
     }
 }

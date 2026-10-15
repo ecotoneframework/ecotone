@@ -4,8 +4,8 @@ namespace Ecotone\Messaging\Handler;
 
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Messaging\Attribute\IgnoreDocblockTypeHint;
-use Ecotone\Messaging\Attribute\IsAbstract;
+use Ecotone\Api\Attribute\IgnoreDocblockTypeHint;
+use Ecotone\Api\Attribute\IsAbstract;
 use Ecotone\Messaging\Config\Container\AttributeDeclaration;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\AttributeReference;
@@ -44,6 +44,10 @@ class TypeResolver
     private const CLASS_PROPERTY_TYPE_HINT_REGEX = "#@var[\s]*([^\n\$\s]*)#";
 
     private AnnotationResolver $annotationParser;
+    /**
+     * @var array<string, array<string, string>>
+     */
+    private array $useStatementsByFileName = [];
 
     private function __construct(AnnotationResolver $annotationParser)
     {
@@ -270,7 +274,6 @@ class TypeResolver
     }
 
     /**
-     * @param ReflectionClass $thisClass
      * @param ReflectionClass $analyzedClass
      * @param string $methodName
      * @return array|ReflectionClass
@@ -310,8 +313,7 @@ class TypeResolver
 
     private function getTypeContext(ReflectionClass $thisClass, ReflectionClass $analyzedClass, ReflectionClass $declaringClass): TypeContext
     {
-        $classContents = file_get_contents($analyzedClass->getFileName());
-        $statements = array_merge($this->getSingleUseStatements($classContents), $this->getGroupUseStatements($classContents));
+        $statements = $this->getUseStatements($analyzedClass->getFileName());
         $parentClass = $thisClass->getParentClass() ?: null;
         return new TypeContext(
             $thisClass->getName(),
@@ -320,6 +322,20 @@ class TypeResolver
             $thisClass->getNamespaceName(),
             aliases: $statements
         );
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function getUseStatements(string $fileName): array
+    {
+        if (isset($this->useStatementsByFileName[$fileName])) {
+            return $this->useStatementsByFileName[$fileName];
+        }
+
+        $classContents = file_get_contents($fileName);
+
+        return $this->useStatementsByFileName[$fileName] = array_merge($this->getSingleUseStatements($classContents), $this->getGroupUseStatements($classContents));
     }
 
     private function getGroupUseStatements(string $classContents): array

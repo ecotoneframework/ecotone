@@ -2,10 +2,10 @@
 
 namespace Ecotone\Messaging\Handler\Processor;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvoker;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\ResultToMessageConverter;
-use Ecotone\Messaging\Message;
 
 /**
  * licence Apache-2.0

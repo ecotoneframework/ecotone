@@ -10,12 +10,26 @@ namespace Ecotone\Projecting\Config;
 use function array_merge;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\EventSourcing\Attribute\ProjectionDelete;
-use Ecotone\EventSourcing\Attribute\ProjectionInitialization;
-use Ecotone\EventSourcing\Attribute\ProjectionReset;
-use Ecotone\Messaging\Attribute\Asynchronous;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
-use Ecotone\Messaging\Attribute\Parameter\Header;
+use Ecotone\Api\Attribute\Asynchronous;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\Header;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\Attribute\NamedEvent;
+use Ecotone\Api\Attribute\Polling;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Projecting\Partitioned;
+use Ecotone\Api\Projecting\Projection;
+use Ecotone\Api\Projecting\ProjectionBackfill;
+use Ecotone\Api\Projecting\ProjectionDelete;
+use Ecotone\Api\Projecting\ProjectionDeployment;
+use Ecotone\Api\Projecting\ProjectionExecution;
+use Ecotone\Api\Projecting\ProjectionFlush;
+use Ecotone\Api\Projecting\ProjectionInitialization;
+use Ecotone\Api\Projecting\ProjectionName;
+use Ecotone\Api\Projecting\ProjectionRebuild;
+use Ecotone\Api\Projecting\ProjectionReset;
+use Ecotone\Api\Projecting\Streaming;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
@@ -23,9 +37,7 @@ use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
@@ -33,17 +45,6 @@ use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\LicensingException;
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\Attribute\NamedEvent;
-use Ecotone\Projecting\Attribute\Partitioned;
-use Ecotone\Projecting\Attribute\Polling;
-use Ecotone\Projecting\Attribute\ProjectionBackfill;
-use Ecotone\Projecting\Attribute\ProjectionDeployment;
-use Ecotone\Projecting\Attribute\ProjectionExecution;
-use Ecotone\Projecting\Attribute\ProjectionFlush;
-use Ecotone\Projecting\Attribute\ProjectionRebuild;
-use Ecotone\Projecting\Attribute\ProjectionV2;
-use Ecotone\Projecting\Attribute\Streaming;
 use Ecotone\Projecting\EventStoreAdapter\PollingProjectionChannelAdapter;
 use Ecotone\Projecting\EventStoreAdapter\StreamingProjectionMessageHandler;
 use Ecotone\Projecting\ProjectingHeaders;
@@ -55,13 +56,14 @@ use ReflectionMethod;
  * This module register projection based on attributes
  */
 #[ModuleAnnotation]
-class ProjectingAttributeModule implements AnnotationModule
+final class ProjectingAttributeModule implements AnnotationModule
 {
     /**
      * @param EcotoneProjectionExecutorBuilder[] $projectionBuilders
      * @param MessageProcessorActivatorBuilder[] $lifecycleHandlers
      * @param array<string, string> $pollingProjections Map of projection name to endpoint ID
      * @param array<string, array{streamingChannelName: string, endpointId: string, projectionBuilder: EcotoneProjectionExecutorBuilder}> $eventStreamingProjections
+     * @param array<int, array{handler: string, parameter: string, projectionName: string}> $handlersRequiringProjectionName
      */
     public function __construct(
         private array $projectionBuilders = [],
@@ -69,6 +71,7 @@ class ProjectingAttributeModule implements AnnotationModule
         private array $pollingProjections = [],
         private array $eventStreamingProjections = [],
         private bool $hasFlushWithProjectionState = false,
+        private array $handlersRequiringProjectionName = [],
     ) {
     }
 
@@ -84,8 +87,8 @@ class ProjectingAttributeModule implements AnnotationModule
         $projectionBuilders = [];
         $pollingProjections = [];
         $eventStreamingProjections = [];
-        foreach ($annotationRegistrationService->findAnnotatedClasses(ProjectionV2::class) as $projectionClassName) {
-            $projectionAttribute = $annotationRegistrationService->getAttributeForClass($projectionClassName, ProjectionV2::class);
+        foreach ($annotationRegistrationService->findAnnotatedClasses(Projection::class) as $projectionClassName) {
+            $projectionAttribute = $annotationRegistrationService->getAttributeForClass($projectionClassName, Projection::class);
             $batchSizeAttribute = $annotationRegistrationService->findAttributeForClass($projectionClassName, ProjectionExecution::class);
             $backfillAttribute = $annotationRegistrationService->findAttributeForClass($projectionClassName, ProjectionBackfill::class);
             $rebuildAttribute = $annotationRegistrationService->findAttributeForClass($projectionClassName, ProjectionRebuild::class);
@@ -120,7 +123,7 @@ class ProjectingAttributeModule implements AnnotationModule
             $isPolling = $pollingAttribute !== null;
             $isEventStreaming = $streamingAttribute !== null;
 
-            self::verifyCorrectApiUsage($isPolling, $asynchronousChannelName, $projectionAttribute, $isEventStreaming, $partitionAttribute !== null);
+            self::verifyCorrectApiUsage($isPolling, $asynchronousChannelName, $projectionAttribute, $isEventStreaming, $partitionAttribute !== null, $projectionDeployment?->manualKickOff ?? false);
 
             if ($asyncAttribute !== null) {
                 $projectionBuilder->setAsyncAttribute($asyncAttribute);
@@ -143,26 +146,35 @@ class ProjectingAttributeModule implements AnnotationModule
 
         /** @var array<string, EcotoneProjectionExecutorBuilder> $projectionBuilders */
         $lifecycleHandlers = [];
-        foreach ($annotationRegistrationService->findCombined(ProjectionV2::class, EventHandler::class) as $projectionEventHandler) {
-            /** @var ProjectionV2 $projectionAttribute */
+        $handlersRequiringProjectionName = [];
+        foreach ($annotationRegistrationService->findCombined(Projection::class, EventHandler::class) as $projectionEventHandler) {
+            /** @var Projection $projectionAttribute */
             $projectionAttribute = $projectionEventHandler->getAnnotationForClass();
             $projectionBuilder = $projectionBuilders[$projectionAttribute->name] ?? throw new LogicException();
             $projectionBuilder->addEventHandler($projectionEventHandler);
+            $handlersRequiringProjectionName = array_merge(
+                $handlersRequiringProjectionName,
+                self::parametersRequiringProjectionName($interfaceToCallRegistry, $projectionEventHandler->getClassName(), $projectionEventHandler->getMethodName(), $projectionAttribute->name),
+            );
         }
 
         $lifecycleAnnotations = array_merge(
-            $annotationRegistrationService->findCombined(ProjectionV2::class, ProjectionInitialization::class),
-            $annotationRegistrationService->findCombined(ProjectionV2::class, ProjectionDelete::class),
-            $annotationRegistrationService->findCombined(ProjectionV2::class, ProjectionFlush::class),
-            $annotationRegistrationService->findCombined(ProjectionV2::class, ProjectionReset::class),
+            $annotationRegistrationService->findCombined(Projection::class, ProjectionInitialization::class),
+            $annotationRegistrationService->findCombined(Projection::class, ProjectionDelete::class),
+            $annotationRegistrationService->findCombined(Projection::class, ProjectionFlush::class),
+            $annotationRegistrationService->findCombined(Projection::class, ProjectionReset::class),
         );
         $hasFlushWithProjectionState = false;
         foreach ($lifecycleAnnotations as $lifecycleAnnotation) {
-            /** @var ProjectionV2 $projectionAttribute */
+            /** @var Projection $projectionAttribute */
             $projectionAttribute = $lifecycleAnnotation->getAnnotationForClass();
             $projectionBuilder = $projectionBuilders[$projectionAttribute->name] ?? throw new LogicException();
             $projectionReferenceName = AnnotatedDefinitionReference::getReferenceForClassName($annotationRegistrationService, $lifecycleAnnotation->getClassName());
             $inputChannel = 'projecting_lifecycle_handler:' . $projectionAttribute->name . ':' . $lifecycleAnnotation->getMethodName();
+            $handlersRequiringProjectionName = array_merge(
+                $handlersRequiringProjectionName,
+                self::parametersRequiringProjectionName($interfaceToCallRegistry, $lifecycleAnnotation->getClassName(), $lifecycleAnnotation->getMethodName(), $projectionAttribute->name),
+            );
             if ($lifecycleAnnotation->getAnnotationForMethod() instanceof ProjectionInitialization) {
                 $projectionBuilder->setInitChannel($inputChannel);
             } elseif ($lifecycleAnnotation->getAnnotationForMethod() instanceof ProjectionDelete) {
@@ -187,20 +199,30 @@ class ProjectingAttributeModule implements AnnotationModule
                 ->withInputChannelName($inputChannel);
         }
 
-        return new self(array_values($projectionBuilders), $lifecycleHandlers, $pollingProjections, $eventStreamingProjections, $hasFlushWithProjectionState);
+        return new self(
+            array_values($projectionBuilders),
+            $lifecycleHandlers,
+            $pollingProjections,
+            $eventStreamingProjections,
+            $hasFlushWithProjectionState,
+            handlersRequiringProjectionName: $handlersRequiringProjectionName,
+        );
     }
 
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         if (! $messagingConfiguration->isRunningForEnterpriseLicence()) {
             if (! empty($this->pollingProjections)) {
-                throw LicensingException::create('#[Polling] projections require Ecotone Enterprise licence.');
+                throw LicensingException::create('#[Polling] projections require Ecotone Enterprise licence. See https://docs.ecotone.tech/enterprise for details.');
             }
             if (! empty($this->eventStreamingProjections)) {
-                throw LicensingException::create('#[Streaming] projections require Ecotone Enterprise licence.');
+                throw LicensingException::create('#[Streaming] projections require Ecotone Enterprise licence. See https://docs.ecotone.tech/enterprise for details.');
             }
             if ($this->hasFlushWithProjectionState) {
-                throw LicensingException::create('Using #[ProjectionState] in #[ProjectionFlush] methods requires Ecotone Enterprise licence.');
+                throw LicensingException::create('Using #[ProjectionState] in #[ProjectionFlush] methods requires Ecotone Enterprise licence. See https://docs.ecotone.tech/enterprise for details.');
+            }
+            foreach ($this->handlersRequiringProjectionName as $required) {
+                throw LicensingException::create("#[ProjectionName] on \${$required['parameter']} of {$required['handler']} requires the projection name, which is passed to a projection handler only under an Ecotone Enterprise licence, and this application runs without one: a parameter that is neither nullable nor defaulted would fail on every call. Either declare it as ?string \${$required['parameter']} = null to receive null without a licence, remove #[ProjectionName] if the handler does not need the name (the projection declares it in #[Projection('{$required['projectionName']}')]), or obtain an Enterprise licence (see https://docs.ecotone.tech/enterprise) and pass it with ServiceConfiguration::withLicenceKey().");
             }
         }
 
@@ -249,11 +271,6 @@ class ProjectingAttributeModule implements AnnotationModule
         }
     }
 
-    public function canHandle($extensionObject): bool
-    {
-        return false;
-    }
-
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
     {
         // Filter out event streaming projections - they don't need ProjectingManager
@@ -285,7 +302,7 @@ class ProjectingAttributeModule implements AnnotationModule
         return null;
     }
 
-    private static function verifyCorrectApiUsage(bool $isPolling, ?string $asynchronousChannelName, ProjectionV2 $projectionAttribute, bool $isEventStreaming, bool $isPartitioned): void
+    private static function verifyCorrectApiUsage(bool $isPolling, ?string $asynchronousChannelName, Projection $projectionAttribute, bool $isEventStreaming, bool $isPartitioned, bool $isManualKickOff): void
     {
         if ($isPolling && $asynchronousChannelName !== null) {
             throw ConfigurationException::create(
@@ -320,6 +337,28 @@ class ProjectingAttributeModule implements AnnotationModule
                 'Partitioned projections cannot use streaming.'
             );
         }
+
+        if ($isPartitioned && $isManualKickOff) {
+            throw ConfigurationException::create(
+                "Projection '{$projectionAttribute->name}' combines #[Partitioned] with #[ProjectionDeployment(manualKickOff: true)], but a partitioned projection initializes each partition on that partition's first event, so it cannot wait to be kicked off and manualKickOff would be ignored. " .
+                "Either remove manualKickOff: true from #[ProjectionDeployment] and let each partition initialize on its first event, or remove #[Partitioned] to keep the projection waiting until it is kicked off with ecotone:projection:init {$projectionAttribute->name}."
+            );
+        }
+    }
+
+    /**
+     * @return array<int, array{handler: string, parameter: string, projectionName: string}>
+     */
+    private static function parametersRequiringProjectionName(InterfaceToCallRegistry $interfaceToCallRegistry, string $className, string $methodName, string $projectionName): array
+    {
+        $required = [];
+        foreach ($interfaceToCallRegistry->getFor($className, $methodName)->getInterfaceParameters() as $parameter) {
+            if ($parameter->hasAnnotation(ProjectionName::class) && ! $parameter->doesAllowNulls() && ! $parameter->hasDefaultValue()) {
+                $required[] = ['handler' => $className . '::' . $methodName, 'parameter' => $parameter->getName(), 'projectionName' => $projectionName];
+            }
+        }
+
+        return $required;
     }
 
     private static function flushMethodUsesProjectionState(string $className, string $methodName): bool

@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
-use Ecotone\Messaging\Attribute\ClassReference;
-use Ecotone\Messaging\Attribute\Interceptor\Around;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Api\Attribute\Around;
+use Ecotone\Api\Attribute\ClassReference;
+use Ecotone\Api\Interceptor\MethodInvocation;
 use stdClass;
 
 #[ClassReference('callWithUnordered')]

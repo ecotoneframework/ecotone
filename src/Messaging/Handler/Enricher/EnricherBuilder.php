@@ -10,6 +10,7 @@ use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\ExpressionLocation;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -147,6 +148,7 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
             $propertySetters,
             $this->requestPayloadExpression,
             $this->requestHeaders,
+            ExpressionLocation::definitionForEndpoint('Enricher request payload', $this->getInputMessageChannelName(), $this->requestPayloadExpression ?? ''),
         ]);
 
         return ServiceActivatorBuilder::createWithDefinition($internalEnrichingService, 'enrich')

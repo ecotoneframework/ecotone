@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Channel\PollableChannel\SendRetries;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
-use Ecotone\Messaging\Channel\DynamicChannel\DynamicMessageChannelBuilder;
-use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\ExtensionObject\DynamicMessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
 use Ecotone\Messaging\Channel\PollableChannel\GlobalPollableChannelConfiguration;
 use Ecotone\Messaging\Channel\PollableChannel\PollableChannelConfiguration;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
@@ -36,6 +36,10 @@ final class PollableChannelSendRetriesModule extends NoExternalConfigurationModu
         $pollableChannelConfigurations = ExtensionObjectResolver::resolve(PollableChannelConfiguration::class, $extensionObjects);
 
         foreach ($pollableMessageChannels as $pollableMessageChannel) {
+            if (! $pollableMessageChannel->isPollable() || $pollableMessageChannel instanceof DynamicMessageChannelBuilder) {
+                continue;
+            }
+
             $channelConfiguration = $globalPollableChannelConfiguration;
 
             foreach ($pollableChannelConfigurations as $pollableChannelConfiguration) {
@@ -54,15 +58,8 @@ final class PollableChannelSendRetriesModule extends NoExternalConfigurationModu
         }
     }
 
-    public function canHandle($extensionObject): bool
-    {
-        return $extensionObject instanceof PollableChannelConfiguration
-            || $extensionObject instanceof GlobalPollableChannelConfiguration
-            || ($extensionObject instanceof MessageChannelBuilder && $extensionObject->isPollable() && ! ($extensionObject instanceof DynamicMessageChannelBuilder));
-    }
-
     public function getModulePackageName(): string
     {
-        return ModulePackageList::ASYNCHRONOUS_PACKAGE;
+        return ModulePackageList::CORE_PACKAGE;
     }
 }

@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use DateTimeImmutable;
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Lite\Test\TestConfiguration;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\TestConfiguration;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Api\Scheduling\TimeSpan;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\Scheduling\TimeSpan;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 use Test\Ecotone\Messaging\Fixture\AddHeaders\AddingMultipleHeaders;
@@ -37,17 +38,16 @@ class EndpointHeadersInterceptorTest extends TestCase
             [
                 AddingMultipleHeaders::class => new AddingMultipleHeaders(),
             ],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async'),
-            ],
-            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async')
+            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async'),
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->withEnabledModulePackageNames([])
         );
 
         $headers = $ecotoneLite
-            ->sendCommandWithRoutingKey('addHeaders', metadata: [
+            ->sendCommandWithRouting('addHeaders', metadata: [
                 'user' => '1233',
             ])
-            ->getRecordedEcotoneMessagesFrom('async')[0]->getHeaders()->headers();
+            ->popRecordedMessagesFrom('async')[0]->getHeaders()->headers();
 
         $this->assertEquals(1001, $headers[MessageHeaders::TIME_TO_LIVE]);
         $this->assertEquals(1000, $headers[MessageHeaders::DELIVERY_DELAY]);
@@ -65,10 +65,9 @@ class EndpointHeadersInterceptorTest extends TestCase
             [
                 AddingMultipleHeaders::class => new AddingMultipleHeaders(),
             ],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async'),
-            ],
-            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async')
+            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async'),
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->withEnabledModulePackageNames([])
         );
 
         $command = new stdClass();
@@ -76,14 +75,14 @@ class EndpointHeadersInterceptorTest extends TestCase
         $command->timeToLive = 1001;
 
         $headers = $ecotoneLite
-            ->sendCommandWithRoutingKey(
+            ->sendCommandWithRouting(
                 'addHeadersWithExpression',
                 command: $command,
                 metadata: [
                     'token' => 123,
                 ]
             )
-            ->getRecordedEcotoneMessagesFrom('async')[0]->getHeaders()->headers();
+            ->popRecordedMessagesFrom('async')[0]->getHeaders()->headers();
 
         $this->assertEquals(1001, $headers[MessageHeaders::TIME_TO_LIVE]);
         $this->assertNotEmpty($headers[MessageHeaders::DELIVERY_DELAY]);
@@ -99,10 +98,9 @@ class EndpointHeadersInterceptorTest extends TestCase
             [
                 AddingMultipleHeaders::class => new AddingMultipleHeaders(),
             ],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async'),
-            ],
-            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async')
+            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async'),
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->withEnabledModulePackageNames([])
         );
 
         $command = new stdClass();
@@ -112,7 +110,7 @@ class EndpointHeadersInterceptorTest extends TestCase
         $this->expectException(ConfigurationException::class);
 
         $ecotoneLite
-            ->sendCommandWithRoutingKey(
+            ->sendCommandWithRouting(
                 'addHeadersWithExpression',
                 command: $command,
                 metadata: [
@@ -130,10 +128,9 @@ class EndpointHeadersInterceptorTest extends TestCase
             [
                 AddingMultipleHeaders::class => new AddingMultipleHeaders(),
             ],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async'),
-            ],
-            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async')
+            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async'),
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->withEnabledModulePackageNames([])
         );
 
         $command = new stdClass();
@@ -143,7 +140,7 @@ class EndpointHeadersInterceptorTest extends TestCase
         $this->expectException(ConfigurationException::class);
 
         $ecotoneLite
-            ->sendCommandWithRoutingKey(
+            ->sendCommandWithRouting(
                 'addHeadersWithExpression',
                 command: $command,
                 metadata: [
@@ -161,18 +158,17 @@ class EndpointHeadersInterceptorTest extends TestCase
             [
                 AddingMultipleHeaders::class => new AddingMultipleHeaders(),
             ],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async'),
-            ],
-            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async')
+            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async'),
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->withEnabledModulePackageNames([])
         );
 
         $headers = $ecotoneLite
-            ->sendCommandWithRoutingKey('keepHeaders', metadata: [
+            ->sendCommandWithRouting('keepHeaders', metadata: [
                 MessageHeaders::DELIVERY_DELAY => $deliveryDelay = 1,
                 MessageHeaders::TIME_TO_LIVE => $timeToLive = TimeSpan::withSeconds(2),
             ])
-            ->getRecordedEcotoneMessagesFrom('async')[0]->getHeaders()->headers();
+            ->popRecordedMessagesFrom('async')[0]->getHeaders()->headers();
 
         $this->assertEquals($deliveryDelay, $headers[MessageHeaders::DELIVERY_DELAY]);
         $this->assertEquals($timeToLive->toMilliseconds(), $headers[MessageHeaders::TIME_TO_LIVE]);
@@ -187,15 +183,14 @@ class EndpointHeadersInterceptorTest extends TestCase
             [
                 AddingMultipleHeaders::class => new AddingMultipleHeaders(),
             ],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async'),
-            ],
-            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async')
+            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async'),
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->withEnabledModulePackageNames([])
         );
 
         $headers = $ecotoneLite
-            ->sendCommandWithRoutingKey('keepHeaders')
-            ->getRecordedEcotoneMessagesFrom('async')[0]->getHeaders()->headers();
+            ->sendCommandWithRouting('keepHeaders')
+            ->popRecordedMessagesFrom('async')[0]->getHeaders()->headers();
 
         $this->assertEquals(1000, $headers[MessageHeaders::DELIVERY_DELAY]);
         $this->assertEquals(1001, $headers[MessageHeaders::TIME_TO_LIVE]);
@@ -210,17 +205,16 @@ class EndpointHeadersInterceptorTest extends TestCase
             [
                 AddingMultipleHeaders::class => new AddingMultipleHeaders(),
             ],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async'),
-            ],
-            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async')
+            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async'),
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->withEnabledModulePackageNames([])
         );
 
         $headers = $ecotoneLite
-            ->sendCommandWithRoutingKey('keepDeliveryDelayHeader', metadata: [
+            ->sendCommandWithRouting('keepDeliveryDelayHeader', metadata: [
                 MessageHeaders::DELIVERY_DELAY => $deliveryDelay = 1,
             ])
-            ->getRecordedEcotoneMessagesFrom('async')[0]->getHeaders()->headers();
+            ->popRecordedMessagesFrom('async')[0]->getHeaders()->headers();
 
         $this->assertEquals($deliveryDelay, $headers[MessageHeaders::DELIVERY_DELAY]);
         $this->assertEquals(1001, $headers[MessageHeaders::TIME_TO_LIVE]);
@@ -235,17 +229,16 @@ class EndpointHeadersInterceptorTest extends TestCase
             [
                 AddingMultipleHeaders::class => new AddingMultipleHeaders(),
             ],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async'),
-            ],
-            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async')
+            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async'),
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->withEnabledModulePackageNames([])
         );
 
         $headers = $ecotoneLite
-            ->sendCommandWithRoutingKey('keepTtlHeader', metadata: [
+            ->sendCommandWithRouting('keepTtlHeader', metadata: [
                 MessageHeaders::TIME_TO_LIVE => $timeToLive = 1,
             ])
-            ->getRecordedEcotoneMessagesFrom('async')[0]->getHeaders()->headers();
+            ->popRecordedMessagesFrom('async')[0]->getHeaders()->headers();
 
         $this->assertEquals(1000, $headers[MessageHeaders::DELIVERY_DELAY]);
         $this->assertEquals($timeToLive, $headers[MessageHeaders::TIME_TO_LIVE]);
@@ -260,10 +253,9 @@ class EndpointHeadersInterceptorTest extends TestCase
             [
                 AddingMultipleHeaders::class => new AddingMultipleHeaders(),
             ],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async'),
-            ],
-            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async')
+            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async'),
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->withEnabledModulePackageNames([])
         );
 
         $command = new stdClass();
@@ -271,14 +263,14 @@ class EndpointHeadersInterceptorTest extends TestCase
         $command->timeToLive = 1001;
 
         $headers = $ecotoneLite
-            ->sendCommandWithRoutingKey(
+            ->sendCommandWithRouting(
                 'addHeadersWithExpression',
                 command: $command,
                 metadata: [
                     'token' => 123,
                 ]
             )
-            ->getRecordedEcotoneMessagesFrom('async')[0]->getHeaders()->headers();
+            ->popRecordedMessagesFrom('async')[0]->getHeaders()->headers();
 
         $this->assertIsInt($headers[MessageHeaders::DELIVERY_DELAY]);
         $this->assertGreaterThan(0, $headers[MessageHeaders::DELIVERY_DELAY]);
@@ -289,10 +281,9 @@ class EndpointHeadersInterceptorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [AddingMultipleHeaders::class],
             [AddingMultipleHeaders::class => new AddingMultipleHeaders()],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async'),
-            ],
-            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async')
+            testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async'),
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->withEnabledModulePackageNames([])
         );
 
         $command = new stdClass();
@@ -300,6 +291,6 @@ class EndpointHeadersInterceptorTest extends TestCase
 
         $this->expectException(ConfigurationException::class);
 
-        $ecotoneLite->sendCommandWithRoutingKey('addHeadersWithStringDelayExpression', command: $command);
+        $ecotoneLite->sendCommandWithRouting('addHeadersWithStringDelayExpression', command: $command);
     }
 }

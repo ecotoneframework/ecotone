@@ -2,14 +2,14 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 
-use Ecotone\Messaging\Attribute\ServiceActivator;
+use Ecotone\Api\Attribute\InternalHandler;
 
 /**
  * licence Apache-2.0
  */
 class ResultService
 {
-    #[ServiceActivator('calculateChannel')]
+    #[InternalHandler('calculateChannel')]
     public function result(int $amount): int
     {
         return $amount;

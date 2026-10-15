@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\Type\BuiltinType;
 use Ecotone\Messaging\Handler\Type\GenericType;
 use Ecotone\Messaging\Handler\Type\TypeContext;
@@ -11,7 +12,6 @@ use Ecotone\Messaging\Handler\Type\TypeFactory;
 use Ecotone\Messaging\Handler\Type\TypeIdentifier;
 use Ecotone\Messaging\Handler\Type\TypeParser;
 use Ecotone\Messaging\Handler\Type\UnionType;
-use Ecotone\Messaging\Message;
 
 use function get_debug_type;
 use function is_array;
@@ -29,14 +29,6 @@ use Stringable;
 abstract class Type implements Stringable
 {
     use TypeFactory;
-
-    //    scalar types
-    /** @deprecated  */
-    public const         STRING = 'string';
-    /** @deprecated  */
-    public const ARRAY = 'array';
-    /** @deprecated  */
-    public const         OBJECT = 'object';
 
     private static array $cachedTypes = [];
 

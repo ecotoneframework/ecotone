@@ -5,17 +5,16 @@ declare(strict_types=1);
 namespace Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\EventSourcing\Attribute\AggregateType;
-use Ecotone\EventSourcing\Attribute\Stream;
+use Ecotone\Api\Attribute\AggregateEvents;
+use Ecotone\Api\Attribute\AggregateType;
+use Ecotone\Api\Attribute\EventSourcingAggregate;
+use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Api\Attribute\IdentifierMethod;
+use Ecotone\Api\Attribute\Version;
+use Ecotone\Api\EventSourcing\Stream;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Modelling\Attribute\AggregateEvents;
-use Ecotone\Modelling\Attribute\AggregateIdentifier;
-use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
-use Ecotone\Modelling\Attribute\AggregateVersion;
-use Ecotone\Modelling\Attribute\EventSourcingAggregate;
-use Ecotone\Modelling\Attribute\Identifier;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
 
 /**
@@ -23,6 +22,8 @@ use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
  */
 final class AggregateDefinitionResolver
 {
+    public const DEFAULT_STREAM = 'ecotone_event_stream';
+
     public static function resolve(string $aggregateClass, InterfaceToCallRegistry $interfaceToCallRegistry): AggregateClassDefinition
     {
         $aggregateClassDefinition = $interfaceToCallRegistry->getClassDefinitionFor(Type::object($aggregateClass));
@@ -88,7 +89,7 @@ final class AggregateDefinitionResolver
             }
         }
 
-        return $classDefinition->getClassType()->toString();
+        return self::DEFAULT_STREAM;
     }
 
     public static function resolveStreamNameFromFinder(AnnotationFinder $finder, string $aggregateClass): string
@@ -100,7 +101,7 @@ final class AggregateDefinitionResolver
             }
         }
 
-        return $aggregateClass;
+        return self::DEFAULT_STREAM;
     }
 
     public static function resolveAggregateTypeFromFinder(AnnotationFinder $finder, string $aggregateClass): string
@@ -112,7 +113,7 @@ final class AggregateDefinitionResolver
 
     private static function resolveAggregateIdentifierMapping(ClassDefinition $aggregateClassDefinition, InterfaceToCallRegistry $interfaceToCallRegistry): array
     {
-        $aggregateIdentifierGetMethodAttribute = Type::attribute(AggregateIdentifierMethod::class);
+        $aggregateIdentifierGetMethodAttribute = Type::attribute(IdentifierMethod::class);
         $aggregateIdentifiers = [];
         $aggregateIdentifierGetMethods = [];
 
@@ -123,14 +124,14 @@ final class AggregateDefinitionResolver
                     throw NoCorrectIdentifierDefinedException::create($methodToCheck . ' should not have any parameters.');
                 }
 
-                /** @var AggregateIdentifierMethod $attribute */
+                /** @var IdentifierMethod $attribute */
                 $attribute = $methodToCheck->getSingleMethodAnnotationOf($aggregateIdentifierGetMethodAttribute);
-                $aggregateIdentifiers[$attribute->getIdentifierPropertyName()] = null;
-                $aggregateIdentifierGetMethods[$attribute->getIdentifierPropertyName()] = $method;
+                $aggregateIdentifiers[$attribute->identifierPropertyName] = null;
+                $aggregateIdentifierGetMethods[$attribute->identifierPropertyName] = $method;
             }
         }
 
-        $aggregateIdentifierAnnotation = Type::attribute(AggregateIdentifier::class);
+        $aggregateIdentifierAnnotation = Type::attribute(Identifier::class);
         foreach ($aggregateClassDefinition->getProperties() as $property) {
             if ($property->hasAnnotation($aggregateIdentifierAnnotation)) {
                 $aggregateIdentifiers[$property->getName()] = null;
@@ -144,13 +145,13 @@ final class AggregateDefinitionResolver
     {
         $aggregateVersionPropertyName = null;
         $isAggregateVersionAutomaticallyIncreased = false;
-        $versionAnnotation = Type::attribute(AggregateVersion::class);
+        $versionAnnotation = Type::attribute(Version::class);
         foreach ($aggregateClassDefinition->getProperties() as $property) {
             if ($property->hasAnnotation($versionAnnotation)) {
                 $aggregateVersionPropertyName = $property->getName();
-                /** @var AggregateVersion $annotation */
+                /** @var Version $annotation */
                 $annotation = $property->getAnnotation($versionAnnotation);
-                $isAggregateVersionAutomaticallyIncreased = $annotation->isAutoIncreased();
+                $isAggregateVersionAutomaticallyIncreased = $annotation->autoIncrease;
             }
         }
 

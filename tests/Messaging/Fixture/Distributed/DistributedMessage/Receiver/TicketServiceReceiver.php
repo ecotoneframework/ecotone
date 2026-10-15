@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Distributed\DistributedMessage\Receiver;
 
-use Ecotone\Messaging\Attribute\ServiceActivator;
-use Ecotone\Modelling\Attribute\Distributed;
-use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Api\Attribute\Distributed;
+use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Api\Attribute\QueryHandler;
 
 /**
  * licence Apache-2.0
@@ -17,7 +17,7 @@ class TicketServiceReceiver
     private array $tickets = [];
 
     #[Distributed]
-    #[ServiceActivator(self::CREATE_TICKET_ENDPOINT)]
+    #[InternalHandler(self::CREATE_TICKET_ENDPOINT)]
     public function registerTicket(string $ticket): void
     {
         $this->tickets[] = $ticket;

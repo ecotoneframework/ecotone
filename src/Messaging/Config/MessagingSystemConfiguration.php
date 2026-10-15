@@ -8,16 +8,23 @@ use function array_map;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationFinderFactory;
-use Ecotone\Lite\Test\TestConfiguration;
-use Ecotone\Messaging\Attribute\Asynchronous;
-use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Api\Attribute\Asynchronous;
+use Ecotone\Api\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Api\ExtensionObject\CombinedMessageChannel;
+use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\ExtensionObject\RetryTemplateBuilder;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\TestConfiguration;
+use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
+use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
-use Ecotone\Messaging\Channel\CombinedMessageChannel;
 use Ecotone\Messaging\Channel\EventDrivenChannelInterceptorAdapter;
-use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\OutboxForwardingChannel;
 use Ecotone\Messaging\Channel\PollableChannelInterceptorAdapter;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Channel\WrongHandlerAmountException;
 use Ecotone\Messaging\Config\Annotation\AnnotationModuleRetrievingService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
@@ -44,7 +51,6 @@ use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingConsumer\AsyncEndpointAnnotationContext;
 use Ecotone\Messaging\Endpoint\PollingConsumer\AsyncHandlerAnnotationRegistry;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -58,14 +64,12 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\InterceptorWithPointCut;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
-use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\UninterruptibleServiceActivator;
 use Ecotone\Messaging\Handler\Transformer\RoutingSlipPrepender;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\NullableMessageChannel;
-use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Modelling\Config\MessageBusChannel;
@@ -137,10 +141,6 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private array $converterBuilders = [];
     private ?Definition $conversionServiceDecoratorBuilder = null;
-    /**
-     * @var string[]
-     */
-    private array $messageConverterReferenceNames = [];
     private ?ModuleReferenceSearchService $moduleReferenceSearchService;
     private array $asynchronousEndpoints = [];
     /**
@@ -194,7 +194,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, InterfaceToCallRegistry $preparationInterfaceRegistry, ServiceConfiguration $serviceConfiguration)
     {
-        $extensionObjects = array_merge($extensionObjects, $serviceConfiguration->getExtensionObjects());
+        $extensionObjects = array_merge($extensionObjects, $serviceConfiguration->extensionObjects);
         $extensionApplicationConfiguration = [];
         foreach ($extensionObjects as $extensionObject) {
             if ($extensionObject instanceof ServiceConfiguration) {
@@ -203,16 +203,16 @@ final class MessagingSystemConfiguration implements Configuration
         }
         $serviceConfiguration = $serviceConfiguration->mergeWith($extensionApplicationConfiguration);
 
-        if (! $serviceConfiguration->getConnectionRetryTemplate()) {
+        if (! $serviceConfiguration->connectionRetryTemplate) {
             if ($serviceConfiguration->isProductionConfiguration()) {
-                $serviceConfiguration->withConnectionRetryTemplate(
-                    RetryTemplateBuilder::exponentialBackoff(1000, 3)
-                        ->maxRetryAttempts(5)
+                $serviceConfiguration = $serviceConfiguration->withConnectionRetryTemplate(
+                    RetryTemplateBuilder::exponentialBackOff(1000, 3)
+                        ->maxRetries(5)
                 );
             } else {
-                $serviceConfiguration->withConnectionRetryTemplate(
-                    RetryTemplateBuilder::exponentialBackoff(100, 3)
-                        ->maxRetryAttempts(3)
+                $serviceConfiguration = $serviceConfiguration->withConnectionRetryTemplate(
+                    RetryTemplateBuilder::exponentialBackOff(100, 3)
+                        ->maxRetries(3)
                 );
             }
         }
@@ -240,28 +240,25 @@ final class MessagingSystemConfiguration implements Configuration
                     $extensionObjects[] = $combinedMessageChannel->getEmbeddedSourceChannelBuilder();
                 }
             } else {
-                $this->plainCombinedChannelUsages[$combinedMessageChannel->getReferenceName()] = $combinedMessageChannel->getCombinedChannels();
+                $this->plainCombinedChannelUsages[$combinedMessageChannel->getReferenceName()] = $combinedMessageChannel->combinedChannels;
             }
         }
 
         $extensionObjects[] = $serviceConfiguration;
 
-        if ($serviceConfiguration->getLicenceKey() !== null) {
-            (new LicenceService())->validate($serviceConfiguration->getLicenceKey());
+        if ($serviceConfiguration->licenceKey !== null) {
+            (new LicenceService())->validate($serviceConfiguration->licenceKey);
             $this->isRunningForEnterpriseLicence = true;
         }
 
         $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $serviceConfiguration);
     }
 
-    /**
-     * @param string[] $skippedModulesPackages
-     */
     private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $serviceExtensions, ServiceConfiguration $serviceConfiguration): void
     {
         $moduleReferenceSearchService = ModuleReferenceSearchService::createEmpty();
 
-        $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations($serviceConfiguration->getSkippedModulesPackages());
+        $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations(array_diff(ModuleClassList::packageNames(), $serviceConfiguration->getEnabledModulePackageNames()));
 
         /** This will allow to delay all configuration when everything is already added to the MessagingConfiguration */
         $this->moduleConfigurationCompilerPass = new ModuleConfigurationCompilerPass($modules, $serviceExtensions, $serviceConfiguration, $this, $moduleReferenceSearchService);
@@ -276,8 +273,8 @@ final class MessagingSystemConfiguration implements Configuration
     public static function getModuleClassesFor(ServiceConfiguration $serviceConfiguration): array
     {
         $modulesClasses = [];
-        foreach (array_diff(array_merge(ModulePackageList::allPackages(), [ModulePackageList::TEST_PACKAGE]), $serviceConfiguration->getSkippedModulesPackages()) as $availablePackage) {
-            $modulesClasses = array_merge($modulesClasses, ModulePackageList::getModuleClassesForPackage($availablePackage));
+        foreach (array_intersect(ModuleClassList::packageNames(), $serviceConfiguration->getEnabledModulePackageNames()) as $availablePackage) {
+            $modulesClasses = array_merge($modulesClasses, ModuleClassList::forPackage($availablePackage));
         }
 
         return array_filter($modulesClasses, fn (string $moduleClassName): bool => class_exists($moduleClassName) || interface_exists($moduleClassName));
@@ -285,15 +282,12 @@ final class MessagingSystemConfiguration implements Configuration
 
     public static function addCorePackage(ServiceConfiguration $serviceConfiguration, bool $enableTestPackage): ServiceConfiguration
     {
-        $requiredModules = [ModulePackageList::CORE_PACKAGE];
-        $skippedPackages = $serviceConfiguration->getSkippedModulesPackages();
+        $enabledModulePackageNames = array_diff($serviceConfiguration->getEnabledModulePackageNames(), [ModulePackageList::TEST_PACKAGE]);
         if ($enableTestPackage) {
-            $requiredModules[] = ModulePackageList::TEST_PACKAGE;
-        } else {
-            $skippedPackages[] = ModulePackageList::TEST_PACKAGE;
+            $enabledModulePackageNames[] = ModulePackageList::TEST_PACKAGE;
         }
 
-        return $serviceConfiguration->withSkippedModulePackageNames(array_diff($skippedPackages, $requiredModules));
+        return $serviceConfiguration->withEnabledModulePackageNames($enabledModulePackageNames);
     }
 
     private function prepareAndOptimizeConfiguration(InterfaceToCallRegistry $interfaceToCallRegistry): void
@@ -341,6 +335,7 @@ final class MessagingSystemConfiguration implements Configuration
 
         $this->configureDefaultMessageChannels();
         $this->configureAsynchronousEndpoints($interfaceToCallRegistry);
+        $this->refuseHandlersSharingADirectChannel();
 
         foreach ($this->requiredConsumerEndpointIds as $requiredConsumerEndpointId) {
             if (! array_key_exists($requiredConsumerEndpointId, $this->messageHandlerBuilders) && ! array_key_exists($requiredConsumerEndpointId, $this->channelAdapters)) {
@@ -354,10 +349,6 @@ final class MessagingSystemConfiguration implements Configuration
             if ($pollingMetadata->getErrorChannelName() && ! isset($this->channelBuilders[$pollingMetadata->getErrorChannelName()])) {
                 throw ConfigurationException::create("Trying to register polling meta data for non existing error channel `{$pollingMetadata->getErrorChannelName()}` for endpoint `{$pollingMetadata->getEndpointId()}`");
             }
-        }
-
-        foreach ($this->gatewayBuilders as $gatewayBuilder) {
-            $gatewayBuilder->withMessageConverters($this->messageConverterReferenceNames);
         }
     }
 
@@ -435,7 +426,7 @@ final class MessagingSystemConfiguration implements Configuration
         $asyncHandlerAnnotations = [];
 
         if ($this->batchForwardingSourceChannels !== [] && ! $this->isRunningForEnterpriseLicence) {
-            throw LicensingException::create(sprintf('Batch forwarding for Message Channel `%s` is available only with Ecotone Enterprise licence.', array_key_first($this->batchForwardingSourceChannels)));
+            throw LicensingException::create(sprintf('Batch forwarding for Message Channel `%s` is available only with Ecotone Enterprise licence. See https://docs.ecotone.tech/enterprise for details.', array_key_first($this->batchForwardingSourceChannels)));
         }
         foreach ($this->declaredBatchForwardingChannels as $declaredBatchForwardingChannel) {
             if (! isset($this->batchForwardingSourceChannels[$declaredBatchForwardingChannel])) {
@@ -452,7 +443,7 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->asynchronousEndpoints as $targetEndpointId => $asynchronousMessageChannels) {
             $asynchronousMessageChannel = array_shift($asynchronousMessageChannels);
             if (! isset($this->channelBuilders[$asynchronousMessageChannel]) && ! isset($this->defaultChannelBuilders[$asynchronousMessageChannel])) {
-                throw ConfigurationException::create("Registered asynchronous endpoint `{$targetEndpointId}`, however channel configuration for `{$asynchronousMessageChannel}` was not provided.");
+                throw ConfigurationException::create("Registered asynchronous endpoint `{$targetEndpointId}`, however channel configuration for `{$asynchronousMessageChannel}` was not provided. Register it with SimpleMessageChannelBuilder::createQueueChannel('{$asynchronousMessageChannel}') as a ServiceConfiguration extension object or from a #[ServiceContext] method.");
             }
 
             $foundEndpoint = false;
@@ -474,7 +465,7 @@ final class MessagingSystemConfiguration implements Configuration
                             }
                         }
                     }
-                    $endpointAnnotations = $asyncAttribute ? $asyncAttribute->getAsynchronousExecution() : [];
+                    $endpointAnnotations = $asyncAttribute ? $asyncAttribute->asynchronousExecution : [];
                     if ($endpointAnnotations && ! $this->isRunningForEnterpriseLicence) {
                         throw LicensingException::create(Annotation\ModuleConfiguration\ErrorChannelExceptionMessages::asynchronousExecutionRequiresEnterprise($targetEndpointId));
                     }
@@ -482,9 +473,9 @@ final class MessagingSystemConfiguration implements Configuration
                     $hasErrorChannel = false;
                     $hasDelayedRetry = false;
                     foreach ($endpointAnnotations as $endpointAnnotation) {
-                        if ($endpointAnnotation instanceof \Ecotone\Messaging\Attribute\ErrorChannel) {
+                        if ($endpointAnnotation instanceof \Ecotone\Api\Attribute\ErrorChannel) {
                             $hasErrorChannel = true;
-                        } elseif ($endpointAnnotation instanceof \Ecotone\Messaging\Attribute\DelayedRetry) {
+                        } elseif ($endpointAnnotation instanceof \Ecotone\Api\Attribute\DelayedRetry) {
                             $hasDelayedRetry = true;
                         }
                     }
@@ -495,12 +486,12 @@ final class MessagingSystemConfiguration implements Configuration
                     }
 
                     foreach ($handlerInterface->getMethodAnnotations() as $methodAnnotation) {
-                        if ($methodAnnotation instanceof \Ecotone\Messaging\Attribute\ErrorChannel) {
+                        if ($methodAnnotation instanceof \Ecotone\Api\Attribute\ErrorChannel) {
                             throw ConfigurationException::create(
                                 Annotation\ModuleConfiguration\ErrorChannelExceptionMessages::errorChannelDirectlyOnAsyncHandlerMethod($targetEndpointId)
                             );
                         }
-                        if ($methodAnnotation instanceof \Ecotone\Messaging\Attribute\DelayedRetry) {
+                        if ($methodAnnotation instanceof \Ecotone\Api\Attribute\DelayedRetry) {
                             throw ConfigurationException::create(
                                 Annotation\ModuleConfiguration\ErrorChannelExceptionMessages::delayedRetryDirectlyOnAsyncHandlerMethod($targetEndpointId)
                             );
@@ -615,6 +606,24 @@ final class MessagingSystemConfiguration implements Configuration
         }
     }
 
+    private function refuseHandlersSharingADirectChannel(): void
+    {
+        $subscribedHandlers = [];
+        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
+            $channelName = $messageHandlerBuilder->getInputMessageChannelName();
+            $channelBuilder = $this->channelBuilders[$channelName] ?? null;
+            if (! $channelBuilder instanceof SimpleMessageChannelBuilder || ! $channelBuilder->isDirect()) {
+                continue;
+            }
+
+            if (isset($subscribedHandlers[$channelName])) {
+                throw WrongHandlerAmountException::forDirectChannelSharedBy($channelName, (string) $subscribedHandlers[$channelName], (string) $messageHandlerBuilder);
+            }
+
+            $subscribedHandlers[$channelName] = $messageHandlerBuilder;
+        }
+    }
+
     /**
      * @return void
      */
@@ -666,7 +675,7 @@ final class MessagingSystemConfiguration implements Configuration
         return self::prepare(
             __DIR__ .'/../../../',
             InMemoryConfigurationVariableService::createEmpty(),
-            $serviceConfiguration ?? ServiceConfiguration::createWithAsynchronicityOnly(),
+            $serviceConfiguration ?? ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
             $extensionObjects,
             true,
         );
@@ -684,9 +693,9 @@ final class MessagingSystemConfiguration implements Configuration
         return self::prepareWithAnnotationFinder(
             AnnotationFinderFactory::createForAttributes(
                 realpath($rootPathToSearchConfigurationFor),
-                $serviceConfiguration->getNamespaces(),
-                $serviceConfiguration->getEnvironment(),
-                $serviceConfiguration->getLoadedCatalog() ?? '',
+                $serviceConfiguration->namespaces,
+                $serviceConfiguration->environment,
+                $serviceConfiguration->loadCatalog ?? '',
                 self::getModuleClassesFor($serviceConfiguration),
                 $userLandClassesToRegister,
                 $enableTestPackage
@@ -752,6 +761,11 @@ final class MessagingSystemConfiguration implements Configuration
         $this->externalContainer = $externalContainer;
 
         return $this;
+    }
+
+    public function getExternalContainer(): ?ContainerInterface
+    {
+        return $this->externalContainer;
     }
 
     /**
@@ -986,16 +1000,6 @@ final class MessagingSystemConfiguration implements Configuration
         return $this;
     }
 
-    /**
-     * @inheritDoc
-     */
-    public function registerMessageConverter(string $referenceName): Configuration
-    {
-        $this->messageConverterReferenceNames[] = $referenceName;
-
-        return $this;
-    }
-
     public function registerServiceDefinition(string|Reference $id, Definition|Reference|array $definition = []): Configuration
     {
         if (! isset($this->serviceDefinitions[(string) $id])) {
@@ -1155,6 +1159,7 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->compilerPasses as $compilerPass) {
             $compilerPass->process($builder);
         }
+        (new Container\Compiler\VerifyEnterpriseLicenceForFetchedAggregates($this->isRunningForEnterpriseLicence))->process($builder);
         (new Container\Compiler\VerifyEnterpriseLicenceForClosureExpressions($this->isRunningForEnterpriseLicence))->process($builder);
 
         (new Container\Compiler\ValidateRequiredReferencesPass(

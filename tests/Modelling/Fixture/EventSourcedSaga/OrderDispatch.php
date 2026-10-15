@@ -2,12 +2,12 @@
 
 namespace Test\Ecotone\Modelling\Fixture\EventSourcedSaga;
 
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\Attribute\EventSourcingHandler;
-use Ecotone\Modelling\Attribute\EventSourcingSaga;
-use Ecotone\Modelling\Attribute\Identifier;
-use Ecotone\Modelling\Attribute\QueryHandler;
-use Ecotone\Modelling\WithAggregateVersioning;
+use Ecotone\Api\Attribute\Apply;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\EventSourcingSaga;
+use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Api\Modelling\WithAggregateVersioning;
 
 #[EventSourcingSaga]
 /**
@@ -47,14 +47,14 @@ class OrderDispatch
         return $this->status;
     }
 
-    #[EventSourcingHandler]
+    #[Apply]
     public function whenOrderStarted(OrderDispatchWasBegun $event): void
     {
         $this->orderId = $event->getOrderId();
         $this->status = 'new';
     }
 
-    #[EventSourcingHandler]
+    #[Apply]
     public function whenPaymentDone(OrderDispatchWasFinished $event): void
     {
         $this->status = 'closed';

@@ -2,14 +2,14 @@
 
 namespace Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder;
 
-use Ecotone\Messaging\Attribute\Parameter\Header;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\EventSourcingAggregate;
-use Ecotone\Modelling\Attribute\EventSourcingHandler;
-use Ecotone\Modelling\Attribute\Identifier;
-use Ecotone\Modelling\Attribute\QueryHandler;
-use Ecotone\Modelling\WithAggregateEvents;
-use Ecotone\Modelling\WithAggregateVersioning;
+use Ecotone\Api\Attribute\Apply;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\EventSourcingAggregate;
+use Ecotone\Api\Attribute\Header;
+use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Api\Modelling\WithAggregateVersioning;
+use Ecotone\Api\Modelling\WithEvents;
 
 #[EventSourcingAggregate(true)]
 /**
@@ -17,7 +17,7 @@ use Ecotone\Modelling\WithAggregateVersioning;
  */
 class Job
 {
-    use WithAggregateEvents;
+    use WithEvents;
     use WithAggregateVersioning;
 
     #[Identifier]
@@ -53,14 +53,14 @@ class Job
         return $this->isInProgress;
     }
 
-    #[EventSourcingHandler]
+    #[Apply]
     public function whenJobWasStarted(JobWasStarted $event): void
     {
         $this->id = $event->getId();
         $this->isInProgress = true;
     }
 
-    #[EventSourcingHandler]
+    #[Apply]
     public function whenJobWasFinished(JobWasFinished $event): void
     {
         $this->isInProgress = false;

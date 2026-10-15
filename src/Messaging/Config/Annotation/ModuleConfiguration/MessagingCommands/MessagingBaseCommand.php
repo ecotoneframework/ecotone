@@ -2,10 +2,10 @@
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingCommands;
 
-use Ecotone\Messaging\Attribute\ConsoleParameterOption;
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
+use Ecotone\Api\Attribute\ConsoleParameterOption;
+use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
+use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\ConsoleCommandResultSet;
-use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 
 /**
  * licence Apache-2.0

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Channel;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Attribute\InternalHandler;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Api\ExtensionObject\DistributedServiceMap;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Consumer\ConsumerPositionTracker;
 use Ecotone\Messaging\Consumer\InMemory\InMemoryConsumerPositionTracker;
-use Ecotone\Modelling\Api\Distribution\DistributedServiceMap;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\TestCase;
 
@@ -53,8 +53,9 @@ final class StreamingChannelTest extends TestCase
                 ->withExtensionObjects([
                     $sharedChannel,
                     DistributedServiceMap::initialize()
-                        ->withServiceMapping(serviceName: 'test-service', channelName: 'distributed_channel'),
-                ]),
+                        ->withCommandMapping(targetServiceName: 'test-service', channelName: 'distributed_channel'),
+                ])
+                    ->withEnabledModulePackageNames([]),
             pathToRootCatalog: __DIR__ . '/../../',
             licenceKey: LicenceTesting::VALID_LICENCE
         );

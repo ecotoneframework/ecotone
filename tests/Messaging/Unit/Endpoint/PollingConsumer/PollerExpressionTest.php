@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Endpoint\PollingConsumer;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
+use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Lite\EcotoneLite;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\Poller\ExpressionPollerExample;
 use Test\Ecotone\Messaging\Fixture\Poller\TimerService;
@@ -29,6 +29,7 @@ final class PollerExpressionTest extends TestCase
                 $pollerExample,
             ],
             ServiceConfiguration::createWithDefaults()
+                ->withEnabledModulePackageNames([])
         );
 
         // Run the consumer - this will evaluate the expression and create the trigger
@@ -51,6 +52,7 @@ final class PollerExpressionTest extends TestCase
                 $pollerExample,
             ],
             ServiceConfiguration::createWithDefaults()
+                ->withEnabledModulePackageNames([])
         );
 
         $ecotoneLite->run('expression_poller_endpoint', ExecutionPollingMetadata::createWithTestingSetup(1, 100));

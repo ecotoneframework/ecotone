@@ -2,10 +2,10 @@
 
 namespace Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\IncorrectEventTypeReturned;
 
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\EventSourcingAggregate;
-use Ecotone\Modelling\Attribute\EventSourcingHandler;
-use Ecotone\Modelling\Attribute\Identifier;
+use Ecotone\Api\Attribute\Apply;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\EventSourcingAggregate;
+use Ecotone\Api\Attribute\Identifier;
 use stdClass;
 
 #[EventSourcingAggregate]
@@ -23,7 +23,7 @@ class IncorrectEventTypeReturnedExample
         return [['id' => 1]];
     }
 
-    #[EventSourcingHandler]
+    #[Apply]
     public static function factory(stdClass $event): void
     {
     }

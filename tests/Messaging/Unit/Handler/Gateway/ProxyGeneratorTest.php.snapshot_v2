@@ -6,7 +6,7 @@ class GeneratedClass implements \Test\Ecotone\Messaging\Unit\Handler\Gateway\Int
 
     private $gatewayProxyReference;
 
-    public function __construct(\Ecotone\Messaging\Config\ConfiguredMessagingSystem $messagingSystem, \Ecotone\Messaging\Config\Container\GatewayProxyReference $gatewayProxyReference)
+    public function __construct(\Ecotone\Api\Messaging\ConfiguredMessagingSystem $messagingSystem, \Ecotone\Messaging\Config\Container\GatewayProxyReference $gatewayProxyReference)
     {
         $this->messagingSystem = $messagingSystem; $this->gatewayProxyReference = $gatewayProxyReference;
     }

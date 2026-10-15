@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory;
 
-use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Api\Attribute\EventSourcingAggregate;
 
 #[EventSourcingAggregate]
 /**

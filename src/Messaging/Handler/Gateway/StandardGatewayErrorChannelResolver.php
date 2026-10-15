@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use Ecotone\Messaging\Attribute\ErrorChannel;
+use Ecotone\Api\Attribute\ErrorChannel;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\LicensingException;
@@ -18,7 +18,7 @@ final class StandardGatewayErrorChannelResolver implements GatewayErrorChannelRe
     {
         $errorChannelAttributes = $interfaceToCall->getAnnotationsByImportanceOrder(Type::attribute(ErrorChannel::class));
         if ($errorChannelAttributes) {
-            throw LicensingException::create('ErrorChannel attribute is available only as part of Ecotone Enterprise');
+            throw LicensingException::create('ErrorChannel attribute is available only as part of Ecotone Enterprise. See https://docs.ecotone.tech/enterprise for details.');
         }
 
         return $errorChannelName;

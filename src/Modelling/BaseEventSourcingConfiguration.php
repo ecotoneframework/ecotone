@@ -2,9 +2,9 @@
 
 namespace Ecotone\Modelling;
 
+use Ecotone\Api\Gateway\DocumentStore;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Store\Document\DocumentStore;
 
 /**
  * licence Apache-2.0
@@ -13,8 +13,9 @@ class BaseEventSourcingConfiguration implements DefinedObject
 {
     public const DEFAULT_SNAPSHOT_TRIGGER_THRESHOLD = 100;
 
-    public function __construct(private array $snapshotsAggregateClasses = [])
-    {
+    public function __construct(
+        private array $snapshotsAggregateClasses = [],
+    ) {
 
     }
 
@@ -23,25 +24,14 @@ class BaseEventSourcingConfiguration implements DefinedObject
         return new self();
     }
 
-    /**
-     * @TODO Ecotone 2.0 drop it
-     * @deprecated use BaseEventSourcingConfiguration::withSnapshotsFor instead
-     */
-    public function withSnapshots(array $aggregateClassesToSnapshot = [], int $thresholdTrigger = self::DEFAULT_SNAPSHOT_TRIGGER_THRESHOLD, string $documentStore = DocumentStore::class): static
+    public function withSnapshotsFor(array|string $aggregateClassToSnapshot, int $thresholdTrigger = self::DEFAULT_SNAPSHOT_TRIGGER_THRESHOLD, string $documentStore = DocumentStore::class): static
     {
-        foreach ($aggregateClassesToSnapshot as $aggregateClassToSnapshot) {
-            $this->withSnapshotsFor($aggregateClassToSnapshot, $thresholdTrigger, $documentStore);
+        foreach ((array) $aggregateClassToSnapshot as $aggregateClass) {
+            $this->snapshotsAggregateClasses[$aggregateClass] = [
+                'thresholdTrigger' => $thresholdTrigger,
+                'documentStore' => $documentStore,
+            ];
         }
-
-        return $this;
-    }
-
-    public function withSnapshotsFor(string $aggregateClassToSnapshot, int $thresholdTrigger = self::DEFAULT_SNAPSHOT_TRIGGER_THRESHOLD, string $documentStore = DocumentStore::class): static
-    {
-        $this->snapshotsAggregateClasses[$aggregateClassToSnapshot] = [
-            'thresholdTrigger' => $thresholdTrigger,
-            'documentStore' => $documentStore,
-        ];
 
         return $this;
     }

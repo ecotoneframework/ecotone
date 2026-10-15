@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder;
 
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\EventSourcingAggregate;
-use Ecotone\Modelling\Attribute\EventSourcingHandler;
-use Ecotone\Modelling\Attribute\Identifier;
-use Ecotone\Modelling\WithAggregateVersioning;
+use Ecotone\Api\Attribute\Apply;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\EventSourcingAggregate;
+use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Api\Modelling\WithAggregateVersioning;
 use stdClass;
 
 #[EventSourcingAggregate]
@@ -41,13 +41,13 @@ final class EventSourcingAggregateExample
         $class->name = 'test';
     }
 
-    #[EventSourcingHandler]
+    #[Apply]
     public function applyAggregateCreated(AggregateCreatedInterface $event): void
     {
         $this->id = $event->id;
     }
 
-    #[EventSourcingHandler]
+    #[Apply]
     public function applySomethingWasDone(SomethingWasDone $event): void
     {
         $this->somethingWasDone = true;

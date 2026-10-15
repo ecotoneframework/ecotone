@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\ApplicationContext;
 
-use Ecotone\Messaging\Attribute\ServiceContext;
+use Ecotone\Api\Attribute\ServiceContext;
 use stdClass;
 
 /**

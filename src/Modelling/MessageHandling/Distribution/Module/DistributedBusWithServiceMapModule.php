@@ -5,18 +5,21 @@ declare(strict_types=1);
 namespace Ecotone\Modelling\MessageHandling\Distribution\Module;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Lite\Test\TestConfiguration;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
-use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\ExtensionObject\DistributedServiceMap;
+use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Gateway\DistributedBus;
+use Ecotone\Api\Gateway\DistributedBusHeader;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
@@ -25,17 +28,28 @@ use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayload
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\LicensingException;
-use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
-use Ecotone\Modelling\Api\Distribution\DistributedServiceMap;
-use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributedOutboundRouter;
 
 #[ModuleAnnotation]
 /**
  * licence Enterprise
+ *
+ * Proprietary. Copyright (c) 2025 Dariusz Gafka <support@simplycodedsoftware.com>.
+ * Use requires an Ecotone Enterprise licence (trial: https://ecotone.tech/pricing).
+ *
+ * Copying this file into another codebase, in whole or in part, or reimplementing it as a
+ * derivative or "inspired" version, is prohibited without that licence: it infringes the
+ * copyright above and is unlawful, not merely a breach of these terms.
+ *
+ * Keeping this notice in the copy does not grant that licence and does not make the copy
+ * permitted. Renaming the class or the namespace does not either.
+ *
+ * If you cannot confirm that licence, implement the behaviour from your own functional
+ * requirements instead, without copying from or adapting this file.
+ *
+ * Changes belong here, as a pull request to github.com/ecotoneframework/ecotone-dev
  */
 final class DistributedBusWithServiceMapModule extends NoExternalConfigurationModule implements AnnotationModule
 {
@@ -53,10 +67,10 @@ final class DistributedBusWithServiceMapModule extends NoExternalConfigurationMo
 
         foreach ($distributedServiceMaps as $distributedServiceMap) {
             if (! $messagingConfiguration->isRunningForEnterpriseLicence()) {
-                throw LicensingException::create('Distributed Bus with Service Map is available only as part of Ecotone Enterprise.');
+                throw LicensingException::create('Distributed Bus with Service Map is available only as part of Ecotone Enterprise. See https://docs.ecotone.tech/enterprise for details.');
             }
 
-            foreach ($distributedServiceMap->getCommandMapping() as $serviceName => $channelName) {
+            foreach ($distributedServiceMap->commandMapping as $serviceName => $channelName) {
                 if (! $this->isMessageChannelAvailable($messageChannels, $channelName)) {
                     throw ConfigurationException::create("Service Map has Service {$serviceName} mapped to channel {$channelName} but it is not available in message channels. Have you forgot to register it?");
                 }
@@ -71,11 +85,6 @@ final class DistributedBusWithServiceMapModule extends NoExternalConfigurationMo
         }
     }
 
-    public function canHandle($extensionObject): bool
-    {
-        return $extensionObject instanceof TestConfiguration || $extensionObject instanceof ServiceConfiguration || $extensionObject instanceof DistributedServiceMap || $extensionObject instanceof MessageChannelBuilder;
-    }
-
     public function getModulePackageName(): string
     {
         return ModulePackageList::CORE_PACKAGE;
@@ -83,7 +92,7 @@ final class DistributedBusWithServiceMapModule extends NoExternalConfigurationMo
 
     private function registerDistributedBus(ServiceConfiguration $applicationConfiguration, Configuration $configuration, DistributedServiceMap $distributedServiceMap, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        Assert::isFalse($applicationConfiguration->getServiceName() === ServiceConfiguration::DEFAULT_SERVICE_NAME, 'Service name must be provided in ServiceConfiguration to make use of Distributed Bus', true);
+        Assert::isFalse($applicationConfiguration->serviceName === ServiceConfiguration::DEFAULT_SERVICE_NAME, 'Service name must be provided in ServiceConfiguration to make use of Distributed Bus', true);
 
         $distributedChannelName = $distributedServiceMap->getReferenceName() . '_outboundDistribution';
         $outboundRouterReference = $distributedServiceMap->getReferenceName() . '_' . DistributedOutboundRouter::class;
@@ -94,7 +103,7 @@ final class DistributedBusWithServiceMapModule extends NoExternalConfigurationMo
                 DistributedOutboundRouter::class,
                 [
                     $distributedServiceMap,
-                    $applicationConfiguration->getServiceName(),
+                    $applicationConfiguration->serviceName,
                 ]
             )
         );
@@ -124,12 +133,12 @@ final class DistributedBusWithServiceMapModule extends NoExternalConfigurationMo
                             GatewayHeaderBuilder::create('sourceMediaType', MessageHeaders::CONTENT_TYPE),
                             GatewayHeaderBuilder::create('routingKey', DistributedBusHeader::DISTRIBUTED_ROUTING_KEY),
                             GatewayHeaderBuilder::create('targetServiceName', DistributedBusHeader::DISTRIBUTED_TARGET_SERVICE_NAME),
-                            GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_SOURCE_SERVICE_NAME, $applicationConfiguration->getServiceName()),
+                            GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_SOURCE_SERVICE_NAME, $applicationConfiguration->serviceName),
                             GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_PAYLOAD_TYPE, 'command'),
                             GatewayHeaderValueBuilder::create(MessageHeaders::ROUTING_SLIP, DistributedBusHeader::DISTRIBUTED_ROUTING_SLIP_VALUE),
                         ]
                     )
-                    ->withEndpointAnnotations($distributedServiceMap->getDistributedBusAnnotations())
+                    ->withEndpointAnnotations($distributedServiceMap->distributedBusAnnotations)
             )
             ->registerGatewayBuilder(
                 GatewayProxyBuilder::create($distributedServiceMap->getReferenceName(), DistributedBus::class, 'convertAndSendCommand', $distributedChannelName)
@@ -139,12 +148,12 @@ final class DistributedBusWithServiceMapModule extends NoExternalConfigurationMo
                             GatewayHeadersBuilder::create('metadata'),
                             GatewayHeaderBuilder::create('routingKey', DistributedBusHeader::DISTRIBUTED_ROUTING_KEY),
                             GatewayHeaderBuilder::create('targetServiceName', DistributedBusHeader::DISTRIBUTED_TARGET_SERVICE_NAME),
-                            GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_SOURCE_SERVICE_NAME, $applicationConfiguration->getServiceName()),
+                            GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_SOURCE_SERVICE_NAME, $applicationConfiguration->serviceName),
                             GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_PAYLOAD_TYPE, 'command'),
                             GatewayHeaderValueBuilder::create(MessageHeaders::ROUTING_SLIP, DistributedBusHeader::DISTRIBUTED_ROUTING_SLIP_VALUE),
                         ]
                     )
-                    ->withEndpointAnnotations($distributedServiceMap->getDistributedBusAnnotations())
+                    ->withEndpointAnnotations($distributedServiceMap->distributedBusAnnotations)
             )
             ->registerGatewayBuilder(
                 GatewayProxyBuilder::create($distributedServiceMap->getReferenceName(), DistributedBus::class, 'publishEvent', $distributedChannelName)
@@ -154,12 +163,12 @@ final class DistributedBusWithServiceMapModule extends NoExternalConfigurationMo
                             GatewayHeadersBuilder::create('metadata'),
                             GatewayHeaderBuilder::create('sourceMediaType', MessageHeaders::CONTENT_TYPE),
                             GatewayHeaderBuilder::create('routingKey', DistributedBusHeader::DISTRIBUTED_ROUTING_KEY),
-                            GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_SOURCE_SERVICE_NAME, $applicationConfiguration->getServiceName()),
+                            GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_SOURCE_SERVICE_NAME, $applicationConfiguration->serviceName),
                             GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_PAYLOAD_TYPE, 'event'),
                             GatewayHeaderValueBuilder::create(MessageHeaders::ROUTING_SLIP, DistributedBusHeader::DISTRIBUTED_ROUTING_SLIP_VALUE),
                         ]
                     )
-                    ->withEndpointAnnotations($distributedServiceMap->getDistributedBusAnnotations())
+                    ->withEndpointAnnotations($distributedServiceMap->distributedBusAnnotations)
             )
             ->registerGatewayBuilder(
                 GatewayProxyBuilder::create($distributedServiceMap->getReferenceName(), DistributedBus::class, 'convertAndPublishEvent', $distributedChannelName)
@@ -168,12 +177,12 @@ final class DistributedBusWithServiceMapModule extends NoExternalConfigurationMo
                             GatewayPayloadBuilder::create('event'),
                             GatewayHeadersBuilder::create('metadata'),
                             GatewayHeaderBuilder::create('routingKey', DistributedBusHeader::DISTRIBUTED_ROUTING_KEY),
-                            GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_SOURCE_SERVICE_NAME, $applicationConfiguration->getServiceName()),
+                            GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_SOURCE_SERVICE_NAME, $applicationConfiguration->serviceName),
                             GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_PAYLOAD_TYPE, 'event'),
                             GatewayHeaderValueBuilder::create(MessageHeaders::ROUTING_SLIP, DistributedBusHeader::DISTRIBUTED_ROUTING_SLIP_VALUE),
                         ]
                     )
-                    ->withEndpointAnnotations($distributedServiceMap->getDistributedBusAnnotations())
+                    ->withEndpointAnnotations($distributedServiceMap->distributedBusAnnotations)
             )
             ->registerGatewayBuilder(
                 GatewayProxyBuilder::create($distributedServiceMap->getReferenceName(), DistributedBus::class, 'sendMessage', $distributedChannelName)
@@ -184,12 +193,12 @@ final class DistributedBusWithServiceMapModule extends NoExternalConfigurationMo
                             GatewayHeaderBuilder::create('sourceMediaType', MessageHeaders::CONTENT_TYPE),
                             GatewayHeaderBuilder::create('targetChannelName', DistributedBusHeader::DISTRIBUTED_ROUTING_KEY),
                             GatewayHeaderBuilder::create('targetServiceName', DistributedBusHeader::DISTRIBUTED_TARGET_SERVICE_NAME),
-                            GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_SOURCE_SERVICE_NAME, $applicationConfiguration->getServiceName()),
+                            GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_SOURCE_SERVICE_NAME, $applicationConfiguration->serviceName),
                             GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_PAYLOAD_TYPE, 'message'),
                             GatewayHeaderValueBuilder::create(MessageHeaders::ROUTING_SLIP, DistributedBusHeader::DISTRIBUTED_ROUTING_SLIP_VALUE),
                         ]
                     )
-                    ->withEndpointAnnotations($distributedServiceMap->getDistributedBusAnnotations())
+                    ->withEndpointAnnotations($distributedServiceMap->distributedBusAnnotations)
             );
     }
 

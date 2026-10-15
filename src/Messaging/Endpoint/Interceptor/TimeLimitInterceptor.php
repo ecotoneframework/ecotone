@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\Interceptor;
 
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Scheduling\DatePoint;
+use Ecotone\Api\Scheduling\Duration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
 use Ecotone\Messaging\Endpoint\ConsumerInterceptorTrait;
-use Ecotone\Messaging\Scheduling\DatePoint;
-use Ecotone\Messaging\Scheduling\Duration;
-use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 
 /**
  * Class LimitConsumedMessagesExtension

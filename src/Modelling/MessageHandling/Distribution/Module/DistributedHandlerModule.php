@@ -3,14 +3,21 @@
 namespace Ecotone\Modelling\MessageHandling\Distribution\Module;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\Distributed;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Gateway\CommandBus;
+use Ecotone\Api\Gateway\DistributedBusHeader;
+use Ecotone\Api\Gateway\EventBus;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
@@ -22,14 +29,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\Distributed;
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\Routing\BusRoutingMapBuilder;
-use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributedMessageHandler;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributionEntrypoint;
 
@@ -37,7 +37,7 @@ use Ecotone\Modelling\MessageHandling\Distribution\DistributionEntrypoint;
 /**
  * licence Apache-2.0
  */
-class DistributedHandlerModule implements AnnotationModule
+final class DistributedHandlerModule implements AnnotationModule
 {
     public function __construct(
         private BusRoutingMapBuilder $commandBusDistributedRoutes,
@@ -103,7 +103,7 @@ class DistributedHandlerModule implements AnnotationModule
             new Definition(DistributedMessageHandler::class, [
                 $this->eventBusDistributedRoutes->compile(),
                 $this->commandBusDistributedRoutes->compile(),
-                $serviceConfiguration->getServiceName(),
+                $serviceConfiguration->serviceName,
             ])
         );
         $messagingConfiguration->registerMessageHandler(
@@ -121,11 +121,6 @@ class DistributedHandlerModule implements AnnotationModule
                     ReferenceBuilder::create('messagingEntrypoint', MessagingEntrypointService::class),
                 ])
         );
-    }
-
-    public function canHandle($extensionObject): bool
-    {
-        return $extensionObject instanceof ServiceConfiguration;
     }
 
     public function getModulePackageName(): string

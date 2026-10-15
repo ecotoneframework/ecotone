@@ -4,11 +4,11 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
 use Ecotone\Messaging\Attribute\MessageConsumer;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
@@ -16,7 +16,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 /**
  * licence Apache-2.0
  */
-class RequiredConsumersModule extends NoExternalConfigurationModule implements AnnotationModule
+final class RequiredConsumersModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
      * @var string[]
@@ -66,11 +66,6 @@ class RequiredConsumersModule extends NoExternalConfigurationModule implements A
     /**
      * @inheritDoc
      */
-    public function canHandle($extensionObject): bool
-    {
-        return false;
-    }
-
     public function getModulePackageName(): string
     {
         return ModulePackageList::CORE_PACKAGE;

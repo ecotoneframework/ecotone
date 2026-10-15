@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion\EnumToScalar;
 
+use BackedEnum;
+use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Messaging\Conversion\Converter;
-use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Type;
-use ReflectionEnum;
 
 /**
  * licence Apache-2.0
@@ -19,13 +19,7 @@ class EnumToScalarConverter implements Converter
      */
     public function convert($source, Type $sourceType, MediaType $sourceMediaType, Type $targetType, MediaType $targetMediaType)
     {
-        $ref = new ReflectionEnum($sourceType->toString());
-
-        if ($ref->isBacked()) {
-            return $source->value;
-        }
-
-        return $source->name;
+        return $source instanceof BackedEnum ? $source->value : $source->name;
     }
 
     /**

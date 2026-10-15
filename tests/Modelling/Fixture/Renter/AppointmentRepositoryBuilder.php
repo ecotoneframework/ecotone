@@ -4,14 +4,12 @@ namespace Test\Ecotone\Modelling\Fixture\Renter;
 
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
-use Ecotone\Modelling\EventSourcedRepository;
-use Ecotone\Modelling\LazyRepositoryBuilder;
-use Ecotone\Modelling\StandardRepository;
+use Ecotone\Modelling\RepositoryBuilder;
 
 /**
  * licence Apache-2.0
  */
-class AppointmentRepositoryBuilder implements LazyRepositoryBuilder
+class AppointmentRepositoryBuilder implements RepositoryBuilder
 {
     /**
      * @var Appointment[]
@@ -41,13 +39,8 @@ class AppointmentRepositoryBuilder implements LazyRepositoryBuilder
         return $aggregateClassName === Appointment::class;
     }
 
-    public function build(): EventSourcedRepository|StandardRepository
-    {
-        return AppointmentStandardRepository::createWith($this->appointments);
-    }
-
     public function compile(MessagingContainerBuilder $builder): Definition
     {
-        return new Definition(AppointmentStandardRepository::class, [$this->appointments], 'createWith');
+        return new Definition(AppointmentStateStoredRepository::class, [$this->appointments], 'createWith');
     }
 }

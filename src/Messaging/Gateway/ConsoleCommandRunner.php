@@ -2,8 +2,8 @@
 
 namespace Ecotone\Messaging\Gateway;
 
-use Ecotone\Messaging\Attribute\Parameter\Header;
-use Ecotone\Messaging\Attribute\Parameter\Payload;
+use Ecotone\Api\Attribute\Header;
+use Ecotone\Api\Attribute\Payload;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingCommands\MessagingCommandsModule;
 
 /**

@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\AggregateFlow\SaveAggregate;
 
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Messaging\Message;
 use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
-use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\FrameworkHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\ResolvedAggregate;
@@ -30,24 +31,22 @@ final class SaveAggregateTestSetupService implements MessageProcessor
         private HeaderMapper $headerMapper,
         private EventMapper $eventMapper,
         private AggregateRepository $aggregateRepository,
+        private EcotoneClockInterface $clock,
     ) {
     }
 
     public function process(Message $message): Message|null
     {
         $resolvedAggregate = $this->resolveAggregate($message);
-        $metadata = MessageHeaders::unsetNonUserKeys($message->getHeaders()->headers());
+        $metadata = FrameworkHeaders::unsetNonUserKeys($message->getHeaders()->headers());
 
         if (! $resolvedAggregate) {
             return null;
         }
 
-        $version = $resolvedAggregate->getVersionBeforeHandling();
-
         $this->aggregateRepository->save(
             $resolvedAggregate,
             $metadata,
-            $version
         );
 
         /** Clear internally recorded events */
@@ -85,6 +84,7 @@ final class SaveAggregateTestSetupService implements MessageProcessor
             $this->headerMapper,
             $this->conversionService,
             $this->eventMapper,
+            $this->clock,
         );
 
         $enrichedEvents = SaveAggregateServiceTemplate::enrichAggregateEvents(

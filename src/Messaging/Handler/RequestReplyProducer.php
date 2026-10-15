@@ -2,12 +2,13 @@
 
 namespace Ecotone\Messaging\Handler;
 
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageChannel;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageChannel;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessageDeliveryException;
 use Ecotone\Messaging\MessageHandler;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Support\MessageDescription;
 
 /**
  * licence Apache-2.0
@@ -59,7 +60,7 @@ class RequestReplyProducer implements MessageHandler
 
         if (! $replyChannel) {
             if ($this->isReplyRequired) {
-                throw MessageDeliveryException::createWithFailedMessage("Can't process {$message}, no output channel during delivery in {$this}", $message);
+                throw MessageDeliveryException::createWithFailedMessage("Can't process " . MessageDescription::of($message) . ", no output channel during delivery in {$this}", $message);
             }
             return;
         }

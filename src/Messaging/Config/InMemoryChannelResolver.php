@@ -2,9 +2,9 @@
 
 namespace Ecotone\Messaging\Config;
 
+use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\DestinationResolutionException;
-use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\Assert;
 

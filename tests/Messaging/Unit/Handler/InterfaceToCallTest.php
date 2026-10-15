@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
 use DateTimeInterface;
-use Ecotone\Messaging\Attribute\Asynchronous;
-use Ecotone\Messaging\Attribute\ClassReference;
-use Ecotone\Messaging\Attribute\Converter;
+use Ecotone\Api\Attribute\Asynchronous;
+use Ecotone\Api\Attribute\ClassReference;
+use Ecotone\Api\Attribute\Converter;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Type;
@@ -57,7 +57,7 @@ class InterfaceToCallTest extends TestCase
         );
 
         $this->assertEquals(
-            InterfaceParameter::createNotNullable('name', Type::create(Type::STRING)),
+            InterfaceParameter::createNotNullable('name', Type::create('string')),
             $interfaceToCall->getParameterWithName('name')
         );
     }

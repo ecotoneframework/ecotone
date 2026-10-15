@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\PollableChannel\SendRetries;
 
-use Ecotone\Messaging\BatchMessage;
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Messaging\BatchMessage;
+use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Messaging\Channel\AbstractChannelInterceptor;
 use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\FailedDelivery;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PublishingFailedException;
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Handler\Gateway\ErrorChannelService;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplate;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageChannel;
-use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -101,7 +101,7 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
             static fn (array $entry): Message => MessageBuilder::withPayload($entry['payload'])
                 ->setMultipleHeaders($entry['headers'])
                 ->build(),
-            $payload->getEntries(),
+            $payload->entries,
         );
     }
 

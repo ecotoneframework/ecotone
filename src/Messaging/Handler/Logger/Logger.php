@@ -2,6 +2,8 @@
 
 namespace Ecotone\Messaging\Handler\Logger;
 
+use Ecotone\Api\Logging\LoggingLevel;
+
 /**
  * licence Apache-2.0
  */

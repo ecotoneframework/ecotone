@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\SymfonyContainer;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Config\ModulePackageList;
-use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\Attributes\RequiresPhp;
 use PHPUnit\Framework\TestCase;
@@ -27,9 +26,10 @@ final class ClosureInAttributeTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, LockingInterceptor::class],
             [new OrderService(), $lockingInterceptor],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
-        $ecotoneLite->sendCommandWithRoutingKey('order.place', 'coffee');
+        $ecotoneLite->sendCommandWithRouting('order.place', 'coffee');
 
         $this->assertSame(['coffee'], $ecotoneLite->sendQueryWithRouting('order.getOrders'));
         $this->assertSame(['order-lock'], $lockingInterceptor->getLockedResources());
@@ -40,7 +40,7 @@ final class ClosureInAttributeTest extends TestCase
         $cacheDirectory = sys_get_temp_dir() . '/ecotone_policy_driven_closure/' . uniqid('', true);
         $configuration = ServiceConfiguration::createWithDefaults()
             ->withCacheDirectoryPath($cacheDirectory)
-            ->withSkippedModulePackageNames(ModulePackageList::allPackages());
+            ->withEnabledModulePackageNames([]);
         $tokenService = new PolicyDrivenTokenService();
         $availableServices = [PolicyDrivenTokenService::class => $tokenService];
 
@@ -74,7 +74,7 @@ final class ClosureInAttributeTest extends TestCase
         $cacheDirectory = sys_get_temp_dir() . '/ecotone_closure_in_attribute/' . uniqid('', true);
         $configuration = ServiceConfiguration::createWithDefaults()
             ->withCacheDirectoryPath($cacheDirectory)
-            ->withSkippedModulePackageNames(ModulePackageList::allPackages());
+            ->withEnabledModulePackageNames([]);
         $lockingInterceptor = new LockingInterceptor();
         $availableServices = [
             OrderService::class => new OrderService(),

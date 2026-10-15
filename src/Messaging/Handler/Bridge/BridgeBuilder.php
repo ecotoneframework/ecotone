@@ -135,4 +135,9 @@ class BridgeBuilder implements MessageHandlerBuilderWithOutputChannel
     {
         return $this->bridgeBuilder->compile($builder);
     }
+
+    public function __toString(): string
+    {
+        return (string) $this->bridgeBuilder;
+    }
 }

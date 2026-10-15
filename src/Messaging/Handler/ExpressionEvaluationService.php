@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Handler;
 
-use Ecotone\Messaging\Message;
+use Ecotone\Api\Messaging\Message;
 
 /**
  * Interface ExpressionEvaluationService

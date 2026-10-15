@@ -2,10 +2,10 @@
 
 namespace Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate;
 
-use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\AggregateIdentifierMethod;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\WithEvents;
+use Ecotone\Api\Attribute\Aggregate;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\IdentifierMethod;
+use Ecotone\Api\Modelling\WithEvents;
 use Test\Ecotone\Modelling\Fixture\IncorrectEventSourcedAggregate\NoIdDefinedAfterCallingFactory\CreateNoIdDefinedAggregate;
 
 #[Aggregate]
@@ -27,7 +27,7 @@ class PublicIdentifierGetMethodForEventSourcedAggregate
         return $self;
     }
 
-    #[AggregateIdentifierMethod('id')]
+    #[IdentifierMethod('id')]
     public function getId()
     {
         return $this->internalId;

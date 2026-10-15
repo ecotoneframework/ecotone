@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Aggregate;
 
-use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\IgnorePayload;
-use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Api\Attribute\Aggregate;
+use Ecotone\Api\Attribute\IgnorePayload;
+use Ecotone\Api\Attribute\QueryHandler;
 use stdClass;
 
 #[Aggregate]

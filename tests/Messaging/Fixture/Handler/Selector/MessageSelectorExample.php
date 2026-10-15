@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Selector;
 
-use Ecotone\Messaging\Message;
+use Ecotone\Api\Messaging\Message;
 use stdClass;
 
 /**

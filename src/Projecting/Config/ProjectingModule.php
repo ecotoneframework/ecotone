@@ -8,10 +8,13 @@ declare(strict_types=1);
 namespace Ecotone\Projecting\Config;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\Asynchronous;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
-use Ecotone\Messaging\Attribute\WithoutDatabaseTransaction;
-use Ecotone\Messaging\Attribute\WithoutMessageCollector;
+use Ecotone\Api\Attribute\Asynchronous;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\Attribute\WithoutDatabaseTransaction;
+use Ecotone\Api\Attribute\WithoutMessageCollector;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Projecting\ProjectionFlush;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Configuration;
@@ -19,9 +22,7 @@ use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\Interceptor\TerminationListener;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -31,8 +32,9 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Support\LicensingException;
-use Ecotone\Projecting\Attribute\ProjectionFlush;
+use Ecotone\Projecting\EnterpriseProjectionNameHeader;
 use Ecotone\Projecting\InMemory\InMemoryProjectionRegistry;
+use Ecotone\Projecting\OpenCoreProjectionNameHeader;
 use Ecotone\Projecting\PartitionBatchExecutorHandler;
 use Ecotone\Projecting\PartitionProviderRegistry;
 use Ecotone\Projecting\ProjectingHeaders;
@@ -49,7 +51,7 @@ use Ecotone\Projecting\StreamSourceRegistry;
  * It allows to register ProjectionExecutorBuilder and ProjectionComponentBuilder implementations
  */
 #[ModuleAnnotation]
-class ProjectingModule implements AnnotationModule
+final class ProjectingModule implements AnnotationModule
 {
     public static function getProjectorExecutorReference(string $projectionName): string
     {
@@ -69,7 +71,7 @@ class ProjectingModule implements AnnotationModule
         if (! empty($projectionBuilders) && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
             foreach ($projectionBuilders as $builder) {
                 if (! $builder instanceof EcotoneProjectionExecutorBuilder || ! $builder->isOpenSourceEligible()) {
-                    throw LicensingException::create('Projections with enterprise features (Partitioned, Streaming, Polling, ProjectionRebuild, ProjectionDeployment, async backfill) require Ecotone Enterprise licence.');
+                    throw LicensingException::create('Projections with enterprise features (Partitioned, Streaming, Polling, ProjectionRebuild, ProjectionDeployment, async backfill) require Ecotone Enterprise licence. See https://docs.ecotone.tech/enterprise for details.');
                 }
             }
         }
@@ -77,6 +79,14 @@ class ProjectingModule implements AnnotationModule
         $messagingConfiguration->registerServiceDefinition(
             SinglePartitionProvider::class,
             new Definition(SinglePartitionProvider::class)
+        );
+        $messagingConfiguration->registerServiceDefinition(
+            OpenCoreProjectionNameHeader::class,
+            new Definition(OpenCoreProjectionNameHeader::class)
+        );
+        $messagingConfiguration->registerServiceDefinition(
+            EnterpriseProjectionNameHeader::class,
+            new Definition(EnterpriseProjectionNameHeader::class)
         );
 
         $projectionRegistryMap = [];
@@ -102,6 +112,7 @@ class ProjectingModule implements AnnotationModule
                     $projectionBuilder->backfillAsyncChannelName(),
                     $projectionBuilder->rebuildPartitionBatchSize(),
                     $projectionBuilder->rebuildAsyncChannelName(),
+                    $projectionBuilder->isPartitioned(),
                 ])
             );
             $projectionRegistryMap[$projectionName] = new Reference($projectingManagerReference);
@@ -126,7 +137,7 @@ class ProjectingModule implements AnnotationModule
 
             $asyncAttribute = $projectionBuilder instanceof EcotoneProjectionExecutorBuilder ? $projectionBuilder->getAsyncAttribute() : null;
             if ($asyncAttribute !== null) {
-                $endpointAnnotations = $asyncAttribute->getAsynchronousExecution();
+                $endpointAnnotations = $asyncAttribute->asynchronousExecution;
                 if ($messagingConfiguration->isRunningForEnterpriseLicence()) {
                     $endpointAnnotations = array_merge($endpointAnnotations, [new WithoutDatabaseTransaction(), new WithoutMessageCollector()]);
                 }
@@ -157,11 +168,7 @@ class ProjectingModule implements AnnotationModule
                     ->withEndpointAnnotations([AttributeDefinition::fromObject(new ProjectionFlush())])
             );
 
-            // Should the projection be triggered asynchronously?
-            if (
-                $serviceConfiguration->isModulePackageEnabled(ModulePackageList::ASYNCHRONOUS_PACKAGE)
-                && $projectionBuilder->asyncChannelName() !== null
-            ) {
+            if ($projectionBuilder->asyncChannelName() !== null) {
                 $messagingConfiguration->registerAsynchronousEndpoint(
                     $projectionBuilder->asyncChannelName(),
                     self::endpointIdForProjection($projectionName),
@@ -207,12 +214,6 @@ class ProjectingModule implements AnnotationModule
 
         // Register console commands
         $messagingConfiguration->registerServiceDefinition(ProjectingConsoleCommands::class, new Definition(ProjectingConsoleCommands::class, [new Reference(ProjectionRegistry::class)]));
-    }
-
-    public function canHandle($extensionObject): bool
-    {
-        return $extensionObject instanceof ServiceConfiguration
-            || $extensionObject instanceof ProjectionExecutorBuilder;
     }
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions, ?InterfaceToCallRegistry $interfaceToCallRegistry = null): array

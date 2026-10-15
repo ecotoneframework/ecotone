@@ -2,13 +2,13 @@
 
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 
-use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\Identifier;
-use Ecotone\Modelling\Attribute\IgnorePayload;
-use Ecotone\Modelling\Attribute\QueryHandler;
-use Ecotone\Modelling\Attribute\Version;
-use Ecotone\Modelling\WithAggregateEvents;
+use Ecotone\Api\Attribute\Aggregate;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Api\Attribute\IgnorePayload;
+use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Api\Attribute\Version;
+use Ecotone\Api\Modelling\WithEvents;
 
 #[Aggregate]
 /**
@@ -16,7 +16,7 @@ use Ecotone\Modelling\WithAggregateEvents;
  */
 class Order implements VersionAggregate
 {
-    use WithAggregateEvents;
+    use WithEvents;
 
     #[Identifier]
     private string $orderId;
@@ -134,12 +134,12 @@ class Order implements VersionAggregate
 
     #[QueryHandler('getVersion')]
     #[IgnorePayload]
-    public function getVersion(): ?int
+    public function getAggregateVersion(): ?int
     {
         return $this->version;
     }
 
-    public function increaseAggregateVersion(): void
+    public function increaseVersion(): void
     {
         $this->version += 1;
     }

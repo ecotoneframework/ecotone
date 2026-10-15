@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\AggregateWithGateway;
 
-use Ecotone\Messaging\Attribute\MessageGateway;
-use Ecotone\Messaging\Attribute\Parameter\Payload;
-use Ecotone\Modelling\Attribute\Identifier;
+use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Api\Attribute\MessageGateway;
+use Ecotone\Api\Attribute\Payload;
 use Ramsey\Uuid\UuidInterface;
 
 /**

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Fixture\Conversion;
 
 use DateTimeInterface;
-use Ecotone\Messaging\Attribute\IgnoreDocblockTypeHint;
+use Ecotone\Api\Attribute\IgnoreDocblockTypeHint;
 use stdClass;
 use Test\Ecotone\Messaging\Fixture\Conversion\Extra\Favourite;
 use Test\Ecotone\Messaging\Fixture\Conversion\Extra\Permission as AdminPermission;

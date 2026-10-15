@@ -18,6 +18,7 @@ interface AggregateMessage
     public const AGGREGATE_ID = 'ecotone.modelling.aggregate.id';
     public const CALLED_AGGREGATE_INSTANCE = 'ecotone.modelling.called_aggregate';
     public const CALLED_AGGREGATE_CLASS = 'ecotone.modelling.called_aggregate_class';
+    public const CALLED_AGGREGATE_COUNTER_CAPTURED_AT_LOAD = 'ecotone.modelling.called_aggregate_counter_captured_at_load';
     public const TARGET_VERSION = 'ecotone.modelling.aggregate.target_version';
     public const RECORDED_AGGREGATE_EVENTS = 'ecotone.modelling.called_aggregate_events';
     public const NULL_EXECUTION_RESULT = 'ecotone.modelling.is_nullable_execution_result';

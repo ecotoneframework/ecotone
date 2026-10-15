@@ -2,11 +2,11 @@
 
 namespace Ecotone\Modelling\Config\InstantRetry;
 
-use Ecotone\Messaging\Attribute\Parameter\Reference;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Api\Attribute\Reference;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\Interceptor\MethodInvocation;
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
-use Ecotone\Messaging\Message;
 use Ecotone\Modelling\Config\DatabaseTransaction\TransactionStatusTracker;
 use Exception;
 

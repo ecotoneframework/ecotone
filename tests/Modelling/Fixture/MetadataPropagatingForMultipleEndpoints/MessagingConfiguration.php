@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\MetadataPropagatingForMultipleEndpoints;
 
-use Ecotone\Messaging\Attribute\ServiceContext;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Api\Attribute\ServiceContext;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 
 /**
  * licence Apache-2.0
@@ -17,8 +17,8 @@ class MessagingConfiguration
         return [
             SimpleMessageChannelBuilder::createQueueChannel('notifications'),
             PollingMetadata::create('notifications')
-                ->setHandledMessageLimit(1)
-                ->setExecutionTimeLimitInMilliseconds(1),
+                ->withHandledMessageLimit(1)
+                ->withExecutionTimeLimitInMilliseconds(1),
         ];
     }
 }

@@ -2,19 +2,19 @@
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\Messaging\ErrorMessage;
+use Ecotone\Api\Messaging\Future;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageChannel;
+use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Future;
 use Ecotone\Messaging\Handler\MessageHandlingException;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptable;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageChannel;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\PollableChannel;
-use Ecotone\Messaging\Support\ErrorMessage;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Symfony\Component\Uid\Uuid;
@@ -43,11 +43,14 @@ class GatewayInternalProcessor implements MessageProcessor, AroundInterceptable
     ) {
     }
 
+    public function getInterfaceToCallName(): string
+    {
+        return $this->interfaceToCallName;
+    }
+
     /**
      * @param Message $requestMessage
-     * @return mixed
      * @throws MessagingException
-     * @throws mixed
      */
     public function process(Message $requestMessage): ?Message
     {
@@ -100,7 +103,7 @@ class GatewayInternalProcessor implements MessageProcessor, AroundInterceptable
     private function getReply(PollableChannel $replyChannel): callable
     {
         return function () use ($replyChannel) {
-            $replyMessage = $this->replyMilliSecondsTimeout > 0 ? $replyChannel->receiveWithTimeout(PollingMetadata::create('gateway_reply')->setFixedRateInMilliseconds($this->replyMilliSecondsTimeout)) : $replyChannel->receive();
+            $replyMessage = $this->replyMilliSecondsTimeout > 0 ? $replyChannel->receiveWithTimeout(PollingMetadata::create('gateway_reply')->withFixedRateInMilliseconds($this->replyMilliSecondsTimeout)) : $replyChannel->receive();
 
             if (is_null($replyMessage) && ! $this->returnTypeAllowsNull) {
                 throw InvalidArgumentException::create("{$this->interfaceToCallName} expects value, but null was returned. Have you consider changing return value to nullable?");

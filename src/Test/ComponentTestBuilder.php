@@ -3,21 +3,23 @@
 namespace Ecotone\Test;
 
 use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
+use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Gateway\CommandBus;
+use Ecotone\Api\Gateway\EventBus;
+use Ecotone\Api\Gateway\QueryBus;
+use Ecotone\Api\Lite\Test\FlowTestSupport;
+use Ecotone\Api\Lite\Test\MessagingTestSupport;
+use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
 use Ecotone\Lite\InMemoryPSRContainer;
-use Ecotone\Lite\Test\FlowTestSupport;
-use Ecotone\Lite\Test\MessagingTestSupport;
-use Ecotone\Messaging\Channel\MessageChannelBuilder;
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
 use Ecotone\Messaging\Config\Container\Compiler\RegisterInterfaceToCallReferences;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Endpoint\InterceptedChannelAdapterBuilder;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
@@ -26,9 +28,6 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Ecotone\Messaging\Scheduling\Clock;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
-use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\EventBus;
-use Ecotone\Modelling\QueryBus;
 use Ecotone\SymfonyContainer\EcotoneContainer;
 use Ecotone\SymfonyContainer\EcotoneSymfonyContainerFactory;
 
@@ -62,7 +61,7 @@ class ComponentTestBuilder
         FileSystemAnnotationFinder::getRealRootCatalog($pathToRootCatalog, $pathToRootCatalog);
 
         $configurationVariableService = InMemoryConfigurationVariableService::create($configurationVariables);
-        $serviceConfiguration = $configuration ?? ServiceConfiguration::createWithDefaults()->withSkippedModulePackageNames(ModulePackageList::allPackages());
+        $serviceConfiguration = $configuration ?? ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]);
         if ($defaultEnterpriseMode) {
             $serviceConfiguration = $serviceConfiguration->withLicenceKey(LicenceTesting::VALID_LICENCE);
         }

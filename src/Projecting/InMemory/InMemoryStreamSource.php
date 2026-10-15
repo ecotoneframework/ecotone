@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Projecting\InMemory;
 
-use Ecotone\Modelling\Event;
+use Ecotone\Api\EventSourcing\Event;
 use Ecotone\Projecting\StreamPage;
 use Ecotone\Projecting\StreamSource;
 
@@ -44,7 +44,7 @@ class InMemoryStreamSource implements StreamSource
         $from = $lastPosition !== null ? (int) $lastPosition : 0;
 
         if ($partitionKey) {
-            $events = array_filter($this->events, fn (Event $event) => $event->getMetadata()[$this->partitionHeader] === $partitionKey);
+            $events = array_filter($this->events, fn (Event $event) => $event->metadata[$this->partitionHeader] === $partitionKey);
         } else {
             $events = $this->events;
         }

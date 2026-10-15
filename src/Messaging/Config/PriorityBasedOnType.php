@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config;
 
 use Ecotone\AnnotationFinder\AnnotatedFinding;
-use Ecotone\Messaging\Attribute\Endpoint\Priority;
+use Ecotone\Api\Attribute\Aggregate;
+use Ecotone\Api\Attribute\Priority;
 use Ecotone\Messaging\Attribute\StreamBasedSource;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Modelling\Attribute\Aggregate;
 
 /**
  * licence Apache-2.0
@@ -55,7 +55,7 @@ final class PriorityBasedOnType
         };
 
         return $objectToCheck->hasAnnotation(Priority::class)
-            ? new self($objectToCheck->getAnnotationsByImportanceOrder(Priority::class)[0]->getHeaderValue(), $type)
+            ? new self($objectToCheck->getAnnotationsByImportanceOrder(Priority::class)[0]->headerValue, $type)
             : new self(Priority::DEFAULT_PRIORITY, $type);
     }
 

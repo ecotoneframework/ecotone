@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
 use InvalidArgumentException;
 

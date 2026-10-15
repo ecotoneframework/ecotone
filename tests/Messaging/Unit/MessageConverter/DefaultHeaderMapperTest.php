@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\MessageConverter;
 
-use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\Type;
+use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use Ecotone\Test\InMemoryConversionService;
 use PHPUnit\Framework\TestCase;
@@ -136,7 +135,7 @@ class DefaultHeaderMapperTest extends TestCase
                     MediaType::APPLICATION_X_PHP,
                     UuidInterface::class,
                     MediaType::APPLICATION_JSON,
-                    Type::STRING,
+                    'string',
                     $personId
                 )
             )
@@ -163,7 +162,7 @@ class DefaultHeaderMapperTest extends TestCase
                         MediaType::APPLICATION_X_PHP,
                         UuidInterface::class,
                         MediaType::APPLICATION_JSON,
-                        Type::STRING,
+                        'string',
                         $convertedData
                     )
             )

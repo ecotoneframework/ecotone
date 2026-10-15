@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Channel;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Message;
 
 /**
  * licence Apache-2.0

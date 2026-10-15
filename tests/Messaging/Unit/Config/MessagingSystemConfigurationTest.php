@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Interceptor\Precedence;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Messaging\MessageChannel;
+use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
-use Ecotone\Messaging\Channel\PublishSubscribeChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleChannelInterceptorBuilder;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ConsoleCommandConfiguration;
@@ -20,16 +25,10 @@ use Ecotone\Messaging\Config\Container\GatewayProxyReference;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\InMemoryModuleMessaging;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
-use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
-use Ecotone\Messaging\Endpoint\PollingConsumer\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
@@ -38,13 +37,10 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\PollableChannel;
-use Ecotone\Messaging\Precedence;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Exception;
+use InvalidArgumentException;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\CombinedGatewayExample;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Gateway\SingleMethodGatewayExample;
@@ -56,7 +52,6 @@ use Test\Ecotone\Messaging\Fixture\Handler\Gateway\MultipleMethodsGatewayExample
 use Test\Ecotone\Messaging\Fixture\Handler\NoReturnMessageHandler;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\CallWithAnnotationFromMethodInterceptorExample;
 use Test\Ecotone\Messaging\Fixture\Handler\Processor\StubCallSavingService;
-use Test\Ecotone\Messaging\Fixture\InterceptedBridge\BridgeExampleIncomplete;
 use Test\Ecotone\Messaging\Fixture\SameChannelAndRouting\SomeTestCommandHandler;
 use Test\Ecotone\Messaging\Fixture\SameChannelAndRouting\SomeTestEventHandler;
 use Test\Ecotone\Messaging\Fixture\Service\CalculatingService;
@@ -81,51 +76,16 @@ use Test\Ecotone\Messaging\Unit\MessagingTestCase;
  */
 class MessagingSystemConfigurationTest extends MessagingTestCase
 {
-    /**
-     * @throws ConfigurationException
-     * @throws Exception
-     * @throws MessagingException
-     */
-    public function test_run_event_driven_consumer()
-    {
-        $subscribableChannelName = 'input';
-        $subscribableChannel = DirectChannel::create();
-        $messageHandler = NoReturnMessageHandler::create();
-
-        $messagingSystem = $this->createMessagingSystemConfiguration()
-            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $subscribableChannelName))
-            ->registerMessageChannel(SimpleMessageChannelBuilder::create($subscribableChannelName, $subscribableChannel))
-            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        $messagingSystem->getMessageChannelByName($subscribableChannelName)->send(MessageBuilder::withPayload('a')->build());
-
-        $this->assertTrue($messageHandler->wasCalled());
-    }
-
     private function createMessagingSystemConfiguration(): Configuration
     {
         return MessagingSystemConfiguration::prepareWithDefaultsForTesting();
     }
 
-    public function test_running_pollable_consumer()
-    {
-        $messageChannelName = 'pollableChannel';
-        $messageHandler = NoReturnMessageHandler::create();
-
-        $messagingSystem = $this->createMessagingSystemConfiguration()
-            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $messageChannelName))
-            ->registerMessageChannel(SimpleMessageChannelBuilder::create($messageChannelName, QueueChannel::create()))
-            ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        $messagingSystem->getMessageChannelByName($messageChannelName)->send(MessageBuilder::withPayload('a')->build());
-
-        $messagingSystem->run($messagingSystem->list()[0]);
-
-        $this->assertTrue($messageHandler->wasCalled());
-    }
-
+    /**
+     * @throws ConfigurationException
+     * @throws Exception
+     * @throws MessagingException
+     */
     public function test_running_overriding_polling_metadata()
     {
         $messageChannelName = 'pollableChannel';
@@ -145,16 +105,6 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         $this->assertTrue($messageHandler->wasCalled());
     }
 
-    public function test_throwing_exception_if_running_not_existing_consumer()
-    {
-        $messagingSystem = $this->createMessagingSystemConfiguration()
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        $this->expectException(InvalidArgumentException::class);
-
-        $messagingSystem->run('some');
-    }
-
     public function test_throwing_exception_if_registered_asynchronous_for_not_existing_endpoint()
     {
         $this->expectException(ConfigurationException::class);
@@ -162,120 +112,6 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         MessagingSystemConfiguration::prepareWithDefaultsForTesting()
             ->registerAsynchronousEndpoint('asyncChannel', 'endpointId')
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-    }
-
-    public function test_throwing_exception_if_registering_asynchronous_for_not_existing_channel()
-    {
-        $this->expectException(ConfigurationException::class);
-
-        MessagingSystemConfiguration::prepareWithDefaultsForTesting()
-            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
-            ->registerConsumerFactory(new PollingConsumerBuilder())
-            ->registerMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'result')
-                    ->withEndpointId('endpointId')
-                    ->withInputChannelName('inputChannel')
-            )
-            ->registerAsynchronousEndpoint('asyncChannel', 'endpointId')
-            ->registerPollingMetadata(PollingMetadata::create('asyncChannel')->setExecutionAmountLimit(1))
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-    }
-
-    public function test_registering_asynchronous_endpoint()
-    {
-        $calculatingService = CalculatingService::create(1);
-        $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaultsForTesting()
-            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
-            ->registerConsumerFactory(new PollingConsumerBuilder())
-            ->registerMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference($calculatingService, 'result')
-                    ->withEndpointId('endpointId')
-                    ->withInputChannelName('inputChannel')
-            )
-            ->registerAsynchronousEndpoint('asyncChannel', 'endpointId')
-            ->registerPollingMetadata(PollingMetadata::create('asyncChannel')->setExecutionAmountLimit(1))
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel('asyncChannel'))
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        $message = MessageBuilder::withPayload(2)
-            ->build();
-
-        /** @var MessageChannel $channel */
-        $channel = $configuredMessagingSystem->getMessageChannelByName('inputChannel');
-
-        $channel->send($message);
-        $this->assertNull($calculatingService->getLastResult());
-        $configuredMessagingSystem->run('asyncChannel');
-        $this->assertEquals(2, $calculatingService->getLastResult());
-    }
-
-    public function test_registering_asynchronous_endpoint_with_two_channels()
-    {
-        $calculatingService = CalculatingService::create(1);
-        $entrypointChannelName = 'inputChannel';
-        $channelNameOne = 'asyncChannel1';
-        $channelNameTwo = 'asyncChannel2';
-        $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaultsForTesting()
-            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
-            ->registerConsumerFactory(new PollingConsumerBuilder())
-            ->registerMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference($calculatingService, 'result')
-                    ->withEndpointId('endpointId')
-                    ->withInputChannelName($entrypointChannelName)
-            )
-            ->registerAsynchronousEndpoint([$channelNameOne, $channelNameTwo], 'endpointId')
-            ->registerPollingMetadata(PollingMetadata::create($channelNameOne)->withTestingSetup())
-            ->registerPollingMetadata(PollingMetadata::create($channelNameTwo)->withTestingSetup())
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($channelNameOne))
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($channelNameTwo))
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        /** @var MessageChannel $channel */
-        $channel = $configuredMessagingSystem->getMessageChannelByName($entrypointChannelName);
-
-        $channel->send(MessageBuilder::withPayload(2)->build());
-        $this->assertNull($calculatingService->getLastResult());
-        $configuredMessagingSystem->run($channelNameOne);
-        $this->assertNull($calculatingService->getLastResult());
-        $configuredMessagingSystem->run($channelNameTwo);
-        $this->assertEquals(2, $calculatingService->getLastResult());
-    }
-
-    public function test_registering_asynchronous_endpoint_with_three_channels()
-    {
-        $calculatingService = CalculatingService::create(1);
-        $entrypointChannelName = 'inputChannel';
-        $channelNameOne = 'asyncChannel1';
-        $channelNameTwo = 'asyncChannel2';
-        $channelNameThree = 'asyncChannel3';
-        $configuredMessagingSystem = MessagingSystemConfiguration::prepareWithDefaultsForTesting()
-            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
-            ->registerConsumerFactory(new PollingConsumerBuilder())
-            ->registerMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference($calculatingService, 'result')
-                    ->withEndpointId('endpointId')
-                    ->withInputChannelName($entrypointChannelName)
-            )
-            ->registerAsynchronousEndpoint([$channelNameOne, $channelNameTwo, $channelNameThree], 'endpointId')
-            ->registerPollingMetadata(PollingMetadata::create($channelNameOne)->withTestingSetup())
-            ->registerPollingMetadata(PollingMetadata::create($channelNameTwo)->withTestingSetup())
-            ->registerPollingMetadata(PollingMetadata::create($channelNameThree)->withTestingSetup())
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($channelNameOne))
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($channelNameTwo))
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($channelNameThree))
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        /** @var MessageChannel $channel */
-        $channel = $configuredMessagingSystem->getMessageChannelByName($entrypointChannelName);
-
-        $channel->send(MessageBuilder::withPayload(2)->build());
-        $this->assertNull($calculatingService->getLastResult());
-        $configuredMessagingSystem->run($channelNameOne);
-        $this->assertNull($calculatingService->getLastResult());
-        $configuredMessagingSystem->run($channelNameTwo);
-        $this->assertNull($calculatingService->getLastResult());
-        $configuredMessagingSystem->run($channelNameThree);
-        $this->assertEquals(2, $calculatingService->getLastResult());
     }
 
     public function test_registering_before_call_intercepted_asynchronous_endpoint()
@@ -297,7 +133,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
                 1,
                 CalculatingService::class
             ))
-            ->registerPollingMetadata(PollingMetadata::create('asyncChannel')->setExecutionAmountLimit(1))
+            ->registerPollingMetadata(PollingMetadata::create('asyncChannel')->withExecutionAmountLimit(1))
             ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel('asyncChannel'))
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith([
                 $reference => $calculatingService,
@@ -326,18 +162,18 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [CalculatingServiceForAsynchronousScenario::class],
             [$calculatingService],
-            ServiceConfiguration::createWithAsynchronicityOnly()
+            ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([])
                 ->withExtensionObjects([
                     SimpleMessageChannelBuilder::createQueueChannel('asyncOne'),
                     SimpleMessageChannelBuilder::createQueueChannel('asyncTwo'),
                 ])
         );
 
-        $ecotoneLite->sendCommandWithRoutingKey('getResultOne', 2);
+        $ecotoneLite->sendCommandWithRouting('getResultOne', 2);
         $ecotoneLite->run('asyncOne');
         $this->assertEquals(4, $calculatingService->getLastResult());
 
-        $ecotoneLite->sendCommandWithRoutingKey('getResultTwo', 3);
+        $ecotoneLite->sendCommandWithRouting('getResultTwo', 3);
         $ecotoneLite->run('asyncTwo');
         $this->assertEquals(6, $calculatingService->getLastResult());
     }
@@ -652,7 +488,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
                     ->withInputChannelName('inputChannel')
             )
             ->registerAsynchronousEndpoint('asyncChannel', 'endpointId')
-            ->registerPollingMetadata(PollingMetadata::create('asyncChannel')->setExecutionAmountLimit(1))
+            ->registerPollingMetadata(PollingMetadata::create('asyncChannel')->withExecutionAmountLimit(1))
             ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel('asyncChannel'))
             ->registerChannelInterceptor(SimpleChannelInterceptorBuilder::create('inputChannel', 'ref-name'))
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith(['ref-name' => $channelInterceptor]));
@@ -906,7 +742,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         $this->assertTrue($channelInterceptor->wasPreSendCalled());
         $this->assertTrue($channelInterceptor->wasAfterSendCompletionCalled());
         $this->assertSame($message, $channelInterceptor->getCapturedMessage());
-        $this->assertInstanceOf(\InvalidArgumentException::class, $channelInterceptor->getCapturedException());
+        $this->assertInstanceOf(InvalidArgumentException::class, $channelInterceptor->getCapturedException());
     }
 
     /**
@@ -994,171 +830,6 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
     /**
      * @throws MessagingException
      */
-    public function test_creating_implicit_direct_channel_if_not_exists()
-    {
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaultsForTesting();
-
-        $inputMessageChannelName = 'inputChannelName';
-        $messageHandler = NoReturnMessageHandler::create();
-        $messagingSystem = $messagingSystemConfiguration
-            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $inputMessageChannelName))
-            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
-            ->buildMessagingSystemFromConfiguration(
-                InMemoryReferenceSearchService::createEmpty()
-            );
-
-        $messagingSystem->getMessageChannelByName($inputMessageChannelName)
-            ->send(MessageBuilder::withPayload('some')->build());
-
-        $this->assertTrue($messageHandler->wasCalled());
-    }
-
-    /**
-     * @throws ConfigurationException
-     * @throws MessagingException
-     */
-    public function test_creating_default_channel_configuration_if_not_exists()
-    {
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaultsForTesting();
-
-        $inputMessageChannelName = 'inputChannelName';
-        $messageHandler = NoReturnMessageHandler::create();
-        $messagingSystem = $messagingSystemConfiguration
-            ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($inputMessageChannelName))
-            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $inputMessageChannelName))
-            ->registerConsumerFactory(new EventDrivenConsumerBuilder())
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        $messagingSystem->getMessageChannelByName($inputMessageChannelName)
-            ->send(MessageBuilder::withPayload('some')->build());
-
-        $this->assertInstanceOf(PublishSubscribeChannel::class, $messagingSystem->getMessageChannelByName($inputMessageChannelName));
-    }
-
-    /**
-     * @throws ConfigurationException
-     * @throws MessagingException
-     */
-    public function test_replacing_implicit_direct_channel_with_real_channel_if_passed()
-    {
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaultsForTesting();
-
-        $inputMessageChannelName = 'inputChannelName';
-        $messageHandler = NoReturnMessageHandler::create();
-        $messagingSystem = $messagingSystemConfiguration
-            ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $inputMessageChannelName))
-            ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($inputMessageChannelName))
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        $messagingSystem->getMessageChannelByName($inputMessageChannelName)
-            ->send(MessageBuilder::withPayload('some')->build());
-
-        $this->assertFalse($messageHandler->wasCalled(), 'Queue channel was registered, so without explicit calling the consumer it should not be ever called');
-    }
-
-    public function test_registering_endpoint_with_error_channel()
-    {
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaultsForTesting();
-
-        $inputMessageChannelName = 'inputChannelName';
-        $messageHandler = ExceptionMessageHandler::create();
-        $endpointName = 'pollableName';
-        $errorChannel = QueueChannel::create();
-        $messagingSystem = $messagingSystemConfiguration
-            ->registerMessageHandler(
-                DumbMessageHandlerBuilder::create($messageHandler, $inputMessageChannelName)
-                    ->withEndpointId($endpointName)
-            )
-            ->registerConsumerFactory(new PollingConsumerBuilder())
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($inputMessageChannelName))
-            ->registerMessageChannel(SimpleMessageChannelBuilder::create('error', $errorChannel))
-            ->registerPollingMetadata(
-                PollingMetadata::create($endpointName)
-                    ->setHandledMessageLimit(1)
-                    ->setErrorChannelName('error')
-            )
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        $messagingSystem->getMessageChannelByName($inputMessageChannelName)
-            ->send(MessageBuilder::withPayload('some')->build());
-
-        $messagingSystem->run($endpointName);
-
-        $this->assertNotNull($errorChannel->receive());
-    }
-
-    public function test_registering_endpoint_with_default_error_channel()
-    {
-        $applicationConfiguration = ServiceConfiguration::createWithAsynchronicityOnly()
-                                        ->withDefaultErrorChannel('error');
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaultsForTesting(serviceConfiguration: $applicationConfiguration);
-
-        $inputMessageChannelName = 'inputChannelName';
-        $messageHandler = ExceptionMessageHandler::create();
-        $endpointName = 'pollableName';
-        $errorChannel = QueueChannel::create();
-        $messagingSystem = $messagingSystemConfiguration
-            ->registerMessageHandler(
-                DumbMessageHandlerBuilder::create($messageHandler, $inputMessageChannelName)
-                    ->withEndpointId($endpointName)
-            )
-            ->registerConsumerFactory(new PollingConsumerBuilder())
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($inputMessageChannelName))
-            ->registerMessageChannel(SimpleMessageChannelBuilder::create('error', $errorChannel))
-            ->registerPollingMetadata(
-                PollingMetadata::create($endpointName)
-                    ->setHandledMessageLimit(1)
-            )
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        $messagingSystem->getMessageChannelByName($inputMessageChannelName)
-            ->send(MessageBuilder::withPayload('some')->build());
-
-        $messagingSystem->run($endpointName);
-
-        $this->assertNotNull($errorChannel->receive());
-    }
-
-    public function test_disabling_error_channel_for_endpoint()
-    {
-        $applicationConfiguration = ServiceConfiguration::createWithDefaults()
-            ->withDefaultErrorChannel('error');
-        $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithModuleRetrievingService(
-            InMemoryModuleMessaging::createEmpty(),
-            InterfaceToCallRegistry::createEmpty(),
-            $applicationConfiguration,
-            ServiceCacheConfiguration::noCache()
-        );
-
-        $inputMessageChannelName = 'inputChannelName';
-        $messageHandler = ExceptionMessageHandler::create();
-        $endpointName = 'pollableName';
-        $errorChannel = QueueChannel::create();
-        $messagingSystem = $messagingSystemConfiguration
-            ->registerMessageHandler(
-                DumbMessageHandlerBuilder::create($messageHandler, $inputMessageChannelName)
-                    ->withEndpointId($endpointName)
-            )
-            ->registerConsumerFactory(new PollingConsumerBuilder())
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel($inputMessageChannelName))
-            ->registerMessageChannel(SimpleMessageChannelBuilder::create('error', $errorChannel))
-            ->registerPollingMetadata(
-                PollingMetadata::create($endpointName)
-                    ->setExecutionTimeLimitInMilliseconds(1)
-                    ->setHandledMessageLimit(1)
-                    ->setEnabledErrorChannel(false)
-            )
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
-
-        $this->expectException(\InvalidArgumentException::class);
-
-        $messagingSystem->getMessageChannelByName($inputMessageChannelName)
-            ->send(MessageBuilder::withPayload('some')->build());
-
-        $messagingSystem->run($endpointName);
-    }
-
     public function test_throwing_exception_if_registering_inbound_channel_adapter_with_same_names()
     {
         $messagingSystemConfiguration = MessagingSystemConfiguration::prepareWithDefaultsForTesting();
@@ -1281,7 +952,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             ->registerConsumerFactory(new EventDrivenConsumerBuilder())
             ->registerPollingMetadata(
                 PollingMetadata::create($endpointName)
-                    ->setHandledMessageLimit(1)
+                    ->withHandledMessageLimit(1)
             )
             ->registerBeforeMethodInterceptor(
                 MethodInterceptorBuilder::create(
@@ -1617,21 +1288,6 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         $this->assertContains('combinedGateway', array_map(fn (GatewayProxyReference $gatewayProxyReference) => $gatewayProxyReference->getReferenceName(), $messagingSystem->getGatewayList()));
     }
 
-    public function test_throwing_exception_if_registering_endpoint_with_id_same_as_message_channel_name()
-    {
-        $this->expectException(ConfigurationException::class);
-
-        MessagingSystemConfiguration::prepareWithDefaultsForTesting()
-            ->registerMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(new OrderService(), 'order')
-                    ->withInputChannelName('some')
-                    ->withEndpointId('order.register')
-            )
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel('order.register'))
-            ->process(new ContainerBuilder())
-        ;
-    }
-
     public function test_throwing_exception_if_registering_message_channel_name_with_same_name_as_endpoint_id()
     {
         $this->expectException(ConfigurationException::class);
@@ -1660,18 +1316,6 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             )
             ->process(new ContainerBuilder())
         ;
-    }
-
-    public function test_throwing_exception_if_message_handler_having_same_channel_and_endpoint_id()
-    {
-        $this->expectException(ConfigurationException::class);
-
-        MessagingSystemConfiguration::prepareWithDefaultsForTesting()
-            ->registerMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(new OrderService(), 'order')
-                    ->withInputChannelName('order.register')
-                    ->withEndpointId('order.register')
-            );
     }
 
     /**
@@ -2050,40 +1694,6 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
     /**
      * @throws MessagingException
      */
-    public function test_throwing_exception_if_registering_handlers_with_same_endpoint_id()
-    {
-        $this->expectException(ConfigurationException::class);
-
-        MessagingSystemConfiguration::prepareWithDefaultsForTesting()
-            ->registerMessageHandler(DumbMessageHandlerBuilder::createSimple()->withEndpointId('1'))
-            ->registerMessageHandler(DumbMessageHandlerBuilder::createSimple()->withEndpointId('1'));
-    }
-
-    /**
-     * @throws ConfigurationException
-     * @throws MessagingException
-     */
-    public function test_generating_random_id_if_no_endpoint_id_passed()
-    {
-        MessagingSystemConfiguration::prepareWithDefaultsForTesting()
-            ->registerMessageHandler(DumbMessageHandlerBuilder::createSimple())
-            ->registerMessageHandler(DumbMessageHandlerBuilder::createSimple());
-
-        $this->assertTrue(true);
-    }
-
-    /**
-     * @throws MessagingException
-     */
-    public function test_throwing_exception_if_trying_to_register_two_channels_with_same_names()
-    {
-        $this->expectException(ConfigurationException::class);
-
-        MessagingSystemConfiguration::prepareWithDefaultsForTesting()
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel('some'))
-            ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel('some'));
-    }
-
     public function test_calling_console_command_with_default()
     {
         $consoleCommandName = 'someName';
@@ -2128,36 +1738,44 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         $this->assertEquals(1000, $headers['header.token']);
     }
 
-    public function test_throwing_exception_if_registered_command_handler_with_same_routing_as_asynchronous_channel()
+    public function test_command_handler_routing_key_can_match_asynchronous_channel_name(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("Command Handler routing key can't be equal to asynchronous channel name");
+        $commandHandler = new SomeTestCommandHandler();
 
-        EcotoneLite::bootstrapForTesting(
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
             [SomeTestCommandHandler::class],
-            [new SomeTestCommandHandler()],
+            [$commandHandler],
             ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withEnabledModulePackageNames([])
                 ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('input'),
+                    SimpleMessageChannelBuilder::createQueueChannel('orders'),
                 ])
         );
+
+        $ecotone->sendCommandWithRouting('orders');
+        $ecotone->run('orders', ExecutionPollingMetadata::createWithTestingSetup(1));
+
+        $this->assertSame(1, $commandHandler->handled);
     }
 
-    public function test_throwing_exception_if_registered_event_handler_with_same_routing_as_asynchronous_channel()
+    public function test_event_handler_routing_key_can_match_asynchronous_channel_name(): void
     {
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage("Event Handler listen to routing can't be equal to asynchronous channel name");
+        $eventHandler = new SomeTestEventHandler();
 
-        EcotoneLite::bootstrapForTesting(
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
             [SomeTestEventHandler::class],
-            [new SomeTestEventHandler()],
+            [$eventHandler],
             ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withEnabledModulePackageNames([])
                 ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('input'),
+                    SimpleMessageChannelBuilder::createQueueChannel('orders'),
                 ])
         );
+
+        $ecotone->publishEventWithRouting('orders');
+        $ecotone->run('orders', ExecutionPollingMetadata::createWithTestingSetup(1));
+
+        $this->assertSame(1, $eventHandler->handled);
     }
 
     public function test_throwing_exception_on_lacking_request_channel_for_gateway(): void
@@ -2167,6 +1785,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         EcotoneLite::bootstrapFlowTesting(
             [MultipleMethodsGatewayExample::class],
             [],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
     }
 
@@ -2174,9 +1793,12 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
     {
         $this->expectException(ConfigurationException::class);
 
-        EcotoneLite::bootstrapFlowTesting(
-            [BridgeExampleIncomplete::class],
-            [],
-        );
+        MessagingSystemConfiguration::prepareWithDefaultsForTesting()
+            ->registerMessageHandler(
+                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(0), 'result')
+                    ->withInputChannelName('bridgeExample')
+                    ->withOutputMessageChannel('bridgeSum')
+            )
+            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
     }
 }

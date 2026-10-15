@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Handler;
 
-use Ecotone\Messaging\Message;
+use Ecotone\Api\Messaging\Message;
 
 /**
  * @licence Apache-2.0

@@ -61,7 +61,7 @@ class AggregateRepositoriesCompilerPass implements CompilerPass
         }
 
         if (! empty($repositoriesLeftToHandle)) {
-            throw new InvalidArgumentException('No aggregate repository builder found for ' . implode(', ', $repositoriesLeftToHandle) . '. Did you forget to implement one of StandardRepository or EventSourcedRepository interface ?');
+            throw new InvalidArgumentException('No aggregate repository builder found for ' . implode(', ', $repositoriesLeftToHandle) . '. Did you forget to implement one of StateStoredRepository or EventSourcedRepository interface ?');
         }
 
         $builder->register(AllAggregateRepository::class, new Definition(AllAggregateRepository::class, [$aggregateRepositories]));

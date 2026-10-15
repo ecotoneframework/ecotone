@@ -2,7 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Processor;
 
-use Ecotone\Lite\EcotoneLite;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Lite\EcotoneLite;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\InterceptorsOrdering\Gateway;
 use Test\Ecotone\Messaging\Fixture\InterceptorsOrdering\GatewayInterceptors;
@@ -27,7 +28,8 @@ class InterceptorsOrderingTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [InterceptorOrderingCase::class, InterceptorOrderingInterceptors::class],
             [new InterceptorOrderingCase(), new InterceptorOrderingInterceptors(), $stack],
-        )->sendCommandWithRoutingKey('commandEndpointReturning');
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+        )->sendCommandWithRouting('commandEndpointReturning');
 
         self::assertEquals(
             [
@@ -49,7 +51,8 @@ class InterceptorsOrderingTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [InterceptorOrderingCase::class, InterceptorOrderingInterceptors::class],
             [new InterceptorOrderingCase(), new InterceptorOrderingInterceptors(), $stack],
-        )->sendCommandWithRoutingKey('commandEndpointVoid');
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+        )->sendCommandWithRouting('commandEndpointVoid');
 
         self::assertEquals(
             [
@@ -69,6 +72,7 @@ class InterceptorsOrderingTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [InterceptorOrderingCase::class, InterceptorOrderingInterceptors::class],
             [new InterceptorOrderingCase(), new InterceptorOrderingInterceptors(), $callStack],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )->sendDirectToChannel('serviceEndpointReturning');
 
         self::assertEquals(
@@ -91,6 +95,7 @@ class InterceptorsOrderingTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [InterceptorOrderingCase::class, InterceptorOrderingInterceptors::class],
             [new InterceptorOrderingCase(), new InterceptorOrderingInterceptors(), $callStack],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )->sendDirectToChannel('serviceEndpointVoid');
 
         self::assertEquals(
@@ -112,6 +117,7 @@ class InterceptorsOrderingTest extends TestCase
         $gateway = EcotoneLite::bootstrapFlowTesting(
             [InterceptorOrderingCase::class, Gateway::class, InterceptorOrderingInterceptors::class, GatewayInterceptors::class],
             [new InterceptorOrderingCase(), new InterceptorOrderingInterceptors(), new GatewayInterceptors(), $callStack],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )
             ->getGateway(Gateway::class);
         $gateway->runWithReturn();
@@ -141,6 +147,7 @@ class InterceptorsOrderingTest extends TestCase
         $gateway = EcotoneLite::bootstrapFlowTesting(
             [InterceptorOrderingCase::class, Gateway::class, InterceptorOrderingInterceptors::class, GatewayInterceptors::class],
             [new InterceptorOrderingCase(), new InterceptorOrderingInterceptors(), new GatewayInterceptors(), $callStack],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )
             ->getGateway(Gateway::class);
         $gateway->runWithVoid();
@@ -166,9 +173,10 @@ class InterceptorsOrderingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [InterceptorOrderingAggregate::class, InterceptorOrderingInterceptors::class],
             [new InterceptorOrderingInterceptors(), $callStack],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
-        $ecotone->sendCommandWithRoutingKey('endpoint', metadata: ['aggregate.id' => 'id']);
+        $ecotone->sendCommandWithRouting('endpoint', metadata: ['aggregate.id' => 'id']);
 
         self::assertEquals(
             [
@@ -189,7 +197,7 @@ class InterceptorsOrderingTest extends TestCase
         );
 
         $callStack->reset();
-        $ecotone->sendCommandWithRoutingKey('endpoint', metadata: ['aggregate.id' => 'id']);
+        $ecotone->sendCommandWithRouting('endpoint', metadata: ['aggregate.id' => 'id']);
         self::assertEquals(
             [
                 'beforeChangeHeaders',
@@ -214,11 +222,12 @@ class InterceptorsOrderingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [InterceptorOrderingAggregate::class, InterceptorOrderingInterceptors::class],
             [new InterceptorOrderingInterceptors(), $callStack],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )
             ->withStateFor(new InterceptorOrderingAggregate('existingAggregateId'));
 
         $ecotone
-            ->sendCommandWithRoutingKey('actionVoid', metadata: ['aggregate.id' => 'existingAggregateId']);
+            ->sendCommandWithRouting('actionVoid', metadata: ['aggregate.id' => 'existingAggregateId']);
 
         self::assertEquals(
             [
@@ -240,7 +249,8 @@ class InterceptorsOrderingTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [InterceptorOrderingCase::class, InterceptorOrderingInterceptors::class],
             [new InterceptorOrderingCase(), new InterceptorOrderingInterceptors(), $stack],
-        )->sendCommandWithRoutingKey('commandWithOutputChannel');
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+        )->sendCommandWithRouting('commandWithOutputChannel');
 
         self::assertEquals(
             [
@@ -271,6 +281,7 @@ class InterceptorsOrderingTest extends TestCase
         $gateway = EcotoneLite::bootstrapFlowTesting(
             [InterceptorOrderingCase::class, Gateway::class, InterceptorOrderingInterceptors::class, GatewayInterceptors::class],
             [new InterceptorOrderingCase(), new InterceptorOrderingInterceptors(), new GatewayInterceptors(), $callStack],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )
             ->getGateway(Gateway::class);
         $gateway->runWithEndpointOutputChannel();
@@ -309,13 +320,14 @@ class InterceptorsOrderingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [InterceptorOrderingAggregate::class, InterceptorOrderingInterceptors::class, OutputHandler::class],
             [new InterceptorOrderingInterceptors(), $callStack, new OutputHandler()],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )
             ->withStateFor(new InterceptorOrderingAggregate('existingAggregateId'));
         // Remove event handler event from stack
         $callStack->reset();
 
         $ecotone
-            ->sendCommandWithRoutingKey('endpointWithOutput', metadata: ['aggregate.id' => 'existingAggregateId']);
+            ->sendCommandWithRouting('endpointWithOutput', metadata: ['aggregate.id' => 'existingAggregateId']);
 
         self::assertEquals(
             [
@@ -338,7 +350,8 @@ class InterceptorsOrderingTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [InterceptorOrderingAggregate::class, InterceptorOrderingInterceptors::class, OutputHandler::class],
             [new InterceptorOrderingInterceptors(), $callStack, new OutputHandler()],
-        )->sendCommandWithRoutingKey('endpointFactoryWithOutput', metadata: ['aggregate.id' => 'id']);
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+        )->sendCommandWithRouting('endpointFactoryWithOutput', metadata: ['aggregate.id' => 'id']);
 
         self::assertEquals(
             [
@@ -364,7 +377,8 @@ class InterceptorsOrderingTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [InterceptorOrderingAggregate::class, InterceptorOrderingInterceptors::class, OutputHandler::class],
             [new InterceptorOrderingInterceptors(), $callStack, new OutputHandler()],
-        )->sendCommandWithRoutingKey('endpointFactoryWithOutput', metadata: ['aggregate.id' => 'id']);
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+        )->sendCommandWithRouting('endpointFactoryWithOutput', metadata: ['aggregate.id' => 'id']);
 
         self::assertEquals(
             [

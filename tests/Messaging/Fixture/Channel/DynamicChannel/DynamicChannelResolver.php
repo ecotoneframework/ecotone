@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Channel\DynamicChannel;
 
-use Ecotone\Messaging\Attribute\InternalHandler;
-use Ecotone\Messaging\Attribute\Parameter\Header;
+use Ecotone\Api\Attribute\Header;
+use Ecotone\Api\Attribute\InternalHandler;
 use Ecotone\Messaging\NullableMessageChannel;
 use InvalidArgumentException;
 

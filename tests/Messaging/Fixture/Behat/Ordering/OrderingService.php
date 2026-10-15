@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Ordering;
 
-use Ecotone\Messaging\Future;
+use Ecotone\Api\Messaging\Future;
 
 /**
  * Interface OrderingService

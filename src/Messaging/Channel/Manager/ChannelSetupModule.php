@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Channel\Manager;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
@@ -14,7 +15,6 @@ use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
@@ -24,7 +24,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
  *
  * licence Apache-2.0
  */
-class ChannelSetupModule extends NoExternalConfigurationModule implements AnnotationModule
+final class ChannelSetupModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
@@ -41,12 +41,12 @@ class ChannelSetupModule extends NoExternalConfigurationModule implements Annota
         );
 
         // Collect all pollable channels from extension objects
-        $messageChannelBuilders = ExtensionObjectResolver::resolve(\Ecotone\Messaging\Channel\MessageChannelBuilder::class, $extensionObjects);
+        $messageChannelBuilders = ExtensionObjectResolver::resolve(\Ecotone\Api\ExtensionObject\MessageChannelBuilder::class, $extensionObjects);
         $allPollableChannelNames = array_map(
-            fn (\Ecotone\Messaging\Channel\MessageChannelBuilder $builder) => $builder->getMessageChannelName(),
+            fn (\Ecotone\Api\ExtensionObject\MessageChannelBuilder $builder) => $builder->getMessageChannelName(),
             array_filter(
                 $messageChannelBuilders,
-                fn (\Ecotone\Messaging\Channel\MessageChannelBuilder $builder) => $builder->isPollable()
+                fn (\Ecotone\Api\ExtensionObject\MessageChannelBuilder $builder) => $builder->isPollable()
             )
         );
 
@@ -68,13 +68,6 @@ class ChannelSetupModule extends NoExternalConfigurationModule implements Annota
         // Register console commands
         $this->registerConsoleCommand('setup', 'ecotone:migration:channel:setup', ChannelSetupCommand::class, $messagingConfiguration, $interfaceToCallRegistry, 'Initializes infrastructure of registered message channels');
         $this->registerConsoleCommand('delete', 'ecotone:migration:channel:delete', ChannelDeleteCommand::class, $messagingConfiguration, $interfaceToCallRegistry, 'Deletes infrastructure of registered message channels');
-    }
-
-    public function canHandle($extensionObject): bool
-    {
-        return $extensionObject instanceof ChannelManagerReference
-            || $extensionObject instanceof ChannelInitializationConfiguration
-            || $extensionObject instanceof \Ecotone\Messaging\Channel\MessageChannelBuilder;
     }
 
     public function getModulePackageName(): string

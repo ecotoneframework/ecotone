@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Ecotone\Test;
 
 use DateTimeImmutable;
-use Ecotone\Messaging\Scheduling\Duration;
-use Ecotone\Messaging\Scheduling\SleepInterface;
+use Ecotone\Api\Scheduling\Duration;
+use Ecotone\Api\Scheduling\SleepInterface;
 use Psr\Clock\ClockInterface;
 
 /**
@@ -16,10 +16,12 @@ final class StaticPsrClock implements ClockInterface, SleepInterface
 {
     private bool $hasBeenChanged = false;
     private ?DateTimeImmutable $now = null;
+    private ?DateTimeImmutable $pinnedTime = null;
 
     public function __construct(?string $now = null)
     {
         $this->now = ($now === null || $now === 'now') ? null : new DateTimeImmutable($now);
+        $this->pinnedTime = $this->now;
     }
 
     public function now(): DateTimeImmutable
@@ -54,6 +56,34 @@ final class StaticPsrClock implements ClockInterface, SleepInterface
     public function setCurrentTime(DateTimeImmutable $time): void
     {
         $this->now = $time;
+        $this->pinnedTime = $time;
         $this->hasBeenChanged = true;
+    }
+
+    public function pinCurrentTime(): void
+    {
+        $this->pinnedTime = $this->now;
+    }
+
+    public function returnToPinnedTime(): void
+    {
+        if ($this->pinnedTime !== null) {
+            $this->now = $this->pinnedTime;
+        }
+    }
+
+    public function executeAtPinnedTime(callable $execution): mixed
+    {
+        if ($this->pinnedTime === null) {
+            return $execution();
+        }
+
+        $consumerTime = $this->now();
+        $this->now = $this->pinnedTime;
+        try {
+            return $execution();
+        } finally {
+            $this->now = $consumerTime;
+        }
     }
 }

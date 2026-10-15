@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Channel\DeliveryConfirmation;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\BatchMessage;
+use Ecotone\Api\ExtensionObject\RetryTemplateBuilder;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Messaging\BatchMessage;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
 use Ecotone\Messaging\Channel\PollableChannel\PollableChannelConfiguration;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\HighThroughputPublishing\AsyncOrderSubscriber;
@@ -52,20 +52,17 @@ final class DeadLetterOfFailedBatchDeliveriesTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, AsyncOrderSubscriber::class],
             [new OrderService($operationsLog), new AsyncOrderSubscriber(), OperationsLog::class => $operationsLog],
-            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
-                PollableChannelConfiguration::create('async_orders', RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(1)->build())
+            (ServiceConfiguration::createWithDefaults()->withExtensionObjects([
+                PollableChannelConfiguration::create('async_orders', RetryTemplateBuilder::fixedBackOff(1)->maxRetries(1)->build())
                     ->withErrorChannel('dead_letters'),
-            ]),
-            enableAsynchronousProcessing: [
-                InMemoryHighThroughputPublishingChannelBuilder::create('async_orders'),
-                SimpleMessageChannelBuilder::createQueueChannel('dead_letters'),
-            ],
+            ]))->addExtensionObject(InMemoryHighThroughputPublishingChannelBuilder::create('async_orders'))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('dead_letters'))
+                ->withEnabledModulePackageNames([])
         );
         $ordersChannel = $ecotoneLite->getMessageChannel('async_orders');
         assert($ordersChannel instanceof MessageChannelInterceptorAdapter);
         $ordersChannel->getInternalMessageChannel()->failDeliveriesWith('broker not available');
 
-        $ecotoneLite->sendCommandWithRoutingKey('order.place', 'espresso');
+        $ecotoneLite->sendCommandWithRouting('order.place', 'espresso');
 
         $deadLetteredPayloads = $this->receiveAllPayloads($ecotoneLite->getMessageChannel('dead_letters'));
         $this->assertCount(2, $deadLetteredPayloads);
@@ -75,21 +72,18 @@ final class DeadLetterOfFailedBatchDeliveriesTest extends TestCase
         $this->assertStringNotContainsString('espresso-1', $deadLetteredPayloads[1]);
     }
 
-    private function bootstrapWithDeadLetterChannel(): \Ecotone\Lite\Test\FlowTestSupport
+    private function bootstrapWithDeadLetterChannel(): \Ecotone\Api\Lite\Test\FlowTestSupport
     {
         $operationsLog = new OperationsLog();
 
         return EcotoneLite::bootstrapFlowTesting(
             [OrderService::class],
             [new OrderService($operationsLog), OperationsLog::class => $operationsLog],
-            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
-                PollableChannelConfiguration::create('async_orders', RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(1)->build())
+            (ServiceConfiguration::createWithDefaults()->withExtensionObjects([
+                PollableChannelConfiguration::create('async_orders', RetryTemplateBuilder::fixedBackOff(1)->maxRetries(1)->build())
                     ->withErrorChannel('dead_letters'),
-            ]),
-            enableAsynchronousProcessing: [
-                InMemoryHighThroughputPublishingChannelBuilder::create('async_orders'),
-                SimpleMessageChannelBuilder::createQueueChannel('dead_letters'),
-            ],
+            ]))->addExtensionObject(InMemoryHighThroughputPublishingChannelBuilder::create('async_orders'))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('dead_letters'))
+                ->withEnabledModulePackageNames([])
         );
     }
 

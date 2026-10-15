@@ -2,9 +2,9 @@
 
 namespace Ecotone\Messaging\Handler\Router;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Message;
 
 /**
  * Class HeaderValueRouter
@@ -44,5 +44,10 @@ final class HeaderExistsRouter implements RouteSelector, DefinedObject
             $this->routeToChannel,
             $this->fallbackRoute,
         ], 'create');
+    }
+
+    public function __toString(): string
+    {
+        return "header exists `{$this->headerName}` ? `{$this->routeToChannel}` : `{$this->fallbackRoute}`";
     }
 }

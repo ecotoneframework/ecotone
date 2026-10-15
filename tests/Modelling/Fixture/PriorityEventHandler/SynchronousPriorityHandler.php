@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\PriorityEventHandler;
 
-use Ecotone\Messaging\Attribute\Endpoint\Priority;
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\Priority;
+use Ecotone\Api\Attribute\QueryHandler;
 
 /**
  * licence Apache-2.0

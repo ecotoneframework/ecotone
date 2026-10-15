@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\AggregateFlow\LoadAggregate;
 
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Api\Modelling\AggregateNotFoundException;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\AggregateIdMetadata;
 use Ecotone\Modelling\AggregateMessage;
-use Ecotone\Modelling\AggregateNotFoundException;
 use Ecotone\Modelling\Repository\AggregateRepository;
 
 /**
@@ -75,7 +75,9 @@ final class LoadAggregateMessageProcessor implements MessageProcessor
         }
 
         if ($aggregate) {
-            $resultMessage = $resultMessage->setHeader(AggregateMessage::CALLED_AGGREGATE_INSTANCE, $aggregate->getAggregateInstance());
+            $resultMessage = $resultMessage
+                ->setHeader(AggregateMessage::CALLED_AGGREGATE_INSTANCE, $aggregate->getAggregateInstance())
+                ->setHeader(AggregateMessage::CALLED_AGGREGATE_COUNTER_CAPTURED_AT_LOAD, $aggregate->getCounterCapturedAtLoad());
         }
 
         if (! $message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {

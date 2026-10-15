@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\SymfonyContainer;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Attribute\Parameter\Header;
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
-use Ecotone\Messaging\Config\ModulePackageList;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\Header;
+use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -63,15 +62,64 @@ final class CachedBootstrapIsolationTest extends TestCase
         self::assertSame(['from second'], $secondEcotone->getQueryBus()->sendWithRouting('second.retrieve'));
     }
 
+    public function test_bootstraps_of_different_classes_declared_in_one_file_do_not_share_a_cached_container(): void
+    {
+        $cacheDirectory = sys_get_temp_dir() . '/ecotone_cached_bootstrap_isolation_' . bin2hex(random_bytes(6));
+
+        EcotoneLite::bootstrap(
+            [RegisterCustomerHandler::class],
+            [new RegisterCustomerHandler()],
+            ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([])->withCacheDirectoryPath($cacheDirectory),
+            useCachedVersion: true,
+        )->getCommandBus()->sendWithRouting('customer.register');
+
+        $blockCustomerHandler = new BlockCustomerHandler();
+        EcotoneLite::bootstrap(
+            [BlockCustomerHandler::class],
+            [$blockCustomerHandler],
+            ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([])->withCacheDirectoryPath($cacheDirectory),
+            useCachedVersion: true,
+        )->getCommandBus()->sendWithRouting('customer.block');
+
+        self::assertTrue($blockCustomerHandler->blocked);
+    }
+
     private function bootstrapWithCache(object $service): ConfiguredMessagingSystem
     {
         return EcotoneLite::bootstrap(
             [$service::class],
             [$service],
             ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+                ->withEnabledModulePackageNames([])
                 ->withCacheDirectoryPath(sys_get_temp_dir() . '/ecotone_cached_bootstrap_isolation'),
             useCachedVersion: true,
         );
+    }
+}
+
+/**
+ * licence Apache-2.0
+ * @internal
+ */
+final class RegisterCustomerHandler
+{
+    #[CommandHandler('customer.register')]
+    public function register(): void
+    {
+    }
+}
+
+/**
+ * licence Apache-2.0
+ * @internal
+ */
+final class BlockCustomerHandler
+{
+    public bool $blocked = false;
+
+    #[CommandHandler('customer.block')]
+    public function block(): void
+    {
+        $this->blocked = true;
     }
 }

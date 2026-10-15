@@ -2,11 +2,11 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Ticket;
 
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\EventSourcingAggregate;
-use Ecotone\Modelling\Attribute\EventSourcingHandler;
-use Ecotone\Modelling\Attribute\Identifier;
-use Ecotone\Modelling\WithAggregateVersioning;
+use Ecotone\Api\Attribute\Apply;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\EventSourcingAggregate;
+use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Api\Modelling\WithAggregateVersioning;
 
 #[EventSourcingAggregate]
 /**
@@ -26,13 +26,13 @@ class Ticket
         return [new TicketWasStartedEvent($command->getTicketId())];
     }
 
-    #[EventSourcingHandler]
+    #[Apply]
     public function onTicketWasStarted(TicketWasStartedEvent $event): void
     {
         $this->ticketId = $event->getTicketId();
     }
 
-    #[EventSourcingHandler]
+    #[Apply]
     public function onWorkerWasAssigned(WorkerWasAssignedEvent $event): void
     {
         $this->workerId = $event->getAssignedWorkerId();
@@ -59,7 +59,7 @@ class Ticket
         return $this->ticketId;
     }
 
-    public function getVersion(): int
+    public function getAggregateVersion(): int
     {
         return $this->version;
     }

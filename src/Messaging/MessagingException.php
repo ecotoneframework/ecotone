@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\MessageHandlingException;
 use Exception;
 use Throwable;
@@ -42,22 +43,13 @@ class MessagingException extends Exception
     private ?Message $failedMessage = null;
     private ?Throwable $cause = null;
 
-    /**
-     * @param string $message
-     * @return MessagingException|static
-     */
-    public static function create(string $message, ?int $errorCode = null): self
+    public static function create(string $message, ?int $errorCode = null): static
     {
         /** @phpstan-ignore-next-line */
         return new static($message, is_null($errorCode) ? static::errorCode() : $errorCode);
     }
 
-    /**
-     * @param string $message
-     * @param Message $failedMessage
-     * @return MessagingException|static
-     */
-    public static function createWithFailedMessage(string $message, Message $failedMessage): self
+    public static function createWithFailedMessage(string $message, Message $failedMessage): static
     {
         $exception = static::create($message);
         $exception->setFailedMessage($failedMessage);
@@ -65,12 +57,7 @@ class MessagingException extends Exception
         return $exception;
     }
 
-    /**
-     * @param string $message
-     * @param Throwable $throwable
-     * @return MessagingException
-     */
-    public static function createFromPreviousException(string $message, Throwable $throwable): self
+    public static function createFromPreviousException(string $message, Throwable $throwable): static
     {
         /** @phpstan-ignore-next-line */
         return new static($message, static::errorCode(), $throwable);

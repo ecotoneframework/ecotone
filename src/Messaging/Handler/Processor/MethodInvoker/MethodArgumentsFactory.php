@@ -2,10 +2,10 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use Ecotone\Messaging\Attribute\AsynchronousEndpointAttribute;
-use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Api\Attribute\AsynchronousEndpointAttribute;
+use Ecotone\Api\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\ClosureExpression\AttributeExpressionExecutorCompiler;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -29,7 +29,6 @@ class MethodArgumentsFactory
 {
     /**
      * @param ParameterConverterBuilder[] $passedMethodParameterConverters
-     * @param AttributeDefinition[] $endpointAnnotations
      * @return ParameterConverterBuilder[]
      */
     public static function createDefaultMethodParameters(InterfaceToCall $interfaceToCall, array $passedMethodParameterConverters, bool $ignorePayload = false): array

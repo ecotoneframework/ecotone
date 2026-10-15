@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Logger;
 
-use Ecotone\Messaging\Message;
+use Ecotone\Api\Messaging\Message;
 use Psr\Log\LogLevel;
 use Stringable;
 

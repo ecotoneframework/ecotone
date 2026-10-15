@@ -7,34 +7,35 @@ declare(strict_types=1);
 
 namespace Ecotone\EventSourcing;
 
-use Ecotone\Messaging\Handler\ClassDefinition;
+use Ecotone\Api\Gateway\DocumentStore;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
-use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Store\Document\DocumentException;
-use Ecotone\Messaging\Store\Document\DocumentStore;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\GenericMessage;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\ResolvedAggregate;
-use Ecotone\Modelling\Attribute\AggregateVersion;
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
 use Ecotone\Modelling\EventSourcedRepository;
 use Ecotone\Modelling\EventSourcingExecutor\GroupedEventSourcingExecutor;
 use Ecotone\Modelling\Repository\AggregateRepository;
+
+use function is_string;
+
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
 class EventSourcedRepositoryAdapter implements AggregateRepository
 {
     public const SNAPSHOT_COLLECTION = 'aggregate_snapshots_';
+    public const SNAPSHOT_FOLD_SHAPE_COLLECTION = 'aggregate_snapshot_fold_shapes_';
 
     public function __construct(
         private EventSourcedRepository $eventSourcedRepository,
         private AggregateDefinitionRegistry $aggregateDefinitionRegistry,
         private BaseEventSourcingConfiguration $eventSourcingConfiguration,
-        private GroupedEventSourcingExecutor $eventSourcingHandlerExecutor,
+        private GroupedEventSourcingExecutor $applyMethodExecutor,
         private ContainerInterface $container,
         private PropertyEditorAccessor $propertyEditorAccessor,
         private bool $isDefaultRepository,
@@ -68,6 +69,11 @@ class EventSourcedRepositoryAdapter implements AggregateRepository
                     ]);
                 }
 
+                if ($aggregate !== null && ! $this->foldShapeStoredWith($documentStore, $aggregateClassName, $identifiers)) {
+                    $this->logger->error("Snapshot for aggregate {$aggregateClassName} with identifiers " . json_encode($identifiers) . ' was taken with a different set of #[Apply] events than the class declares now. Snapshot ignored to self-heal system.');
+                    $aggregate = null;
+                }
+
                 if ($aggregate !== null && $aggregate::class === $aggregateClassName) {
                     $aggregateVersion = $this->getAggregateVersion($aggregate);
                     Assert::isTrue($aggregateVersion > 0, sprintf('Serialization for snapshot of %s is set incorrectly, it does not serialize aggregate version', $aggregate::class));
@@ -82,7 +88,7 @@ class EventSourcedRepositoryAdapter implements AggregateRepository
 
         if ($eventStream->getEvents()) {
             $aggregateVersion = $eventStream->getAggregateVersion();
-            $aggregate = $this->eventSourcingHandlerExecutor->fillFor($aggregateClassName, $aggregate, $eventStream->getEvents());
+            $aggregate = $this->applyMethodExecutor->fillFor($aggregateClassName, $aggregate, $eventStream->getEvents());
         }
 
         if (! $aggregate) {
@@ -122,7 +128,13 @@ class EventSourcedRepositoryAdapter implements AggregateRepository
                     $documentStore = $this->container->get(
                         $this->eventSourcingConfiguration->getDocumentStoreReferenceFor($aggregate->getAggregateClassName())
                     );
-                    $documentStore->upsertDocument(self::getSnapshotCollectionName($aggregate->getAggregateClassName()), self::getSnapshotDocumentId($aggregate->getIdentifiers()), $aggregate->getAggregateInstance());
+                    $documentStore->upsertDocument(self::getSnapshotCollectionName($aggregate->getAggregateClassName()), self::getSnapshotDocumentId($aggregate->getIdentifiers()), $aggregate->getAggregateInstance(), DocumentStore::LAST_WRITE_WINS);
+                    $documentStore->upsertDocument(
+                        self::getSnapshotFoldShapeCollectionName($aggregate->getAggregateClassName()),
+                        self::getSnapshotDocumentId($aggregate->getIdentifiers()),
+                        json_encode(['foldShape' => $this->applyMethodExecutor->foldShapeOf($aggregate->getAggregateClassName())]),
+                        DocumentStore::LAST_WRITE_WINS,
+                    );
                 }
             }
         }
@@ -138,20 +150,30 @@ class EventSourcedRepositoryAdapter implements AggregateRepository
         return $version + count($aggregate->getEvents());
     }
 
-    private function getAggregateVersion(object|array|string $aggregate): mixed
+    /**
+     * A snapshot is only loadable while the class still folds the events it was taken with. A
+     * document stored before Ecotone recorded the fold shape has no marker beside it, so it counts
+     * as taken with another shape and is replaced the next time a snapshot is written.
+     */
+    private function foldShapeStoredWith(DocumentStore $documentStore, string $aggregateClassName, array $identifiers): bool
     {
-        $propertyReader = new PropertyReaderAccessor();
-        $versionAnnotation = Type::attribute(AggregateVersion::class);
-        $aggregateVersionPropertyName = null;
-        foreach (ClassDefinition::createFor(Type::createFromVariable($aggregate))->getProperties() as $property) {
-            if ($property->hasAnnotation($versionAnnotation)) {
-                $aggregateVersionPropertyName = $property->getName();
-                break;
-            }
+        try {
+            $marker = $documentStore->findDocument(self::getSnapshotFoldShapeCollectionName($aggregateClassName), self::getSnapshotDocumentId($identifiers));
+        } catch (DocumentException) {
+            return false;
         }
 
-        return $propertyReader->getPropertyValue(
-            PropertyPath::createWith($aggregateVersionPropertyName),
+        if (! is_string($marker)) {
+            return false;
+        }
+
+        return (json_decode($marker, true)['foldShape'] ?? null) === $this->applyMethodExecutor->foldShapeOf($aggregateClassName);
+    }
+
+    private function getAggregateVersion(object $aggregate): mixed
+    {
+        return (new PropertyReaderAccessor())->getPropertyValue(
+            PropertyPath::createWith($this->aggregateDefinitionRegistry->getFor($aggregate::class)->getAggregateVersionProperty()),
             $aggregate
         );
     }
@@ -159,6 +181,11 @@ class EventSourcedRepositoryAdapter implements AggregateRepository
     private static function getSnapshotCollectionName(string $aggregateClassname): string
     {
         return self::SNAPSHOT_COLLECTION . $aggregateClassname;
+    }
+
+    private static function getSnapshotFoldShapeCollectionName(string $aggregateClassname): string
+    {
+        return self::SNAPSHOT_FOLD_SHAPE_COLLECTION . $aggregateClassname;
     }
 
     private static function getSnapshotDocumentId(array $identifiers): string

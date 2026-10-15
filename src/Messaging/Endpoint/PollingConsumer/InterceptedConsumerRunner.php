@@ -2,18 +2,18 @@
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
+use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Messaging\MessagePoller;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 use Ecotone\Messaging\Endpoint\EndpointRunner;
-use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\Interceptor\PcntlTerminationListener;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\NonProxyGateway;
-use Ecotone\Messaging\MessagePoller;
 use Ecotone\Messaging\Scheduling\CronTrigger;
-use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Ecotone\Messaging\Scheduling\PeriodicTrigger;
 use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
 
@@ -74,7 +74,7 @@ class InterceptedConsumerRunner implements EndpointRunner
         // Evaluate cron expression if provided
         if ($pollingMetadata->hasCronExpression()) {
             $cronValue = $this->expressionEvaluationService->evaluate(
-                $pollingMetadata->getCronExpression(),
+                $pollingMetadata->cronExpression,
                 []
             );
             return CronTrigger::createWith((string) $cronValue);
@@ -83,16 +83,16 @@ class InterceptedConsumerRunner implements EndpointRunner
         // Evaluate fixed rate expression if provided
         if ($pollingMetadata->hasFixedRateExpression()) {
             $fixedRateValue = $this->expressionEvaluationService->evaluate(
-                $pollingMetadata->getFixedRateExpression(),
+                $pollingMetadata->fixedRateExpression,
                 []
             );
 
-            return PeriodicTrigger::create((int) $fixedRateValue, $pollingMetadata->getInitialDelayInMilliseconds());
+            return PeriodicTrigger::create((int) $fixedRateValue, $pollingMetadata->initialDelayInMilliseconds);
         }
 
         // Fall back to static values
-        return $pollingMetadata->getCron()
-            ? CronTrigger::createWith($pollingMetadata->getCron())
-            : PeriodicTrigger::create($pollingMetadata->getFixedRateInMilliseconds(), $pollingMetadata->getInitialDelayInMilliseconds());
+        return $pollingMetadata->cron
+            ? CronTrigger::createWith($pollingMetadata->cron)
+            : PeriodicTrigger::create($pollingMetadata->fixedRateInMilliseconds, $pollingMetadata->initialDelayInMilliseconds);
     }
 }

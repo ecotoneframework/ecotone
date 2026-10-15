@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Scheduling;
 
+use Ecotone\Api\Scheduling\Duration;
 use Ecotone\Messaging\Scheduling\Clock;
-use Ecotone\Messaging\Scheduling\Duration;
 use Ecotone\Test\StaticPsrClock;
 use PHPUnit\Framework\TestCase;
 

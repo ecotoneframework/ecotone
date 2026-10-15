@@ -3,7 +3,7 @@
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use Closure;
-use Ecotone\Messaging\Handler\InterfaceToCall;
+use Ecotone\Api\Interceptor\MethodInvocation;
 use stdClass;
 
 /**
@@ -69,14 +69,5 @@ class StubMethodInvocation implements MethodInvocation
     public function getName(): string
     {
         return 'stdClass::someMethod';
-    }
-
-    public function getInterfaceToCall(): InterfaceToCall
-    {
-        return InterfaceToCall::create(stdClass::class, 'someMethod');
-    }
-
-    public function replaceArgument(string $parameterName, $value): void
-    {
     }
 }

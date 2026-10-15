@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Lite\EcotoneLite;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Config\ConfigurationException;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\SagaWithMultipleActions\RandomEvent;
@@ -26,14 +27,16 @@ final class SagaTest extends TestCase
         $this->expectExceptionMessage('Message Handlers on Aggregate and Saga can be used either for single factory method and single action method together, or for multiple actions methods');
 
         EcotoneLite::bootstrapFlowTesting(
-            [SagaWithMultipleEventHandlersAndFactoryMethod::class]
+            [SagaWithMultipleEventHandlersAndFactoryMethod::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
     }
 
     public function test_handling_saga_with_multiple_action_methods_for_same_event(): void
     {
         $saga = EcotoneLite::bootstrapFlowTesting(
-            [SagaWithMultipleEventHandlers::class]
+            [SagaWithMultipleEventHandlers::class],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         )
             ->publishEvent(new RandomEvent('123'))
             ->getSaga(SagaWithMultipleEventHandlers::class, '123');

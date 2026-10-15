@@ -24,7 +24,7 @@ class ConsoleCommandConfiguration implements DefinedObject
     private string $description;
 
     /**
-     * @var ConsoleCommandParameter[] $parameterNames
+     * @param ConsoleCommandParameter[] $parameterNames
      */
     private function __construct(string $channelName, string $name, array $parameterNames, string $description)
     {
@@ -54,7 +54,7 @@ class ConsoleCommandConfiguration implements DefinedObject
     }
 
     /**
-     * @var ConsoleCommandParameter[] $parameterNames
+     * @param ConsoleCommandParameter[] $parameterNames
      */
     public static function create(string $channelName, string $name, array $parameterNames, string $description = ''): self
     {

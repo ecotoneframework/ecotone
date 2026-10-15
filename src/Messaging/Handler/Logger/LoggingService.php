@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Handler\Logger;
 
 use function array_merge;
 
-use Ecotone\Messaging\Message;
+use Ecotone\Api\Messaging\Message;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LoggerTrait;
 use Psr\Log\LogLevel;

@@ -1,24 +1,27 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Test\Ecotone\Dbal\Store\Document;
 
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Gateway\DocumentStore;
+use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Store\Document\DocumentException;
-use Ecotone\Messaging\Store\Document\DocumentStore;
+use Ecotone\Messaging\Store\Document\InMemoryDocumentStore;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
 /**
- * @internal
- */
-/**
  * licence Apache-2.0
+ *
  * @internal
  */
 class InMemoryDocumentStoreTest extends TestCase
 {
     public function test_adding_document_to_collection()
     {
-        $documentStore = $this->getMemoryDocumentStore();
+        $documentStore = $this->getDocumentStore();
 
         $this->assertEquals(0, $documentStore->countDocuments('users'));
 
@@ -30,7 +33,7 @@ class InMemoryDocumentStoreTest extends TestCase
 
     public function test_finding_document()
     {
-        $documentStore = $this->getMemoryDocumentStore();
+        $documentStore = $this->getDocumentStore();
 
         $this->assertNull($documentStore->findDocument('users', '123'));
 
@@ -41,30 +44,30 @@ class InMemoryDocumentStoreTest extends TestCase
 
     public function test_updating_document()
     {
-        $documentStore = $this->getMemoryDocumentStore();
+        $documentStore = $this->getDocumentStore();
 
         $this->assertEquals(0, $documentStore->countDocuments('users'));
 
         $documentStore->addDocument('users', '123', '{"name":"Johny"}');
-        $documentStore->updateDocument('users', '123', '{"name":"Franco"}');
+        $documentStore->updateDocument('users', '123', '{"name":"Franco"}', expectedVersion: 1);
 
         $this->assertEquals('{"name":"Franco"}', $documentStore->getDocument('users', '123'));
     }
 
     public function test_throwing_exception_when_updating_non_existing_document()
     {
-        $documentStore = $this->getMemoryDocumentStore();
+        $documentStore = $this->getDocumentStore();
 
         $this->assertEquals(0, $documentStore->countDocuments('users'));
 
         $this->expectException(DocumentException::class);
 
-        $documentStore->updateDocument('users', '123', '{"name":"Franco"}');
+        $documentStore->updateDocument('users', '123', '{"name":"Franco"}', expectedVersion: 1);
     }
 
     public function test_adding_document_as_object_should_return_object()
     {
-        $documentStore = $this->getMemoryDocumentStore();
+        $documentStore = $this->getDocumentStore();
 
         $this->assertEquals(0, $documentStore->countDocuments('users'));
 
@@ -75,7 +78,7 @@ class InMemoryDocumentStoreTest extends TestCase
 
     public function test_adding_non_json_document_should_fail()
     {
-        $documentStore = $this->getMemoryDocumentStore();
+        $documentStore = $this->getDocumentStore();
 
         $this->assertEquals(0, $documentStore->countDocuments('users'));
 
@@ -86,7 +89,7 @@ class InMemoryDocumentStoreTest extends TestCase
 
     public function test_deleting_document()
     {
-        $documentStore = $this->getMemoryDocumentStore();
+        $documentStore = $this->getDocumentStore();
 
         $documentStore->addDocument('users', '123', '{"name":"Johny"}');
         $documentStore->deleteDocument('users', '123');
@@ -99,7 +102,7 @@ class InMemoryDocumentStoreTest extends TestCase
 
     public function test_dropping_collection()
     {
-        $documentStore = $this->getMemoryDocumentStore();
+        $documentStore = $this->getDocumentStore();
         $documentStore->addDocument('users', '123', '{"name":"Johny"}');
         $documentStore->addDocument('users', '124', '{"name":"Johny"}');
 
@@ -110,7 +113,7 @@ class InMemoryDocumentStoreTest extends TestCase
 
     public function test_retrieving_whole_collection()
     {
-        $documentStore = $this->getMemoryDocumentStore();
+        $documentStore = $this->getDocumentStore();
 
         $this->assertEquals([], $documentStore->getAllDocuments('users'));
 
@@ -125,19 +128,19 @@ class InMemoryDocumentStoreTest extends TestCase
 
     public function test_replacing_document()
     {
-        $documentStore = $this->getMemoryDocumentStore();
+        $documentStore = $this->getDocumentStore();
 
         $this->assertEquals(0, $documentStore->countDocuments('users'));
 
         $documentStore->addDocument('users', '123', '{"name":"Johny"}');
-        $documentStore->upsertDocument('users', '123', '{"name":"Johny Mac"}');
+        $documentStore->upsertDocument('users', '123', '{"name":"Johny Mac"}', expectedVersion: 1);
 
         $this->assertEquals('{"name":"Johny Mac"}', $documentStore->getDocument('users', '123'));
     }
 
     public function test_excepting_if_trying_to_add_document_twice()
     {
-        $documentStore = $this->getMemoryDocumentStore();
+        $documentStore = $this->getDocumentStore();
 
         $this->expectException(DocumentException::class);
 
@@ -145,8 +148,12 @@ class InMemoryDocumentStoreTest extends TestCase
         $documentStore->addDocument('users', '123', '{"name":"Johny Mac"}');
     }
 
-    private function getMemoryDocumentStore(): DocumentStore
+    private function getDocumentStore(): DocumentStore
     {
-        return \Ecotone\Messaging\Store\Document\InMemoryDocumentStore::createEmpty();
+        return EcotoneLite::bootstrapFlowTesting(
+            [],
+            [DocumentStore::class => InMemoryDocumentStore::createEmpty()],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+        )->getGateway(DocumentStore::class);
     }
 }

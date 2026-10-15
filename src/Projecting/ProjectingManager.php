@@ -34,6 +34,7 @@ class ProjectingManager
         private ?string                        $backfillAsyncChannelName = null,
         private int                            $rebuildPartitionBatchSize = self::DEFAULT_REBUILD_PARTITION_BATCH_SIZE,
         private ?string                        $rebuildAsyncChannelName = null,
+        private bool                           $partitioned = false,
     ) {
         if ($eventLoadingBatchSize < 1) {
             throw new InvalidArgumentException('Event loading batch size must be at least 1');
@@ -70,6 +71,10 @@ class ProjectingManager
 
     public function executePartitionBatch(?string $partitionKeyValue = null, bool $canInitialize = false, bool $shouldReset = false): int
     {
+        if ($canInitialize) {
+            $this->ensurePartitionInitialized($partitionKeyValue);
+        }
+
         $transaction = $this->getProjectionStateStorage()->beginTransaction();
         try {
             $projectionState = $this->loadOrInitializePartitionState($partitionKeyValue, $canInitialize);
@@ -149,6 +154,10 @@ class ProjectingManager
         $this->getProjectionStateStorage()->init($this->projectionName);
 
         $this->projectorExecutor->init();
+
+        if (! $this->partitioned) {
+            $this->getProjectionStateStorage()->initPartition($this->projectionName);
+        }
     }
 
     public function delete(): void
@@ -163,14 +172,6 @@ class ProjectingManager
         $this->preparePartitionBatches($this->backfillPartitionBatchSize, $this->backfillAsyncChannelName, false);
     }
 
-    /**
-     * @deprecated Use prepareBackfill() instead. This method is kept for backward compatibility.
-     */
-    public function backfill(): void
-    {
-        $this->prepareBackfill();
-    }
-
     public function executeWithReset(?string $partitionKeyValue = null): void
     {
         $this->messagingEntrypoint->sendWithHeaders(
@@ -182,6 +183,30 @@ class ProjectingManager
             ],
             self::batchChannelFor($this->projectionName)
         );
+    }
+
+    public function executeAll(bool $manualInitialization = true): void
+    {
+        foreach ($this->partitionsToProcess() as $partitionKeyValue) {
+            $this->execute($partitionKeyValue, $manualInitialization);
+        }
+    }
+
+    public function executeAllWithReset(): void
+    {
+        $this->delete();
+        $this->init();
+        $this->executeAll();
+    }
+
+    /**
+     * @return iterable<string|null>
+     */
+    private function partitionsToProcess(): iterable
+    {
+        foreach ($this->streamFilterRegistry->provide($this->projectionName) as $streamFilter) {
+            yield from $this->getPartitionProvider()->partitions($streamFilter);
+        }
     }
 
     public function prepareRebuild(): void
@@ -250,14 +275,27 @@ class ProjectingManager
         }
 
         if ($canInitialize) {
-            $projectionState = $storage->initPartition($this->projectionName, $partitionKey);
-            if ($projectionState) {
-                $this->projectorExecutor->init();
-            } else {
-                $projectionState = $storage->loadPartition($this->projectionName, $partitionKey);
-            }
-            return $projectionState;
+            return $storage->initPartition($this->projectionName, $partitionKey)
+                ?? $storage->loadPartition($this->projectionName, $partitionKey);
         }
         return null;
+    }
+
+    /**
+     * The projector's own #[ProjectionInitialization] handler may run arbitrary SQL, DDL included.
+     * It must run before any database transaction is open: on MySQL, DDL issued mid-transaction
+     * triggers an implicit commit, leaving the transaction object out of sync with the actual
+     * connection state and the later explicit commit failing with "no active transaction".
+     */
+    private function ensurePartitionInitialized(?string $partitionKeyValue): void
+    {
+        $storage = $this->getProjectionStateStorage();
+        if ($storage->loadPartition($this->projectionName, $partitionKeyValue, lock: false) !== null) {
+            return;
+        }
+
+        if ($storage->initPartition($this->projectionName, $partitionKeyValue) !== null) {
+            $this->projectorExecutor->init();
+        }
     }
 }

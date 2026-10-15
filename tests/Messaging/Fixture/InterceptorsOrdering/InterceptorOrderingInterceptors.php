@@ -2,13 +2,13 @@
 
 namespace Test\Ecotone\Messaging\Fixture\InterceptorsOrdering;
 
-use Ecotone\Messaging\Attribute\Interceptor\After;
-use Ecotone\Messaging\Attribute\Interceptor\Around;
-use Ecotone\Messaging\Attribute\Interceptor\Before;
-use Ecotone\Messaging\Attribute\Parameter\Headers;
-use Ecotone\Messaging\Attribute\Parameter\Reference;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
-use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Api\Attribute\After;
+use Ecotone\Api\Attribute\Around;
+use Ecotone\Api\Attribute\Before;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\Headers;
+use Ecotone\Api\Attribute\Reference;
+use Ecotone\Api\Interceptor\MethodInvocation;
 
 /**
  * licence Apache-2.0

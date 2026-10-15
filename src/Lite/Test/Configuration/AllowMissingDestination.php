@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite\Test\Configuration;
 
+use Ecotone\Api\Interceptor\MethodInvocation;
 use Ecotone\Messaging\Handler\DestinationResolutionException;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 /**
  * licence Apache-2.0

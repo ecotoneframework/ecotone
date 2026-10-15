@@ -1,0 +1,28 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Ecotone\Api\Attribute;
+
+use Attribute;
+use Closure;
+use Ecotone\Messaging\Attribute\WithExpression;
+
+#[Attribute(Attribute::TARGET_PARAMETER)]
+/**
+ * licence Apache-2.0
+ */
+class Payload implements WithExpression
+{
+    public string|Closure $expression = '';
+
+    public function __construct(string|Closure $expression = '')
+    {
+        $this->expression = $expression;
+    }
+
+    public function getExpression(): string|Closure
+    {
+        return $this->expression;
+    }
+}

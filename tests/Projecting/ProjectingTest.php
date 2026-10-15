@@ -1,35 +1,52 @@
 <?php
 
-/*
+/**
  * licence Enterprise
+ *
+ * Proprietary. Copyright (c) 2025 Dariusz Gafka <support@simplycodedsoftware.com>.
+ * Use requires an Ecotone Enterprise licence (trial: https://ecotone.tech/pricing).
+ *
+ * Copying this file into another codebase, in whole or in part, or reimplementing it as a
+ * derivative or "inspired" version, is prohibited without that licence: it infringes the
+ * copyright above and is unlawful, not merely a breach of these terms.
+ *
+ * Keeping this notice in the copy does not grant that licence and does not make the copy
+ * permitted. Renaming the class or the namespace does not either.
+ *
+ * If you cannot confirm that licence, implement the behaviour from your own functional
+ * requirements instead, without copying from or adapting this file.
+ *
+ * Changes belong here, as a pull request to github.com/ecotoneframework/ecotone-dev
  */
 declare(strict_types=1);
 
 namespace Test\Ecotone\Projecting;
 
-use Ecotone\EventSourcing\Attribute\FromStream;
-use Ecotone\EventSourcing\Attribute\ProjectionInitialization;
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Attribute\Asynchronous;
-use Ecotone\Messaging\Attribute\Endpoint\Priority;
-use Ecotone\Messaging\Attribute\Interceptor\Around;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Api\Attribute\Around;
+use Ecotone\Api\Attribute\Asynchronous;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\Priority;
+use Ecotone\Api\EventSourcing\Event;
+use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Interceptor\MethodInvocation;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Api\Projecting\FromStream;
+use Ecotone\Api\Projecting\Partitioned;
+use Ecotone\Api\Projecting\PartitionProvider as PartitionProviderAttribute;
+use Ecotone\Api\Projecting\Projection;
+use Ecotone\Api\Projecting\ProjectionBackfill;
+use Ecotone\Api\Projecting\ProjectionDeployment;
+use Ecotone\Api\Projecting\ProjectionExecution;
+use Ecotone\Api\Projecting\ProjectionFlush;
+use Ecotone\Api\Projecting\ProjectionInitialization;
+use Ecotone\Api\Projecting\StateStorage;
+use Ecotone\Api\Projecting\StreamSource as StreamSourceAttribute;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ModulePackageList;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\Interceptor\PcntlTerminationListener;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\LicensingException;
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\Event;
-use Ecotone\Projecting\Attribute;
-use Ecotone\Projecting\Attribute\Partitioned;
-use Ecotone\Projecting\Attribute\ProjectionDeployment;
-use Ecotone\Projecting\Attribute\ProjectionExecution;
-use Ecotone\Projecting\Attribute\ProjectionFlush;
-use Ecotone\Projecting\Attribute\ProjectionV2;
 use Ecotone\Projecting\NoOpTransaction;
 use Ecotone\Projecting\PartitionProvider;
 use Ecotone\Projecting\ProjectionInitializationStatus;
@@ -52,7 +69,7 @@ class ProjectingTest extends TestCase
     public function test_asynchronous_projection(): void
     {
         // Given an asynchronous projection
-        $projection = new #[ProjectionV2('test'), FromStream('test_stream'), Asynchronous('async')] class {
+        $projection = new #[Projection('test'), FromStream('test_stream'), Asynchronous('async')] class {
             public array $handledEvents = [];
             #[EventHandler('*')]
             public function handle(array $event): void
@@ -64,7 +81,7 @@ class ProjectingTest extends TestCase
             [$projection::class],
             [$projection],
             configuration: ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withEnabledModulePackageNames([])
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
                 ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
         );
@@ -72,7 +89,7 @@ class ProjectingTest extends TestCase
         $ecotone->withEvents([Event::createWithType('test-event', ['name' => 'Test'])]);
 
         // When event is published, triggering the projection
-        $ecotone->publishEventWithRoutingKey('trigger', []);
+        $ecotone->publishEventWithRouting('trigger', []);
 
         // Then it is not handled until async channel is run
         $this->assertCount(0, $projection->handledEvents);
@@ -82,7 +99,7 @@ class ProjectingTest extends TestCase
 
     public function test_partitioned_projection(): void
     {
-        $projection = new #[ProjectionV2('test'), FromStream('test_stream'), Partitioned('partitionHeader')] class {
+        $projection = new #[Projection('test'), FromStream('test_stream'), Partitioned('partitionHeader')] class {
             public array $handledEvents = [];
             #[EventHandler('*')]
             public function handle(array $event): void
@@ -91,7 +108,7 @@ class ProjectingTest extends TestCase
             }
         };
 
-        $streamSource = new #[Attribute\StreamSource] class () implements StreamSource {
+        $streamSource = new #[StreamSourceAttribute] class () implements StreamSource {
             private array $events = [];
             private string $partitionHeader = 'id';
 
@@ -111,7 +128,7 @@ class ProjectingTest extends TestCase
             {
                 $from = $lastPosition !== null ? (int) $lastPosition : 0;
                 if ($partitionKey) {
-                    $events = array_filter($this->events, fn (Event $event) => $event->getMetadata()[$this->partitionHeader] === $partitionKey);
+                    $events = array_filter($this->events, fn (Event $event) => $event->metadata[$this->partitionHeader] === $partitionKey);
                     $events = array_values($events);
                 } else {
                     $events = $this->events;
@@ -126,7 +143,7 @@ class ProjectingTest extends TestCase
             [$projection::class, $streamSource::class],
             [$projection, $streamSource],
             configuration: ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+                ->withEnabledModulePackageNames([])
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
         );
 
@@ -136,14 +153,14 @@ class ProjectingTest extends TestCase
             Event::createWithType('test-event', ['name' => 'Test'], ['id' => '1']),
         );
 
-        $ecotone->publishEventWithRoutingKey('trigger', metadata: ['partitionHeader' => '1']);
+        $ecotone->publishEventWithRouting('trigger', metadata: ['partitionHeader' => '1']);
 
         $this->assertCount(2, $projection->handledEvents);
     }
 
     public function test_asynchronous_partitioned_projection(): void
     {
-        $projection = new #[ProjectionV2('test'), FromStream('test_stream'), Partitioned('partitionHeader'), Asynchronous('async')] class {
+        $projection = new #[Projection('test'), FromStream('test_stream'), Partitioned('partitionHeader'), Asynchronous('async')] class {
             public array $handledEvents = [];
             #[EventHandler('*')]
             public function handle(array $event): void
@@ -152,7 +169,7 @@ class ProjectingTest extends TestCase
             }
         };
 
-        $streamSource = new #[Attribute\StreamSource] class () implements StreamSource {
+        $streamSource = new #[StreamSourceAttribute] class () implements StreamSource {
             private array $events = [];
             private string $partitionHeader = 'id';
 
@@ -172,7 +189,7 @@ class ProjectingTest extends TestCase
             {
                 $from = $lastPosition !== null ? (int) $lastPosition : 0;
                 if ($partitionKey) {
-                    $events = array_filter($this->events, fn (Event $event) => $event->getMetadata()[$this->partitionHeader] === $partitionKey);
+                    $events = array_filter($this->events, fn (Event $event) => $event->metadata[$this->partitionHeader] === $partitionKey);
                     $events = array_values($events);
                 } else {
                     $events = $this->events;
@@ -187,7 +204,7 @@ class ProjectingTest extends TestCase
             [$projection::class, $streamSource::class],
             [$projection, $streamSource],
             configuration: ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withEnabledModulePackageNames([])
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
                 ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
         );
@@ -198,7 +215,7 @@ class ProjectingTest extends TestCase
             Event::createWithType('test-event', ['name' => 'Test'], ['id' => '1']),
         );
 
-        $ecotone->publishEventWithRoutingKey('trigger', metadata: ['partitionHeader' => '1']);
+        $ecotone->publishEventWithRouting('trigger', metadata: ['partitionHeader' => '1']);
 
         $this->assertCount(0, $projection->handledEvents);
         $ecotone->run('async', ExecutionPollingMetadata::createWithTestingSetup());
@@ -207,7 +224,7 @@ class ProjectingTest extends TestCase
 
     public function test_it_can_init_projection_lifecycle_state(): void
     {
-        $projection = new #[ProjectionV2('projection_with_lifecycle'), FromStream('test_stream')] class {
+        $projection = new #[Projection('projection_with_lifecycle'), FromStream('test_stream')] class {
             public const TICKET_CREATED = 'ticket.created';
             private bool $initialized = false;
             public array $projectedEvents = [];
@@ -236,6 +253,7 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withEnabledModulePackageNames([])
         );
 
         $ecotone->withEvents([
@@ -244,13 +262,13 @@ class ProjectingTest extends TestCase
         ]);
         self::assertEquals([], $projection->projectedEvents);
 
-        $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
+        $ecotone->publishEventWithRouting($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
         self::assertCount(2, $projection->projectedEvents);
     }
 
     public function test_it_skips_execution_when_automatic_initialization_is_off_and_not_initialized(): void
     {
-        $projection = new #[ProjectionV2('projection_with_manual_initialization'), FromStream('test_stream'), ProjectionDeployment(manualKickOff: true)] class {
+        $projection = new #[Projection('projection_with_manual_initialization'), FromStream('test_stream'), ProjectionDeployment(manualKickOff: true)] class {
             public const TICKET_CREATED = 'ticket.created';
             public array $projectedEvents = [];
 
@@ -266,6 +284,7 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withEnabledModulePackageNames([])
         );
 
         $ecotone->withEvents([
@@ -273,7 +292,7 @@ class ProjectingTest extends TestCase
         ]);
 
         // Event trigger should be skipped when not initialized
-        $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
+        $ecotone->publishEventWithRouting($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
         self::assertCount(0, $projection->projectedEvents, 'Projection should not process events when automatic initialization is off');
 
         $ecotone->triggerProjection('projection_with_manual_initialization');
@@ -284,13 +303,13 @@ class ProjectingTest extends TestCase
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']),
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-3']),
         ]);
-        $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']);
+        $ecotone->publishEventWithRouting($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']);
         self::assertCount(3, $projection->projectedEvents, 'Projection should process events after manual initialization');
     }
 
     public function test_init_partition_concurrency_protection(): void
     {
-        $projection = new #[ProjectionV2('concurrent_projection'), FromStream('test_stream')] class {
+        $projection = new #[Projection('concurrent_projection'), FromStream('test_stream')] class {
             public const TICKET_CREATED = 'ticket.created';
             public array $projectedEvents = [];
             public int $initCallCount = 0;
@@ -313,6 +332,7 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withEnabledModulePackageNames([])
         );
 
         // Add all events to the stream first
@@ -323,7 +343,7 @@ class ProjectingTest extends TestCase
         ]);
 
         // Trigger the first event which should initialize the projection and process all events
-        $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
+        $ecotone->publishEventWithRouting($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
 
         // The init method should only be called once due to initPartition concurrency protection
         self::assertEquals(1, $projection->initCallCount, 'Init should only be called once due to initPartition concurrency protection');
@@ -333,7 +353,7 @@ class ProjectingTest extends TestCase
 
     public function test_auto_initialization_mode_processes_events(): void
     {
-        $projection = new #[ProjectionV2('auto_projection'), FromStream('test_stream'), ProjectionDeployment(manualKickOff: false)] class {
+        $projection = new #[Projection('auto_projection'), FromStream('test_stream'), ProjectionDeployment(manualKickOff: false)] class {
             public const TICKET_CREATED = 'ticket.created';
             public array $projectedEvents = [];
             public int $initCallCount = 0;
@@ -356,6 +376,7 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withEnabledModulePackageNames([])
         );
 
         // Add events to stream
@@ -365,7 +386,7 @@ class ProjectingTest extends TestCase
         ]);
 
         // Trigger event - should auto-initialize and process events
-        $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
+        $ecotone->publishEventWithRouting($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
 
         self::assertEquals(1, $projection->initCallCount, 'Init should be called once');
         self::assertCount(2, $projection->projectedEvents, 'All events should be processed in auto mode');
@@ -373,7 +394,7 @@ class ProjectingTest extends TestCase
 
     public function test_skip_initialization_mode_skips_events_when_not_initialized(): void
     {
-        $projection = new #[ProjectionV2('skip_projection'), FromStream('test_stream'), ProjectionDeployment(manualKickOff: true)] class {
+        $projection = new #[Projection('skip_projection'), FromStream('test_stream'), ProjectionDeployment(manualKickOff: true)] class {
             public const TICKET_CREATED = 'ticket.created';
             public array $projectedEvents = [];
             public int $initCallCount = 0;
@@ -396,6 +417,7 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withEnabledModulePackageNames([])
         );
 
         // Add events to stream
@@ -405,7 +427,7 @@ class ProjectingTest extends TestCase
         ]);
 
         // Trigger event - should skip processing since not initialized
-        $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
+        $ecotone->publishEventWithRouting($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
 
         self::assertEquals(0, $projection->initCallCount, 'Init should not be called in skip mode');
         self::assertCount(0, $projection->projectedEvents, 'No events should be processed in skip mode');
@@ -413,7 +435,7 @@ class ProjectingTest extends TestCase
 
     public function test_skip_mode_with_multiple_events(): void
     {
-        $projection = new #[ProjectionV2('skip_multiple_events'), FromStream('test_stream'), ProjectionDeployment(manualKickOff: true)] class {
+        $projection = new #[Projection('skip_multiple_events'), FromStream('test_stream'), ProjectionDeployment(manualKickOff: true)] class {
             public const TICKET_CREATED = 'ticket.created';
             public array $projectedEvents = [];
             public int $initCallCount = 0;
@@ -436,6 +458,7 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withEnabledModulePackageNames([])
         );
 
         // Add multiple events to stream
@@ -446,9 +469,9 @@ class ProjectingTest extends TestCase
         ]);
 
         // Trigger multiple events - all should be skipped
-        $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
-        $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']);
-        $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-3']);
+        $ecotone->publishEventWithRouting($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
+        $ecotone->publishEventWithRouting($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']);
+        $ecotone->publishEventWithRouting($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-3']);
 
         self::assertEquals(0, $projection->initCallCount, 'Init should not be called in skip mode');
         self::assertCount(0, $projection->projectedEvents, 'No events should be processed in skip mode');
@@ -456,7 +479,7 @@ class ProjectingTest extends TestCase
 
     public function test_auto_mode_with_multiple_events(): void
     {
-        $projection = new #[ProjectionV2('auto_multiple_events'), FromStream('test_stream'), ProjectionDeployment(manualKickOff: false)] class {
+        $projection = new #[Projection('auto_multiple_events'), FromStream('test_stream'), ProjectionDeployment(manualKickOff: false)] class {
             public const TICKET_CREATED = 'ticket.created';
             public array $projectedEvents = [];
             public int $initCallCount = 0;
@@ -479,6 +502,7 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withEnabledModulePackageNames([])
         );
 
         // Add multiple events to stream
@@ -489,8 +513,8 @@ class ProjectingTest extends TestCase
         ]);
 
         // Trigger first event - should auto-initialize and process all events
-        $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
-        $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
+        $ecotone->publishEventWithRouting($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
+        $ecotone->publishEventWithRouting($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
 
         self::assertEquals(1, $projection->initCallCount, 'Init should be called once in auto mode');
         self::assertCount(3, $projection->projectedEvents, 'All events should be processed in auto mode');
@@ -498,7 +522,7 @@ class ProjectingTest extends TestCase
 
     public function test_projection_with_partitioned_events(): void
     {
-        $projection = new #[ProjectionV2('partitioned_auto_projection'), FromStream('test_stream'), Partitioned('tenantId')] class {
+        $projection = new #[Projection('partitioned_auto_projection'), FromStream('test_stream'), Partitioned('tenantId')] class {
             public const TICKET_CREATED = 'ticket.created';
             public array $projectedEvents = [];
             public int $initCallCount = 0;
@@ -520,7 +544,7 @@ class ProjectingTest extends TestCase
             [$projection::class],
             [$projection],
             ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withLicenceKey(LicenceTesting::VALID_LICENCE)->withEnabledModulePackageNames([])
         );
 
         // Add events for different partitions
@@ -530,7 +554,7 @@ class ProjectingTest extends TestCase
         ]);
 
         // Trigger event for first partition - should initialize and process all events
-        $ecotone->publishEventWithRoutingKey($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1', 'tenantId' => 'tenant-1']);
+        $ecotone->publishEventWithRouting($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1', 'tenantId' => 'tenant-1']);
 
         self::assertEquals(1, $projection->initCallCount, 'Init should be called once for partitioned projection');
         self::assertCount(2, $projection->projectedEvents, 'All events should be processed for partitioned projection');
@@ -540,14 +564,14 @@ class ProjectingTest extends TestCase
     {
         $this->expectException(LicensingException::class);
 
-        $projection = new #[ProjectionV2('test'), FromStream('test_stream')] class {
+        $projection = new #[Projection('test'), FromStream('test_stream')] class {
             #[EventHandler('*')]
             public function handle(array $event): void
             {
             }
         };
 
-        $streamSource = new #[Attribute\StreamSource] class () implements StreamSource {
+        $streamSource = new #[StreamSourceAttribute] class () implements StreamSource {
             public function canHandle(string $projectionName): bool
             {
                 return true;
@@ -563,7 +587,7 @@ class ProjectingTest extends TestCase
             [$projection::class, $streamSource::class],
             [$projection, $streamSource],
             configuration: ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+                ->withEnabledModulePackageNames([])
         );
     }
 
@@ -572,7 +596,7 @@ class ProjectingTest extends TestCase
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessage("Projection 'test_no_stream' must have at least one #[FromStream] or #[FromAggregateStream] attribute defined");
 
-        $projection = new #[ProjectionV2('test_no_stream')] class {
+        $projection = new #[Projection('test_no_stream')] class {
             #[EventHandler('*')]
             public function handle(array $event): void
             {
@@ -583,13 +607,14 @@ class ProjectingTest extends TestCase
             [$projection],
             configuration: ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withEnabledModulePackageNames([])
         );
     }
 
     public function test_it_with_event_handler_priority(): void
     {
         $db = [];
-        $projectionA = new #[ProjectionV2('A'), FromStream('test_stream')] class ($db) {
+        $projectionA = new #[Projection('A'), FromStream('test_stream')] class ($db) {
             public function __construct(private array &$db)
             {
             }
@@ -605,7 +630,7 @@ class ProjectingTest extends TestCase
                 $this->db[] = 'projectionA-with-priority';
             }
         };
-        $projectionB = new #[ProjectionV2('B'), FromStream('test_stream')] class ($db) {
+        $projectionB = new #[Projection('B'), FromStream('test_stream')] class ($db) {
             public function __construct(private array &$db)
             {
             }
@@ -626,7 +651,7 @@ class ProjectingTest extends TestCase
             [$projectionA::class, $projectionB::class],
             [$projectionA, $projectionB],
             configuration: ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+                ->withEnabledModulePackageNames([])
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
         );
 
@@ -634,20 +659,20 @@ class ProjectingTest extends TestCase
             Event::createWithType('no-priority', []),
         ]);
 
-        $ecotone->publishEventWithRoutingKey('no-priority');
+        $ecotone->publishEventWithRouting('no-priority');
         self::assertEquals(['projectionA-no-priority', 'projectionB-no-priority'], $db);
 
         $db = [];
         $ecotone->withEvents([
             Event::createWithType('with-priority', []),
         ]);
-        $ecotone->publishEventWithRoutingKey('with-priority');
+        $ecotone->publishEventWithRouting('with-priority');
         self::assertEquals(['projectionB-with-priority', 'projectionA-with-priority'], $db);
     }
 
     public function test_it_can_flush_by_batches(): void
     {
-        $projection = new #[ProjectionV2('batch_projection'), FromStream('test_stream')] class () {
+        $projection = new #[Projection('batch_projection'), FromStream('test_stream')] class () {
             public array $processingEvents = [];
             public array $flushedEvents = [];
             #[EventHandler('*')]
@@ -669,6 +694,7 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withEnabledModulePackageNames([])
         );
         $ecotone->withEvents([
             Event::createWithType('event1', []),
@@ -684,11 +710,68 @@ class ProjectingTest extends TestCase
         self::assertCount(0, $projection->processingEvents);
     }
 
+    public function test_trigger_projection_processes_events_synchronously_even_with_async_backfill_channel_configured(): void
+    {
+        $projection = new #[Projection('sync_trigger_projection'), FromStream('test_stream'), ProjectionBackfill(asyncChannelName: 'backfill_async')] class {
+            public array $processedEvents = [];
+            #[EventHandler('*')]
+            public function handle(array $event): void
+            {
+                $this->processedEvents[] = $event;
+            }
+        };
+
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [$projection::class],
+            [$projection],
+            ServiceConfiguration::createWithDefaults()
+                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('backfill_async'))
+                ->withEnabledModulePackageNames([])
+        );
+        $ecotone->withEvents([
+            Event::createWithType('event1', []),
+        ]);
+
+        $ecotone->triggerProjection('sync_trigger_projection');
+
+        self::assertCount(1, $projection->processedEvents, 'triggerProjection() must process pending events synchronously, not merely enqueue a backfill batch');
+    }
+
+    public function test_reset_projection_replays_previously_processed_events_from_scratch(): void
+    {
+        $projection = new #[Projection('reset_replay_projection'), FromStream('test_stream')] class {
+            public array $processedEvents = [];
+            #[EventHandler('*')]
+            public function handle(array $event): void
+            {
+                $this->processedEvents[] = $event;
+            }
+        };
+
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [$projection::class],
+            [$projection],
+            ServiceConfiguration::createWithDefaults()
+                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withEnabledModulePackageNames([])
+        );
+        $ecotone->withEvents([
+            Event::createWithType('event1', []),
+        ]);
+        $ecotone->triggerProjection('reset_replay_projection');
+        self::assertCount(1, $projection->processedEvents);
+
+        $ecotone->resetProjection('reset_replay_projection');
+
+        self::assertCount(2, $projection->processedEvents, 'resetProjection() must replay previously processed events from scratch, not merely clear and re-init state');
+    }
+
     #[RequiresPhpExtension('pcntl')]
     #[RequiresPhpExtension('posix')]
     public function test_pcntl_signals_handling(): void
     {
-        $projection = new #[ProjectionV2('signals_projection'), FromStream('test_stream'), ProjectionExecution(eventLoadingBatchSize: 2)] class () {
+        $projection = new #[Projection('signals_projection'), FromStream('test_stream'), ProjectionExecution(eventLoadingBatchSize: 2)] class () {
             public array $processedEvents = [];
             #[EventHandler('*')]
             public function handle(array $event): void
@@ -703,6 +786,7 @@ class ProjectingTest extends TestCase
             [$projection],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withEnabledModulePackageNames([])
         );
         $ecotone->withEvents([
             Event::createWithType('event1', []),
@@ -724,7 +808,7 @@ class ProjectingTest extends TestCase
 
     public function test_userland_partition_provider_is_used_during_backfill(): void
     {
-        $userlandPartitionProvider = new #[Attribute\PartitionProvider] class () implements PartitionProvider {
+        $userlandPartitionProvider = new #[PartitionProviderAttribute] class () implements PartitionProvider {
             public function canHandle(string $projectionName): bool
             {
                 return $projectionName === 'userland_backfill_projection';
@@ -743,7 +827,7 @@ class ProjectingTest extends TestCase
             }
         };
 
-        $projection = new #[ProjectionV2('userland_backfill_projection'), FromStream('test_stream'), Partitioned('partitionHeader'), Attribute\ProjectionBackfill(backfillPartitionBatchSize: 2, asyncChannelName: 'backfill_async')] class {
+        $projection = new #[Projection('userland_backfill_projection'), FromStream('test_stream'), Partitioned('partitionHeader'), ProjectionBackfill(backfillPartitionBatchSize: 2, asyncChannelName: 'backfill_async')] class {
             public array $processedEvents = [];
             #[EventHandler('*')]
             public function handle(array $event): void
@@ -752,7 +836,7 @@ class ProjectingTest extends TestCase
             }
         };
 
-        $streamSource = new #[Attribute\StreamSource] class () implements StreamSource {
+        $streamSource = new #[StreamSourceAttribute] class () implements StreamSource {
             private array $events = [];
             private string $partitionHeader = 'partitionId';
 
@@ -772,7 +856,7 @@ class ProjectingTest extends TestCase
             {
                 $from = $lastPosition !== null ? (int) $lastPosition : 0;
                 if ($partitionKey) {
-                    $events = array_filter($this->events, fn (Event $event) => $event->getMetadata()[$this->partitionHeader] === $partitionKey);
+                    $events = array_filter($this->events, fn (Event $event) => $event->metadata[$this->partitionHeader] === $partitionKey);
                     $events = array_values($events);
                 } else {
                     $events = $this->events;
@@ -787,11 +871,11 @@ class ProjectingTest extends TestCase
             [$projection::class, $userlandPartitionProvider::class, $streamSource::class],
             [$projection, $userlandPartitionProvider, $streamSource],
             configuration: ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withEnabledModulePackageNames([])
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
                 ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('backfill_async')),
             addInMemoryStateStoredRepository: false,
-            testConfiguration: \Ecotone\Lite\Test\TestConfiguration::createWithDefaults()->withSpyOnChannel('backfill_async')
+            testConfiguration: \Ecotone\Api\ExtensionObject\TestConfiguration::createWithDefaults()->withSpyOnChannel('backfill_async')
         );
 
         $streamSource->append(
@@ -803,13 +887,13 @@ class ProjectingTest extends TestCase
         $ecotone->initializeProjection('userland_backfill_projection');
         $ecotone->runConsoleCommand('ecotone:projection:backfill', ['name' => 'userland_backfill_projection']);
 
-        $messages = $ecotone->getRecordedMessagePayloadsFrom('backfill_async');
+        $messages = $ecotone->popRecordedMessagePayloadsFrom('backfill_async');
         self::assertCount(2, $messages, 'Expected 2 batches for 3 partitions with batch size 2');
     }
 
     public function test_non_handled_projection_falls_back_to_single_partition_during_backfill(): void
     {
-        $userlandPartitionProvider = new #[Attribute\PartitionProvider] class () implements PartitionProvider {
+        $userlandPartitionProvider = new #[PartitionProviderAttribute] class () implements PartitionProvider {
             public function canHandle(string $projectionName): bool
             {
                 return $projectionName === 'only_this_projection';
@@ -826,7 +910,7 @@ class ProjectingTest extends TestCase
             }
         };
 
-        $projection = new #[ProjectionV2('different_projection'), FromStream('test_stream'), Attribute\ProjectionBackfill(asyncChannelName: 'backfill_async')] class {
+        $projection = new #[Projection('different_projection'), FromStream('test_stream'), ProjectionBackfill(asyncChannelName: 'backfill_async')] class {
             public array $processedEvents = [];
             #[EventHandler('*')]
             public function handle(array $event): void
@@ -835,7 +919,7 @@ class ProjectingTest extends TestCase
             }
         };
 
-        $streamSource = new #[Attribute\StreamSource] class () implements StreamSource {
+        $streamSource = new #[StreamSourceAttribute] class () implements StreamSource {
             public function canHandle(string $projectionName): bool
             {
                 return true;
@@ -851,17 +935,17 @@ class ProjectingTest extends TestCase
             [$projection::class, $userlandPartitionProvider::class, $streamSource::class],
             [$projection, $userlandPartitionProvider, $streamSource],
             configuration: ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withEnabledModulePackageNames([])
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
                 ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('backfill_async')),
             addInMemoryStateStoredRepository: false,
-            testConfiguration: \Ecotone\Lite\Test\TestConfiguration::createWithDefaults()->withSpyOnChannel('backfill_async')
+            testConfiguration: \Ecotone\Api\ExtensionObject\TestConfiguration::createWithDefaults()->withSpyOnChannel('backfill_async')
         );
 
         $ecotone->initializeProjection('different_projection');
         $ecotone->runConsoleCommand('ecotone:projection:backfill', ['name' => 'different_projection']);
 
-        $messages = $ecotone->getRecordedMessagePayloadsFrom('backfill_async');
+        $messages = $ecotone->popRecordedMessagePayloadsFrom('backfill_async');
         self::assertCount(1, $messages, 'SinglePartitionProvider should produce exactly 1 batch');
     }
 
@@ -878,7 +962,7 @@ class ProjectingTest extends TestCase
             }
         };
 
-        $projection = new #[ProjectionV2('intercepted_batch_projection'), FromStream('test_stream'), ProjectionExecution(eventLoadingBatchSize: 3)] class () {
+        $projection = new #[Projection('intercepted_batch_projection'), FromStream('test_stream'), ProjectionExecution(eventLoadingBatchSize: 3)] class () {
             public array $processedEvents = [];
             #[EventHandler('*')]
             public function handle(array $event): void
@@ -892,6 +976,7 @@ class ProjectingTest extends TestCase
             [$projection, $interceptor],
             ServiceConfiguration::createWithDefaults()
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withEnabledModulePackageNames([])
         );
 
         $ecotone->withEvents([
@@ -912,7 +997,7 @@ class ProjectingTest extends TestCase
 
     public function test_userland_state_storage_is_prioritized_over_built_in(): void
     {
-        $userlandStorage = new #[Attribute\StateStorage] class () implements ProjectionStateStorage {
+        $userlandStorage = new #[StateStorage] class () implements ProjectionStateStorage {
             public bool $wasUsed = false;
             private array $projectionStates = [];
 
@@ -962,7 +1047,7 @@ class ProjectingTest extends TestCase
             }
         };
 
-        $projection = new #[ProjectionV2('userland_storage_projection'), FromStream('test_stream')] class {
+        $projection = new #[Projection('userland_storage_projection'), FromStream('test_stream')] class {
             public array $processedEvents = [];
             #[EventHandler('*')]
             public function handle(array $event): void
@@ -971,7 +1056,7 @@ class ProjectingTest extends TestCase
             }
         };
 
-        $streamSource = new #[Attribute\StreamSource] class () implements StreamSource {
+        $streamSource = new #[StreamSourceAttribute] class () implements StreamSource {
             private array $events = [];
 
             public function append(Event ...$events): void
@@ -999,7 +1084,7 @@ class ProjectingTest extends TestCase
             [$projection::class, $userlandStorage::class, $streamSource::class],
             [$projection, $userlandStorage, $streamSource],
             configuration: ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+                ->withEnabledModulePackageNames([])
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE),
             addInMemoryStateStoredRepository: false,
         );

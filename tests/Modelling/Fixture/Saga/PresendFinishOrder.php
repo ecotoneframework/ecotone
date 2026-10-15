@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\Saga;
 
-use Ecotone\Messaging\Attribute\Interceptor\Presend;
+use Ecotone\Api\Attribute\Presend;
 
 final class PresendFinishOrder
 {

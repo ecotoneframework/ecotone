@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Handler\Router;
 
-use Ecotone\Messaging\Message;
+use Ecotone\Api\Messaging\Message;
 
 /**
  * licence Apache-2.0
@@ -24,5 +24,10 @@ class HeaderRouter implements RouteSelector
     public function route(Message $message): array
     {
         return [$message->getHeaders()->get($this->headerName)];
+    }
+
+    public function __toString(): string
+    {
+        return "header `{$this->headerName}`";
     }
 }

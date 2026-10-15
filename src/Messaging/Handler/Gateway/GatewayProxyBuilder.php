@@ -4,7 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Api\Attribute\Asynchronous;
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Interceptor\Precedence;
+use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\ChannelReference;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
@@ -13,10 +18,8 @@ use Ecotone\Messaging\Config\Container\GatewayProxyMethodReference;
 use Ecotone\Messaging\Config\Container\GatewayProxyReference;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
-use Ecotone\Messaging\Config\Container\ProxyBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
-use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
@@ -28,11 +31,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\ChainedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\PollableChannel;
-use Ecotone\Messaging\Precedence;
-use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Ecotone\Messaging\SubscribableChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -49,7 +48,7 @@ use Symfony\Component\Uid\Uuid;
 /**
  * licence Apache-2.0
  */
-class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, ProxyBuilder
+class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder
 {
     public const DEFAULT_REPLY_MILLISECONDS_TIMEOUT = -1;
 
@@ -65,10 +64,6 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
      */
     private array $methodArgumentConverters = [];
     private ?string $errorChannelName = null;
-    /**
-     * @var string[]
-     */
-    private array $messageConverterReferenceNames = [];
     /**
      * @var AroundInterceptorBuilder[]
      */
@@ -195,17 +190,6 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
         Assert::isTrue($amount <= 1, "Can't create gateway {$this} with two Payload converters");
 
         $this->methodArgumentConverters = $methodArgumentConverters;
-
-        return $this;
-    }
-
-    /**
-     * @param string[] $messageConverterReferenceNames
-     * @return $this
-     */
-    public function withMessageConverters(array $messageConverterReferenceNames): self
-    {
-        $this->messageConverterReferenceNames = array_unique(array_merge($this->messageConverterReferenceNames, $messageConverterReferenceNames));
 
         return $this;
     }
@@ -338,11 +322,6 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
             }
         }
 
-        $messageConverters = [];
-        foreach ($this->messageConverterReferenceNames as $messageConverterReferenceName) {
-            $messageConverters[] = new Reference($messageConverterReferenceName);
-        }
-
         if (empty($methodArgumentConverters) && $interfaceToCall->hasMoreThanOneParameter()) {
             throw InvalidArgumentException::create("You need to pass method argument converts for {$interfaceToCall}");
         }
@@ -360,12 +339,10 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, Pro
                 new Reference(EcotoneClockInterface::class),
             ]),
             $interfaceToCall->getReturnType(),
-            $messageConverters,
             new Definition(GatewayReplyConverter::class, [
                 new Reference(ConversionService::REFERENCE_NAME),
                 $interfaceToCall->toString(),
                 $interfaceToCall->getReturnType(),
-                $messageConverters,
             ]),
             $internalHandlerReference,
         ]);

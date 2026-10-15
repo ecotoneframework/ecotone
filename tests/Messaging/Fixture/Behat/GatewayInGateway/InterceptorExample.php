@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway;
 
-use Ecotone\Messaging\Attribute\Interceptor\After;
-use Ecotone\Messaging\Attribute\Interceptor\Around;
-use Ecotone\Messaging\Attribute\Interceptor\Before;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Api\Attribute\After;
+use Ecotone\Api\Attribute\Around;
+use Ecotone\Api\Attribute\Before;
+use Ecotone\Api\Interceptor\MethodInvocation;
 
 /**
  * licence Apache-2.0
@@ -24,7 +24,7 @@ class InterceptorExample
     public function sum(MethodInvocation $methodInvocation): int
     {
         $proceed = $methodInvocation->proceed();
-        $proceed = $proceed instanceof \Ecotone\Messaging\Message ? $proceed->getPayload() : $proceed;
+        $proceed = $proceed instanceof \Ecotone\Api\Messaging\Message ? $proceed->getPayload() : $proceed;
 
         return $proceed + 1;
     }

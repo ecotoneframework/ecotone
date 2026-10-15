@@ -6,7 +6,7 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use Ecotone\Messaging\Message;
+use Ecotone\Api\Messaging\Message;
 
 interface AroundInterceptable
 {

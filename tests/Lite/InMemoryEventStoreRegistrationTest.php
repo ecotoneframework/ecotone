@@ -4,17 +4,16 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Lite;
 
-use Ecotone\EventSourcing\Attribute\FromStream;
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Attribute\Converter;
-use Ecotone\Messaging\Config\ModulePackageList;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\Event;
-use Ecotone\Projecting\Attribute;
-use Ecotone\Projecting\Attribute\Polling;
-use Ecotone\Projecting\Attribute\ProjectionV2;
+use Ecotone\Api\Attribute\Converter;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\Polling;
+use Ecotone\Api\EventSourcing\Event;
+use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Projecting\FromStream;
+use Ecotone\Api\Projecting\Projection;
+use Ecotone\Api\Projecting\StreamSource as StreamSourceAttribute;
 use Ecotone\Projecting\StreamPage;
 use Ecotone\Projecting\StreamSource;
 use Ecotone\Test\LicenceTesting;
@@ -33,7 +32,7 @@ class InMemoryEventStoreRegistrationTest extends TestCase
             }
         };
 
-        $projection = new #[ProjectionV2('test_projection'), Polling('test_projection_poller'), FromStream('test_stream')] class ($testEvent) {
+        $projection = new #[Projection('test_projection'), Polling('test_projection_poller'), FromStream('test_stream')] class ($testEvent) {
             public array $events = [];
             public int $callCount = 0;
             private string $eventClass;
@@ -55,7 +54,7 @@ class InMemoryEventStoreRegistrationTest extends TestCase
             [$projection::class, $testEvent::class],
             [$projection],
             configuration: ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withEnabledModulePackageNames([])
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
         );
 
@@ -83,7 +82,7 @@ class InMemoryEventStoreRegistrationTest extends TestCase
             }
         };
 
-        $projection = new #[ProjectionV2('test_projection'), Polling('test_projection_poller'), FromStream('test_stream')] class {
+        $projection = new #[Projection('test_projection'), Polling('test_projection_poller'), FromStream('test_stream')] class {
             public array $events = [];
             public int $callCount = 0;
 
@@ -95,7 +94,7 @@ class InMemoryEventStoreRegistrationTest extends TestCase
             }
         };
 
-        $customStreamSource = new #[Attribute\StreamSource] class () implements StreamSource {
+        $customStreamSource = new #[StreamSourceAttribute] class () implements StreamSource {
             private array $events = [];
 
             public function append(Event ...$events): void
@@ -123,7 +122,7 @@ class InMemoryEventStoreRegistrationTest extends TestCase
             [$projection::class, $testEvent::class, $customStreamSource::class],
             [$projection, $customStreamSource],
             configuration: ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withEnabledModulePackageNames([])
                 ->withLicenceKey(LicenceTesting::VALID_LICENCE)
         );
 

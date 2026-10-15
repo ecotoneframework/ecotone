@@ -9,8 +9,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageChannel;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHandler;
 
 /**

@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\ErrorHandling\DeadLetter;
 
-use Ecotone\Messaging\Attribute\ServiceContext;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Handler\Recoverability\ErrorHandlerConfiguration;
-use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
+use Ecotone\Api\Attribute\ServiceContext;
+use Ecotone\Api\ExtensionObject\ErrorHandlerConfiguration;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\ExtensionObject\RetryTemplateBuilder;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 
 /**
  * licence Apache-2.0
@@ -22,7 +22,7 @@ class ErrorConfigurationContext
     #[ServiceContext]
     public function getInputChannel()
     {
-        return SimpleMessageChannelBuilder::createQueueChannel(self::INPUT_CHANNEL);
+        return SimpleMessageChannelBuilder::createQueueChannel(self::INPUT_CHANNEL, delayable: false);
     }
 
     #[ServiceContext]
@@ -30,8 +30,8 @@ class ErrorConfigurationContext
     {
         return ErrorHandlerConfiguration::createWithDeadLetterChannel(
             self::ERROR_CHANNEL,
-            RetryTemplateBuilder::exponentialBackoff(1, 2)
-                ->maxRetryAttempts(2),
+            RetryTemplateBuilder::exponentialBackOff(1, 2)
+                ->maxRetries(2),
             self::DEAD_LETTER_CHANNEL
         );
     }
@@ -40,8 +40,8 @@ class ErrorConfigurationContext
     public function pollingConfiguration()
     {
         return PollingMetadata::create('orderService')
-            ->setExecutionTimeLimitInMilliseconds(100)
-            ->setHandledMessageLimit(1)
-            ->setErrorChannelName(ErrorConfigurationContext::ERROR_CHANNEL);
+            ->withExecutionTimeLimitInMilliseconds(100)
+            ->withHandledMessageLimit(1)
+            ->withErrorChannelName(ErrorConfigurationContext::ERROR_CHANNEL);
     }
 }

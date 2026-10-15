@@ -35,6 +35,11 @@ final class AttributeDeclaration
         return $this->methodName;
     }
 
+    public function getParameterName(): ?string
+    {
+        return $this->parameterName;
+    }
+
     public function toAttributeDefinition(): AttributeDefinition
     {
         return new AttributeDefinition(

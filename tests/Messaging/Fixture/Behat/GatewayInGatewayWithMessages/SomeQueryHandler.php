@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages;
 
-use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Message;
+use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Modelling\Attribute\QueryHandler;
 
 /**
  * licence Apache-2.0

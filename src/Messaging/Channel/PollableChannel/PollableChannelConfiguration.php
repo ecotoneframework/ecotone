@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\PollableChannel;
 
+use Ecotone\Api\ExtensionObject\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplate;
-use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 
 /**
  * licence Apache-2.0
@@ -56,8 +56,8 @@ class PollableChannelConfiguration
 
     private static function defaultRetry(): RetryTemplate
     {
-        return RetryTemplateBuilder::exponentialBackoff(1, 20)
-            ->maxRetryAttempts(2)
+        return RetryTemplateBuilder::exponentialBackOff(1, 20)
+            ->maxRetries(2)
             ->build();
     }
 

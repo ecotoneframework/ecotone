@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Modelling\Fixture;
 
-use Ecotone\Modelling\Attribute\IgnorePayload;
-use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Api\Attribute\IgnorePayload;
+use Ecotone\Api\Attribute\QueryHandler;
 
 /**
  * licence Apache-2.0

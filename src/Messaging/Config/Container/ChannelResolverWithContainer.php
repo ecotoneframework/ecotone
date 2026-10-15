@@ -2,8 +2,8 @@
 
 namespace Ecotone\Messaging\Config\Container;
 
+use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Messaging\Handler\ChannelResolver;
-use Ecotone\Messaging\MessageChannel;
 use Psr\Container\ContainerInterface;
 
 /**

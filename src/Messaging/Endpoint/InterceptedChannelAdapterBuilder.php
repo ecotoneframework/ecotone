@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Interceptor\Precedence;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
@@ -26,8 +28,6 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Recoverability\RetryRunner;
-use Ecotone\Messaging\Precedence;
-use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 
 /**
  * Class InterceptedConsumerBuilder

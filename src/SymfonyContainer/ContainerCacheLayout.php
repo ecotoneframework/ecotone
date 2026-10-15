@@ -8,9 +8,9 @@ use const DIRECTORY_SEPARATOR;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationFinderFactory;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 
 use function realpath;
 
@@ -29,6 +29,7 @@ final class ContainerCacheLayout
     /**
      * @param array<string, mixed> $configurationVariables
      * @param string[] $classesToResolve
+     * @param string[]|null $providedServiceIds
      */
     public static function resolve(
         string $rootCatalog,
@@ -39,13 +40,14 @@ final class ContainerCacheLayout
         array $configurationVariables = [],
         array $classesToResolve = [],
         bool $enableTesting = false,
+        ?array $providedServiceIds = [],
     ): self {
         $realRootCatalog = realpath($rootCatalog) ?: $rootCatalog;
         $annotationFinder = AnnotationFinderFactory::createForAttributes(
             $realRootCatalog,
-            $serviceConfiguration->getNamespaces(),
-            $serviceConfiguration->getEnvironment(),
-            $serviceConfiguration->getLoadedCatalog() ?? '',
+            $serviceConfiguration->namespaces,
+            $serviceConfiguration->environment,
+            $serviceConfiguration->loadCatalog ?? '',
             MessagingSystemConfiguration::getModuleClassesFor($serviceConfiguration),
             $classesToResolve,
             $enableTesting,
@@ -56,12 +58,16 @@ final class ContainerCacheLayout
             $configurationVariables,
             $enableTesting,
         );
+        if ($providedServiceIds) {
+            sort($providedServiceIds);
+            $configHash = 'ecotone' . DIRECTORY_SEPARATOR . sha1($configHash . serialize($providedServiceIds));
+        }
 
         return new self(
             $annotationFinder,
             new ServiceCacheConfiguration(
                 $useHashSubDirectory ? $cacheDirectory . DIRECTORY_SEPARATOR . $configHash : $cacheDirectory,
-                $shouldUseCache && ! self::containsAnonymousClass($annotationFinder->registeredClasses()),
+                $shouldUseCache && $providedServiceIds !== null && ! self::containsAnonymousClass($annotationFinder->registeredClasses()),
             ),
             $configHash,
         );

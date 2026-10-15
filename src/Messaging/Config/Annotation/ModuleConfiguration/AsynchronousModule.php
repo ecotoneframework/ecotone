@@ -5,34 +5,32 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Api\Attribute\Asynchronous;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Api\ExtensionObject\CombinedMessageChannel;
+use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Attribute\EndpointAnnotation;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Attribute\StreamBasedSource;
-use Ecotone\Messaging\Channel\CombinedMessageChannel;
-use Ecotone\Messaging\Channel\MessageChannelBuilder;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Support\Assert;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\Attribute\QueryHandler;
-use Ecotone\Modelling\Config\Routing\RoutingEvent;
-use Ecotone\Modelling\Config\Routing\RoutingEventHandler;
 
 #[ModuleAnnotation]
 /**
  * licence Apache-2.0
  */
-class AsynchronousModule implements AnnotationModule, RoutingEventHandler
+final class AsynchronousModule implements AnnotationModule
 {
     /**
      * @param array<string, array<string>> $asyncEndpoints
@@ -71,7 +69,7 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
                     if ($endpoint->hasClassAnnotation(StreamBasedSource::class)) {
                         $streamSourcesAsyncEndpoints[$annotationForMethod->getEndpointId()] = $asyncClass->getChannelName();
                     } else {
-                        if (in_array(get_class($annotationForMethod), [CommandHandler::class, EventHandler::class])) {
+                        if ($annotationForMethod instanceof CommandHandler || $annotationForMethod instanceof EventHandler || $annotationForMethod instanceof InternalHandler) {
                             if ($annotationForMethod->isEndpointIdGenerated()) {
                                 throw ConfigurationException::create("{$endpoint} should have endpointId defined for handling asynchronously");
                             }
@@ -93,7 +91,7 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
                     if ($annotationForMethod instanceof QueryHandler) {
                         continue;
                     }
-                    if (in_array(get_class($annotationForMethod), [CommandHandler::class, EventHandler::class])) {
+                    if ($annotationForMethod instanceof CommandHandler || $annotationForMethod instanceof EventHandler || $annotationForMethod instanceof InternalHandler) {
                         if ($annotationForMethod->isEndpointIdGenerated()) {
                             throw ConfigurationException::create("{$endpoint} should have endpointId defined for handling asynchronously");
                         }
@@ -124,15 +122,6 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
     /**
      * @inheritDoc
      */
-    public function canHandle($extensionObject): bool
-    {
-        return
-            $extensionObject instanceof CombinedMessageChannel
-            || ($extensionObject instanceof SimpleMessageChannelBuilder && $extensionObject->isPollable())
-            || $extensionObject instanceof ServiceConfiguration
-            || $extensionObject instanceof PollingMetadata;
-    }
-
     /**
      * @inheritDoc
      */
@@ -148,43 +137,48 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
             $this->registerDefaultPollingMetadata($serviceConfiguration, $asyncChannels, $pollingMetadata, $polingChannelBuilders, $messagingConfiguration);
         }
         foreach ($this->streamSourcesAsyncEndpoints as $endpointChannel => $asyncChannels) {
+            $asyncChannels = is_array($asyncChannels) ? $asyncChannels : [$asyncChannels];
             $this->registerDefaultPollingMetadata($serviceConfiguration, $asyncChannels, $pollingMetadata, $polingChannelBuilders, $messagingConfiguration);
         }
     }
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
     {
-        $extensions = [$this];
-
-        if ($serviceConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
-            $polingChannelBuilders = array_map(
-                fn (MessageChannelBuilder $channelBuilder) => $channelBuilder->getMessageChannelName(),
-                ExtensionObjectResolver::resolve(MessageChannelBuilder::class, $serviceExtensions)
-            );
-            $endpointChannels = array_reduce(
-                $this->resolveChannels($serviceExtensions),
-                fn (array $carry, array $item) => array_unique(array_merge($carry, $item)),
-                []
-            );
-
-            foreach ($endpointChannels as $endpointChannel) {
-                if (in_array($endpointChannel, $polingChannelBuilders)) {
-                    continue;
-                }
-
-                $extensions[] = SimpleMessageChannelBuilder::createQueueChannel(
-                    $endpointChannel,
-                    true,
-                );
-            }
+        if (! $serviceConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
+            return [$this];
         }
 
-        return $extensions;
+        return array_merge([$this], $this->inMemoryChannelsForUnconfiguredAsynchronousChannels($serviceExtensions));
+    }
+
+    /**
+     * @param object[] $serviceExtensions
+     * @return SimpleMessageChannelBuilder[]
+     */
+    private function inMemoryChannelsForUnconfiguredAsynchronousChannels(array $serviceExtensions): array
+    {
+        $configuredChannelNames = array_map(
+            fn (MessageChannelBuilder $channelBuilder) => $channelBuilder->getMessageChannelName(),
+            ExtensionObjectResolver::resolve(MessageChannelBuilder::class, $serviceExtensions)
+        );
+
+        $asynchronousChannelNames = [];
+        foreach ($this->resolveChannels($serviceExtensions) as $asyncChannels) {
+            $asynchronousChannelNames = array_merge($asynchronousChannelNames, $asyncChannels);
+        }
+        foreach ($this->streamSourcesAsyncEndpoints as $asyncChannels) {
+            $asynchronousChannelNames = array_merge($asynchronousChannelNames, is_array($asyncChannels) ? $asyncChannels : [$asyncChannels]);
+        }
+
+        return array_map(
+            fn (string $channelName) => SimpleMessageChannelBuilder::createQueueChannel($channelName),
+            array_values(array_diff(array_unique($asynchronousChannelNames), $configuredChannelNames))
+        );
     }
 
     public function getModulePackageName(): string
     {
-        return ModulePackageList::ASYNCHRONOUS_PACKAGE;
+        return ModulePackageList::CORE_PACKAGE;
     }
 
     private function hasPollingMetadata(array $pollingMetadata, string $asyncEndpoint): bool
@@ -220,7 +214,7 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
         $combinedMessageChannels = [];
         /** @var CombinedMessageChannel $combinedMessageChannel */
         foreach (ExtensionObjectResolver::resolve(CombinedMessageChannel::class, $extensionObjects) as $combinedMessageChannel) {
-            $combinedMessageChannels[$combinedMessageChannel->getReferenceName()] = $combinedMessageChannel->getCombinedChannels();
+            $combinedMessageChannels[$combinedMessageChannel->getReferenceName()] = $combinedMessageChannel->combinedChannels;
         }
 
         $endpointChannels = [];
@@ -240,24 +234,6 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
         return $endpointChannels;
     }
 
-    public function handleRoutingEvent(RoutingEvent $event): void
-    {
-        $registration = $event->getRegistration();
-        $isAsynchronous = $registration->hasMethodAnnotation(Asynchronous::class);
-        if (! $isAsynchronous) {
-            return;
-        }
-
-        $annotationForMethod = $registration->getAnnotationForMethod();
-        $asynchronous = $registration->getMethodAnnotationsWithType(Asynchronous::class)[0];
-
-        if ($annotationForMethod instanceof CommandHandler) {
-            Assert::isTrue(! in_array($annotationForMethod->getInputChannelName(), $asynchronous->getChannelName()), "Command Handler routing key can't be equal to asynchronous channel name in {$registration}");
-        } elseif ($annotationForMethod instanceof EventHandler) {
-            Assert::isTrue(! in_array($annotationForMethod->getListenTo(), $asynchronous->getChannelName()), "Event Handler listen to routing can't be equal to asynchronous channel name in {$registration}");
-        }
-    }
-
     public function registerDefaultPollingMetadata(ServiceConfiguration $serviceConfiguration, array $asyncChannels, array $pollingMetadata, array $polingChannelBuilders, Configuration $messagingConfiguration): void
     {
         /** Default polling metadata for tests */
@@ -267,8 +243,8 @@ class AsynchronousModule implements AnnotationModule, RoutingEventHandler
                     if ($this->isInMemoryPollableChannel($polingChannelBuilders, $asyncEndpointChannel)) {
                         $messagingConfiguration->registerPollingMetadata(
                             PollingMetadata::create($asyncEndpointChannel)
-                                ->setStopOnError(true)
-                                ->setFinishWhenNoMessages(true)
+                                ->withStopOnError(true)
+                                ->withFinishWhenNoMessages(true)
                         );
 
                         continue;

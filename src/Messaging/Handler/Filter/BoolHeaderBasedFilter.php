@@ -2,9 +2,9 @@
 
 namespace Ecotone\Messaging\Handler\Filter;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Message;
 
 /**
  * licence Apache-2.0

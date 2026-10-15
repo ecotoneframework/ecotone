@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Endpoint\PollingConsumer;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Attribute\Asynchronous;
-use Ecotone\Messaging\Attribute\OnConsumerStop;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Api\Attribute\Asynchronous;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\OnConsumerStop;
+use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Lite\EcotoneLite;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -24,13 +25,12 @@ final class OnConsumerStopTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConsumerStopHandler::class, AsyncCommandHandler::class],
             [new ConsumerStopHandler(), new AsyncCommandHandler()],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async_channel'),
-            ]
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async_channel'))
+                ->withEnabledModulePackageNames([])
         );
 
         // Send a command to async channel
-        $ecotoneLite->sendCommandWithRoutingKey('async.command', 'test');
+        $ecotoneLite->sendCommandWithRouting('async.command', 'test');
 
         // Run consumer with message limit (will stop after 1 message)
         // When running by channel name, the endpoint ID in PollingMetadata is the channel name

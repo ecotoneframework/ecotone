@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Modelling\Fixture\NoIdentifierAggregate;
 
-use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\Aggregate;
+use Ecotone\Api\Attribute\CommandHandler;
 
 #[Aggregate]
 /**

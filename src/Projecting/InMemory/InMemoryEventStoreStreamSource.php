@@ -9,10 +9,10 @@ namespace Ecotone\Projecting\InMemory;
 
 use function count;
 
-use Ecotone\EventSourcing\EventStore\FieldType;
+use Ecotone\Api\EventSourcing\FieldType;
+use Ecotone\Api\EventSourcing\MetadataMatcher;
+use Ecotone\Api\EventSourcing\Operator;
 use Ecotone\EventSourcing\EventStore\InMemoryEventStore;
-use Ecotone\EventSourcing\EventStore\MetadataMatcher;
-use Ecotone\EventSourcing\EventStore\Operator;
 use Ecotone\Projecting\StreamPage;
 use Ecotone\Projecting\StreamSource;
 

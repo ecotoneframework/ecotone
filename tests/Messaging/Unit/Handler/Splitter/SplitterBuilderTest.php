@@ -4,21 +4,16 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Splitter;
 
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Handler\Splitter\SplitterBuilder;
-use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Test\ComponentTestBuilder;
-use Exception;
-use Test\Ecotone\Messaging\Fixture\Handler\Splitter\ServiceSplittingArrayPayload;
-use Test\Ecotone\Messaging\Fixture\Handler\Splitter\WrongSplittingService;
 use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
- * Class SplitterBuilderTest
- * @package Ecotone\Messaging\Handler\Splitter
- * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ * SplitterBuilder::createMessagePayloadSplitter() and __toString() have no
+ * public #[Splitter] attribute surface -- SplitterAttributeTest covers the
+ * user-reachable service-backed splitting behaviour via #[Splitter].
  *
  * @internal
  */
@@ -28,43 +23,6 @@ use Test\Ecotone\Messaging\Unit\MessagingTestCase;
  */
 class SplitterBuilderTest extends MessagingTestCase
 {
-    public function test_splitting_incoming_message_where_service_returns_payloads()
-    {
-        $messaging = ComponentTestBuilder::create()
-            ->withChannel(SimpleMessageChannelBuilder::createQueueChannel('outputChannel'))
-            ->withMessageHandler(
-                SplitterBuilder::createWithDefinition(ServiceSplittingArrayPayload::class, 'splitToPayload')
-                    ->withInputChannelName('inputChannel')
-                    ->withOutputMessageChannel('outputChannel')
-            )
-            ->build();
-
-        $messaging->sendDirectToChannel('inputChannel', [1, 2]);
-
-        $this->assertEquals(1, $messaging->receiveMessageFrom('outputChannel')->getPayload());
-        $this->assertEquals(2, $messaging->receiveMessageFrom('outputChannel')->getPayload());
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     */
-    public function test_throwing_exception_if_splitter_does_not_return_array()
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        ComponentTestBuilder::create()
-            ->withMessageHandler(
-                SplitterBuilder::createWithDefinition(WrongSplittingService::class, 'splittingWithReturnString')
-            )
-            ->build();
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     * @throws MessagingException
-     * @throws Exception
-     */
     public function test_splitting_directly_from_message_without_service()
     {
         $messaging = ComponentTestBuilder::create()

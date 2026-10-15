@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Console;
 
-use Ecotone\Messaging\Attribute\ConsoleCommand;
+use Ecotone\Api\Attribute\ConsoleCommand;
 use Ecotone\Messaging\Config\ConsoleCommandConfiguration;
 use PHPUnit\Framework\TestCase;
 
@@ -18,14 +18,14 @@ final class ConsoleCommandDescriptionTest extends TestCase
     {
         $consoleCommand = new ConsoleCommand('app:import', 'Imports orders from given file');
 
-        $this->assertSame('Imports orders from given file', $consoleCommand->getDescription());
+        $this->assertSame('Imports orders from given file', $consoleCommand->description);
     }
 
     public function test_console_command_attribute_defaults_to_empty_description(): void
     {
         $consoleCommand = new ConsoleCommand('app:import');
 
-        $this->assertSame('', $consoleCommand->getDescription());
+        $this->assertSame('', $consoleCommand->description);
     }
 
     public function test_configuration_exposes_description_after_container_serialization(): void

@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Channel\PollableChannel\InMemory;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
-use Ecotone\Messaging\Channel\MessageChannelBuilder;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
@@ -31,21 +31,19 @@ final class InMemoryQueueAcknowledgeModule extends NoExternalConfigurationModule
     {
         $pollableMessageChannels = ExtensionObjectResolver::resolve(MessageChannelBuilder::class, $extensionObjects);
 
-        /** @var SimpleMessageChannelBuilder $pollableMessageChannel */
         foreach ($pollableMessageChannels as $pollableMessageChannel) {
+            if (! $pollableMessageChannel instanceof SimpleMessageChannelBuilder || ! $pollableMessageChannel->isPollable()) {
+                continue;
+            }
+
             $messagingConfiguration->registerChannelInterceptor(
                 new InMemoryQueueAcknowledgeInterceptorBuilder(
                     $pollableMessageChannel->getMessageChannelName(),
                     $pollableMessageChannel->getFinalFailureStrategy(),
-                    $pollableMessageChannel->isAutoAcked()
+                    $pollableMessageChannel->isAutoAcked
                 )
             );
         }
-    }
-
-    public function canHandle($extensionObject): bool
-    {
-        return $extensionObject instanceof SimpleMessageChannelBuilder && $extensionObject->isPollable();
     }
 
     public function getModulePackageName(): string

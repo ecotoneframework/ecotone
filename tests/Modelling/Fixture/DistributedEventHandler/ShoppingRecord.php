@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\DistributedEventHandler;
 
-use Ecotone\Modelling\Attribute\Distributed;
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Api\Attribute\Distributed;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\QueryHandler;
 
 /**
  * licence Apache-2.0

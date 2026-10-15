@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Messaging\Unit;
 
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
-use Ecotone\Messaging\MessageHeaders;
 
 use function json_encode;
 

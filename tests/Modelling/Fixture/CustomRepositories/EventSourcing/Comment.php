@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\CustomRepositories\EventSourcing;
 
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\EventSourcingAggregate;
-use Ecotone\Modelling\Attribute\EventSourcingHandler;
-use Ecotone\Modelling\Attribute\Identifier;
-use Ecotone\Modelling\WithAggregateVersioning;
+use Ecotone\Api\Attribute\Apply;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\EventSourcingAggregate;
+use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Api\Modelling\WithAggregateVersioning;
 use Test\Ecotone\Modelling\Fixture\CustomRepositories\EventSourcing\Event\CommentCreated;
 
 #[EventSourcingAggregate]
@@ -27,7 +27,7 @@ final class Comment
         return [new CommentCreated($id)];
     }
 
-    #[EventSourcingHandler]
+    #[Apply]
     public function applyCommentCreated(CommentCreated $event): void
     {
         $this->id = $event->id;

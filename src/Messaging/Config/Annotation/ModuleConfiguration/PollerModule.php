@@ -3,27 +3,27 @@
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\Attribute\Poller;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
 use Ecotone\Messaging\Attribute\ChannelAdapter;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
-use Ecotone\Messaging\Attribute\Poller;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 #[ModuleAnnotation]
 /**
  * licence Apache-2.0
  */
-class PollerModule extends NoExternalConfigurationModule implements AnnotationModule
+final class PollerModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     private array $pollingMetadata;
 
     /**
-     * @var PollingMetadata[] $pollingMetadata
+     * @param PollingMetadata[] $pollingMetadata
      */
     public function __construct(array $pollingMetadata)
     {
@@ -46,15 +46,15 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
             $channelAdapters = $pollerAnnotation->getMethodAnnotationsWithType(ChannelAdapter::class);
             foreach ($channelAdapters as $channelAdapter) {
                 $pollingMetadata = PollingMetadata::create($channelAdapter->getEndpointId())
-                    ->setCron($poller->getCron())
-                    ->setInitialDelayInMilliseconds($poller->getInitialDelayInMilliseconds())
-                    ->setFixedRateInMilliseconds($poller->getFixedRateInMilliseconds())
-                    ->setErrorChannelName($poller->getErrorChannelName())
-                    ->setMemoryLimitInMegaBytes($poller->getMemoryLimitInMegabytes())
-                    ->setHandledMessageLimit($poller->getHandledMessageLimit())
-                    ->setExecutionTimeLimitInMilliseconds($poller->getExecutionTimeLimitInMilliseconds())
-                    ->setFixedRateExpression($poller->getFixedRateExpression())
-                    ->setCronExpression($poller->getCronExpression());
+                    ->withCron($poller->getCron())
+                    ->withInitialDelayInMilliseconds($poller->getInitialDelayInMilliseconds())
+                    ->withFixedRateInMilliseconds($poller->getFixedRateInMilliseconds())
+                    ->withErrorChannelName($poller->getErrorChannelName())
+                    ->withMemoryLimitInMegaBytes($poller->getMemoryLimitInMegabytes())
+                    ->withHandledMessageLimit($poller->getHandledMessageLimit())
+                    ->withExecutionTimeLimitInMilliseconds($poller->getExecutionTimeLimitInMilliseconds())
+                    ->withFixedRateExpression($poller->getFixedRateExpression())
+                    ->withCronExpression($poller->getCronExpression());
 
                 $multiplePollingMetadata[] = $pollingMetadata;
             }
@@ -68,11 +68,6 @@ class PollerModule extends NoExternalConfigurationModule implements AnnotationMo
         foreach ($this->pollingMetadata as $metadata) {
             $messagingConfiguration->registerPollingMetadata($metadata);
         }
-    }
-
-    public function canHandle($extensionObject): bool
-    {
-        return false;
     }
 
     public function getModulePackageName(): string

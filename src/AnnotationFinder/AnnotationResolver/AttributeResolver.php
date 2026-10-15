@@ -5,7 +5,7 @@ namespace Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\AnnotationResolver;
 use Ecotone\AnnotationFinder\ConfigurationException;
 use Ecotone\AnnotationFinder\TypeResolver;
-use Ecotone\Messaging\Attribute\IsAbstract;
+use Ecotone\Api\Attribute\IsAbstract;
 use Error;
 
 use function preg_match;

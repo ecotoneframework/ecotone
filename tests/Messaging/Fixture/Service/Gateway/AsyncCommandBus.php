@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Service\Gateway;
 
-use Ecotone\Messaging\Attribute\Asynchronous;
-use Ecotone\Modelling\CommandBus;
+use Ecotone\Api\Attribute\Asynchronous;
+use Ecotone\Api\Gateway\CommandBus;
 
 #[Asynchronous('async')]
 /**

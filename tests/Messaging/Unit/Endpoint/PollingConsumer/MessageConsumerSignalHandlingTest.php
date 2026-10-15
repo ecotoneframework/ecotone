@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Endpoint\PollingConsumer;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Attribute\Asynchronous;
-use Ecotone\Messaging\Attribute\ServiceActivator;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
+use Ecotone\Api\Attribute\Asynchronous;
+use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Lite\EcotoneLite;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -24,9 +25,8 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [TestMessageHandler::class],
             [$messageHandler],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async'),
-            ]
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->withEnabledModulePackageNames([])
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', 'test-message');
@@ -34,8 +34,8 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite->run(
             'async',
             ExecutionPollingMetadata::createWithTestingSetup(
-                amountOfMessagesToHandle: 1,
-                maxExecutionTimeInMilliseconds: 1000
+                handledMessageLimit: 1,
+                executionTimeLimitInMilliseconds: 1000
             )
         );
 
@@ -49,9 +49,8 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [TestMessageHandler::class],
             [$messageHandler],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async'),
-            ]
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->withEnabledModulePackageNames([])
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', 'message-1');
@@ -61,8 +60,8 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite->run(
             'async',
             ExecutionPollingMetadata::createWithTestingSetup(
-                amountOfMessagesToHandle: 10,
-                maxExecutionTimeInMilliseconds: 50
+                handledMessageLimit: 10,
+                executionTimeLimitInMilliseconds: 50
             )
         );
 
@@ -77,9 +76,8 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [TestMessageHandler::class],
             [$messageHandler],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async'),
-            ]
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->withEnabledModulePackageNames([])
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', 'message-1');
@@ -89,8 +87,8 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite->run(
             'async',
             ExecutionPollingMetadata::createWithTestingSetup(
-                amountOfMessagesToHandle: 3,
-                maxExecutionTimeInMilliseconds: 0
+                handledMessageLimit: 3,
+                executionTimeLimitInMilliseconds: 0
             )
         );
 
@@ -104,9 +102,8 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [SignalSendingMessageHandler::class],
             [$signalHandler],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async'),
-            ]
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->withEnabledModulePackageNames([])
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', 'message-1');
@@ -116,8 +113,8 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite->run(
             'async',
             ExecutionPollingMetadata::createWithTestingSetup(
-                amountOfMessagesToHandle: 10,
-                maxExecutionTimeInMilliseconds: 30000
+                handledMessageLimit: 10,
+                executionTimeLimitInMilliseconds: 30000
             )
         );
 
@@ -131,9 +128,8 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [SignalSendingMessageHandler::class],
             [$signalHandler],
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('async'),
-            ]
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+                ->withEnabledModulePackageNames([])
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', 'message-1');
@@ -154,7 +150,7 @@ class TestMessageHandler
     private array $processedMessages = [];
 
     #[Asynchronous('async')]
-    #[ServiceActivator('handle_channel', 'test_handler')]
+    #[InternalHandler('handle_channel', endpointId: 'test_handler')]
     public function handle(string $message): void
     {
         $this->processedMessages[] = $message;
@@ -172,7 +168,7 @@ class SignalSendingMessageHandler
     private array $processedMessages = [];
 
     #[Asynchronous('async')]
-    #[ServiceActivator('handle_channel', 'signal_handler')]
+    #[InternalHandler('handle_channel', endpointId: 'signal_handler')]
     public function handle(string $message): void
     {
         $this->processedMessages[] = $message;

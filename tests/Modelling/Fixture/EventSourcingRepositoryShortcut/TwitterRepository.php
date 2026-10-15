@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut;
 
-use Ecotone\Modelling\Attribute\RelatedAggregate;
-use Ecotone\Modelling\Attribute\Repository;
+use Ecotone\Api\Attribute\RelatedAggregate;
+use Ecotone\Api\Attribute\Repository;
 
 /**
  * licence Apache-2.0

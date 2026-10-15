@@ -2,8 +2,8 @@
 
 namespace Ecotone\Messaging\Handler;
 
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\MessagingException;
@@ -42,7 +42,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
         }
         if (! array_key_exists(ServiceCacheConfiguration::REFERENCE_NAME, $objectsToResolve) && ! self::hasInOriginalReferenceService(ServiceCacheConfiguration::REFERENCE_NAME, $referenceSearchService)) {
             $objectsToResolve[ServiceCacheConfiguration::REFERENCE_NAME] = new ServiceCacheConfiguration(
-                $serviceConfiguration->getCacheDirectoryPath(),
+                $serviceConfiguration->cacheDirectoryPath,
                 false
             );
         }

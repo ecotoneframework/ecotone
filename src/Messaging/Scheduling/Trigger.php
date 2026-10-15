@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
 
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Scheduling\DatePoint;
+
 /**
  * Interface Trigger
  * @package Ecotone\Messaging\Scheduling
@@ -14,5 +17,5 @@ namespace Ecotone\Messaging\Scheduling;
  */
 interface Trigger
 {
-    public function nextExecutionTime(EcotoneClockInterface $clock, TriggerContext $triggerContext): DatePoint;
+    public function nextExecutionTime(EcotoneClockInterface $clock, SimpleTriggerContext $triggerContext): DatePoint;
 }

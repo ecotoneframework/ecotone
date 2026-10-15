@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Channel\DeliveryConfirmation;
 
-use Ecotone\Messaging\BatchMessage;
+use Ecotone\Api\ExtensionObject\RetryTemplateBuilder;
+use Ecotone\Api\Messaging\BatchMessage;
+use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\FailedDelivery;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PublishingFailedException;
 use Ecotone\Messaging\Channel\PollableChannel\SendRetries\SendRetryChannelInterceptor;
 use Ecotone\Messaging\Channel\PollableChannel\Serialization\OutboundMessageConverter;
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Gateway\ErrorChannelService;
 use Ecotone\Messaging\Handler\Logger\LoggingService;
-use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\Scheduling\StubUTCClock;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
@@ -72,7 +72,7 @@ final class SendRetryOfFailedBatchDeliveriesTest extends TestCase
     {
         return new SendRetryChannelInterceptor(
             'orders',
-            RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(1)->build(),
+            RetryTemplateBuilder::fixedBackOff(1)->maxRetries(1)->build(),
             null,
             new ErrorChannelService(
                 new LoggingService(),
@@ -96,8 +96,13 @@ final class SendRetryOfFailedBatchDeliveriesTest extends TestCase
             {
                 $payload = $message->getPayload();
                 $this->sentBatchPayloads[] = $payload instanceof BatchMessage
-                    ? array_map(fn (array $entry): mixed => $entry['payload'], $payload->getEntries())
+                    ? array_map(fn (array $entry): mixed => $entry['payload'], $payload->entries)
                     : [$payload];
+            }
+
+            public function __toString(): string
+            {
+                return 'recording';
             }
         };
     }

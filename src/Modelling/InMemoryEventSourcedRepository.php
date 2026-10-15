@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Messaging\Handler\ClassDefinition;
-use Ecotone\Messaging\Handler\Type;
-use Ecotone\Modelling\Attribute\EventSourcingAggregate;
-use Ecotone\Modelling\Attribute\EventSourcingSaga;
-use Ecotone\Modelling\Attribute\Repository;
+use Ecotone\Api\Attribute\Repository;
+use Ecotone\Api\EventSourcing\Event;
 
 /**
  * Class InMemoryEventSourcedRepository
@@ -21,14 +18,18 @@ use Ecotone\Modelling\Attribute\Repository;
 #[Repository]
 class InMemoryEventSourcedRepository implements EventSourcedRepository
 {
+    use MatchesEventSourcedAggregateTypes;
+
     /**
      * @var array<string, array<string, Event[]>>
      */
     private array $eventsPerAggregate;
     private ?array $aggregateTypes;
 
-    public function __construct(array $eventsPerAggregate = [], ?array $aggregateTypes = [])
-    {
+    public function __construct(
+        array $eventsPerAggregate = [],
+        ?array $aggregateTypes = [],
+    ) {
         $this->eventsPerAggregate = $eventsPerAggregate;
         $this->aggregateTypes = $aggregateTypes;
     }
@@ -53,32 +54,15 @@ class InMemoryEventSourcedRepository implements EventSourcedRepository
     /**
      * @inheritDoc
      */
-    public function canHandle(string $aggregateClassName): bool
-    {
-        if ($this->aggregateTypes === null) {
-            return false;
-        }
-
-        if (in_array($aggregateClassName, $this->aggregateTypes)) {
-            return true;
-        }
-
-        $classDefinition = ClassDefinition::createFor(Type::object($aggregateClassName));
-        return $classDefinition->hasClassAnnotationOfPreciseType(Type::attribute(EventSourcingAggregate::class)) || $classDefinition->hasClassAnnotationOfPreciseType(Type::attribute(EventSourcingSaga::class));
-    }
-
-    /**
-     * @inheritDoc
-     */
-    public function findBy(string $aggregateClassName, array $identifiers, int $fromAggregateVersion = 1): EventStream
+    public function findBy(string $aggregateClassName, array $identifiers, int $fromVersion = 1): EventStream
     {
         $key = $this->getKey($identifiers);
 
         if (isset($this->eventsPerAggregate[$aggregateClassName][$key])) {
             $events = $this->eventsPerAggregate[$aggregateClassName][$key];
 
-            if ($fromAggregateVersion > 1) {
-                $events = array_slice($events, $fromAggregateVersion - 1);
+            if ($fromVersion > 1) {
+                $events = array_slice($events, $fromVersion - 1);
             }
 
             return EventStream::createWith(count($events), $events);

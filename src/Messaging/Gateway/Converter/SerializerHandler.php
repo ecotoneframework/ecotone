@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Gateway\Converter;
 
+use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Messaging\Conversion\ConversionService;
-use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Type;
 
 /**
@@ -31,7 +31,7 @@ class SerializerHandler
             $data,
             Type::createFromVariable($data),
             MediaType::createApplicationXPHP(),
-            $targetMediaType->hasTypeParameter() ? $targetMediaType->getTypeParameter() : Type::anything(),
+            $targetMediaType->hasTypeParameter() ? Type::create($targetMediaType->getParameter(MediaType::TYPE_PARAMETER)) : Type::anything(),
             $targetMediaType
         );
     }
@@ -42,7 +42,7 @@ class SerializerHandler
 
         return $this->conversionService->convert(
             $data,
-            $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : Type::createFromVariable($data),
+            $sourceMediaType->hasTypeParameter() ? Type::create($sourceMediaType->getParameter(MediaType::TYPE_PARAMETER)) : Type::createFromVariable($data),
             $sourceMediaType,
             Type::create($metadata[self::TARGET_TYPE]),
             MediaType::createApplicationXPHP()

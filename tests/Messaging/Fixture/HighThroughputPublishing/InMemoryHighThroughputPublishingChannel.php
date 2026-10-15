@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\HighThroughputPublishing;
 
-use Ecotone\Messaging\BatchMessage;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\Messaging\BatchMessage;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Channel\BatchSupportingMessageChannel;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PendingDeliveryRegistry;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PublishingFailedException;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -38,7 +38,7 @@ final class InMemoryHighThroughputPublishingChannel implements PollableChannel, 
 
         if ($payload instanceof BatchMessage) {
             $this->operationsLog->log(sprintf('published batch of %d messages to broker', count($payload)));
-            foreach ($payload->getEntries() as $entry) {
+            foreach ($payload->entries as $entry) {
                 $this->queue[] = MessageBuilder::withPayload($entry['payload'])
                     ->setMultipleHeaders($entry['headers'])
                     ->build();
@@ -122,7 +122,7 @@ final class InMemoryHighThroughputPublishingChannel implements PollableChannel, 
         }
 
         $failedMessages = [];
-        foreach ($payload->getEntries() as $entry) {
+        foreach ($payload->entries as $entry) {
             if ($this->matchesFailingFragment($entry['payload'])) {
                 $failedMessages[] = MessageBuilder::withPayload($entry['payload'])
                     ->setMultipleHeaders($entry['headers'])
@@ -138,5 +138,10 @@ final class InMemoryHighThroughputPublishingChannel implements PollableChannel, 
         $payloadAsString = is_string($payload) ? $payload : json_encode($payload);
 
         return is_string($payloadAsString) && str_contains($payloadAsString, $this->failingPayloadFragment);
+    }
+
+    public function __toString(): string
+    {
+        return 'in memory high throughput: ' . $this->channelName;
     }
 }

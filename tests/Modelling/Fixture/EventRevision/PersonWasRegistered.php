@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\EventRevision;
 
-use Ecotone\Modelling\Attribute\Revision;
+use Ecotone\Api\Attribute\Revision;
 
 #[Revision(2)]
 /**

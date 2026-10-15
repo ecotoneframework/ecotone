@@ -7,9 +7,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\Config\Routing;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Router\RouteSelector;
-use Ecotone\Messaging\Message;
 
 class EventBusRouteSelector implements RouteSelector
 {
@@ -33,5 +33,10 @@ class EventBusRouteSelector implements RouteSelector
         );
 
         return $routes;
+    }
+
+    public function __toString(): string
+    {
+        return 'event bus routing';
     }
 }

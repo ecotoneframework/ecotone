@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\AggregateFlow;
 
+use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\Converter;
-use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Type;
 
 /**

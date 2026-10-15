@@ -3,24 +3,26 @@
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
-use Ecotone\Messaging\Attribute\OnConsumerStop;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\Attribute\OnConsumerStop;
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
-use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\PollableChannel\Serialization\OutboundMessageConverter;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingCommands\MessagingCommandsModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\LicenceDecider;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\EnumToScalar\EnumToScalarConverter;
-use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverter;
 use Ecotone\Messaging\Conversion\ScalarToEnum\ScalarToEnumConverter;
 use Ecotone\Messaging\Conversion\SerializedToObject\DeserializingConverter;
@@ -31,7 +33,6 @@ use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\Interceptor\PcntlTerminationListener;
 use Ecotone\Messaging\Endpoint\Interceptor\TerminationListener;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Gateway\ConsoleCommandRunner;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\ChannelResolver;
@@ -46,7 +47,6 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PollingMetadataC
 use Ecotone\Messaging\Handler\Router\HeaderRouter;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Ramsey\Uuid\UuidInterface;
@@ -55,7 +55,7 @@ use Ramsey\Uuid\UuidInterface;
 /**
  * licence Apache-2.0
  */
-class BasicMessagingModule extends NoExternalConfigurationModule implements AnnotationModule
+final class BasicMessagingModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
      * @inheritDoc
@@ -130,7 +130,7 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
                 Reference::to(LoggingGateway::class),
                 new Definition(OutboundMessageConverter::class, [
                     DefaultHeaderMapper::createAllHeadersMapping()->getDefinition(),
-                    MediaType::parseMediaType($serviceConfiguration->getDefaultSerializationMediaType()),
+                    MediaType::parseMediaType($serviceConfiguration->defaultSerializationMediaType),
                 ]),
                 Reference::to(ConversionService::REFERENCE_NAME),
                 Reference::to(MessageHeadersPropagatorInterceptor::class),
@@ -159,24 +159,6 @@ class BasicMessagingModule extends NoExternalConfigurationModule implements Anno
     /**
      * @inheritDoc
      */
-    public function canHandle($extensionObject): bool
-    {
-        return
-            $extensionObject instanceof ChannelInterceptorBuilder
-            ||
-            $extensionObject instanceof MessageHandlerBuilder
-            ||
-            $extensionObject instanceof MessageChannelBuilder
-            ||
-            $extensionObject instanceof GatewayProxyBuilder
-            ||
-            $extensionObject instanceof ChannelAdapterConsumerBuilder
-            ||
-            $extensionObject instanceof PollingMetadata
-            ||
-            $extensionObject instanceof ServiceConfiguration;
-    }
-
     public function getModulePackageName(): string
     {
         return ModulePackageList::CORE_PACKAGE;

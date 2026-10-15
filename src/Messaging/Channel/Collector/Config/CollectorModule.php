@@ -5,12 +5,15 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Channel\Collector\Config;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Api\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\ExtensionObject\DynamicMessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\Gateway\CommandBus;
+use Ecotone\Api\Interceptor\Precedence;
 use Ecotone\Messaging\Channel\Collector\CollectorSenderInterceptor;
 use Ecotone\Messaging\Channel\Collector\CollectorStorage;
-use Ecotone\Messaging\Channel\DynamicChannel\DynamicMessageChannelBuilder;
-use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\PollableChannel\GlobalPollableChannelConfiguration;
 use Ecotone\Messaging\Channel\PollableChannel\PollableChannelConfiguration;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
@@ -20,12 +23,9 @@ use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
-use Ecotone\Messaging\Precedence;
-use Ecotone\Modelling\CommandBus;
 
 #[ModuleAnnotation]
 /**
@@ -52,6 +52,10 @@ final class CollectorModule extends NoExternalConfigurationModule implements Ann
 
 
         foreach ($pollableMessageChannels as $pollableMessageChannel) {
+            if (! $pollableMessageChannel->isPollable() || $pollableMessageChannel instanceof DynamicMessageChannelBuilder) {
+                continue;
+            }
+
             $channelConfiguration = $globalPollableChannelConfiguration;
 
             foreach ($pollableChannelConfigurations as $pollableChannelConfiguration) {
@@ -96,15 +100,6 @@ final class CollectorModule extends NoExternalConfigurationModule implements Ann
     public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
         return new self();
-    }
-
-    public function canHandle($extensionObject): bool
-    {
-        return
-            $extensionObject instanceof PollableChannelConfiguration
-            || $extensionObject instanceof GlobalPollableChannelConfiguration
-            /** Dynamic and RoundRobin are proxies, therefore should not be intercepted */
-            || ($extensionObject instanceof MessageChannelBuilder && $extensionObject->isPollable() && ! ($extensionObject instanceof DynamicMessageChannelBuilder));
     }
 
     public function getModulePackageName(): string

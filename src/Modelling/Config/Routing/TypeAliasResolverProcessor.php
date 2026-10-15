@@ -7,9 +7,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\Config\Routing;
 
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Handler\MessageProcessor;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 use function is_object;

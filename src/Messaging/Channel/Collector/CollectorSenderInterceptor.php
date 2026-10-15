@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\Collector;
 
-use Ecotone\Messaging\Attribute\Parameter\Reference;
-use Ecotone\Messaging\Attribute\WithoutMessageCollector;
-use Ecotone\Messaging\BatchMessage;
+use Ecotone\Api\Attribute\Reference;
+use Ecotone\Api\Attribute\WithoutMessageCollector;
+use Ecotone\Api\Interceptor\MethodInvocation;
+use Ecotone\Api\Messaging\BatchMessage;
+use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Messaging\Channel\BatchSupportingMessageChannel;
 use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -87,7 +87,7 @@ final class CollectorSenderInterceptor
         foreach ($collectedMessages as $collectedMessage) {
             $payload = $collectedMessage->getPayload();
             if ($payload instanceof BatchMessage) {
-                foreach ($payload->getEntries() as $entry) {
+                foreach ($payload->entries as $entry) {
                     $entries[] = $entry;
                 }
 

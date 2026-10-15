@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate;
 
-use Ecotone\Messaging\Attribute\ServiceActivator;
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Api\Attribute\QueryHandler;
 use Test\Ecotone\Modelling\Fixture\InterceptedCommandAggregate\EventWasLogged;
 
 /**
@@ -16,7 +16,7 @@ class NotificationService
 
     private ?string $happenedAt = null;
 
-    #[ServiceActivator('notify')]
+    #[InternalHandler('notify')]
     public function notify(array $logs, array $metadata): void
     {
         $this->lastLog  = $logs[0];

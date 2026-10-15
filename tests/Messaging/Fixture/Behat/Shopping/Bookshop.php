@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Shopping;
 
-use Ecotone\Messaging\Attribute\ServiceActivator;
+use Ecotone\Api\Attribute\InternalHandler;
 
 /**
  * licence Apache-2.0
@@ -11,7 +11,7 @@ class Bookshop
 {
     private array $reservationRequests = [];
 
-    #[ServiceActivator('reserveRequestTransformer')]
+    #[InternalHandler('reserveRequestTransformer')]
     public function reserve(ReserveRequest $reservationRequest): BookWasReserved
     {
         $this->reservationRequests[] = $reservationRequest;

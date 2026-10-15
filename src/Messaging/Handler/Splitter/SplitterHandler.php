@@ -2,16 +2,17 @@
 
 namespace Ecotone\Messaging\Handler\Splitter;
 
-use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageChannel;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageDeliveryException;
 use Ecotone\Messaging\MessageHandler;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Support\MessageDescription;
 
 /**
  * @licence Apache-2.0
@@ -37,7 +38,7 @@ class SplitterHandler implements MessageHandler
         $replyData = $replyMessage->getPayload();
 
         if (! is_iterable($replyData)) {
-            throw MessageDeliveryException::createWithFailedMessage("Can't split message {$message}, payload to split is not iterable in {$this}", $message);
+            throw MessageDeliveryException::createWithFailedMessage("Can't split message " . MessageDescription::of($message) . ", payload to split is not iterable in {$this}", $message);
         }
 
         $sequenceSize = count($replyData);

@@ -2,6 +2,10 @@
 
 namespace Ecotone\Modelling\AggregateFlow\CallAggregate;
 
+use Ecotone\Api\Attribute\EventSourcingAggregate;
+use Ecotone\Api\Attribute\EventSourcingSaga;
+use Ecotone\Api\Attribute\Version;
+use Ecotone\Api\Modelling\WithAggregateVersioning;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
@@ -16,10 +20,6 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerAggregateObje
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Modelling\Attribute\AggregateVersion;
-use Ecotone\Modelling\Attribute\EventSourcingAggregate;
-use Ecotone\Modelling\Attribute\EventSourcingSaga;
-use Ecotone\Modelling\WithAggregateVersioning;
 
 /**
  * licence Apache-2.0
@@ -59,7 +59,7 @@ class CallAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
         }
 
         $aggregateVersionPropertyName = null;
-        $versionAnnotation             = Type::attribute(AggregateVersion::class);
+        $versionAnnotation             = Type::attribute(Version::class);
         foreach ($aggregateClassDefinition->getProperties() as $property) {
             if ($property->hasAnnotation($versionAnnotation)) {
                 $aggregateVersionPropertyName = $property->getName();
@@ -75,7 +75,7 @@ class CallAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
         $this->interfaceToCall = $interfaceToCall;
         $isFactoryMethod = $this->interfaceToCall->isFactoryMethod();
         if ($isFactoryMethod) {
-            if ($this->isEventSourced && ! $eventSourcingAttribute->hasInternalEventRecorder()) {
+            if ($this->isEventSourced && ! $eventSourcingAttribute->withInternalEventRecorder) {
                 return;
             }
 

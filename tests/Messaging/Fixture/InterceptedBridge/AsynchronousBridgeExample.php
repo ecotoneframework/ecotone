@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\InterceptedBridge;
 
-use Ecotone\Messaging\Attribute\Asynchronous;
-use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
-use Ecotone\Messaging\Attribute\Interceptor\Around;
-use Ecotone\Messaging\Attribute\ServiceActivator;
-use Ecotone\Messaging\Attribute\ServiceContext;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Api\Attribute\Around;
+use Ecotone\Api\Attribute\Asynchronous;
+use Ecotone\Api\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Api\Attribute\ServiceContext;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Interceptor\MethodInvocation;
 
 /**
  * licence Apache-2.0
@@ -20,7 +20,7 @@ final class AsynchronousBridgeExample
     public int $result = 2;
 
     #[Asynchronous('async')]
-    #[ServiceActivator('bridgeExample', 'async_bridge_result', outputChannelName: 'bridgeSum')]
+    #[InternalHandler('bridgeExample', endpointId: 'async_bridge_result', outputChannelName: 'bridgeSum')]
     public function result(int $result): int
     {
         $this->result += $result;
@@ -28,7 +28,7 @@ final class AsynchronousBridgeExample
         return $this->result;
     }
 
-    #[ServiceActivator('bridgeSum')]
+    #[InternalHandler('bridgeSum')]
     public function sum(int $amount): int
     {
         $this->result += $amount;

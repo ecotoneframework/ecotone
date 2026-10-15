@@ -1,0 +1,44 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Ecotone\Api\Interceptor;
+
+/**
+ * licence Apache-2.0
+ *
+ * @link https://docs.ecotone.tech/modelling/extending-messaging-middlewares/interceptors#precedence
+ */
+interface Precedence
+{
+    public const TRACING_PRECEDENCE = Precedence::ERROR_CHANNEL_PRECEDENCE - 101;
+    public const ASYNCHRONOUS_CONSUMER_INTERCEPTOR_PRECEDENCE = Precedence::ERROR_CHANNEL_PRECEDENCE - 100;
+    public const MESSAGE_ACKNOWLEDGE_PRECEDENCE = Precedence::ERROR_CHANNEL_PRECEDENCE - 99;
+    public const EXCEPTION_LOGGING_PRECEDENCE = Precedence::ERROR_CHANNEL_PRECEDENCE - 1;
+    public const ERROR_CHANNEL_PRECEDENCE = -1000000;
+
+    public const SYSTEM_PRECEDENCE_BEFORE = -1001;
+    public const SYSTEM_PRECEDENCE_AFTER = 1001;
+
+    public const ENDPOINT_HEADERS_PRECEDENCE = -3000;
+
+    public const CUSTOM_INSTANT_RETRY_PRECEDENCE = -2003;
+
+    public const GLOBAL_INSTANT_RETRY_PRECEDENCE = -2002;
+
+    public const BETWEEN_INSTANT_RETRY_AND_TRANSACTION_PRECEDENCE = -2001;
+
+    public const DATABASE_TRANSACTION_PRECEDENCE = -2000;
+
+    public const DELIVERY_CONFIRMATION_PRECEDENCE = self::DATABASE_TRANSACTION_PRECEDENCE + 1;
+
+    public const COLLECTOR_SENDER_PRECEDENCE = self::DELIVERY_CONFIRMATION_PRECEDENCE + 1;
+
+    public const DATABASE_OBJECT_MANAGER_PRECEDENCE = self::COLLECTOR_SENDER_PRECEDENCE + 1;
+
+    public const LAZY_EVENT_PUBLICATION_PRECEDENCE = -1900;
+
+    public const DEFAULT_PRECEDENCE = 1;
+
+    public const AGGREGATE_MESSAGE_PAYLOAD_CONVERTER = Precedence::DEFAULT_PRECEDENCE + 10000;
+}

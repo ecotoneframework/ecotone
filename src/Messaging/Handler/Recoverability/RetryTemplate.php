@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Recoverability;
 
+use Ecotone\Api\Scheduling\Duration;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Scheduling\Duration;
 use Ecotone\Messaging\Support\Assert;
 
 /**

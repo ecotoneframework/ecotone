@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Integration;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Gateway\ConsoleCommandRunner;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -102,14 +102,15 @@ final class ChannelSetupCommandTest extends TestCase
         self::assertEquals(['Channel', 'Warning'], $result->getColumnHeaders());
     }
 
-    private function bootstrapEcotone(): \Ecotone\Lite\Test\FlowTestSupport
+    private function bootstrapEcotone(): \Ecotone\Api\Lite\Test\FlowTestSupport
     {
         return EcotoneLite::bootstrapFlowTesting(
             containerOrAvailableServices: [],
             configuration: ServiceConfiguration::createWithDefaults()
                 ->withExtensionObjects([
                     SimpleMessageChannelBuilder::createQueueChannel(self::IN_MEMORY_CHANNEL),
-                ]),
+                ])
+                    ->withEnabledModulePackageNames([]),
             pathToRootCatalog: __DIR__ . '/../../',
         );
     }

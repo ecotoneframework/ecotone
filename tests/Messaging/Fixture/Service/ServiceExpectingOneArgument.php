@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Service;
 
-use Ecotone\Messaging\Attribute\ServiceActivator;
+use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Message;
 use Ramsey\Uuid\UuidInterface;
 use stdClass;
 
@@ -39,7 +39,7 @@ class ServiceExpectingOneArgument implements DefinedObject
         return $value;
     }
 
-    #[ServiceActivator('withoutReturnValue')]
+    #[InternalHandler('withoutReturnValue')]
     public function withoutReturnValue(string $name): void
     {
         $this->wasCalled = true;

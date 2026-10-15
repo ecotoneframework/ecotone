@@ -5,30 +5,30 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\Logger\Config;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Api\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Api\Attribute\LogAfter;
+use Ecotone\Api\Attribute\LogBefore;
+use Ecotone\Api\Attribute\LogError;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\Interceptor\Precedence;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
-use Ecotone\Messaging\Handler\Logger\Annotation\LogBefore;
-use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
-use Ecotone\Messaging\Precedence;
 
 #[ModuleAnnotation]
 /**
  * licence Apache-2.0
  */
-class LoggingModule extends NoExternalConfigurationModule implements AnnotationModule
+final class LoggingModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
      * @inheritDoc
@@ -51,7 +51,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
         $messagingConfiguration->registerBeforeMethodInterceptor(
             MethodInterceptorBuilder::create(
                 Reference::to(LoggingInterceptor::class),
-                $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'log'),
+                $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'logBefore'),
                 Precedence::EXCEPTION_LOGGING_PRECEDENCE,
                 LogBefore::class
             )
@@ -59,7 +59,7 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
         $messagingConfiguration->registerAfterMethodInterceptor(
             MethodInterceptorBuilder::create(
                 Reference::to(LoggingInterceptor::class),
-                $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'log'),
+                $interfaceToCallRegistry->getFor(LoggingInterceptor::class, 'logAfter'),
                 Precedence::EXCEPTION_LOGGING_PRECEDENCE,
                 LogAfter::class
             )
@@ -77,11 +77,6 @@ class LoggingModule extends NoExternalConfigurationModule implements AnnotationM
     /**
      * @inheritDoc
      */
-    public function canHandle($extensionObject): bool
-    {
-        return false;
-    }
-
     public function getModulePackageName(): string
     {
         return ModulePackageList::CORE_PACKAGE;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\ConfigurationVariableService;
-use Ecotone\Messaging\Message;
 use Symfony\Component\ExpressionLanguage\ExpressionLanguage;
 
 /**

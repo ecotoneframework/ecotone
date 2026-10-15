@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Conversion;
 
-use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
@@ -68,7 +68,7 @@ class MediaTypeTest extends TestCase
     {
         $mediaType = MediaType::parseMediaType('application/json;charset=utf-8');
 
-        $this->assertEquals($mediaType->getParameters(), ['charset' => 'utf-8']);
+        $this->assertEquals($mediaType->parameters, ['charset' => 'utf-8']);
         $this->assertTrue($mediaType->hasParameter('charset'));
         $this->assertEquals($mediaType->getParameter('charset'), 'utf-8');
     }

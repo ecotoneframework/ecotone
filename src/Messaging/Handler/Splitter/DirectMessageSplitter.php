@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Handler\Splitter;
 
-use Ecotone\Messaging\Message;
+use Ecotone\Api\Messaging\Message;
 
 /**
  * Class DirectMessageSplitter

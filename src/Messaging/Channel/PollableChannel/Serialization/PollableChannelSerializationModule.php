@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Channel\PollableChannel\Serialization;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
 use Ecotone\Messaging\Channel\MessageChannelWithSerializationBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
@@ -31,6 +31,10 @@ final class PollableChannelSerializationModule extends NoExternalConfigurationMo
         $pollableMessageChannels = ExtensionObjectResolver::resolve(MessageChannelWithSerializationBuilder::class, $extensionObjects);
 
         foreach ($pollableMessageChannels as $pollableMessageChannel) {
+            if (! $pollableMessageChannel->isPollable()) {
+                continue;
+            }
+
             $messagingConfiguration->registerChannelInterceptor(
                 new OutboundSerializationChannelBuilder(
                     $pollableMessageChannel->getMessageChannelName(),
@@ -41,13 +45,8 @@ final class PollableChannelSerializationModule extends NoExternalConfigurationMo
         }
     }
 
-    public function canHandle($extensionObject): bool
-    {
-        return $extensionObject instanceof MessageChannelWithSerializationBuilder && $extensionObject->isPollable();
-    }
-
     public function getModulePackageName(): string
     {
-        return ModulePackageList::ASYNCHRONOUS_PACKAGE;
+        return ModulePackageList::CORE_PACKAGE;
     }
 }

@@ -2,12 +2,12 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Distributed\DistributedCommandBus\Receiver;
 
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\Distributed;
-use Ecotone\Modelling\Attribute\QueryHandler;
-use Ecotone\Modelling\EventBus;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\Distributed;
+use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Gateway\EventBus;
+use Ecotone\Api\Messaging\Message;
 use Test\Ecotone\Amqp\Fixture\DistributedCommandBus\Receiver\Event\TicketCreated;
 
 /**

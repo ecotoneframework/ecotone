@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Closure;
-use Ecotone\Messaging\Attribute\Parameter\ConfigurationVariable;
-use Ecotone\Messaging\Attribute\Parameter\Fetch;
-use Ecotone\Messaging\Attribute\Parameter\Header;
-use Ecotone\Messaging\Attribute\Parameter\Headers;
-use Ecotone\Messaging\Attribute\Parameter\Payload;
-use Ecotone\Messaging\Attribute\Parameter\Reference;
+use Ecotone\Api\Attribute\ConfigurationVariable;
+use Ecotone\Api\Attribute\Fetch;
+use Ecotone\Api\Attribute\Header;
+use Ecotone\Api\Attribute\Headers;
+use Ecotone\Api\Attribute\IgnorePayload;
+use Ecotone\Api\Attribute\Payload;
+use Ecotone\Api\Attribute\Reference;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\AttributeDeclaration;
 use Ecotone\Messaging\Handler\ClosureExpression\ClosureExpressionParameterConverterBuilder;
@@ -28,7 +29,8 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadExpressio
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodArgumentsFactory;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Modelling\Attribute\IgnorePayload;
+use Ecotone\Modelling\DecisionModel\DecisionModelConverterBuilder;
+use Ecotone\Modelling\DecisionModel\DecisionModelReflection;
 
 /**
  * Class ParameterConverterAnnotationFactory
@@ -131,14 +133,24 @@ class ParameterConverterAnnotationFactory
                     throw ConfigurationException::create(sprintf('Closure expression inside %s attribute is not supported for parameter `%s` in this context.', get_class($annotation), $interfaceParameter->getName()));
                 }
 
+                $attributeDeclaration = $expression instanceof Closure
+                    ? new AttributeDeclaration(get_class($annotation), $relatedClassInterface->getInterfaceName(), $relatedClassInterface->getMethodName(), $interfaceParameter->getName())
+                    : null;
+
+                if ($interfaceParameter->isClassOrInterface() && DecisionModelReflection::isDecisionModel($interfaceParameter->getTypeHint())) {
+                    return DecisionModelConverterBuilder::create($interfaceParameter, $expression, $attributeDeclaration);
+                }
+
                 return FetchAggregateConverterBuilder::create(
                     $interfaceParameter,
                     $expression,
-                    $expression instanceof Closure
-                        ? new AttributeDeclaration(get_class($annotation), $relatedClassInterface->getInterfaceName(), $relatedClassInterface->getMethodName(), $interfaceParameter->getName())
-                        : null,
+                    $attributeDeclaration,
                 );
             }
+        }
+
+        if ($interfaceParameter->isClassOrInterface() && DecisionModelReflection::isDecisionModel($interfaceParameter->getTypeHint())) {
+            return DecisionModelConverterBuilder::create($interfaceParameter);
         }
 
         return $interfaceParameter->isMessage() ? MessageConverterBuilder::create($interfaceParameter->getName()) : null;

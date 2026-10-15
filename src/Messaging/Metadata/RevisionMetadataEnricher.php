@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Metadata;
 
-use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Modelling\Attribute\Revision;
+use Ecotone\Api\Attribute\Revision;
+use Ecotone\Api\Messaging\MessageHeaders;
 use ReflectionAttribute;
 use ReflectionObject;
 
@@ -24,7 +24,7 @@ final class RevisionMetadataEnricher
         if (! empty($revisionAttributes)) {
             /** @var Revision $revision */
             $revision = $revisionAttributes[0]->newInstance();
-            $metadata[MessageHeaders::REVISION] = $revision->getRevision();
+            $metadata[MessageHeaders::REVISION] = $revision->revision;
         }
 
 

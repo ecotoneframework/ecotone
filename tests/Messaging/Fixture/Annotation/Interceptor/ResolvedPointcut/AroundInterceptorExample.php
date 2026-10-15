@@ -2,12 +2,12 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\ResolvedPointcut;
 
-use Ecotone\Messaging\Attribute\Interceptor\Around;
-use Ecotone\Messaging\Attribute\Parameter\Header;
-use Ecotone\Messaging\Attribute\Parameter\Headers;
-use Ecotone\Messaging\Attribute\Parameter\Payload;
-use Ecotone\Modelling\CommandBus;
-use Ecotone\Modelling\EventBus;
+use Ecotone\Api\Attribute\Around;
+use Ecotone\Api\Attribute\Header;
+use Ecotone\Api\Attribute\Headers;
+use Ecotone\Api\Attribute\Payload;
+use Ecotone\Api\Gateway\CommandBus;
+use Ecotone\Api\Gateway\EventBus;
 use stdClass;
 
 /**

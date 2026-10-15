@@ -4,25 +4,26 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\AggregateFlow\SaveAggregate;
 
+use Ecotone\Api\EventSourcing\Event;
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Metadata\RevisionMetadataEnricher;
-use Ecotone\Messaging\Scheduling\Clock;
 use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\FrameworkHeaders;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\AggregateIdMetadata;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateClassDefinition;
 use Ecotone\Modelling\AggregateIdResolver;
 use Ecotone\Modelling\AggregateMessage;
-use Ecotone\Modelling\Event;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
 use Symfony\Component\Uid\Uuid;
 
@@ -56,10 +57,6 @@ class SaveAggregateServiceTemplate
         }
     }
 
-    /**
-     * @param array<string, string> $aggregateIdentifierMapping
-     * @param array<string, string> $aggregateIds
-     */
     public static function getAggregateIds(
         PropertyReaderAccessor $propertyReaderAccessor,
         array $metadata,
@@ -92,7 +89,7 @@ class SaveAggregateServiceTemplate
                     continue;
                 }
 
-                throw NoCorrectIdentifierDefinedException::create("After calling {$aggregateDefinition->getClassName()} has no identifier assigned. If you're using Event Sourcing Aggregate, please set up #[EventSourcingHandler] that will assign the id after first event");
+                throw NoCorrectIdentifierDefinedException::create("After calling {$aggregateDefinition->getClassName()} has no identifier assigned. If you're using Event Sourcing Aggregate, please set up #[Apply] that will assign the id after first event");
             }
 
             $aggregateIds[$aggregateIdName] = $id;
@@ -107,7 +104,7 @@ class SaveAggregateServiceTemplate
     public static function buildReplyMessage(
         bool $isFactoryMethod,
         array $aggregateIds,
-        int $versionAfterHandling,
+        ?int $versionAfterHandling,
         Message $message
     ): Message|null {
         if ($message->getHeaders()->containsKey(AggregateMessage::NULL_EXECUTION_RESULT)) {
@@ -116,9 +113,9 @@ class SaveAggregateServiceTemplate
             }
         }
 
-        $messageBuilder = MessageBuilder::fromMessage($message)
-            ->setHeader(AggregateMessage::TARGET_VERSION, $versionAfterHandling)
-        ;
+        $messageBuilder = $versionAfterHandling === null
+            ? MessageBuilder::fromMessage($message)->removeHeader(AggregateMessage::TARGET_VERSION)
+            : MessageBuilder::fromMessage($message)->setHeader(AggregateMessage::TARGET_VERSION, $versionAfterHandling);
 
         if ($isFactoryMethod) {
             if (count($aggregateIds) === 1) {
@@ -134,28 +131,28 @@ class SaveAggregateServiceTemplate
     /**
      * @return Event[]
      */
-    public static function buildEcotoneEvents(mixed $events, string $calledInterface, Message $message, HeaderMapper $headerMapper, ConversionService $conversionService, EventMapper $eventMapper): array
+    public static function buildEcotoneEvents(mixed $events, string $calledInterface, Message $message, HeaderMapper $headerMapper, ConversionService $conversionService, EventMapper $eventMapper, EcotoneClockInterface $clock): array
     {
         Assert::isIterable($events, "Return value Event Sourced Aggregate {$calledInterface} must return array of events");
-        return array_map(static function ($event) use ($message, $calledInterface, $headerMapper, $conversionService, $eventMapper): Event {
+        return array_map(static function ($event) use ($message, $calledInterface, $headerMapper, $conversionService, $eventMapper, $clock): Event {
             if (! is_object($event)) {
                 $typeDescriptor = Type::createFromVariable($event);
                 throw InvalidArgumentException::create("Events return by after calling {$calledInterface} must all be objects, {$typeDescriptor->toString()} given");
             }
             $eventMetadata = $message->getHeaders()->headers();
             if ($event instanceof Event) {
-                $eventMetadata = $event->getMetadata();
+                $eventMetadata = $event->metadata;
                 $event = $event->getPayload();
             }
-            $eventMetadata = MessageHeaders::unsetAllFrameworkHeaders($eventMetadata);
+            $eventMetadata = FrameworkHeaders::unsetAllFrameworkHeaders($eventMetadata);
             /** This need to be removed explicitly after saving, to be passed correctly across asynchronous message channels */
             unset($eventMetadata[AggregateMessage::AGGREGATE_ID], $eventMetadata[AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER]);
             $eventMetadata = $headerMapper->mapFromMessageHeaders($eventMetadata, $conversionService);
 
             $eventMetadata = RevisionMetadataEnricher::enrich($eventMetadata, $event);
             $eventMetadata[MessageHeaders::MESSAGE_ID] ??= Uuid::v7()->toRfc4122();
-            $eventMetadata[MessageHeaders::TIMESTAMP] ??= Clock::get()->now()->unixTime()->inSeconds();
-            $eventMetadata = MessageHeaders::propagateContextHeaders([
+            $eventMetadata[MessageHeaders::TIMESTAMP] ??= $clock->now()->unixTime()->inSeconds();
+            $eventMetadata = FrameworkHeaders::propagateContextHeaders([
                 MessageHeaders::MESSAGE_ID => $message->getHeaders()->getMessageId(),
                 MessageHeaders::MESSAGE_CORRELATION_ID => $message->getHeaders()->getCorrelationId(),
             ], $eventMetadata);
@@ -176,7 +173,7 @@ class SaveAggregateServiceTemplate
     public static function enrichAggregateEvents(array $events, int $versionBeforeHandling, array $identifiers, AggregateClassDefinition $aggregateDefinition): array
     {
         $incrementedVersion = $versionBeforeHandling;
-        $aggregateId = count($identifiers) === 1 ? $identifiers[array_key_first($identifiers)] : $identifiers;
+        $aggregateId = count($identifiers) === 1 ? (string) $identifiers[array_key_first($identifiers)] : $identifiers;
         $streamName = $aggregateDefinition->getAggregateStreamName();
         $aggregateType = $aggregateDefinition->getAggregateClassType();
 

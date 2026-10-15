@@ -2,9 +2,12 @@
 
 namespace Ecotone\Messaging\Config\Container\Compiler;
 
+use Ecotone\Api\Console\ConsoleWriter;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
 use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PendingDeliveryRegistry;
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\Container\ChannelResolverWithContainer;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
@@ -12,10 +15,7 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\Container\ReferenceSearchServiceWithContainer;
 use Ecotone\Messaging\Config\LicenceDecider;
 use Ecotone\Messaging\Config\MessagingSystemContainer;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Console\ConsoleWriter;
 use Ecotone\Messaging\Console\DelegatingConsoleWriter;
 use Ecotone\Messaging\Console\PlainConsoleWriter;
 use Ecotone\Messaging\Handler\Bridge\Bridge;
@@ -29,7 +29,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Scheduling\Clock;
-use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
+use Ecotone\Messaging\Scheduling\NativeClock;
 use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
 
@@ -54,9 +54,9 @@ class RegisterSingletonMessagingServices implements CompilerPass
             Clock::class,
             [
                 new Reference(ClockInterface::class, ContainerImplementation::NULL_ON_INVALID_REFERENCE),
-                $this->serviceConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE),
+                new Definition(NativeClock::class),
             ],
-            factory: [Clock::class, 'createBasedOnConfig']
+            factory: [Clock::class, 'createWithFallback']
         ));
         $this->registerDefault($builder, ChannelResolver::class, new Definition(ChannelResolverWithContainer::class, [new Reference(ContainerInterface::class)]));
         $this->registerDefault($builder, ReferenceSearchService::class, new Definition(ReferenceSearchServiceWithContainer::class, [new Reference(ContainerInterface::class)]));

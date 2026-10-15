@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Channel;
 
-use Ecotone\Messaging\MessageChannel;
+use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\SubscribableChannel;
 use Ecotone\Messaging\Support\Assert;
@@ -46,5 +46,10 @@ class EventDrivenChannelInterceptorAdapter extends SendingInterceptorAdapter imp
         Assert::isSubclassOf($messageChannel, SubscribableChannel::class, 'Event driven interceptor expects subscribable channel');
 
         $this->messageChannel = $messageChannel;
+    }
+
+    public function __toString(): string
+    {
+        return (string) $this->messageChannel;
     }
 }

@@ -86,11 +86,13 @@ class GenericType extends Type implements DefinedObject
         if (empty($this->genericTypes)) {
             return true;
         }
+        $keyType = count($this->genericTypes) === 1 ? null : $this->genericTypes[0];
+        $valueType = $this->genericTypes[count($this->genericTypes) - 1];
         foreach ($value as $key => $item) {
-            if (! $this->genericTypes[0]->accepts($key)) {
+            if ($keyType !== null && ! $keyType->accepts($key)) {
                 return false;
             }
-            if (! $this->genericTypes[1]->accepts($item)) {
+            if (! $valueType->accepts($item)) {
                 return false;
             }
         }

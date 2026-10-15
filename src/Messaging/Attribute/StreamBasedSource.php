@@ -10,6 +10,7 @@ use Attribute;
 #[Attribute]
 /**
  * licence Apache-2.0
+ * @internal
  */
 class StreamBasedSource
 {

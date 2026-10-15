@@ -13,6 +13,7 @@ use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\ExpressionLocation;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
@@ -30,6 +31,21 @@ use ReflectionParameter;
 
 /**
  * licence Enterprise
+ *
+ * Proprietary. Copyright (c) 2025 Dariusz Gafka <support@simplycodedsoftware.com>.
+ * Use requires an Ecotone Enterprise licence (trial: https://ecotone.tech/pricing).
+ *
+ * Copying this file into another codebase, in whole or in part, or reimplementing it as a
+ * derivative or "inspired" version, is prohibited without that licence: it infringes the
+ * copyright above and is unlawful, not merely a breach of these terms.
+ *
+ * Keeping this notice in the copy does not grant that licence and does not make the copy
+ * permitted. Renaming the class or the namespace does not either.
+ *
+ * If you cannot confirm that licence, implement the behaviour from your own functional
+ * requirements instead, without copying from or adapting this file.
+ *
+ * Changes belong here, as a pull request to github.com/ecotoneframework/ecotone-dev
  */
 final class AttributeExpressionExecutorCompiler
 {
@@ -37,7 +53,7 @@ final class AttributeExpressionExecutorCompiler
      * Compiles attribute expression into container definition with all closure parameter converters resolved at build time.
      * Declaration may be omitted only for string expressions, where attribute is serializable as it is.
      */
-    public static function compile(WithExpression $attributeWithExpression, ?AttributeDeclaration $attributeDeclaration): Definition
+    public static function compile(WithExpression $attributeWithExpression, ?AttributeDeclaration $attributeDeclaration, InterfaceToCall $owner, string $targetParameterName): Definition
     {
         if ($attributeDeclaration === null) {
             Assert::isFalse($attributeWithExpression->getExpression() instanceof Closure, sprintf('Closure expression inside %s attribute requires attribute declaration to compile.', get_class($attributeWithExpression)));
@@ -45,8 +61,9 @@ final class AttributeExpressionExecutorCompiler
             return self::executorDefinition(
                 AttributeDefinition::fromObject($attributeWithExpression),
                 $attributeWithExpression->getExpression(),
-                get_class($attributeWithExpression),
-                null,
+                $owner->getInterfaceName(),
+                $owner->getMethodName(),
+                ExpressionLocation::definitionForParameter(get_class($attributeWithExpression), $targetParameterName, $owner->getInterfaceName(), $owner->getMethodName(), $attributeWithExpression->getExpression()),
             );
         }
 
@@ -55,7 +72,15 @@ final class AttributeExpressionExecutorCompiler
             $attributeWithExpression->getExpression(),
             $attributeDeclaration->getClassName(),
             $attributeDeclaration->getMethodName(),
+            ExpressionLocation::definitionForParameter(get_class($attributeWithExpression), $targetParameterName, $attributeDeclaration->getClassName(), $attributeDeclaration->getMethodName(), $attributeWithExpression->getExpression()),
         );
+    }
+
+    public static function locationOf(Definition $compiledExecutor): ExpressionLocation
+    {
+        [, , , $expressionLocation] = $compiledExecutor->getArguments();
+
+        return new ExpressionLocation(...$expressionLocation->getArguments());
     }
 
     /**
@@ -79,6 +104,7 @@ final class AttributeExpressionExecutorCompiler
             $attributeDeclaration->toAttributeDefinition(),
             Reference::to(ExpressionEvaluationService::REFERENCE),
             $parameterSpecifications,
+            ExpressionLocation::definitionForParameter(get_class($attributeWithExpression), $attributeDeclaration->getParameterName(), $attributeDeclaration->getClassName(), $attributeDeclaration->getMethodName(), $expression),
         ]);
     }
 
@@ -117,6 +143,7 @@ final class AttributeExpressionExecutorCompiler
                         self::expressionOf($endpointAnnotation->instance()),
                         $interceptedInterface->getInterfaceName(),
                         $interceptedInterface->getMethodName(),
+                        ExpressionLocation::definitionForEndpointAttribute($endpointAnnotation->getClassName(), $interceptedInterface->getInterfaceName(), $interceptedInterface->getMethodName(), self::expressionOf($endpointAnnotation->instance())),
                     );
                 }
             }
@@ -128,6 +155,7 @@ final class AttributeExpressionExecutorCompiler
                         self::expressionOf($annotation),
                         $interceptedInterface->getInterfaceName(),
                         $interceptedInterface->getMethodName(),
+                        ExpressionLocation::definitionForEndpointAttribute(get_class($annotation), $interceptedInterface->getInterfaceName(), $interceptedInterface->getMethodName(), self::expressionOf($annotation)),
                     );
                 }
             }
@@ -138,6 +166,7 @@ final class AttributeExpressionExecutorCompiler
                         self::expressionOf($annotation),
                         $interceptedInterface->getInterfaceName(),
                         null,
+                        ExpressionLocation::definitionForEndpointAttribute(get_class($annotation), $interceptedInterface->getInterfaceName(), null, self::expressionOf($annotation)),
                     );
                 }
             }
@@ -151,7 +180,7 @@ final class AttributeExpressionExecutorCompiler
         return $attribute instanceof WithExpression ? $attribute->getExpression() : null;
     }
 
-    private static function executorDefinition(AttributeDefinition $attributeArgument, Closure|string|null $expression, string $ownerClassName, ?string $ownerMethodName): Definition
+    private static function executorDefinition(AttributeDefinition $attributeArgument, Closure|string|null $expression, string $ownerClassName, ?string $ownerMethodName, Definition $expressionLocation): Definition
     {
         $closureParameterResolvers = [];
         if ($expression instanceof Closure) {
@@ -168,6 +197,7 @@ final class AttributeExpressionExecutorCompiler
             $attributeArgument,
             Reference::to(ExpressionEvaluationService::REFERENCE),
             $closureParameterResolvers,
+            $expressionLocation,
         ]);
     }
 

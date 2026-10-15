@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\ErrorHandler;
 
-use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
+use Ecotone\Api\ExtensionObject\RetryTemplateBuilder;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -19,7 +19,7 @@ class RetryTemplateTest extends TestCase
     public function test_calculating_fixed_back_off_with_max_attempts()
     {
         $retryTemplate = RetryTemplateBuilder::fixedBackOff(100)
-                            ->maxRetryAttempts(3)
+                            ->maxRetries(3)
                             ->build();
 
         $this->assertEquals(0, $retryTemplate->calculateNextDelay(0));
@@ -33,7 +33,7 @@ class RetryTemplateTest extends TestCase
 
     public function test_calculating_exponential_back_off()
     {
-        $retryTemplate = RetryTemplateBuilder::exponentialBackoff(10, 2)
+        $retryTemplate = RetryTemplateBuilder::exponentialBackOff(10, 2)
             ->build();
 
         $this->assertEquals(10, $retryTemplate->calculateNextDelay(1));
@@ -46,7 +46,7 @@ class RetryTemplateTest extends TestCase
 
     public function test_stopping_on_max_delay()
     {
-        $retryTemplate = RetryTemplateBuilder::exponentialBackoffWithMaxDelay(10, 2, 80)
+        $retryTemplate = RetryTemplateBuilder::exponentialBackOffWithMaxDelay(10, 2, 80)
             ->build();
 
         $this->assertTrue($retryTemplate->canBeCalledNextTime(1));

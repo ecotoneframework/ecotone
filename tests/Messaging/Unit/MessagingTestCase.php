@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Unit;
 
-use Ecotone\Messaging\Message;
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Support\MessageCompareService;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;

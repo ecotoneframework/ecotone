@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Scheduling;
 
+use Ecotone\Api\Scheduling\DatePoint;
 use Ecotone\Messaging\Scheduling\CronTrigger;
-use Ecotone\Messaging\Scheduling\DatePoint;
 use Ecotone\Messaging\Scheduling\SimpleTriggerContext;
 use Ecotone\Messaging\Scheduling\StubUTCClock;
 use Ecotone\Messaging\Support\InvalidArgumentException;

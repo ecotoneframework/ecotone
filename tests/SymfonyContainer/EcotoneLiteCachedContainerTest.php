@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\SymfonyContainer;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Attribute\Parameter\Payload;
-use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
-use Ecotone\Messaging\Config\ModulePackageList;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\CommandBus;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\Payload;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Gateway\CommandBus;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand\OneTimeWithResultExample;
@@ -26,7 +25,7 @@ class EcotoneLiteCachedContainerTest extends TestCase
         $cacheDirectory = sys_get_temp_dir() . '/ecotone_lite_dumped_container/' . uniqid('', true);
         $configuration = ServiceConfiguration::createWithDefaults()
             ->withCacheDirectoryPath($cacheDirectory)
-            ->withSkippedModulePackageNames(ModulePackageList::allPackages());
+            ->withEnabledModulePackageNames([]);
         $handler = new CachedCommandHandlerService();
 
         $messagingSystem = EcotoneLite::bootstrap(
@@ -56,7 +55,7 @@ class EcotoneLiteCachedContainerTest extends TestCase
             [OneTimeWithResultExample::class],
             [OneTimeWithResultExample::class => new OneTimeWithResultExample()],
             ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
+                ->withEnabledModulePackageNames([]),
         );
 
         $container = $messagingSystem->getServiceFromContainer(ContainerInterface::class);
@@ -71,7 +70,7 @@ class EcotoneLiteCachedContainerTest extends TestCase
             [CachedCommandHandlerService::class],
             [CachedCommandHandlerService::class => new CachedCommandHandlerService()],
             ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
+                ->withEnabledModulePackageNames([]),
         );
         $container = $messagingSystem->getServiceFromContainer(ContainerInterface::class);
 

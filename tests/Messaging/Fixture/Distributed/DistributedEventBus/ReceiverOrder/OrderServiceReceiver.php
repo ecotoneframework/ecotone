@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Distributed\DistributedEventBus\ReceiverOrder;
 
-use Ecotone\Messaging\Message;
-use Ecotone\Modelling\Attribute\Distributed;
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Api\Attribute\Distributed;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Api\Messaging\Message;
 
 final class OrderServiceReceiver
 {

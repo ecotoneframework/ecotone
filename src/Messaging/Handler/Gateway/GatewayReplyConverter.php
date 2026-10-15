@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\Messaging\Future;
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Conversion\ConversionService;
-use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Future;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageConverter\MessageConverter;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Generator;
@@ -19,30 +18,15 @@ use Generator;
  */
 class GatewayReplyConverter
 {
-    /**
-     * @param MessageConverter[] $messageConverters
-     */
     public function __construct(
         private ConversionService $conversionService,
         private string $interfaceToCallName,
         private ?Type $returnType,
-        private array $messageConverters
     ) {
     }
 
     public function convert(mixed $result, ?MediaType $replyContentType)
     {
-        foreach ($this->messageConverters as $messageConverter) {
-            $reply = $messageConverter->fromMessage(
-                $result,
-                $this->returnType
-            );
-
-            if ($reply) {
-                return $reply;
-            }
-        }
-
         $isMessage = $result instanceof Message;
         $data = $isMessage ? $result->getPayload() : $result;
         $sourceMediaType = MediaType::createApplicationXPHP();
@@ -53,24 +37,23 @@ class GatewayReplyConverter
                 $sourceMediaType = $result->getHeaders()->getContentType();
 
                 if ($sourceMediaType->hasTypeParameter()) {
-                    $sourceType = $sourceMediaType->getTypeParameter();
+                    $sourceType = Type::create($sourceMediaType->getParameter(MediaType::TYPE_PARAMETER));
                 }
             }
         }
 
         if (! $replyContentType) {
             if ($data instanceof Generator) {
-                $isCollection = $this->returnType->isCollection();
-                $genericType = null;
-                if ($this->returnType instanceof Type\GenericType) {
-                    $resolvedTypes = $this->returnType->genericTypes;
+                return $this->yieldResults($data, $this->collectionElementType());
+            }
 
-                    if (count($resolvedTypes) === 1) {
-                        $genericType = $resolvedTypes[0];
-                    }
+            if (is_array($data) && ! $sourceType instanceof Type\GenericType && ($elementType = $this->collectionElementType())) {
+                $converted = [];
+                foreach ($data as $key => $item) {
+                    $converted[$key] = $this->convertElementIfNeeded($item, $elementType);
                 }
 
-                return $this->yieldResults($data, $isCollection, $genericType);
+                return $converted;
             }
 
             if (! $this->returnType->isMessage() && ! $sourceType->isCompatibleWith($this->returnType)) {
@@ -90,8 +73,8 @@ class GatewayReplyConverter
             return $result->getPayload();
         }
 
-        if (! $sourceMediaType->isCompatibleWith($replyContentType) || ($replyContentType->hasTypeParameter() && $replyContentType->getTypeParameter()->isIterable())) {
-            $targetType = $replyContentType->hasTypeParameter() ? $replyContentType->getTypeParameter() : Type::anything();
+        if (! $sourceMediaType->isCompatibleWith($replyContentType) || ($replyContentType->hasTypeParameter() && Type::create($replyContentType->getParameter(MediaType::TYPE_PARAMETER))->isIterable())) {
+            $targetType = $replyContentType->hasTypeParameter() ? Type::create($replyContentType->getParameter(MediaType::TYPE_PARAMETER)) : Type::anything();
             if (! $this->conversionService->canConvert(
                 $sourceType,
                 $sourceMediaType,
@@ -120,16 +103,28 @@ class GatewayReplyConverter
         return $data;
     }
 
-    private function yieldResults(Generator $data, bool $isCollection, ?Type $expectedType): Generator
+    private function yieldResults(Generator $data, ?Type $expectedType): Generator
     {
         foreach ($data as $result) {
-            if ($expectedType !== null) {
-                if ($isCollection && ! $expectedType->accepts($result)) {
-                    $result = $this->conversionService->convert($result, Type::createFromVariable($result), MediaType::createApplicationXPHP(), $expectedType, MediaType::createApplicationXPHP());
-                }
-            }
-
-            yield $result;
+            yield $expectedType !== null ? $this->convertElementIfNeeded($result, $expectedType) : $result;
         }
+    }
+
+    private function collectionElementType(): ?Type
+    {
+        if ($this->returnType instanceof Type\GenericType && count($this->returnType->genericTypes) === 1) {
+            return $this->returnType->genericTypes[0];
+        }
+
+        return null;
+    }
+
+    private function convertElementIfNeeded(mixed $result, Type $expectedType): mixed
+    {
+        if ($expectedType->accepts($result)) {
+            return $result;
+        }
+
+        return $this->conversionService->convert($result, Type::createFromVariable($result), MediaType::createApplicationXPHP(), $expectedType, MediaType::createApplicationXPHP());
     }
 }

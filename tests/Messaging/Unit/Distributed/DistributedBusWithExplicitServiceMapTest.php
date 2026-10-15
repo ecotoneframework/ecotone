@@ -4,28 +4,27 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Distributed;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Lite\Test\FlowTestSupport;
-use Ecotone\Messaging\Channel\DynamicChannel\DynamicMessageChannelBuilder;
-use Ecotone\Messaging\Channel\MessageChannelBuilder;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\Distributed;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Api\ExtensionObject\DistributedServiceMap;
+use Ecotone\Api\ExtensionObject\DynamicMessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Gateway\DistributedBus;
+use Ecotone\Api\Gateway\DistributedBusHeader;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Lite\Test\FlowTestSupport;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ModulePackageList;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Consumer\ConsumerPositionTracker;
 use Ecotone\Messaging\Consumer\InMemory\InMemoryConsumerPositionTracker;
-use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
-use Ecotone\Modelling\Api\Distribution\DistributedServiceMap;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\Distributed;
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\Attribute\QueryHandler;
-use Ecotone\Modelling\DistributedBus;
 use Ecotone\Modelling\MessageHandling\Distribution\UnknownDistributedDestination;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\TestCase;
@@ -41,6 +40,22 @@ use Test\Ecotone\Messaging\Fixture\Distributed\TestServiceName;
 
 /**
  * licence Enterprise
+ *
+ * Proprietary. Copyright (c) 2025 Dariusz Gafka <support@simplycodedsoftware.com>.
+ * Use requires an Ecotone Enterprise licence (trial: https://ecotone.tech/pricing).
+ *
+ * Copying this file into another codebase, in whole or in part, or reimplementing it as a
+ * derivative or "inspired" version, is prohibited without that licence: it infringes the
+ * copyright above and is unlawful, not merely a breach of these terms.
+ *
+ * Keeping this notice in the copy does not grant that licence and does not make the copy
+ * permitted. Renaming the class or the namespace does not either.
+ *
+ * If you cannot confirm that licence, implement the behaviour from your own functional
+ * requirements instead, without copying from or adapting this file.
+ *
+ * Changes belong here, as a pull request to github.com/ecotoneframework/ecotone-dev
+ *
  * @internal
  */
 final class DistributedBusWithExplicitServiceMapTest extends TestCase
@@ -129,7 +144,7 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
 
         self::assertEquals(0, $ticketService->sendQueryWithRouting(TicketServiceReceiver::GET_TICKETS_COUNT));
 
-        $userService->sendCommandWithRoutingKey(UserService::CHANGE_BILLING_DETAILS, 'change details');
+        $userService->sendCommandWithRouting(UserService::CHANGE_BILLING_DETAILS, 'change details');
         self::assertEquals(0, $ticketService->sendQueryWithRouting(TicketServiceReceiver::GET_TICKETS_COUNT));
 
         $ticketService->run($sharedQueueChannel->getMessageChannelName(), ExecutionPollingMetadata::createWithTestingSetup());
@@ -158,7 +173,7 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
             ]
         );
 
-        $userService->sendCommandWithRoutingKey(UserService::CHANGE_BILLING_DETAILS, 'change details');
+        $userService->sendCommandWithRouting(UserService::CHANGE_BILLING_DETAILS, 'change details');
     }
 
     public function test_failing_on_distribution_to_not_existing_message_channel_service(): void
@@ -572,7 +587,8 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
                 ->withServiceName('test')
                 ->withExtensionObjects([
                     DistributedServiceMap::initialize(),
-                ]),
+                ])
+                    ->withEnabledModulePackageNames([]),
             pathToRootCatalog: __DIR__ . '/../../',
         );
     }
@@ -585,7 +601,8 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
             configuration: ServiceConfiguration::createWithDefaults()
                 ->withExtensionObjects([
                     DistributedServiceMap::initialize(),
-                ]),
+                ])
+                    ->withEnabledModulePackageNames([]),
             pathToRootCatalog: __DIR__ . '/../../',
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
@@ -662,7 +679,7 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
             containerOrAvailableServices: $services,
             configuration: ServiceConfiguration::createWithDefaults()
                 ->withServiceName($serviceName)
-                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withEnabledModulePackageNames([])
                 ->withExtensionObjects(array_merge(is_array($sharedQueueChannel) ? $sharedQueueChannel : [
                     $sharedQueueChannel ?? SimpleMessageChannelBuilder::createQueueChannel($serviceName),
                 ], $extensionObjects ?: []))
@@ -685,7 +702,7 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
         // Publisher service
         $publisher = new class () {
             #[CommandHandler('publish.event')]
-            public function publish(string $payload, \Ecotone\Modelling\EventBus $eventBus): void
+            public function publish(string $payload, \Ecotone\Api\Gateway\EventBus $eventBus): void
             {
                 $eventBus->publish($payload);
             }
@@ -748,7 +765,7 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
             [$publisher, ConsumerPositionTracker::class => $positionTracker],
             ServiceConfiguration::createWithDefaults()
                 ->withServiceName($service0Name)
-                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withEnabledModulePackageNames([])
                 ->withExtensionObjects([
                     $publisherStreamingChannel,
                     $queueChannelService0,
@@ -766,7 +783,7 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
             [$consumer1, ConsumerPositionTracker::class => $positionTracker],
             ServiceConfiguration::createWithDefaults()
                 ->withServiceName($service1Name)
-                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withEnabledModulePackageNames([])
                 ->withExtensionObjects([
                     $publisherStreamingChannel,
                     $queueChannelService0,
@@ -784,7 +801,7 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
             [$consumer2, ConsumerPositionTracker::class => $positionTracker],
             ServiceConfiguration::createWithDefaults()
                 ->withServiceName($service2Name)
-                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withEnabledModulePackageNames([])
                 ->withExtensionObjects([
                     $publisherStreamingChannel,
                     $queueChannelService0,
@@ -802,8 +819,8 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
         $publisherService->getDistributedBus()->publishEvent('distributed.event', 'event3');
 
         // Both consumers should receive all events independently
-        $consumerService1->run($channelName, ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 10));
-        $consumerService2->run($channelName, ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 10));
+        $consumerService1->run($channelName, ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 10));
+        $consumerService2->run($channelName, ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 10));
 
         $this->assertEquals(['event1', 'event2', 'event3'], $consumerService1->sendQueryWithRouting('getConsumed1'));
         $this->assertEquals(['event1', 'event2', 'event3'], $consumerService2->sendQueryWithRouting('getConsumed2'));
@@ -812,45 +829,6 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
         $this->assertNull($consumerService2->getMessageChannel($service2Name)->receive());
     }
 
-    public function test_cannot_use_legacy_with_service_mapping_after_with_command_mapping(): void
-    {
-        $this->expectException(ConfigurationException::class);
-        $this->expectExceptionMessage('Cannot use withServiceMapping() after withCommandMapping() or withEventMapping()');
-
-        DistributedServiceMap::initialize()
-            ->withCommandMapping('service1', 'channel1')
-            ->withServiceMapping('service2', 'channel2');
-    }
-
-    public function test_cannot_use_legacy_with_service_mapping_after_with_event_mapping(): void
-    {
-        $this->expectException(ConfigurationException::class);
-        $this->expectExceptionMessage('Cannot use withServiceMapping() after withCommandMapping() or withEventMapping()');
-
-        DistributedServiceMap::initialize()
-            ->withEventMapping('channel1', ['*'])
-            ->withServiceMapping('service2', 'channel2');
-    }
-
-    public function test_cannot_use_with_command_mapping_after_legacy_with_service_mapping(): void
-    {
-        $this->expectException(ConfigurationException::class);
-        $this->expectExceptionMessage('Cannot use withCommandMapping() after withServiceMapping()');
-
-        DistributedServiceMap::initialize()
-            ->withServiceMapping('service1', 'channel1')
-            ->withCommandMapping('service2', 'channel2');
-    }
-
-    public function test_cannot_use_with_event_mapping_after_legacy_with_service_mapping(): void
-    {
-        $this->expectException(ConfigurationException::class);
-        $this->expectExceptionMessage('Cannot use withEventMapping() after withServiceMapping()');
-
-        DistributedServiceMap::initialize()
-            ->withServiceMapping('service1', 'channel1')
-            ->withEventMapping('channel2', ['*']);
-    }
 
     public function test_it_publishes_event_only_to_channel_when_source_service_is_in_include_list(): void
     {

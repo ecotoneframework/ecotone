@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand\ConsoleCommandWithArrayOptions;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand\ConsoleCommandWithMessageHeaders;
@@ -31,12 +29,7 @@ final class ConsoleCommandModuleTest extends AnnotationConfigurationTestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        ConsoleCommandModule::create(
-            InMemoryAnnotationFinder::createFrom([
-                OneTimeWithIncorrectResultSet::class,
-            ]),
-            InterfaceToCallRegistry::createEmpty()
-        );
+        EcotoneLite::bootstrapFlowTesting([OneTimeWithIncorrectResultSet::class], [new OneTimeWithIncorrectResultSet()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
     }
 
     public function test_execute_console_command_with_array_of_options()
@@ -44,7 +37,8 @@ final class ConsoleCommandModuleTest extends AnnotationConfigurationTestCase
         $consoleCommand = new ConsoleCommandWithArrayOptions();
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConsoleCommandWithArrayOptions::class],
-            [$consoleCommand]
+            [$consoleCommand],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $ecotoneLite->runConsoleCommand('cli-command:array-options', [
@@ -62,7 +56,8 @@ final class ConsoleCommandModuleTest extends AnnotationConfigurationTestCase
         $consoleCommand = new ConsoleCommandWithArrayOptions();
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConsoleCommandWithArrayOptions::class],
-            [$consoleCommand]
+            [$consoleCommand],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $ecotoneLite->runConsoleCommand('cli-command:array-options-and-argument', [
@@ -82,7 +77,8 @@ final class ConsoleCommandModuleTest extends AnnotationConfigurationTestCase
         $stdClassConverter = new StdClassConverter();
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConsoleCommandWithMessageHeaders::class, StdClassConverter::class],
-            [$consoleCommand, $stdClassConverter]
+            [$consoleCommand, $stdClassConverter],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $ecotoneLite->runConsoleCommand('cli-command:with-headers', [
@@ -102,7 +98,8 @@ final class ConsoleCommandModuleTest extends AnnotationConfigurationTestCase
         $stdClassConverter = new StdClassConverter();
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConsoleCommandWithMessageHeaders::class, StdClassConverter::class],
-            [$consoleCommand, $stdClassConverter]
+            [$consoleCommand, $stdClassConverter],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $ecotoneLite->runConsoleCommand('cli-command:with-multiple-headers', [
@@ -122,7 +119,8 @@ final class ConsoleCommandModuleTest extends AnnotationConfigurationTestCase
         $stdClassConverter = new StdClassConverter();
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConsoleCommandWithMessageHeaders::class, StdClassConverter::class],
-            [$consoleCommand, $stdClassConverter]
+            [$consoleCommand, $stdClassConverter],
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $this->expectException(InvalidArgumentException::class);

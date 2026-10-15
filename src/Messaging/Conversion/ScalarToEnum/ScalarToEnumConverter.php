@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Conversion\ScalarToEnum;
 
+use BackedEnum;
+use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Messaging\Conversion\Converter;
-use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Type;
-use ReflectionEnum;
+use ValueError;
 
 /**
  * licence Apache-2.0
@@ -23,13 +24,18 @@ class ScalarToEnumConverter implements Converter
             $targetType = $targetType->withoutNull();
         }
 
-        $ref = new ReflectionEnum($targetType->toString());
-
-        if ($ref->isBacked()) {
-            return $targetType->toString()::from($source);
+        $enumClass = $targetType->toString();
+        if (is_subclass_of($enumClass, BackedEnum::class)) {
+            return $enumClass::from($source);
         }
 
-        return ($ref)->getCase($source)->getValue();
+        foreach ($enumClass::cases() as $case) {
+            if ($case->name === $source) {
+                return $case;
+            }
+        }
+
+        throw new ValueError(sprintf('"%s" is not a valid case name for enum %s', $source, $enumClass));
     }
 
     /**

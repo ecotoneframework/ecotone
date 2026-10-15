@@ -6,12 +6,15 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\EndpointHeader
 
 use DateTimeImmutable;
 use DateTimeInterface;
-use Ecotone\Messaging\Attribute\Endpoint\AddHeader;
-use Ecotone\Messaging\Attribute\Endpoint\ContentType;
-use Ecotone\Messaging\Attribute\Endpoint\Delayed;
-use Ecotone\Messaging\Attribute\Endpoint\Priority;
-use Ecotone\Messaging\Attribute\Endpoint\RemoveHeader;
-use Ecotone\Messaging\Attribute\Endpoint\TimeToLive;
+use Ecotone\Api\Attribute\AddHeader;
+use Ecotone\Api\Attribute\ContentType;
+use Ecotone\Api\Attribute\Delayed;
+use Ecotone\Api\Attribute\Priority;
+use Ecotone\Api\Attribute\RemoveHeader;
+use Ecotone\Api\Attribute\TimeToLive;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Api\Scheduling\TimeSpan;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
@@ -19,9 +22,6 @@ use Ecotone\Messaging\Handler\ClosureExpression\AttributeExpressionExecutor;
 use Ecotone\Messaging\Handler\ClosureExpression\ExecutorFor;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\Type\UnionType;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\Scheduling\TimeSpan;
 
 use function is_string;
 use function preg_match;
@@ -59,7 +59,7 @@ class EndpointHeadersInterceptor implements DefinedObject
             /** @var ContentType $contentTypeAttribute */
             $contentTypeAttribute = $contentType->getAttribute();
             if ($contentTypeAttribute->shouldReplaceExistingHeader() || ! $isContentTypeHeaderExists) {
-                $metadata[MessageHeaders::CONTENT_TYPE] = $contentTypeAttribute->getHeaderValue();
+                $metadata[MessageHeaders::CONTENT_TYPE] = $contentTypeAttribute->headerValue;
             } else {
                 $metadata[MessageHeaders::CONTENT_TYPE] = $message->getHeaders()->get(MessageHeaders::CONTENT_TYPE);
             }
@@ -131,7 +131,7 @@ class EndpointHeadersInterceptor implements DefinedObject
         /** @var AddHeader $attribute */
         $attribute = $executor->getAttribute();
 
-        return $attribute->getHeaderValue();
+        return $attribute->headerValue;
     }
 
     private function parseDateTimeStringWithRequiredOffset(string $dateTimeString): DateTimeImmutable

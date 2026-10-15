@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\Workflow\Saga;
 
-use Ecotone\Messaging\Attribute\Parameter\Header;
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\Attribute\Identifier;
-use Ecotone\Modelling\Attribute\Saga;
-use Ecotone\Modelling\WithEvents;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\Header;
+use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Api\Attribute\Saga;
+use Ecotone\Api\Modelling\WithEvents;
 use Test\Ecotone\Modelling\Fixture\Workflow\Saga\Command\TakePayment;
 use Test\Ecotone\Modelling\Fixture\Workflow\Saga\Event\OrderProcessSagaStarted;
 use Test\Ecotone\Modelling\Fixture\Workflow\Saga\Event\OrderWasPlaced;

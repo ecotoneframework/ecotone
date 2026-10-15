@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Support;
 
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 
 /**

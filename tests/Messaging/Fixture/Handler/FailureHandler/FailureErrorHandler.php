@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\FailureHandler;
 
-use Ecotone\Messaging\Attribute\Asynchronous;
-use Ecotone\Messaging\Attribute\InternalHandler;
-use Ecotone\Messaging\Support\ErrorMessage;
+use Ecotone\Api\Attribute\Asynchronous;
+use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Api\Messaging\ErrorMessage;
 
 final class FailureErrorHandler
 {

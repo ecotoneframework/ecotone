@@ -2,12 +2,12 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\AllConfigurationDefined;
 
-use Ecotone\Messaging\Attribute\Parameter\ConfigurationVariable;
-use Ecotone\Messaging\Attribute\Parameter\Header;
-use Ecotone\Messaging\Attribute\Parameter\Payload;
-use Ecotone\Messaging\Attribute\Parameter\Reference;
-use Ecotone\Messaging\Attribute\ServiceActivator;
-use Ecotone\Messaging\Message;
+use Ecotone\Api\Attribute\ConfigurationVariable;
+use Ecotone\Api\Attribute\Header;
+use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Api\Attribute\Payload;
+use Ecotone\Api\Attribute\Reference;
+use Ecotone\Api\Messaging\Message;
 use stdClass;
 
 /**
@@ -15,7 +15,7 @@ use stdClass;
  */
 class ServiceActivatorWithAllConfigurationDefined
 {
-    #[ServiceActivator(
+    #[InternalHandler(
         endpointId: 'test-name',
         inputChannelName: 'inputChannel',
         outputChannelName: 'outputChannel',

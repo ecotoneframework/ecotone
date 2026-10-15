@@ -2,10 +2,11 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
+use Ecotone\Api\Interceptor\MethodInvocation;
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\Message;
 
 /**
  * @author  Dariusz Gafka <support@simplycodedsoftware.com>

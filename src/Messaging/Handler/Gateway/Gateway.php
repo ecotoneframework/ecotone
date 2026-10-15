@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\MessageConverter\MessageConverter;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Throwable;
@@ -26,13 +25,9 @@ use Throwable;
  */
 class Gateway implements NonProxyGateway
 {
-    /**
-     * @param MessageConverter[] $messageConverters
-     */
     public function __construct(
         private MethodCallToMessageConverter $methodCallToMessageConverter,
         private ?Type $returnType,
-        private array $messageConverters,
         private GatewayReplyConverter $gatewayReplyConverter,
         private MessageProcessor $gatewayInternalProcessor
     ) {
@@ -50,17 +45,6 @@ class Gateway implements NonProxyGateway
             $requestMessage = MessageBuilder::fromMessage($methodArgumentValues[0]);
         } else {
             $requestMessage = $this->methodCallToMessageConverter->convert($methodArgumentValues);
-
-            foreach ($this->messageConverters as $messageConverter) {
-                $convertedMessageBuilder = $messageConverter->toMessage(
-                    $requestMessage->getPayload(),
-                    $requestMessage->getCurrentHeaders()
-                );
-
-                if ($convertedMessageBuilder) {
-                    $requestMessage = $convertedMessageBuilder;
-                }
-            }
         }
 
         $canReturnValue = $this->returnType?->isVoid() === false;

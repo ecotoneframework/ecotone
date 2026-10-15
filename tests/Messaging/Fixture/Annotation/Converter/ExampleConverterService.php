@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Converter;
 
-use Ecotone\Messaging\Attribute\ClassReference;
-use Ecotone\Messaging\Attribute\Converter;
+use Ecotone\Api\Attribute\ClassReference;
+use Ecotone\Api\Attribute\Converter;
 use stdClass;
 
 #[ClassReference('exampleConverterService')]

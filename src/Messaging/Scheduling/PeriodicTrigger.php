@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
 
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Scheduling\DatePoint;
+use Ecotone\Api\Scheduling\Duration;
+
 /**
  * Class PeriodicTrigger
  * @package Ecotone\Messaging\Scheduling
@@ -34,7 +38,7 @@ class PeriodicTrigger implements Trigger
     /**
      * @inheritDoc
      */
-    public function nextExecutionTime(EcotoneClockInterface $clock, TriggerContext $triggerContext): DatePoint
+    public function nextExecutionTime(EcotoneClockInterface $clock, SimpleTriggerContext $triggerContext): DatePoint
     {
         if ($this->isFirstSchedule($triggerContext)) {
             return $clock->now()->add($this->initialDelay);
@@ -50,28 +54,28 @@ class PeriodicTrigger implements Trigger
     }
 
     /**
-     * @param TriggerContext $triggerContext
+     * @param SimpleTriggerContext $triggerContext
      * @return bool
      */
-    private function isFirstSchedule(TriggerContext $triggerContext): bool
+    private function isFirstSchedule(SimpleTriggerContext $triggerContext): bool
     {
         return is_null($triggerContext->lastScheduledTime()) && is_null($triggerContext->lastActualExecutionTime());
     }
 
     /**
-     * @param TriggerContext $triggerContext
+     * @param SimpleTriggerContext $triggerContext
      * @return bool
      */
-    private function isPlannedAndNeverExecuted(TriggerContext $triggerContext): bool
+    private function isPlannedAndNeverExecuted(SimpleTriggerContext $triggerContext): bool
     {
         return $triggerContext->lastScheduledTime() && is_null($triggerContext->lastActualExecutionTime());
     }
 
     /**
-     * @param TriggerContext $triggerContext
+     * @param SimpleTriggerContext $triggerContext
      * @return bool
      */
-    private function isPlannedTimeAfterExecution(TriggerContext $triggerContext): bool
+    private function isPlannedTimeAfterExecution(SimpleTriggerContext $triggerContext): bool
     {
         return $triggerContext->lastScheduledTime() && $triggerContext->lastScheduledTime() > $triggerContext->lastActualExecutionTime();
     }

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithPoller;
 
-use Ecotone\Messaging\Attribute\ServiceActivator;
+use Ecotone\Api\Attribute\InternalHandler;
 
 /**
  * licence Apache-2.0
  */
 class ServiceActivatorWithPollerExample
 {
-    #[ServiceActivator('inputChannel', 'test-name')]
+    #[InternalHandler('inputChannel', endpointId: 'test-name')]
     public function sendMessage(): void
     {
     }

@@ -2,12 +2,12 @@
 
 namespace Test\Ecotone\Messaging\Fixture\InterceptorsOrdering;
 
-use Ecotone\Messaging\Attribute\Parameter\Headers;
-use Ecotone\Messaging\Attribute\Parameter\Reference;
-use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\Identifier;
-use Ecotone\Modelling\WithEvents;
+use Ecotone\Api\Attribute\Aggregate;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\Headers;
+use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Api\Attribute\Reference;
+use Ecotone\Api\Modelling\WithEvents;
 
 #[Aggregate]
 /**

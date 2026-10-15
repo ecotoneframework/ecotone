@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
-use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 

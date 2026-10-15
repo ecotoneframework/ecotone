@@ -2,11 +2,11 @@
 
 namespace Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut;
 
-use Ecotone\Modelling\Attribute\EventSourcingAggregate;
-use Ecotone\Modelling\Attribute\EventSourcingHandler;
-use Ecotone\Modelling\Attribute\Identifier;
-use Ecotone\Modelling\WithAggregateEvents;
-use Ecotone\Modelling\WithAggregateVersioning;
+use Ecotone\Api\Attribute\Apply;
+use Ecotone\Api\Attribute\EventSourcingAggregate;
+use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Api\Modelling\WithAggregateVersioning;
+use Ecotone\Api\Modelling\WithEvents;
 
 #[EventSourcingAggregate(true)]
 /**
@@ -15,7 +15,7 @@ use Ecotone\Modelling\WithAggregateVersioning;
 class TwitterWithRecorder
 {
     use WithAggregateVersioning;
-    use WithAggregateEvents;
+    use WithEvents;
 
     #[Identifier]
     private string $twitId;
@@ -39,14 +39,14 @@ class TwitterWithRecorder
         $this->recordThat(new TwitContentWasChanged($this->twitId, $content));
     }
 
-    #[EventSourcingHandler]
+    #[Apply]
     public function whenTwitWasCreated(TwitWasCreated $event): void
     {
         $this->twitId = $event->twitId;
         $this->content = $event->content;
     }
 
-    #[EventSourcingHandler]
+    #[Apply]
     public function whenTwitContentWasChanged(TwitContentWasChanged $event): void
     {
         $this->content = $event->content;

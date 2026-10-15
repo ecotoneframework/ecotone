@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Channel;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Message;
 use InvalidArgumentException;
 
 /**

@@ -10,6 +10,7 @@ use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
+use Ecotone\Messaging\Handler\ExpressionLocation;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -17,7 +18,6 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ParameterConverter;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
-use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -200,7 +200,11 @@ class TransformerBuilder extends InputOutputMessageHandlerBuilder implements Mes
     public function prepare(MessagingContainerBuilder $builder): array
     {
         if ($this->expression) {
-            $objectToInvokeOn = new Definition(ExpressionTransformer::class, [$this->expression, new Reference(ExpressionEvaluationService::REFERENCE), new Reference(ReferenceSearchService::class)]);
+            $objectToInvokeOn = new Definition(ExpressionTransformer::class, [
+                $this->expression,
+                new Reference(ExpressionEvaluationService::REFERENCE),
+                ExpressionLocation::definitionForEndpoint('Transformer', $this->getInputMessageChannelName(), $this->expression),
+            ]);
             $interfaceToCallReference = new InterfaceToCallReference(ExpressionTransformer::class, 'transform');
         } else {
             $objectToInvokeOn = $this->directObject ?: new Reference($this->objectToInvokeReferenceName);

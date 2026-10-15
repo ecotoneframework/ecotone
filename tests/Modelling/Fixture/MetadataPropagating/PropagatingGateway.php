@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\MetadataPropagating;
 
-use Ecotone\Messaging\Attribute\MessageGateway;
-use Ecotone\Messaging\Attribute\Parameter\Headers;
-use Ecotone\Messaging\Attribute\PropagateHeaders;
+use Ecotone\Api\Attribute\Headers;
+use Ecotone\Api\Attribute\MessageGateway;
+use Ecotone\Api\Attribute\PropagateHeaders;
 
 /**
  * licence Apache-2.0

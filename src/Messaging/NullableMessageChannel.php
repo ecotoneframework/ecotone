@@ -2,9 +2,11 @@
 
 namespace Ecotone\Messaging;
 
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 /**
  * Class NullableMessageChannel

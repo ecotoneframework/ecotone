@@ -2,17 +2,16 @@
 
 namespace Test\Ecotone\Lite;
 
-use Ecotone\Lite\EcotoneLite;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Lite\InMemoryPSRContainer;
-use Ecotone\Messaging\Config\ModulePackageList;
-use Ecotone\Messaging\Config\ServiceConfiguration;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\Behat\Presend\CoinGateway;
 use Test\Ecotone\Messaging\Fixture\Behat\Presend\MultiplyCoins;
 use Test\Ecotone\Messaging\Fixture\Behat\Presend\Shop;
 
 /**
- * Class EcotoneLiteConfigurationTest
+ * Class MessagingConfigurationTest
  * @package Test\Ecotone\Lite
  * @author Dariusz Gafka <support@simplycodedsoftware.com>
  *
@@ -31,7 +30,7 @@ class MessagingConfigurationTest extends TestCase
         ]);
         $serviceConfiguration = ServiceConfiguration::createWithDefaults()
                                 ->withNamespaces(["Test\Ecotone\Messaging\Fixture\Behat\Presend"])
-                                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]));
+                                ->withEnabledModulePackageNames([]);
 
         $ecotone = EcotoneLite::bootstrap(
             containerOrAvailableServices: $container,

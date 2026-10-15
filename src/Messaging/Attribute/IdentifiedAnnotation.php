@@ -10,6 +10,7 @@ use Symfony\Component\Uid\Uuid;
 #[Attribute()]
 /**
  * licence Apache-2.0
+ * @internal
  */
 class IdentifiedAnnotation
 {

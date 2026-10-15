@@ -2,14 +2,13 @@
 
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Attribute\Parameter\Payload;
-use Ecotone\Messaging\Config\ModulePackageList;
-use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\Payload;
+use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\QueryHandler;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -75,13 +74,13 @@ class SymfonyExpressionEvaluationAdapterTest extends TestCase
             [get_class($handler)],
             [$handler],
             ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
+                ->withEnabledModulePackageNames([]),
             configurationVariables: [
                 'multiplier' => 10,
             ]
         );
 
-        $messaging->sendCommandWithRoutingKey('calculate', ['value' => 5]);
+        $messaging->sendCommandWithRouting('calculate', ['value' => 5]);
 
         $this->assertEquals(50, $messaging->sendQueryWithRouting('getResult'));
     }

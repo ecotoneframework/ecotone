@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Config\ModulePackageList;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Gateway\DistributedBusHeader;
+use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributionEntrypoint;
 use Ecotone\Modelling\MessageHandling\Distribution\RoutingKeyIsNotDistributed;
 use PHPUnit\Framework\TestCase;
@@ -32,7 +31,7 @@ final class DistributedBusTest extends TestCase
                 new ShoppingCenter(),
             ],
             ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+                ->withEnabledModulePackageNames([])
         );
 
         $distributionEntrypoint = $ecotoneTestSupport->getGateway(DistributionEntrypoint::class);
@@ -51,7 +50,7 @@ final class DistributedBusTest extends TestCase
                 new ShoppingRecord(),
             ],
             ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+                ->withEnabledModulePackageNames([])
         );
 
         $distributionEntrypoint = $ecotoneTestSupport->getGateway(DistributionEntrypoint::class);
@@ -70,7 +69,7 @@ final class DistributedBusTest extends TestCase
                 new ShoppingRecord(),
             ],
             ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+                ->withEnabledModulePackageNames([])
         );
 
         $distributionEntrypoint = $ecotoneTestSupport->getGateway(DistributionEntrypoint::class);
@@ -89,7 +88,7 @@ final class DistributedBusTest extends TestCase
                 new ShoppingCenter(),
             ],
             ServiceConfiguration::createWithDefaults()
-                ->withSkippedModulePackageNames(ModulePackageList::allPackages())
+                ->withEnabledModulePackageNames([])
         );
 
         $distributionEntrypoint = $ecotoneTestSupport->getGateway(DistributionEntrypoint::class);

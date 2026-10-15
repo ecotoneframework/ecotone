@@ -2,9 +2,11 @@
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Transformer;
 
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
@@ -12,7 +14,6 @@ use Ecotone\Messaging\Config\InMemoryChannelResolver;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Conversion\JsonToArray\JsonToArrayConverter;
-use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Enricher\Converter\EnrichHeaderWithExpressionBuilder;
 use Ecotone\Messaging\Handler\Enricher\Converter\EnrichHeaderWithValueBuilder;
 use Ecotone\Messaging\Handler\Enricher\Converter\EnrichPayloadWithExpressionBuilder;
@@ -22,8 +23,6 @@ use Ecotone\Messaging\Handler\Enricher\EnrichException;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
-use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Test\ComponentTestBuilder;
@@ -143,7 +142,7 @@ class EnricherBuilderTest extends MessagingTestCase
         );
         $this->assertEquals(
             MediaType::parseMediaType(MediaType::APPLICATION_X_PHP)
-                ->addParameter('type', Type::ARRAY)->toString(),
+                ->addParameter('type', 'array')->toString(),
             $transformedMessage->getHeaders()->get(MessageHeaders::CONTENT_TYPE)
         );
     }
@@ -183,12 +182,12 @@ class EnricherBuilderTest extends MessagingTestCase
 
         $this->createEnricherWithConvertersAndHandle(
             MessageBuilder::withPayload(['name' => 'Franco'])
-                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(Type::OBJECT)),
+                ->setContentType(MediaType::createApplicationXPHPWithTypeParameter('object')),
             $outputChannel,
             [
                 EnrichPayloadWithValueBuilder::createWith('token', '123'),
             ],
-            [FakeConverterService::create(['wrong' => 12], Type::OBJECT, MediaType::APPLICATION_X_PHP)]
+            [FakeConverterService::create(['wrong' => 12], 'object', MediaType::APPLICATION_X_PHP)]
         );
 
         $this->assertEquals(

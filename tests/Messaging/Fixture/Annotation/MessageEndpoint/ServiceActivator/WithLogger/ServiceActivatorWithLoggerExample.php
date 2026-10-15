@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator\WithLogger;
 
-use Ecotone\Messaging\Attribute\ServiceActivator;
-use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
-use Ecotone\Messaging\Handler\Logger\Annotation\LogBefore;
-use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
-use Ecotone\Messaging\Handler\Logger\LoggingLevel;
+use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Api\Attribute\LogAfter;
+use Ecotone\Api\Attribute\LogBefore;
+use Ecotone\Api\Attribute\LogError;
+use Ecotone\Api\Logging\LoggingLevel;
 
 /**
  * licence Apache-2.0
  */
 class ServiceActivatorWithLoggerExample
 {
-    #[ServiceActivator('inputChannel', 'test-name')]
+    #[InternalHandler('inputChannel', endpointId: 'test-name')]
     #[
         LogBefore(LoggingLevel::INFO, true),
         LogAfter(LoggingLevel::INFO, true),

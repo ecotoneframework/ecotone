@@ -8,26 +8,24 @@ declare(strict_types=1);
 namespace Ecotone\Projecting\Config;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\Projecting\StreamSource as StreamSourceAttribute;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
-use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Support\LicensingException;
-use Ecotone\Projecting\Attribute\StreamSource as StreamSourceAttribute;
-use Ecotone\Projecting\StreamSource;
 use Ecotone\Projecting\StreamSourceReference;
 use Ecotone\Projecting\StreamSourceRegistry;
 
 #[ModuleAnnotation]
-class StreamSourceRegistryModule extends NoExternalConfigurationModule implements AnnotationModule
+final class StreamSourceRegistryModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
      * @param string[] $userlandStreamSourceReferences
@@ -50,7 +48,7 @@ class StreamSourceRegistryModule extends NoExternalConfigurationModule implement
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         if (! empty($this->userlandStreamSourceReferences) && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
-            throw LicensingException::create('Custom #[StreamSource] implementations require Ecotone Enterprise licence.');
+            throw LicensingException::create('Custom #[StreamSource] implementations require Ecotone Enterprise licence. See https://docs.ecotone.tech/enterprise for details.');
         }
 
         $streamSourceReferences = ExtensionObjectResolver::resolve(
@@ -75,12 +73,6 @@ class StreamSourceRegistryModule extends NoExternalConfigurationModule implement
                 $builtinSources,
             ])
         );
-    }
-
-    public function canHandle($extensionObject): bool
-    {
-        return $extensionObject instanceof StreamSourceReference
-            || ($extensionObject instanceof StreamSource && $extensionObject instanceof DefinedObject);
     }
 
     public function getModulePackageName(): string

@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Logger;
 
+use Ecotone\Api\Attribute\LogAfter;
+use Ecotone\Api\Attribute\LogBefore;
+use Ecotone\Api\Attribute\LogError;
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\Interceptor\MethodInvocation;
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Conversion\ConversionService;
-use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\Logger\Annotation\LogError;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Message;
 use Psr\Log\LogLevel;
 use Throwable;
 
@@ -27,7 +29,17 @@ class LoggingInterceptor
     {
     }
 
-    public function log(Message $message, Logger $logAnnotation): void
+    public function logBefore(Message $message, LogBefore $logAnnotation): void
+    {
+        $this->doLog($message, $logAnnotation);
+    }
+
+    public function logAfter(Message $message, LogAfter $logAnnotation): void
+    {
+        $this->doLog($message, $logAnnotation);
+    }
+
+    private function doLog(Message $message, Logger $logAnnotation): void
     {
         $payload = $this->convertPayloadToScalarType($message);
 
@@ -57,7 +69,7 @@ class LoggingInterceptor
     {
         $data = $message->getPayload();
         $sourceMediaType = $message->getHeaders()->hasContentType() ? $message->getHeaders()->getContentType() : MediaType::createApplicationXPHP();
-        $sourceTypeDescriptor = $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : Type::createFromVariable($message->getPayload());
+        $sourceTypeDescriptor = $sourceMediaType->hasTypeParameter() ? Type::create($sourceMediaType->getParameter(MediaType::TYPE_PARAMETER)) : Type::createFromVariable($message->getPayload());
 
         if (is_object($data) && method_exists($data, '__toString')) {
             $data = (string)$data;

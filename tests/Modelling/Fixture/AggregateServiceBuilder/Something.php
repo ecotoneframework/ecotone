@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder;
 
-use Ecotone\EventSourcing\Attribute\AggregateType;
-use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\Identifier;
-use Ecotone\Modelling\WithAggregateVersioning;
-use Ecotone\Modelling\WithEvents;
+use Ecotone\Api\Attribute\Aggregate;
+use Ecotone\Api\Attribute\AggregateType;
+use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Api\Modelling\WithAggregateVersioning;
+use Ecotone\Api\Modelling\WithEvents;
 
 #[AggregateType('something')]
 #[Aggregate]
@@ -25,7 +25,7 @@ final class Something
         $this->recordThat(new SomethingWasCreatedPrivateEvent($int));
     }
 
-    public function getVersion(): int
+    public function getAggregateVersion(): int
     {
         return $this->version;
     }

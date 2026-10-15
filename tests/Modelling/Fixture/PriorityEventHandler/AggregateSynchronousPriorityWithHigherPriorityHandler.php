@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\PriorityEventHandler;
 
-use Ecotone\Messaging\Attribute\Endpoint\Priority;
-use Ecotone\Modelling\Attribute\Aggregate;
-use Ecotone\Modelling\Attribute\CommandHandler;
-use Ecotone\Modelling\Attribute\EventHandler;
-use Ecotone\Modelling\Attribute\Identifier;
-use Ecotone\Modelling\WithEvents;
+use Ecotone\Api\Attribute\Aggregate;
+use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Api\Attribute\Priority;
+use Ecotone\Api\Modelling\WithEvents;
 
 #[Aggregate]
 /**

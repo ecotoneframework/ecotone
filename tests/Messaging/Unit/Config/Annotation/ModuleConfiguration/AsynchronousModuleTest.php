@@ -5,17 +5,14 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
-use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Lite\Test\FlowTestSupport;
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Lite\Test\FlowTestSupport;
 use Ecotone\Messaging\Channel\Collector\Config\CollectorConfiguration;
-use Ecotone\Messaging\Channel\MessageChannelBuilder;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Conversion\MediaType;
-use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
 use Ecotone\Messaging\MessagingException;
 use ReflectionException;
@@ -49,22 +46,14 @@ final class AsynchronousModuleTest extends AnnotationConfigurationTestCase
     {
         $this->expectException(ConfigurationException::class);
 
-        AsynchronousModule::create(
-            InMemoryAnnotationFinder::createEmpty()
-                ->registerClassWithAnnotations(AsyncEventHandlerWithoutIdExample::class),
-            InterfaceToCallRegistry::createEmpty()
-        );
+        EcotoneLite::bootstrapFlowTesting([AsyncEventHandlerWithoutIdExample::class], [new AsyncEventHandlerWithoutIdExample()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
     }
 
     public function test_throwing_exception_if_using_generated_id_for_command_handler()
     {
         $this->expectException(ConfigurationException::class);
 
-        AsynchronousModule::create(
-            InMemoryAnnotationFinder::createEmpty()
-                ->registerClassWithAnnotations(AsyncCommandHandlerWithoutIdExample::class),
-            InterfaceToCallRegistry::createEmpty()
-        );
+        EcotoneLite::bootstrapFlowTesting([AsyncCommandHandlerWithoutIdExample::class], [new AsyncCommandHandlerWithoutIdExample()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
     }
 
     public function test_messaging_provide_default_ending_polling_metadata()
@@ -97,7 +86,7 @@ final class AsynchronousModuleTest extends AnnotationConfigurationTestCase
             []
         );
 
-        $ecotoneLite->sendCommandWithRoutingKey('retried.asynchronous', 2);
+        $ecotoneLite->sendCommandWithRouting('retried.asynchronous', 2);
 
         $this->expectException(RuntimeException::class);
 
@@ -115,9 +104,9 @@ final class AsynchronousModuleTest extends AnnotationConfigurationTestCase
         return EcotoneLite::bootstrapFlowTesting(
             $classesToResolve,
             $services,
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects($collectorConfigurations),
-            enableAsynchronousProcessing: $channelBuilders
+            (ServiceConfiguration::createWithDefaults()
+                ->withExtensionObjects($collectorConfigurations))->withExtensionObjects($channelBuilders)->addExtensionObject(\Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false))
+                ->withEnabledModulePackageNames([])
         );
     }
 }

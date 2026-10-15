@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Endpoint;
 
-use Ecotone\Messaging\Transaction\Transactional;
+use Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor\RecordOutcomeIn;
 
-#[Transactional(['transactionFactory1'])]
+#[RecordOutcomeIn('classRecorder')]
 /**
  * licence Apache-2.0
  */
@@ -35,7 +35,7 @@ class ConsumerContinuouslyWorkingService
         return $this->returnData;
     }
 
-    #[Transactional(['transactionFactory2'])]
+    #[RecordOutcomeIn('methodRecorder')]
     public function executeReturnWithInterceptor()
     {
         return $this->returnData;

@@ -20,5 +20,5 @@ interface AggregateRepository
      * @param array $metadata
      * @return int Aggregate version after save
      */
-    public function save(ResolvedAggregate $aggregate, array $metadata): int;
+    public function save(ResolvedAggregate $aggregate, array $metadata): ?int;
 }

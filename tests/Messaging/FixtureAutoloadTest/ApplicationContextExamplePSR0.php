@@ -2,7 +2,7 @@
 
 namespace FixtureAutoloadTest;
 
-use Ecotone\Messaging\Attribute\ServiceContext;
+use Ecotone\Api\Attribute\ServiceContext;
 
 /**
  * licence Apache-2.0

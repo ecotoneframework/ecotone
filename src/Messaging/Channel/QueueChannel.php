@@ -2,12 +2,12 @@
 
 namespace Ecotone\Messaging\Channel;
 
-use Ecotone\Messaging\BatchMessage;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\Messaging\BatchMessage;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -43,10 +43,10 @@ class QueueChannel implements PollableChannel, DefinedObject
         $payload = $message->getPayload();
         if ($payload instanceof BatchMessage) {
             if (! $this->batchMessagesSupport) {
-                throw LicensingException::create('Sending BatchMessage is available only with Ecotone Enterprise licence.');
+                throw LicensingException::create('Sending BatchMessage is available only with Ecotone Enterprise licence. See https://docs.ecotone.tech/enterprise for details.');
             }
 
-            foreach ($payload->getEntries() as $entry) {
+            foreach ($payload->entries as $entry) {
                 $this->queue[] = MessageBuilder::withPayload($entry['payload'])
                     ->setMultipleHeaders($entry['headers'])
                     ->build();

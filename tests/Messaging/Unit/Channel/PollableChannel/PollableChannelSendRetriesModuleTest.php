@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Channel\PollableChannel;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Lite\Test\FlowTestSupport;
-use Ecotone\Messaging\Channel\DynamicChannel\DynamicMessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\DynamicMessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
+use Ecotone\Api\ExtensionObject\RetryTemplateBuilder;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Lite\Test\FlowTestSupport;
 use Ecotone\Messaging\Channel\ExceptionalQueueChannel;
-use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\PollableChannel\GlobalPollableChannelConfiguration;
 use Ecotone\Messaging\Channel\PollableChannel\PollableChannelConfiguration;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Test\LicenceTesting;
 use Ecotone\Test\StubLogger;
 use Exception;
@@ -168,7 +168,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
                 ExceptionalQueueChannel::createWithExceptionOnSend('orders', 2),
             ],
             [
-                PollableChannelConfiguration::create('orders', RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(1)->build()),
+                PollableChannelConfiguration::create('orders', RetryTemplateBuilder::fixedBackOff(1)->maxRetries(1)->build()),
             ]
         );
 
@@ -266,7 +266,7 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
                 PollableChannelConfiguration::create(
                     'orders',
                     RetryTemplateBuilder::fixedBackOff(1)
-                        ->maxRetryAttempts(2)
+                        ->maxRetries(2)
                         ->build()
                 )
                     ->withErrorChannel('deadLetter'),
@@ -292,8 +292,8 @@ final class PollableChannelSendRetriesModuleTest extends TestCase
             $classesToResolve,
             $services,
             ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects($extensionObjects),
-            enableAsynchronousProcessing: $channelBuilders,
+                ->withExtensionObjects(array_merge($extensionObjects, $channelBuilders))
+                ->withEnabledModulePackageNames([]),
             licenceKey: $withEnterpriseLicence ? LicenceTesting::VALID_LICENCE : null
         );
     }

@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
 
+use Ecotone\Api\ExtensionObject\MediaType;
+use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
-use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Endpoint\PollingConsumer\ConnectionException;
-use Ecotone\Messaging\Endpoint\PollingMetadata;
-use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
-use Ecotone\Messaging\PollableChannel;
 use RuntimeException;
 
 /**
@@ -121,5 +121,10 @@ class ExceptionalQueueChannel implements PollableChannel, MessageChannelWithSeri
             $this->exceptionOnSend,
             $this->stopFailingAfterAttempt,
         ]);
+    }
+
+    public function __toString(): string
+    {
+        return 'exceptional queue: ' . $this->channelName;
     }
 }

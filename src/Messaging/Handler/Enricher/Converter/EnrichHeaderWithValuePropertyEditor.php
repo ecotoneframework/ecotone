@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher\Converter;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditor;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
-use Ecotone\Messaging\Message;
 
 /**
  * Class StaticHeaderHeader

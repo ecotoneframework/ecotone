@@ -4,9 +4,8 @@ namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
 use function array_values;
 
-use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Message;
-use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Api\Interceptor\MethodInvocation;
+use Ecotone\Api\Messaging\Message;
 
 /**
  * Executes endpoint with around interceptors
@@ -96,19 +95,6 @@ class AroundMethodInvocation implements MethodInvocation
     public function getMethodName(): string
     {
         return $this->interceptedMethodInvocation->getMethodName();
-    }
-
-    public function getInterfaceToCall(): InterfaceToCall
-    {
-        return InterfaceToCall::create($this->getObjectToInvokeOn(), $this->getMethodName());
-    }
-
-    public function replaceArgument(string $parameterName, mixed $value): void
-    {
-        if (! isset($this->arguments[$parameterName])) {
-            throw InvalidArgumentException::create("Parameter with name `{$parameterName}` does not exist");
-        }
-        $this->arguments[$parameterName] = $value;
     }
 
     public function getName(): string

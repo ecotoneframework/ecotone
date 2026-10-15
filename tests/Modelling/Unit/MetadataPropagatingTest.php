@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Lite\EcotoneLite;
-use Ecotone\Messaging\Channel\CombinedMessageChannel;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
-use Ecotone\Messaging\Config\ServiceConfiguration;
-use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
-use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Api\ExtensionObject\CombinedMessageChannel;
+use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Modelling\AggregateMessage;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\BasketWithReservations\AddItemToBasket;
@@ -37,15 +37,20 @@ final class MetadataPropagatingTest extends TestCase
     {
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [OrderService::class],
-            containerOrAvailableServices: [new OrderService()]
+            containerOrAvailableServices: [new OrderService()],
+            configuration: ServiceConfiguration::createWithDefaults()
+                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders'))
+                ->withEnabledModulePackageNames([])
         );
 
-        $ecotoneTestSupport->sendCommandWithRoutingKey(
+        $ecotoneTestSupport->sendCommandWithRouting(
             'placeOrder',
             metadata: [
                 'userId' => '123',
             ]
         );
+
+        $ecotoneTestSupport->run('orders', ExecutionPollingMetadata::createWithTestingSetup(2));
 
         $notifications = $ecotoneTestSupport->sendQueryWithRouting('getAllNotificationHeaders');
         $this->assertCount(2, $notifications);
@@ -58,13 +63,13 @@ final class MetadataPropagatingTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [OrderService::class],
             containerOrAvailableServices: [new OrderService()],
-            configuration: ServiceConfiguration::createWithAsynchronicityOnly()
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([])
                 ->withExtensionObjects([
                     SimpleMessageChannelBuilder::createQueueChannel('orders'),
                 ])
         );
 
-        $ecotoneTestSupport->sendCommandWithRoutingKey(
+        $ecotoneTestSupport->sendCommandWithRouting(
             'placeOrder',
             metadata: [
                 'userId' => '123',
@@ -81,26 +86,32 @@ final class MetadataPropagatingTest extends TestCase
 
     public function test_not_propagating_aggregate_headers(): void
     {
-        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting([Order::class]);
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [Order::class],
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders'))
+                ->withEnabledModulePackageNames([])
+        );
 
         $orderId = '1';
 
-        /** Setting up initial state for state stored aggregate */
         $this->assertArrayNotHasKey(
             AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER,
             $ecotoneTestSupport
                 ->withStateFor(Order::register(new PlaceOrder($orderId)))
                 ->discardRecordedMessages()
-                ->sendCommandWithRoutingKey('order.cancel_from_metadata', metadata: ['aggregate.id' => $orderId])
-                ->getRecordedEventHeaders()[0]->headers()
+                ->sendCommandWithRouting('order.cancel_from_metadata', metadata: ['aggregate.id' => $orderId])
+                ->run('orders')
+                ->popRecordedEventHeaders()[0]->headers()
         );
     }
 
     public function test_using_aggregate_id_target_with_asynchronous_endpoint(): void
     {
-        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting([Order::class], enableAsynchronousProcessing: [
-            SimpleMessageChannelBuilder::createQueueChannel('orders'),
-        ]);
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
+            [Order::class],
+            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders'))
+                ->withEnabledModulePackageNames([])
+        );
 
         $orderId = '1';
 
@@ -109,9 +120,9 @@ final class MetadataPropagatingTest extends TestCase
             $ecotoneTestSupport
                 ->withStateFor(Order::register(new PlaceOrder($orderId)))
                 ->discardRecordedMessages()
-                ->sendCommandWithRoutingKey('order.cancel_from_metadata', metadata: ['aggregate.id' => $orderId])
+                ->sendCommandWithRouting('order.cancel_from_metadata', metadata: ['aggregate.id' => $orderId])
                 ->run('orders')
-                ->getRecordedEventHeaders()[0]->headers()
+                ->popRecordedEventHeaders()[0]->headers()
         );
     }
 
@@ -119,7 +130,7 @@ final class MetadataPropagatingTest extends TestCase
     {
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [Order::class],
-            configuration: ServiceConfiguration::createWithAsynchronicityOnly()
+            configuration: (ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([])
                 ->withExtensionObjects(
                     [
                         CombinedMessageChannel::create(
@@ -127,11 +138,7 @@ final class MetadataPropagatingTest extends TestCase
                             ['outbox', 'processing']
                         ),
                     ]
-                ),
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('outbox'),
-                SimpleMessageChannelBuilder::createQueueChannel('processing'),
-            ]
+                ))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('outbox'))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('processing'))
         );
 
         $orderId = '1';
@@ -141,10 +148,10 @@ final class MetadataPropagatingTest extends TestCase
             $ecotoneTestSupport
                 ->withStateFor(Order::register(new PlaceOrder($orderId)))
                 ->discardRecordedMessages()
-                ->sendCommandWithRoutingKey('order.cancel_from_metadata', metadata: ['aggregate.id' => $orderId])
+                ->sendCommandWithRouting('order.cancel_from_metadata', metadata: ['aggregate.id' => $orderId])
                 ->run('outbox')
                 ->run('processing')
-                ->getRecordedEventHeaders()[0]->headers()
+                ->popRecordedEventHeaders()[0]->headers()
         );
     }
 
@@ -153,15 +160,15 @@ final class MetadataPropagatingTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [OrderService::class],
             containerOrAvailableServices: [new OrderService()],
-            configuration: ServiceConfiguration::createWithAsynchronicityOnly()
+            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([])
                 ->withExtensionObjects([
                     SimpleMessageChannelBuilder::createQueueChannel('orders'),
                 ])
         );
 
-        $ecotoneTestSupport->sendCommandWithRoutingKey('sendNotificationViaCommandBus');
+        $ecotoneTestSupport->sendCommandWithRouting('sendNotificationViaCommandBus');
 
-        $ecotoneTestSupport->run('orders', ExecutionPollingMetadata::createWithTestingSetup());
+        $ecotoneTestSupport->run('orders', ExecutionPollingMetadata::createWithTestingSetup(1));
 
         $this->assertArrayNotHasKey(
             MessageHeaders::CONSUMER_POLLING_METADATA,
@@ -173,11 +180,8 @@ final class MetadataPropagatingTest extends TestCase
     {
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [Basket::class, ItemInventory::class],
-            configuration: ServiceConfiguration::createWithDefaults(),
-            enableAsynchronousProcessing: [
-                SimpleMessageChannelBuilder::createQueueChannel('basket'),
-                SimpleMessageChannelBuilder::createQueueChannel('itemInventory'),
-            ]
+            configuration: (ServiceConfiguration::createWithDefaults())->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('basket'))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('itemInventory'))
+                ->withEnabledModulePackageNames([])
         );
 
         $ecotoneTestSupport->withEventsFor(
@@ -198,14 +202,14 @@ final class MetadataPropagatingTest extends TestCase
 
         $ecotoneTestSupport->sendCommand(new AddItemToBasket('basket-123', 'item-123'));
 
-        self::assertEquals([new ItemWasAddedToBasket('basket-123', 'item-123')], $ecotoneTestSupport->getRecordedEvents());
+        self::assertEquals([new ItemWasAddedToBasket('basket-123', 'item-123')], $ecotoneTestSupport->popRecordedEvents());
 
         $ecotoneTestSupport->run('basket', ExecutionPollingMetadata::createWithTestingSetup());
 
-        self::assertEquals([new ItemReservationCreated('item-123')], $ecotoneTestSupport->getRecordedEvents());
+        self::assertEquals([new ItemReservationCreated('item-123')], $ecotoneTestSupport->popRecordedEvents());
 
         $ecotoneTestSupport->run('itemInventory', ExecutionPollingMetadata::createWithTestingSetup());
 
-        self::assertEquals([new ItemReserved('item-123')], $ecotoneTestSupport->getRecordedEvents());
+        self::assertEquals([new ItemReserved('item-123')], $ecotoneTestSupport->popRecordedEvents());
     }
 }

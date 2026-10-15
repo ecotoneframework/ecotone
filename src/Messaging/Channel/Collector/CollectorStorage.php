@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\Collector;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
-use Ecotone\Messaging\Message;
 
 /**
  * This is responsible for collecting message in order to send them later.
@@ -18,7 +18,7 @@ use Ecotone\Messaging\Message;
 final class CollectorStorage
 {
     /**
-     * @param CollectedMessage[] $collectedMessages
+     * @param Message[] $collectedMessages
      */
     public function __construct(
         private bool $enabled = false,

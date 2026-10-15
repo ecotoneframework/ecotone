@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Handler\Enricher;
 
-use Ecotone\Messaging\Message;
+use Ecotone\Api\Messaging\Message;
 
 /**
  * Interface EnrichReferenceService

@@ -5,37 +5,37 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Messaging\Attribute\Asynchronous;
-use Ecotone\Messaging\Attribute\DelayedRetry;
-use Ecotone\Messaging\Attribute\ErrorChannel;
-use Ecotone\Messaging\Attribute\ModuleAnnotation;
-use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Api\Attribute\Asynchronous;
+use Ecotone\Api\Attribute\DelayedRetry;
+use Ecotone\Api\Attribute\ErrorChannel;
+use Ecotone\Api\Attribute\ModuleAnnotation;
+use Ecotone\Api\ExtensionObject\ErrorHandlerConfiguration;
+use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\ExtensionObject\RetryTemplateBuilder;
+use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
-use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Recoverability\DelayedRetryErrorHandler;
-use Ecotone\Messaging\Handler\Recoverability\ErrorHandlerConfiguration;
 use Ecotone\Messaging\Handler\Recoverability\RetryRunner;
-use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\Router\HeaderRouter;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\MessageHeaders;
-use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 
 #[ModuleAnnotation]
 /**
  * licence Apache-2.0
  */
-class ErrorHandlerModule extends NoExternalConfigurationModule implements AnnotationModule
+final class ErrorHandlerModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
      * @param ErrorHandlerConfiguration[] $perHandlerRetryConfigurations
@@ -69,7 +69,7 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
 
             $delayedRetry = null;
             $hasErrorChannel = false;
-            foreach ($asyncAnnotation->getAsynchronousExecution() as $endpointAnnotation) {
+            foreach ($asyncAnnotation->asynchronousExecution as $endpointAnnotation) {
                 if ($endpointAnnotation instanceof DelayedRetry) {
                     $delayedRetry = $endpointAnnotation;
                 } elseif ($endpointAnnotation instanceof ErrorChannel) {
@@ -98,10 +98,10 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
 
                 $generatedErrorChannelName = DelayedRetry::generateChannelName($handlerEndpointId);
                 $retryTemplateBuilder = new RetryTemplateBuilder(
-                    $delayedRetry->initialDelayMs,
+                    $delayedRetry->initialDelayInMilliseconds,
                     $delayedRetry->multiplier,
-                    $delayedRetry->maxDelayMs,
-                    $delayedRetry->maxAttempts,
+                    $delayedRetry->maxDelayInMilliseconds,
+                    $delayedRetry->maxRetries,
                 );
 
                 $perHandlerRetryConfigurations[] = self::buildErrorHandlerConfig($generatedErrorChannelName, $retryTemplateBuilder, $delayedRetry->deadLetterChannel);
@@ -123,10 +123,10 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
 
             $generatedErrorChannelName = DelayedRetry::generateGatewayChannelName($gatewayInterfaceFqn);
             $retryTemplateBuilder = new RetryTemplateBuilder(
-                $delayedRetry->initialDelayMs,
+                $delayedRetry->initialDelayInMilliseconds,
                 $delayedRetry->multiplier,
-                $delayedRetry->maxDelayMs,
-                $delayedRetry->maxAttempts,
+                $delayedRetry->maxDelayInMilliseconds,
+                $delayedRetry->maxRetries,
             );
             $perHandlerRetryConfigurations[] = self::buildErrorHandlerConfig($generatedErrorChannelName, $retryTemplateBuilder, $delayedRetry->deadLetterChannel);
         }
@@ -164,8 +164,8 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
 
             $errorHandler = ServiceActivatorBuilder::createWithDefinition(
                 new Definition(DelayedRetryErrorHandler::class, [
-                    $extensionObject->getDelayedRetryTemplate(),
-                    (bool)$extensionObject->getDeadLetterQueueChannel(),
+                    $extensionObject->delayedRetryTemplate,
+                    (bool)$extensionObject->deadLetterChannel,
                     Reference::to(LoggingGateway::class),
                 ]),
                 'handle',
@@ -175,10 +175,10 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
                 ->withMethodParameterConverters([
                     ReferenceBuilder::create('logger', LoggingGateway::class),
                 ]);
-            if ($extensionObject->getDeadLetterQueueChannel()) {
-                $errorHandler = $errorHandler->withOutputMessageChannel($extensionObject->getDeadLetterQueueChannel());
+            if ($extensionObject->deadLetterChannel) {
+                $errorHandler = $errorHandler->withOutputMessageChannel($extensionObject->deadLetterChannel);
                 $messagingConfiguration
-                    ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($extensionObject->getDeadLetterQueueChannel()));
+                    ->registerDefaultChannelFor(SimpleMessageChannelBuilder::createPublishSubscribeChannel($extensionObject->deadLetterChannel));
             }
 
             $messagingConfiguration
@@ -201,11 +201,6 @@ class ErrorHandlerModule extends NoExternalConfigurationModule implements Annota
     /**
      * @inheritDoc
      */
-    public function canHandle($extensionObject): bool
-    {
-        return $extensionObject instanceof ErrorHandlerConfiguration;
-    }
-
     public function getModulePackageName(): string
     {
         return ModulePackageList::CORE_PACKAGE;

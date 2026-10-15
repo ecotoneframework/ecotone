@@ -24,6 +24,7 @@ final class ServiceConfiguration
      * @param string[]|null $enabledModulePackageNames
      * @param object[] $extensionObjects
      * @param object[] $pollableEndpointAnnotations
+     * @param array<int, string> $headersInLogContext
      */
     private function __construct(
         public readonly string $cacheDirectoryPath,
@@ -40,6 +41,7 @@ final class ServiceConfiguration
         public readonly array $extensionObjects = [],
         public readonly array $pollableEndpointAnnotations = [],
         public readonly ?string $licenceKey = null,
+        public readonly array $headersInLogContext = [],
     ) {
     }
 
@@ -85,7 +87,25 @@ final class ServiceConfiguration
             }
         }
 
+        foreach ($applicationConfigurations as $applicationConfiguration) {
+            $self = $self->withHeadersInLogContext([...$self->headersInLogContext, ...$applicationConfiguration->headersInLogContext]);
+        }
+
         return $self;
+    }
+
+    /**
+     * @param array<int, string> $headerNames
+     */
+    public function withHeadersInLogContext(array $headerNames): self
+    {
+        foreach ($headerNames as $headerName) {
+            if (! is_string($headerName) || $headerName === '') {
+                throw ConfigurationException::create("withHeadersInLogContext() was given an empty header name. Pass the exact name of each message header to add to the log context, for example withHeadersInLogContext(['userId']), or remove the empty entry.");
+            }
+        }
+
+        return new self(...[...get_object_vars($this), 'headersInLogContext' => array_values(array_unique($headerNames))]);
     }
 
     public function withFailFast(bool $failFast): self

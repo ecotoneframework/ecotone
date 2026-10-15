@@ -10,6 +10,7 @@ use Ecotone\Api\Scheduling\Duration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
 use Ecotone\Messaging\Endpoint\ConsumerInterceptorTrait;
+use Throwable;
 
 /**
  * Class LimitConsumedMessagesExtension
@@ -25,6 +26,7 @@ class TimeLimitInterceptor implements ConsumerInterceptor
 
     private ?DatePoint $startTime;
     private Duration $timeout;
+    private bool $hasPolledSinceStartup = false;
 
     /**
      * LimitMemoryUsageInterceptor constructor.
@@ -45,6 +47,12 @@ class TimeLimitInterceptor implements ConsumerInterceptor
     public function onStartup(): void
     {
         $this->startTime = $this->clock->now();
+        $this->hasPolledSinceStartup = false;
+    }
+
+    public function postRun(?Throwable $unhandledFailure): void
+    {
+        $this->hasPolledSinceStartup = true;
     }
 
     /**
@@ -52,6 +60,7 @@ class TimeLimitInterceptor implements ConsumerInterceptor
      */
     public function shouldBeStopped(): bool
     {
-        return $this->clock->now()->durationSince($this->startTime)->isGreaterThan($this->timeout);
+        return $this->hasPolledSinceStartup
+            && $this->clock->now()->durationSince($this->startTime)->isGreaterThan($this->timeout);
     }
 }

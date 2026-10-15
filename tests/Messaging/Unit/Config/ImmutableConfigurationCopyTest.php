@@ -180,14 +180,15 @@ final class ImmutableConfigurationCopyTest extends TestCase
             ->withConsumerMemoryLimit(128)
             ->withConnectionRetryTemplate($retryTemplate)
             ->withExtensionObjects([$extensionObject])
-            ->withLicenceKey('licence');
+            ->withLicenceKey('licence')
+            ->withHeadersInLogContext(['userId']);
         $observe = fn (ServiceConfiguration $configuration) => [
             ...get_object_vars($configuration),
             'enabledModulePackageNames' => $configuration->getEnabledModulePackageNames(),
         ];
 
         self::assertSame(
-            ['cacheDirectoryPath', 'serviceName', 'failFast', 'environment', 'loadCatalog', 'namespaces', 'defaultSerializationMediaType', 'defaultErrorChannel', 'defaultMemoryLimitInMegabytes', 'connectionRetryTemplate', 'extensionObjects', 'pollableEndpointAnnotations', 'licenceKey'],
+            ['cacheDirectoryPath', 'serviceName', 'failFast', 'environment', 'loadCatalog', 'namespaces', 'defaultSerializationMediaType', 'defaultErrorChannel', 'defaultMemoryLimitInMegabytes', 'connectionRetryTemplate', 'extensionObjects', 'pollableEndpointAnnotations', 'licenceKey', 'headersInLogContext'],
             array_keys(get_object_vars($original)),
         );
         self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withCacheDirectoryPath('/var/cache/'), ['cacheDirectoryPath' => '/var/cache'], $observe);
@@ -210,6 +211,7 @@ final class ImmutableConfigurationCopyTest extends TestCase
         self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withExtensionObjects([$otherExtensionObject]), ['extensionObjects' => [$otherExtensionObject]], $observe);
         self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->addExtensionObject($otherExtensionObject), ['extensionObjects' => [$extensionObject, $otherExtensionObject]], $observe);
         self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withLicenceKey('other_licence'), ['licenceKey' => 'other_licence'], $observe);
+        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withHeadersInLogContext(['region']), ['headersInLogContext' => ['region']], $observe);
     }
 
     public function test_polling_metadata_copy_changes_only_the_named_fields(): void

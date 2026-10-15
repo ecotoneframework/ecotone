@@ -28,6 +28,10 @@ class LoggingService implements LoggingGateway, SubscribableLoggingGateway
      * @var LoggerInterface[] $loggers
      */
     private array $loggers = [];
+    /**
+     * @var array<int, string>
+     */
+    private array $headersInLogContext = [];
 
     public function info(Stringable|string $message, Message|array|null $context = [], array $additionalContext = []): void
     {
@@ -51,6 +55,7 @@ class LoggingService implements LoggingGateway, SubscribableLoggingGateway
                 'message_id' => $context->getHeaders()->getMessageId(),
                 'correlation_id' => $context->getHeaders()->getCorrelationId(),
                 'parent_id' => $context->getHeaders()->getParentId(),
+                ...$this->headersInLogContextOf($context),
             ] : $context,
             $additionalContext
         );
@@ -58,6 +63,28 @@ class LoggingService implements LoggingGateway, SubscribableLoggingGateway
         foreach ($this->loggers as $logger) {
             $logger->log($level, $message, $resultingContext);
         }
+    }
+
+    public function includeHeaderInLogContext(string $headerName): void
+    {
+        if (! in_array($headerName, $this->headersInLogContext, true)) {
+            $this->headersInLogContext[] = $headerName;
+        }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function headersInLogContextOf(Message $message): array
+    {
+        $headers = [];
+        foreach ($this->headersInLogContext as $headerName) {
+            if ($message->getHeaders()->containsKey($headerName)) {
+                $headers[$headerName] = $message->getHeaders()->get($headerName);
+            }
+        }
+
+        return $headers;
     }
 
     public function registerLogger(?LoggerInterface $logger): void

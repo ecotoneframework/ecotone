@@ -1063,11 +1063,12 @@ final class MessagingSystemConfiguration implements Configuration
             $messagingBuilder->register($id, $definition);
         }
 
-        $messagingBuilder->register(
-            LoggingGateway::class,
-            (new Definition(LoggingService::class))
-                ->addMethodCall('registerLogger', [new Reference('logger', ContainerImplementation::NULL_ON_INVALID_REFERENCE)])
-        );
+        $loggingService = (new Definition(LoggingService::class))
+            ->addMethodCall('registerLogger', [new Reference('logger', ContainerImplementation::NULL_ON_INVALID_REFERENCE)]);
+        foreach ($this->applicationConfiguration->headersInLogContext as $headerName) {
+            $loggingService->addMethodCall('includeHeaderInLogContext', [$headerName]);
+        }
+        $messagingBuilder->register(LoggingGateway::class, $loggingService);
 
         // TODO: some service configuration should be handled at runtime. Here they are all cached in the container
         //        $messagingBuilder->register('config.defaultSerializationMediaType', MediaType::parseMediaType($this->applicationConfiguration->getDefaultSerializationMediaType()));

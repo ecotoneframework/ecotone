@@ -20,7 +20,6 @@ use Ecotone\Api\EventSourcing\DecisionModelConcurrencyException;
 use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
 use Ecotone\Api\EventSourcing\EventCriteria;
 use Ecotone\Api\EventSourcing\EventStore;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\CommandBus;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
@@ -159,8 +158,8 @@ final class FetchedAggregateBoundaryTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [CustomerOnCredit::class, CreditGranted::class, CreditSpent::class, QuoteService::class, CreditOrderPlaced::class],
             containerOrAvailableServices: [new QuoteService()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
         $ecotone->sendCommandWithRouting('customer.grant', ['customerId' => 'c-1', 'amount' => 100]);
 
@@ -173,8 +172,8 @@ final class FetchedAggregateBoundaryTest extends TestCase
             EcotoneLite::bootstrapFlowTesting(
                 classesToResolve: [SagaFetchingService::class, EscalationSaga::class, CouponRedemptions::class, CreditOrderPlaced::class, EscalateCase::class],
                 containerOrAvailableServices: [new SagaFetchingService()],
-                configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                    ->withEnabledModulePackageNames([]),
+                extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+                enabledModules: [],
                 licenceKey: LicenceTesting::VALID_LICENCE,
             );
             $this->fail('Expected a ConfigurationException');
@@ -199,8 +198,8 @@ final class FetchedAggregateBoundaryTest extends TestCase
                 OrderOnCreditService::class, SettlementService::class, CreditReservationService::class, QuoteService::class,
             ],
             containerOrAvailableServices: [new OrderOnCreditService(), new SettlementService(), new CreditReservationService(), new QuoteService()],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }

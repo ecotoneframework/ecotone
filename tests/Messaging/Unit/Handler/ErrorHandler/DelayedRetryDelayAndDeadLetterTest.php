@@ -8,13 +8,13 @@ use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\Attribute\DelayedRetry;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Messaging\ErrorContext;
 use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Handler\MessageHandlingException;
+use Ecotone\Test\ChannelTestSupport;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -34,7 +34,7 @@ final class DelayedRetryDelayAndDeadLetterTest extends TestCase
         $ecotone->run(GrowingDelayHandler::ASYNC_CHANNEL, ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 1, stopOnError: false));
 
         /** @var PollableChannel $channel */
-        $channel = $ecotone->getMessageChannel(GrowingDelayHandler::ASYNC_CHANNEL);
+        $channel = ChannelTestSupport::of($ecotone)->getMessageChannel(GrowingDelayHandler::ASYNC_CHANNEL);
         $requeuedMessage = $channel->receive();
 
         $this->assertNotNull($requeuedMessage);
@@ -50,7 +50,7 @@ final class DelayedRetryDelayAndDeadLetterTest extends TestCase
         $ecotone->run(GrowingDelayHandler::ASYNC_CHANNEL, ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 1, stopOnError: false));
 
         /** @var PollableChannel $channel */
-        $channel = $ecotone->getMessageChannel(GrowingDelayHandler::ASYNC_CHANNEL);
+        $channel = ChannelTestSupport::of($ecotone)->getMessageChannel(GrowingDelayHandler::ASYNC_CHANNEL);
         $requeuedMessage = $channel->receive();
 
         $this->assertNotNull($requeuedMessage);
@@ -62,13 +62,12 @@ final class DelayedRetryDelayAndDeadLetterTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [DeadLetterRoutingHandler::class],
             [new DeadLetterRoutingHandler()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withExtensionObjects([
-                    \Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
-                    SimpleMessageChannelBuilder::createQueueChannel(DeadLetterRoutingHandler::ASYNC_CHANNEL, delayable: false),
-                    SimpleMessageChannelBuilder::createQueueChannel(DeadLetterRoutingHandler::DEAD_LETTER_CHANNEL, delayable: false),
-                ]),
+            extensionObjects: [
+                \Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
+                SimpleMessageChannelBuilder::createQueueChannel(DeadLetterRoutingHandler::ASYNC_CHANNEL, delayable:false),
+                SimpleMessageChannelBuilder::createQueueChannel(DeadLetterRoutingHandler::DEAD_LETTER_CHANNEL, delayable:false),
+            ],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
@@ -77,7 +76,7 @@ final class DelayedRetryDelayAndDeadLetterTest extends TestCase
         $ecotone->run(DeadLetterRoutingHandler::ASYNC_CHANNEL, ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 1, stopOnError: false));
 
         /** @var PollableChannel $deadLetterChannel */
-        $deadLetterChannel = $ecotone->getMessageChannel(DeadLetterRoutingHandler::DEAD_LETTER_CHANNEL);
+        $deadLetterChannel = ChannelTestSupport::of($ecotone)->getMessageChannel(DeadLetterRoutingHandler::DEAD_LETTER_CHANNEL);
         $deadLetterMessage = $deadLetterChannel->receive();
 
         $this->assertNotNull($deadLetterMessage);
@@ -95,12 +94,11 @@ final class DelayedRetryDelayAndDeadLetterTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [NoDeadLetterHandler::class],
             [new NoDeadLetterHandler()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withExtensionObjects([
-                    \Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
-                    SimpleMessageChannelBuilder::createQueueChannel(NoDeadLetterHandler::ASYNC_CHANNEL, delayable: false),
-                ]),
+            extensionObjects: [
+                \Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
+                SimpleMessageChannelBuilder::createQueueChannel(NoDeadLetterHandler::ASYNC_CHANNEL, delayable:false),
+            ],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
@@ -119,12 +117,11 @@ final class DelayedRetryDelayAndDeadLetterTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             [GrowingDelayHandler::class],
             [new GrowingDelayHandler()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withExtensionObjects([
-                    \Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
-                    SimpleMessageChannelBuilder::createQueueChannel(GrowingDelayHandler::ASYNC_CHANNEL, delayable: false),
-                ]),
+            extensionObjects: [
+                \Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
+                SimpleMessageChannelBuilder::createQueueChannel(GrowingDelayHandler::ASYNC_CHANNEL, delayable:false),
+            ],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }

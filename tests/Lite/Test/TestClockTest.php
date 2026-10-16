@@ -8,7 +8,6 @@ use DateTimeImmutable;
 use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\Attribute\Delayed;
 use Ecotone\Api\Attribute\EventHandler;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
@@ -159,9 +158,8 @@ final class TestClockTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             [$handler::class],
             [$handler, ClockInterface::class => $clock],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([SimpleMessageChannelBuilder::createQueueChannel('async')])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
     }
 }

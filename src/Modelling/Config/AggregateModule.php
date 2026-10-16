@@ -45,6 +45,7 @@ use Ecotone\Messaging\Handler\Transformer\TransformerProcessorBuilder;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\AggregateIdMetadataConverter;
 use Ecotone\Modelling\AggregateFlow\CallAggregate\CallAggregateServiceBuilder;
 use Ecotone\Modelling\AggregateFlow\LoadAggregate\LoadAggregateMode;
@@ -315,7 +316,7 @@ final class AggregateModule implements AnnotationModule, RoutingEventHandler
                 ->chain(
                     LoadAggregateServiceBuilder::create($aggregateClassDefinition, $methodName, null, $canReturnNull ? LoadAggregateMode::createContinueOnNotFound() : LoadAggregateMode::createThrowOnNotFound())
                 )
-                ->chain(new Definition(FetchAggregate::class))
+                ->chain(new Definition(FetchAggregate::class, [Reference::to(MessageBuilder::class)]))
         );
     }
 
@@ -379,6 +380,7 @@ final class AggregateModule implements AnnotationModule, RoutingEventHandler
                 DefaultHeaderMapper::createAllHeadersMapping()->getDefinition(),
                 Reference::to(EventMapper::class),
                 Reference::to(\Ecotone\Api\Gateway\EcotoneClockInterface::class),
+                Reference::to(MessageBuilder::class),
             ])
         );
     }

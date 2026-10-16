@@ -9,7 +9,7 @@ use Ecotone\Api\Attribute\Around;
 use Ecotone\Api\Attribute\Before;
 use Ecotone\Api\Interceptor\MethodInvocation;
 use Ecotone\Api\Messaging\Message;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\StaticMessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -19,7 +19,7 @@ class InterceptorExample
     #[Before(pointcut: SomeQueryHandler::class . '::sum')]
     public function multiplyBefore(Message $message): Message
     {
-        return MessageBuilder::fromMessage($message)
+        return StaticMessageBuilder::fromMessage($message)
                 ->setPayload($message->getPayload() * 2)
                 ->build();
     }
@@ -29,7 +29,7 @@ class InterceptorExample
     {
         $message = $methodInvocation->proceed();
 
-        return MessageBuilder::fromMessage($message)
+        return StaticMessageBuilder::fromMessage($message)
             ->setPayload($message->getPayload() + 1)
             ->build();
     }
@@ -37,7 +37,7 @@ class InterceptorExample
     #[After(pointcut: SomeQueryHandler::class . '::sum')]
     public function multiplyAfter(Message $message): Message
     {
-        return MessageBuilder::fromMessage($message)
+        return StaticMessageBuilder::fromMessage($message)
             ->setPayload($message->getPayload() * 2)
             ->build();
     }

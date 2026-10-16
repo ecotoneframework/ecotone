@@ -18,9 +18,8 @@ use Ecotone\Api\Gateway\MessagePublisher;
 use Ecotone\Api\Gateway\QueryBus;
 use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
 use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Api\Messaging\MessageHeaders;
-use Ecotone\Api\Messaging\PollableChannel;
+use Ecotone\Api\Scheduling\DatePoint;
 use Ecotone\Api\Scheduling\Duration;
 use Ecotone\Api\Scheduling\TimeSpan;
 use Ecotone\Lite\Test\DatabaseTablesSetUp;
@@ -28,7 +27,6 @@ use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Scheduling\Clock;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionResolver;
 use Ecotone\Modelling\AggregateMessage;
@@ -123,27 +121,9 @@ final class FlowTestSupport
         return $this->testSupportGateway->popRecordedMessagesFrom($channelName);
     }
 
-    public function getMessageChannel(string $channelName): MessageChannel|PollableChannel
-    {
-        return $this->configuredMessagingSystem->getMessageChannelByName($channelName);
-    }
-
-    public function getMessageChannelByName(string $channelName): MessageChannel|PollableChannel
-    {
-        return $this->getMessageChannel($channelName);
-    }
-
     public function getMessagePublisher(string $referenceName = MessagePublisher::class): MessagePublisher
     {
         return $this->configuredMessagingSystem->getMessagePublisher($referenceName);
-    }
-
-    public function receiveMessageFrom(string $channelName): ?Message
-    {
-        $messageChannel = $this->getMessageChannel($channelName);
-        Assert::isTrue($messageChannel instanceof PollableChannel, "Channel {$channelName} is not pollable");
-
-        return $messageChannel->receive();
     }
 
     public function run(string $channelOrEndpointName, ?ExecutionPollingMetadata $executionPollingMetadata = null): self
@@ -163,9 +143,9 @@ final class FlowTestSupport
     /**
      * @param Event[]|object[]|array[] $events
      */
-    public function withEventStream(string $streamName, array $events): self
+    public function withEventStream(string $streamName, array $events, ?DateTimeImmutable $at = null): self
     {
-        $this->getGateway(EventStore::class)->appendTo($streamName, $events);
+        $this->seedAt($at, fn () => $this->getGateway(EventStore::class)->appendTo($streamName, $events));
 
         return $this;
     }
@@ -173,9 +153,20 @@ final class FlowTestSupport
     /**
      * @param Event[]|object[]|array[] $events
      */
-    public function withEvents(array $events): self
+    public function withEvents(array $events, ?DateTimeImmutable $at = null): self
     {
-        return $this->withEventStream(AggregateDefinitionResolver::DEFAULT_STREAM, $events);
+        return $this->withEventStream(AggregateDefinitionResolver::DEFAULT_STREAM, $events, $at);
+    }
+
+    private function seedAt(?DateTimeImmutable $at, callable $seed): void
+    {
+        if ($at === null) {
+            $seed();
+
+            return;
+        }
+
+        $this->getStaticPsrClockFromContainer()->executeAt($at, $seed);
     }
 
     public function deleteEventStream(string $streamName): self
@@ -196,6 +187,11 @@ final class FlowTestSupport
     public function getEventStreamEvents(string $streamName): array
     {
         return $this->getGateway(EventStore::class)->load($streamName);
+    }
+
+    public function now(): DatePoint
+    {
+        return $this->clock->now();
     }
 
     public function changeTimeTo(DateTimeImmutable $time): self
@@ -268,12 +264,12 @@ final class FlowTestSupport
     /**
      * @param Event[]|object[]|array[] $events
      */
-    public function withEventsFor(string|object|array $identifiers, string $aggregateClass, array $events, int $aggregateVersion = 0): self
+    public function withEventsFor(string|object|array $identifiers, string $aggregateClass, array $events, int $aggregateVersion = 0, ?DateTimeImmutable $at = null): self
     {
         $aggregateDefinition = $this->aggregateDefinitionRegistry->getFor(Type::object($aggregateClass));
         Assert::isTrue($aggregateDefinition->isEventSourced(), "Aggregate {$aggregateClass} is not event sourced. Can't store events for it.");
 
-        $this->messagingEntrypoint->sendWithHeaders(
+        $this->seedAt($at, fn () => $this->messagingEntrypoint->sendWithHeaders(
             [],
             [
                 AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER => is_object($identifiers) ? (string)$identifiers : $identifiers,
@@ -283,7 +279,7 @@ final class FlowTestSupport
                 AggregateMessage::TEST_SETUP_AGGREGATE_EVENTS => $events,
             ],
             AggregateModule::getRegisterAggregateSaveRepositoryInputChannel($aggregateClass, forTesting: true)
-        );
+        ));
 
         return $this;
     }
@@ -467,29 +463,6 @@ final class FlowTestSupport
     public function sendDirectToChannelWithMessageReply(string $targetChannel, mixed $payload = '', array $metadata = []): Message
     {
         return $this->messagingEntrypoint->sendWithHeadersWithMessageReply($payload, $metadata, $targetChannel, $metadata[MessageHeaders::ROUTING_SLIP] ?? null);
-    }
-
-    public function sendMessageDirectToChannel(string $targetChannel, Message $message): mixed
-    {
-        Assert::isFalse($message->getHeaders()->containsKey(MessagingEntrypointService::ENTRYPOINT), 'Message must not contain entrypoint header. Make use of first argument in sendDirectToChannel method');
-
-        return $this->messagingEntrypoint->sendMessage(
-            MessageBuilder::fromMessage($message)
-                ->setHeader(MessagingEntrypointService::ENTRYPOINT, $targetChannel)
-                ->build()
-        );
-    }
-
-    public function sendMessageDirectToChannelWithMessageReply(string $targetChannel, Message $message): Message
-    {
-        Assert::isFalse($message->getHeaders()->containsKey(MessagingEntrypointService::ENTRYPOINT), 'Message must not contain entrypoint header. Make use of first argument in sendDirectToChannel method');
-
-        return $this->messagingEntrypoint->sendWithHeadersWithMessageReply(
-            $message->getPayload(),
-            $message->getHeaders()->headers(),
-            $targetChannel,
-            $message->getHeaders()->containsKey(MessageHeaders::ROUTING_SLIP) ? $message->getHeaders()->get(MessageHeaders::ROUTING_SLIP) : null
-        );
     }
 
     /**

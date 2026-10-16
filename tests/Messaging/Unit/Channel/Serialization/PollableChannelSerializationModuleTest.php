@@ -6,10 +6,10 @@ namespace Test\Ecotone\Messaging\Unit\Channel\Serialization;
 
 use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
+use Ecotone\Test\ChannelTestSupport;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Order\OrderService;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
@@ -40,7 +40,7 @@ final class PollableChannelSerializationModuleTest extends TestCase
 
         $this->assertSame(
             addslashes(serialize(new PlaceOrder('1'))),
-            $ecotoneLite->getMessageChannel('orders')->receive()->getPayload()
+            ChannelTestSupport::of($ecotoneLite)->getMessageChannel('orders')->receive()->getPayload()
         );
     }
 
@@ -55,9 +55,8 @@ final class PollableChannelSerializationModuleTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             $classesToResolve,
             $services,
-            (ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects($extensionObjects))->withExtensionObjects($channelBuilders)
-                ->withEnabledModulePackageNames([])
+            extensionObjects: array_merge($extensionObjects, $channelBuilders),
+            enabledModules: [],
         );
     }
 }

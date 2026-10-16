@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config;
 
 use Ecotone\Api\Attribute\InternalHandler;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Config\ConfigurationException;
@@ -25,10 +24,8 @@ final class EndpointChannelNameCollisionTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [CollidingEndpointIdHandler::class],
             [new CollidingEndpointIdHandler()],
-            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
-                SimpleMessageChannelBuilder::createDirectMessageChannel(CollidingEndpointIdHandler::ENDPOINT_ID),
-            ])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createDirectMessageChannel(CollidingEndpointIdHandler::ENDPOINT_ID)],
+            enabledModules: [],
         );
     }
 
@@ -36,7 +33,11 @@ final class EndpointChannelNameCollisionTest extends TestCase
     {
         $this->expectException(ConfigurationException::class);
 
-        EcotoneLite::bootstrapFlowTesting([SameChannelAndEndpointIdHandler::class], [new SameChannelAndEndpointIdHandler()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        EcotoneLite::bootstrapFlowTesting(
+            [SameChannelAndEndpointIdHandler::class],
+            [new SameChannelAndEndpointIdHandler()],
+            enabledModules: [],
+        );
     }
 }
 

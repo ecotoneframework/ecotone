@@ -7,7 +7,6 @@ namespace Test\Ecotone\Modelling\Unit;
 use Ecotone\Api\Attribute\Aggregate;
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\Attribute\Identifier;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
 use PHPUnit\Framework\TestCase;
@@ -24,7 +23,7 @@ class AggregateIdResolverTest extends TestCase
 {
     public function test_resolving_a_scalar_aggregate_id(): void
     {
-        $ecotone = EcotoneLite::bootstrapFlowTesting([ScalarIdAggregate::class], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting([ScalarIdAggregate::class], enabledModules: []);
 
         $ecotone->sendCommandWithRouting('scalarIdAggregate.create', 123);
 
@@ -33,7 +32,7 @@ class AggregateIdResolverTest extends TestCase
 
     public function test_resolving_an_aggregate_id_that_implements_stringable(): void
     {
-        $ecotone = EcotoneLite::bootstrapFlowTesting([StringableIdAggregate::class], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting([StringableIdAggregate::class], enabledModules: []);
 
         $id = Uuid::fromString('5495ec27-c286-48fe-aed4-2548c1113c37');
         $ecotone->sendCommandWithRouting('stringableIdAggregate.create', $id);
@@ -45,7 +44,7 @@ class AggregateIdResolverTest extends TestCase
     {
         $this->expectException(NoCorrectIdentifierDefinedException::class);
 
-        $ecotone = EcotoneLite::bootstrapFlowTesting([ScalarIdAggregate::class], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting([ScalarIdAggregate::class], enabledModules: []);
         $ecotone->sendCommandWithRouting('scalarIdAggregate.create', new stdClass());
     }
 
@@ -53,7 +52,7 @@ class AggregateIdResolverTest extends TestCase
     {
         $this->expectException(NoCorrectIdentifierDefinedException::class);
 
-        $ecotone = EcotoneLite::bootstrapFlowTesting([ScalarIdAggregate::class], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting([ScalarIdAggregate::class], enabledModules: []);
         $ecotone->sendCommandWithRouting('scalarIdAggregate.create', ['johny']);
     }
 }

@@ -8,7 +8,6 @@ use DateTimeImmutable;
 use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\Attribute\Delayed;
 use Ecotone\Api\Attribute\EventHandler;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Scheduling\TimeSpan;
@@ -24,7 +23,11 @@ final class AsynchronousChannelsInFlowTestsTest extends TestCase
     public function test_asynchronous_handler_is_consumed_from_an_in_memory_channel_without_configuring_it(): void
     {
         $handler = $this->notificationHandler();
-        $ecotone = EcotoneLite::bootstrapFlowTesting([$handler::class], [$handler], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [$handler::class],
+            [$handler],
+            enabledModules: [],
+        );
 
         $ecotone->publishEventWithRouting('order.placed', 'order-1');
         $this->assertSame([], $handler->notified);
@@ -46,7 +49,11 @@ final class AsynchronousChannelsInFlowTestsTest extends TestCase
                 $this->expired[] = $orderId;
             }
         };
-        $ecotone = EcotoneLite::bootstrapFlowTesting([$handler::class], [$handler], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [$handler::class],
+            [$handler],
+            enabledModules: [],
+        );
         $ecotone->changeTimeTo(new DateTimeImmutable('2026-03-01 12:00:00'));
 
         $ecotone->publishEventWithRouting('order.placed', 'order-1')->run('async');
@@ -72,9 +79,8 @@ final class AsynchronousChannelsInFlowTestsTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$handler::class],
             [$handler],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([SimpleMessageChannelBuilder::createQueueChannel('async', delayable: false)])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async', delayable:false)],
+            enabledModules: [],
         );
 
         $ecotone->publishEventWithRouting('order.placed', 'order-1')->run('async');
@@ -89,7 +95,11 @@ final class AsynchronousChannelsInFlowTestsTest extends TestCase
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessage('Registered asynchronous endpoint `notifyAboutOrder`, however channel configuration for `notifications` was not provided.');
 
-        EcotoneLite::bootstrap([$handler::class], [$handler], ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        EcotoneLite::bootstrap(
+            [$handler::class],
+            [$handler],
+            enabledModules: [],
+        );
     }
 
     private function notificationHandler(): object

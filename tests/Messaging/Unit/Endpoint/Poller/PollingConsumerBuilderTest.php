@@ -6,7 +6,6 @@ namespace Test\Ecotone\Messaging\Unit\Endpoint\Poller;
 
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
 use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
@@ -15,10 +14,12 @@ use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Channel\ExceptionalQueueChannel;
 use Ecotone\Messaging\Channel\PollableChannel\InMemory\InMemoryAcknowledgeCallback;
 use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Endpoint\NullAcknowledgementCallback;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ChannelTestSupport;
 use Ecotone\Test\ComponentTestBuilder;
+use Ecotone\Test\StaticMessageBuilder;
 use Ecotone\Test\StubLogger;
 use InvalidArgumentException;
 use Test\Ecotone\Messaging\Fixture\Handler\DataReturningService;
@@ -43,7 +44,7 @@ class PollingConsumerBuilderTest extends MessagingTestCase
     public function test_acking_message_when_ack_available_in_message_header()
     {
         $acknowledgementCallback = NullAcknowledgementCallback::create();
-        $message = MessageBuilder::withPayload('some')
+        $message = StaticMessageBuilder::withPayload('some')
             ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, 'amqpAcker')
             ->setHeader('amqpAcker', $acknowledgementCallback)
             ->build();
@@ -55,7 +56,7 @@ class PollingConsumerBuilderTest extends MessagingTestCase
 
         $messaging = $this->createPollingConsumer($inputChannelName, $inputChannel, $messageHandler);
 
-        $messaging->sendMessageDirectToChannel($inputChannelName, $message);
+        ChannelTestSupport::of($messaging)->sendMessageDirectToChannel($inputChannelName, $message);
 
         $messaging->run('some-id');
 
@@ -65,7 +66,7 @@ class PollingConsumerBuilderTest extends MessagingTestCase
     public function test_requeing_message_on_gateway_failure()
     {
         $acknowledgementCallback = NullAcknowledgementCallback::create();
-        $message = MessageBuilder::withPayload('some')
+        $message = StaticMessageBuilder::withPayload('some')
             ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, 'amqpAcker')
             ->setHeader('amqpAcker', $acknowledgementCallback)
             ->build();
@@ -78,7 +79,7 @@ class PollingConsumerBuilderTest extends MessagingTestCase
 
         $messaging = $this->createPollingConsumer($inputChannelName, $inputChannel, $messageHandler);
 
-        $messaging->sendMessageDirectToChannel($inputChannelName, $message);
+        ChannelTestSupport::of($messaging)->sendMessageDirectToChannel($inputChannelName, $message);
         $messaging->run('some-id');
 
         $this->assertTrue($acknowledgementCallback->isRequeued());
@@ -87,7 +88,7 @@ class PollingConsumerBuilderTest extends MessagingTestCase
     public function test_throwing_exception_and_requeuing_when_stop_on_error_defined()
     {
         $acknowledgementCallback = NullAcknowledgementCallback::create();
-        $message = MessageBuilder::withPayload('some')
+        $message = StaticMessageBuilder::withPayload('some')
             ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, 'amqpAcker')
             ->setHeader('amqpAcker', $acknowledgementCallback)
             ->build();
@@ -102,7 +103,7 @@ class PollingConsumerBuilderTest extends MessagingTestCase
 
         $this->expectException(InvalidArgumentException::class);
 
-        $messaging->sendMessageDirectToChannel($inputChannelName, $message);
+        ChannelTestSupport::of($messaging)->sendMessageDirectToChannel($inputChannelName, $message);
         $messaging->run('some-id');
 
         $this->assertTrue($acknowledgementCallback->isRequeued());
@@ -111,7 +112,7 @@ class PollingConsumerBuilderTest extends MessagingTestCase
     public function test_throwing_exception_and_rejecting_message()
     {
         $acknowledgementCallback = NullAcknowledgementCallback::create();
-        $message = MessageBuilder::withPayload('some')
+        $message = StaticMessageBuilder::withPayload('some')
             ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, 'amqpAcker')
             ->setHeader('amqpAcker', $acknowledgementCallback)
             ->build();
@@ -124,7 +125,7 @@ class PollingConsumerBuilderTest extends MessagingTestCase
 
         $messaging = $this->createPollingConsumer($inputChannelName, $inputChannel, $messageHandler, true);
 
-        $messaging->sendMessageDirectToChannel($inputChannelName, $message);
+        ChannelTestSupport::of($messaging)->sendMessageDirectToChannel($inputChannelName, $message);
         $messaging->run('some-id');
 
         $this->assertTrue($acknowledgementCallback->isRejected());
@@ -137,8 +138,8 @@ class PollingConsumerBuilderTest extends MessagingTestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [SuccessServiceActivator::class],
             [new SuccessServiceActivator()],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel($messageChannelName))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel($messageChannelName)],
+            enabledModules: [],
         );
 
         $ecotoneTestSupport->sendDirectToChannel('handle_channel');
@@ -149,7 +150,7 @@ class PollingConsumerBuilderTest extends MessagingTestCase
         /** @var InMemoryAcknowledgeCallback $acknowledge */
         $acknowledge = $headers[$headers[MessageHeaders::CONSUMER_ACK_HEADER_LOCATION]];
         $this->assertInstanceOf(InMemoryAcknowledgeCallback::class, $acknowledge);
-        $this->assertNull($ecotoneTestSupport->getMessageChannel($messageChannelName)->receive());
+        $this->assertNull(ChannelTestSupport::of($ecotoneTestSupport)->getMessageChannel($messageChannelName)->receive());
     }
 
     public function test_sending_to_error_channel()
@@ -160,23 +161,19 @@ class PollingConsumerBuilderTest extends MessagingTestCase
         $messaging = EcotoneLite::bootstrapFlowTesting(
             [ExampleFailureCommandHandler::class],
             [new ExampleFailureCommandHandler(), 'logger' => $logger = StubLogger::create()],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel($asyncChannelName),
-                    SimpleMessageChannelBuilder::createQueueChannel($errorChannelName),
-                    PollingMetadata::create('async')
-                        ->withStopOnError(false)
-                        ->withExecutionAmountLimit(1)
-                        ->withErrorChannelName($errorChannelName),
-                ])
-                    ->withEnabledModulePackageNames([])
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createQueueChannel($asyncChannelName),
+                SimpleMessageChannelBuilder::createQueueChannel($errorChannelName),
+                PollingMetadata::create('async')->withStopOnError(false)->withExecutionAmountLimit(1)->withErrorChannelName($errorChannelName),
+            ],
+            enabledModules: [],
         );
 
         $messaging->sendCommandWithRouting('handler.fail', ['command' => 0]);
 
         $messaging->run($asyncChannelName);
 
-        $message = $messaging->getMessageChannel($errorChannelName)->receive();
+        $message = ChannelTestSupport::of($messaging)->getMessageChannel($errorChannelName)->receive();
         $this->assertNotNull($message);
         $this->assertTrue($message->getHeaders()->containsKey(ErrorContext::EXCEPTION_MESSAGE));
     }
@@ -188,15 +185,11 @@ class PollingConsumerBuilderTest extends MessagingTestCase
         $messaging = EcotoneLite::bootstrapFlowTesting(
             [ExampleFailureCommandHandler::class, FailureErrorHandler::class],
             [new ExampleFailureCommandHandler(), $failureHandler = new FailureErrorHandler()],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel($asyncChannelName),
-                    PollingMetadata::create('async')
-                        ->withStopOnError(false)
-                        ->withExecutionAmountLimit(1)
-                        ->withErrorChannelName('errorHandler'),
-                ])
-                    ->withEnabledModulePackageNames([])
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createQueueChannel($asyncChannelName),
+                PollingMetadata::create('async')->withStopOnError(false)->withExecutionAmountLimit(1)->withErrorChannelName('errorHandler'),
+            ],
+            enabledModules: [],
         );
 
         $messaging->sendCommandWithRouting('handler.fail', ['command' => 0]);
@@ -218,25 +211,21 @@ class PollingConsumerBuilderTest extends MessagingTestCase
         $messaging = EcotoneLite::bootstrapFlowTesting(
             [ExampleFailureCommandHandler::class],
             [new ExampleFailureCommandHandler(), 'logger' => $logger = StubLogger::create()],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel($asyncChannelName),
-                    SimpleMessageChannelBuilder::createExceptionChannel(ExceptionalQueueChannel::createWithExceptionOnSend($errorChannelName)),
-                    PollingMetadata::create('async')
-                        ->withStopOnError(false)
-                        ->withExecutionAmountLimit(1)
-                        ->withErrorChannelName($errorChannelName),
-                ])
-                    ->withEnabledModulePackageNames([])
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createQueueChannel($asyncChannelName),
+                SimpleMessageChannelBuilder::createExceptionChannel(ExceptionalQueueChannel::createWithExceptionOnSend($errorChannelName)),
+                PollingMetadata::create('async')->withStopOnError(false)->withExecutionAmountLimit(1)->withErrorChannelName($errorChannelName),
+            ],
+            enabledModules: [],
         );
 
-        $originalNessage = MessageBuilder::withPayload('some')->build();
+        $originalNessage = StaticMessageBuilder::withPayload('some')->build();
         $messaging->sendCommandWithRouting('handler.fail', ['command' => 0]);
 
         $messaging->run($asyncChannelName);
 
-        $this->assertNull($messaging->getMessageChannel($errorChannelName)->receive());
-        $requeuedMessage = $messaging->getMessageChannel($asyncChannelName)->receive();
+        $this->assertNull(ChannelTestSupport::of($messaging)->getMessageChannel($errorChannelName)->receive());
+        $requeuedMessage = ChannelTestSupport::of($messaging)->getMessageChannel($asyncChannelName)->receive();
         $this->assertNotNull($requeuedMessage);
         $this->assertNotSame($originalNessage->getHeaders()->getMessageId(), $requeuedMessage->getHeaders()->getMessageId());
     }
@@ -247,8 +236,8 @@ class PollingConsumerBuilderTest extends MessagingTestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [SuccessServiceActivator::class],
             [new SuccessServiceActivator()],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel($inputChannelName))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel($inputChannelName)],
+            enabledModules: [],
         );
 
         $ecotoneTestSupport->sendDirectToChannel('handle_channel');
@@ -260,7 +249,7 @@ class PollingConsumerBuilderTest extends MessagingTestCase
             $ecotoneTestSupport->sendQueryWithRouting('get_number_of_calls')
         );
         $this->assertNull(
-            $ecotoneTestSupport->getMessageChannel($inputChannelName)->receive()
+            ChannelTestSupport::of($ecotoneTestSupport)->getMessageChannel($inputChannelName)->receive()
         );
     }
 
@@ -270,8 +259,8 @@ class PollingConsumerBuilderTest extends MessagingTestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [SuccessServiceActivator::class],
             [new SuccessServiceActivator()],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel($inputChannelName))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel($inputChannelName)],
+            enabledModules: [],
         );
 
         $ecotoneTestSupport->sendDirectToChannel('handle_channel');
@@ -285,7 +274,7 @@ class PollingConsumerBuilderTest extends MessagingTestCase
             $ecotoneTestSupport->sendQueryWithRouting('get_number_of_calls')
         );
         $this->assertNull(
-            $ecotoneTestSupport->getMessageChannel($inputChannelName)->receive()
+            ChannelTestSupport::of($ecotoneTestSupport)->getMessageChannel($inputChannelName)->receive()
         );
     }
 
@@ -295,7 +284,7 @@ class PollingConsumerBuilderTest extends MessagingTestCase
         MessageHandlerBuilder $messageHandler,
         bool $stopOnFailure = false
     ): FlowTestSupport {
-        return ComponentTestBuilder::create(configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([])->addExtensionObject(\Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false)))
+        return ComponentTestBuilder::create(configuration: BootstrapConfiguration::createWithDefaults()->withEnabledModulePackageNames([])->addExtensionObject(\Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false)))
             ->withChannel(SimpleMessageChannelBuilder::create($inputChannelName, $inputChannel))
             ->withPollingMetadata(
                 PollingMetadata::create($messageHandler->getEndpointId())
@@ -310,7 +299,7 @@ class PollingConsumerBuilderTest extends MessagingTestCase
 
     private function createPollingConsumerWithCustomConfiguration(array $channels, MessageHandlerBuilder $messageHandler, PollingMetadata  $pollingMetadata): FlowTestSupport
     {
-        $componentTest = ComponentTestBuilder::create(configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([])->addExtensionObject(\Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false)))
+        $componentTest = ComponentTestBuilder::create(configuration: BootstrapConfiguration::createWithDefaults()->withEnabledModulePackageNames([])->addExtensionObject(\Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false)))
             ->withPollingMetadata($pollingMetadata);
         foreach ($channels as $channelName => $channel) {
             $componentTest = $componentTest->withChannel(SimpleMessageChannelBuilder::create($channelName, $channel));

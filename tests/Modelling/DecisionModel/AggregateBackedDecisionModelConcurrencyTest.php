@@ -17,7 +17,6 @@ use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
 use Ecotone\Api\EventSourcing\EventCriteria;
 use Ecotone\Api\EventSourcing\EventStore;
 use Ecotone\Api\ExtensionObject\InstantRetryConfiguration;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\CommandBus;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
@@ -152,8 +151,8 @@ final class AggregateBackedDecisionModelConcurrencyTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             classesToResolve: self::CLASSES,
             containerOrAvailableServices: [new PayoutsForConcurrencyTest(), new CompetingWalletWriterForConcurrencyTest()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
     }
 
@@ -167,8 +166,8 @@ final class AggregateBackedDecisionModelConcurrencyTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             classesToResolve: self::CLASSES,
             containerOrAvailableServices: [new PayoutsForConcurrencyTest(), new CompetingWalletWriterForConcurrencyTest()],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects($extensionObjects)
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: $extensionObjects,
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }

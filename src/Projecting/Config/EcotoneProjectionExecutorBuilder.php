@@ -18,6 +18,7 @@ use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Router\RouterProcessor;
 use Ecotone\Messaging\Handler\Router\RouteToChannelResolver;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Config\Routing\BusRouteSelector;
 use Ecotone\Modelling\Config\Routing\BusRoutingKeyResolver;
 use Ecotone\Modelling\Config\Routing\BusRoutingMapBuilder;
@@ -173,6 +174,7 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
             $this->projectionName,
             $routerProcessor,
             LicenceDecider::prepareDefinition(ProjectionNameHeader::class, OpenCoreProjectionNameHeader::class, EnterpriseProjectionNameHeader::class),
+            new Reference(MessageBuilder::class),
             $this->initChannel,
             $this->deleteChannel,
             $this->flushChannel,

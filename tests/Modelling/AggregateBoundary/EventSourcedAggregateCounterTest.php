@@ -14,7 +14,6 @@ use Ecotone\Api\EventSourcing\DecisionModelConcurrencyException;
 use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
 use Ecotone\Api\EventSourcing\EventCriteria;
 use Ecotone\Api\EventSourcing\EventStore;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\CommandBus;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
@@ -121,10 +120,7 @@ final class EventSourcedAggregateCounterTest extends TestCase
 
     public function test_an_event_sourced_aggregate_declaring_aggregate_type_is_reloaded_in_flow_testing_without_dcb(): void
     {
-        $ecotone = EcotoneLite::bootstrapFlowTesting(
-            classesToResolve: [LedgerWallet::class, LedgerWalletOpened::class, LedgerWalletDeposited::class],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
-        );
+        $ecotone = EcotoneLite::bootstrapFlowTesting(classesToResolve: [LedgerWallet::class, LedgerWalletOpened::class, LedgerWalletDeposited::class], enabledModules: []);
 
         $ecotone->sendCommandWithRouting('ledgerWallet.open', 'w-1');
         $ecotone->sendCommandWithRouting('ledgerWallet.deposit', ['walletId' => 'w-1', 'amount' => 50]);
@@ -146,9 +142,8 @@ final class EventSourcedAggregateCounterTest extends TestCase
     {
         return EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [LedgerWallet::class, LedgerWalletOpened::class, LedgerWalletDeposited::class, LedgerWalletAudited::class, LedgerShipmentSaga::class, LedgerShipmentStarted::class],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }

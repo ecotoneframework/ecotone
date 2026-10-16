@@ -6,7 +6,6 @@ use DateTimeImmutable;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
 use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\ExtensionObject\TestConfiguration;
 use Ecotone\Api\Gateway\CommandBus;
@@ -46,10 +45,9 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, ChannelConfiguration::class],
             [new OrderService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders')),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
+            environment: 'test',
         );
 
         $orderId = 'someId';
@@ -65,12 +63,11 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [],
             [new OrderService(), new PlaceOrderConverter(), new OrderWasPlacedConverter()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders'))
-                ->withNamespaces(["Test\Ecotone\Modelling\Fixture\Order"]),
-            pathToRootCatalog: __DIR__ . '/../../'
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
+            pathToRootCatalog: __DIR__ . '/../../',
+            namespaces: ["Test\Ecotone\Modelling\Fixture\Order"],
+            environment: 'test',
         );
 
         $orderId = 'someId';
@@ -86,8 +83,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, ChannelConfiguration::class],
             [new OrderService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
 
         $orderId = 'someId';
@@ -103,10 +99,9 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, PlaceOrderConverter::class],
             [new OrderService(), new PlaceOrderConverter()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders')),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
+            environment: 'test',
         );
 
         $orderId = 'someId';
@@ -122,10 +117,9 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, ChannelConfiguration::class, PlaceOrderConverter::class],
             [new OrderService(), new PlaceOrderConverter()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders')),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
+            environment: 'test',
         );
 
         $orderId = 'someId';
@@ -141,13 +135,11 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class],
             [new OrderService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('orders', conversionMediaType: MediaType::createApplicationXPHPArray()),
-                    PollingMetadata::create('orders')
-                        ->withTestingSetup(2),
-                ]),
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createQueueChannel('orders', conversionMediaType:MediaType::createApplicationXPHPArray()),
+                PollingMetadata::create('orders')->withTestingSetup(2),
+            ],
+            enabledModules: [],
         );
 
         /** Failing on command serialization */
@@ -161,9 +153,10 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, PlaceOrderConverter::class],
             [new OrderService(), new PlaceOrderConverter()],
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders', conversionMediaType:MediaType::createApplicationXPHPArray())],
+            enabledModules: [],
             testConfiguration: TestConfiguration::createWithDefaults()
-                ->withSpyOnChannel('orders'),
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders', conversionMediaType: MediaType::createApplicationXPHPArray()))->withEnabledModulePackageNames([])
+            ->withSpyOnChannel('orders'),
         );
 
         $ecotoneTestSupport->sendCommandWithRouting('order.register', new PlaceOrder('someId'));
@@ -184,15 +177,13 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, PlaceOrderConverter::class, OrderWasPlacedConverter::class],
             [new OrderService(), new PlaceOrderConverter(), new OrderWasPlacedConverter()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('orders', conversionMediaType: MediaType::createApplicationXPHPArray()),
-                    PollingMetadata::create('orders')
-                        ->withTestingSetup(2),
-                ]),
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createQueueChannel('orders', conversionMediaType:MediaType::createApplicationXPHPArray()),
+                PollingMetadata::create('orders')->withTestingSetup(2),
+            ],
+            enabledModules: [],
             testConfiguration: TestConfiguration::createWithDefaults()
-                ->withSpyOnChannel('orders'),
+            ->withSpyOnChannel('orders'),
         );
 
         $orderId = 'someId';
@@ -221,10 +212,9 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, ChannelConfiguration::class],
             [new OrderService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders')),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
+            environment: 'test',
         );
 
         $orderId = 'someId';
@@ -243,10 +233,9 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, ChannelConfiguration::class],
             [new OrderService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders')),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
+            environment: 'test',
         );
 
         $orderId = 'someId';
@@ -265,10 +254,9 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, ChannelConfiguration::class],
             [new OrderService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders')),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
+            environment: 'test',
         );
 
         $orderId = 'someId';
@@ -287,11 +275,10 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [\Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService::class],
             [new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders')),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
             testConfiguration: TestConfiguration::createWithDefaults()->withFailOnQueryHandlerNotFound(false),
+            environment: 'test',
         );
 
         $ecotoneTestSupport->getQueryBus()->sendWithRouting('basket.getItem', new stdClass());
@@ -304,8 +291,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [\Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService::class],
             [new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
 
         $ecotoneTestSupport->getEventBus()->publish(new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderWasPlaced());
@@ -321,8 +307,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [\Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService::class],
             [new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
 
         $ecotoneTestSupport->getEventBus()->publish(new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderWasPlaced());
@@ -338,11 +323,10 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [\Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService::class],
             [new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders')),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
             testConfiguration: TestConfiguration::createWithDefaults()->withFailOnCommandHandlerNotFound(false),
+            environment: 'test',
         );
 
         $command = new PlaceOrder('someId');
@@ -356,11 +340,10 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [\Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService::class],
             [new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders')),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
             testConfiguration: TestConfiguration::createWithDefaults()->withFailOnCommandHandlerNotFound(true),
+            environment: 'test',
         );
 
         $this->expectException(DestinationResolutionException::class);
@@ -373,11 +356,10 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [\Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService::class],
             [new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders')),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
             testConfiguration: TestConfiguration::createWithDefaults()->withFailOnQueryHandlerNotFound(false),
+            environment: 'test',
         );
 
         $ecotoneTestSupport->getQueryBus()->sendWithRouting('basket.getItem', new stdClass());
@@ -390,11 +372,10 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [\Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService::class],
             [new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders')),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
             testConfiguration: TestConfiguration::createWithDefaults()->withFailOnQueryHandlerNotFound(true),
+            environment: 'test',
         );
 
         $this->expectException(DestinationResolutionException::class);
@@ -407,13 +388,12 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [Order::class],
             [],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders'))
-                ->withExtensionObjects([
-                    InMemoryRepositoryBuilder::createForAllStateStoredAggregates(),
-                ]),
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createQueueChannel('orders'),
+                InMemoryRepositoryBuilder::createForAllStateStoredAggregates(),
+            ],
+            enabledModules: [],
+            environment: 'test',
         );
 
         $ecotoneTestSupport->getCommandBus()->send(CreateOrderCommand::createWith(1, 1, 'some'));
@@ -434,10 +414,9 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class],
             $inMemoryPSRContainer,
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders')),
-            allowGatewaysToBeRegisteredInContainer: true
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
+            allowGatewaysToBeRegisteredInContainer: true,
         );
 
         $orderId = '123';
@@ -461,21 +440,19 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         EcotoneLite::bootstrap(
             [OrderService::class],
             $inMemoryPSRContainer,
-            ServiceConfiguration::createWithDefaults()
-                ->withCacheDirectoryPath($cacheDirectoryPath)
-                ->withEnabledModulePackageNames([])
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders')),
-            useCachedVersion: true
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
+            useCachedVersion: true,
+            cacheDirectoryPath: $cacheDirectoryPath,
         );
 
         $ecotoneLite = EcotoneLite::bootstrap(
             [OrderService::class],
             $inMemoryPSRContainer,
-            ServiceConfiguration::createWithDefaults()
-                ->withCacheDirectoryPath($cacheDirectoryPath)
-                ->withEnabledModulePackageNames([])
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders')),
-            useCachedVersion: true
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
+            useCachedVersion: true,
+            cacheDirectoryPath: $cacheDirectoryPath,
         );
 
         $orderId = '123';
@@ -491,8 +468,8 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, PlaceOrderConverter::class, OrderWasPlacedConverter::class],
             [new OrderService(), new PlaceOrderConverter(), new OrderWasPlacedConverter()],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders', true, MediaType::createApplicationXPHPArray()))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders', true, MediaType::createApplicationXPHPArray())],
+            enabledModules: [],
         );
 
         $orderId = 'someId';
@@ -518,8 +495,8 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, PlaceOrderConverter::class, OrderWasPlacedConverter::class],
             [new OrderService(), new PlaceOrderConverter(), new OrderWasPlacedConverter()],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders', true, MediaType::createApplicationXPHPArray()))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders', true, MediaType::createApplicationXPHPArray())],
+            enabledModules: [],
         );
 
         $orderId = 'someId';
@@ -544,8 +521,8 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, PlaceOrderConverter::class, OrderWasPlacedConverter::class],
             [new OrderService(), new PlaceOrderConverter(), new OrderWasPlacedConverter()],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders', true, MediaType::createApplicationXPHPArray()))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders', true, MediaType::createApplicationXPHPArray())],
+            enabledModules: [],
         );
 
         $orderId = 'someId';
@@ -565,8 +542,8 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, PlaceOrderConverter::class, OrderWasPlacedConverter::class],
             [new OrderService(), new PlaceOrderConverter(), new OrderWasPlacedConverter()],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders', true, MediaType::createApplicationXPHPArray()))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders', true, MediaType::createApplicationXPHPArray())],
+            enabledModules: [],
         );
 
         $orderId = 'someId';
@@ -591,8 +568,8 @@ final class MessagingTestSupportFrameworkTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, PlaceOrderConverter::class, OrderWasPlacedConverter::class],
             [new OrderService(), new PlaceOrderConverter(), new OrderWasPlacedConverter()],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders', false))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders', false)],
+            enabledModules: [],
         );
 
         $orderId = 'someId';

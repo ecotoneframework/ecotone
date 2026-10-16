@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Test\Ecotone\Lite\Test;
 
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use PHPUnit\Framework\TestCase;
@@ -27,8 +26,8 @@ final class FlowTestSupportFrameworkTest extends TestCase
         $flowSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class],
             [new OrderService()],
-            configuration: self::ordersChannelConfiguration()
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: []
         );
 
         $this->assertEquals(
@@ -43,7 +42,7 @@ final class FlowTestSupportFrameworkTest extends TestCase
 
     public function test_providing_initial_state_in_form_of_state_stored_aggregate(): void
     {
-        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting([Order::class], configuration: self::ordersChannelConfiguration()->withEnabledModulePackageNames([]));
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting([Order::class], extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')], enabledModules: []);
 
         $orderId = '1';
 
@@ -59,7 +58,7 @@ final class FlowTestSupportFrameworkTest extends TestCase
 
     public function test_state_stored_aggregate(): void
     {
-        $flowSupport = EcotoneLite::bootstrapFlowTesting([Order::class], configuration: self::ordersChannelConfiguration()->withEnabledModulePackageNames([]));
+        $flowSupport = EcotoneLite::bootstrapFlowTesting([Order::class], extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')], enabledModules: []);
 
         $this->assertEquals(
             1,
@@ -72,9 +71,4 @@ final class FlowTestSupportFrameworkTest extends TestCase
         );
     }
 
-    private static function ordersChannelConfiguration(): ServiceConfiguration
-    {
-        return ServiceConfiguration::createWithDefaults()
-            ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders'));
-    }
 }

@@ -28,7 +28,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class OrchestratorResultMessageConverter implements ResultToMessageConverter
 {
-    public function __construct(private string $headerName)
+    public function __construct(private string $headerName, private MessageBuilder $messageBuilder)
     {
     }
 
@@ -48,7 +48,7 @@ class OrchestratorResultMessageConverter implements ResultToMessageConverter
             }
         }
 
-        return MessageBuilder::fromMessage($requestMessage)
+        return $this->messageBuilder->fromMessage($requestMessage)
             ->prependRoutingSlip($result)
             ->build();
     }

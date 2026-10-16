@@ -11,6 +11,7 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -36,6 +37,7 @@ final class SerializationChannelAdapterBuilder implements ChannelInterceptorBuil
         return new Definition(SerializationChannelAdapter::class, [
             $this->targetMediaType,
             Reference::to(ConversionService::REFERENCE_NAME),
+            Reference::to(MessageBuilder::class),
         ]);
     }
 }

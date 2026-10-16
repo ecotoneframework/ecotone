@@ -7,7 +7,6 @@ use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\InvalidMessageHeaderException;
 use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
 use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Scheduling\NativeClock;
 
 use function json_encode;
 
@@ -93,11 +92,6 @@ final class MessageHeaders
     /**
      * @return MessageHeaders|static
      */
-    final public static function createEmpty(): self
-    {
-        return static::createMessageHeadersWith([]);
-    }
-
     /**
      * @param array|string[] $headers
      * @return MessageHeaders|static
@@ -251,13 +245,9 @@ final class MessageHeaders
         if (! array_key_exists(self::MESSAGE_ID, $headers)) {
             $headers[self::MESSAGE_ID] = Uuid::v7()->toRfc4122();
         }
-        if (! array_key_exists(self::TIMESTAMP, $headers)) {
-            $headers[self::TIMESTAMP] = (new NativeClock())->now()->unixTime()->inSeconds();
-        } else {
-            $headers[self::TIMESTAMP] = (int)$headers[self::TIMESTAMP];
-            if ($headers[self::TIMESTAMP] === 0) {
-                $headers[self::TIMESTAMP] = (new NativeClock())->now()->unixTime()->inSeconds();
-            }
+        $headers[self::TIMESTAMP] = (int) ($headers[self::TIMESTAMP] ?? 0);
+        if ($headers[self::TIMESTAMP] === 0) {
+            throw InvalidMessageHeaderException::create('Message headers have no timestamp. Build messages with MessageBuilder, the container service that stamps them from EcotoneClockInterface; in tests use Ecotone\\Test\\StaticMessageBuilder.');
         }
         if (! array_key_exists(self::MESSAGE_CORRELATION_ID, $headers)) {
             $headers[self::MESSAGE_CORRELATION_ID] = $headers[self::MESSAGE_ID];

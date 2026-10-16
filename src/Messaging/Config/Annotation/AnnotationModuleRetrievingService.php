@@ -8,9 +8,11 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Api\Attribute\ConfigurationVariable;
 use Ecotone\Api\Attribute\ModuleAnnotation;
 use Ecotone\Api\Attribute\ServiceContext;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Module;
 use Ecotone\Messaging\Config\ModuleRetrievingService;
+use Ecotone\Messaging\Config\ServiceConfigurationFromServiceContext;
 use Ecotone\Messaging\ConfigurationVariableService;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -53,6 +55,7 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
     {
         $extensionObjectsRegistrations = $this->annotationRegistrationService->findAnnotatedMethods(ServiceContext::class);
         $extensionObjects              = [];
+        $serviceConfigurationOrigin = null;
 
         foreach ($extensionObjectsRegistrations as $annotationRegistration) {
             $reflectionClass    = new ReflectionClass($annotationRegistration->getClassName());
@@ -82,18 +85,36 @@ class AnnotationModuleRetrievingService implements ModuleRetrievingService
             if (! is_array($extensionObjectToResolve)) {
                 Assert::isObject($extensionObjectToResolve, "Incorrect configuration given in {$annotationRegistration->getClassName()}:{$annotationRegistration->getMethodName()}. Configuration returned by ServiceContext must be object or array of objects.");
 
-                $extensionObjects[] = $extensionObjectToResolve;
-                continue;
+                $extensionObjectToResolve = [$extensionObjectToResolve];
             }
 
             foreach ($extensionObjectToResolve as $singleMessagingComponent) {
                 Assert::isObject($singleMessagingComponent, "Incorrect configuration given in {$annotationRegistration->getClassName()}:{$annotationRegistration->getMethodName()}. Configuration returned by ServiceContext must be object or array of objects.");
+
+                if ($singleMessagingComponent instanceof ServiceConfiguration) {
+                    $singleMessagingComponent = new ServiceConfigurationFromServiceContext($singleMessagingComponent, $annotationRegistration->getClassName(), $annotationRegistration->getMethodName());
+                    $this->refuseSecondServiceConfiguration($serviceConfigurationOrigin, $singleMessagingComponent);
+                    $serviceConfigurationOrigin = $singleMessagingComponent;
+                }
 
                 $extensionObjects[] = $singleMessagingComponent;
             }
         }
 
         return $extensionObjects;
+    }
+
+    private function refuseSecondServiceConfiguration(?ServiceConfigurationFromServiceContext $first, ServiceConfigurationFromServiceContext $second): void
+    {
+        if ($first === null) {
+            return;
+        }
+
+        throw ConfigurationException::create(
+            "Ecotone was given more than one ServiceConfiguration: {$first->origin()} and {$second->origin()} each return one. "
+            . ServiceConfigurationFromServiceContext::ONLY_ONE_IS_READ
+            . 'Keep one #[ServiceContext] method returning ServiceConfiguration::createWithDefaults() and move every with*() call onto it.'
+        );
     }
 
     /**

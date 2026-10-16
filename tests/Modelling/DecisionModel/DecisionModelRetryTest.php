@@ -15,7 +15,6 @@ use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
 use Ecotone\Api\EventSourcing\EventCriteria;
 use Ecotone\Api\EventSourcing\EventStore;
 use Ecotone\Api\ExtensionObject\InstantRetryConfiguration;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\CommandBus;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Modelling\Config\DatabaseTransaction\TransactionStatusTracker;
@@ -89,12 +88,11 @@ final class DecisionModelRetryTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [$handler::class, CourseForRetryTest::class, CourseDefinedForRetryTest::class, StudentSubscribedForRetryTest::class, AlwaysConflictingWriteInjectorForRetryTest::class],
             containerOrAvailableServices: [$handler, $injector],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    DynamicConsistencyBoundaryConfiguration::createWithDefaults(),
-                    InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 2, [DecisionModelConcurrencyException::class]),
-                ])
-                    ->withEnabledModulePackageNames([]),
+            extensionObjects: [
+                DynamicConsistencyBoundaryConfiguration::createWithDefaults(),
+                InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 2, [DecisionModelConcurrencyException::class]),
+            ],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
@@ -148,8 +146,8 @@ final class DecisionModelRetryTest extends TestCase
                 RetryCommandBusForRetryTest::class,
             ],
             containerOrAvailableServices: [$handler, $injector],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
@@ -169,16 +167,16 @@ final class DecisionModelRetryTest extends TestCase
         $handler = new SubscribeHandlerForRetryTest();
         $injector = new CompetingWriteInjectorForRetryTest();
 
-        $configuration = ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()]);
+        $extensionObjects = [DynamicConsistencyBoundaryConfiguration::createWithDefaults()];
         if ($retryConfiguration !== null) {
-            $configuration = $configuration->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults(), $retryConfiguration]);
+            $extensionObjects[] = $retryConfiguration;
         }
 
         return EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [$handler::class, CourseForRetryTest::class, CourseDefinedForRetryTest::class, StudentSubscribedForRetryTest::class, CompetingWriteInjectorForRetryTest::class],
             containerOrAvailableServices: [$handler, $injector],
-            configuration: $configuration
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: $extensionObjects,
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }

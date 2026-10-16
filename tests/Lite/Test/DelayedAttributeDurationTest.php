@@ -8,7 +8,6 @@ use DateTimeImmutable;
 use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\Attribute\Delayed;
 use Ecotone\Api\Attribute\EventHandler;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Scheduling\TimeSpan;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -33,7 +32,11 @@ final class DelayedAttributeDurationTest extends TestCase
                 $this->expired[] = $basketId;
             }
         };
-        $ecotone = EcotoneLite::bootstrapFlowTesting([$handler::class], [$handler], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [$handler::class],
+            [$handler],
+            enabledModules: [],
+        );
         $ecotone->changeTimeTo(new DateTimeImmutable('2026-03-01 12:00:00'));
 
         $ecotone->publishEventWithRouting('basket.changed', 'basket-1');

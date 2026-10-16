@@ -33,7 +33,8 @@ final class CustomSendingStrategy implements ChannelSendingStrategy
 {
     public function __construct(
         private MessagingEntrypointService $messagingEntrypoint,
-        private string $channelNameToResolveSendingMessageChannel
+        private string $channelNameToResolveSendingMessageChannel,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -41,7 +42,7 @@ final class CustomSendingStrategy implements ChannelSendingStrategy
     {
         $channelName = $this->messagingEntrypoint->send(
             /** This need to be removed in order to return the Message correctly (order routing_slip, replyChannel) */
-            MessageBuilder::fromMessage($message)
+            $this->messageBuilder->fromMessage($message)
                 ->removeHeader(MessageHeaders::ROUTING_SLIP),
             $this->channelNameToResolveSendingMessageChannel
         );

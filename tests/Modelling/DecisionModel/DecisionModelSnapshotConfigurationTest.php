@@ -11,7 +11,6 @@ use Ecotone\Api\Attribute\EventTag;
 use Ecotone\Api\Attribute\MediaTypeConverter;
 use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
 use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\DocumentStore;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Config\ConfigurationException;
@@ -49,11 +48,8 @@ final class DecisionModelSnapshotConfigurationTest extends TestCase
 
         EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [WalletBalanceForSnapshotConfigurationTest::class, WalletCreditedForSnapshotConfigurationTest::class],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([
-                DynamicConsistencyBoundaryConfiguration::createWithDefaults()
-                    ->withSnapshotsFor(NotADecisionModelForSnapshotConfigurationTest::class),
-            ])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()->withSnapshotsFor(NotADecisionModelForSnapshotConfigurationTest::class)],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
@@ -89,8 +85,8 @@ final class DecisionModelSnapshotConfigurationTest extends TestCase
                 new WalletBalanceConverterForSnapshotConfigurationTest(),
                 DocumentStore::class => InMemoryDocumentStore::createEmpty(),
             ],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([$boundaryConfiguration])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [$boundaryConfiguration],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 

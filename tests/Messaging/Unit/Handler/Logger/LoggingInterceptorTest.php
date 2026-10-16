@@ -14,7 +14,7 @@ use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverter;
 use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
 use Ecotone\Messaging\Handler\Logger\StubLoggingGateway;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\StaticMessageBuilder;
 
 use function json_encode;
 
@@ -50,7 +50,7 @@ class LoggingInterceptorTest extends TestCase
         ]));
 
         $payload = ['some'];
-        $message = MessageBuilder::withPayload($payload)->build();
+        $message = StaticMessageBuilder::withPayload($payload)->build();
 
         $loggingInterceptor->logAfter($message, new LogAfter(LogLevel::DEBUG, false));
 
@@ -68,7 +68,7 @@ class LoggingInterceptorTest extends TestCase
         ]));
 
         $payload = Uuid::uuid4();
-        $message = MessageBuilder::withPayload($payload)->build();
+        $message = StaticMessageBuilder::withPayload($payload)->build();
 
         $loggingInterceptor->logAfter($message, new LogAfter(LogLevel::DEBUG, false));
         $logs = $loggingService->getLogs();
@@ -85,7 +85,7 @@ class LoggingInterceptorTest extends TestCase
         ]));
 
         $payload = ['some'];
-        $message = MessageBuilder::withPayload($payload)
+        $message = StaticMessageBuilder::withPayload($payload)
                     ->setContentType(MediaType::createApplicationXPHPWithTypeParameter('array'))
                     ->build();
 
@@ -104,7 +104,7 @@ class LoggingInterceptorTest extends TestCase
         ]));
 
         $payload = 'some';
-        $message = MessageBuilder::withPayload($payload)->build();
+        $message = StaticMessageBuilder::withPayload($payload)->build();
 
         $loggingInterceptor->logAfter($message, new LogAfter(LogLevel::DEBUG, true));
         $logs = $loggingService->getLogs();
@@ -113,8 +113,8 @@ class LoggingInterceptorTest extends TestCase
         $this->assertEquals($payload, $logs[0]->message);
         $this->assertEquals([
             'headers' => json_encode([
-                'id' => $message->getHeaders()->get(MessageHeaders::MESSAGE_ID),
                 'timestamp' => $message->getHeaders()->get(MessageHeaders::TIMESTAMP),
+                'id' => $message->getHeaders()->get(MessageHeaders::MESSAGE_ID),
                 'correlationId' => $message->getHeaders()->getCorrelationId(),
             ]),
         ], $logs[0]->context);

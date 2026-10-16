@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\ServiceActivator;
 
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Test\ComponentTestBuilder;
+use Ecotone\Test\StaticMessageBuilder;
 use Exception;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceExpectingOneArgument;
 use Test\Ecotone\Messaging\Fixture\Service\ServiceReturningMessage;
@@ -36,7 +35,11 @@ class ServiceActivatorBuilderTest extends MessagingTestCase
     public function test_building_service_activator()
     {
         $objectToInvoke = ServiceExpectingOneArgument::create();
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([ServiceExpectingOneArgument::class], [ServiceExpectingOneArgument::class => $objectToInvoke], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [ServiceExpectingOneArgument::class],
+            [ServiceExpectingOneArgument::class => $objectToInvoke],
+            enabledModules: [],
+        );
 
         $ecotoneLite->sendDirectToChannel('withoutReturnValue', 'some');
 
@@ -49,11 +52,15 @@ class ServiceActivatorBuilderTest extends MessagingTestCase
      */
     public function test_handler_returns_message_with_no_reply_channel_and_making_use_of_requested_reply_channel()
     {
-        $message = MessageBuilder::withPayload('some')
+        $message = StaticMessageBuilder::withPayload('some')
                     ->build();
 
         $objectToInvoke = ServiceReturningMessage::createWith($message);
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([ServiceReturningMessage::class], [ServiceReturningMessage::class => $objectToInvoke], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [ServiceReturningMessage::class],
+            [ServiceReturningMessage::class => $objectToInvoke],
+            enabledModules: [],
+        );
 
         $this->assertNotNull(
             $ecotoneLite->sendDirectToChannel('get', 'someOther')
@@ -66,7 +73,7 @@ class ServiceActivatorBuilderTest extends MessagingTestCase
      */
     public function test_activating_statically_called_service()
     {
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([StaticallyCalledService::class], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([StaticallyCalledService::class], enabledModules: []);
 
         $this->assertNotNull(
             $ecotoneLite->sendDirectToChannel('run', 'someOther')
@@ -80,7 +87,11 @@ class ServiceActivatorBuilderTest extends MessagingTestCase
     public function test_calling_direct_object_reference()
     {
         $objectToInvoke = ServiceExpectingOneArgument::create();
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([ServiceExpectingOneArgument::class], [ServiceExpectingOneArgument::class => $objectToInvoke], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [ServiceExpectingOneArgument::class],
+            [ServiceExpectingOneArgument::class => $objectToInvoke],
+            enabledModules: [],
+        );
 
         $ecotoneLite->sendDirectToChannel('withoutReturnValue', 'some');
 

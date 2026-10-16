@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\CommandBus;
 use Ecotone\Api\Gateway\EventBus;
 use Ecotone\Api\Gateway\QueryBus;
@@ -786,11 +785,10 @@ final class ModellingBehatMigrationTest extends TestCase
         return EcotoneLite::bootstrap(
             [],
             InMemoryPSRContainer::createFromObjects($objects),
-            ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([])
-                ->withEnvironment('prod')
-                ->withFailFast(false)
-                ->withNamespaces([$namespace]),
-            pathToRootCatalog: __DIR__ . '/../../..'
+            enabledModules: [],
+            pathToRootCatalog: __DIR__ . '/../../..',
+            namespaces: [$namespace],
+            environment: 'prod',
         );
     }
 }

@@ -15,7 +15,6 @@ use Ecotone\Api\EventSourcing\DecisionModelConcurrencyException;
 use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
 use Ecotone\Api\EventSourcing\EventCriteria;
 use Ecotone\Api\EventSourcing\EventStore;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\CommandBus;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
@@ -90,7 +89,7 @@ final class StateStoredAggregateCounterTest extends TestCase
 
     public function test_concurrent_commands_on_a_state_stored_aggregate_keep_last_write_wins_when_dcb_is_disabled(): void
     {
-        $ecotone = EcotoneLite::bootstrapFlowTesting(classesToResolve: [Purse::class, PurseAudited::class], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting(classesToResolve: [Purse::class, PurseAudited::class], enabledModules: []);
         $ecotone->sendCommandWithRouting('purse.open', 'p-1');
 
         $ecotone->sendCommandWithRouting('purse.withdrawWhileAnotherWithdrawalLands', ['purseId' => 'p-1', 'amount' => 30]);
@@ -110,7 +109,7 @@ final class StateStoredAggregateCounterTest extends TestCase
 
     private function versionAfterSameCommandsWithoutDcb(): int
     {
-        $ecotone = EcotoneLite::bootstrapFlowTesting(classesToResolve: [Purse::class, PurseAudited::class], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting(classesToResolve: [Purse::class, PurseAudited::class], enabledModules: []);
         $ecotone->sendCommandWithRouting('purse.open', 'p-1');
         $ecotone->sendCommandWithRouting('purse.withdraw', ['purseId' => 'p-1', 'amount' => 30]);
         $ecotone->sendCommandWithRouting('purse.withdraw', ['purseId' => 'p-1', 'amount' => 20]);
@@ -132,9 +131,8 @@ final class StateStoredAggregateCounterTest extends TestCase
     {
         return EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [Purse::class, PurseAudited::class, RefundSaga::class],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }

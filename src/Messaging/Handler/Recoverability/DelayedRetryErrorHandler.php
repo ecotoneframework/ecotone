@@ -26,6 +26,7 @@ class DelayedRetryErrorHandler
         private RetryTemplate $delayedRetryTemplate,
         private bool $hasDeadLetterOutput,
         private LoggingGateway $loggingGateway,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -49,7 +50,7 @@ class DelayedRetryErrorHandler
         /** @var MessageChannel $messageChannel */
         $messageChannel = $channelResolver->resolve($failedMessage->getHeaders()->get(MessageHeaders::POLLED_CHANNEL_NAME));
 
-        $messageBuilder = MessageBuilder::fromMessage($failedMessage);
+        $messageBuilder = $this->messageBuilder->fromMessage($failedMessage);
         if ($messageBuilder->containsKey(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION)) {
             $messageBuilder->removeHeader($messageBuilder->getHeaderWithName(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION));
         }

@@ -23,6 +23,7 @@ class MessagingEntrypointService
     public function __construct(
         private ChannelResolver $channelResolver,
         private MessageHeadersPropagatorInterceptor $messageHeadersPropagator,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -116,7 +117,7 @@ class MessagingEntrypointService
     public function sendMessage(Message $message): mixed
     {
         $replyChannel = QueueChannel::create('messaging-entrypoint-reply');
-        $message = MessageBuilder::fromMessage($message)
+        $message = $this->messageBuilder->fromMessage($message)
             ->setReplyChannel($replyChannel)
             ->build();
 
@@ -132,7 +133,7 @@ class MessagingEntrypointService
 
     private function createMessageBuilder(mixed $payload, array $headers, string $targetChannel): MessageBuilder
     {
-        return MessageBuilder::withPayload($payload)
+        return $this->messageBuilder->withPayload($payload)
             ->setContentTypeIfAbsent(MediaType::createApplicationXPHPWithTypeParameter(Type::createFromVariable($payload)->getTypeHint()))
             ->setMultipleHeaders($headers)
             ->setHeader(self::ENTRYPOINT, $targetChannel);

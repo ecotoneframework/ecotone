@@ -10,7 +10,6 @@ namespace Test\Ecotone\Projecting;
 use Closure;
 use Ecotone\Api\Attribute\EventHandler;
 use Ecotone\Api\EventSourcing\Event;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
 use Ecotone\Api\Projecting\FromStream;
@@ -45,7 +44,7 @@ final class ProjectionNameHeaderTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $drive($ecotone->withEvents([Event::createWithType('ticket.registered', ['ticketId' => '1'])]));
@@ -60,7 +59,7 @@ final class ProjectionNameHeaderTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 

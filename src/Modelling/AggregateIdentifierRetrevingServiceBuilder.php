@@ -17,6 +17,7 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 use function is_null;
 
@@ -71,6 +72,7 @@ class AggregateIdentifierRetrevingServiceBuilder implements CompilableBuilder
                 $this->identifierMapping,
                 Reference::to(ExpressionEvaluationService::REFERENCE),
                 $this->perClassIdentifierMappings,
+                Reference::to(MessageBuilder::class),
             ]
         );
     }

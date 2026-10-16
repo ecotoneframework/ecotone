@@ -9,7 +9,6 @@ use Ecotone\Api\Attribute\Before;
 use Ecotone\Api\Attribute\QueryHandler;
 use Ecotone\Api\Attribute\Scheduled;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\NullableMessageChannel;
 use PHPUnit\Framework\TestCase;
@@ -61,8 +60,7 @@ final class ScheduledModuleTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$service::class, $counter::class],
             [$service, $counter],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->run('scheduledWithMarker', ExecutionPollingMetadata::createWithTestingSetup(1, 1));

@@ -32,6 +32,7 @@ final class SaveAggregateTestSetupService implements MessageProcessor
         private EventMapper $eventMapper,
         private AggregateRepository $aggregateRepository,
         private EcotoneClockInterface $clock,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -74,7 +75,7 @@ final class SaveAggregateTestSetupService implements MessageProcessor
         $events = SaveAggregateServiceTemplate::buildEcotoneEvents(
             $this->resolveEvents($message),
             $aggregateDefinition->getDefinition()->getClassName(),
-            MessageBuilder::fromMessage($message)
+            $this->messageBuilder->fromMessage($message)
                 ->removeHeaders([
                     AggregateMessage::TEST_SETUP_AGGREGATE_CLASS,
                     AggregateMessage::TEST_SETUP_AGGREGATE_INSTANCE,

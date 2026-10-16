@@ -9,8 +9,9 @@ use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ChannelTestSupport;
 use Ecotone\Test\ComponentTestBuilder;
+use Ecotone\Test\StaticMessageBuilder;
 use Exception;
 use stdClass;
 use Test\Ecotone\Messaging\Fixture\Router\MultipleChannelRouter;
@@ -52,8 +53,8 @@ class RouterBuilderTest extends MessagingTestCase
 
         $messaging->sendDirectToChannel('inputChannel', new stdClass());
 
-        $this->assertNotNull($messaging->receiveMessageFrom('channel1'));
-        $this->assertNull($messaging->receiveMessageFrom('channel2'));
+        $this->assertNotNull(ChannelTestSupport::of($messaging)->receiveMessageFrom('channel1'));
+        $this->assertNull(ChannelTestSupport::of($messaging)->receiveMessageFrom('channel2'));
     }
 
     /**
@@ -75,8 +76,8 @@ class RouterBuilderTest extends MessagingTestCase
 
         $messaging->sendDirectToChannel('inputChannel', new stdClass());
 
-        $this->assertNull($messaging->receiveMessageFrom('channel1'));
-        $this->assertNotNull($messaging->receiveMessageFrom($defaultResolutionChannel));
+        $this->assertNull(ChannelTestSupport::of($messaging)->receiveMessageFrom('channel1'));
+        $this->assertNotNull(ChannelTestSupport::of($messaging)->receiveMessageFrom($defaultResolutionChannel));
     }
 
     /**
@@ -96,7 +97,7 @@ class RouterBuilderTest extends MessagingTestCase
 
         $messaging->sendDirectToChannel('inputChannel', new stdClass());
 
-        $this->assertNotNull($messaging->receiveMessageFrom($channelName));
+        $this->assertNotNull(ChannelTestSupport::of($messaging)->receiveMessageFrom($channelName));
     }
 
     /**
@@ -117,15 +118,15 @@ class RouterBuilderTest extends MessagingTestCase
             )
             ->build();
 
-        $messaging->sendMessageDirectToChannel(
+        ChannelTestSupport::of($messaging)->sendMessageDirectToChannel(
             'inputChannel',
-            MessageBuilder::withPayload('some')
+            StaticMessageBuilder::withPayload('some')
                 ->setHeader($headerName, 'private')
                 ->build()
         );
 
-        $this->assertNotNull($messaging->receiveMessageFrom($privateChannelName));
-        $this->assertNull($messaging->receiveMessageFrom($publicChannelName));
+        $this->assertNotNull(ChannelTestSupport::of($messaging)->receiveMessageFrom($privateChannelName));
+        $this->assertNull(ChannelTestSupport::of($messaging)->receiveMessageFrom($publicChannelName));
     }
 
     /**
@@ -163,8 +164,8 @@ class RouterBuilderTest extends MessagingTestCase
 
         $messaging->sendDirectToChannel('inputChannel', 'some');
 
-        $this->assertNotNull($messaging->receiveMessageFrom($privateChannelName));
-        $this->assertNotNull($messaging->receiveMessageFrom($publicChannelName));
+        $this->assertNotNull(ChannelTestSupport::of($messaging)->receiveMessageFrom($privateChannelName));
+        $this->assertNotNull(ChannelTestSupport::of($messaging)->receiveMessageFrom($publicChannelName));
     }
 
     /**
@@ -185,10 +186,10 @@ class RouterBuilderTest extends MessagingTestCase
 
         $messaging->sendDirectToChannel('inputChannel', [1, 2]);
 
-        $firstMessage = $messaging->receiveMessageFrom('channel1');
+        $firstMessage = ChannelTestSupport::of($messaging)->receiveMessageFrom('channel1');
         $this->assertEquals(1, $firstMessage->getHeaders()->get(MessageHeaders::SEQUENCE_NUMBER));
         $this->assertEquals(2, $firstMessage->getHeaders()->get(MessageHeaders::SEQUENCE_SIZE));
-        $secondMessage = $messaging->receiveMessageFrom('channel2');
+        $secondMessage = ChannelTestSupport::of($messaging)->receiveMessageFrom('channel2');
         $this->assertEquals(2, $secondMessage->getHeaders()->get(MessageHeaders::SEQUENCE_NUMBER));
         $this->assertEquals(2, $secondMessage->getHeaders()->get(MessageHeaders::SEQUENCE_SIZE));
     }

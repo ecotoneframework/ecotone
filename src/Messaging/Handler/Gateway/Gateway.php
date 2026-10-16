@@ -29,7 +29,8 @@ class Gateway implements NonProxyGateway
         private MethodCallToMessageConverter $methodCallToMessageConverter,
         private ?Type $returnType,
         private GatewayReplyConverter $gatewayReplyConverter,
-        private MessageProcessor $gatewayInternalProcessor
+        private MessageProcessor $gatewayInternalProcessor,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -42,7 +43,7 @@ class Gateway implements NonProxyGateway
     public function execute(array $methodArgumentValues)
     {
         if (count($methodArgumentValues) === 1 && ($methodArgumentValues[0] instanceof Message)) {
-            $requestMessage = MessageBuilder::fromMessage($methodArgumentValues[0]);
+            $requestMessage = $this->messageBuilder->fromMessage($methodArgumentValues[0]);
         } else {
             $requestMessage = $this->methodCallToMessageConverter->convert($methodArgumentValues);
         }
@@ -64,7 +65,7 @@ class Gateway implements NonProxyGateway
             if ($replyContentType !== null || ! ($this->returnType?->isAnything() || $this->returnType?->isMessage())) {
                 $reply = $this->gatewayReplyConverter->convert($replyMessage, $replyContentType);
                 if (! ($reply instanceof Message)) {
-                    $replyMessage = MessageBuilder::fromMessage($replyMessage)
+                    $replyMessage = $this->messageBuilder->fromMessage($replyMessage)
                                         ->setPayload($reply)
                                         ->build();
                 } else {
@@ -76,7 +77,7 @@ class Gateway implements NonProxyGateway
         if ($replyMessage) {
             if ($this->returnType?->isClassOfType(Message::class)) {
                 if ($previousReplyChannel) {
-                    return MessageBuilder::fromMessage($replyMessage)
+                    return $this->messageBuilder->fromMessage($replyMessage)
                         ->setReplyChannel($previousReplyChannel)
                         ->build();
                 }

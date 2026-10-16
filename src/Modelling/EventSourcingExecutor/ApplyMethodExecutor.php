@@ -22,6 +22,7 @@ final class ApplyMethodExecutor
         private string $aggregateClassName,
         private array $applyMethods,
         private AggregateMethodInvoker $aggregateMethodInvoker,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -54,7 +55,7 @@ final class ApplyMethodExecutor
                 $eventPayload = $event;
             }
 
-            $message = MessageBuilder::withPayload($eventPayload)
+            $message = $this->messageBuilder->withPayload($eventPayload)
                 ->setMultipleHeaders($metadata)
                 ->build();
             foreach ($this->applyMethods as $applyMethod) {

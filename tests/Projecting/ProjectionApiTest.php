@@ -7,7 +7,6 @@ namespace Test\Ecotone\Projecting;
 use Ecotone\Api\Attribute\EventHandler;
 use Ecotone\Api\Attribute\Polling;
 use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Projecting\FromStream;
@@ -58,9 +57,8 @@ final class ProjectionApiTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 
@@ -79,9 +77,8 @@ final class ProjectionApiTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 
@@ -100,9 +97,8 @@ final class ProjectionApiTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 
@@ -121,9 +117,8 @@ final class ProjectionApiTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 
@@ -144,12 +139,9 @@ final class ProjectionApiTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection, ConsumerPositionTracker::class => $positionTracker],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createStreamingChannel('streaming_channel', conversionMediaType: MediaType::createApplicationXPHP()),
-                ])
+            extensionObjects: [SimpleMessageChannelBuilder::createStreamingChannel('streaming_channel', conversionMediaType:MediaType::createApplicationXPHP())],
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $this->assertNotNull($ecotone);
@@ -170,9 +162,8 @@ final class ProjectionApiTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 }

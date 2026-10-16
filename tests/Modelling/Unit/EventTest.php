@@ -6,7 +6,6 @@ namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Api\EventSourcing\Event;
 use Ecotone\Api\EventSourcing\EventStore;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Lite\Test\Configuration\InMemoryRepositoryBuilder;
@@ -25,9 +24,8 @@ final class EventTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [],
             [],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([InMemoryRepositoryBuilder::createDefaultEventSourcedRepository()])
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [InMemoryRepositoryBuilder::createDefaultEventSourcedRepository()],
+            enabledModules: [],
         );
 
         $metadata = [

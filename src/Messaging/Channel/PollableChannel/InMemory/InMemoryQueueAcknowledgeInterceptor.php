@@ -22,9 +22,8 @@ final class InMemoryQueueAcknowledgeInterceptor extends AbstractChannelIntercept
 {
     public const ECOTONE_IN_MEMORY_QUEUE_ACK = 'ecotone.in_memory_queue.ack';
 
-    public function __construct(private FinalFailureStrategy $finalFailureStrategy, private bool $isAutoAcked)
+    public function __construct(private FinalFailureStrategy $finalFailureStrategy, private bool $isAutoAcked, private MessageBuilder $messageBuilder)
     {
-
     }
 
     /**
@@ -43,7 +42,7 @@ final class InMemoryQueueAcknowledgeInterceptor extends AbstractChannelIntercept
             return $message;
         }
 
-        return MessageBuilder::fromMessage($message)
+        return $this->messageBuilder->fromMessage($message)
             ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, self::ECOTONE_IN_MEMORY_QUEUE_ACK)
             ->setHeader(self::ECOTONE_IN_MEMORY_QUEUE_ACK, new InMemoryAcknowledgeCallback(queueChannel: $messageChannel, message: $message, failureStrategy: $this->finalFailureStrategy, isAutoAcked: $this->isAutoAcked))
             ->build();

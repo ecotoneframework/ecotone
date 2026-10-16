@@ -12,6 +12,7 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\PrecedenceChannelInterceptor;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -40,9 +41,11 @@ final class OutboundSerializationChannelBuilder implements ChannelInterceptorBui
         return new Definition(OutboundSerializationChannelInterceptor::class, [
             new Definition(OutboundMessageConverter::class, [
                 $this->headerMapper,
+                Reference::to(MessageBuilder::class),
                 $this->channelConversionMediaType ?: MediaType::parseMediaType($builder->getServiceConfiguration()->defaultSerializationMediaType),
             ]),
             Reference::to(ConversionService::REFERENCE_NAME),
+            Reference::to(MessageBuilder::class),
         ]);
     }
 }

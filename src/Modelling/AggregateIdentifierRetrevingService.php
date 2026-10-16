@@ -42,6 +42,7 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
         private array $identifierMapping,
         private ExpressionEvaluationService $expressionEvaluationService,
         private array $perClassIdentifierMappings,
+        private MessageBuilder $messageBuilder,
     ) {
 
     }
@@ -61,7 +62,7 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
             $aggregateIds = $message->getHeaders()->get(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER);
             $aggregateIds = is_array($aggregateIds) ? $aggregateIds : [\array_key_first($messageIdentifierMapping) ?? '' => $aggregateIds];
 
-            return MessageBuilder::fromMessage($message)
+            return $this->messageBuilder->fromMessage($message)
                 ->setHeader(AggregateMessage::AGGREGATE_ID, AggregateIdResolver::resolveArrayOfIdentifiers($this->aggregateClassName, $aggregateIds))
                 ->removeHeader(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER)
                 ->build();
@@ -101,7 +102,7 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
             return $message;
         }
 
-        return MessageBuilder::fromMessage($message)
+        return $this->messageBuilder->fromMessage($message)
             ->setHeader(AggregateMessage::AGGREGATE_ID, AggregateIdResolver::resolveArrayOfIdentifiers($this->aggregateClassName, $aggregateIdentifiers))
             ->build();
     }

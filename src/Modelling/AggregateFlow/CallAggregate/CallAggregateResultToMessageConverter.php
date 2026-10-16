@@ -24,12 +24,13 @@ final class CallAggregateResultToMessageConverter implements ResultToMessageConv
         private bool                   $isCommandHandler,
         private bool                   $isFactoryMethod,
         private ?string                $aggregateVersionProperty,
+        private MessageBuilder         $messageBuilder,
     ) {
     }
 
     public function convertToMessage(Message $requestMessage, mixed $result): ?Message
     {
-        $resultMessage = MessageBuilder::fromMessage($requestMessage);
+        $resultMessage = $this->messageBuilder->fromMessage($requestMessage);
 
         $resultType = Type::createFromVariable($result);
         if ($resultType->isIterable() && $this->returnType?->isCollection()) {

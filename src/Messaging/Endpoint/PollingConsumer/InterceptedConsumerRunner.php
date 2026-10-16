@@ -16,6 +16,7 @@ use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Scheduling\CronTrigger;
 use Ecotone\Messaging\Scheduling\PeriodicTrigger;
 use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -33,6 +34,7 @@ class InterceptedConsumerRunner implements EndpointRunner
         private ExpressionEvaluationService $expressionEvaluationService,
         private AsyncHandlerAnnotationRegistry $asyncHandlerAnnotationRegistry,
         private AsyncEndpointAnnotationContext $asyncEndpointAnnotationContext,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -53,7 +55,14 @@ class InterceptedConsumerRunner implements EndpointRunner
         $interceptedConsumer = new ScheduledTaskConsumer(
             SyncTaskScheduler::createWithEmptyTriggerContext($this->clock, $pollingMetadata),
             $trigger,
-            new PollToGatewayTaskExecutor($this->messagePoller, $interceptedGateway, $this->messagingEntrypoint, $this->asyncHandlerAnnotationRegistry, $this->asyncEndpointAnnotationContext),
+            new PollToGatewayTaskExecutor(
+                messagePoller: $this->messagePoller,
+                gateway: $interceptedGateway,
+                messagingEntrypoint: $this->messagingEntrypoint,
+                asyncHandlerAnnotationRegistry: $this->asyncHandlerAnnotationRegistry,
+                asyncEndpointAnnotationContext: $this->asyncEndpointAnnotationContext,
+                messageBuilder: $this->messageBuilder,
+            ),
         );
 
         if ($interceptors) {

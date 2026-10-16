@@ -6,7 +6,6 @@ namespace Test\Ecotone\Messaging\Unit\Handler\ServiceActivator;
 
 use Ecotone\Api\Attribute\Around;
 use Ecotone\Api\Attribute\InternalHandler;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Interceptor\MethodInvocation;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Test\LicenceTesting;
@@ -45,7 +44,7 @@ final class ServiceActivatorAttributeTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [MathHandler::class, MathInterceptors::class],
             [new MathHandler(), new MathInterceptors(2)],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $this->assertSame(8, $ecotone->sendDirectToChannel(MathHandler::MATH_CHANNEL, 1));
@@ -56,8 +55,8 @@ final class ServiceActivatorAttributeTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             $classesToResolve,
             $services,
-            ServiceConfiguration::createWithDefaults()->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([]),
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 }

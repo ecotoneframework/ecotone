@@ -18,6 +18,7 @@ use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderB
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Enterprise
@@ -60,6 +61,7 @@ final class DeferredPublishingGatewayRegistration
                         $nonBlockingConfirmationEnabled,
                         new Reference(ConfiguredMessagingSystem::class),
                         new Reference(PendingDeliveryRegistry::class),
+                        new Reference(MessageBuilder::class),
                     ]),
                     'publish'
                 )

@@ -7,7 +7,6 @@ namespace Test\Ecotone\Messaging\Unit\Channel;
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\Attribute\InternalHandler;
 use Ecotone\Api\Attribute\Reference;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
@@ -29,11 +28,8 @@ final class NonPollableChannelInterceptorTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$service::class, DirectChannelPayloadForNonPollableChannel::class],
             [$service],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createDirectMessageChannel($service::DIRECT_CHANNEL),
-                ])
-                    ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createDirectMessageChannel($service::DIRECT_CHANNEL)],
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting($service::TRIGGER_ROUTING_KEY, 'first');
@@ -49,11 +45,8 @@ final class NonPollableChannelInterceptorTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$service::class, DirectChannelPayloadForNonPollableChannel::class],
             [$service],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createDirectMessageChannel($service::DIRECT_CHANNEL),
-                ])
-                    ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createDirectMessageChannel($service::DIRECT_CHANNEL)],
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting($service::TRIGGER_OBJECT_ROUTING_KEY, 'second');

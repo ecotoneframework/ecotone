@@ -6,7 +6,6 @@ namespace Test\Ecotone\SymfonyContainer;
 
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\Attribute\Payload;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\CommandBus;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
@@ -23,16 +22,14 @@ class EcotoneLiteCachedContainerTest extends TestCase
     public function test_bootstrap_with_cache_dumps_symfony_container_and_warm_boot_uses_it(): void
     {
         $cacheDirectory = sys_get_temp_dir() . '/ecotone_lite_dumped_container/' . uniqid('', true);
-        $configuration = ServiceConfiguration::createWithDefaults()
-            ->withCacheDirectoryPath($cacheDirectory)
-            ->withEnabledModulePackageNames([]);
         $handler = new CachedCommandHandlerService();
 
         $messagingSystem = EcotoneLite::bootstrap(
             [CachedCommandHandlerService::class],
             [CachedCommandHandlerService::class => $handler],
-            $configuration,
+            enabledModules: [],
             useCachedVersion: true,
+            cacheDirectoryPath: $cacheDirectory,
         );
         $messagingSystem->getCommandBus()->sendWithRouting('cache.command', 'first');
 
@@ -41,8 +38,9 @@ class EcotoneLiteCachedContainerTest extends TestCase
         $warmBootedMessagingSystem = EcotoneLite::bootstrap(
             [CachedCommandHandlerService::class],
             [CachedCommandHandlerService::class => $handler],
-            $configuration,
+            enabledModules: [],
             useCachedVersion: true,
+            cacheDirectoryPath: $cacheDirectory,
         );
         $warmBootedMessagingSystem->getCommandBus()->sendWithRouting('cache.command', 'second');
 
@@ -54,8 +52,7 @@ class EcotoneLiteCachedContainerTest extends TestCase
         $messagingSystem = EcotoneLite::bootstrap(
             [OneTimeWithResultExample::class],
             [OneTimeWithResultExample::class => new OneTimeWithResultExample()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $container = $messagingSystem->getServiceFromContainer(ContainerInterface::class);
@@ -69,8 +66,7 @@ class EcotoneLiteCachedContainerTest extends TestCase
         $messagingSystem = EcotoneLite::bootstrap(
             [CachedCommandHandlerService::class],
             [CachedCommandHandlerService::class => new CachedCommandHandlerService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
         $container = $messagingSystem->getServiceFromContainer(ContainerInterface::class);
 

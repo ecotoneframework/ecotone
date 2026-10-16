@@ -22,6 +22,7 @@ final class StaticPsrClock implements ClockInterface, SleepInterface
     {
         $this->now = ($now === null || $now === 'now') ? null : new DateTimeImmutable($now);
         $this->pinnedTime = $this->now;
+        $this->hasBeenChanged = $this->now !== null;
     }
 
     public function now(): DateTimeImmutable
@@ -69,6 +70,17 @@ final class StaticPsrClock implements ClockInterface, SleepInterface
     {
         if ($this->pinnedTime !== null) {
             $this->now = $this->pinnedTime;
+        }
+    }
+
+    public function executeAt(DateTimeImmutable $time, callable $execution): mixed
+    {
+        $now = $this->now;
+        $this->now = $time;
+        try {
+            return $execution();
+        } finally {
+            $this->now = $now;
         }
     }
 

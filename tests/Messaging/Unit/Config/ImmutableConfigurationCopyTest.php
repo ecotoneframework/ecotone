@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config;
 
 use Closure;
+use DateTimeImmutable;
 use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\EventSourcing\FieldType;
 use Ecotone\Api\EventSourcing\MetadataMatcher;
@@ -19,6 +20,7 @@ use Ecotone\Api\ExtensionObject\RetryTemplateBuilder;
 use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\TestConfiguration;
 use Ecotone\Api\Messaging\BatchMessage;
+use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use PHPUnit\Framework\TestCase;
 use stdClass;
@@ -114,10 +116,11 @@ final class ImmutableConfigurationCopyTest extends TestCase
             ->withMediaTypeConversion('orders', MediaType::createApplicationJson())
             ->withSpyOnChannel('audit')
             ->withInMemoryConsumerPositionTracker(false)
-            ->withDatabaseTablesSetUpOnBootstrap(false);
+            ->withDatabaseTablesSetUpOnBootstrap(false)
+            ->withTimeAt(new DateTimeImmutable('2024-03-01 10:00:00'));
 
         self::assertSame(
-            ['failOnCommandHandlerNotFound', 'failOnQueryHandlerNotFound', 'pollableChannelMediaTypeConversion', 'channelToConvertOn', 'spiedChannelNames', 'inMemoryConsumerPositionTracker', 'databaseTablesSetUpOnBootstrap'],
+            ['failOnCommandHandlerNotFound', 'failOnQueryHandlerNotFound', 'pollableChannelMediaTypeConversion', 'channelToConvertOn', 'spiedChannelNames', 'inMemoryConsumerPositionTracker', 'databaseTablesSetUpOnBootstrap', 'timeAt'],
             array_keys(get_object_vars($original)),
         );
         self::assertCopyChangesOnly($original, fn (TestConfiguration $configuration) => $configuration->withFailOnCommandHandlerNotFound(true), ['failOnCommandHandlerNotFound' => true]);
@@ -130,6 +133,7 @@ final class ImmutableConfigurationCopyTest extends TestCase
         self::assertCopyChangesOnly($original, fn (TestConfiguration $configuration) => $configuration->withSpyOnChannel('shipping'), ['spiedChannelNames' => ['orders', 'audit', 'shipping']]);
         self::assertCopyChangesOnly($original, fn (TestConfiguration $configuration) => $configuration->withInMemoryConsumerPositionTracker(true), ['inMemoryConsumerPositionTracker' => true]);
         self::assertCopyChangesOnly($original, fn (TestConfiguration $configuration) => $configuration->withDatabaseTablesSetUpOnBootstrap(true), ['databaseTablesSetUpOnBootstrap' => true]);
+        self::assertCopyChangesOnly($original, fn (TestConfiguration $configuration) => $configuration->withTimeAt(new DateTimeImmutable('2025-01-01 00:00:00')), ['timeAt' => new DateTimeImmutable('2025-01-01 00:00:00')]);
     }
 
     public function test_execution_polling_metadata_copy_changes_only_the_named_fields(): void
@@ -163,55 +167,62 @@ final class ImmutableConfigurationCopyTest extends TestCase
 
     public function test_service_configuration_copy_changes_only_the_named_fields(): void
     {
-        $extensionObject = new stdClass();
-        $otherExtensionObject = new stdClass();
         $retryTemplate = RetryTemplateBuilder::fixedBackOff(10);
         $otherRetryTemplate = RetryTemplateBuilder::fixedBackOff(20);
         $original = ServiceConfiguration::createWithDefaults()
-            ->withCacheDirectoryPath('/tmp/ecotone')
             ->withServiceName('billing')
-            ->withFailFast(false)
-            ->withEnvironment('prod')
-            ->withLoadCatalog('src')
-            ->withNamespaces(['App'])
-            ->withEnabledModulePackageNames([ModulePackageList::DBAL_PACKAGE])
             ->withDefaultSerializationMediaType(MediaType::createApplicationJson())
             ->withDefaultErrorChannel('errors')
             ->withConsumerMemoryLimit(128)
             ->withConnectionRetryTemplate($retryTemplate)
-            ->withExtensionObjects([$extensionObject])
-            ->withLicenceKey('licence')
             ->withHeadersInLogContext(['userId']);
-        $observe = fn (ServiceConfiguration $configuration) => [
+
+        self::assertSame(
+            ['serviceName', 'defaultSerializationMediaType', 'defaultErrorChannel', 'defaultMemoryLimitInMegabytes', 'connectionRetryTemplate', 'headersInLogContext'],
+            array_keys(get_object_vars($original)),
+        );
+        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withServiceName('shipping'), ['serviceName' => 'shipping']);
+        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withDefaultSerializationMediaType(MediaType::createApplicationXml()), ['defaultSerializationMediaType' => MediaType::APPLICATION_XML]);
+        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withDefaultErrorChannel('dead_letters'), ['defaultErrorChannel' => 'dead_letters']);
+        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withConsumerMemoryLimit(512), ['defaultMemoryLimitInMegabytes' => 512]);
+        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withConnectionRetryTemplate($otherRetryTemplate), ['connectionRetryTemplate' => $otherRetryTemplate]);
+        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withHeadersInLogContext(['region']), ['headersInLogContext' => ['region']]);
+    }
+
+    public function test_bootstrap_configuration_copy_changes_only_the_named_fields(): void
+    {
+        $extensionObject = new stdClass();
+        $otherExtensionObject = new stdClass();
+        $original = BootstrapConfiguration::createWithDefaults()
+            ->withCacheDirectoryPath('/tmp/ecotone')
+            ->withEnvironment('prod')
+            ->withLoadCatalog('src')
+            ->withNamespaces(['App'])
+            ->withEnabledModulePackageNames([ModulePackageList::DBAL_PACKAGE])
+            ->withExtensionObjects([$extensionObject])
+            ->withLicenceKey('licence');
+        $observe = fn (BootstrapConfiguration $configuration) => [
             ...get_object_vars($configuration),
             'enabledModulePackageNames' => $configuration->getEnabledModulePackageNames(),
         ];
 
         self::assertSame(
-            ['cacheDirectoryPath', 'serviceName', 'failFast', 'environment', 'loadCatalog', 'namespaces', 'defaultSerializationMediaType', 'defaultErrorChannel', 'defaultMemoryLimitInMegabytes', 'connectionRetryTemplate', 'extensionObjects', 'pollableEndpointAnnotations', 'licenceKey', 'headersInLogContext'],
+            ['cacheDirectoryPath', 'environment', 'loadCatalog', 'namespaces', 'licenceKey', 'extensionObjects'],
             array_keys(get_object_vars($original)),
         );
-        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withCacheDirectoryPath('/var/cache/'), ['cacheDirectoryPath' => '/var/cache'], $observe);
-        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withServiceName('shipping'), ['serviceName' => 'shipping'], $observe);
-        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withFailFast(true), ['failFast' => true], $observe);
-        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withEnvironment('test'), ['environment' => 'test'], $observe);
-        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withLoadCatalog('lib'), ['loadCatalog' => 'lib'], $observe);
-        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->doNotLoadCatalog(), ['loadCatalog' => null], $observe);
-        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withNamespaces(['Billing']), ['namespaces' => ['Billing']], $observe);
+        self::assertCopyChangesOnly($original, fn (BootstrapConfiguration $configuration) => $configuration->withCacheDirectoryPath('/var/cache/'), ['cacheDirectoryPath' => '/var/cache'], $observe);
+        self::assertCopyChangesOnly($original, fn (BootstrapConfiguration $configuration) => $configuration->withEnvironment('test'), ['environment' => 'test'], $observe);
+        self::assertCopyChangesOnly($original, fn (BootstrapConfiguration $configuration) => $configuration->withLoadCatalog('lib'), ['loadCatalog' => 'lib'], $observe);
+        self::assertCopyChangesOnly($original, fn (BootstrapConfiguration $configuration) => $configuration->withNamespaces(['Billing']), ['namespaces' => ['Billing']], $observe);
         self::assertCopyChangesOnly(
             $original,
-            fn (ServiceConfiguration $configuration) => $configuration->withEnabledModulePackageNames([ModulePackageList::AMQP_PACKAGE]),
+            fn (BootstrapConfiguration $configuration) => $configuration->withEnabledModulePackageNames([ModulePackageList::AMQP_PACKAGE]),
             ['enabledModulePackageNames' => [ModulePackageList::AMQP_PACKAGE, ModulePackageList::CORE_PACKAGE]],
             $observe,
         );
-        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withDefaultSerializationMediaType(MediaType::createApplicationXml()), ['defaultSerializationMediaType' => MediaType::APPLICATION_XML], $observe);
-        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withDefaultErrorChannel('dead_letters'), ['defaultErrorChannel' => 'dead_letters'], $observe);
-        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withConsumerMemoryLimit(512), ['defaultMemoryLimitInMegabytes' => 512], $observe);
-        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withConnectionRetryTemplate($otherRetryTemplate), ['connectionRetryTemplate' => $otherRetryTemplate], $observe);
-        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withExtensionObjects([$otherExtensionObject]), ['extensionObjects' => [$otherExtensionObject]], $observe);
-        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->addExtensionObject($otherExtensionObject), ['extensionObjects' => [$extensionObject, $otherExtensionObject]], $observe);
-        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withLicenceKey('other_licence'), ['licenceKey' => 'other_licence'], $observe);
-        self::assertCopyChangesOnly($original, fn (ServiceConfiguration $configuration) => $configuration->withHeadersInLogContext(['region']), ['headersInLogContext' => ['region']], $observe);
+        self::assertCopyChangesOnly($original, fn (BootstrapConfiguration $configuration) => $configuration->withExtensionObjects([$otherExtensionObject]), ['extensionObjects' => [$otherExtensionObject]], $observe);
+        self::assertCopyChangesOnly($original, fn (BootstrapConfiguration $configuration) => $configuration->addExtensionObject($otherExtensionObject), ['extensionObjects' => [$extensionObject, $otherExtensionObject]], $observe);
+        self::assertCopyChangesOnly($original, fn (BootstrapConfiguration $configuration) => $configuration->withLicenceKey('other_licence'), ['licenceKey' => 'other_licence'], $observe);
     }
 
     public function test_polling_metadata_copy_changes_only_the_named_fields(): void

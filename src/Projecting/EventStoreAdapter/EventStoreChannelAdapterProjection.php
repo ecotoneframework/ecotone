@@ -40,7 +40,8 @@ class EventStoreChannelAdapterProjection implements ProjectorExecutor
      */
     public function __construct(
         private MessageChannel $outputChannel,
-        private array $eventNames = []
+        private MessageBuilder $messageBuilder,
+        private array $eventNames = [],
     ) {
     }
 
@@ -70,7 +71,7 @@ class EventStoreChannelAdapterProjection implements ProjectorExecutor
         }
 
         $this->outputChannel->send(
-            MessageBuilder::withPayload($payload)
+            $this->messageBuilder->withPayload($payload)
                 ->setMultipleHeaders($metadata)
                 ->build()
         );

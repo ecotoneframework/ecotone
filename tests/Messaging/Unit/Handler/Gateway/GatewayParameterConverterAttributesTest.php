@@ -9,7 +9,6 @@ use Ecotone\Api\Attribute\InternalHandler;
 use Ecotone\Api\Attribute\MessageGateway;
 use Ecotone\Api\Attribute\Payload;
 use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -28,7 +27,7 @@ final class GatewayParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [EchoGateway::class, EchoHandler::class],
             [new EchoHandler(), 'calculatingService' => new CalculatingReferenceService(1)],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $message = $ecotone->getGateway(EchoGateway::class)->sendHeaders([
@@ -45,7 +44,7 @@ final class GatewayParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [EchoGateway::class, EchoHandler::class],
             [new EchoHandler(), 'calculatingService' => new CalculatingReferenceService(1)],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $this->expectException(InvalidArgumentException::class);
@@ -58,7 +57,7 @@ final class GatewayParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [EchoGateway::class, EchoHandler::class],
             [new EchoHandler(), 'calculatingService' => new CalculatingReferenceService(1)],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $message = $ecotone->getGateway(EchoGateway::class)->sendPayloadExpression(1);
@@ -71,7 +70,7 @@ final class GatewayParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [EchoGateway::class, EchoHandler::class],
             [new EchoHandler(), 'calculatingService' => new CalculatingReferenceService(1)],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $payload = new stdClass();
@@ -90,7 +89,7 @@ final class GatewayParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [OneWayEchoGateway::class, CapturingOneWayHandler::class],
             [$capturingHandler],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $payload = new stdClass();

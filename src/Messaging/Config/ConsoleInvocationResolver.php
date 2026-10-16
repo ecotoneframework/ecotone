@@ -5,33 +5,32 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config;
 
 use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 
 /**
  * licence Apache-2.0
  */
 final class ConsoleInvocationResolver
 {
-    public static function resolveConsolePrefix(ServiceConfiguration $serviceConfiguration): ?string
+    public static function resolveConsolePrefix(BootstrapConfiguration $bootstrapConfiguration): ?string
     {
-        if (self::isPackageActive($serviceConfiguration, ModulePackageList::SYMFONY_PACKAGE)) {
+        if (self::isPackageActive($bootstrapConfiguration, ModulePackageList::SYMFONY_PACKAGE)) {
             return 'bin/console';
         }
 
-        if (self::isPackageActive($serviceConfiguration, ModulePackageList::LARAVEL_PACKAGE)) {
+        if (self::isPackageActive($bootstrapConfiguration, ModulePackageList::LARAVEL_PACKAGE)) {
             return 'php artisan';
         }
 
-        if (self::isPackageActive($serviceConfiguration, ModulePackageList::TEMPEST_PACKAGE)) {
+        if (self::isPackageActive($bootstrapConfiguration, ModulePackageList::TEMPEST_PACKAGE)) {
             return './tempest';
         }
 
         return null;
     }
 
-    private static function isPackageActive(ServiceConfiguration $serviceConfiguration, string $packageName): bool
+    private static function isPackageActive(BootstrapConfiguration $bootstrapConfiguration, string $packageName): bool
     {
-        if (! $serviceConfiguration->isModulePackageEnabled($packageName)) {
+        if (! $bootstrapConfiguration->isModulePackageEnabled($packageName)) {
             return false;
         }
 

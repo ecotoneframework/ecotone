@@ -15,6 +15,7 @@ use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Handler\MessageHandlingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Test\ChannelTestSupport;
 use Ecotone\Test\StubLogger;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -42,22 +43,21 @@ final class DelayedRetryBackOffTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$sender::class],
             [$sender],
-            ServiceConfiguration::createWithDefaults()
-                ->withDefaultErrorChannel('errorChannel')
-                ->withExtensionObjects([
-                    ErrorHandlerConfiguration::createWithDeadLetterChannel('errorChannel', RetryTemplateBuilder::fixedBackOff(0)->maxRetries(3), 'deadLetter'),
-                    InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
-                    SimpleMessageChannelBuilder::createQueueChannel('deadLetter'),
-                    SimpleMessageChannelBuilder::createQueueChannel('async'),
-                ])
-                    ->withEnabledModulePackageNames([]),
+            extensionObjects: [
+                ErrorHandlerConfiguration::createWithDeadLetterChannel('errorChannel', RetryTemplateBuilder::fixedBackOff(0)->maxRetries(3), 'deadLetter'),
+                InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
+                SimpleMessageChannelBuilder::createQueueChannel('deadLetter'),
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+                ServiceConfiguration::createWithDefaults()->withDefaultErrorChannel('errorChannel'),
+            ],
+            enabledModules: [],
         );
 
         $ecotone->publishEventWithRouting('order.completed', 'order-1');
         $ecotone->run('async', ExecutionPollingMetadata::createWithTestingSetup(stopOnError: false));
 
         $this->assertSame(4, $sender->attempts);
-        $this->assertNotNull($ecotone->getMessageChannel('deadLetter')->receive());
+        $this->assertNotNull(ChannelTestSupport::of($ecotone)->getMessageChannel('deadLetter')->receive());
     }
 
     public function test_exponential_back_off_accepts_zero_initial_delay(): void
@@ -112,17 +112,14 @@ final class DelayedRetryBackOffTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             [$sender::class],
             [$sender, 'logger' => $logger],
-            ServiceConfiguration::createWithDefaults()
-                ->withDefaultErrorChannel('errorChannel')
-                ->withExtensionObjects([
-                    $deadLetter
-                        ? ErrorHandlerConfiguration::createWithDeadLetterChannel('errorChannel', RetryTemplateBuilder::fixedBackOff(0)->maxRetries($maxRetries), 'deadLetter')
-                        : ErrorHandlerConfiguration::create('errorChannel', RetryTemplateBuilder::fixedBackOff(0)->maxRetries($maxRetries)),
-                    InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
-                    SimpleMessageChannelBuilder::createQueueChannel('deadLetter'),
-                    SimpleMessageChannelBuilder::createQueueChannel('async'),
-                ])
-                    ->withEnabledModulePackageNames([]),
+            extensionObjects: [
+                $deadLetter ? ErrorHandlerConfiguration::createWithDeadLetterChannel('errorChannel', RetryTemplateBuilder::fixedBackOff(0)->maxRetries($maxRetries), 'deadLetter') : ErrorHandlerConfiguration::create('errorChannel', RetryTemplateBuilder::fixedBackOff(0)->maxRetries($maxRetries)),
+                InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
+                SimpleMessageChannelBuilder::createQueueChannel('deadLetter'),
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+                ServiceConfiguration::createWithDefaults()->withDefaultErrorChannel('errorChannel'),
+            ],
+            enabledModules: [],
         );
     }
 }

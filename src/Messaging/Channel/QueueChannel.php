@@ -5,11 +5,12 @@ namespace Ecotone\Messaging\Channel;
 use Ecotone\Api\ExtensionObject\PollingMetadata;
 use Ecotone\Api\Messaging\BatchMessage;
 use Ecotone\Api\Messaging\Message;
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Support\GenericMessage;
 use Ecotone\Messaging\Support\LicensingException;
-use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -47,9 +48,7 @@ class QueueChannel implements PollableChannel, DefinedObject
             }
 
             foreach ($payload->entries as $entry) {
-                $this->queue[] = MessageBuilder::withPayload($entry['payload'])
-                    ->setMultipleHeaders($entry['headers'])
-                    ->build();
+                $this->queue[] = GenericMessage::createWithArrayHeaders($entry['payload'], [MessageHeaders::TIMESTAMP => $message->getHeaders()->getTimestamp(), ...$entry['headers']]);
             }
 
             return;

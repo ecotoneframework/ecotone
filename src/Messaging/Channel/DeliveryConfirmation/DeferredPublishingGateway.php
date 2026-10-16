@@ -36,6 +36,7 @@ final class DeferredPublishingGateway
         private bool $nonBlockingConfirmationEnabled,
         private ConfiguredMessagingSystem $configuredMessagingSystem,
         private PendingDeliveryRegistry $pendingDeliveryRegistry,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -59,7 +60,7 @@ final class DeferredPublishingGateway
             $collectionPoint = $this->pendingDeliveryRegistry->collectionPoint();
 
             $this->configuredMessagingSystem->getMessageChannelByName($this->publisherReference)->send(
-                MessageBuilder::fromMessage($message)
+                $this->messageBuilder->fromMessage($message)
                     ->removeHeader(MessageHeaders::REPLY_CHANNEL)
                     ->removeHeader(MessageHeaders::ROUTING_SLIP)
                     ->build()

@@ -28,7 +28,6 @@ use Ecotone\Api\Attribute\EventHandler;
 use Ecotone\Api\Attribute\Priority;
 use Ecotone\Api\EventSourcing\Event;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Interceptor\MethodInvocation;
 use Ecotone\Api\Lite\EcotoneLite;
@@ -80,10 +79,9 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotone->withEvents([Event::createWithType('test-event', ['name' => 'Test'])]);
@@ -142,9 +140,8 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class, $streamSource::class],
             [$projection, $streamSource],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $streamSource->append(
@@ -203,10 +200,9 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class, $streamSource::class],
             [$projection, $streamSource],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $streamSource->append(
@@ -251,9 +247,8 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotone->withEvents([
@@ -282,9 +277,8 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotone->withEvents([
@@ -330,9 +324,8 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         // Add all events to the stream first
@@ -374,9 +367,8 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         // Add events to stream
@@ -415,9 +407,8 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         // Add events to stream
@@ -456,9 +447,8 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         // Add multiple events to stream
@@ -500,9 +490,8 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         // Add multiple events to stream
@@ -543,8 +532,8 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         // Add events for different partitions
@@ -586,8 +575,7 @@ class ProjectingTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class, $streamSource::class],
             [$projection, $streamSource],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
     }
 
@@ -605,9 +593,8 @@ class ProjectingTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 
@@ -650,9 +637,8 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projectionA::class, $projectionB::class],
             [$projectionA, $projectionB],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotone->withEvents([
@@ -692,9 +678,8 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
         $ecotone->withEvents([
             Event::createWithType('event1', []),
@@ -724,10 +709,9 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('backfill_async'))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('backfill_async')],
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
         $ecotone->withEvents([
             Event::createWithType('event1', []),
@@ -752,9 +736,8 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
         $ecotone->withEvents([
             Event::createWithType('event1', []),
@@ -784,9 +767,8 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
         $ecotone->withEvents([
             Event::createWithType('event1', []),
@@ -870,12 +852,11 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class, $userlandPartitionProvider::class, $streamSource::class],
             [$projection, $userlandPartitionProvider, $streamSource],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('backfill_async')),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('backfill_async')],
+            enabledModules: [],
             addInMemoryStateStoredRepository: false,
-            testConfiguration: \Ecotone\Api\ExtensionObject\TestConfiguration::createWithDefaults()->withSpyOnChannel('backfill_async')
+            testConfiguration: \Ecotone\Api\ExtensionObject\TestConfiguration::createWithDefaults()->withSpyOnChannel('backfill_async'),
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $streamSource->append(
@@ -934,12 +915,11 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class, $userlandPartitionProvider::class, $streamSource::class],
             [$projection, $userlandPartitionProvider, $streamSource],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('backfill_async')),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('backfill_async')],
+            enabledModules: [],
             addInMemoryStateStoredRepository: false,
-            testConfiguration: \Ecotone\Api\ExtensionObject\TestConfiguration::createWithDefaults()->withSpyOnChannel('backfill_async')
+            testConfiguration: \Ecotone\Api\ExtensionObject\TestConfiguration::createWithDefaults()->withSpyOnChannel('backfill_async'),
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotone->initializeProjection('different_projection');
@@ -974,9 +954,8 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class, $interceptor::class],
             [$projection, $interceptor],
-            ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotone->withEvents([
@@ -1083,10 +1062,9 @@ class ProjectingTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class, $userlandStorage::class, $streamSource::class],
             [$projection, $userlandStorage, $streamSource],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE),
+            enabledModules: [],
             addInMemoryStateStoredRepository: false,
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $streamSource->append(

@@ -6,7 +6,6 @@ namespace Ecotone\Messaging\Handler\Gateway;
 
 use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\Gateway\EcotoneClockInterface;
 use Ecotone\Api\Interceptor\Precedence;
 use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Api\Messaging\PollableChannel;
@@ -23,7 +22,6 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
-use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadConverter;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
 use Ecotone\Messaging\Handler\InterceptedEndpoint;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -35,6 +33,7 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\SubscribableChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 use function is_a;
 
@@ -276,7 +275,7 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder
         $interfaceToCall = $builder->getInterfaceToCall($interfaceToCallReference);
 
         // Choose resolver based on Enterprise license
-        $isEnterprise = $builder->getServiceConfiguration()->isRunningForEnterprise();
+        $isEnterprise = $builder->getBootstrapConfiguration()->isRunningForEnterprise();
         $errorChannelResolver = $isEnterprise
             ? new EnterpriseGatewayErrorChannelResolver()
             : new StandardGatewayErrorChannelResolver();
@@ -327,7 +326,7 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder
         }
 
         if (empty($methodArgumentConverters) && $interfaceToCall->hasSingleParameter()) {
-            $methodArgumentConverters = [GatewayPayloadConverter::create($interfaceToCall->getFirstParameter())];
+            $methodArgumentConverters = [GatewayPayloadBuilder::create($interfaceToCall->getFirstParameter()->getName())->compile($builder, $interfaceToCall)];
         }
 
         $internalHandlerReference = $this->compileGatewayInternalProcessor($builder, $errorChannelResolver);
@@ -336,15 +335,17 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder
             new Definition(MethodCallToMessageConverter::class, [
                 $methodArgumentConverters,
                 $interfaceToCall->getInterfaceParametersNames(),
-                new Reference(EcotoneClockInterface::class),
+                new Reference(MessageBuilder::class),
             ]),
             $interfaceToCall->getReturnType(),
             new Definition(GatewayReplyConverter::class, [
                 new Reference(ConversionService::REFERENCE_NAME),
                 $interfaceToCall->toString(),
                 $interfaceToCall->getReturnType(),
+                new Reference(MessageBuilder::class),
             ]),
             $internalHandlerReference,
+            new Reference(MessageBuilder::class),
         ]);
     }
 

@@ -9,7 +9,6 @@ use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\Attribute\QueryHandler;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
@@ -81,9 +80,8 @@ final class ConsumerTimeLimitTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             [$registry::class],
             [$registry, ClockInterface::class => $clock],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([SimpleMessageChannelBuilder::createQueueChannel('async')])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
     }
 }

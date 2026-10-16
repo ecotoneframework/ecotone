@@ -48,6 +48,7 @@ use Ecotone\Messaging\Handler\Router\HeaderRouter;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use Ecotone\Messaging\NullableMessageChannel;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Ramsey\Uuid\UuidInterface;
 
@@ -130,10 +131,12 @@ final class BasicMessagingModule extends NoExternalConfigurationModule implement
                 Reference::to(LoggingGateway::class),
                 new Definition(OutboundMessageConverter::class, [
                     DefaultHeaderMapper::createAllHeadersMapping()->getDefinition(),
+                    Reference::to(MessageBuilder::class),
                     MediaType::parseMediaType($serviceConfiguration->defaultSerializationMediaType),
                 ]),
                 Reference::to(ConversionService::REFERENCE_NAME),
                 Reference::to(MessageHeadersPropagatorInterceptor::class),
+                Reference::to(MessageBuilder::class),
             ])
         );
 
@@ -152,6 +155,7 @@ final class BasicMessagingModule extends NoExternalConfigurationModule implement
             new Definition(MessagingEntrypointService::class, [
                 new Reference(ChannelResolver::class),
                 Reference::to(MessageHeadersPropagatorInterceptor::class),
+                Reference::to(MessageBuilder::class),
             ])
         );
     }

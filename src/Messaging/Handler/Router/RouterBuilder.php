@@ -15,6 +15,7 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 use function get_class;
 use function is_string;
@@ -149,6 +150,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
             $this->resolutionRequired,
             $this->defaultResolution,
             $this->applySequence,
+            new Reference(MessageBuilder::class),
         ]);
     }
 

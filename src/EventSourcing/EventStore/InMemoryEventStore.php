@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\EventSourcing\EventStore;
 
+use function array_key_exists;
 use function array_map;
 use function count;
 
@@ -15,6 +16,7 @@ use Ecotone\Api\EventSourcing\FieldType;
 use Ecotone\Api\EventSourcing\LoadedEvents;
 use Ecotone\Api\EventSourcing\MetadataMatcher;
 use Ecotone\Api\EventSourcing\Operator;
+use Ecotone\Api\Gateway\EcotoneClockInterface;
 use Ecotone\Api\Messaging\ConcurrencyException;
 use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\EventSourcing\EventStore\AppendStrategy\AppendableStore;
@@ -42,6 +44,7 @@ final class InMemoryEventStore implements EventStore, AppendableStore, GuardedTa
         private readonly AppendStrategy $appendStrategy,
         private readonly InMemoryTagCollaborator $tagCollaborator,
         private readonly RecordedEventFormat $recordedEventFormat,
+        private readonly EcotoneClockInterface $clock,
     ) {
     }
 
@@ -132,12 +135,22 @@ final class InMemoryEventStore implements EventStore, AppendableStore, GuardedTa
      */
     private function appendPlainEvents(string $streamName, array $events): void
     {
-        $recordedEvents = array_map($this->recordedEventFormat->recordedFrom(...), $events);
+        $recordedEvents = array_map($this->stampedFrom(...), $events);
         $this->refuseEventsRecordedBefore($streamName, $recordedEvents);
 
         foreach ($recordedEvents as $recordedEvent) {
             $this->record($streamName, $recordedEvent);
         }
+    }
+
+    private function stampedFrom(object|array $event): Event
+    {
+        $recordedEvent = $this->recordedEventFormat->recordedFrom($event);
+        if (array_key_exists(MessageHeaders::TIMESTAMP, $recordedEvent->metadata)) {
+            return $recordedEvent;
+        }
+
+        return $recordedEvent->withAddedMetadata([MessageHeaders::TIMESTAMP => $this->clock->now()->unixTime()->inSeconds()]);
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
 
+use Ecotone\Api\Gateway\EcotoneClockInterface;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
@@ -16,6 +17,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class InboundChannelAdapterBuilder
@@ -143,13 +145,14 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
                 throw InvalidArgumentException::create("{$this->interfaceToCall} for InboundChannelAdapter should not be void, if channel name is not nullChannel");
             }
 
-            $objectReference = new Definition(PassThroughService::class, [$objectReference, $methodName]);
+            $objectReference = new Definition(PassThroughService::class, [$objectReference, $methodName, new Reference(EcotoneClockInterface::class)]);
             $methodName = 'execute';
         }
 
         return new Definition(InvocationPollerAdapter::class, [
             $objectReference,
             $methodName,
+            new Reference(MessageBuilder::class),
             $this->requestChannelName,
         ]);
     }

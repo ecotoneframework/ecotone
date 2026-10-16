@@ -7,7 +7,7 @@ namespace Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages;
 use Ecotone\Api\Attribute\QueryHandler;
 use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Api\Messaging\Message;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\StaticMessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -28,7 +28,7 @@ class SomeQueryHandler
     #[QueryHandler(SomeQueryHandler::SUM)]
     public function sum(Message $message): Message
     {
-        return MessageBuilder::fromMessage($message)
+        return StaticMessageBuilder::fromMessage($message)
             ->setPayload($message->getPayload() + 1)
             ->build();
     }
@@ -36,7 +36,7 @@ class SomeQueryHandler
     #[QueryHandler(SomeQueryHandler::MULTIPLY)]
     public function multiply(Message $message): Message
     {
-        return MessageBuilder::fromMessage($message)
+        return StaticMessageBuilder::fromMessage($message)
             ->setPayload($message->getPayload() * 2)
             ->build();
     }

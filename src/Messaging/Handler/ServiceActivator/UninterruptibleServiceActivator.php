@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\ServiceActivator;
 
-use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
@@ -19,9 +18,9 @@ final class UninterruptibleServiceActivator implements MessageHandlerBuilderWith
     {
     }
 
-    public static function create(DefinedObject $objectToInvokeOnReferenceName, string $methodName): self
+    public static function create(Definition $objectToInvokeOn, string $methodName): self
     {
-        return new self(ServiceActivatorBuilder::createWithDirectReference($objectToInvokeOnReferenceName, $methodName));
+        return new self(ServiceActivatorBuilder::createWithDefinition($objectToInvokeOn, $methodName));
     }
 
     /**

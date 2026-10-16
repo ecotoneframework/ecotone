@@ -18,13 +18,13 @@ use Throwable;
  */
 final class SerializationChannelAdapter implements ChannelInterceptor
 {
-    public function __construct(private MediaType $targetMediaType, private ConversionService $conversionService)
+    public function __construct(private MediaType $targetMediaType, private ConversionService $conversionService, private MessageBuilder $messageBuilder)
     {
     }
 
     public function preSend(Message $message, MessageChannel $messageChannel): ?Message
     {
-        return MessageBuilder::fromMessage($message)
+        return $this->messageBuilder->fromMessage($message)
                 ->setPayload($this->conversionService->convert(
                     $message->getPayload(),
                     Type::createFromVariable($message->getPayload()),

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modelling\Unit;
 
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
@@ -21,7 +20,7 @@ final class SaveAggregateTestSetupServiceBuilderTest extends TestCase
 {
     public function test_using_initial_state_for_event_sourced_aggregates(): void
     {
-        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting([Ticket::class], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting([Ticket::class], enabledModules: []);
 
         $ticketId = Uuid::v7()->toRfc4122();
 
@@ -41,7 +40,7 @@ final class SaveAggregateTestSetupServiceBuilderTest extends TestCase
 
     public function test_using_initial_state_for_state_aggregates(): void
     {
-        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting([SimplifiedAggregate::class], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting([SimplifiedAggregate::class], enabledModules: []);
 
         $this->assertTrue(
             $ecotoneTestSupport

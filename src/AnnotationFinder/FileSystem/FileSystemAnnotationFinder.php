@@ -16,9 +16,9 @@ use Ecotone\Api\Attribute\Environment;
 use Ecotone\Api\Attribute\EventHandler;
 use Ecotone\Api\Attribute\IsAbstract;
 use Ecotone\Api\Attribute\QueryHandler;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Messaging\Attribute\IdentifiedAnnotation;
 use Ecotone\Messaging\Attribute\MessageConsumer;
+use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use ReflectionAttribute;
@@ -561,7 +561,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
 
     public function getCacheMessagingFileNameBasedOnConfig(
         string $pathToRootCatalog,
-        ServiceConfiguration $serviceConfiguration,
+        BootstrapConfiguration $bootstrapConfiguration,
         array $configurationVariables,
         bool $enableTesting
     ): string {
@@ -579,7 +579,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
             $fileSha .= hash_file(self::FILE_CONTENT_HASH_ALGORITHM, $composerLockPath);
         }
 
-        $fileSha .= sha1(serialize($serviceConfiguration));
+        $fileSha .= sha1(serialize($bootstrapConfiguration));
         $fileSha .= sha1(serialize($this->skipClosures($configurationVariables)));
         $fileSha .= $enableTesting ? 'true' : 'false';
 

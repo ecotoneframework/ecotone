@@ -30,6 +30,7 @@ use Ecotone\Messaging\Handler\Recoverability\RetryRunner;
 use Ecotone\Messaging\Handler\Router\HeaderRouter;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 #[ModuleAnnotation]
 /**
@@ -167,6 +168,7 @@ final class ErrorHandlerModule extends NoExternalConfigurationModule implements 
                     $extensionObject->delayedRetryTemplate,
                     (bool)$extensionObject->deadLetterChannel,
                     Reference::to(LoggingGateway::class),
+                    Reference::to(MessageBuilder::class),
                 ]),
                 'handle',
             )

@@ -30,7 +30,7 @@ use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDef
  */
 final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessagingSystem
 {
-    public function __construct(private ConfiguredMessagingSystem $configuredMessagingSystem)
+    public function __construct(private ConfiguredMessagingSystem $configuredMessagingSystem, private MessageBuilder $messageBuilder)
     {
     }
 
@@ -76,7 +76,7 @@ final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessag
 
         if ($payload instanceof Message) {
             return $messagingEntrypoint->sendMessage(
-                MessageBuilder::fromMessage($payload)
+                $this->messageBuilder->fromMessage($payload)
                     ->setMultipleHeaders($metadata)
                     ->setHeader(MessagingEntrypointService::ENTRYPOINT, $targetChannel)
                     ->build()

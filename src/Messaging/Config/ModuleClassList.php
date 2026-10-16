@@ -28,7 +28,6 @@ use Ecotone\EventSourcing\Config\EventSourcingModule;
 use Ecotone\EventSourcing\Config\EventSourcingProjectingModule;
 use Ecotone\EventSourcing\Tagging\Config\EventTaggingModule;
 use Ecotone\JMSConverter\Configuration\JMSConverterConfigurationModule;
-use Ecotone\JMSConverter\Configuration\JMSDefaultSerialization;
 use Ecotone\Kafka\Configuration\KafkaModule;
 use Ecotone\Laravel\Config\LaravelConnectionModule;
 use Ecotone\Lite\Test\Configuration\EcotoneTestSupportModule;
@@ -192,7 +191,6 @@ class ModuleClassList
 
     public const JMS_CONVERTER_MODULES = [
         JMSConverterConfigurationModule::class,
-        JMSDefaultSerialization::class,
     ];
 
     public const TRACING_MODULES = [

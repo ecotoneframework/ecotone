@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Handler;
 
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
 use Ecotone\Messaging\Conversion\ConversionService;
@@ -29,7 +29,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
     /**
      * @param array|object[]              $objectsToResolve
      */
-    private function __construct(array $objectsToResolve, ?ContainerInterface $referenceSearchService, ServiceConfiguration $serviceConfiguration)
+    private function __construct(array $objectsToResolve, ?ContainerInterface $referenceSearchService, BootstrapConfiguration $bootstrapConfiguration)
     {
         if (! array_key_exists(ExpressionEvaluationService::REFERENCE, $objectsToResolve)) {
             $objectsToResolve[ExpressionEvaluationService::REFERENCE] = SymfonyExpressionEvaluationAdapter::create($this);
@@ -42,7 +42,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
         }
         if (! array_key_exists(ServiceCacheConfiguration::REFERENCE_NAME, $objectsToResolve) && ! self::hasInOriginalReferenceService(ServiceCacheConfiguration::REFERENCE_NAME, $referenceSearchService)) {
             $objectsToResolve[ServiceCacheConfiguration::REFERENCE_NAME] = new ServiceCacheConfiguration(
-                $serviceConfiguration->cacheDirectoryPath,
+                $bootstrapConfiguration->cacheDirectoryPath,
                 false
             );
         }
@@ -59,7 +59,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
      */
     public static function createWith(array $objects): self
     {
-        return new self($objects, null, ServiceConfiguration::createWithDefaults());
+        return new self($objects, null, BootstrapConfiguration::createWithDefaults());
     }
 
     /**
@@ -68,7 +68,7 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
      */
     public static function createEmpty(): self
     {
-        return new self([], null, ServiceConfiguration::createWithDefaults());
+        return new self([], null, BootstrapConfiguration::createWithDefaults());
     }
 
     /**
@@ -78,9 +78,9 @@ class InMemoryReferenceSearchService implements ReferenceSearchService
      * @return InMemoryReferenceSearchService
      * @throws MessagingException
      */
-    public static function createWithContainer(ContainerInterface $referenceSearchService, array $objects, ServiceConfiguration $serviceConfiguration): self
+    public static function createWithContainer(ContainerInterface $referenceSearchService, array $objects, BootstrapConfiguration $bootstrapConfiguration): self
     {
-        return new self($objects, $referenceSearchService, $serviceConfiguration);
+        return new self($objects, $referenceSearchService, $bootstrapConfiguration);
     }
 
     public function registerReferencedObject(string $referenceName, object $object): void

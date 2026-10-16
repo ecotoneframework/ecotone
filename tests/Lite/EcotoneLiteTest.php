@@ -3,7 +3,6 @@
 namespace Test\Ecotone\Lite;
 
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\ExtensionObject\TestConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
@@ -27,10 +26,9 @@ class EcotoneLiteTest extends TestCase
         $ecotone = EcotoneLite::bootstrap(
             [OrderService::class, ChannelConfiguration::class],
             [new OrderService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders'))
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
+            environment: 'test',
         );
 
         $ecotone->runConsoleCommand('ecotone:list', []);
@@ -40,13 +38,9 @@ class EcotoneLiteTest extends TestCase
     public function test_flow_testing_refuses_test_configuration_passed_as_extension_object(): void
     {
         $this->expectException(ConfigurationException::class);
-        $this->expectExceptionMessage('EcotoneLite::bootstrapFlowTesting() was given a TestConfiguration as an extension object of the ServiceConfiguration. A flow test runs with exactly one TestConfiguration, the one passed as the testConfiguration: parameter, so this one would be replaced by that one and its settings ignored. Remove it from withExtensionObjects() / addExtensionObject() and pass it as EcotoneLite::bootstrapFlowTesting(..., testConfiguration: $yourTestConfiguration) instead.');
+        $this->expectExceptionMessage('EcotoneLite::bootstrapFlowTesting() was given a TestConfiguration in extensionObjects. A flow test runs with exactly one TestConfiguration, the one passed as the testConfiguration: parameter, so this one would be replaced by that one and its settings ignored. Remove it from extensionObjects and pass it as EcotoneLite::bootstrapFlowTesting(..., testConfiguration: $yourTestConfiguration) instead.');
 
-        EcotoneLite::bootstrapFlowTesting(
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->addExtensionObject(TestConfiguration::createWithDefaults()->withSpyOnChannel('async'))
-                ->withEnabledModulePackageNames([]),
-        );
+        EcotoneLite::bootstrapFlowTesting(extensionObjects: [TestConfiguration::createWithDefaults()->withSpyOnChannel('async')], enabledModules: []);
     }
 
     public function test_with_spying_on_multiple_channels(): void
@@ -54,11 +48,14 @@ class EcotoneLiteTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [],
             [],
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createQueueChannel('async1'),
+                SimpleMessageChannelBuilder::createQueueChannel('async2'),
+            ],
+            enabledModules: [],
             testConfiguration: TestConfiguration::createWithDefaults()
-                ->withSpyOnChannel('async1')
-                ->withSpyOnChannel('async2'),
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async1'))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async2'))
-                ->withEnabledModulePackageNames([])
+            ->withSpyOnChannel('async1')
+            ->withSpyOnChannel('async2'),
         );
 
         $ecotoneLite->sendDirectToChannel('async1', 'test1');
@@ -83,13 +80,12 @@ class EcotoneLiteTest extends TestCase
         $ecotone = EcotoneLite::bootstrap(
             [OrderService::class, ChannelConfiguration::class],
             [new OrderService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders')),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
             configurationVariables: [
                 'name' => fn () => 'Name',
-            ]
+            ],
+            environment: 'test',
         );
 
         $this->assertEquals(
@@ -104,7 +100,7 @@ class EcotoneLiteTest extends TestCase
             $this->markTestSkipped('pcntl extension is not loaded');
         }
 
-        $ecotone = EcotoneLite::bootstrapFlowTesting(configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting(extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')], enabledModules: []);
 
         $handler = pcntl_signal_get_handler(SIGINT);
 

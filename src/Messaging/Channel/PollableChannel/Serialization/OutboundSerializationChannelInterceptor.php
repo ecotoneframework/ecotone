@@ -20,7 +20,8 @@ final class OutboundSerializationChannelInterceptor extends AbstractChannelInter
 {
     public function __construct(
         private OutboundMessageConverter $outboundMessageConverter,
-        private ConversionService $conversionService
+        private ConversionService $conversionService,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -38,7 +39,7 @@ final class OutboundSerializationChannelInterceptor extends AbstractChannelInter
         }
 
         $outboundMessage = $this->outboundMessageConverter->prepare($message, $this->conversionService);
-        $preparedMessage = MessageBuilder::withPayload($outboundMessage->getPayload())
+        $preparedMessage = $this->messageBuilder->withPayload($outboundMessage->getPayload())
             ->setMultipleHeaders($outboundMessage->getHeaders());
 
         if ($outboundMessage->getDeliveryDelay()) {

@@ -26,6 +26,7 @@ use Ecotone\Api\Projecting\EventStreamingChannelAdapter;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Projecting\Config\ProjectionExecutorBuilder;
 
 /**
@@ -97,6 +98,7 @@ class EventStoreStreamingChannelAdapterBuilder implements ProjectionExecutorBuil
             EventStoreChannelAdapterProjection::class,
             [
                 Reference::toChannel($this->channelAdapter->streamChannelName),
+                Reference::to(MessageBuilder::class),
                 $this->channelAdapter->eventNames,
             ]
         );

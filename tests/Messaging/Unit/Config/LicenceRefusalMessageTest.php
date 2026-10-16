@@ -20,15 +20,16 @@ final class LicenceRefusalMessageTest extends TestCase
     {
         try {
             EcotoneLite::bootstrapFlowTesting(
-                configuration: ServiceConfiguration::createWithDefaults()
-                    ->withServiceName('licence_refusal')
-                    ->withExtensionObjects([DistributedServiceMap::initialize()])
-                    ->withEnabledModulePackageNames([]),
+                extensionObjects: [
+                    DistributedServiceMap::initialize(),
+                    ServiceConfiguration::createWithDefaults()->withServiceName('licence_refusal'),
+                ],
+                enabledModules: [],
             );
             $this->fail('An Enterprise feature was accepted without a licence key');
         } catch (LicensingException $exception) {
             $this->assertStringContainsString('https://ecotone.tech/pricing', $exception->getMessage());
-            $this->assertStringContainsString('ServiceConfiguration::withLicenceKey()', $exception->getMessage());
+            $this->assertStringContainsString('the licenceKey: argument of EcotoneLite::bootstrap()', $exception->getMessage());
             $this->assertStringContainsString('licenceKey: argument of EcotoneLite::bootstrap()', $exception->getMessage());
             $this->assertStringContainsString("'licenceKey' in config/ecotone.php", $exception->getMessage());
             $this->assertStringContainsString('ecotone.licenceKey', $exception->getMessage());

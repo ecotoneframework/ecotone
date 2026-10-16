@@ -22,6 +22,7 @@ use Ecotone\Messaging\Consumer\ConsumerPositionTracker;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\NullableMessageChannel;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -150,6 +151,7 @@ class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuil
                 $this->messageChannelName,
                 new DefinedObjectWrapper($this->inMemoryMessageChannelHolder),
                 new Reference(ConsumerPositionTracker::class),
+                new Reference(MessageBuilder::class),
                 $this->finalFailureStrategy,
                 $this->isAutoAcked,
             ]);
@@ -157,7 +159,7 @@ class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuil
 
         if (
             ($this->messageChannel instanceof QueueChannel || $this->messageChannel instanceof DelayableQueueChannel)
-            && $builder->getServiceConfiguration()->isRunningForEnterprise()
+            && $builder->getBootstrapConfiguration()->isRunningForEnterprise()
         ) {
             $this->messageChannel->enableBatchMessagesSupport();
         }

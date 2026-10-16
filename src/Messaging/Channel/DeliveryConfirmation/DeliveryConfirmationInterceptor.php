@@ -40,6 +40,7 @@ final class DeliveryConfirmationInterceptor
         private ?string $globalErrorChannelName,
         private ErrorChannelService $errorChannelService,
         private ConfiguredMessagingSystem $configuredMessagingSystem,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -112,7 +113,7 @@ final class DeliveryConfirmationInterceptor
         }
 
         return array_map(
-            fn (array $entry): Message => MessageBuilder::withPayload($entry['payload'])
+            fn (array $entry): Message => $this->messageBuilder->withPayload($entry['payload'])
                 ->setMultipleHeaders($entry['headers'])
                 ->build(),
             $payload->entries,

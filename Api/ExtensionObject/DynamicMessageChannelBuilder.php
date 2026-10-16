@@ -21,6 +21,7 @@ use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Enterprise
@@ -155,6 +156,7 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
         $this->channelSendingStrategy = new Definition(CustomSendingStrategy::class, [
             Reference::to(MessagingEntrypointService::class),
             $requestChannelName,
+            Reference::to(MessageBuilder::class),
         ]);
 
         return $this;

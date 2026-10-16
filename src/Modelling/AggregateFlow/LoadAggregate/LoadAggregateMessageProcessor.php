@@ -28,13 +28,14 @@ final class LoadAggregateMessageProcessor implements MessageProcessor
         private string $aggregateMethod,
         private ?string $messageVersionPropertyName,
         private PropertyReaderAccessor $propertyReaderAccessor,
-        private LoadAggregateMode $loadAggregateMode
+        private LoadAggregateMode $loadAggregateMode,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
     public function process(Message $message): ?Message
     {
-        $resultMessage = MessageBuilder::fromMessage($message);
+        $resultMessage = $this->messageBuilder->fromMessage($message);
         $messageType = Type::createFromVariable($message->getPayload());
 
         if (! $message->getHeaders()->containsKey(AggregateMessage::AGGREGATE_ID)) {

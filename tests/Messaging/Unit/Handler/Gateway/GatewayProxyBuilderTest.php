@@ -4,7 +4,6 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Gateway;
 
 use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Interceptor\MethodInvocation;
 use Ecotone\Api\Lite\EcotoneLite;
@@ -26,9 +25,10 @@ use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ChannelTestSupport;
 use Ecotone\Test\ComponentTestBuilder;
 use Ecotone\Test\InMemoryConversionService;
+use Ecotone\Test\StaticMessageBuilder;
 use RuntimeException;
 use stdClass;
 use Test\Ecotone\Messaging\Fixture\Channel\PollingChannelThrowingException;
@@ -72,7 +72,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [TicketCreator::class, TicketService::class],
             [new TicketService()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         /** @var TicketCreator $ticketCreator */
@@ -110,7 +110,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
     public function test_calling_reply_queue_with_time_out()
     {
         $payload = 'replyData';
-        $replyMessage = MessageBuilder::withPayload($payload)->build();
+        $replyMessage = StaticMessageBuilder::withPayload($payload)->build();
         $replyChannel = new class ($replyMessage) extends QueueChannel {
             public function __construct(private Message $replyMessage)
             {
@@ -152,7 +152,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
     public function test_ignoring_reply_from_message_handler_when_reply_channel_is_set()
     {
         $payload = 'replyData';
-        $replyMessage = MessageBuilder::withPayload($payload)->build();
+        $replyMessage = StaticMessageBuilder::withPayload($payload)->build();
         $replyChannel = new class ($replyMessage) extends QueueChannel {
             public function __construct(private Message $replyMessage)
             {
@@ -241,7 +241,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
         $messaging->getGateway(ServiceInterfaceSendOnly::class)
             ->sendMail($content = 'testContent');
 
-        $message = $messaging->receiveMessageFrom($outputChannel);
+        $message = ChannelTestSupport::of($messaging)->receiveMessageFrom($outputChannel);
         $this->assertEquals($content, $message->getHeaders()->get('test1'));
         $this->assertEquals($content, $message->getHeaders()->get('test2'));
     }
@@ -269,7 +269,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
             )
             ->build();
 
-        $messaging->getMessageChannel($replyChannelName)->send(MessageBuilder::withPayload('some')->build());
+        ChannelTestSupport::of($messaging)->getMessageChannel($replyChannelName)->send(StaticMessageBuilder::withPayload('some')->build());
 
         $this->assertEquals(
             'some',
@@ -298,7 +298,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
             )
             ->build();
 
-        $messaging->getMessageChannel($replyChannelName)->send(ErrorMessage::create(MessageBuilder::withPayload('some')->build(), MessageHandlingException::create('error occurred')));
+        ChannelTestSupport::of($messaging)->getMessageChannel($replyChannelName)->send(ErrorMessage::create(StaticMessageBuilder::withPayload('some')->build(), MessageHandlingException::create('error occurred')));
 
         $this->expectException(MessageHandlingException::class);
 
@@ -325,7 +325,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
             )
             ->build();
 
-        $messaging->getMessageChannel($replyChannelName)->send(ErrorMessage::create(MessageBuilder::withPayload('some')->build(), MessageHandlingException::create('error occurred')));
+        ChannelTestSupport::of($messaging)->getMessageChannel($replyChannelName)->send(ErrorMessage::create(StaticMessageBuilder::withPayload('some')->build(), MessageHandlingException::create('error occurred')));
 
         $this->expectException(MessageHandlingException::class);
 
@@ -355,13 +355,13 @@ class GatewayProxyBuilderTest extends MessagingTestCase
             )
             ->build();
 
-        $messaging->getMessageChannel($replyChannelName)->send(ErrorMessage::create(MessageBuilder::withPayload('some')->build(), MessageHandlingException::create('error occurred')));
+        ChannelTestSupport::of($messaging)->getMessageChannel($replyChannelName)->send(ErrorMessage::create(StaticMessageBuilder::withPayload('some')->build(), MessageHandlingException::create('error occurred')));
 
         $messaging->getGateway(ServiceInterfaceReceiveOnlyWithNull::class)->sendMail();
 
         $this->assertInstanceOf(
             ErrorMessage::class,
-            $messaging->receiveMessageFrom($errorChannelName)
+            ChannelTestSupport::of($messaging)->receiveMessageFrom($errorChannelName)
         );
     }
 
@@ -605,7 +605,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
         $messaging->getGateway(GatewayRecordingOutcomeOnClass::class)->invoke();
 
         $this->assertSame('failed', $recorder->outcome);
-        $this->assertNotNull($messaging->receiveMessageFrom('some'));
+        $this->assertNotNull(ChannelTestSupport::of($messaging)->receiveMessageFrom('some'));
     }
 
     public function test_calling_interceptors_before_sending_to_error_channel_when_receive_throws_error()
@@ -644,7 +644,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
         $messaging->getGateway(ServiceInterfaceReceiveOnlyWithNull::class)->sendMail();
 
         $this->assertSame('failed', $recorder->outcome);
-        $this->assertNotNull($messaging->receiveMessageFrom('some'));
+        $this->assertNotNull(ChannelTestSupport::of($messaging)->receiveMessageFrom('some'));
     }
 
     public function test_converting_to_string()

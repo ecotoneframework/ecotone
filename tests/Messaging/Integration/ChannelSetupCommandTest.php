@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Integration;
 
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Gateway\ConsoleCommandRunner;
@@ -106,11 +105,8 @@ final class ChannelSetupCommandTest extends TestCase
     {
         return EcotoneLite::bootstrapFlowTesting(
             containerOrAvailableServices: [],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel(self::IN_MEMORY_CHANNEL),
-                ])
-                    ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel(self::IN_MEMORY_CHANNEL)],
+            enabledModules: [],
             pathToRootCatalog: __DIR__ . '/../../',
         );
     }

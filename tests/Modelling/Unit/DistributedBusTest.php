@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\DistributedBusHeader;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributionEntrypoint;
@@ -30,8 +29,7 @@ final class DistributedBusTest extends TestCase
             [
                 new ShoppingCenter(),
             ],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
 
         $distributionEntrypoint = $ecotoneTestSupport->getGateway(DistributionEntrypoint::class);
@@ -49,8 +47,7 @@ final class DistributedBusTest extends TestCase
             [
                 new ShoppingRecord(),
             ],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
 
         $distributionEntrypoint = $ecotoneTestSupport->getGateway(DistributionEntrypoint::class);
@@ -68,8 +65,7 @@ final class DistributedBusTest extends TestCase
             [
                 new ShoppingRecord(),
             ],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
 
         $distributionEntrypoint = $ecotoneTestSupport->getGateway(DistributionEntrypoint::class);
@@ -87,8 +83,7 @@ final class DistributedBusTest extends TestCase
             [
                 new ShoppingCenter(),
             ],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
 
         $distributionEntrypoint = $ecotoneTestSupport->getGateway(DistributionEntrypoint::class);

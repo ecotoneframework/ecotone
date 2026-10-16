@@ -6,7 +6,6 @@ namespace Test\Ecotone\EventSourcing\Tagging;
 
 use Ecotone\Api\Attribute\EventTag;
 use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Support\LicensingException;
 use PHPUnit\Framework\TestCase;
@@ -39,8 +38,8 @@ final class EventTagLicenceTest extends TestCase
 
         EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [TaggedEventForLicenceTest::class],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
         );
     }
 }

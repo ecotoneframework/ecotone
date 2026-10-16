@@ -27,6 +27,7 @@ final class SaveAggregateService implements MessageProcessor
         private PropertyReaderAccessor $propertyReaderAccessor,
         private AggregateResolver $aggregateResolver,
         private EventBus $eventBus,
+        private MessageBuilder $messageBuilder,
     ) {
 
     }
@@ -40,7 +41,7 @@ final class SaveAggregateService implements MessageProcessor
         );
 
         if (! $resolvedAggregates) {
-            return MessageBuilder::fromMessage($message)->build();
+            return $this->messageBuilder->fromMessage($message)->build();
         }
 
         foreach ($resolvedAggregates as $key => $resolvedAggregate) {
@@ -63,10 +64,11 @@ final class SaveAggregateService implements MessageProcessor
         }
 
         return SaveAggregateServiceTemplate::buildReplyMessage(
-            $resolvedAggregates[0]->isNewInstance(),
-            $resolvedAggregates[0]->isNewInstance() ? $resolvedAggregates[0]->getIdentifiers() : [],
-            $resolvedAggregates[0]->getVersionAfterHandling(),
-            $message,
+            isFactoryMethod: $resolvedAggregates[0]->isNewInstance(),
+            aggregateIds: $resolvedAggregates[0]->isNewInstance() ? $resolvedAggregates[0]->getIdentifiers() : [],
+            versionAfterHandling: $resolvedAggregates[0]->getVersionAfterHandling(),
+            message: $message,
+            messageBuilder: $this->messageBuilder,
         );
     }
 

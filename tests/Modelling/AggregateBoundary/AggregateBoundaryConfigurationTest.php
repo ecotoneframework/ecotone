@@ -14,7 +14,6 @@ use Ecotone\Api\Attribute\EventTag;
 use Ecotone\Api\Attribute\Identifier;
 use Ecotone\Api\Attribute\Saga;
 use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
 use Ecotone\Api\Modelling\WithAggregateVersioning;
@@ -75,11 +74,7 @@ final class AggregateBoundaryConfigurationTest extends TestCase
 
     public function test_aggregates_without_aggregate_type_boot_when_dcb_is_disabled(): void
     {
-        $ecotone = EcotoneLite::bootstrapFlowTesting(
-            classesToResolve: [WalletWithoutAggregateType::class, LedgerWithoutAggregateType::class, LedgerOpened::class],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([]),
-        );
+        $ecotone = EcotoneLite::bootstrapFlowTesting(classesToResolve: [WalletWithoutAggregateType::class, LedgerWithoutAggregateType::class, LedgerOpened::class], enabledModules: []);
 
         $ecotone->sendCommandWithRouting('wallet.open', 'w-1');
 
@@ -145,9 +140,8 @@ final class AggregateBoundaryConfigurationTest extends TestCase
     {
         return EcotoneLite::bootstrapFlowTesting(
             classesToResolve: $classesToResolve,
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }

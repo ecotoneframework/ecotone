@@ -10,7 +10,6 @@ use Ecotone\Api\Attribute\EventTag;
 use Ecotone\Api\Attribute\NamedEvent;
 use Ecotone\Api\Attribute\QueryHandler;
 use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
 use Ecotone\Test\LicenceTesting;
@@ -63,7 +62,8 @@ final class DecisionModelEventMatchingTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [$counter::class, ParentEventCountForMatchingTest::class, NamedEventCountForMatchingTest::class, CourseEventForMatchingTest::class, SpecialCourseEventForMatchingTest::class, NamedCourseEventForMatchingTest::class],
             containerOrAvailableServices: [$counter],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }

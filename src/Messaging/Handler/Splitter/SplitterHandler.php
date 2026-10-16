@@ -23,6 +23,7 @@ class SplitterHandler implements MessageHandler
         private ?MessageChannel  $outputChannel,
         private MessageProcessor $messageProcessor,
         private ChannelResolver  $channelResolver,
+        private MessageBuilder   $messageBuilder,
         private string           $name = '',
     ) {
     }
@@ -46,12 +47,12 @@ class SplitterHandler implements MessageHandler
             $payload = $replyData[$sequenceNumber];
 
             $messageToSend = $payload instanceof Message
-                ? MessageBuilder::fromMessage($payload)
+                ? $this->messageBuilder->fromMessage($payload)
                     ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $message->getHeaders()->getCorrelationId())
                     ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber + 1)
                     ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
                     ->build()
-                : MessageBuilder::fromParentMessage($replyMessage)
+                : $this->messageBuilder->fromParentMessage($replyMessage)
                     ->setPayload($payload)
                     ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(Type::createFromVariable($payload)->toString()))
                     ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $message->getHeaders()->getCorrelationId())
@@ -84,7 +85,7 @@ class SplitterHandler implements MessageHandler
         $nextStep = array_shift($routingSlip);
         $targetChannel = $this->channelResolver->resolve($nextStep);
 
-        $messageToSend = MessageBuilder::fromMessage($message)
+        $messageToSend = $this->messageBuilder->fromMessage($message)
             ->setRoutingSlip($routingSlip)
             ->build();
 

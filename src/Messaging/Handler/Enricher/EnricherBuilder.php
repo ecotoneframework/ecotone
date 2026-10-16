@@ -18,6 +18,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -149,6 +150,7 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
             $this->requestPayloadExpression,
             $this->requestHeaders,
             ExpressionLocation::definitionForEndpoint('Enricher request payload', $this->getInputMessageChannelName(), $this->requestPayloadExpression ?? ''),
+            new Reference(MessageBuilder::class),
         ]);
 
         return ServiceActivatorBuilder::createWithDefinition($internalEnrichingService, 'enrich')

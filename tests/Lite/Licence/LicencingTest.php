@@ -7,7 +7,6 @@ namespace Test\Ecotone\Lite\Licence;
 use DateTimeImmutable;
 use DateTimeZone;
 use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Support\LicensingException;
 
@@ -64,12 +63,11 @@ final class LicencingTest extends TestCase
             [
                 Person::class,
             ],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE]),
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
             licenceKey: $this->generate(
                 (new DateTimeImmutable('now', new DateTimeZone('UTC')))->modify('+30 seconds'),
                 false
-            )
+            ),
         );
 
         $this->expectNotToPerformAssertions();
@@ -99,12 +97,11 @@ final class LicencingTest extends TestCase
             [
                 Person::class,
             ],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE]),
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
             licenceKey: $this->generate(
                 $releaseTime->modify('+30 seconds'),
                 true
-            )
+            ),
         );
 
         $this->expectNotToPerformAssertions();

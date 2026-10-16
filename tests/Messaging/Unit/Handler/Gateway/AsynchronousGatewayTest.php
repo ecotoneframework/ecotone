@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Handler\Gateway;
 
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Support\LicensingException;
@@ -42,9 +41,9 @@ final class AsynchronousGatewayTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [AsyncTicketCreator::class, TicketService::class],
             [new TicketService()],
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
-                ->withEnabledModulePackageNames([])
         );
 
         /** @var AsyncTicketCreator $ticketCreator */
@@ -70,9 +69,9 @@ final class AsynchronousGatewayTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [AsyncTicketCreator::class, TicketService::class],
             [new TicketService()],
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
-                ->withEnabledModulePackageNames([])
         );
 
         /** @var AsyncTicketCreator $ticketCreator */
@@ -96,9 +95,9 @@ final class AsynchronousGatewayTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [AsyncCommandBus::class, TicketService::class],
             [new TicketService()],
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
-                ->withEnabledModulePackageNames([])
         );
 
         /** @var AsyncCommandBus $commandBus */
@@ -121,8 +120,8 @@ final class AsynchronousGatewayTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [AsyncTicketCreator::class, TicketService::class],
             [new TicketService()],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
     }
 }

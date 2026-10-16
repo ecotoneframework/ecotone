@@ -21,6 +21,7 @@ use Ecotone\Messaging\Attribute\EndpointAnnotation;
 use Ecotone\Messaging\Attribute\StreamBasedSource;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -128,23 +129,24 @@ final class AsynchronousModule implements AnnotationModule
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         $endpointChannels = $this->resolveChannels($extensionObjects);
-        $serviceConfiguration = ExtensionObjectResolver::resolveUnique(ServiceConfiguration::class, $extensionObjects, ServiceConfiguration::createWithDefaults());
+        $bootstrapConfiguration = ExtensionObjectResolver::resolveUnique(BootstrapConfiguration::class, $extensionObjects, BootstrapConfiguration::createWithDefaults());
         $pollingMetadata = ExtensionObjectResolver::resolve(PollingMetadata::class, $extensionObjects);
         $polingChannelBuilders = ExtensionObjectResolver::resolve(SimpleMessageChannelBuilder::class, $extensionObjects);
 
         foreach ($endpointChannels as $endpointChannel => $asyncChannels) {
             $messagingConfiguration->registerAsynchronousEndpoint($asyncChannels, $endpointChannel);
-            $this->registerDefaultPollingMetadata($serviceConfiguration, $asyncChannels, $pollingMetadata, $polingChannelBuilders, $messagingConfiguration);
+            $this->registerDefaultPollingMetadata($bootstrapConfiguration, $asyncChannels, $pollingMetadata, $polingChannelBuilders, $messagingConfiguration);
         }
         foreach ($this->streamSourcesAsyncEndpoints as $endpointChannel => $asyncChannels) {
             $asyncChannels = is_array($asyncChannels) ? $asyncChannels : [$asyncChannels];
-            $this->registerDefaultPollingMetadata($serviceConfiguration, $asyncChannels, $pollingMetadata, $polingChannelBuilders, $messagingConfiguration);
+            $this->registerDefaultPollingMetadata($bootstrapConfiguration, $asyncChannels, $pollingMetadata, $polingChannelBuilders, $messagingConfiguration);
         }
     }
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
     {
-        if (! $serviceConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
+        $bootstrapConfiguration = ExtensionObjectResolver::resolveUnique(BootstrapConfiguration::class, $serviceExtensions, BootstrapConfiguration::createWithDefaults());
+        if (! $bootstrapConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
             return [$this];
         }
 
@@ -234,10 +236,10 @@ final class AsynchronousModule implements AnnotationModule
         return $endpointChannels;
     }
 
-    public function registerDefaultPollingMetadata(ServiceConfiguration $serviceConfiguration, array $asyncChannels, array $pollingMetadata, array $polingChannelBuilders, Configuration $messagingConfiguration): void
+    public function registerDefaultPollingMetadata(BootstrapConfiguration $bootstrapConfiguration, array $asyncChannels, array $pollingMetadata, array $polingChannelBuilders, Configuration $messagingConfiguration): void
     {
         /** Default polling metadata for tests */
-        if ($serviceConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
+        if ($bootstrapConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
             foreach ($asyncChannels as $asyncEndpointChannel) {
                 if (! $this->hasPollingMetadata($pollingMetadata, $asyncEndpointChannel)) {
                     if ($this->isInMemoryPollableChannel($polingChannelBuilders, $asyncEndpointChannel)) {

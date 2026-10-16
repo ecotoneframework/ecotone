@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config;
 
 use Ecotone\Api\Attribute\InternalHandler;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Config\ConfigurationException;
@@ -22,13 +21,21 @@ final class HandlerAndChannelNamingValidationTest extends TestCase
     {
         $this->expectException(ConfigurationException::class);
 
-        EcotoneLite::bootstrapFlowTesting([DuplicateEndpointIdHandlers::class], [new DuplicateEndpointIdHandlers()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        EcotoneLite::bootstrapFlowTesting(
+            [DuplicateEndpointIdHandlers::class],
+            [new DuplicateEndpointIdHandlers()],
+            enabledModules: [],
+        );
     }
 
     public function test_handlers_with_no_explicit_endpoint_id_are_registered_with_generated_ids(): void
     {
         $handler = new GeneratedEndpointIdHandlers();
-        $ecotone = EcotoneLite::bootstrapFlowTesting([GeneratedEndpointIdHandlers::class], [$handler], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [GeneratedEndpointIdHandlers::class],
+            [$handler],
+            enabledModules: [],
+        );
 
         $ecotone->sendDirectToChannel('channelOne', 'a');
         $ecotone->sendDirectToChannel('channelTwo', 'b');
@@ -43,11 +50,11 @@ final class HandlerAndChannelNamingValidationTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [],
             [],
-            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
+            extensionObjects: [
                 SimpleMessageChannelBuilder::createDirectMessageChannel('duplicateChannel'),
                 SimpleMessageChannelBuilder::createQueueChannel('duplicateChannel'),
-            ])
-                ->withEnabledModulePackageNames([]),
+            ],
+            enabledModules: [],
         );
     }
 }

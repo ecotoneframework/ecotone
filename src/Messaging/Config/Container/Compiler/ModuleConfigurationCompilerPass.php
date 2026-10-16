@@ -8,9 +8,12 @@ use Ecotone\Api\ExtensionObject\ModulePackageList;
 use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Lite\Test\Configuration\ProvidedReferences;
 use Ecotone\Lite\Test\Configuration\ResolvesExtensionObjectsForFlowTesting;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
+use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\Module;
+use Ecotone\Messaging\Config\ModuleDefaultSerializationMediaType;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 
 /**
@@ -26,6 +29,7 @@ final class ModuleConfigurationCompilerPass implements CompilerPass
         private array $modules,
         private $extensionObjects,
         private ServiceConfiguration $serviceConfiguration,
+        private BootstrapConfiguration $bootstrapConfiguration,
         private MessagingSystemConfiguration $configuration,
         private ModuleReferenceSearchService $moduleReferenceSearchService
     ) {
@@ -39,6 +43,8 @@ final class ModuleConfigurationCompilerPass implements CompilerPass
         foreach ($this->modules as $module) {
             $extensionObjects = array_merge($extensionObjects, $module->getModuleExtensions($this->serviceConfiguration, $serviceExtensions, $this->configuration->getInterfaceToCallRegistry()));
         }
+
+        $extensionObjects = $this->withResolvedSerializationMediaType($extensionObjects);
 
         foreach ($this->modules as $module) {
             $module->prepare(
@@ -54,10 +60,30 @@ final class ModuleConfigurationCompilerPass implements CompilerPass
      * @param object[] $extensionObjects
      * @return object[]
      */
+    private function withResolvedSerializationMediaType(array $extensionObjects): array
+    {
+        if ($this->serviceConfiguration->defaultSerializationMediaType !== null) {
+            return $extensionObjects;
+        }
+
+        $moduleDefaults = ExtensionObjectResolver::resolve(ModuleDefaultSerializationMediaType::class, $extensionObjects);
+        $serviceConfiguration = $this->serviceConfiguration->withDefaultSerializationMediaType($moduleDefaults[0]->mediaType ?? ServiceConfiguration::DEFAULT_SERIALIZATION_MEDIA_TYPE);
+        $this->configuration->replaceServiceConfiguration($serviceConfiguration);
+
+        return array_map(
+            fn (object $extensionObject): object => $extensionObject instanceof ServiceConfiguration ? $serviceConfiguration : $extensionObject,
+            $extensionObjects,
+        );
+    }
+
+    /**
+     * @param object[] $extensionObjects
+     * @return object[]
+     */
     private function resolveForFlowTesting(array $extensionObjects): array
     {
         $externalContainer = $this->configuration->getExternalContainer();
-        if ($externalContainer === null || ! $this->serviceConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
+        if ($externalContainer === null || ! $this->bootstrapConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
             return $extensionObjects;
         }
 

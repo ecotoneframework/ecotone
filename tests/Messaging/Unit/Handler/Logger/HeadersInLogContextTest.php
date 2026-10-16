@@ -7,6 +7,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Logger;
 use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\ServiceContext;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
 use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
@@ -28,7 +29,7 @@ final class HeadersInLogContextTest extends TestCase
     public function test_configured_headers_are_in_the_command_handler_log_context(): void
     {
         $logger = $this->recordingLogger();
-        $ecotone = $this->bootstrap($logger, ServiceConfiguration::createWithDefaults()->withHeadersInLogContext(['userId', 'region']));
+        $ecotone = $this->bootstrap($logger, [ServiceConfiguration::createWithDefaults()->withHeadersInLogContext(['userId', 'region'])]);
 
         $ecotone->sendCommandWithRouting('order.place', 'order-1', metadata: ['userId' => 'user-7', 'region' => 'eu', 'secret' => 'hidden']);
 
@@ -41,7 +42,7 @@ final class HeadersInLogContextTest extends TestCase
     public function test_configured_header_is_in_the_event_handler_log_context_when_propagated_from_the_command(): void
     {
         $logger = $this->recordingLogger();
-        $ecotone = $this->bootstrap($logger, ServiceConfiguration::createWithDefaults()->withHeadersInLogContext(['userId']));
+        $ecotone = $this->bootstrap($logger, [ServiceConfiguration::createWithDefaults()->withHeadersInLogContext(['userId'])]);
 
         $ecotone->sendCommandWithRouting('order.place', 'order-1', metadata: ['userId' => 'user-7']);
 
@@ -51,7 +52,7 @@ final class HeadersInLogContextTest extends TestCase
     public function test_configured_header_is_in_the_asynchronous_consumption_log_context(): void
     {
         $logger = $this->recordingLogger();
-        $ecotone = $this->bootstrap($logger, ServiceConfiguration::createWithDefaults()->withHeadersInLogContext(['userId']));
+        $ecotone = $this->bootstrap($logger, [ServiceConfiguration::createWithDefaults()->withHeadersInLogContext(['userId'])]);
 
         $ecotone->sendCommandWithRouting('order.place_async', 'order-1', metadata: ['userId' => 'user-7']);
         $ecotone->run('orders_async', ExecutionPollingMetadata::createWithTestingSetup());
@@ -62,7 +63,7 @@ final class HeadersInLogContextTest extends TestCase
     public function test_configured_header_missing_from_the_message_is_left_out_of_the_log_context(): void
     {
         $logger = $this->recordingLogger();
-        $ecotone = $this->bootstrap($logger, ServiceConfiguration::createWithDefaults()->withHeadersInLogContext(['userId']));
+        $ecotone = $this->bootstrap($logger, [ServiceConfiguration::createWithDefaults()->withHeadersInLogContext(['userId'])]);
 
         $ecotone->sendCommandWithRouting('order.place', 'order-1');
 
@@ -72,22 +73,24 @@ final class HeadersInLogContextTest extends TestCase
     public function test_headers_are_left_out_of_the_log_context_unless_configured(): void
     {
         $logger = $this->recordingLogger();
-        $ecotone = $this->bootstrap($logger, ServiceConfiguration::createWithDefaults());
+        $ecotone = $this->bootstrap($logger, []);
 
         $ecotone->sendCommandWithRouting('order.place', 'order-1', metadata: ['userId' => 'user-7']);
 
         self::assertArrayNotHasKey('userId', $logger->contextOf('Executing Command Handler'));
     }
 
-    public function test_headers_configured_in_a_service_context_are_added_to_the_root_configuration(): void
+    public function test_headers_configured_in_a_service_context_are_in_the_log_context(): void
     {
         $logger = $this->recordingLogger();
-        $ecotone = $this->bootstrap(
-            $logger,
-            ServiceConfiguration::createWithDefaults()
-                ->withHeadersInLogContext(['userId'])
-                ->addExtensionObject(ServiceConfiguration::createWithDefaults()->withHeadersInLogContext(['region'])),
-        );
+        $serviceContext = new class () {
+            #[ServiceContext]
+            public function serviceConfiguration(): ServiceConfiguration
+            {
+                return ServiceConfiguration::createWithDefaults()->withHeadersInLogContext(['userId', 'region']);
+            }
+        };
+        $ecotone = $this->bootstrap($logger, [], [$serviceContext]);
 
         $ecotone->sendCommandWithRouting('order.place', 'order-1', metadata: ['userId' => 'user-7', 'region' => 'eu']);
 
@@ -104,7 +107,11 @@ final class HeadersInLogContextTest extends TestCase
         ServiceConfiguration::createWithDefaults()->withHeadersInLogContext(['userId', '']);
     }
 
-    private function bootstrap(object $logger, ServiceConfiguration $configuration): FlowTestSupport
+    /**
+     * @param object[] $extensionObjects
+     * @param object[] $serviceContexts
+     */
+    private function bootstrap(object $logger, array $extensionObjects, array $serviceContexts = []): FlowTestSupport
     {
         $handler = new class () {
             #[CommandHandler('order.place')]
@@ -126,11 +133,10 @@ final class HeadersInLogContextTest extends TestCase
         };
 
         return EcotoneLite::bootstrapFlowTesting(
-            [$handler::class],
-            [$handler, 'logger' => $logger],
-            $configuration
-                ->withEnabledModulePackageNames([])
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('orders_async')),
+            [$handler::class, ...array_map(fn (object $serviceContext): string => $serviceContext::class, $serviceContexts)],
+            [$handler, 'logger' => $logger, ...$serviceContexts],
+            extensionObjects: [...$extensionObjects, SimpleMessageChannelBuilder::createQueueChannel('orders_async')],
+            enabledModules: [],
         );
     }
 

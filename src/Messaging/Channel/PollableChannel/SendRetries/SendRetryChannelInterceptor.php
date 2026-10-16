@@ -32,7 +32,8 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
         private ErrorChannelService $errorChannelService,
         private ConfiguredMessagingSystem $configuredMessagingSystem,
         private LoggerInterface $logger,
-        private EcotoneClockInterface $clock
+        private EcotoneClockInterface $clock,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -98,7 +99,7 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
         }
 
         return array_map(
-            static fn (array $entry): Message => MessageBuilder::withPayload($entry['payload'])
+            fn (array $entry): Message => $this->messageBuilder->withPayload($entry['payload'])
                 ->setMultipleHeaders($entry['headers'])
                 ->build(),
             $payload->entries,
@@ -124,7 +125,7 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
             $failedDeliveries,
         ));
 
-        return MessageBuilder::fromMessage($message)
+        return $this->messageBuilder->fromMessage($message)
             ->setPayload($batchOfFailedDeliveries)
             ->build();
     }

@@ -7,7 +7,7 @@ use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Endpoint\PollingConsumer\RejectMessageException;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\StaticMessageBuilder;
 use InvalidArgumentException;
 
 /**
@@ -68,7 +68,7 @@ class DataReturningService implements DefinedObject
         }
 
         if ($this->asAMessage) {
-            return MessageBuilder::fromMessage($message)
+            return StaticMessageBuilder::fromMessage($message)
                         ->setMultipleHeaders($this->headers)
                         ->setPayload($this->data)
                         ->build();

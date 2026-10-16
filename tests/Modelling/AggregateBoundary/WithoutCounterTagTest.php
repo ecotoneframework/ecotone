@@ -19,7 +19,6 @@ use Ecotone\Api\EventSourcing\DecisionModelConcurrencyException;
 use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
 use Ecotone\Api\EventSourcing\EventCriteria;
 use Ecotone\Api\EventSourcing\EventStore;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\CommandBus;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
@@ -181,7 +180,7 @@ final class WithoutCounterTagTest extends TestCase
 
     private function itemsWithTheBoundarySwitchedOff(): int
     {
-        $ecotone = EcotoneLite::bootstrapFlowTesting(classesToResolve: [UnlockedBasketForWithoutCounterTag::class], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting(classesToResolve: [UnlockedBasketForWithoutCounterTag::class], enabledModules: []);
         $ecotone->sendCommandWithRouting('unlockedBasket.open', 'b-1');
         $ecotone->sendCommandWithRouting('unlockedBasket.addWhileAnotherAdditionLands', ['basketId' => 'b-1']);
 
@@ -196,8 +195,8 @@ final class WithoutCounterTagTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             classesToResolve: $classesToResolve,
             containerOrAvailableServices: $services,
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([$dynamicConsistencyBoundary])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [$dynamicConsistencyBoundary],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }

@@ -7,7 +7,6 @@ namespace Test\Ecotone\SymfonyContainer;
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\Attribute\Header;
 use Ecotone\Api\Attribute\QueryHandler;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
 use PHPUnit\Framework\TestCase;
@@ -69,16 +68,18 @@ final class CachedBootstrapIsolationTest extends TestCase
         EcotoneLite::bootstrap(
             [RegisterCustomerHandler::class],
             [new RegisterCustomerHandler()],
-            ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([])->withCacheDirectoryPath($cacheDirectory),
+            enabledModules: [],
             useCachedVersion: true,
+            cacheDirectoryPath: $cacheDirectory,
         )->getCommandBus()->sendWithRouting('customer.register');
 
         $blockCustomerHandler = new BlockCustomerHandler();
         EcotoneLite::bootstrap(
             [BlockCustomerHandler::class],
             [$blockCustomerHandler],
-            ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([])->withCacheDirectoryPath($cacheDirectory),
+            enabledModules: [],
             useCachedVersion: true,
+            cacheDirectoryPath: $cacheDirectory,
         )->getCommandBus()->sendWithRouting('customer.block');
 
         self::assertTrue($blockCustomerHandler->blocked);
@@ -89,10 +90,9 @@ final class CachedBootstrapIsolationTest extends TestCase
         return EcotoneLite::bootstrap(
             [$service::class],
             [$service],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withCacheDirectoryPath(sys_get_temp_dir() . '/ecotone_cached_bootstrap_isolation'),
+            enabledModules: [],
             useCachedVersion: true,
+            cacheDirectoryPath: sys_get_temp_dir().'/ecotone_cached_bootstrap_isolation',
         );
     }
 }

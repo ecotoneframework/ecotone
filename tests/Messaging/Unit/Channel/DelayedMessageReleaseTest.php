@@ -8,7 +8,6 @@ use DateTimeImmutable;
 use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Messaging\MessageHeaders;
@@ -74,10 +73,8 @@ final class DelayedMessageReleaseTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             [DelayedMessageHandler::class],
             [$handler],
-            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
-                SimpleMessageChannelBuilder::createQueueChannel(DelayedMessageHandler::CHANNEL, delayable: true),
-            ])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel(DelayedMessageHandler::CHANNEL, delayable:true)],
+            enabledModules: [],
         )->changeTimeTo(new DateTimeImmutable('2026-01-01 12:00:00'));
     }
 }

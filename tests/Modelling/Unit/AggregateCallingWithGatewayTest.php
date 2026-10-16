@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Modelling\AggregateNotFoundException;
 use PHPUnit\Framework\TestCase;
@@ -23,11 +22,7 @@ final class AggregateCallingWithGatewayTest extends TestCase
 {
     public function test_aggregate_with_gateway(): void
     {
-        $ecotone = EcotoneLite::bootstrapFlowTesting(
-            [Bucket::class, BucketGateway::class],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-        );
+        $ecotone = EcotoneLite::bootstrapFlowTesting([Bucket::class, BucketGateway::class], enabledModules: []);
 
         $bucketId = Uuid::uuid4();
 
@@ -49,11 +44,7 @@ final class AggregateCallingWithGatewayTest extends TestCase
 
     public function test_throwing_exception_when_aggregate_id_not_found(): void
     {
-        $ecotone = EcotoneLite::bootstrapFlowTesting(
-            [Bucket::class, BucketGateway::class],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-        );
+        $ecotone = EcotoneLite::bootstrapFlowTesting([Bucket::class, BucketGateway::class], enabledModules: []);
 
         $gateway = $ecotone->getGateway(BucketGateway::class);
 

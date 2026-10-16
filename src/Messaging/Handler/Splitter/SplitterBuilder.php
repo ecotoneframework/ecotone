@@ -21,6 +21,7 @@ use Ecotone\Messaging\Handler\Processor\ChainedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 use function is_string;
 
@@ -115,6 +116,7 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
             $this->outputMessageChannelName ? new ChannelReference($this->outputMessageChannelName) : null,
             $processor,
             new Reference(ChannelResolver::class),
+            new Reference(MessageBuilder::class),
             $interfaceToCall->toString(),
         ]);
     }

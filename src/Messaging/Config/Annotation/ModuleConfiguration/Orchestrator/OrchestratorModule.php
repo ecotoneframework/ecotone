@@ -18,6 +18,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
@@ -31,6 +32,7 @@ use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\LicensingException;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 #[ModuleAnnotation]
 /**
@@ -114,7 +116,7 @@ final class OrchestratorModule implements AnnotationModule
                     HeaderBuilder::create('routingSlip', self::ORCHESTRATOR_ROUTING_SLIP_HEADER),
                 ])
                 ->withCustomResultToMessageConverter(
-                    new Definition(OrchestratorResultMessageConverter::class, [MessageHeaders::ROUTING_SLIP])
+                    new Definition(OrchestratorResultMessageConverter::class, [MessageHeaders::ROUTING_SLIP, Reference::to(MessageBuilder::class)])
                 );
         }
 
@@ -219,7 +221,7 @@ final class OrchestratorModule implements AnnotationModule
             ->withEndpointId($annotation->getEndpointId())
             ->withInputChannelName($annotation->getInputChannelName())
             ->withCustomResultToMessageConverter(
-                new Definition(OrchestratorResultMessageConverter::class, [MessageHeaders::ROUTING_SLIP])
+                new Definition(OrchestratorResultMessageConverter::class, [MessageHeaders::ROUTING_SLIP, Reference::to(MessageBuilder::class)])
             );
     }
 

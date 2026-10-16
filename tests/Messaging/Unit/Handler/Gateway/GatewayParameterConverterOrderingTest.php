@@ -8,7 +8,6 @@ use Ecotone\Api\Attribute\Header;
 use Ecotone\Api\Attribute\InternalHandler;
 use Ecotone\Api\Attribute\MessageGateway;
 use Ecotone\Api\Attribute\Payload;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Messaging\Message;
 use PHPUnit\Framework\TestCase;
@@ -23,7 +22,11 @@ final class GatewayParameterConverterOrderingTest extends TestCase
     public function test_a_header_converter_and_a_payload_converter_can_target_different_parameters_of_the_same_gateway_call(): void
     {
         $handler = new CapturingHandler();
-        $ecotone = EcotoneLite::bootstrapFlowTesting([SendMailGateway::class, CapturingHandler::class], [$handler], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [SendMailGateway::class, CapturingHandler::class],
+            [$handler],
+            enabledModules: [],
+        );
 
         $ecotone->getGateway(SendMailGateway::class)->sendMail('123', 'some bla content');
 

@@ -25,7 +25,8 @@ final class Router implements MessageHandler
         private RouteSelector   $routeSelector,
         private bool            $isResolutionRequired,
         private ?string         $defaultResolutionChannelName,
-        private bool            $applySequence
+        private bool            $applySequence,
+        private MessageBuilder  $messageBuilder,
     ) {
     }
 
@@ -50,7 +51,7 @@ final class Router implements MessageHandler
             $outputChannel = $this->channelResolver->resolve($resolutionChannel);
 
             $messageToSend = $this->applySequence
-                                ? MessageBuilder::fromMessage($message)
+                                ? $this->messageBuilder->fromMessage($message)
                                     ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber)
                                     ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
                                     ->build()

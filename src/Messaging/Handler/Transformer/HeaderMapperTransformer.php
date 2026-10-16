@@ -3,27 +3,20 @@
 namespace Ecotone\Messaging\Handler\Transformer;
 
 use Ecotone\Api\Messaging\Message;
-use Ecotone\Messaging\Config\Container\DefinedObject;
-use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
  */
-final class HeaderMapperTransformer implements DefinedObject
+final class HeaderMapperTransformer
 {
-    private function __construct(private array $mappedHeaders)
+    public function __construct(private array $mappedHeaders, private MessageBuilder $messageBuilder)
     {
-    }
-
-    public static function create(array $mappedHeaders): self
-    {
-        return new self($mappedHeaders);
     }
 
     public function transform(Message $message): Message
     {
-        $messageToBuild = MessageBuilder::fromMessage($message);
+        $messageToBuild = $this->messageBuilder->fromMessage($message);
 
         foreach ($this->mappedHeaders as $fromHeaderName => $toHeaderName) {
             if ($message->getHeaders()->containsKey($fromHeaderName)) {
@@ -33,12 +26,5 @@ final class HeaderMapperTransformer implements DefinedObject
         }
 
         return $messageToBuild->build();
-    }
-
-    public function getDefinition(): Definition
-    {
-        return new Definition(self::class, [
-            $this->mappedHeaders,
-        ]);
     }
 }

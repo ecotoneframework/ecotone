@@ -28,6 +28,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Recoverability\RetryRunner;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class InterceptedConsumerBuilder
@@ -75,6 +76,7 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
             new Reference(ExpressionEvaluationService::REFERENCE),
             new Reference(AsyncHandlerAnnotationRegistry::class),
             new Reference(AsyncEndpointAnnotationContext::class),
+            new Reference(MessageBuilder::class),
         ]);
         $builder->registerPollingEndpoint($this->endpointId, $consumerRunner, $this->withContinuesPolling());
     }

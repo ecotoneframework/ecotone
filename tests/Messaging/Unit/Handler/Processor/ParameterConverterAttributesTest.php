@@ -11,7 +11,6 @@ use Ecotone\Api\Attribute\Headers;
 use Ecotone\Api\Attribute\Payload;
 use Ecotone\Api\Attribute\QueryHandler;
 use Ecotone\Api\Attribute\Reference;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Handler\MethodInvocationException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -30,7 +29,7 @@ final class ParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [RecordingParameterConverterHandler::class],
             [new RecordingParameterConverterHandler()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('converter.payload', 100);
@@ -43,7 +42,7 @@ final class ParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [RecordingParameterConverterHandler::class],
             [new RecordingParameterConverterHandler()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('converter.payloadExpression', 100);
@@ -56,7 +55,7 @@ final class ParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [RecordingParameterConverterHandler::class],
             [new RecordingParameterConverterHandler()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('converter.header', metadata: ['token' => 100]);
@@ -69,7 +68,7 @@ final class ParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [RecordingParameterConverterHandler::class],
             [new RecordingParameterConverterHandler()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $this->expectException(MethodInvocationException::class);
@@ -82,7 +81,7 @@ final class ParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [RecordingParameterConverterHandler::class],
             [new RecordingParameterConverterHandler()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('converter.optionalHeader');
@@ -95,7 +94,7 @@ final class ParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [RecordingParameterConverterHandler::class],
             [new RecordingParameterConverterHandler()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('converter.headerExpression', metadata: ['token' => 100]);
@@ -108,7 +107,7 @@ final class ParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [RecordingParameterConverterHandler::class],
             [new RecordingParameterConverterHandler()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('converter.allHeaders', metadata: ['some' => 'test']);
@@ -123,7 +122,7 @@ final class ParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [RecordingParameterConverterHandler::class],
             [new RecordingParameterConverterHandler(), 'referencedService' => $referencedService],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('converter.reference');
@@ -137,7 +136,7 @@ final class ParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [RecordingParameterConverterHandler::class],
             [new RecordingParameterConverterHandler(), 'referencedService' => $referencedService],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('converter.referenceExpression');
@@ -150,8 +149,8 @@ final class ParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [RecordingParameterConverterHandler::class],
             [new RecordingParameterConverterHandler()],
+            enabledModules: [],
             configurationVariables: ['appName' => 'ecotone-app'],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $ecotone->sendCommandWithRouting('converter.configurationVariable');
@@ -164,7 +163,7 @@ final class ParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [RecordingParameterConverterHandler::class],
             [new RecordingParameterConverterHandler()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('converter.configurationVariableWithDefault');
@@ -177,7 +176,7 @@ final class ParameterConverterAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [RequiredMissingConfigurationVariableHandler::class],
             [new RequiredMissingConfigurationVariableHandler()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $this->expectException(InvalidArgumentException::class);

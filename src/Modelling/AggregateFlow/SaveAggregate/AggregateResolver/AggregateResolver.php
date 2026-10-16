@@ -35,6 +35,7 @@ final class AggregateResolver
         private HeaderMapper $headerMapper,
         private EventMapper $eventMapper,
         private EcotoneClockInterface $clock,
+        private MessageBuilder $messageBuilder,
     ) {
 
     }
@@ -114,7 +115,7 @@ final class AggregateResolver
         $returnType = Type::createFromVariable($message->getPayload());
         if ($this->isNewAggregateInstanceReturned($returnType)) {
             $returnedResolvedAggregates = $this->resolveMultipleAggregates(
-                MessageBuilder::fromMessage($message)
+                $this->messageBuilder->fromMessage($message)
                     ->setPayload([])
                     ->setHeader(AggregateMessage::CALLED_AGGREGATE_INSTANCE, $message->getPayload())
                     ->setHeader(AggregateMessage::CALLED_AGGREGATE_CLASS, $returnType->getTypeHint())

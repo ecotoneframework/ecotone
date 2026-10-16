@@ -8,7 +8,6 @@ use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\Attribute\EventHandler;
 use Ecotone\Api\Attribute\Polling;
 use Ecotone\Api\EventSourcing\Event;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Messaging\MessageHeaders;
@@ -61,8 +60,7 @@ final class ProjectionEnterpriseTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
 
         $ecotone->withEvents([Event::createWithType('test-event', ['name' => 'Test'])]);
@@ -86,9 +84,8 @@ final class ProjectionEnterpriseTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $this->assertNotNull($ecotone);
@@ -109,8 +106,7 @@ final class ProjectionEnterpriseTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
 
         $this->assertNotNull($ecotone);
@@ -159,8 +155,7 @@ final class ProjectionEnterpriseTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
 
         $this->assertNotNull($ecotone);
@@ -181,8 +176,7 @@ final class ProjectionEnterpriseTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
 
         $this->assertNotNull($ecotone);
@@ -202,8 +196,7 @@ final class ProjectionEnterpriseTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
     }
 
@@ -221,8 +214,7 @@ final class ProjectionEnterpriseTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
     }
 
@@ -240,8 +232,7 @@ final class ProjectionEnterpriseTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
     }
 
@@ -259,8 +250,7 @@ final class ProjectionEnterpriseTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
     }
 
@@ -278,8 +268,7 @@ final class ProjectionEnterpriseTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
     }
 
@@ -297,8 +286,7 @@ final class ProjectionEnterpriseTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
     }
 
@@ -328,8 +316,7 @@ final class ProjectionEnterpriseTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class, $customStreamSource::class],
             [$projection, $customStreamSource],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
     }
 
@@ -381,8 +368,7 @@ final class ProjectionEnterpriseTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class, $customStateStorage::class],
             [$projection, $customStateStorage],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
     }
 
@@ -417,8 +403,7 @@ final class ProjectionEnterpriseTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class, $customPartitionProvider::class],
             [$projection, $customPartitionProvider],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
     }
 
@@ -437,8 +422,7 @@ final class ProjectionEnterpriseTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
     }
 
@@ -497,8 +481,7 @@ final class ProjectionEnterpriseTest extends TestCase
                 EcotoneLite::bootstrapFlowTesting(
                     [$projection::class],
                     [$projection],
-                    configuration: ServiceConfiguration::createWithDefaults()
-                        ->withEnabledModulePackageNames([])
+                    enabledModules: [],
                 );
                 $refusals[$methodName] = '';
             } catch (LicensingException $exception) {
@@ -529,8 +512,7 @@ final class ProjectionEnterpriseTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([]),
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
@@ -560,13 +542,12 @@ final class ProjectionEnterpriseTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
+            enabledModules: [],
         );
     }
 
     private function projectionNameRefusal(string $handler, string $projectionName): string
     {
-        return "#[ProjectionName] on \$projectionName of {$handler} requires the projection name, which is passed to a projection handler only under an Ecotone Enterprise licence, and this application runs without one: a parameter that is neither nullable nor defaulted would fail on every call. Either declare it as ?string \$projectionName = null to receive null without a licence, remove #[ProjectionName] if the handler does not need the name (the projection declares it in #[Projection('{$projectionName}')]), or obtain an Enterprise licence (see https://docs.ecotone.tech/enterprise) and pass it with ServiceConfiguration::withLicenceKey(). To evaluate Enterprise features, start a trial at https://ecotone.tech/pricing or email us at \"support@simplycodedsoftware.com\" for a trial key. Production licenses are available at https://ecotone.tech. Pass the key with ServiceConfiguration::withLicenceKey() or the licenceKey: argument of EcotoneLite::bootstrap() (Ecotone Lite), 'licenceKey' in config/ecotone.php (Laravel), ecotone.licenceKey in your Symfony configuration, or the licenceKey argument of EcotoneConfig (Tempest).";
+        return "#[ProjectionName] on \$projectionName of {$handler} requires the projection name, which is passed to a projection handler only under an Ecotone Enterprise licence, and this application runs without one: a parameter that is neither nullable nor defaulted would fail on every call. Either declare it as ?string \$projectionName = null to receive null without a licence, remove #[ProjectionName] if the handler does not need the name (the projection declares it in #[Projection('{$projectionName}')]), or obtain an Enterprise licence (see https://docs.ecotone.tech/enterprise) and pass it as the licenceKey of your framework's Ecotone configuration or of EcotoneLite::bootstrap(). To evaluate Enterprise features, start a trial at https://ecotone.tech/pricing or email us at \"support@simplycodedsoftware.com\" for a trial key. Production licenses are available at https://ecotone.tech. Pass the key with the licenceKey: argument of EcotoneLite::bootstrap() (Ecotone Lite), 'licenceKey' in config/ecotone.php (Laravel), ecotone.licenceKey in your Symfony configuration, or the licenceKey argument of EcotoneConfig (Tempest).";
     }
 }

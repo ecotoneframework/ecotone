@@ -16,6 +16,7 @@ class InvocationPollerAdapter implements MessagePoller
     public function __construct(
         private object $serviceToCall,
         private string $methodName,
+        private MessageBuilder $messageBuilder,
         private ?string $inboundRequestChannelName = null,
     ) {
     }
@@ -27,8 +28,8 @@ class InvocationPollerAdapter implements MessagePoller
             return null;
         }
         $message = $result instanceof Message
-            ? MessageBuilder::fromMessage($result)
-            : MessageBuilder::withPayload($result);
+            ? $this->messageBuilder->fromMessage($result)
+            : $this->messageBuilder->withPayload($result);
 
         if ($this->inboundRequestChannelName !== null) {
             $message = $message->setHeader(MessageHeaders::INBOUND_REQUEST_CHANNEL, $this->inboundRequestChannelName);

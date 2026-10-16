@@ -15,6 +15,7 @@ class PayloadResultMessageConverter implements ResultToMessageConverter
 {
     public function __construct(
         private Type $returnType,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -26,7 +27,7 @@ class PayloadResultMessageConverter implements ResultToMessageConverter
 
         $returnType = $this->getReturnTypeFromResult($result);
 
-        return MessageBuilder::fromMessage($requestMessage)
+        return $this->messageBuilder->fromMessage($requestMessage)
             ->setContentType(MediaType::createApplicationXPHPWithTypeParameter($returnType->toString()))
             ->setPayload($result)
             ->build();

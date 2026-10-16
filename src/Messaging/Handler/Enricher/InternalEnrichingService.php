@@ -46,7 +46,7 @@ class InternalEnrichingService
      * @param string $requestPayloadExpression
      * @param string[] $requestHeaders
      */
-    public function __construct(?EnrichGateway $enrichGateway, ExpressionEvaluationService $expressionEvaluationService, ConversionService $conversionService, array $setters, ?string $requestPayloadExpression, array $requestHeaders, private ExpressionLocation $requestPayloadLocation)
+    public function __construct(?EnrichGateway $enrichGateway, ExpressionEvaluationService $expressionEvaluationService, ConversionService $conversionService, array $setters, ?string $requestPayloadExpression, array $requestHeaders, private ExpressionLocation $requestPayloadLocation, private MessageBuilder $messageBuilder)
     {
         $this->enrichGateway               = $enrichGateway;
         $this->setters                     = $setters;
@@ -66,7 +66,7 @@ class InternalEnrichingService
     {
         $replyMessage = null;
         if ($this->enrichGateway) {
-            $requestMessage = MessageBuilder::fromMessage($message);
+            $requestMessage = $this->messageBuilder->fromMessage($message);
 
             if ($this->requestPayloadExpression) {
                 try {
@@ -99,7 +99,7 @@ class InternalEnrichingService
 
         $enrichedMessage = $this->getConvertedMessage($message);
         foreach ($this->setters as $setter) {
-            $settedMessage = MessageBuilder::fromMessage($enrichedMessage);
+            $settedMessage = $this->messageBuilder->fromMessage($enrichedMessage);
 
             if ($setter->isPayloadSetter()) {
                 $settedMessage = $settedMessage
@@ -125,7 +125,7 @@ class InternalEnrichingService
      */
     private function getConvertedMessage(Message $message): Message
     {
-        $enrichedMessage = MessageBuilder::fromMessage($message);
+        $enrichedMessage = $this->messageBuilder->fromMessage($message);
 
         if ($message->getHeaders()->containsKey(MessageHeaders::CONTENT_TYPE)) {
             $mediaType = MediaType::parseMediaType($message->getHeaders()->get(MessageHeaders::CONTENT_TYPE));

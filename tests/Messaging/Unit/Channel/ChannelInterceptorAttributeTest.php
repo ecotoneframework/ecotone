@@ -9,11 +9,12 @@ use Ecotone\Api\Attribute\Header;
 use Ecotone\Api\Attribute\InternalHandler;
 use Ecotone\Api\Attribute\Reference;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Support\LicensingException;
+use Ecotone\Test\ChannelTestSupport;
 use Ecotone\Test\LicenceTesting;
+use Ecotone\Test\StaticMessageBuilder;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -45,7 +46,7 @@ final class ChannelInterceptorAttributeTest extends TestCase
 
         $ecotone->sendCommandWithRouting(AsyncCapturingHandler::ROUTING_KEY, 'hello');
 
-        $queuedMessage = $ecotone->getMessageChannel(AsyncCapturingHandler::CHANNEL)->receive();
+        $queuedMessage = ChannelTestSupport::of($ecotone)->getMessageChannel(AsyncCapturingHandler::CHANNEL)->receive();
         $this->assertSame('HELLO', $queuedMessage->getPayload());
     }
 
@@ -112,9 +113,9 @@ final class ChannelInterceptorAttributeTest extends TestCase
             [$interceptor, $handler, new UppercaseService()],
         );
 
-        $ecotone->sendMessageDirectToChannel(
+        ChannelTestSupport::of($ecotone)->sendMessageDirectToChannel(
             CapturingHandler::CHANNEL,
-            \Ecotone\Messaging\Support\MessageBuilder::withPayload('hello')
+            StaticMessageBuilder::withPayload('hello')
                 ->setHeader('suffix', '!')
                 ->build(),
         );
@@ -130,7 +131,7 @@ final class ChannelInterceptorAttributeTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [UppercasingInterceptor::class, CapturingHandler::class],
             [new UppercasingInterceptor(), new CapturingHandler()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
     }
 
@@ -139,12 +140,9 @@ final class ChannelInterceptorAttributeTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             $classesToResolve,
             $services,
-            ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel(AsyncCapturingHandler::CHANNEL),
-                ])
-                    ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel(AsyncCapturingHandler::CHANNEL)],
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 }

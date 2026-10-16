@@ -13,7 +13,7 @@ use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Store\Document\DocumentException;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Messaging\Support\GenericMessage;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\ResolvedAggregate;
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
@@ -40,6 +40,7 @@ class EventSourcedRepositoryAdapter implements AggregateRepository
         private PropertyEditorAccessor $propertyEditorAccessor,
         private bool $isDefaultRepository,
         private LoggerInterface $logger,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -101,7 +102,7 @@ class EventSourcedRepositoryAdapter implements AggregateRepository
                 PropertyPath::createWith($aggregateClassDefinition->getAggregateVersionProperty()),
                 $aggregate,
                 $aggregateVersion,
-                GenericMessage::createWithEmptyHeaders(''),
+                $this->messageBuilder->withPayload('')->build(),
                 null
             );
         }

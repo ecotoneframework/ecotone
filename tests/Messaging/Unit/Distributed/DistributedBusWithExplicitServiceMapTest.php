@@ -24,9 +24,10 @@ use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Consumer\ConsumerPositionTracker;
 use Ecotone\Messaging\Consumer\InMemory\InMemoryConsumerPositionTracker;
 use Ecotone\Messaging\Support\LicensingException;
-use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\MessageHandling\Distribution\UnknownDistributedDestination;
+use Ecotone\Test\ChannelTestSupport;
 use Ecotone\Test\LicenceTesting;
+use Ecotone\Test\StaticMessageBuilder;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\Distributed\DistributedCommandBus\CommandConverter\RegisterTicketConverter;
 use Test\Ecotone\Messaging\Fixture\Distributed\DistributedCommandBus\Publisher\UserService;
@@ -315,8 +316,8 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
             metadata: ['token' => '123']
         );
 
-        self::assertNotNull($ticketService->getMessageChannel($ticketChannelName)->receive());
-        self::assertNull($userService->getMessageChannel($userChannelName)->receive());
+        self::assertNotNull(ChannelTestSupport::of($ticketService)->getMessageChannel($ticketChannelName)->receive());
+        self::assertNull(ChannelTestSupport::of($userService)->getMessageChannel($userChannelName)->receive());
     }
 
     public function test_publishing_events_with_name_filtering(): void
@@ -343,8 +344,8 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
             metadata: ['token' => '123']
         );
 
-        self::assertNotNull($ticketService->getMessageChannel($ticketChannelName)->receive());
-        self::assertNull($orderService->getMessageChannel($orderChannelName)->receive());
+        self::assertNotNull(ChannelTestSupport::of($ticketService)->getMessageChannel($ticketChannelName)->receive());
+        self::assertNull(ChannelTestSupport::of($orderService)->getMessageChannel($orderChannelName)->receive());
     }
 
     public function test_if_two_keys_match_event_is_published_once(): void
@@ -367,8 +368,8 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
             metadata: ['token' => '123']
         );
 
-        self::assertNotNull($ticketService->getMessageChannel($ticketChannelName)->receive());
-        self::assertNull($ticketService->getMessageChannel($ticketChannelName)->receive());
+        self::assertNotNull(ChannelTestSupport::of($ticketService)->getMessageChannel($ticketChannelName)->receive());
+        self::assertNull(ChannelTestSupport::of($ticketService)->getMessageChannel($ticketChannelName)->receive());
     }
 
     public function test_not_receiving_when_no_event_mapping(): void
@@ -391,7 +392,7 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
             metadata: ['token' => '123']
         );
 
-        self::assertNull($ticketService->getMessageChannel($ticketChannelName)->receive());
+        self::assertNull(ChannelTestSupport::of($ticketService)->getMessageChannel($ticketChannelName)->receive());
     }
 
     /**
@@ -474,9 +475,9 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
             ]
         );
 
-        $this->assertNotNull($ticketService->getMessageChannel($ticketChannelName)->receive());
+        $this->assertNotNull(ChannelTestSupport::of($ticketService)->getMessageChannel($ticketChannelName)->receive());
         ;
-        $this->assertNull($orderService->getMessageChannel($orderChannelName)->receive());
+        $this->assertNull(ChannelTestSupport::of($orderService)->getMessageChannel($orderChannelName)->receive());
         ;
 
         $userService->getDistributedBus($externalDistributedBus)->publishEvent(
@@ -485,8 +486,8 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
             metadata: ['token' => '123']
         );
 
-        $this->assertNull($ticketService->getMessageChannel($ticketChannelName)->receive());
-        $this->assertNotNull($orderService->getMessageChannel($orderChannelName)->receive());
+        $this->assertNull(ChannelTestSupport::of($ticketService)->getMessageChannel($ticketChannelName)->receive());
+        $this->assertNotNull(ChannelTestSupport::of($orderService)->getMessageChannel($orderChannelName)->receive());
     }
 
     public function test_combining_distributed_bus_with_dynamic_message_channels(): void
@@ -532,9 +533,9 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
             ]
         );
 
-        $this->assertNotNull($ticketService->getMessageChannel($commandDistributedChannel->getMessageChannelName())->receive());
+        $this->assertNotNull(ChannelTestSupport::of($ticketService)->getMessageChannel($commandDistributedChannel->getMessageChannelName())->receive());
         ;
-        $this->assertNull($ticketService->getMessageChannel($eventDistributedChannel->getMessageChannelName())->receive());
+        $this->assertNull(ChannelTestSupport::of($ticketService)->getMessageChannel($eventDistributedChannel->getMessageChannelName())->receive());
         ;
 
         $userService->getDistributedBus()->publishEvent(
@@ -543,8 +544,8 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
             metadata: ['token' => '123']
         );
 
-        $this->assertNull($ticketService->getMessageChannel($commandDistributedChannel->getMessageChannelName())->receive());
-        $this->assertNotNull($ticketService->getMessageChannel($eventDistributedChannel->getMessageChannelName())->receive());
+        $this->assertNull(ChannelTestSupport::of($ticketService)->getMessageChannel($commandDistributedChannel->getMessageChannelName())->receive());
+        $this->assertNotNull(ChannelTestSupport::of($ticketService)->getMessageChannel($eventDistributedChannel->getMessageChannelName())->receive());
         ;
     }
 
@@ -555,9 +556,9 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
 
         self::assertEquals(0, $ticketService->sendQueryWithRouting(TicketServiceReceiver::GET_TICKETS_COUNT));
 
-        $messageChannel = $ticketService->getMessageChannel($sharedQueueChannel->getMessageChannelName());
+        $messageChannel = ChannelTestSupport::of($ticketService)->getMessageChannel($sharedQueueChannel->getMessageChannelName());
         $messageChannel->send(
-            MessageBuilder::withPayload('User changed billing address')
+            StaticMessageBuilder::withPayload('User changed billing address')
                 ->setHeader(MessageHeaders::ROUTING_SLIP, DistributedBusHeader::DISTRIBUTED_ROUTING_SLIP_VALUE)
                 ->setHeader(DistributedBusHeader::DISTRIBUTED_ROUTING_KEY, TicketServiceReceiver::CREATE_TICKET_ENDPOINT)
                 ->setHeader(DistributedBusHeader::DISTRIBUTED_PAYLOAD_TYPE, 'command')
@@ -583,12 +584,11 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
         $this->expectException(LicensingException::class);
 
         EcotoneLite::bootstrapFlowTesting(
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withServiceName('test')
-                ->withExtensionObjects([
-                    DistributedServiceMap::initialize(),
-                ])
-                    ->withEnabledModulePackageNames([]),
+            extensionObjects: [
+                DistributedServiceMap::initialize(),
+                ServiceConfiguration::createWithDefaults()->withServiceName('test'),
+            ],
+            enabledModules: [],
             pathToRootCatalog: __DIR__ . '/../../',
         );
     }
@@ -598,11 +598,8 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
         $this->expectException(ConfigurationException::class);
 
         EcotoneLite::bootstrapFlowTesting(
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    DistributedServiceMap::initialize(),
-                ])
-                    ->withEnabledModulePackageNames([]),
+            extensionObjects: [DistributedServiceMap::initialize()],
+            enabledModules: [],
             pathToRootCatalog: __DIR__ . '/../../',
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
@@ -677,15 +674,11 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
 
         return EcotoneLite::bootstrapFlowTesting(
             containerOrAvailableServices: $services,
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withServiceName($serviceName)
-                ->withEnabledModulePackageNames([])
-                ->withExtensionObjects(array_merge(is_array($sharedQueueChannel) ? $sharedQueueChannel : [
-                    $sharedQueueChannel ?? SimpleMessageChannelBuilder::createQueueChannel($serviceName),
-                ], $extensionObjects ?: []))
-                ->withNamespaces($namespaces),
+            extensionObjects: array_merge(array_merge(is_array($sharedQueueChannel) ? $sharedQueueChannel : [$sharedQueueChannel ?? SimpleMessageChannelBuilder::createQueueChannel($serviceName), ], $extensionObjects ?: []), [ServiceConfiguration::createWithDefaults()->withServiceName($serviceName)]),
+            enabledModules: [],
             pathToRootCatalog: __DIR__ . '/../../',
             licenceKey: LicenceTesting::VALID_LICENCE,
+            namespaces: $namespaces,
         );
     }
 
@@ -763,54 +756,51 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
         $publisherService = EcotoneLite::bootstrapFlowTesting(
             [$publisher::class],
             [$publisher, ConsumerPositionTracker::class => $positionTracker],
-            ServiceConfiguration::createWithDefaults()
-                ->withServiceName($service0Name)
-                ->withEnabledModulePackageNames([])
-                ->withExtensionObjects([
-                    $publisherStreamingChannel,
-                    $queueChannelService0,
-                    $queueChannelService1,
-                    $queueChannelService2,
-                    $sharedDistributedMap,
-                ]),
+            extensionObjects: [
+                $publisherStreamingChannel,
+                $queueChannelService0,
+                $queueChannelService1,
+                $queueChannelService2,
+                $sharedDistributedMap,
+                ServiceConfiguration::createWithDefaults()->withServiceName($service0Name),
+            ],
+            enabledModules: [],
             pathToRootCatalog: __DIR__ . '/../../',
-            licenceKey: LicenceTesting::VALID_LICENCE
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         // Consumer service 1
         $consumerService1 = EcotoneLite::bootstrapFlowTesting(
             [$consumer1::class],
             [$consumer1, ConsumerPositionTracker::class => $positionTracker],
-            ServiceConfiguration::createWithDefaults()
-                ->withServiceName($service1Name)
-                ->withEnabledModulePackageNames([])
-                ->withExtensionObjects([
-                    $publisherStreamingChannel,
-                    $queueChannelService0,
-                    $queueChannelService1,
-                    $queueChannelService2,
-                    $sharedDistributedMap,
-                ]),
+            extensionObjects: [
+                $publisherStreamingChannel,
+                $queueChannelService0,
+                $queueChannelService1,
+                $queueChannelService2,
+                $sharedDistributedMap,
+                ServiceConfiguration::createWithDefaults()->withServiceName($service1Name),
+            ],
+            enabledModules: [],
             pathToRootCatalog: __DIR__ . '/../../',
-            licenceKey: LicenceTesting::VALID_LICENCE
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         // Consumer service 2
         $consumerService2 = EcotoneLite::bootstrapFlowTesting(
             [$consumer2::class],
             [$consumer2, ConsumerPositionTracker::class => $positionTracker],
-            ServiceConfiguration::createWithDefaults()
-                ->withServiceName($service2Name)
-                ->withEnabledModulePackageNames([])
-                ->withExtensionObjects([
-                    $publisherStreamingChannel,
-                    $queueChannelService0,
-                    $queueChannelService1,
-                    $queueChannelService2,
-                    $sharedDistributedMap,
-                ]),
+            extensionObjects: [
+                $publisherStreamingChannel,
+                $queueChannelService0,
+                $queueChannelService1,
+                $queueChannelService2,
+                $sharedDistributedMap,
+                ServiceConfiguration::createWithDefaults()->withServiceName($service2Name),
+            ],
+            enabledModules: [],
             pathToRootCatalog: __DIR__ . '/../../',
-            licenceKey: LicenceTesting::VALID_LICENCE
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         // Publish events
@@ -824,9 +814,9 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
 
         $this->assertEquals(['event1', 'event2', 'event3'], $consumerService1->sendQueryWithRouting('getConsumed1'));
         $this->assertEquals(['event1', 'event2', 'event3'], $consumerService2->sendQueryWithRouting('getConsumed2'));
-        $this->assertNull($publisherService->getMessageChannel($service0Name)->receive());
-        $this->assertNull($consumerService1->getMessageChannel($service1Name)->receive());
-        $this->assertNull($consumerService2->getMessageChannel($service2Name)->receive());
+        $this->assertNull(ChannelTestSupport::of($publisherService)->getMessageChannel($service0Name)->receive());
+        $this->assertNull(ChannelTestSupport::of($consumerService1)->getMessageChannel($service1Name)->receive());
+        $this->assertNull(ChannelTestSupport::of($consumerService2)->getMessageChannel($service2Name)->receive());
     }
 
 
@@ -853,8 +843,8 @@ final class DistributedBusWithExplicitServiceMapTest extends TestCase
             metadata: ['token' => '123']
         );
 
-        self::assertNull($ticketService->getMessageChannel($ticketChannelName)->receive());
-        self::assertNotNull($userService->getMessageChannel($userChannelName)->receive());
+        self::assertNull(ChannelTestSupport::of($ticketService)->getMessageChannel($ticketChannelName)->receive());
+        self::assertNotNull(ChannelTestSupport::of($userService)->getMessageChannel($userChannelName)->receive());
     }
 
     public function test_cannot_use_both_exclude_and_include_publishing_services(): void

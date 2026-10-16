@@ -20,6 +20,7 @@ class RequestReplyProducer implements MessageHandler
         private MessageProcessor $messageProcessor,
         private ChannelResolver  $channelResolver,
         private bool             $isReplyRequired,
+        private MessageBuilder   $messageBuilder,
         private string           $name = '',
     ) {
     }
@@ -45,11 +46,11 @@ class RequestReplyProducer implements MessageHandler
                 $replyChannel = $this->channelResolver->resolve(array_shift($routingSlipChannels));
                 $routingSlip = implode(',', $routingSlipChannels);
                 if ($routingSlip) {
-                    $replyMessage = MessageBuilder::fromMessage($replyMessage)
+                    $replyMessage = $this->messageBuilder->fromMessage($replyMessage)
                         ->setHeader(MessageHeaders::ROUTING_SLIP, $routingSlip)
                         ->build();
                 } else {
-                    $replyMessage = MessageBuilder::fromMessage($replyMessage)
+                    $replyMessage = $this->messageBuilder->fromMessage($replyMessage)
                         ->removeHeader(MessageHeaders::ROUTING_SLIP)
                         ->build();
                 }

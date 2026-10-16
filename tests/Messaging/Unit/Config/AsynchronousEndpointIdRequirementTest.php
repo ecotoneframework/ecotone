@@ -10,7 +10,6 @@ use Ecotone\Api\Attribute\EventHandler;
 use Ecotone\Api\Attribute\InternalHandler;
 use Ecotone\Api\Attribute\QueryHandler;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Config\ConfigurationException;
@@ -28,7 +27,11 @@ final class AsynchronousEndpointIdRequirementTest extends TestCase
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessageMatches('/GeneratedIdCommandHandler::handle::.*CommandHandler should have endpointId defined for handling asynchronously/');
 
-        EcotoneLite::bootstrapFlowTesting([GeneratedIdCommandHandler::class], [new GeneratedIdCommandHandler()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        EcotoneLite::bootstrapFlowTesting(
+            [GeneratedIdCommandHandler::class],
+            [new GeneratedIdCommandHandler()],
+            enabledModules: [],
+        );
     }
 
     public function test_event_handler_without_endpoint_id_throws(): void
@@ -36,7 +39,11 @@ final class AsynchronousEndpointIdRequirementTest extends TestCase
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessageMatches('/GeneratedIdEventHandler::handle::.*EventHandler should have endpointId defined for handling asynchronously/');
 
-        EcotoneLite::bootstrapFlowTesting([GeneratedIdEventHandler::class], [new GeneratedIdEventHandler()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        EcotoneLite::bootstrapFlowTesting(
+            [GeneratedIdEventHandler::class],
+            [new GeneratedIdEventHandler()],
+            enabledModules: [],
+        );
     }
 
     public function test_internal_handler_without_endpoint_id_throws_for_method_level_asynchronous(): void
@@ -44,7 +51,11 @@ final class AsynchronousEndpointIdRequirementTest extends TestCase
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessageMatches('/GeneratedIdInternalHandlerMethodLevel::handle::.*InternalHandler should have endpointId defined for handling asynchronously/');
 
-        EcotoneLite::bootstrapFlowTesting([GeneratedIdInternalHandlerMethodLevel::class], [new GeneratedIdInternalHandlerMethodLevel()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        EcotoneLite::bootstrapFlowTesting(
+            [GeneratedIdInternalHandlerMethodLevel::class],
+            [new GeneratedIdInternalHandlerMethodLevel()],
+            enabledModules: [],
+        );
     }
 
     public function test_internal_handler_without_endpoint_id_throws_for_class_level_asynchronous(): void
@@ -52,12 +63,20 @@ final class AsynchronousEndpointIdRequirementTest extends TestCase
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessageMatches('/GeneratedIdInternalHandlerClassLevel::handle::.*InternalHandler should have endpointId defined for handling asynchronously/');
 
-        EcotoneLite::bootstrapFlowTesting([GeneratedIdInternalHandlerClassLevel::class], [new GeneratedIdInternalHandlerClassLevel()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        EcotoneLite::bootstrapFlowTesting(
+            [GeneratedIdInternalHandlerClassLevel::class],
+            [new GeneratedIdInternalHandlerClassLevel()],
+            enabledModules: [],
+        );
     }
 
     public function test_query_handler_without_endpoint_id_is_exempt(): void
     {
-        $ecotone = EcotoneLite::bootstrapFlowTesting([GeneratedIdQueryHandler::class], [new GeneratedIdQueryHandler()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [GeneratedIdQueryHandler::class],
+            [new GeneratedIdQueryHandler()],
+            enabledModules: [],
+        );
 
         $this->assertNotNull($ecotone);
     }
@@ -100,12 +119,12 @@ final class AsynchronousEndpointIdRequirementTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             $classesToResolve,
             $services,
-            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
+            extensionObjects: [
                 SimpleMessageChannelBuilder::createQueueChannel(ExplicitIdCommandHandler::CHANNEL),
                 SimpleMessageChannelBuilder::createQueueChannel(ExplicitIdEventHandler::CHANNEL),
                 SimpleMessageChannelBuilder::createQueueChannel(ExplicitIdInternalHandler::CHANNEL),
-            ])
-                ->withEnabledModulePackageNames([]),
+            ],
+            enabledModules: [],
         );
     }
 }

@@ -16,8 +16,11 @@ use function is_object;
 
 class TypeAliasResolverProcessor implements MessageProcessor
 {
-    public function __construct(private array $typeAliases, private string $typeHeaderName)
-    {
+    public function __construct(
+        private array $typeAliases,
+        private string $typeHeaderName,
+        private MessageBuilder $messageBuilder,
+    ) {
     }
 
     public function process(Message $message): ?Message
@@ -29,14 +32,14 @@ class TypeAliasResolverProcessor implements MessageProcessor
         if ($message->getHeaders()->containsKey($this->typeHeaderName)) {
             $routingKey = $message->getHeaders()->get($this->typeHeaderName);
             if (isset($this->typeAliases[$routingKey])) {
-                return MessageBuilder::fromMessage($message)
+                return $this->messageBuilder->fromMessage($message)
                     ->setHeader(MessageHeaders::TYPE_ID, $routingKey)
                     ->build();
             }
         }
 
         if (is_object($message->getPayload())) {
-            return MessageBuilder::fromMessage($message)
+            return $this->messageBuilder->fromMessage($message)
                 ->setHeader(MessageHeaders::TYPE_ID, get_class($message->getPayload()))
                 ->build();
         } else {

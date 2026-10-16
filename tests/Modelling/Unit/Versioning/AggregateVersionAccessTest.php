@@ -8,7 +8,6 @@ use Ecotone\Api\Attribute\Apply;
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\Attribute\EventSourcingAggregate;
 use Ecotone\Api\Attribute\Identifier;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Modelling\WithAggregateVersioning;
 use PHPUnit\Framework\TestCase;
@@ -21,7 +20,7 @@ final class AggregateVersionAccessTest extends TestCase
 {
     public function test_aggregate_using_versioning_trait_exposes_its_version(): void
     {
-        $ecotone = EcotoneLite::bootstrapFlowTesting([VersionedBasket::class], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting([VersionedBasket::class], enabledModules: []);
 
         $ecotone
             ->sendCommandWithRouting('versionedBasket.create', 'basket-1')

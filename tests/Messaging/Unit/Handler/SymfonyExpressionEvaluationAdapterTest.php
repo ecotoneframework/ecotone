@@ -5,7 +5,6 @@ namespace Test\Ecotone\Messaging\Unit\Handler;
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\Attribute\Payload;
 use Ecotone\Api\Attribute\QueryHandler;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
@@ -73,11 +72,10 @@ class SymfonyExpressionEvaluationAdapterTest extends TestCase
         $messaging = EcotoneLite::bootstrapFlowTesting(
             [get_class($handler)],
             [$handler],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([]),
+            enabledModules: [],
             configurationVariables: [
                 'multiplier' => 10,
-            ]
+            ],
         );
 
         $messaging->sendCommandWithRouting('calculate', ['value' => 5]);

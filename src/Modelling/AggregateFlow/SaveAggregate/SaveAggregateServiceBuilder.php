@@ -8,6 +8,7 @@ use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateResolver;
 use Ecotone\Modelling\Repository\AllAggregateRepository;
 
@@ -35,6 +36,7 @@ class SaveAggregateServiceBuilder implements CompilableBuilder
             Definition::createFor(PropertyReaderAccessor::class, []),
             new Reference(AggregateResolver::class),
             Reference::to(EventBus::class),
+            Reference::to(MessageBuilder::class),
         ]);
     }
 

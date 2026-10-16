@@ -13,7 +13,6 @@ use Ecotone\Api\Attribute\Identifier;
 use Ecotone\Api\Attribute\QueryHandler;
 use Ecotone\Api\Attribute\Saga;
 use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Test\LicenceTesting;
@@ -47,8 +46,8 @@ final class DecisionModelValidationTest extends TestCase
 
         EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [ModelWithMissingTagForValidationTest::class, EventWithoutStudentTagForValidationTest::class],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
@@ -59,8 +58,8 @@ final class DecisionModelValidationTest extends TestCase
 
         EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [ModelWithInterfaceTypedHandlerForValidationTest::class, TaggedEventInterfaceForValidationTest::class],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
@@ -71,8 +70,8 @@ final class DecisionModelValidationTest extends TestCase
 
         EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [ModelWithConstructorArgumentsForValidationTest::class, TaggedEventForValidationTest::class],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
@@ -83,8 +82,8 @@ final class DecisionModelValidationTest extends TestCase
 
         EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [ModelWithCommandHandlerForValidationTest::class, TaggedEventForValidationTest::class],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
@@ -98,8 +97,8 @@ final class DecisionModelValidationTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [$handler::class, ModelForValidationTest::class, TaggedEventForValidationTest::class],
             containerOrAvailableServices: [$handler],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
@@ -110,8 +109,8 @@ final class DecisionModelValidationTest extends TestCase
 
         EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [ModelWithNoHandledEventsForValidationTest::class],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
@@ -123,8 +122,8 @@ final class DecisionModelValidationTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [$handler::class, ModelForValidationTest::class, TaggedEventForValidationTest::class, CommandWithNullTagPropertyForValidationTest::class],
             containerOrAvailableServices: [$handler],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
@@ -150,8 +149,8 @@ final class DecisionModelValidationTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [$handler::class, CountingModelForValidationTest::class, TaggedEventForValidationTest::class],
             containerOrAvailableServices: [$handler],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
@@ -171,8 +170,8 @@ final class DecisionModelValidationTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [$handler::class, ModelForValidationTest::class, TaggedEventForValidationTest::class],
             containerOrAvailableServices: [$handler],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
@@ -184,8 +183,8 @@ final class DecisionModelValidationTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [$handler::class, ModelForValidationTest::class, TaggedEventForValidationTest::class],
             containerOrAvailableServices: [$handler],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
@@ -205,8 +204,8 @@ final class DecisionModelValidationTest extends TestCase
         try {
             EcotoneLite::bootstrapFlowTesting(
                 classesToResolve: [TenantItemsModelForValidationTest::class, TenantItemAddedForValidationTest::class],
-                configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()->withFilterOnlyTags(['tenant'])])
-                    ->withEnabledModulePackageNames([]),
+                extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()->withFilterOnlyTags(['tenant'])],
+                enabledModules: [],
                 licenceKey: LicenceTesting::VALID_LICENCE,
             );
             $this->fail('Expected a ConfigurationException');
@@ -225,8 +224,8 @@ final class DecisionModelValidationTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [$handler::class, TenantItemModelForValidationTest::class, TenantItemAddedForValidationTest::class],
             containerOrAvailableServices: [$handler],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()->withFilterOnlyTags(['tenant'])])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()->withFilterOnlyTags(['tenant'])],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
@@ -241,8 +240,8 @@ final class DecisionModelValidationTest extends TestCase
             EcotoneLite::bootstrapFlowTesting(
                 classesToResolve: [$handler::class, ModelForValidationTest::class, TaggedEventForValidationTest::class, CommandWithoutTagPropertyForValidationTest::class],
                 containerOrAvailableServices: [$handler],
-                configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                    ->withEnabledModulePackageNames([]),
+                extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+                enabledModules: [],
                 licenceKey: LicenceTesting::VALID_LICENCE,
             );
             $this->fail('Expected a ConfigurationException');
@@ -259,8 +258,8 @@ final class DecisionModelValidationTest extends TestCase
         try {
             EcotoneLite::bootstrapFlowTesting(
                 classesToResolve: [ModelHandlingUntaggedEventForValidationTest::class, UntaggedEventForValidationTest::class],
-                configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                    ->withEnabledModulePackageNames([]),
+                extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+                enabledModules: [],
                 licenceKey: LicenceTesting::VALID_LICENCE,
             );
             $this->fail('Expected a ConfigurationException');
@@ -277,8 +276,8 @@ final class DecisionModelValidationTest extends TestCase
         try {
             EcotoneLite::bootstrapFlowTesting(
                 classesToResolve: [ModelForValidationTest::class],
-                configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                    ->withEnabledModulePackageNames([]),
+                extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+                enabledModules: [],
                 licenceKey: LicenceTesting::VALID_LICENCE,
             );
             $this->fail('Expected a ConfigurationException');
@@ -293,8 +292,8 @@ final class DecisionModelValidationTest extends TestCase
         try {
             EcotoneLite::bootstrapFlowTesting(
                 classesToResolve: [ModelHandlingDisjointlyTaggedEventsForValidationTest::class, TaggedEventForValidationTest::class, StudentTaggedEventForValidationTest::class],
-                configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                    ->withEnabledModulePackageNames([]),
+                extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+                enabledModules: [],
                 licenceKey: LicenceTesting::VALID_LICENCE,
             );
             $this->fail('Expected a ConfigurationException');
@@ -322,8 +321,8 @@ final class DecisionModelValidationTest extends TestCase
         try {
             EcotoneLite::bootstrapFlowTesting(
                 classesToResolve: [$modelClass, TaggedEventForValidationTest::class],
-                configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                    ->withEnabledModulePackageNames([]),
+                extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+                enabledModules: [],
                 licenceKey: LicenceTesting::VALID_LICENCE,
             );
             $this->fail('Expected a ConfigurationException');

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config;
 
 use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Config\ConsoleInvocationResolver;
 use Ecotone\Messaging\Config\ModuleClassList;
 use PHPUnit\Framework\TestCase;
@@ -18,7 +18,7 @@ final class ConsoleInvocationResolverTest extends TestCase
 {
     public function test_resolves_no_console_prefix_when_no_framework_integration_package_is_loaded(): void
     {
-        $serviceConfiguration = ServiceConfiguration::createWithDefaults()
+        $serviceConfiguration = BootstrapConfiguration::createWithDefaults()
             ->withEnabledModulePackageNames([ModulePackageList::DBAL_PACKAGE]);
 
         $this->assertNull(ConsoleInvocationResolver::resolveConsolePrefix($serviceConfiguration));
@@ -32,7 +32,7 @@ final class ConsoleInvocationResolverTest extends TestCase
             }
         }
 
-        $serviceConfiguration = ServiceConfiguration::createWithDefaults()
+        $serviceConfiguration = BootstrapConfiguration::createWithDefaults()
             ->withEnabledModulePackageNames([ModulePackageList::SYMFONY_PACKAGE]);
 
         $this->assertNull(ConsoleInvocationResolver::resolveConsolePrefix($serviceConfiguration));

@@ -8,13 +8,13 @@ use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\Attribute\Header;
 use Ecotone\Api\Attribute\InternalHandler;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\LicensingException;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ChannelTestSupport;
 use Ecotone\Test\LicenceTesting;
+use Ecotone\Test\StaticMessageBuilder;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -77,9 +77,9 @@ final class InternalHandlerChangingHeadersTest extends TestCase
         $handlerB = new CapturingHandlerB();
         $ecotone = $this->bootstrap([EnrichingHandlerA::class, CapturingHandlerB::class], [new EnrichingHandlerA(), $handlerB]);
 
-        $ecotone->sendMessageDirectToChannel(
+        ChannelTestSupport::of($ecotone)->sendMessageDirectToChannel(
             EnrichingHandlerA::INPUT_CHANNEL,
-            MessageBuilder::withPayload('hello')
+            StaticMessageBuilder::withPayload('hello')
                 ->setHeader('enrichedHeader', 'original-value')
                 ->setHeader('preserveMe', 'still-here')
                 ->build(),
@@ -92,7 +92,11 @@ final class InternalHandlerChangingHeadersTest extends TestCase
     public function test_default_changing_headers_false_still_replaces_payload(): void
     {
         $handler = new DefaultBehaviorHandler();
-        $ecotone = EcotoneLite::bootstrapFlowTesting([DefaultBehaviorHandler::class], [$handler], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [DefaultBehaviorHandler::class],
+            [$handler],
+            enabledModules: [],
+        );
 
         $result = $ecotone->sendDirectToChannel(DefaultBehaviorHandler::INPUT_CHANNEL, 'hello');
 
@@ -104,7 +108,11 @@ final class InternalHandlerChangingHeadersTest extends TestCase
         $this->expectException(LicensingException::class);
         $this->expectExceptionMessageMatches('/EnrichingHandlerA::enrich/');
 
-        EcotoneLite::bootstrapFlowTesting([EnrichingHandlerA::class, CapturingHandlerB::class], [new EnrichingHandlerA(), new CapturingHandlerB()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        EcotoneLite::bootstrapFlowTesting(
+            [EnrichingHandlerA::class, CapturingHandlerB::class],
+            [new EnrichingHandlerA(), new CapturingHandlerB()],
+            enabledModules: [],
+        );
     }
 
     private function bootstrap(array $classesToResolve, array $services, array $extensionObjects = [])
@@ -112,10 +120,9 @@ final class InternalHandlerChangingHeadersTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             $classesToResolve,
             $services,
-            ServiceConfiguration::createWithDefaults()
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withExtensionObjects($extensionObjects)
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: $extensionObjects,
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 }

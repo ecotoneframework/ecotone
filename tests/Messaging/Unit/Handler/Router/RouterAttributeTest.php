@@ -6,7 +6,6 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Router;
 
 use Ecotone\Api\Attribute\InternalHandler;
 use Ecotone\Api\Attribute\Router;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Channel\WrongHandlerAmountException;
@@ -61,7 +60,7 @@ final class RouterAttributeTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [NotRequiredRouterHandler::class],
             [$handler],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->sendDirectToChannel(NotRequiredRouterHandler::ROUTER_CHANNEL, 'some');
@@ -90,7 +89,11 @@ final class RouterAttributeTest extends TestCase
         };
 
         try {
-            EcotoneLite::bootstrapFlowTesting([$fixture::class], [$fixture], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+            EcotoneLite::bootstrapFlowTesting(
+                [$fixture::class],
+                [$fixture],
+                enabledModules: [],
+            );
             $this->fail('A direct channel with two subscribed handlers was not refused at bootstrap');
         } catch (WrongHandlerAmountException $exception) {
             $this->assertStringContainsString('Direct channel `router.shared` delivers a message to one handler only', $exception->getMessage());
@@ -115,7 +118,11 @@ final class RouterAttributeTest extends TestCase
         };
 
         try {
-            EcotoneLite::bootstrapFlowTesting([$fixture::class], [$fixture], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+            EcotoneLite::bootstrapFlowTesting(
+                [$fixture::class],
+                [$fixture],
+                enabledModules: [],
+            );
             $this->fail('Two handlers on one direct channel were not refused at bootstrap');
         } catch (WrongHandlerAmountException $exception) {
             $this->assertStringContainsString('Direct channel `shared.channel` delivers a message to one handler only', $exception->getMessage());
@@ -146,10 +153,8 @@ final class RouterAttributeTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$fixture::class],
             [$fixture],
-            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
-                SimpleMessageChannelBuilder::createPublishSubscribeChannel('shared.channel'),
-            ])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createPublishSubscribeChannel('shared.channel')],
+            enabledModules: [],
         );
 
         $ecotone->sendDirectToChannel('shared.channel', 'some');
@@ -162,10 +167,8 @@ final class RouterAttributeTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             [CustomRouterHandler::class],
             [$handler],
-            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
-                SimpleMessageChannelBuilder::createQueueChannel('unused'),
-            ])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('unused')],
+            enabledModules: [],
         );
     }
 }

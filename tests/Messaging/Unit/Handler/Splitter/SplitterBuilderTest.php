@@ -7,6 +7,7 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Splitter;
 use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Handler\Splitter\SplitterBuilder;
+use Ecotone\Test\ChannelTestSupport;
 use Ecotone\Test\ComponentTestBuilder;
 use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
@@ -36,8 +37,8 @@ class SplitterBuilderTest extends MessagingTestCase
 
         $messaging->sendDirectToChannel('inputChannel', [1, 2]);
 
-        $this->assertEquals(1, $messaging->receiveMessageFrom('outputChannel')->getPayload());
-        $this->assertEquals(2, $messaging->receiveMessageFrom('outputChannel')->getPayload());
+        $this->assertEquals(1, ChannelTestSupport::of($messaging)->receiveMessageFrom('outputChannel')->getPayload());
+        $this->assertEquals(2, ChannelTestSupport::of($messaging)->receiveMessageFrom('outputChannel')->getPayload());
     }
 
     public function test_splitting_will_set_new_content_type()
@@ -53,8 +54,8 @@ class SplitterBuilderTest extends MessagingTestCase
 
         $messaging->sendDirectToChannel('inputChannel', [1, 2]);
 
-        $this->assertEquals(MediaType::createApplicationXPHPWithTypeParameter('int')->toString(), $messaging->receiveMessageFrom('outputChannel')->getHeaders()->getContentType()->toString());
-        $this->assertEquals(MediaType::createApplicationXPHPWithTypeParameter('int')->toString(), $messaging->receiveMessageFrom('outputChannel')->getHeaders()->getContentType()->toString());
+        $this->assertEquals(MediaType::createApplicationXPHPWithTypeParameter('int')->toString(), ChannelTestSupport::of($messaging)->receiveMessageFrom('outputChannel')->getHeaders()->getContentType()->toString());
+        $this->assertEquals(MediaType::createApplicationXPHPWithTypeParameter('int')->toString(), ChannelTestSupport::of($messaging)->receiveMessageFrom('outputChannel')->getHeaders()->getContentType()->toString());
     }
 
     public function test_converting_to_string()

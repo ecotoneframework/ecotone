@@ -4,6 +4,7 @@ namespace Ecotone\Messaging\Config\Container;
 
 use Ecotone\Api\ExtensionObject\PollingMetadata;
 use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Endpoint\EndpointRunner;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -33,6 +34,7 @@ class MessagingContainerBuilder
         private ContainerBuilder $builder,
         private InterfaceToCallRegistry $interfaceToCallRegistry,
         private ServiceConfiguration $applicationConfiguration,
+        private BootstrapConfiguration $bootstrapConfiguration,
         private array $pollingMetadata = [],
         private array $beforeInterceptors = [],
         private array $aroundInterceptors = [],
@@ -53,6 +55,11 @@ class MessagingContainerBuilder
     public function getServiceConfiguration(): ServiceConfiguration
     {
         return $this->applicationConfiguration;
+    }
+
+    public function getBootstrapConfiguration(): BootstrapConfiguration
+    {
+        return $this->bootstrapConfiguration;
     }
 
     public function registerPollingEndpoint(string $endpointId, Definition $definition, bool $withContinuousPolling = false): void

@@ -8,7 +8,6 @@ use Ecotone\Api\EventSourcing\AppendCondition;
 use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
 use Ecotone\Api\EventSourcing\Event;
 use Ecotone\Api\EventSourcing\EventStore;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
 use Ecotone\Api\Messaging\ConcurrencyException;
@@ -94,12 +93,12 @@ final class InMemoryEventStoreAppendConditionTest extends TestCase
     private function bootstrapEcotone(bool $dynamicConsistencyBoundaryEnabled = false): FlowTestSupport
     {
         if (! $dynamicConsistencyBoundaryEnabled) {
-            return EcotoneLite::bootstrapFlowTesting(configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+            return EcotoneLite::bootstrapFlowTesting(enabledModules: []);
         }
 
         return EcotoneLite::bootstrapFlowTesting(
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }

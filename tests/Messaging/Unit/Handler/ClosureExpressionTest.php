@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
 use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\ExtensionObject\TestConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
@@ -51,8 +50,8 @@ final class ClosureExpressionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ClosureExpressionService::class, UpperCaseService::class],
             [new ClosureExpressionService(), new UpperCaseService()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $ecotoneLite->sendCommandWithRouting('notification.send', 'hello', metadata: ['token' => 'abc']);
@@ -65,8 +64,8 @@ final class ClosureExpressionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ClosureExpressionService::class, UpperCaseService::class],
             [new ClosureExpressionService(), new UpperCaseService()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $ecotoneLite->sendCommandWithRouting('notification.sendWithReversedToken', 'hello', metadata: ['token' => 'abc']);
@@ -79,8 +78,8 @@ final class ClosureExpressionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ClosureExpressionService::class, UpperCaseService::class],
             [new ClosureExpressionService(), new UpperCaseService()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $ecotoneLite->sendCommandWithRouting('order.total', ['items' => [100, 250]], metadata: ['fee' => 50]);
@@ -95,7 +94,7 @@ final class ClosureExpressionTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [ClosureExpressionService::class, UpperCaseService::class],
             [new ClosureExpressionService(), new UpperCaseService()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
     }
 
@@ -104,10 +103,10 @@ final class ClosureExpressionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [DelayedClosureService::class],
             [new DelayedClosureService()],
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
             testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async'),
             licenceKey: LicenceTesting::VALID_LICENCE,
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
-                ->withEnabledModulePackageNames([])
         );
 
         $headers = $ecotoneLite
@@ -124,8 +123,8 @@ final class ClosureExpressionTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [DelayedClosureService::class],
             [new DelayedClosureService()],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
     }
 
@@ -139,8 +138,8 @@ final class ClosureExpressionTest extends TestCase
                 UserRepository::class => $userRepository,
                 FetchClosureOrderService::class => $orderService,
             ],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         $ecotoneLite->sendCommandWithRouting('placeOrderWithClosureFetch', new PlaceOrder('order-1', 'user-1', 'Laptop'));
@@ -154,10 +153,6 @@ final class ClosureExpressionTest extends TestCase
     public function test_closure_expression_works_with_dumped_container(): void
     {
         $cacheDirectory = sys_get_temp_dir() . '/ecotone_closure_expression/' . uniqid('', true);
-        $configuration = ServiceConfiguration::createWithDefaults()
-            ->withCacheDirectoryPath($cacheDirectory)
-            ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-            ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE]);
         $service = new ClosureExpressionService();
         $availableServices = [
             ClosureExpressionService::class => $service,
@@ -167,16 +162,20 @@ final class ClosureExpressionTest extends TestCase
         $messagingSystem = EcotoneLite::bootstrap(
             [ClosureExpressionService::class, UpperCaseService::class],
             $availableServices,
-            $configuration,
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
             useCachedVersion: true,
+            licenceKey: LicenceTesting::VALID_LICENCE,
+            cacheDirectoryPath: $cacheDirectory,
         );
         $messagingSystem->getCommandBus()->sendWithRouting('notification.send', 'first', metadata: ['token' => 'abc']);
 
         $warmBootedMessagingSystem = EcotoneLite::bootstrap(
             [ClosureExpressionService::class, UpperCaseService::class],
             $availableServices,
-            $configuration,
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
             useCachedVersion: true,
+            licenceKey: LicenceTesting::VALID_LICENCE,
+            cacheDirectoryPath: $cacheDirectory,
         );
         $warmBootedMessagingSystem->getCommandBus()->sendWithRouting('notification.send', 'second', metadata: ['token' => 'xyz']);
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Api\ExtensionObject;
 
+use DateTimeImmutable;
 use Ecotone\Messaging\Support\Assert;
 
 /**
@@ -22,12 +23,18 @@ final class TestConfiguration
         public readonly array $spiedChannelNames,
         public readonly bool $inMemoryConsumerPositionTracker,
         public readonly bool $databaseTablesSetUpOnBootstrap,
+        public readonly ?DateTimeImmutable $timeAt,
     ) {
     }
 
     public static function createWithDefaults(): self
     {
-        return new self(true, true, null, '', [], true, true);
+        return new self(true, true, null, '', [], true, true, null);
+    }
+
+    public function withTimeAt(DateTimeImmutable $time): self
+    {
+        return new self(...[...get_object_vars($this), 'timeAt' => $time]);
     }
 
     public function withFailOnCommandHandlerNotFound(bool $shouldFail): self

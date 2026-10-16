@@ -14,7 +14,6 @@ use Ecotone\Api\Attribute\Identifier;
 use Ecotone\Api\Attribute\MediaTypeConverter;
 use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
 use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\DocumentStore;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
@@ -233,7 +232,8 @@ final class AggregateBackedDecisionModelSnapshotTest extends TestCase
                 ...($withConverter ? [WalletBalanceConverterForSnapshotTest::class] : []),
             ],
             containerOrAvailableServices: $services,
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([$boundaryConfiguration])->withEnabledModulePackageNames([]),
+            extensionObjects: [$boundaryConfiguration],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 

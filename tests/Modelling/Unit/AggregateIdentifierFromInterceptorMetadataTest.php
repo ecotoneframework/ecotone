@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Test\Ecotone\Messaging\BaseEcotoneTestCase;
@@ -34,7 +33,7 @@ final class AggregateIdentifierFromInterceptorMetadataTest extends BaseEcotoneTe
             containerOrAvailableServices: [
                 new BeforeFinishOrder(),
             ],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('order.start', $orderId = 100);
@@ -53,9 +52,8 @@ final class AggregateIdentifierFromInterceptorMetadataTest extends BaseEcotoneTe
             containerOrAvailableServices: [
                 new BeforeFinishOrder(),
             ],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('order.start', $orderId = 100);
@@ -75,7 +73,7 @@ final class AggregateIdentifierFromInterceptorMetadataTest extends BaseEcotoneTe
             containerOrAvailableServices: [
                 new PresendFinishOrder(),
             ],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('order.start', $orderId = 100);
@@ -94,9 +92,8 @@ final class AggregateIdentifierFromInterceptorMetadataTest extends BaseEcotoneTe
             containerOrAvailableServices: [
                 new PresendFinishOrder(),
             ],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('order.start', $orderId = 100);

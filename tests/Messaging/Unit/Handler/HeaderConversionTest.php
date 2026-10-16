@@ -32,10 +32,8 @@ final class HeaderConversionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConvertedHeaderEndpoint::class, JsonConverter::class],
             [$convertedHeaderEndpoint, new JsonConverter()],
-            ($serviceConfiguration)->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel(
-                'async'
-            ))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [$serviceConfiguration, SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $ecotoneLite
@@ -57,10 +55,8 @@ final class HeaderConversionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConvertedHeaderEndpoint::class, JsonConverter::class],
             [$convertedHeaderEndpoint, new JsonConverter()],
-            ($serviceConfiguration)->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel(
-                'async'
-            ))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [$serviceConfiguration, SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $ecotoneLite
@@ -82,10 +78,8 @@ final class HeaderConversionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConvertedHeaderEndpoint::class, JsonConverter::class],
             [$convertedHeaderEndpoint, new JsonConverter()],
-            ($serviceConfiguration)->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel(
-                'async'
-            ))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [$serviceConfiguration, SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $ecotoneLite
@@ -116,7 +110,7 @@ final class HeaderConversionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$handler::class],
             [$handler],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotoneLite->sendCommandWithRouting('withNullableEnumConversion', metadata: [
@@ -133,11 +127,11 @@ final class HeaderConversionTest extends TestCase
     public static function differentDefaultSerializations(): iterable
     {
         yield [
-            ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([])
+            ServiceConfiguration::createWithDefaults()
                 ->withDefaultSerializationMediaType(MediaType::APPLICATION_X_PHP_SERIALIZED),
         ];
         yield [
-            ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([])
+            ServiceConfiguration::createWithDefaults()
                 ->withDefaultSerializationMediaType(MediaType::APPLICATION_JSON),
         ];
     }

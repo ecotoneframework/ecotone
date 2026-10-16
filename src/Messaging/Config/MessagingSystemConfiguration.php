@@ -72,6 +72,7 @@ use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\LicensingException;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Config\MessageBusChannel;
 use Exception;
 
@@ -156,6 +157,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private array $plainCombinedChannelUsages = [];
     private ServiceConfiguration $applicationConfiguration;
+    private BootstrapConfiguration $bootstrapConfiguration;
     /**
      * @var string[]
      */
@@ -192,19 +194,16 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @param object[] $extensionObjects
      */
-    private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, InterfaceToCallRegistry $preparationInterfaceRegistry, ServiceConfiguration $serviceConfiguration)
+    private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, InterfaceToCallRegistry $preparationInterfaceRegistry, BootstrapConfiguration $bootstrapConfiguration)
     {
-        $extensionObjects = array_merge($extensionObjects, $serviceConfiguration->extensionObjects);
-        $extensionApplicationConfiguration = [];
-        foreach ($extensionObjects as $extensionObject) {
-            if ($extensionObject instanceof ServiceConfiguration) {
-                $extensionApplicationConfiguration[] = $extensionObject;
-            }
-        }
-        $serviceConfiguration = $serviceConfiguration->mergeWith($extensionApplicationConfiguration);
+        $serviceConfiguration = self::resolveServiceConfiguration($extensionObjects, $bootstrapConfiguration->extensionObjects);
+        $extensionObjects = array_merge(
+            array_filter($extensionObjects, fn (?object $extensionObject): bool => ! $extensionObject instanceof ServiceConfigurationFromServiceContext),
+            $bootstrapConfiguration->extensionObjects,
+        );
 
         if (! $serviceConfiguration->connectionRetryTemplate) {
-            if ($serviceConfiguration->isProductionConfiguration()) {
+            if ($bootstrapConfiguration->isProductionConfiguration()) {
                 $serviceConfiguration = $serviceConfiguration->withConnectionRetryTemplate(
                     RetryTemplateBuilder::exponentialBackOff(1000, 3)
                         ->maxRetries(5)
@@ -218,6 +217,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         $this->applicationConfiguration = $serviceConfiguration;
+        $this->bootstrapConfiguration = $bootstrapConfiguration;
         $this->interfaceToCallRegistry = $preparationInterfaceRegistry;
 
         $extensionObjects = array_filter(
@@ -245,23 +245,51 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         $extensionObjects[] = $serviceConfiguration;
+        $extensionObjects[] = $bootstrapConfiguration;
 
-        if ($serviceConfiguration->licenceKey !== null) {
-            (new LicenceService())->validate($serviceConfiguration->licenceKey);
+        if ($bootstrapConfiguration->licenceKey !== null) {
+            (new LicenceService())->validate($bootstrapConfiguration->licenceKey);
             $this->isRunningForEnterpriseLicence = true;
         }
 
-        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $serviceConfiguration);
+        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $serviceConfiguration, $bootstrapConfiguration);
     }
 
-    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $serviceExtensions, ServiceConfiguration $serviceConfiguration): void
+    /**
+     * @param object[] $serviceContextExtensionObjects
+     * @param object[] $bootstrapExtensionObjects
+     */
+    private static function resolveServiceConfiguration(array $serviceContextExtensionObjects, array $bootstrapExtensionObjects): ServiceConfiguration
+    {
+        $fromServiceContext = ExtensionObjectResolver::resolve(ServiceConfigurationFromServiceContext::class, $serviceContextExtensionObjects);
+        $fromBootstrap = ExtensionObjectResolver::resolve(ServiceConfiguration::class, $bootstrapExtensionObjects);
+
+        if (count($fromBootstrap) > 1) {
+            throw ConfigurationException::create(
+                'Ecotone was given more than one ServiceConfiguration in the extensionObjects passed to EcotoneLite. '
+                . ServiceConfigurationFromServiceContext::ONLY_ONE_IS_READ
+                . 'Keep one of them and move every with*() call onto it.'
+            );
+        }
+        if ($fromBootstrap !== [] && $fromServiceContext !== []) {
+            throw ConfigurationException::create(
+                'Ecotone was given more than one ServiceConfiguration: one in the extensionObjects passed to EcotoneLite and one returned from ' . $fromServiceContext[0]->origin() . '. '
+                . ServiceConfigurationFromServiceContext::ONLY_ONE_IS_READ
+                . 'Keep one of them and move every with*() call onto it.'
+            );
+        }
+
+        return $fromBootstrap[0] ?? ($fromServiceContext === [] ? ServiceConfiguration::createWithDefaults() : $fromServiceContext[0]->serviceConfiguration);
+    }
+
+    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $serviceExtensions, ServiceConfiguration $serviceConfiguration, BootstrapConfiguration $bootstrapConfiguration): void
     {
         $moduleReferenceSearchService = ModuleReferenceSearchService::createEmpty();
 
-        $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations(array_diff(ModuleClassList::packageNames(), $serviceConfiguration->getEnabledModulePackageNames()));
+        $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations(array_diff(ModuleClassList::packageNames(), $bootstrapConfiguration->getEnabledModulePackageNames()));
 
         /** This will allow to delay all configuration when everything is already added to the MessagingConfiguration */
-        $this->moduleConfigurationCompilerPass = new ModuleConfigurationCompilerPass($modules, $serviceExtensions, $serviceConfiguration, $this, $moduleReferenceSearchService);
+        $this->moduleConfigurationCompilerPass = new ModuleConfigurationCompilerPass($modules, $serviceExtensions, $serviceConfiguration, $bootstrapConfiguration, $this, $moduleReferenceSearchService);
         $this->moduleReferenceSearchService = $moduleReferenceSearchService;
     }
 
@@ -270,24 +298,29 @@ final class MessagingSystemConfiguration implements Configuration
         return $this->interfaceToCallRegistry;
     }
 
-    public static function getModuleClassesFor(ServiceConfiguration $serviceConfiguration): array
+    public function replaceServiceConfiguration(ServiceConfiguration $serviceConfiguration): void
+    {
+        $this->applicationConfiguration = $serviceConfiguration;
+    }
+
+    public static function getModuleClassesFor(BootstrapConfiguration $bootstrapConfiguration): array
     {
         $modulesClasses = [];
-        foreach (array_intersect(ModuleClassList::packageNames(), $serviceConfiguration->getEnabledModulePackageNames()) as $availablePackage) {
+        foreach (array_intersect(ModuleClassList::packageNames(), $bootstrapConfiguration->getEnabledModulePackageNames()) as $availablePackage) {
             $modulesClasses = array_merge($modulesClasses, ModuleClassList::forPackage($availablePackage));
         }
 
         return array_filter($modulesClasses, fn (string $moduleClassName): bool => class_exists($moduleClassName) || interface_exists($moduleClassName));
     }
 
-    public static function addCorePackage(ServiceConfiguration $serviceConfiguration, bool $enableTestPackage): ServiceConfiguration
+    public static function addCorePackage(BootstrapConfiguration $bootstrapConfiguration, bool $enableTestPackage): BootstrapConfiguration
     {
-        $enabledModulePackageNames = array_diff($serviceConfiguration->getEnabledModulePackageNames(), [ModulePackageList::TEST_PACKAGE]);
+        $enabledModulePackageNames = array_diff($bootstrapConfiguration->getEnabledModulePackageNames(), [ModulePackageList::TEST_PACKAGE]);
         if ($enableTestPackage) {
             $enabledModulePackageNames[] = ModulePackageList::TEST_PACKAGE;
         }
 
-        return $serviceConfiguration->withEnabledModulePackageNames($enabledModulePackageNames);
+        return $bootstrapConfiguration->withEnabledModulePackageNames($enabledModulePackageNames);
     }
 
     private function prepareAndOptimizeConfiguration(InterfaceToCallRegistry $interfaceToCallRegistry): void
@@ -518,13 +551,14 @@ final class MessagingSystemConfiguration implements Configuration
                     $generatedEndpointId = Uuid::v7()->toRfc4122();
                     $this->registerMessageHandler(
                         UninterruptibleServiceActivator::create(
-                            RoutingSlipPrepender::create(
+                            new Definition(RoutingSlipPrepender::class, [
                                 $consequentialChannels,
                                 [
                                     MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME,
                                     MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME,
-                                ]
-                            ),
+                                ],
+                                Reference::to(MessageBuilder::class),
+                            ]),
                             'transform',
                         )
                             ->withEndpointId($generatedEndpointId)
@@ -670,12 +704,12 @@ final class MessagingSystemConfiguration implements Configuration
 
     public static function prepareWithDefaultsForTesting(
         array $extensionObjects = [],
-        ?ServiceConfiguration $serviceConfiguration = null
+        ?BootstrapConfiguration $bootstrapConfiguration = null
     ): Configuration {
         return self::prepare(
             __DIR__ .'/../../../',
             InMemoryConfigurationVariableService::createEmpty(),
-            $serviceConfiguration ?? ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            $bootstrapConfiguration ?? BootstrapConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
             $extensionObjects,
             true,
         );
@@ -684,24 +718,24 @@ final class MessagingSystemConfiguration implements Configuration
     public static function prepare(
         string $rootPathToSearchConfigurationFor,
         ConfigurationVariableService $configurationVariableService,
-        ServiceConfiguration $serviceConfiguration,
+        BootstrapConfiguration $bootstrapConfiguration,
         array $userLandClassesToRegister = [],
         bool $enableTestPackage = false,
     ): Configuration {
-        $serviceConfiguration = self::addCorePackage($serviceConfiguration, $enableTestPackage);
+        $bootstrapConfiguration = self::addCorePackage($bootstrapConfiguration, $enableTestPackage);
 
         return self::prepareWithAnnotationFinder(
             AnnotationFinderFactory::createForAttributes(
                 realpath($rootPathToSearchConfigurationFor),
-                $serviceConfiguration->namespaces,
-                $serviceConfiguration->environment,
-                $serviceConfiguration->loadCatalog ?? '',
-                self::getModuleClassesFor($serviceConfiguration),
+                $bootstrapConfiguration->namespaces,
+                $bootstrapConfiguration->environment,
+                $bootstrapConfiguration->loadCatalog,
+                self::getModuleClassesFor($bootstrapConfiguration),
                 $userLandClassesToRegister,
                 $enableTestPackage
             ),
             $configurationVariableService,
-            $serviceConfiguration,
+            $bootstrapConfiguration,
             $enableTestPackage,
         );
     }
@@ -709,10 +743,10 @@ final class MessagingSystemConfiguration implements Configuration
     public static function prepareWithAnnotationFinder(
         AnnotationFinder $annotationFinder,
         ConfigurationVariableService $configurationVariableService,
-        ServiceConfiguration $serviceConfiguration,
+        BootstrapConfiguration $bootstrapConfiguration,
         bool $enableTestPackage = false,
     ): Configuration {
-        $serviceConfiguration = self::addCorePackage($serviceConfiguration, $enableTestPackage);
+        $bootstrapConfiguration = self::addCorePackage($bootstrapConfiguration, $enableTestPackage);
 
         $preparationInterfaceRegistry = InterfaceToCallRegistry::createWith($annotationFinder);
         return self::prepareWithModuleRetrievingService(
@@ -722,7 +756,7 @@ final class MessagingSystemConfiguration implements Configuration
                 $configurationVariableService
             ),
             $preparationInterfaceRegistry,
-            $serviceConfiguration,
+            $bootstrapConfiguration,
         );
     }
 
@@ -732,13 +766,13 @@ final class MessagingSystemConfiguration implements Configuration
     public static function prepareWithModuleRetrievingService(
         ModuleRetrievingService $moduleConfigurationRetrievingService,
         InterfaceToCallRegistry $preparationInterfaceRegistry,
-        ServiceConfiguration $applicationConfiguration,
+        BootstrapConfiguration $bootstrapConfiguration,
     ): MessagingSystemConfiguration {
         return new self(
             $moduleConfigurationRetrievingService,
             $moduleConfigurationRetrievingService->findAllExtensionObjects(),
             $preparationInterfaceRegistry,
-            $applicationConfiguration,
+            $bootstrapConfiguration,
         );
     }
 
@@ -1040,6 +1074,7 @@ final class MessagingSystemConfiguration implements Configuration
             $builder,
             $this->interfaceToCallRegistry,
             $this->applicationConfiguration,
+            $this->bootstrapConfiguration,
             $this->pollingMetadata,
             $this->beforeCallMethodInterceptors,
             $this->aroundMethodInterceptors,
@@ -1156,7 +1191,7 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         $messagingBuilder->register(ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), $messagingBuilder->getPollingEndpoints(), $gatewayListReferences]));
-        (new RegisterSingletonMessagingServices($this->applicationConfiguration))->process($builder);
+        (new RegisterSingletonMessagingServices($this->bootstrapConfiguration))->process($builder);
         foreach ($this->compilerPasses as $compilerPass) {
             $compilerPass->process($builder);
         }
@@ -1165,7 +1200,7 @@ final class MessagingSystemConfiguration implements Configuration
 
         (new Container\Compiler\ValidateRequiredReferencesPass(
             $this->requiredReferences,
-            $this->applicationConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE),
+            $this->bootstrapConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE),
             $this->externalContainer
         ))->process($builder);
     }
@@ -1175,7 +1210,7 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function getRequiredReferencesForValidation(): array
     {
-        if ($this->applicationConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
+        if ($this->bootstrapConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
             return [];
         }
 

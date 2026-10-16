@@ -10,7 +10,6 @@ use Ecotone\Api\Attribute\QueryHandler;
 use Ecotone\Api\EventSourcing\Event;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
 use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Messaging\MessageHeaders;
@@ -53,18 +52,13 @@ final class EventStoreChannelAdapterTest extends TestCase
                 $consumer,
                 ConsumerPositionTracker::class => $positionTracker,
             ],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createStreamingChannel('event_stream'),
-                    EventStreamingChannelAdapter::create(
-                        streamChannelName: 'event_stream',
-                        endpointId: 'event_store_feeder',
-                        fromStream: 'test_stream'
-                    ),
-                    PollingMetadata::create('stream_consumer')->withTestingSetup(),
-                ])
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createStreamingChannel('event_stream'),
+                EventStreamingChannelAdapter::create(streamChannelName:'event_stream', endpointId:'event_store_feeder', fromStream:'test_stream'),
+                PollingMetadata::create('stream_consumer')->withTestingSetup(),
+            ],
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         // When events are appended to the stream source
@@ -113,18 +107,13 @@ final class EventStoreChannelAdapterTest extends TestCase
                 $consumer,
                 ConsumerPositionTracker::class => $positionTracker,
             ],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createStreamingChannel('event_stream'),
-                    EventStreamingChannelAdapter::create(
-                        streamChannelName: 'event_stream',
-                        endpointId: 'event_store_feeder',
-                        fromStream: 'test_stream'
-                    )->withEventNames(['ticket.registered']), // Only registered events
-                    PollingMetadata::create('stream_consumer')->withTestingSetup(),
-                ])
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createStreamingChannel('event_stream'),
+                EventStreamingChannelAdapter::create(streamChannelName:'event_stream', endpointId:'event_store_feeder', fromStream:'test_stream')->withEventNames(['ticket.registered']),
+                PollingMetadata::create('stream_consumer')->withTestingSetup(),
+            ],
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         // When events are appended to the stream source
@@ -203,18 +192,13 @@ final class EventStoreChannelAdapterTest extends TestCase
                 $consumer,
                 ConsumerPositionTracker::class => $positionTracker,
             ],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createStreamingChannel('event_stream'),
-                    EventStreamingChannelAdapter::create(
-                        streamChannelName: 'event_stream',
-                        endpointId: 'event_store_feeder',
-                        fromStream: 'test_stream'
-                    ),
-                    PollingMetadata::create('stream_consumer')->withTestingSetup(),
-                ])
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createStreamingChannel('event_stream'),
+                EventStreamingChannelAdapter::create(streamChannelName:'event_stream', endpointId:'event_store_feeder', fromStream:'test_stream'),
+                PollingMetadata::create('stream_consumer')->withTestingSetup(),
+            ],
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         // When events are published via Event Bus (which triggers event handlers)

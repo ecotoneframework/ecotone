@@ -6,7 +6,7 @@ namespace Test\Ecotone\Messaging\Unit\Channel;
 
 use Ecotone\Messaging\Channel\PollableChannelInterceptorAdapter;
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\StaticMessageBuilder;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
@@ -25,8 +25,8 @@ class ChannelInterceptorTest extends TestCase
 {
     public function test_intercepting_sending_with_sucess()
     {
-        $requestMessage = MessageBuilder::withPayload('some1')->build();
-        $transformedMessage = MessageBuilder::withPayload('some2')->build();
+        $requestMessage = StaticMessageBuilder::withPayload('some1')->build();
+        $transformedMessage = StaticMessageBuilder::withPayload('some2')->build();
         $queueChannel = QueueChannel::create();
 
         $channelInterceptor = new TestChannelInterceptor($transformedMessage);
@@ -47,7 +47,7 @@ class ChannelInterceptorTest extends TestCase
 
     public function test_intercepting_to_not_send_the_request_message()
     {
-        $requestMessage = MessageBuilder::withPayload('some1')->build();
+        $requestMessage = StaticMessageBuilder::withPayload('some1')->build();
         $queueChannel = QueueChannel::create();
 
         $channelInterceptor = new TestChannelInterceptor(null, true, false, null);
@@ -67,7 +67,7 @@ class ChannelInterceptorTest extends TestCase
 
     public function test_intercepting_send_completion_if_exception_occurred()
     {
-        $requestMessage = MessageBuilder::withPayload('some1')->build();
+        $requestMessage = StaticMessageBuilder::withPayload('some1')->build();
         $queueChannel = TestQueueChannel::createWithException();
 
         $channelInterceptor = new TestChannelInterceptor($requestMessage, true, false);
@@ -83,7 +83,7 @@ class ChannelInterceptorTest extends TestCase
 
     public function test_intercepting_send_completion_if_exception_occurred_and_was_handled()
     {
-        $requestMessage = MessageBuilder::withPayload('some1')->build();
+        $requestMessage = StaticMessageBuilder::withPayload('some1')->build();
         $queueChannel = TestQueueChannel::createWithException();
 
         $channelInterceptor = new TestChannelInterceptor($requestMessage, true, true);
@@ -104,7 +104,7 @@ class ChannelInterceptorTest extends TestCase
 
     public function test_intercepting_receiving_message_with_success()
     {
-        $message = MessageBuilder::withPayload('some1')->build();
+        $message = StaticMessageBuilder::withPayload('some1')->build();
         $queueChannel = QueueChannel::create();
         $queueChannel->send($message);
 
@@ -112,7 +112,7 @@ class ChannelInterceptorTest extends TestCase
             returnMessageOnPreSend: null,
             returnValueOnPreReceive: true,
             returnValueOnAfterSendCompletion: false,
-            returnMessageOnPostReceive: $expectedReceivedMessage = MessageBuilder::withPayload('some2')->build()
+            returnMessageOnPostReceive: $expectedReceivedMessage = StaticMessageBuilder::withPayload('some2')->build()
         );
 
         $pollableChannel = new PollableChannelInterceptorAdapter(
@@ -132,7 +132,7 @@ class ChannelInterceptorTest extends TestCase
 
     public function test_stopping_message_receiving()
     {
-        $message = MessageBuilder::withPayload('some1')->build();
+        $message = StaticMessageBuilder::withPayload('some1')->build();
         $queueChannel = QueueChannel::create();
         $queueChannel->send($message);
 

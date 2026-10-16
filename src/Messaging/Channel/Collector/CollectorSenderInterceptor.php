@@ -30,6 +30,7 @@ final class CollectorSenderInterceptor
         Message $message,
         #[Reference] ConfiguredMessagingSystem $configuredMessagingSystem,
         #[Reference] LoggingGateway $logger,
+        #[Reference] MessageBuilder $messageBuilder,
         ?WithoutMessageCollector $withoutMessageCollector = null,
     ): mixed {
         if ($withoutMessageCollector !== null) {
@@ -49,7 +50,7 @@ final class CollectorSenderInterceptor
 
                 if ($this->supportsBatchMessages($messageChannel)) {
                     $messageChannel->send(
-                        MessageBuilder::withPayload($this->combineIntoBatch($collectedMessages))->build()
+                        $messageBuilder->withPayload($this->combineIntoBatch($collectedMessages))->build()
                     );
                 } else {
                     foreach ($collectedMessages as $collectedMessage) {

@@ -6,7 +6,6 @@ namespace Modelling\Unit\Config\InstantRetry;
 
 use Ecotone\Api\Attribute\InstantRetry;
 use Ecotone\Api\ExtensionObject\InstantRetryConfiguration;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Config\ConfigurationException;
@@ -55,14 +54,11 @@ final class InstantRetryAttributeModuleTest extends TestCase
             [
                 new RetriedCommandHandler(),
             ],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('async'),
-                    InstantRetryConfiguration::createWithDefaults()
-                        ->withAsynchronousEndpointsRetry(true, 3)
-                        ->withCommandBusRetry(true, 3),
-                ]),
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+                InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(true, 3)->withCommandBusRetry(true, 3),
+            ],
+            enabledModules: [],
         );
     }
 
@@ -73,8 +69,8 @@ final class InstantRetryAttributeModuleTest extends TestCase
             [
                 new RetriedCommandHandler(),
             ],
-            self::asyncChannelConfiguration()
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE
         );
 
@@ -92,8 +88,8 @@ final class InstantRetryAttributeModuleTest extends TestCase
             [
                 new RetriedCommandHandler(),
             ],
-            self::asyncChannelConfiguration()
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE
         );
 
@@ -119,8 +115,8 @@ final class InstantRetryAttributeModuleTest extends TestCase
             [
                 new RetriedCommandHandler(),
             ],
-            self::asyncChannelConfiguration()
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE
         );
 
@@ -137,14 +133,12 @@ final class InstantRetryAttributeModuleTest extends TestCase
             [
                 new RetriedCommandHandler(),
             ],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('async'),
-                    InstantRetryConfiguration::createWithDefaults()
-                        ->withCommandBusRetry(true, 3),
-                ])
-                    ->withEnabledModulePackageNames([]),
-            licenceKey: LicenceTesting::VALID_LICENCE
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+                InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 3),
+            ],
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite
@@ -161,14 +155,12 @@ final class InstantRetryAttributeModuleTest extends TestCase
             [
                 new RetriedCommandHandler(),
             ],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('async'),
-                    InstantRetryConfiguration::createWithDefaults()
-                        ->withCommandBusRetry(true, 3),
-                ])
-                    ->withEnabledModulePackageNames([]),
-            licenceKey: LicenceTesting::VALID_LICENCE
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+                InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 3),
+            ],
+            enabledModules: [],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $this->expectException(RuntimeException::class);
@@ -188,8 +180,8 @@ final class InstantRetryAttributeModuleTest extends TestCase
                 new RetriedCommandHandler(),
                 $errorChannelHandler,
             ],
-            configuration: self::asyncChannelConfiguration()
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE
         );
 
@@ -210,8 +202,8 @@ final class InstantRetryAttributeModuleTest extends TestCase
                 new RetriedCommandHandler(),
                 $errorChannelHandler,
             ],
-            configuration: self::asyncChannelConfiguration()
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE
         );
 
@@ -233,15 +225,10 @@ final class InstantRetryAttributeModuleTest extends TestCase
             [
                 new RetriedCommandHandler(),
             ],
-            self::asyncChannelConfiguration()
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE
         );
     }
 
-    private static function asyncChannelConfiguration(): ServiceConfiguration
-    {
-        return ServiceConfiguration::createWithDefaults()
-            ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'));
-    }
 }

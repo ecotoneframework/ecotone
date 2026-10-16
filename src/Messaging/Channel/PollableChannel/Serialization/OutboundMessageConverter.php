@@ -23,6 +23,7 @@ class OutboundMessageConverter
 {
     public function __construct(
         private HeaderMapper $headerMapper,
+        private MessageBuilder $messageBuilder,
         private ?MediaType $defaultConversionMediaType = null,
         private ?int $defaultDeliveryDelay = null,
         private ?int $defaultTimeToLive = null,
@@ -44,7 +45,7 @@ class OutboundMessageConverter
 
         if (! is_string($payload) || ! isset($headers[MessageHeaders::MESSAGE_ID], $headers[MessageHeaders::TIMESTAMP])) {
             return $this->prepare(
-                MessageBuilder::withPayload($payload)->setMultipleHeaders($headers)->build(),
+                $this->messageBuilder->withPayload($payload)->setMultipleHeaders($headers)->build(),
                 $conversionService,
             );
         }

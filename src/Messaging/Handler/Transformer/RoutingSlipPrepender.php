@@ -3,8 +3,6 @@
 namespace Ecotone\Messaging\Handler\Transformer;
 
 use Ecotone\Api\Messaging\Message;
-use Ecotone\Messaging\Config\Container\DefinedObject;
-use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -16,36 +14,23 @@ use Ecotone\Messaging\Support\MessageBuilder;
 /**
  * licence Apache-2.0
  */
-final class RoutingSlipPrepender implements DefinedObject
+final class RoutingSlipPrepender
 {
     /**
      * HeaderEnricher constructor.
      * @param string[] $routingSlip
      */
-    private function __construct(private array $routingSlip, private array $unsetHeaders)
+    public function __construct(private array $routingSlip, private array $unsetHeaders, private MessageBuilder $messageBuilder)
     {
-    }
-
-    public static function create(array $routingSlip, array $unsetHeaders): self
-    {
-        return new self($routingSlip, $unsetHeaders);
     }
 
     public function transform(Message $message): Message
     {
-        $messageToBuild = MessageBuilder::fromMessage($message);
+        $messageToBuild = $this->messageBuilder->fromMessage($message);
 
         return $messageToBuild
                 ->prependRoutingSlip($this->routingSlip)
                 ->removeHeaders($this->unsetHeaders)
                 ->build();
-    }
-
-    public function getDefinition(): Definition
-    {
-        return new Definition(self::class, [
-            $this->routingSlip,
-            $this->unsetHeaders,
-        ], 'create');
     }
 }

@@ -10,7 +10,6 @@ use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
 use Ecotone\Api\EventSourcing\Event;
 use Ecotone\Api\EventSourcing\EventCriteria;
 use Ecotone\Api\EventSourcing\EventStore;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
 use Ecotone\Api\Messaging\ConcurrencyException;
@@ -79,13 +78,13 @@ final class AppendStrategyTest extends TestCase
     private function bootstrapEcotone(bool $dynamicConsistencyBoundaryEnabled = false, array $classesToResolve = []): FlowTestSupport
     {
         if (! $dynamicConsistencyBoundaryEnabled) {
-            return EcotoneLite::bootstrapFlowTesting(classesToResolve: $classesToResolve, configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+            return EcotoneLite::bootstrapFlowTesting(classesToResolve: $classesToResolve, enabledModules: []);
         }
 
         return EcotoneLite::bootstrapFlowTesting(
             classesToResolve: $classesToResolve,
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }

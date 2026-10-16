@@ -7,7 +7,6 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
@@ -46,14 +45,22 @@ final class AsynchronousModuleTest extends AnnotationConfigurationTestCase
     {
         $this->expectException(ConfigurationException::class);
 
-        EcotoneLite::bootstrapFlowTesting([AsyncEventHandlerWithoutIdExample::class], [new AsyncEventHandlerWithoutIdExample()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        EcotoneLite::bootstrapFlowTesting(
+            [AsyncEventHandlerWithoutIdExample::class],
+            [new AsyncEventHandlerWithoutIdExample()],
+            enabledModules: [],
+        );
     }
 
     public function test_throwing_exception_if_using_generated_id_for_command_handler()
     {
         $this->expectException(ConfigurationException::class);
 
-        EcotoneLite::bootstrapFlowTesting([AsyncCommandHandlerWithoutIdExample::class], [new AsyncCommandHandlerWithoutIdExample()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        EcotoneLite::bootstrapFlowTesting(
+            [AsyncCommandHandlerWithoutIdExample::class],
+            [new AsyncCommandHandlerWithoutIdExample()],
+            enabledModules: [],
+        );
     }
 
     public function test_messaging_provide_default_ending_polling_metadata()
@@ -104,9 +111,8 @@ final class AsynchronousModuleTest extends AnnotationConfigurationTestCase
         return EcotoneLite::bootstrapFlowTesting(
             $classesToResolve,
             $services,
-            (ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects($collectorConfigurations))->withExtensionObjects($channelBuilders)->addExtensionObject(\Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: array_merge($collectorConfigurations, $channelBuilders, [\Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false)]),
+            enabledModules: [],
         );
     }
 }

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Channel\DeliveryConfirmation;
 
 use Ecotone\Api\ExtensionObject\RetryTemplateBuilder;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Messaging\BatchMessage;
@@ -13,7 +12,8 @@ use Ecotone\Api\Messaging\Message;
 use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
 use Ecotone\Messaging\Channel\PollableChannel\PollableChannelConfiguration;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\ChannelTestSupport;
+use Ecotone\Test\StaticMessageBuilder;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\HighThroughputPublishing\AsyncOrderSubscriber;
 use Test\Ecotone\Messaging\Fixture\HighThroughputPublishing\InMemoryHighThroughputPublishingChannelBuilder;
@@ -29,11 +29,11 @@ final class DeadLetterOfFailedBatchDeliveriesTest extends TestCase
     public function test_send_retries_exhaustion_stores_each_failed_batch_delivery_as_separate_dead_letter(): void
     {
         $ecotoneLite = $this->bootstrapWithDeadLetterChannel();
-        $ordersChannel = $ecotoneLite->getMessageChannel('async_orders');
+        $ordersChannel = ChannelTestSupport::of($ecotoneLite)->getMessageChannel('async_orders');
         assert($ordersChannel instanceof MessageChannelInterceptorAdapter);
         $ordersChannel->getInternalMessageChannel()->failDeliveriesContaining('poison', 'nacked by broker');
 
-        $ordersChannel->send(MessageBuilder::withPayload(
+        $ordersChannel->send(StaticMessageBuilder::withPayload(
             BatchMessage::constructEmpty()
                 ->append('first poison order')
                 ->append('delivered order')
@@ -42,7 +42,7 @@ final class DeadLetterOfFailedBatchDeliveriesTest extends TestCase
 
         $this->assertSame(
             ['first poison order', 'second poison order'],
-            $this->receiveAllPayloads($ecotoneLite->getMessageChannel('dead_letters')),
+            $this->receiveAllPayloads(ChannelTestSupport::of($ecotoneLite)->getMessageChannel('dead_letters')),
         );
     }
 
@@ -52,19 +52,20 @@ final class DeadLetterOfFailedBatchDeliveriesTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, AsyncOrderSubscriber::class],
             [new OrderService($operationsLog), new AsyncOrderSubscriber(), OperationsLog::class => $operationsLog],
-            (ServiceConfiguration::createWithDefaults()->withExtensionObjects([
-                PollableChannelConfiguration::create('async_orders', RetryTemplateBuilder::fixedBackOff(1)->maxRetries(1)->build())
-                    ->withErrorChannel('dead_letters'),
-            ]))->addExtensionObject(InMemoryHighThroughputPublishingChannelBuilder::create('async_orders'))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('dead_letters'))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [
+                PollableChannelConfiguration::create('async_orders', RetryTemplateBuilder::fixedBackOff(1)->maxRetries(1)->build())->withErrorChannel('dead_letters'),
+                InMemoryHighThroughputPublishingChannelBuilder::create('async_orders'),
+                SimpleMessageChannelBuilder::createQueueChannel('dead_letters'),
+            ],
+            enabledModules: [],
         );
-        $ordersChannel = $ecotoneLite->getMessageChannel('async_orders');
+        $ordersChannel = ChannelTestSupport::of($ecotoneLite)->getMessageChannel('async_orders');
         assert($ordersChannel instanceof MessageChannelInterceptorAdapter);
         $ordersChannel->getInternalMessageChannel()->failDeliveriesWith('broker not available');
 
         $ecotoneLite->sendCommandWithRouting('order.place', 'espresso');
 
-        $deadLetteredPayloads = $this->receiveAllPayloads($ecotoneLite->getMessageChannel('dead_letters'));
+        $deadLetteredPayloads = $this->receiveAllPayloads(ChannelTestSupport::of($ecotoneLite)->getMessageChannel('dead_letters'));
         $this->assertCount(2, $deadLetteredPayloads);
         $this->assertStringContainsString('espresso-1', $deadLetteredPayloads[0]);
         $this->assertStringNotContainsString('espresso-2', $deadLetteredPayloads[0]);
@@ -79,11 +80,12 @@ final class DeadLetterOfFailedBatchDeliveriesTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             [OrderService::class],
             [new OrderService($operationsLog), OperationsLog::class => $operationsLog],
-            (ServiceConfiguration::createWithDefaults()->withExtensionObjects([
-                PollableChannelConfiguration::create('async_orders', RetryTemplateBuilder::fixedBackOff(1)->maxRetries(1)->build())
-                    ->withErrorChannel('dead_letters'),
-            ]))->addExtensionObject(InMemoryHighThroughputPublishingChannelBuilder::create('async_orders'))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('dead_letters'))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [
+                PollableChannelConfiguration::create('async_orders', RetryTemplateBuilder::fixedBackOff(1)->maxRetries(1)->build())->withErrorChannel('dead_letters'),
+                InMemoryHighThroughputPublishingChannelBuilder::create('async_orders'),
+                SimpleMessageChannelBuilder::createQueueChannel('dead_letters'),
+            ],
+            enabledModules: [],
         );
     }
 

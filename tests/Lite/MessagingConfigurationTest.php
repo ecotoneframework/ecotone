@@ -2,7 +2,6 @@
 
 namespace Test\Ecotone\Lite;
 
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Lite\InMemoryPSRContainer;
 use PHPUnit\Framework\TestCase;
@@ -28,13 +27,10 @@ class MessagingConfigurationTest extends TestCase
         $container = InMemoryPSRContainer::createFromObjects([
             new MultiplyCoins(), new Shop(),
         ]);
-        $serviceConfiguration = ServiceConfiguration::createWithDefaults()
-                                ->withNamespaces(["Test\Ecotone\Messaging\Fixture\Behat\Presend"])
-                                ->withEnabledModulePackageNames([]);
-
         $ecotone = EcotoneLite::bootstrap(
             containerOrAvailableServices: $container,
-            configuration: $serviceConfiguration,
+            namespaces: ["Test\Ecotone\Messaging\Fixture\Behat\Presend"],
+            enabledModules: [],
             allowGatewaysToBeRegisteredInContainer: true,
             pathToRootCatalog: __DIR__
         );

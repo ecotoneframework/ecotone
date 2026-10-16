@@ -9,7 +9,6 @@ use Ecotone\Api\Attribute\LogAfter;
 use Ecotone\Api\Attribute\LogBefore;
 use Ecotone\Api\Attribute\LogError;
 use Ecotone\Api\Attribute\QueryHandler;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Logging\LoggingLevel;
 use PHPUnit\Framework\TestCase;
@@ -31,7 +30,7 @@ final class LoggingAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [LogBeforeHandler::class],
             ['logger' => $logger, new LogBeforeHandler()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('logBefore.handle', 'some-payload');
@@ -47,7 +46,7 @@ final class LoggingAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [LogAfterHandler::class],
             ['logger' => $logger, new LogAfterHandler()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->sendQueryWithRouting('logAfter.handle', 'some-payload');
@@ -63,7 +62,7 @@ final class LoggingAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [LogBeforeFullMessageHandler::class],
             ['logger' => $logger, new LogBeforeFullMessageHandler()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('logBeforeFull.handle', 'some-payload');
@@ -79,7 +78,7 @@ final class LoggingAttributesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [LogErrorHandler::class],
             ['logger' => $logger, new LogErrorHandler()],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         try {

@@ -7,7 +7,6 @@ namespace Ecotone\Api\Lite;
 use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
 use Ecotone\AnnotationFinder\FileSystem\RootCatalogNotFound;
 use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\TestConfiguration;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
 use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
@@ -15,11 +14,13 @@ use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Lite\Test\Configuration\InMemoryRepositoryBuilder;
 use Ecotone\Lite\Test\ConfiguredMessagingSystemWithTestSupport;
 use Ecotone\Lite\Test\DatabaseTablesSetUp;
+use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ModuleClassList;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
 use Ecotone\SymfonyContainer\ContainerCacheLayout;
 use Ecotone\SymfonyContainer\EcotoneSymfonyContainerFactory;
@@ -35,64 +36,103 @@ final class EcotoneLite
 {
     /**
      * @param string[] $classesToResolve
-     * @param array<string,mixed> $configurationVariables
      * @param ContainerInterface|object[] $containerOrAvailableServices
+     * @param object[] $extensionObjects
+     * @param string[]|null $enabledModules
+     * @param array<string,mixed> $configurationVariables
+     * @param string[] $namespaces
      */
     public static function bootstrap(
         array                    $classesToResolve = [],
         ContainerInterface|array $containerOrAvailableServices = [],
-        ?ServiceConfiguration    $configuration = null,
+        array                    $extensionObjects = [],
+        ?array                   $enabledModules = null,
         array                    $configurationVariables = [],
         bool                     $useCachedVersion = false,
         ?string                  $pathToRootCatalog = null,
         bool                     $allowGatewaysToBeRegisteredInContainer = false,
         ?string                  $licenceKey = null,
+        array                    $namespaces = [],
+        string                   $environment = BootstrapConfiguration::DEFAULT_ENVIRONMENT,
+        ?string                  $cacheDirectoryPath = null,
     ): ConfiguredMessagingSystem {
         return self::prepareConfiguration(
             $containerOrAvailableServices,
-            $configuration,
+            self::bootstrapConfiguration($extensionObjects, $enabledModules, $licenceKey, $namespaces, $environment, $cacheDirectoryPath),
             $classesToResolve,
             $configurationVariables,
             $pathToRootCatalog,
             false,
             $allowGatewaysToBeRegisteredInContainer,
             $useCachedVersion,
-            $licenceKey,
         );
     }
 
     /**
      * @param string[] $classesToResolve
-     * @param array<string,mixed> $configurationVariables
      * @param ContainerInterface|object[] $containerOrAvailableServices
+     * @param object[] $extensionObjects
+     * @param string[]|null $enabledModules
+     * @param array<string,mixed> $configurationVariables
+     * @param string[] $namespaces
      */
     public static function bootstrapFlowTesting(
         array                    $classesToResolve = [],
         ContainerInterface|array $containerOrAvailableServices = [],
-        ?ServiceConfiguration    $configuration = null,
+        array                    $extensionObjects = [],
+        ?array                   $enabledModules = null,
         array                    $configurationVariables = [],
         ?string                  $pathToRootCatalog = null,
         bool                     $allowGatewaysToBeRegisteredInContainer = false,
         bool                     $addInMemoryStateStoredRepository = true,
         bool                     $addInMemoryEventSourcedRepository = true,
-        ?TestConfiguration        $testConfiguration = null,
-        ?string                  $licenceKey = null
+        ?TestConfiguration       $testConfiguration = null,
+        ?string                  $licenceKey = null,
+        array                    $namespaces = [],
+        string                   $environment = BootstrapConfiguration::DEFAULT_ENVIRONMENT,
+        ?string                  $cacheDirectoryPath = null,
     ): FlowTestSupport {
-        $configuration = self::prepareForFlowTesting($configuration, $classesToResolve, $addInMemoryStateStoredRepository, $testConfiguration, $licenceKey);
+        $bootstrapConfiguration = self::bootstrapConfiguration($extensionObjects, $enabledModules ?? self::installedModulePackageNames(), $licenceKey, $namespaces, $environment, $cacheDirectoryPath);
+        $bootstrapConfiguration = self::prepareForFlowTesting($bootstrapConfiguration, $addInMemoryStateStoredRepository, $testConfiguration);
 
-        if ($addInMemoryEventSourcedRepository && ! $configuration->isModulePackageEnabled(ModulePackageList::EVENT_SOURCING_PACKAGE) && ! $configuration->hasExtensionObject(BaseEventSourcingConfiguration::class)) {
-            $configuration = $configuration->addExtensionObject(InMemoryRepositoryBuilder::createDefaultEventSourcedRepository());
+        if ($addInMemoryEventSourcedRepository && ! $bootstrapConfiguration->isModulePackageEnabled(ModulePackageList::EVENT_SOURCING_PACKAGE) && ! $bootstrapConfiguration->hasExtensionObject(BaseEventSourcingConfiguration::class)) {
+            $bootstrapConfiguration = $bootstrapConfiguration->addExtensionObject(InMemoryRepositoryBuilder::createDefaultEventSourcedRepository());
         }
 
         return self::withDatabaseTablesSetUp(
-            self::prepareConfiguration($containerOrAvailableServices, $configuration, $classesToResolve, $configurationVariables, $pathToRootCatalog, true, $allowGatewaysToBeRegisteredInContainer, false),
-            $configuration,
+            self::prepareConfiguration($containerOrAvailableServices, $bootstrapConfiguration, $classesToResolve, $configurationVariables, $pathToRootCatalog, true, $allowGatewaysToBeRegisteredInContainer, false),
+            $bootstrapConfiguration,
         );
     }
 
-    private static function withDatabaseTablesSetUp(ConfiguredMessagingSystemWithTestSupport $messagingSystem, ServiceConfiguration $configuration): FlowTestSupport
+    /**
+     * @param object[] $extensionObjects
+     * @param string[]|null $enabledModules
+     * @param string[] $namespaces
+     */
+    private static function bootstrapConfiguration(array $extensionObjects, ?array $enabledModules, ?string $licenceKey, array $namespaces, string $environment, ?string $cacheDirectoryPath): BootstrapConfiguration
     {
-        foreach ($configuration->extensionObjects as $extensionObject) {
+        $bootstrapConfiguration = BootstrapConfiguration::createWithDefaults()
+            ->withExtensionObjects($extensionObjects)
+            ->withNamespaces($namespaces)
+            ->withEnvironment($environment);
+
+        if ($enabledModules !== null) {
+            $bootstrapConfiguration = $bootstrapConfiguration->withEnabledModulePackageNames($enabledModules);
+        }
+        if ($licenceKey !== null) {
+            $bootstrapConfiguration = $bootstrapConfiguration->withLicenceKey($licenceKey);
+        }
+        if ($cacheDirectoryPath !== null) {
+            $bootstrapConfiguration = $bootstrapConfiguration->withCacheDirectoryPath($cacheDirectoryPath);
+        }
+
+        return $bootstrapConfiguration;
+    }
+
+    private static function withDatabaseTablesSetUp(ConfiguredMessagingSystemWithTestSupport $messagingSystem, BootstrapConfiguration $bootstrapConfiguration): FlowTestSupport
+    {
+        foreach ($bootstrapConfiguration->extensionObjects as $extensionObject) {
             if ($extensionObject instanceof TestConfiguration && $extensionObject->databaseTablesSetUpOnBootstrap) {
                 $messagingSystem->getServiceFromContainer(DatabaseTablesSetUp::class)->setUpTablesOfProvidedConnections();
             }
@@ -106,7 +146,7 @@ final class EcotoneLite
      * @param string[] $classesToResolve
      * @param array<string,mixed> $configurationVariables
      */
-    private static function prepareConfiguration(ContainerInterface|array $containerOrAvailableServices, ?ServiceConfiguration $serviceConfiguration, array $classesToResolve, array $configurationVariables, ?string $originalPathToRootCatalog, bool $enableTesting, bool $allowGatewaysToBeRegisteredInContainer, bool $useCachedVersion, ?string $enterpriseLicenceKey = null): ConfiguredMessagingSystemWithTestSupport|ConfiguredMessagingSystem
+    private static function prepareConfiguration(ContainerInterface|array $containerOrAvailableServices, BootstrapConfiguration $bootstrapConfiguration, array $classesToResolve, array $configurationVariables, ?string $originalPathToRootCatalog, bool $enableTesting, bool $allowGatewaysToBeRegisteredInContainer, bool $useCachedVersion): ConfiguredMessagingSystemWithTestSupport|ConfiguredMessagingSystem
     {
         // moving out of vendor catalog
         $pathToRootCatalog = $originalPathToRootCatalog ?: __DIR__ . '/../../../../';
@@ -121,21 +161,13 @@ final class EcotoneLite
             );
         }
 
-        if (is_null($serviceConfiguration)) {
-            $serviceConfiguration = ServiceConfiguration::createWithDefaults();
-        }
-
-        if ($enterpriseLicenceKey !== null) {
-            $serviceConfiguration = $serviceConfiguration->withLicenceKey($enterpriseLicenceKey);
-        }
-
         $externalContainer = $containerOrAvailableServices instanceof ContainerInterface ? $containerOrAvailableServices : InMemoryPSRContainer::createFromAssociativeArray($containerOrAvailableServices);
-        $serviceConfiguration = MessagingSystemConfiguration::addCorePackage($serviceConfiguration, $enableTesting);
+        $bootstrapConfiguration = MessagingSystemConfiguration::addCorePackage($bootstrapConfiguration, $enableTesting);
 
         $cacheLayout = ContainerCacheLayout::resolve(
             $pathToRootCatalog,
-            $serviceConfiguration,
-            $serviceConfiguration->cacheDirectoryPath,
+            $bootstrapConfiguration,
+            $bootstrapConfiguration->cacheDirectoryPath,
             self::shouldUseAutomaticCache($useCachedVersion, $pathToRootCatalog),
             configurationVariables: $configurationVariables,
             classesToResolve: $classesToResolve,
@@ -152,11 +184,11 @@ final class EcotoneLite
             $serviceCacheConfiguration,
             $configurationVariableService,
             $externalContainer,
-            function () use ($annotationFinder, $configurationVariableService, $serviceConfiguration, $enableTesting, $externalContainer) {
+            function () use ($annotationFinder, $configurationVariableService, $bootstrapConfiguration, $enableTesting, $externalContainer) {
                 $messagingConfiguration = MessagingSystemConfiguration::prepareWithAnnotationFinder(
                     $annotationFinder,
                     $configurationVariableService,
-                    $serviceConfiguration,
+                    $bootstrapConfiguration,
                     $enableTesting
                 );
                 $messagingConfiguration->withExternalContainer($externalContainer);
@@ -181,55 +213,43 @@ final class EcotoneLite
         }
 
         if ($enableTesting) {
-            $messagingSystem = new ConfiguredMessagingSystemWithTestSupport($messagingSystem);
+            $messagingSystem = new ConfiguredMessagingSystemWithTestSupport($messagingSystem, $messagingSystem->getServiceFromContainer(MessageBuilder::class));
         }
 
         gc_collect_cycles();
         return $messagingSystem;
     }
 
-    private static function refuseTestConfigurationPassedAsExtensionObject(ServiceConfiguration $configuration): void
+    private static function refuseTestConfigurationPassedAsExtensionObject(BootstrapConfiguration $bootstrapConfiguration): void
     {
-        if (! $configuration->hasExtensionObject(TestConfiguration::class)) {
+        if (! $bootstrapConfiguration->hasExtensionObject(TestConfiguration::class)) {
             return;
         }
 
         throw ConfigurationException::create(
-            'EcotoneLite::bootstrapFlowTesting() was given a TestConfiguration as an extension object of the ServiceConfiguration. '
+            'EcotoneLite::bootstrapFlowTesting() was given a TestConfiguration in extensionObjects. '
             . 'A flow test runs with exactly one TestConfiguration, the one passed as the testConfiguration: parameter, so this one would be replaced by that one and its settings ignored. '
-            . 'Remove it from withExtensionObjects() / addExtensionObject() and pass it as EcotoneLite::bootstrapFlowTesting(..., testConfiguration: $yourTestConfiguration) instead.'
+            . 'Remove it from extensionObjects and pass it as EcotoneLite::bootstrapFlowTesting(..., testConfiguration: $yourTestConfiguration) instead.'
         );
     }
 
     private static function prepareForFlowTesting(
-        ?ServiceConfiguration $configuration,
-        array                 $classesToResolve,
-        bool                  $addInMemoryStateStoredRepository,
-        ?TestConfiguration    $testConfiguration,
-        ?string               $enterpriseLicenceKey,
-    ): ServiceConfiguration {
-        $configuration = $configuration ?: ServiceConfiguration::createWithDefaults();
-        self::refuseTestConfigurationPassedAsExtensionObject($configuration);
+        BootstrapConfiguration $bootstrapConfiguration,
+        bool                   $addInMemoryStateStoredRepository,
+        ?TestConfiguration     $testConfiguration,
+    ): BootstrapConfiguration {
+        self::refuseTestConfigurationPassedAsExtensionObject($bootstrapConfiguration);
         $testConfiguration ??= TestConfiguration::createWithDefaults();
 
-        if (! $configuration->areEnabledModulePackageNamesDefined()) {
-            $configuration = $configuration->withEnabledModulePackageNames(self::installedModulePackageNames());
-        }
-
-        $configuration = $configuration
+        $bootstrapConfiguration = $bootstrapConfiguration
             ->addExtensionObject($testConfiguration);
 
         if ($addInMemoryStateStoredRepository) {
-            $configuration = $configuration
+            $bootstrapConfiguration = $bootstrapConfiguration
                 ->addExtensionObject(InMemoryRepositoryBuilder::createDefaultStateStoredRepository());
         }
 
-        if ($enterpriseLicenceKey !== null) {
-            $configuration = $configuration
-                ->withLicenceKey($enterpriseLicenceKey);
-        }
-
-        return $configuration;
+        return $bootstrapConfiguration;
     }
 
     /**

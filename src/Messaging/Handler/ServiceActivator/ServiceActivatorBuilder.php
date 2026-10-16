@@ -18,6 +18,7 @@ use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\SpecificHeaderResultMessageConverter;
 use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 use function get_class;
 
@@ -165,7 +166,7 @@ final class ServiceActivatorBuilder extends InputOutputMessageHandlerBuilder imp
 
         if ($this->specificHeaderName !== null) {
             return $methodInvokerBuilder->withResultToMessageConverter(
-                new Definition(SpecificHeaderResultMessageConverter::class, [$this->specificHeaderName])
+                new Definition(SpecificHeaderResultMessageConverter::class, [$this->specificHeaderName, Reference::to(MessageBuilder::class)])
             );
         }
 

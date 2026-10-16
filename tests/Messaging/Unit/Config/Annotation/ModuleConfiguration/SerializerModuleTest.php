@@ -6,7 +6,6 @@ namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
 use Doctrine\Common\Annotations\AnnotationException;
 use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\SerializerGateway;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Handler\TypeDefinitionException;
@@ -36,7 +35,11 @@ final class SerializerModuleTest extends AnnotationConfigurationTestCase
      */
     public function test_converting_from_php()
     {
-        $messagingSystem = EcotoneLite::bootstrapFlowTesting([ExampleSingleConverterService::class], [new ExampleSingleConverterService()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $messagingSystem = EcotoneLite::bootstrapFlowTesting(
+            [ExampleSingleConverterService::class],
+            [new ExampleSingleConverterService()],
+            enabledModules: [],
+        );
         /** @var Serializer $gateway */
         $gateway = $messagingSystem->getGateway(SerializerGateway::class);
 
@@ -48,7 +51,11 @@ final class SerializerModuleTest extends AnnotationConfigurationTestCase
 
     public function test_converting_to_php()
     {
-        $messagingSystem = EcotoneLite::bootstrapFlowTesting([ExampleSingleConverterService::class], [new ExampleSingleConverterService()], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $messagingSystem = EcotoneLite::bootstrapFlowTesting(
+            [ExampleSingleConverterService::class],
+            [new ExampleSingleConverterService()],
+            enabledModules: [],
+        );
 
         /** @var Serializer $gateway */
         $gateway = $messagingSystem->getGateway(SerializerGateway::class);

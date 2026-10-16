@@ -20,6 +20,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerAggregateObje
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\Assert;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -124,6 +125,7 @@ class CallAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
                     $this->isCommandHandler,
                     $this->interfaceToCall->isFactoryMethod() ?? false,
                     $this->aggregateVersionProperty,
+                    new Reference(MessageBuilder::class),
                 ])
             )
             ->compile($builder, $aroundInterceptors);

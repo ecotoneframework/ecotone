@@ -21,7 +21,7 @@ final class MissingHandlerMessage
             [$handlerClass, $handlerMethod] = $handler;
             $handlerNamespace = substr($handlerClass, 0, (int) strrpos($handlerClass, '\\'));
 
-            return "Can't send {$messageKind} to {$routingKey}. It is handled by {$handlerClass}::{$handlerMethod}(), which is not registered in this Ecotone Lite bootstrap. Add {$handlerClass} to the classesToResolve of EcotoneLite::bootstrapFlowTesting(), or load its namespace with ServiceConfiguration::withNamespaces(['{$handlerNamespace}']).";
+            return "Can't send {$messageKind} to {$routingKey}. It is handled by {$handlerClass}::{$handlerMethod}(), which is not registered in this Ecotone Lite bootstrap. Add {$handlerClass} to the classesToResolve of EcotoneLite::bootstrapFlowTesting(), or load its namespace with EcotoneLite::bootstrapFlowTesting(..., namespaces: ['{$handlerNamespace}']).";
         }
 
         $attributeShortName = substr($handlerAttribute, (int) strrpos($handlerAttribute, '\\') + 1);

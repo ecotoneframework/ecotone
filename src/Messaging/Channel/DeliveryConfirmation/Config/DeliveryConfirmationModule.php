@@ -25,6 +25,7 @@ use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\Gateway\ErrorChannelService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 #[ModuleAnnotation]
 /**
@@ -68,6 +69,7 @@ final class DeliveryConfirmationModule extends NoExternalConfigurationModule imp
                 $globalPollableChannelConfiguration->getErrorChannelName(),
                 new Reference(ErrorChannelService::class),
                 new Reference(ConfiguredMessagingSystem::class),
+                new Reference(MessageBuilder::class),
             ])
         );
         $messagingConfiguration->registerAroundMethodInterceptor(

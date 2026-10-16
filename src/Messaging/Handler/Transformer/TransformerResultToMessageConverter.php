@@ -19,7 +19,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class TransformerResultToMessageConverter implements ResultToMessageConverter
 {
-    public function __construct(private Type $returnType)
+    public function __construct(private Type $returnType, private MessageBuilder $messageBuilder)
     {
     }
 
@@ -31,10 +31,10 @@ class TransformerResultToMessageConverter implements ResultToMessageConverter
         return match (true) {
             is_null($result) => null,
             $result instanceof Message => $result,
-            is_array($result) => MessageBuilder::fromMessage($requestMessage)
+            is_array($result) => $this->messageBuilder->fromMessage($requestMessage)
                 ->setMultipleHeaders($result)
                 ->build(),
-            default => MessageBuilder::fromMessage($requestMessage)
+            default => $this->messageBuilder->fromMessage($requestMessage)
                 ->setPayload($result)
                 ->setContentType(MediaType::createApplicationXPHPWithTypeParameter($this->returnType->toString()))
                 ->build()

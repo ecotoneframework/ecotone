@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Channel\DeliveryConfirmation;
 
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
 use Ecotone\Messaging\Channel\PollableChannel\PollableChannelConfiguration;
+use Ecotone\Test\ChannelTestSupport;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\HighThroughputPublishing\AsyncOrderSubscriber;
 use Test\Ecotone\Messaging\Fixture\HighThroughputPublishing\FakeTransactionModule;
@@ -53,11 +53,11 @@ final class HighThroughputPublishingCollectorMatrixTest extends TestCase
             $this->assertEquals(
                 [new OrderWasPlaced('espresso-1'), new OrderWasPlaced('espresso-2')],
                 [
-                    $ecotoneLite->receiveMessageFrom('async_orders')->getPayload(),
-                    $ecotoneLite->receiveMessageFrom('async_orders')->getPayload(),
+                    ChannelTestSupport::of($ecotoneLite)->receiveMessageFrom('async_orders')->getPayload(),
+                    ChannelTestSupport::of($ecotoneLite)->receiveMessageFrom('async_orders')->getPayload(),
                 ],
             );
-            $this->assertNull($ecotoneLite->receiveMessageFrom('async_orders'));
+            $this->assertNull(ChannelTestSupport::of($ecotoneLite)->receiveMessageFrom('async_orders'));
         }
     }
 
@@ -66,10 +66,11 @@ final class HighThroughputPublishingCollectorMatrixTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, AsyncOrderSubscriber::class, FakeTransactionModule::class],
             [new OrderService($operationsLog), new AsyncOrderSubscriber(), OperationsLog::class => $operationsLog],
-            (ServiceConfiguration::createWithDefaults()->withExtensionObjects([
+            extensionObjects: [
                 PollableChannelConfiguration::neverRetry('async_orders')->withCollector($collectorEnabled),
-            ]))->addExtensionObject(InMemoryHighThroughputPublishingChannelBuilder::create('async_orders'))
-                ->withEnabledModulePackageNames([])
+                InMemoryHighThroughputPublishingChannelBuilder::create('async_orders'),
+            ],
+            enabledModules: [],
         );
     }
 }

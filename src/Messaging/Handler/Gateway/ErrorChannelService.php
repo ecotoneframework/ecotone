@@ -25,6 +25,7 @@ final class ErrorChannelService
         private OutboundMessageConverter $outboundMessageConverter,
         private ConversionService $conversionService,
         private MessageHeadersPropagatorInterceptor $messageHeadersPropagator,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -42,7 +43,7 @@ final class ErrorChannelService
         );
 
         $outboundMessage = $this->outboundMessageConverter->prepare($requestMessage, $this->conversionService);
-        $messageBuilder = MessageBuilder::withPayload($outboundMessage->getPayload())
+        $messageBuilder = $this->messageBuilder->withPayload($outboundMessage->getPayload())
             ->setMultipleHeaders($outboundMessage->getHeaders());
 
         if ($relatedPolledChannelName) {

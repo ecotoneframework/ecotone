@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\DocumentStore;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
@@ -79,11 +78,11 @@ final class AggregateSnapshotFoldShapeTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             [Ticket::class],
             [DocumentStore::class => InMemoryDocumentStore::createEmpty(), 'logger' => $logger],
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    InMemoryRepositoryBuilder::createDefaultEventSourcedRepository(),
-                    BaseEventSourcingConfiguration::withDefaults()->withSnapshotsFor(Ticket::class, 1),
-                ])->withEnabledModulePackageNames([])
+            extensionObjects: [
+                InMemoryRepositoryBuilder::createDefaultEventSourcedRepository(),
+                BaseEventSourcingConfiguration::withDefaults()->withSnapshotsFor(Ticket::class, 1),
+            ],
+            enabledModules: [],
         );
     }
 }

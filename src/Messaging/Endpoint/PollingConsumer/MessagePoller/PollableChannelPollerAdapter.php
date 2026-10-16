@@ -21,7 +21,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class PollableChannelPollerAdapter implements MessagePoller
 {
-    public function __construct(private string $pollableChannelName, private PollableChannel $pollableChannel)
+    public function __construct(private string $pollableChannelName, private PollableChannel $pollableChannel, private MessageBuilder $messageBuilder)
     {
     }
 
@@ -34,7 +34,7 @@ class PollableChannelPollerAdapter implements MessagePoller
             : $this->pollableChannel->receive();
 
         if ($message) {
-            $message = MessageBuilder::fromMessage($message)
+            $message = $this->messageBuilder->fromMessage($message)
                 ->setHeader(MessageHeaders::POLLED_CHANNEL_NAME, $this->pollableChannelName)
                 ->build();
         }

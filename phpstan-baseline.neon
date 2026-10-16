@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^PHPDoc tag @param for parameter \$className contains unresolvable type\.$#'
-			identifier: parameter.unresolvableType
-			count: 1
-			path: Api/ExtensionObject/ServiceConfiguration.php
-
-		-
 			message: '#^Call to an undefined method Psr\\Container\\ContainerInterface\:\:set\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -29,12 +23,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: Api/Lite/EcotoneLite.php
-
-		-
-			message: '#^Call to an undefined method Ecotone\\Api\\Messaging\\MessageChannel\:\:receive\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: Api/Lite/Test/FlowTestSupport.php
 
 		-
 			message: '#^Method Ecotone\\Api\\Lite\\Test\\FlowTestSupport\:\:popRecordedCommandsWithRouting\(\) should return array\<string\> but returns list\<array\<int, mixed\>\>\.$#'

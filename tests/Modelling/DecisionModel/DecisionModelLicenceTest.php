@@ -8,7 +8,6 @@ use Ecotone\Api\Attribute\Apply;
 use Ecotone\Api\Attribute\DecisionModel;
 use Ecotone\Api\Attribute\EventTag;
 use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Support\LicensingException;
 use PHPUnit\Framework\TestCase;
@@ -41,8 +40,8 @@ final class DecisionModelLicenceTest extends TestCase
 
         EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [ModelForLicenceTest::class, TaggedEventForDecisionModelLicenceTest::class],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([DynamicConsistencyBoundaryConfiguration::createWithDefaults()])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()],
+            enabledModules: [],
         );
     }
 }

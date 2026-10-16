@@ -3,8 +3,6 @@
 namespace Ecotone\Messaging\Handler\Transformer;
 
 use Ecotone\Api\Messaging\Message;
-use Ecotone\Messaging\Config\Container\DefinedObject;
-use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -16,37 +14,22 @@ use Ecotone\Messaging\Support\MessageBuilder;
 /**
  * licence Apache-2.0
  */
-final class HeaderEnricher implements DefinedObject
+final class HeaderEnricher
 {
-    private array $headers;
-
     /**
      * HeaderEnricher constructor.
      * @param array $headers
      */
-    private function __construct(array $headers)
+    public function __construct(private array $headers, private MessageBuilder $messageBuilder)
     {
-        $this->headers = $headers;
-    }
-
-    public static function create(array $headers): self
-    {
-        return new self($headers);
     }
 
     public function transform(Message $message): Message
     {
-        $messageToBuild = MessageBuilder::fromMessage($message);
+        $messageToBuild = $this->messageBuilder->fromMessage($message);
 
         return $messageToBuild
                 ->setMultipleHeaders($this->headers)
                 ->build();
-    }
-
-    public function getDefinition(): Definition
-    {
-        return new Definition(self::class, [
-            $this->headers,
-        ], 'create');
     }
 }

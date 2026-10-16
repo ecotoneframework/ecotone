@@ -6,7 +6,6 @@ namespace Test\Ecotone\Lite\Test;
 
 use Ecotone\Api\Attribute\Converter;
 use Ecotone\Api\EventSourcing\Event;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
@@ -25,9 +24,8 @@ final class InMemoryEventStoreRegistrationTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [TestEventConverter::class],
             [new TestEventConverter()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withEnvironment('test')
+            enabledModules: [],
+            environment: 'test',
         );
 
         /** @var \Ecotone\Api\EventSourcing\EventStore $eventStore */

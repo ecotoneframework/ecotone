@@ -14,7 +14,6 @@ use Ecotone\Api\EventSourcing\DecisionModelConcurrencyException;
 use Ecotone\Api\EventSourcing\DynamicConsistencyBoundaryConfiguration;
 use Ecotone\Api\EventSourcing\EventCriteria;
 use Ecotone\Api\EventSourcing\EventStore;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\CommandBus;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
@@ -143,10 +142,8 @@ final class UniqueUsernamePerTenantTest extends TestCase
                     : [UsernameAvailability::class, UsernameRegistration::class]),
             ],
             containerOrAvailableServices: $tenantFirst ? [new UsernameRegistrationScopedTenantFirst()] : [new UsernameRegistration()],
-            configuration: ServiceConfiguration::createWithDefaults()->withExtensionObjects([
-                DynamicConsistencyBoundaryConfiguration::createWithDefaults()->withFilterOnlyTags(['tenant']),
-            ])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [DynamicConsistencyBoundaryConfiguration::createWithDefaults()->withFilterOnlyTags(['tenant'])],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }

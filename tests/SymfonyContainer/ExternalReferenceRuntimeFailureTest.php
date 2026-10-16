@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Test\Ecotone\SymfonyContainer;
 
 use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
 use PHPUnit\Framework\TestCase;
@@ -125,8 +124,7 @@ final class ExternalReferenceRuntimeFailureTest extends TestCase
         return EcotoneLite::bootstrap(
             classesToResolve: $classesToResolve,
             containerOrAvailableServices: $container,
-            configuration: ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
     }
 }

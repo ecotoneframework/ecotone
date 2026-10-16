@@ -8,7 +8,6 @@ use Ecotone\Api\Attribute\InternalHandler;
 use Ecotone\Api\Attribute\QueryHandler;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
 use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Consumer\ConsumerPositionTracker;
@@ -47,12 +46,11 @@ final class InMemoryStreamingChannelTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$handler::class],
             [$handler, ConsumerPositionTracker::class => $positionTracker],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createStreamingChannel('shared_channel'),
-                    PollingMetadata::create('consumer1')->withHandledMessageLimit(1),
-                ])
-                    ->withEnabledModulePackageNames([])
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createStreamingChannel('shared_channel'),
+                PollingMetadata::create('consumer1')->withHandledMessageLimit(1),
+            ],
+            enabledModules: [],
         );
 
         // Send 3 messages
@@ -110,13 +108,12 @@ final class InMemoryStreamingChannelTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$handler1::class, $handler2::class],
             [$handler1, $handler2, ConsumerPositionTracker::class => $positionTracker],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createStreamingChannel('shared_channel'),
-                    PollingMetadata::create('consumer1')->withHandledMessageLimit(1),
-                    PollingMetadata::create('consumer2')->withHandledMessageLimit(1),
-                ])
-                    ->withEnabledModulePackageNames([])
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createStreamingChannel('shared_channel'),
+                PollingMetadata::create('consumer1')->withHandledMessageLimit(1),
+                PollingMetadata::create('consumer2')->withHandledMessageLimit(1),
+            ],
+            enabledModules: [],
         );
 
         // Send 3 messages

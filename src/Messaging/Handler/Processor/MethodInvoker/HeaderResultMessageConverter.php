@@ -11,7 +11,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class HeaderResultMessageConverter implements ResultToMessageConverter
 {
-    public function __construct(private string $interfaceToCallName)
+    public function __construct(private string $interfaceToCallName, private MessageBuilder $messageBuilder)
     {
     }
 
@@ -24,7 +24,7 @@ class HeaderResultMessageConverter implements ResultToMessageConverter
         Assert::isFalse($result instanceof Message, 'Message should not be returned when changing headers in ' . $this->interfaceToCallName);
         Assert::isTrue(is_array($result), 'Result should be an array when changing headers in ' . $this->interfaceToCallName);
 
-        return MessageBuilder::fromMessage($requestMessage)
+        return $this->messageBuilder->fromMessage($requestMessage)
             ->setMultipleHeaders($result)
             ->build();
     }

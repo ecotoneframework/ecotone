@@ -26,7 +26,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class SpecificHeaderResultMessageConverter implements ResultToMessageConverter
 {
-    public function __construct(private string $headerName)
+    public function __construct(private string $headerName, private MessageBuilder $messageBuilder)
     {
     }
 
@@ -38,7 +38,7 @@ class SpecificHeaderResultMessageConverter implements ResultToMessageConverter
 
         Assert::isFalse($result instanceof Message, 'Message should not be returned when setting specific header in ' . $this->headerName);
 
-        return MessageBuilder::fromMessage($requestMessage)
+        return $this->messageBuilder->fromMessage($requestMessage)
             ->setHeader($this->headerName, $result)
             ->build();
     }

@@ -39,7 +39,8 @@ class GatewayInternalProcessor implements MessageProcessor, AroundInterceptable
         private MessageChannel $requestChannel,
         private array $routingSlipChannels,
         private ?PollableChannel $replyChannel,
-        private int $replyMilliSecondsTimeout
+        private int $replyMilliSecondsTimeout,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -59,7 +60,7 @@ class GatewayInternalProcessor implements MessageProcessor, AroundInterceptable
 
         $canReturnValue = $this->returnType?->isVoid() === false;
 
-        $requestMessage = MessageBuilder::fromMessage($requestMessage);
+        $requestMessage = $this->messageBuilder->fromMessage($requestMessage);
         $replyChannel = $this->replyChannel ?: ($canReturnValue ? QueueChannel::create(Uuid::v7()->toRfc4122() . '-replyChannel') : null);
         if ($replyChannel) {
             $requestMessage = $requestMessage
@@ -79,7 +80,7 @@ class GatewayInternalProcessor implements MessageProcessor, AroundInterceptable
             $replyCallable = $this->getReply($requestMessage->getHeaders()->getReplyChannel());
 
             if ($this->returnType?->isClassOfType(Future::class)) {
-                return MessageBuilder::fromMessage($requestMessage)
+                return $this->messageBuilder->fromMessage($requestMessage)
                     ->setPayload(FutureReplyReceiver::create($replyCallable))
                     ->build();
             }
@@ -88,7 +89,7 @@ class GatewayInternalProcessor implements MessageProcessor, AroundInterceptable
         }
 
         if ($replyMessage instanceof Message && $previousReplyChannel) {
-            $replyMessage = MessageBuilder::fromMessage($replyMessage)
+            $replyMessage = $this->messageBuilder->fromMessage($replyMessage)
                 ->setReplyChannel($previousReplyChannel)
                 ->build();
         }

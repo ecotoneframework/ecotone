@@ -5,7 +5,6 @@ namespace Ecotone\Test;
 use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
 use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
 use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\CommandBus;
 use Ecotone\Api\Gateway\EventBus;
 use Ecotone\Api\Gateway\QueryBus;
@@ -13,6 +12,7 @@ use Ecotone\Api\Lite\Test\FlowTestSupport;
 use Ecotone\Api\Lite\Test\MessagingTestSupport;
 use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
 use Ecotone\Lite\InMemoryPSRContainer;
+use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
 use Ecotone\Messaging\Config\Container\Compiler\RegisterInterfaceToCallReferences;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
@@ -49,7 +49,7 @@ class ComponentTestBuilder
      */
     public static function create(
         array                 $classesToResolve = [],
-        ?ServiceConfiguration $configuration = null,
+        ?BootstrapConfiguration $configuration = null,
         array                 $configurationVariables = [],
         bool                  $defaultEnterpriseMode = false,
     ): self {
@@ -61,7 +61,7 @@ class ComponentTestBuilder
         FileSystemAnnotationFinder::getRealRootCatalog($pathToRootCatalog, $pathToRootCatalog);
 
         $configurationVariableService = InMemoryConfigurationVariableService::create($configurationVariables);
-        $serviceConfiguration = $configuration ?? ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]);
+        $serviceConfiguration = $configuration ?? BootstrapConfiguration::createWithDefaults()->withEnabledModulePackageNames([]);
         if ($defaultEnterpriseMode) {
             $serviceConfiguration = $serviceConfiguration->withLicenceKey(LicenceTesting::VALID_LICENCE);
         }

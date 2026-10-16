@@ -11,7 +11,7 @@ use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Channel\BatchSupportingMessageChannel;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PendingDeliveryRegistry;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PublishingFailedException;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\StaticMessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -39,7 +39,7 @@ final class InMemoryHighThroughputPublishingChannel implements PollableChannel, 
         if ($payload instanceof BatchMessage) {
             $this->operationsLog->log(sprintf('published batch of %d messages to broker', count($payload)));
             foreach ($payload->entries as $entry) {
-                $this->queue[] = MessageBuilder::withPayload($entry['payload'])
+                $this->queue[] = StaticMessageBuilder::withPayload($entry['payload'])
                     ->setMultipleHeaders($entry['headers'])
                     ->build();
             }
@@ -124,7 +124,7 @@ final class InMemoryHighThroughputPublishingChannel implements PollableChannel, 
         $failedMessages = [];
         foreach ($payload->entries as $entry) {
             if ($this->matchesFailingFragment($entry['payload'])) {
-                $failedMessages[] = MessageBuilder::withPayload($entry['payload'])
+                $failedMessages[] = StaticMessageBuilder::withPayload($entry['payload'])
                     ->setMultipleHeaders($entry['headers'])
                     ->build();
             }

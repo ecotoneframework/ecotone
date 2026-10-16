@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Channel;
 
 use Ecotone\Api\Attribute\InternalHandler;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Channel\MessageDispatchingException;
@@ -21,7 +20,11 @@ final class DirectAndPublishSubscribeChannelTest extends TestCase
     public function test_direct_channel_dispatches_to_its_single_subscribed_handler(): void
     {
         $handler = new DirectChannelHandler();
-        $ecotone = EcotoneLite::bootstrapFlowTesting([DirectChannelHandler::class], [$handler], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [DirectChannelHandler::class],
+            [$handler],
+            enabledModules: [],
+        );
 
         $ecotone->sendDirectToChannel(DirectChannelHandler::CHANNEL, 'test');
 
@@ -33,10 +36,8 @@ final class DirectAndPublishSubscribeChannelTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [],
             [],
-            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
-                SimpleMessageChannelBuilder::createDirectMessageChannel('unhandledChannel'),
-            ])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createDirectMessageChannel('unhandledChannel')],
+            enabledModules: [],
         );
 
         $this->expectException(MessageDispatchingException::class);
@@ -50,10 +51,8 @@ final class DirectAndPublishSubscribeChannelTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [PublishSubscribeChannelHandlers::class],
             [$handler],
-            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
-                SimpleMessageChannelBuilder::createPublishSubscribeChannel(PublishSubscribeChannelHandlers::CHANNEL),
-            ])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createPublishSubscribeChannel(PublishSubscribeChannelHandlers::CHANNEL)],
+            enabledModules: [],
         );
 
         $ecotone->sendDirectToChannel(PublishSubscribeChannelHandlers::CHANNEL, 'test');

@@ -19,6 +19,7 @@ use Ecotone\Messaging\Handler\Logger\LoggingService;
 use Ecotone\Messaging\Scheduling\StubUTCClock;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
+use Ecotone\Test\StaticMessageBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 
@@ -32,7 +33,7 @@ final class SendRetryOfFailedBatchDeliveriesTest extends TestCase
         $channel = $this->createRecordingChannel();
         $interceptor = $this->createInterceptor();
 
-        $batchMessage = MessageBuilder::withPayload(
+        $batchMessage = StaticMessageBuilder::withPayload(
             BatchMessage::constructEmpty()
                 ->append('first delivered order')
                 ->append('poison order')
@@ -43,7 +44,7 @@ final class SendRetryOfFailedBatchDeliveriesTest extends TestCase
             $batchMessage,
             $channel,
             PublishingFailedException::withFailedDeliveries([
-                new FailedDelivery(MessageBuilder::withPayload('poison order')->build(), 'nacked by broker', 'orders'),
+                new FailedDelivery(StaticMessageBuilder::withPayload('poison order')->build(), 'nacked by broker', 'orders'),
             ]),
         );
 
@@ -55,7 +56,7 @@ final class SendRetryOfFailedBatchDeliveriesTest extends TestCase
         $channel = $this->createRecordingChannel();
         $interceptor = $this->createInterceptor();
 
-        $singleMessage = MessageBuilder::withPayload('failed order')->build();
+        $singleMessage = StaticMessageBuilder::withPayload('failed order')->build();
 
         $interceptor->afterSendCompletion(
             $singleMessage,
@@ -70,6 +71,8 @@ final class SendRetryOfFailedBatchDeliveriesTest extends TestCase
 
     private function createInterceptor(): SendRetryChannelInterceptor
     {
+        $clock = StubUTCClock::createWithCurrentTime('2025-01-01 00:00:00');
+
         return new SendRetryChannelInterceptor(
             'orders',
             RetryTemplateBuilder::fixedBackOff(1)->maxRetries(1)->build(),
@@ -79,10 +82,12 @@ final class SendRetryOfFailedBatchDeliveriesTest extends TestCase
                 $this->createStub(OutboundMessageConverter::class),
                 $this->createStub(ConversionService::class),
                 new MessageHeadersPropagatorInterceptor(),
+                new MessageBuilder($clock),
             ),
             $this->createStub(ConfiguredMessagingSystem::class),
             new NullLogger(),
-            StubUTCClock::createWithCurrentTime('2025-01-01 00:00:00'),
+            $clock,
+            new MessageBuilder($clock),
         );
     }
 

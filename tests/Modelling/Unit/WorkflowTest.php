@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Modelling\Unit;
 
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use PHPUnit\Framework\TestCase;
@@ -30,7 +29,7 @@ final class WorkflowTest extends TestCase
             [
                 PaymentHandler::class => new PaymentHandler(),
             ],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $orderId = '123';
@@ -53,7 +52,7 @@ final class WorkflowTest extends TestCase
             [
                 PaymentHandler::class => new PaymentHandler(),
             ],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $orderId = '123';
@@ -71,8 +70,8 @@ final class WorkflowTest extends TestCase
             [
                 AsynchronousPaymentHandler::class => new AsynchronousPaymentHandler(),
             ],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $orderId = '123';
@@ -96,10 +95,7 @@ final class WorkflowTest extends TestCase
 
     public function test_workflow_with_separated_output_command_handler(): void
     {
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            [OrderProcessSaga::class],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
-        );
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([OrderProcessSaga::class], enabledModules: []);
 
         $orderId = '123';
 

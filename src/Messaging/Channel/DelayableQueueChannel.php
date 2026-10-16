@@ -14,8 +14,8 @@ use Ecotone\Api\Scheduling\DatePoint;
 use Ecotone\Api\Scheduling\TimeSpan;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Support\GenericMessage;
 use Ecotone\Messaging\Support\LicensingException;
-use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -51,9 +51,7 @@ final class DelayableQueueChannel implements PollableChannel, DefinedObject
             }
 
             foreach ($payload->entries as $entry) {
-                $this->queue[] = MessageBuilder::withPayload($entry['payload'])
-                    ->setMultipleHeaders($entry['headers'])
-                    ->build();
+                $this->queue[] = GenericMessage::createWithArrayHeaders($entry['payload'], [MessageHeaders::TIMESTAMP => $message->getHeaders()->getTimestamp(), ...$entry['headers']]);
             }
 
             return;
@@ -95,9 +93,10 @@ final class DelayableQueueChannel implements PollableChannel, DefinedObject
             return $message;
         }
 
-        return MessageBuilder::fromMessage($message)
-            ->removeHeader(MessageHeaders::DELIVERY_DELAY)
-            ->build();
+        $headers = $message->getHeaders()->headers();
+        unset($headers[MessageHeaders::DELIVERY_DELAY]);
+
+        return GenericMessage::createWithArrayHeaders($message->getPayload(), $headers);
     }
 
     private function isDue(Message $message): bool

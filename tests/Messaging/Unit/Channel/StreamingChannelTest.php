@@ -48,16 +48,14 @@ final class StreamingChannelTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [$handler::class],
             [$handler, ConsumerPositionTracker::class => new InMemoryConsumerPositionTracker()],
-            ServiceConfiguration::createWithDefaults()
-                ->withServiceName('test-service')
-                ->withExtensionObjects([
-                    $sharedChannel,
-                    DistributedServiceMap::initialize()
-                        ->withCommandMapping(targetServiceName: 'test-service', channelName: 'distributed_channel'),
-                ])
-                    ->withEnabledModulePackageNames([]),
+            extensionObjects: [
+                $sharedChannel,
+                DistributedServiceMap::initialize()->withCommandMapping(targetServiceName:'test-service', channelName:'distributed_channel'),
+                ServiceConfiguration::createWithDefaults()->withServiceName('test-service'),
+            ],
+            enabledModules: [],
             pathToRootCatalog: __DIR__ . '/../../',
-            licenceKey: LicenceTesting::VALID_LICENCE
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 }

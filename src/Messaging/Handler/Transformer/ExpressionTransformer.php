@@ -20,7 +20,7 @@ use Throwable;
  */
 final class ExpressionTransformer
 {
-    public function __construct(private string $expression, private ExpressionEvaluationService $expressionEvaluationService, private ExpressionLocation $location)
+    public function __construct(private string $expression, private ExpressionEvaluationService $expressionEvaluationService, private ExpressionLocation $location, private MessageBuilder $messageBuilder)
     {
     }
 
@@ -43,7 +43,7 @@ final class ExpressionTransformer
             throw ExpressionEvaluationException::wrapping($this->location, $exception);
         }
 
-        return MessageBuilder::fromMessage($message)
+        return $this->messageBuilder->fromMessage($message)
                     ->setPayload($evaluatedPayload)
                     ->build();
     }

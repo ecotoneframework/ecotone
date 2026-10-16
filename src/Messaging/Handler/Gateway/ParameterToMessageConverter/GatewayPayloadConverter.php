@@ -23,16 +23,8 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class GatewayPayloadConverter implements GatewayParameterConverter
 {
-    public function __construct(private string $parameterName, private ?Type $parameterType)
+    public function __construct(private string $parameterName, private ?Type $parameterType, private MessageBuilder $messageBuilder)
     {
-    }
-
-    /**
-     * @return GatewayPayloadConverter
-     */
-    public static function create(InterfaceParameter $parameter): self
-    {
-        return new self($parameter->getName(), self::getParameterTypeDescriptor($parameter));
     }
 
     public static function getParameterTypeDescriptor(InterfaceParameter $parameter): ?Type
@@ -67,6 +59,6 @@ class GatewayPayloadConverter implements GatewayParameterConverter
 
         $messageBuilder->setContentTypeIfAbsent(MediaType::createApplicationXPHPWithTypeParameter($type));
 
-        return $methodArgument->value() instanceof Message ? MessageBuilder::fromMessage($methodArgument->value()) : $messageBuilder->setPayload($methodArgument->value());
+        return $methodArgument->value() instanceof Message ? $this->messageBuilder->fromMessage($methodArgument->value()) : $messageBuilder->setPayload($methodArgument->value());
     }
 }

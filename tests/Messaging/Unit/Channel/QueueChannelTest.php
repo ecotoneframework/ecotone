@@ -6,9 +6,9 @@ use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
 use Ecotone\Api\ExtensionObject\FinalFailureStrategy;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Test\ChannelTestSupport;
 use Exception;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -31,15 +31,15 @@ class QueueChannelTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [],
             [],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('rawQueue', delayable: false))
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('rawQueue', delayable:false)],
+            enabledModules: [],
         );
 
         $ecotoneLite->sendDirectToChannel('rawQueue', 'a');
         $ecotoneLite->sendDirectToChannel('rawQueue', 'b');
 
-        $this->assertSame('a', $ecotoneLite->receiveMessageFrom('rawQueue')->getPayload());
-        $this->assertSame('b', $ecotoneLite->receiveMessageFrom('rawQueue')->getPayload());
+        $this->assertSame('a', ChannelTestSupport::of($ecotoneLite)->receiveMessageFrom('rawQueue')->getPayload());
+        $this->assertSame('b', ChannelTestSupport::of($ecotoneLite)->receiveMessageFrom('rawQueue')->getPayload());
     }
 
     public function test_returning_null_when_queue_is_empty()
@@ -47,11 +47,11 @@ class QueueChannelTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [],
             [],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('rawQueue', delayable: false))
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('rawQueue', delayable:false)],
+            enabledModules: [],
         );
 
-        $this->assertNull($ecotoneLite->receiveMessageFrom('rawQueue'));
+        $this->assertNull(ChannelTestSupport::of($ecotoneLite)->receiveMessageFrom('rawQueue'));
     }
 
     public function test_resending_message_back_to_queue_on_failure(): void
@@ -61,11 +61,11 @@ class QueueChannelTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$failureService::class],
             [$failureService],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(\Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel(
-                'async',
-                finalFailureStrategy: FinalFailureStrategy::RESEND
-            ))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [
+                \Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
+                SimpleMessageChannelBuilder::createQueueChannel('async', finalFailureStrategy:FinalFailureStrategy::RESEND),
+            ],
+            enabledModules: [],
         );
 
         $ecotoneLite
@@ -83,11 +83,11 @@ class QueueChannelTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$failureService::class],
             [$failureService],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(\Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel(
-                'async',
-                finalFailureStrategy: FinalFailureStrategy::RELEASE
-            ))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [
+                \Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
+                SimpleMessageChannelBuilder::createQueueChannel('async', finalFailureStrategy:FinalFailureStrategy::RELEASE),
+            ],
+            enabledModules: [],
         );
 
         $ecotoneLite
@@ -105,11 +105,11 @@ class QueueChannelTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$failureService::class],
             [$failureService],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(\Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel(
-                'async',
-                finalFailureStrategy: FinalFailureStrategy::IGNORE
-            ))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [
+                \Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
+                SimpleMessageChannelBuilder::createQueueChannel('async', finalFailureStrategy:FinalFailureStrategy::IGNORE),
+            ],
+            enabledModules: [],
         );
 
         $ecotoneLite
@@ -127,11 +127,11 @@ class QueueChannelTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$failureService::class],
             [$failureService],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(\Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel(
-                'async',
-                finalFailureStrategy: FinalFailureStrategy::STOP
-            ))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [
+                \Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
+                SimpleMessageChannelBuilder::createQueueChannel('async', finalFailureStrategy:FinalFailureStrategy::STOP),
+            ],
+            enabledModules: [],
         );
 
         $ecotoneLite
@@ -168,11 +168,11 @@ class QueueChannelTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$failureService::class],
             [$failureService],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(\Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel(
-                'async',
-                finalFailureStrategy: FinalFailureStrategy::RESEND
-            ))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [
+                \Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
+                SimpleMessageChannelBuilder::createQueueChannel('async', finalFailureStrategy:FinalFailureStrategy::RESEND),
+            ],
+            enabledModules: [],
         );
 
         $ecotoneLite->sendCommandWithRouting('executionChannel', 'some_1');

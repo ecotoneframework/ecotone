@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Test\LicenceTesting;
@@ -43,8 +42,8 @@ final class EventSourcingAggregateTest extends TestCase
             [
                 Person::class,
             ],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
 
@@ -63,7 +62,7 @@ final class EventSourcingAggregateTest extends TestCase
             [
                 Person::class,
             ],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
 
@@ -78,7 +77,7 @@ final class EventSourcingAggregateTest extends TestCase
             [
                 EventSourcingAggregateExample::class,
             ],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
 

@@ -3,7 +3,6 @@
 namespace Ecotone\Modelling\EventSourcingExecutor;
 
 use Ecotone\Api\Attribute\Apply;
-use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
@@ -12,6 +11,7 @@ use Ecotone\Messaging\Config\LicenceDecider;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\ApplyMethod;
 use ReflectionClass;
 
@@ -70,7 +70,7 @@ final class ApplyMethodExecutorBuilder
             $classDefinition->getClassType()->toString(),
             $applyMethods,
             LicenceDecider::prepareDefinition(AggregateMethodInvoker::class, OpenCoreAggregateMethodInvoker::class, EnterpriseAggregateMethodInvoker::class),
-            Reference::to(EventMapper::class),
+            Reference::to(MessageBuilder::class),
         ]);
     }
 }

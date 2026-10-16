@@ -3,11 +3,11 @@
 namespace Ecotone\Messaging\Config\Container\Compiler;
 
 use Ecotone\Api\Console\ConsoleWriter;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\EcotoneClockInterface;
 use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
 use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PendingDeliveryRegistry;
+use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Config\Container\ChannelResolverWithContainer;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
@@ -30,6 +30,7 @@ use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Scheduling\Clock;
 use Ecotone\Messaging\Scheduling\NativeClock;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
 
@@ -39,7 +40,7 @@ use Psr\Container\ContainerInterface;
 class RegisterSingletonMessagingServices implements CompilerPass
 {
     public function __construct(
-        private ServiceConfiguration $serviceConfiguration,
+        private BootstrapConfiguration $bootstrapConfiguration,
     ) {
     }
 
@@ -58,6 +59,7 @@ class RegisterSingletonMessagingServices implements CompilerPass
             ],
             factory: [Clock::class, 'createWithFallback']
         ));
+        $this->registerDefault($builder, MessageBuilder::class, new Definition(MessageBuilder::class, [new Reference(EcotoneClockInterface::class)]));
         $this->registerDefault($builder, ChannelResolver::class, new Definition(ChannelResolverWithContainer::class, [new Reference(ContainerInterface::class)]));
         $this->registerDefault($builder, ReferenceSearchService::class, new Definition(ReferenceSearchServiceWithContainer::class, [new Reference(ContainerInterface::class)]));
         $this->registerDefault($builder, ExpressionEvaluationService::REFERENCE, new Definition(SymfonyExpressionEvaluationAdapter::class, [new Reference(ReferenceSearchService::class)], 'create'));
@@ -66,7 +68,7 @@ class RegisterSingletonMessagingServices implements CompilerPass
         $this->registerDefault($builder, PropertyReaderAccessor::class, new Definition(PropertyReaderAccessor::class));
         $this->registerDefault($builder, ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), [], []]));
         $this->registerDefault($builder, EventMapper::class, new Definition(EventMapper::class, factory: 'createEmpty'));
-        $this->registerDefault($builder, LicenceDecider::class, new Definition(LicenceDecider::class, [$this->serviceConfiguration->isRunningForEnterprise()]));
+        $this->registerDefault($builder, LicenceDecider::class, new Definition(LicenceDecider::class, [$this->bootstrapConfiguration->isRunningForEnterprise()]));
         $this->registerDefault($builder, PendingDeliveryRegistry::class, new Definition(PendingDeliveryRegistry::class, [new Reference(LoggingGateway::class)]));
     }
 

@@ -8,7 +8,7 @@ use const DIRECTORY_SEPARATOR;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationFinderFactory;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 
@@ -33,7 +33,7 @@ final class ContainerCacheLayout
      */
     public static function resolve(
         string $rootCatalog,
-        ServiceConfiguration $serviceConfiguration,
+        BootstrapConfiguration $bootstrapConfiguration,
         string $cacheDirectory,
         bool $shouldUseCache,
         bool $useHashSubDirectory = true,
@@ -45,16 +45,16 @@ final class ContainerCacheLayout
         $realRootCatalog = realpath($rootCatalog) ?: $rootCatalog;
         $annotationFinder = AnnotationFinderFactory::createForAttributes(
             $realRootCatalog,
-            $serviceConfiguration->namespaces,
-            $serviceConfiguration->environment,
-            $serviceConfiguration->loadCatalog ?? '',
-            MessagingSystemConfiguration::getModuleClassesFor($serviceConfiguration),
+            $bootstrapConfiguration->namespaces,
+            $bootstrapConfiguration->environment,
+            $bootstrapConfiguration->loadCatalog,
+            MessagingSystemConfiguration::getModuleClassesFor($bootstrapConfiguration),
             $classesToResolve,
             $enableTesting,
         );
         $configHash = $annotationFinder->getCacheMessagingFileNameBasedOnConfig(
             $realRootCatalog,
-            $serviceConfiguration,
+            $bootstrapConfiguration,
             $configurationVariables,
             $enableTesting,
         );

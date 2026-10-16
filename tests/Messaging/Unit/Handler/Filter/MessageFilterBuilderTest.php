@@ -9,6 +9,7 @@ use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Test\ChannelTestSupport;
 use Ecotone\Test\ComponentTestBuilder;
 use Exception;
 use Test\Ecotone\Messaging\Fixture\Handler\Selector\MessageSelectorExample;
@@ -203,7 +204,7 @@ class MessageFilterBuilderTest extends MessagingTestCase
             $messaging->sendDirectToChannel($inputChannel)
         );
         $this->assertNotNull(
-            $messaging->receiveMessageFrom($discardChannelName)
+            ChannelTestSupport::of($messaging)->receiveMessageFrom($discardChannelName)
         );
     }
 

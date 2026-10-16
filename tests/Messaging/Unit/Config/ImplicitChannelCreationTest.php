@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config;
 
 use Ecotone\Api\Attribute\InternalHandler;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Channel\PublishSubscribeChannel;
+use Ecotone\Test\ChannelTestSupport;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -21,7 +21,11 @@ final class ImplicitChannelCreationTest extends TestCase
     public function test_creating_an_implicit_direct_channel_for_a_handler_with_no_registered_channel(): void
     {
         $handler = new ImplicitChannelHandler();
-        $ecotone = EcotoneLite::bootstrapFlowTesting([ImplicitChannelHandler::class], [$handler], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [ImplicitChannelHandler::class],
+            [$handler],
+            enabledModules: [],
+        );
 
         $ecotone->sendDirectToChannel(ImplicitChannelHandler::CHANNEL, 'some');
 
@@ -34,13 +38,11 @@ final class ImplicitChannelCreationTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [ImplicitChannelHandler::class],
             [$handler],
-            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
-                SimpleMessageChannelBuilder::createPublishSubscribeChannel(ImplicitChannelHandler::CHANNEL),
-            ])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createPublishSubscribeChannel(ImplicitChannelHandler::CHANNEL)],
+            enabledModules: [],
         );
 
-        $this->assertInstanceOf(PublishSubscribeChannel::class, $ecotone->getMessageChannel(ImplicitChannelHandler::CHANNEL));
+        $this->assertInstanceOf(PublishSubscribeChannel::class, ChannelTestSupport::of($ecotone)->getMessageChannel(ImplicitChannelHandler::CHANNEL));
     }
 
     public function test_explicitly_registered_queue_channel_replaces_the_implicit_direct_channel(): void
@@ -49,10 +51,8 @@ final class ImplicitChannelCreationTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [ImplicitChannelHandler::class],
             [$handler],
-            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
-                SimpleMessageChannelBuilder::createQueueChannel(ImplicitChannelHandler::CHANNEL),
-            ])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel(ImplicitChannelHandler::CHANNEL)],
+            enabledModules: [],
         );
 
         $ecotone->sendDirectToChannel(ImplicitChannelHandler::CHANNEL, 'some');

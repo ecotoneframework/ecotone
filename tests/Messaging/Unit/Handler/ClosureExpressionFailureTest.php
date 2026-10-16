@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Handler\ExpressionEvaluationException;
 use Ecotone\Messaging\Handler\MethodInvocationException;
@@ -42,8 +41,8 @@ final class ClosureExpressionFailureTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [FailingClosureExpressionService::class],
             [new FailingClosureExpressionService()],
+            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
         );
 
         try {

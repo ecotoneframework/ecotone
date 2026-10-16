@@ -13,6 +13,7 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\InterceptedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvokerProcessor;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 use function is_string;
 
@@ -69,9 +70,10 @@ class MethodInvokerBuilder implements InterceptedMessageProcessorBuilder
         $messageConverter = match (true) {
             $this->resultToMessageConverter !== null => $this->resultToMessageConverter->compile($builder),
             $this->shouldPassTroughMessageIfVoid && $interfaceToCall->getReturnType()->isVoid() => new Definition(PassthroughMessageConverter::class),
-            $this->changeHeaders => new Definition(HeaderResultMessageConverter::class, [(string) $interfaceToCall]),
+            $this->changeHeaders => new Definition(HeaderResultMessageConverter::class, [(string) $interfaceToCall, Reference::to(MessageBuilder::class)]),
             default => new Definition(PayloadResultMessageConverter::class, [
                 $interfaceToCall->getReturnType(),
+                Reference::to(MessageBuilder::class),
             ])
         };
 

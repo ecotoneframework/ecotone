@@ -105,7 +105,8 @@ class SaveAggregateServiceTemplate
         bool $isFactoryMethod,
         array $aggregateIds,
         ?int $versionAfterHandling,
-        Message $message
+        Message $message,
+        MessageBuilder $messageBuilder,
     ): Message|null {
         if ($message->getHeaders()->containsKey(AggregateMessage::NULL_EXECUTION_RESULT)) {
             if ($message->getHeaders()->get(AggregateMessage::NULL_EXECUTION_RESULT)) {
@@ -114,8 +115,8 @@ class SaveAggregateServiceTemplate
         }
 
         $messageBuilder = $versionAfterHandling === null
-            ? MessageBuilder::fromMessage($message)->removeHeader(AggregateMessage::TARGET_VERSION)
-            : MessageBuilder::fromMessage($message)->setHeader(AggregateMessage::TARGET_VERSION, $versionAfterHandling);
+            ? $messageBuilder->fromMessage($message)->removeHeader(AggregateMessage::TARGET_VERSION)
+            : $messageBuilder->fromMessage($message)->setHeader(AggregateMessage::TARGET_VERSION, $versionAfterHandling);
 
         if ($isFactoryMethod) {
             if (count($aggregateIds) === 1) {

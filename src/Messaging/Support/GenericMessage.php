@@ -74,15 +74,6 @@ final class GenericMessage implements Message
     }
 
     /**
-     * @param mixed $payload
-     * @return Message
-     */
-    public static function createWithEmptyHeaders($payload): Message
-    {
-        return new static($payload, MessageHeaders::createEmpty());
-    }
-
-    /**
      * @inheritDoc
      */
     public function getPayload(): mixed

@@ -9,7 +9,6 @@ use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\Attribute\EventSourcingAggregate;
 use Ecotone\Api\Attribute\Header;
 use Ecotone\Api\Attribute\Identifier;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Api\Modelling\WithAggregateVersioning;
@@ -24,7 +23,7 @@ final class ApplyMethodMetadataWithoutLicenceTest extends TestCase
 {
     public function test_reading_metadata_in_apply_method_without_licence_names_the_open_source_alternative(): void
     {
-        $ecotone = EcotoneLite::bootstrapFlowTesting([BasketReadingRecordTime::class], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting([BasketReadingRecordTime::class], enabledModules: []);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Using multiple parameters for #[Apply] method: ' . BasketReadingRecordTime::class . '::applyCreated is part of Enterprise features. Without Enterprise, keep a single event parameter and carry the value you need (for example the time of the change) in the event itself.');

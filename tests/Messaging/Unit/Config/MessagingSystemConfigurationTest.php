@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Unit\Config;
 
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Interceptor\Precedence;
 use Ecotone\Api\Lite\EcotoneLite;
@@ -16,6 +14,7 @@ use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Channel\SimpleChannelInterceptorBuilder;
+use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\ConsoleCommandConfiguration;
@@ -38,7 +37,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\StaticMessageBuilder;
 use Exception;
 use InvalidArgumentException;
 use Test\Ecotone\Messaging\Fixture\Annotation\Interceptor\CalculatingServiceInterceptorExample;
@@ -98,7 +97,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             ->registerConsumerFactory(new PollingConsumerBuilder())
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
 
-        $messagingSystem->getMessageChannelByName($messageChannelName)->send(MessageBuilder::withPayload('a')->build());
+        $messagingSystem->getMessageChannelByName($messageChannelName)->send(StaticMessageBuilder::withPayload('a')->build());
 
         $messagingSystem->run('executor', ExecutionPollingMetadata::createWithDefaults()->withExecutionTimeLimitInMilliseconds(1));
 
@@ -139,7 +138,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
                 $reference => $calculatingService,
             ]));
 
-        $message = MessageBuilder::withPayload(2)
+        $message = StaticMessageBuilder::withPayload(2)
             ->build();
 
         /** @var MessageChannel $channel */
@@ -162,11 +161,11 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [CalculatingServiceForAsynchronousScenario::class],
             [$calculatingService],
-            ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([])
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('asyncOne'),
-                    SimpleMessageChannelBuilder::createQueueChannel('asyncTwo'),
-                ])
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createQueueChannel('asyncOne'),
+                SimpleMessageChannelBuilder::createQueueChannel('asyncTwo'),
+            ],
+            enabledModules: [],
         );
 
         $ecotoneLite->sendCommandWithRouting('getResultOne', 2);
@@ -210,7 +209,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         /** @var MessageChannel $channel */
         $channel = $configuredMessagingSystem->getMessageChannelByName('inputChannel');
 
-        $channel->send(MessageBuilder::withPayload(2)->build());
+        $channel->send(StaticMessageBuilder::withPayload(2)->build());
         $this->assertNull($calculatingService->getLastResult());
         $configuredMessagingSystem->run($asyncChannelNameOne);
         $this->assertNull($calculatingService->getLastResult());
@@ -254,7 +253,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             ]));
 
         $replyChannel = QueueChannel::create();
-        $requestMessage = MessageBuilder::withPayload(2)
+        $requestMessage = StaticMessageBuilder::withPayload(2)
             ->setReplyChannel($replyChannel)
             ->build();
 
@@ -301,7 +300,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         /** @var PollableChannel $channel */
         $channel = $configuredMessagingSystem->getMessageChannelByName('inputChannel');
 
-        $channel->send(MessageBuilder::withPayload(2)->build());
+        $channel->send(StaticMessageBuilder::withPayload(2)->build());
         $this->assertNull($calculatingService->getLastResult());
         $this->assertEquals(3, $configuredMessagingSystem->getMessageChannelByName($asyncChannelOne)->receive()->getPayload());
     }
@@ -332,7 +331,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             ]));
 
         $replyChannel = QueueChannel::create();
-        $requestMessage = MessageBuilder::withPayload(2)
+        $requestMessage = StaticMessageBuilder::withPayload(2)
             ->setReplyChannel($replyChannel)
             ->build();
 
@@ -381,7 +380,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             ]));
 
         $replyChannel = QueueChannel::create();
-        $requestMessage = MessageBuilder::withPayload(2)
+        $requestMessage = StaticMessageBuilder::withPayload(2)
             ->setReplyChannel($replyChannel)
             ->build();
 
@@ -432,7 +431,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             ]));
 
         $replyChannel = QueueChannel::create();
-        $requestMessage = MessageBuilder::withPayload(2)
+        $requestMessage = StaticMessageBuilder::withPayload(2)
             ->setReplyChannel($replyChannel)
             ->build();
 
@@ -460,7 +459,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             ->registerPollingMetadata(PollingMetadata::create('fakeAsyncChannel')->withTestingSetup())
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
 
-        $message = MessageBuilder::withPayload(2)
+        $message = StaticMessageBuilder::withPayload(2)
             ->setReplyChannel(QueueChannel::create())
             ->build();
 
@@ -494,7 +493,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createWith(['ref-name' => $channelInterceptor]));
 
         $replyChannel = QueueChannel::create();
-        $requestMessage = MessageBuilder::withPayload(2)
+        $requestMessage = StaticMessageBuilder::withPayload(2)
             ->setReplyChannel($replyChannel)
             ->build();
 
@@ -505,52 +504,6 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
 
         $this->assertTrue($channelInterceptor->wasPreSendCalled());
         $this->assertSame($requestMessage, $channelInterceptor->getCapturedMessage());
-    }
-
-    public function test_registering_with_extension_media_type_serializer_applied_to_application_configuration()
-    {
-        $this->assertEquals(
-            MessagingSystemConfiguration::prepareWithModuleRetrievingService(InMemoryModuleMessaging::createWith([], [ServiceConfiguration::createWithDefaults()]), InterfaceToCallRegistry::createEmpty(), ServiceConfiguration::createWithDefaults()->withDefaultSerializationMediaType(MediaType::APPLICATION_JSON)),
-            MessagingSystemConfiguration::prepareWithModuleRetrievingService(InMemoryModuleMessaging::createWith([], [ServiceConfiguration::createWithDefaults()->withDefaultSerializationMediaType(MediaType::APPLICATION_JSON)]), InterfaceToCallRegistry::createEmpty(), ServiceConfiguration::createWithDefaults())
-        );
-    }
-
-    public function test_throwing_if_passed_two_extension_configurations_for_different_media_type()
-    {
-        $this->expectException(ConfigurationException::class);
-
-        MessagingSystemConfiguration::prepareWithModuleRetrievingService(InMemoryModuleMessaging::createWith([], [ServiceConfiguration::createWithDefaults()->withDefaultSerializationMediaType(MediaType::APPLICATION_JSON), ServiceConfiguration::createWithDefaults()->withDefaultSerializationMediaType(MediaType::APPLICATION_XML)]), InterfaceToCallRegistry::createEmpty(), ServiceConfiguration::createWithDefaults(), ServiceCacheConfiguration::noCache());
-    }
-
-    public function test_taking_default_media_type_serializer_from_global_application_configuration_if_passed()
-    {
-        $this->assertEquals(
-            MessagingSystemConfiguration::prepareWithModuleRetrievingService(InMemoryModuleMessaging::createWith([], [ServiceConfiguration::createWithDefaults()]), InterfaceToCallRegistry::createEmpty(), ServiceConfiguration::createWithDefaults()->withDefaultSerializationMediaType(MediaType::APPLICATION_JSON), ServiceCacheConfiguration::noCache()),
-            MessagingSystemConfiguration::prepareWithModuleRetrievingService(InMemoryModuleMessaging::createWith([], [ServiceConfiguration::createWithDefaults()->withDefaultSerializationMediaType(MediaType::APPLICATION_XML)]), InterfaceToCallRegistry::createEmpty(), ServiceConfiguration::createWithDefaults()->withDefaultSerializationMediaType(MediaType::APPLICATION_JSON), ServiceCacheConfiguration::noCache())
-        );
-    }
-
-    public function test_registering_with_default_error_channel_applied_to_application_configuration()
-    {
-        $this->assertEquals(
-            MessagingSystemConfiguration::prepareWithModuleRetrievingService(InMemoryModuleMessaging::createWith([], [ServiceConfiguration::createWithDefaults()]), InterfaceToCallRegistry::createEmpty(), ServiceConfiguration::createWithDefaults()->withDefaultErrorChannel('errorChannel'), ServiceCacheConfiguration::noCache()),
-            MessagingSystemConfiguration::prepareWithModuleRetrievingService(InMemoryModuleMessaging::createWith([], [ServiceConfiguration::createWithDefaults()->withDefaultErrorChannel('errorChannel')]), InterfaceToCallRegistry::createEmpty(), ServiceConfiguration::createWithDefaults(), ServiceCacheConfiguration::noCache())
-        );
-    }
-
-    public function test_throwing_if_passed_two_extension_configurations_for_different_default_error_channel()
-    {
-        $this->expectException(ConfigurationException::class);
-
-        MessagingSystemConfiguration::prepareWithModuleRetrievingService(InMemoryModuleMessaging::createWith([], [ServiceConfiguration::createWithDefaults()->withDefaultErrorChannel('errorChannel1'), ServiceConfiguration::createWithDefaults()->withDefaultErrorChannel('errorChannel2')]), InterfaceToCallRegistry::createEmpty(), ServiceConfiguration::createWithDefaults(), ServiceCacheConfiguration::noCache());
-    }
-
-    public function test_taking_default_error_channel_from_global_application_configuration_if_passed()
-    {
-        $this->assertEquals(
-            MessagingSystemConfiguration::prepareWithModuleRetrievingService(InMemoryModuleMessaging::createWith([], [ServiceConfiguration::createWithDefaults()]), InterfaceToCallRegistry::createEmpty(), ServiceConfiguration::createWithDefaults()->withDefaultErrorChannel('errorChannel'), ServiceCacheConfiguration::noCache()),
-            MessagingSystemConfiguration::prepareWithModuleRetrievingService(InMemoryModuleMessaging::createWith([], [ServiceConfiguration::createWithDefaults()->withDefaultErrorChannel('inputChannel')]), InterfaceToCallRegistry::createEmpty(), ServiceConfiguration::createWithDefaults()->withDefaultErrorChannel('errorChannel'), ServiceCacheConfiguration::noCache())
-        );
     }
 
     /**
@@ -576,11 +529,11 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             )
         );
 
-        $message = MessageBuilder::withPayload('testMessage')->build();
+        $message = StaticMessageBuilder::withPayload('testMessage')->build();
         /** @var QueueChannel|MessageChannelInterceptorAdapter $queueChannel */
         $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName);
 
-        $preSendModifiedMessage = MessageBuilder::withPayload('preSend')->build();
+        $preSendModifiedMessage = StaticMessageBuilder::withPayload('preSend')->build();
         $channelInterceptor->setReturnMessageOnPreSend($preSendModifiedMessage);
 
         $queueChannel->send($message);
@@ -621,9 +574,9 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         /** @var QueueChannel|MessageChannelInterceptorAdapter $queueChannel */
         $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName);
 
-        $message = MessageBuilder::withPayload('testMessage')->build();
-        $messageFirstModification = MessageBuilder::withPayload('preSend1')->build();
-        $messageSecondModification = MessageBuilder::withPayload('preSend2')->build();
+        $message = StaticMessageBuilder::withPayload('testMessage')->build();
+        $messageFirstModification = StaticMessageBuilder::withPayload('preSend1')->build();
+        $messageSecondModification = StaticMessageBuilder::withPayload('preSend2')->build();
 
         $channelInterceptorFirstToCall->setReturnMessageOnPreSend($messageFirstModification);
         $channelInterceptorSecondToCall->setReturnMessageOnPreSend($messageSecondModification);
@@ -660,7 +613,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             )
         );
 
-        $message = MessageBuilder::withPayload('testMessage')->build();
+        $message = StaticMessageBuilder::withPayload('testMessage')->build();
         /** @var QueueChannel|MessageChannelInterceptorAdapter $queueChannel */
         $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName);
 
@@ -697,7 +650,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             )
         );
 
-        $message = MessageBuilder::withPayload('testMessage')->build();
+        $message = StaticMessageBuilder::withPayload('testMessage')->build();
         /** @var QueueChannel|MessageChannelInterceptorAdapter $queueChannel */
         $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName);
 
@@ -733,7 +686,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             )
         );
 
-        $message = MessageBuilder::withPayload('testMessage')->build();
+        $message = StaticMessageBuilder::withPayload('testMessage')->build();
         /** @var QueueChannel|MessageChannelInterceptorAdapter $queueChannel */
         $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName);
 
@@ -774,11 +727,11 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             )
         );
 
-        $message = MessageBuilder::withPayload('testMessage')->build();
+        $message = StaticMessageBuilder::withPayload('testMessage')->build();
         /** @var QueueChannel|MessageChannelInterceptorAdapter $queueChannel */
         $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName2);
 
-        $preSendModifiedMessage = MessageBuilder::withPayload('preSend')->build();
+        $preSendModifiedMessage = StaticMessageBuilder::withPayload('preSend')->build();
         $channelInterceptor2->setReturnMessageOnPreSend($preSendModifiedMessage);
 
         $queueChannel->send($message);
@@ -812,11 +765,11 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             )
         );
 
-        $message = MessageBuilder::withPayload('testMessage')->build();
+        $message = StaticMessageBuilder::withPayload('testMessage')->build();
         /** @var QueueChannel|MessageChannelInterceptorAdapter $queueChannel */
         $queueChannel = $messagingSystem->getMessageChannelByName($messageChannelName);
 
-        $preSendModifiedMessage = MessageBuilder::withPayload('preSend')->build();
+        $preSendModifiedMessage = StaticMessageBuilder::withPayload('preSend')->build();
         $channelInterceptor->setReturnMessageOnPreSend($preSendModifiedMessage);
 
         $queueChannel->send($message);
@@ -1043,7 +996,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         $outputChannel = QueueChannel::create();
 
         $messageChannel->send(
-            MessageBuilder::withPayload(0)
+            StaticMessageBuilder::withPayload(0)
                 ->setReplyChannel($outputChannel)
                 ->build()
         );
@@ -1090,7 +1043,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         $messageChannel = $messagingSystemConfiguration->getMessageChannelByName($inputChannelName);
         $outputChannel = QueueChannel::create();
 
-        $message = MessageBuilder::withPayload(0)
+        $message = StaticMessageBuilder::withPayload(0)
             ->setReplyChannel($outputChannel)
             ->build();
         $messageChannel->send($message);
@@ -1118,7 +1071,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             MessagingSystemConfiguration::prepareWithModuleRetrievingService(
                 InMemoryModuleMessaging::createEmpty(),
                 InterfaceToCallRegistry::createEmpty(),
-                ServiceConfiguration::createWithDefaults(),
+                BootstrapConfiguration::createWithDefaults(),
                 ServiceCacheConfiguration::noCache()
             )
                 ->registerMessageHandler(
@@ -1184,7 +1137,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         $outputChannel = QueueChannel::create();
 
         $messageChannel->send(
-            MessageBuilder::withPayload(0)
+            StaticMessageBuilder::withPayload(0)
                 ->setReplyChannel($outputChannel)
                 ->build()
         );
@@ -1278,7 +1231,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
             ->registerMessageChannel(SimpleMessageChannelBuilder::createQueueChannel('replyChannel'))
             ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
 
-        $messagingSystem->getMessageChannelByName('replyChannel')->send(MessageBuilder::withPayload('some')->build());
+        $messagingSystem->getMessageChannelByName('replyChannel')->send(StaticMessageBuilder::withPayload('some')->build());
 
         $combinedGateway = $messagingSystem
             ->getNonProxyGatewayByName($buyGateway->getProxyMethodReference());
@@ -1384,7 +1337,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         $outputChannel = QueueChannel::create();
 
         $messageChannel->send(
-            MessageBuilder::withPayload(2)
+            StaticMessageBuilder::withPayload(2)
                 ->setReplyChannel($outputChannel)
                 ->build()
         );
@@ -1745,11 +1698,8 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [SomeTestCommandHandler::class],
             [$commandHandler],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('orders'),
-                ])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting('orders');
@@ -1765,11 +1715,8 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [SomeTestEventHandler::class],
             [$eventHandler],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([])
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('orders'),
-                ])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
+            enabledModules: [],
         );
 
         $ecotone->publishEventWithRouting('orders');
@@ -1785,7 +1732,7 @@ class MessagingSystemConfigurationTest extends MessagingTestCase
         EcotoneLite::bootstrapFlowTesting(
             [MultipleMethodsGatewayExample::class],
             [],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
     }
 

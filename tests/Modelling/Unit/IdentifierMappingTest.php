@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Test\Ecotone\Modelling\Unit;
 
 use Ecotone\Api\Attribute\Converter;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Modelling\AggregateMessage;
@@ -44,8 +43,8 @@ final class IdentifierMappingTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$sagaClass],
-            configuration: self::asyncChannelConfiguration()
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $this->assertEquals(
@@ -62,8 +61,8 @@ final class IdentifierMappingTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$sagaClass],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $this->assertEquals(
@@ -80,8 +79,8 @@ final class IdentifierMappingTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [OrderProcessWithAttributePayloadMapping::class],
-            configuration: self::asyncChannelConfiguration()
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $this->assertEquals(
@@ -100,8 +99,8 @@ final class IdentifierMappingTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [OrderProcessWithAttributePayloadMapping::class],
-            configuration: self::asyncChannelConfiguration()
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $this->assertEquals(
@@ -124,8 +123,8 @@ final class IdentifierMappingTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [OrderProcessWithAttributePayloadMapping::class],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $this->assertEquals(
@@ -145,8 +144,8 @@ final class IdentifierMappingTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [OrderProcessWithAttributePayloadMapping::class],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
-                ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $this->assertEquals(
@@ -172,10 +171,7 @@ final class IdentifierMappingTest extends TestCase
 
     public function test_mapping_using_attribute_mapper_from_header(): void
     {
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            [OrderProcessWithAttributeHeadersMapping::class],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
-        );
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([OrderProcessWithAttributeHeadersMapping::class], enabledModules: []);
 
         $this->assertEquals(
             'ongoing',
@@ -204,7 +200,7 @@ final class IdentifierMappingTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Article::class, get_class($converter)],
             [$converter],
-            configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $this->assertEquals(
@@ -224,8 +220,8 @@ final class IdentifierMappingTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Ticket::class],
-            configuration: self::asyncChannelConfiguration()
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $ecotoneLite->sendCommand(new CreateTicket(new InternalId('123')));
@@ -242,7 +238,8 @@ final class IdentifierMappingTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Ticket::class],
-            configuration: ServiceConfiguration::createWithDefaults()->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $ecotoneLite->sendCommand(new CreateTicketAsync(new InternalId('123')));
@@ -260,8 +257,8 @@ final class IdentifierMappingTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Ticket::class],
-            configuration: self::asyncChannelConfiguration()
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $ecotoneLite->sendCommand(new CreateTicket(new InternalId('123')));
@@ -280,8 +277,8 @@ final class IdentifierMappingTest extends TestCase
     {
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Ticket::class],
-            configuration: self::asyncChannelConfiguration()
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [],
         );
 
         $ecotoneLite->sendCommand(new CreateTicket(new InternalId('123')));
@@ -300,9 +297,4 @@ final class IdentifierMappingTest extends TestCase
         yield 'Method based identifier' => [OrderProcessWithMethodBasedIdentifier::class];
     }
 
-    private static function asyncChannelConfiguration(): ServiceConfiguration
-    {
-        return ServiceConfiguration::createWithDefaults()
-            ->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'));
-    }
 }

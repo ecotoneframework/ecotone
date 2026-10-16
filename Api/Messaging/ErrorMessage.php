@@ -3,7 +3,7 @@
 namespace Ecotone\Api\Messaging;
 
 use Ecotone\Messaging\MessagingException;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Support\GenericMessage;
 use Ecotone\Messaging\Support\MessageDescription;
 use Throwable;
 
@@ -40,14 +40,18 @@ final class ErrorMessage implements Message
     public static function create(Message $message, Throwable $cause): self
     {
         return new self(
-            MessageBuilder::fromMessage($message)
-                ->setHeader(ErrorContext::EXCEPTION_CLASS, get_class($cause))
-                ->setHeader(ErrorContext::EXCEPTION_MESSAGE, $cause->getMessage())
-                ->setHeader(ErrorContext::EXCEPTION_STACKTRACE, $cause->getTraceAsString())
-                ->setHeader(ErrorContext::EXCEPTION_FILE, $cause->getFile())
-                ->setHeader(ErrorContext::EXCEPTION_LINE, $cause->getLine())
-                ->setHeader(ErrorContext::EXCEPTION_CODE, $cause->getCode())
-                ->build()
+            GenericMessage::create(
+                $message->getPayload(),
+                MessageHeaders::create([
+                    ...$message->getHeaders()->headers(),
+                    ErrorContext::EXCEPTION_CLASS => get_class($cause),
+                    ErrorContext::EXCEPTION_MESSAGE => $cause->getMessage(),
+                    ErrorContext::EXCEPTION_STACKTRACE => $cause->getTraceAsString(),
+                    ErrorContext::EXCEPTION_FILE => $cause->getFile(),
+                    ErrorContext::EXCEPTION_LINE => $cause->getLine(),
+                    ErrorContext::EXCEPTION_CODE => $cause->getCode(),
+                ])
+            )
         );
     }
 

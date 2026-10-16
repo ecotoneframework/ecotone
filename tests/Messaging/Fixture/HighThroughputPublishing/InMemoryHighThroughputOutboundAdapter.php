@@ -8,7 +8,7 @@ use Ecotone\Api\Attribute\Reference;
 use Ecotone\Api\Messaging\BatchMessage;
 use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PendingDeliveryRegistry;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Test\StaticMessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -103,7 +103,7 @@ final class InMemoryHighThroughputOutboundAdapter
         $failedMessages = [];
         foreach ($payload->entries as $entry) {
             if ($this->matchesFailingFragment($entry['payload'])) {
-                $failedMessages[] = MessageBuilder::withPayload($entry['payload'])
+                $failedMessages[] = StaticMessageBuilder::withPayload($entry['payload'])
                     ->setMultipleHeaders($entry['headers'])
                     ->build();
             }

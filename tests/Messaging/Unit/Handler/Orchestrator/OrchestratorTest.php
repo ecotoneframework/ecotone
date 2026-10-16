@@ -6,7 +6,6 @@ namespace Test\Ecotone\Messaging\Unit\Handler\Orchestrator;
 
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
 use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Gateway\CommandBus;
 use Ecotone\Api\Gateway\EventBus;
@@ -69,9 +68,8 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [AuthorizationOrchestrator::class],
             [$orchestrator = new AuthorizationOrchestrator()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $result = $ecotoneLite->sendDirectToChannel('start.authorization', 'test-data');
@@ -91,9 +89,8 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [AuthorizationOrchestrator::class, AuthorizationProcess::class],
             [$orchestrator = new AuthorizationOrchestrator()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         /** @var AuthorizationProcess $authorizationProcess */
@@ -115,9 +112,8 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [AuthorizationOrchestrator::class, CommandHandlerAuthorizationProcessor::class],
             [$orchestrator = new AuthorizationOrchestrator(), new CommandHandlerAuthorizationProcessor()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         /** @var CommandBus $commandBus */
@@ -139,9 +135,9 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [AuthorizationOrchestrator::class, AsynchronousEventHandlerAuthorizationProcessor::class],
             [$orchestrator = new AuthorizationOrchestrator(), new AsynchronousEventHandlerAuthorizationProcessor()],
-            (ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE, ])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [ModulePackageList::CORE_PACKAGE, ],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         /** @var EventBus $eventBus */
@@ -161,9 +157,9 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [AuthorizationOrchestrator::class, AuthorizationProcessGateway::class],
             [$orchestrator = new AuthorizationOrchestrator()],
-            (ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE, ])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [ModulePackageList::CORE_PACKAGE, ],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         /** @var AuthorizationProcessGateway $gateway */
@@ -183,9 +179,9 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [AuthorizationOrchestrator::class, AuthorizationProcessGateway::class],
             [$orchestrator = new AuthorizationOrchestrator()],
-            (ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE, ])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [ModulePackageList::CORE_PACKAGE, ],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $this->expectException(InvalidArgumentException::class);
@@ -204,9 +200,9 @@ class OrchestratorTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [OrchestratorGatewayWithIncorrectRouting::class],
             [],
-            (ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE, ])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [ModulePackageList::CORE_PACKAGE, ],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 
@@ -217,9 +213,9 @@ class OrchestratorTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [OrchestratorGatewayWithIncorrectMetadata::class],
             [],
-            (ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE, ])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [ModulePackageList::CORE_PACKAGE, ],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 
@@ -228,9 +224,8 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [SimpleOrchestrator::class],
             [new SimpleOrchestrator()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $this->assertSame('test-data', $ecotoneLite->sendDirectToChannel('empty.workflow', 'test-data'));
@@ -241,9 +236,8 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [SimpleOrchestrator::class],
             [new SimpleOrchestrator()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $this->assertSame('validated: test-data', $ecotoneLite->sendDirectToChannel('single.step', 'test-data'));
@@ -257,9 +251,8 @@ class OrchestratorTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [StringReturnTypeOrchestrator::class],
             [new StringReturnTypeOrchestrator()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 
@@ -271,9 +264,8 @@ class OrchestratorTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [InvalidReturnTypeOrchestrator::class],
             [new InvalidReturnTypeOrchestrator()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 
@@ -285,9 +277,8 @@ class OrchestratorTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [NoReturnTypeOrchestrator::class],
             [new NoReturnTypeOrchestrator()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 
@@ -299,9 +290,8 @@ class OrchestratorTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [UnionTypeOrchestrator::class],
             [new UnionTypeOrchestrator()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 
@@ -313,9 +303,8 @@ class OrchestratorTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [NullableArrayOrchestrator::class],
             [new NullableArrayOrchestrator()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 
@@ -327,9 +316,8 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ArrayWithNonStringOrchestrator::class],
             [new ArrayWithNonStringOrchestrator()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         // This should fail at runtime when the orchestrator executes and returns non-string array
@@ -344,9 +332,8 @@ class OrchestratorTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [VoidReturnTypeOrchestrator::class],
             [new VoidReturnTypeOrchestrator()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
     }
 
@@ -355,9 +342,8 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [OrchestratorEndingDuringFlow::class],
             [$service = new OrchestratorEndingDuringFlow()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('orchestrator.ending.during.flow', 'test-data');
@@ -370,9 +356,8 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [CombinedOrchestrator::class],
             [$service = new CombinedOrchestrator()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('orchestrator.ending.during.flow', []);
@@ -385,9 +370,8 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [OrchestratorWithInternalBus::class],
             [$service = new OrchestratorWithInternalBus()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('orchestrator.ending.during.flow', []);
@@ -400,9 +384,9 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [AsynchronousOrchestrator::class],
             [$service = new AsynchronousOrchestrator()],
-            (ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE, ])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [ModulePackageList::CORE_PACKAGE, ],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('asynchronous.workflow', []);
@@ -418,9 +402,9 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [OrchestratorWithAsynchronousStep::class],
             [$service = new OrchestratorWithAsynchronousStep()],
-            (ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE, ])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [ModulePackageList::CORE_PACKAGE, ],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('asynchronous.workflow', []);
@@ -437,9 +421,9 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [OrchestratorWithAsynchronousAndInputOutputChannels::class],
             [$service = new OrchestratorWithAsynchronousAndInputOutputChannels()],
-            (ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE, ])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [ModulePackageList::CORE_PACKAGE, ],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('asynchronous.workflow', []);
@@ -463,8 +447,8 @@ class OrchestratorTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [AuthorizationOrchestrator::class, AuthorizationProcessGateway::class],
             [new AuthorizationOrchestrator()],
-            (ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE, ]))->addExtensionObject(SimpleMessageChannelBuilder::createQueueChannel('async'))
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
+            enabledModules: [ModulePackageList::CORE_PACKAGE, ],
         );
     }
 
@@ -475,9 +459,7 @@ class OrchestratorTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [SimpleOrchestrator::class],
             [new SimpleOrchestrator()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-            // No license key provided - should throw exception
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
         );
     }
 
@@ -486,9 +468,8 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [OrchestratorWithSplitterStep::class],
             [$service = new OrchestratorWithSplitterStep()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('orchestrator.with.splitter', 'test-data');
@@ -507,9 +488,8 @@ class OrchestratorTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [OrchestratorWithSplitterOutputChannel::class],
             [$service = new OrchestratorWithSplitterOutputChannel()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([ModulePackageList::CORE_PACKAGE])
-                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $ecotoneLite->sendDirectToChannel('orchestrator.with.splitter.output', 'test-data');

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Messaging\MessageHeaders;
 use PHPUnit\Framework\TestCase;
@@ -34,8 +33,7 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [User::class, AuditLog::class],
             [new AuditLog()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotoneLite->sendDirectToChannel(
@@ -54,8 +52,7 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Merchant::class, MerchantSubscriber::class, AuditLog::class, User::class],
             [new MerchantSubscriber(), new AuditLog()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotoneLite->sendDirectToChannel(
@@ -80,8 +77,7 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Merchant::class, MerchantSubscriber::class, AuditLog::class, User::class],
             [new MerchantSubscriber(), new AuditLog()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotoneLite->sendCommand(
@@ -99,8 +95,7 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Merchant::class, MerchantSubscriber::class, AuditLog::class, User::class, ExtendedCommandBus::class],
             [new MerchantSubscriber(), new AuditLog()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         /** @var ExtendedCommandBus $commandBus */
@@ -120,8 +115,7 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Merchant::class, MerchantSubscriber::class, AuditLog::class, User::class],
             [new MerchantSubscriber(), new AuditLog()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotoneLite->sendQueryWithRouting(
@@ -139,8 +133,7 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [CreateMerchantService::class, Merchant::class, MerchantSubscriber::class, AuditLog::class, User::class],
             [new MerchantSubscriber(), new AuditLog()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         /** @var CreateMerchantService $gateway */
@@ -160,8 +153,7 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [MerchantSubscriber::class, AuditLog::class, User::class],
             [new MerchantSubscriber(), new AuditLog()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
 
         $ecotoneLite->publishEvent(
@@ -180,8 +172,7 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Article::class, ArticleRepository::class, RepositoryBusinessInterface::class, Page::class, Author::class, AuditLog::class, ArticleService::class],
             [ArticleRepository::class => $articleRepository, new AuditLog(), new ArticleService()],
-            ServiceConfiguration::createWithDefaults()
-                ->withEnabledModulePackageNames([]),
+            enabledModules: [],
             addInMemoryStateStoredRepository: false,
         );
 

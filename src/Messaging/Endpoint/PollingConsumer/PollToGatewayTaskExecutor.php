@@ -22,6 +22,7 @@ class PollToGatewayTaskExecutor
         private MessagingEntrypointService $messagingEntrypoint,
         private AsyncHandlerAnnotationRegistry $asyncHandlerAnnotationRegistry,
         private AsyncEndpointAnnotationContext $asyncEndpointAnnotationContext,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -44,7 +45,7 @@ class PollToGatewayTaskExecutor
             }
             try {
                 $this->gateway->execute([
-                    MessageBuilder::fromMessage($message)
+                    $this->messageBuilder->fromMessage($message)
                         ->setHeader(MessageHeaders::CONSUMER_POLLING_METADATA, $pollingMetadata)
                         ->build(),
                 ]);

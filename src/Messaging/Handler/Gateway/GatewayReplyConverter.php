@@ -22,6 +22,7 @@ class GatewayReplyConverter
         private ConversionService $conversionService,
         private string $interfaceToCallName,
         private ?Type $returnType,
+        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -94,7 +95,7 @@ class GatewayReplyConverter
         }
 
         if ($this->returnType->isMessage()) {
-            return MessageBuilder::fromMessage($result)
+            return $this->messageBuilder->fromMessage($result)
                         ->setContentType($replyContentType)
                         ->setPayload($data)
                         ->build();

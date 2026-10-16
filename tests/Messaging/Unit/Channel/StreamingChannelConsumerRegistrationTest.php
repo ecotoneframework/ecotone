@@ -8,7 +8,6 @@ use Ecotone\Api\Attribute\InternalHandler;
 use Ecotone\Api\Attribute\QueryHandler;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
 use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Consumer\ConsumerPositionTracker;
@@ -31,11 +30,8 @@ final class StreamingChannelConsumerRegistrationTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [],
             [ConsumerPositionTracker::class => $positionTracker],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createStreamingChannel('shared_channel'),
-                ])
-                    ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createStreamingChannel('shared_channel')],
+            enabledModules: [],
         );
 
         $this->assertContains('shared_channel', $ecotoneLite->list());
@@ -64,12 +60,11 @@ final class StreamingChannelConsumerRegistrationTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$handler::class],
             [$handler, ConsumerPositionTracker::class => $positionTracker],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createStreamingChannel('shared_channel'),
-                    PollingMetadata::create('consumer1')->withHandledMessageLimit(1),
-                ])
-                    ->withEnabledModulePackageNames([])
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createStreamingChannel('shared_channel'),
+                PollingMetadata::create('consumer1')->withHandledMessageLimit(1),
+            ],
+            enabledModules: [],
         );
 
         // Consumer should be registered when handler uses the shared channel
@@ -86,11 +81,8 @@ final class StreamingChannelConsumerRegistrationTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [],
             [],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createQueueChannel('regular_channel'),
-                ])
-                    ->withEnabledModulePackageNames([])
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('regular_channel')],
+            enabledModules: [],
         );
 
         // Regular pollable channel SHOULD be in the list of consumers
@@ -118,13 +110,12 @@ final class StreamingChannelConsumerRegistrationTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$handler1::class, $handler2::class],
             [$handler1, $handler2, ConsumerPositionTracker::class => $positionTracker],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createStreamingChannel('shared_channel'),
-                    PollingMetadata::create('consumer_group_1')->withHandledMessageLimit(1),
-                    PollingMetadata::create('consumer_group_2')->withHandledMessageLimit(1),
-                ])
-                    ->withEnabledModulePackageNames([])
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createStreamingChannel('shared_channel'),
+                PollingMetadata::create('consumer_group_1')->withHandledMessageLimit(1),
+                PollingMetadata::create('consumer_group_2')->withHandledMessageLimit(1),
+            ],
+            enabledModules: [],
         );
 
         // Both consumers should be registered with their own endpoint IDs
@@ -171,13 +162,12 @@ final class StreamingChannelConsumerRegistrationTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$handler1::class, $handler2::class],
             [$handler1, $handler2, ConsumerPositionTracker::class => $positionTracker],
-            ServiceConfiguration::createWithDefaults()
-                ->withExtensionObjects([
-                    SimpleMessageChannelBuilder::createStreamingChannel('shared_channel'),
-                    PollingMetadata::create('consumer_group_1')->withHandledMessageLimit(1),
-                    PollingMetadata::create('consumer_group_2')->withHandledMessageLimit(1),
-                ])
-                    ->withEnabledModulePackageNames([])
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createStreamingChannel('shared_channel'),
+                PollingMetadata::create('consumer_group_1')->withHandledMessageLimit(1),
+                PollingMetadata::create('consumer_group_2')->withHandledMessageLimit(1),
+            ],
+            enabledModules: [],
         );
 
         // Send messages to the shared channel

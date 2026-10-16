@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use Ecotone\Api\Gateway\EcotoneClockInterface;
-use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadConverter;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionConverter;
 use Ecotone\Messaging\Handler\MethodArgument;
@@ -26,7 +24,7 @@ class MethodCallToMessageConverter
      * @param array|GatewayParameterConverter[] $methodArgumentConverters
      * @param string[] $parameterNames
      */
-    public function __construct(private array $methodArgumentConverters, private array $parameterNames, private EcotoneClockInterface $clock)
+    public function __construct(private array $methodArgumentConverters, private array $parameterNames, private MessageBuilder $messageBuilder)
     {
         Assert::allInstanceOfType($methodArgumentConverters, GatewayParameterConverter::class);
     }
@@ -71,8 +69,7 @@ class MethodCallToMessageConverter
      */
     public function getMessageBuilderUsingPayloadConverter(array $methodArguments): MessageBuilder
     {
-        $defaultBuilder = MessageBuilder::withPayload('')
-            ->setHeader(MessageHeaders::TIMESTAMP, $this->clock->now()->unixTime()->inSeconds());
+        $defaultBuilder = $this->messageBuilder->withPayload('');
         foreach ($methodArguments as $methodArgument) {
             foreach ($this->methodArgumentConverters as $methodParameterConverter) {
                 if ($this->isPayloadConverter($methodParameterConverter) && $methodParameterConverter->isSupporting($methodArgument)) {

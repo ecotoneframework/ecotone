@@ -2,26 +2,25 @@
 
 namespace Ecotone\Messaging\Endpoint\InboundChannelAdapter;
 
-use DateTimeImmutable;
+use Ecotone\Api\Gateway\EcotoneClockInterface;
+use Ecotone\Api\Scheduling\DatePoint;
 
 /**
  * licence Apache-2.0
  */
 class PassThroughService
 {
-    private object $serviceToCall;
-    private string $method;
-
-    public function __construct(object $serviceToCall, string $method)
-    {
-        $this->serviceToCall = $serviceToCall;
-        $this->method = $method;
+    public function __construct(
+        private object $serviceToCall,
+        private string $method,
+        private EcotoneClockInterface $clock,
+    ) {
     }
 
-    public function execute(): DateTimeImmutable
+    public function execute(): DatePoint
     {
         $this->serviceToCall->{$this->method}();
 
-        return new DateTimeImmutable();
+        return $this->clock->now();
     }
 }

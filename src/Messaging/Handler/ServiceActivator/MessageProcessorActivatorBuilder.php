@@ -15,6 +15,7 @@ use Ecotone\Messaging\Handler\Processor\ChainedMessageProcessor;
 use Ecotone\Messaging\Handler\Processor\ChainedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\Processor\InterceptedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\RequestReplyProducer;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * @licence Apache-2.0
@@ -73,6 +74,7 @@ class MessageProcessorActivatorBuilder extends InputOutputMessageHandlerBuilder
                 $chainedMessageProcessorBuilder->compile($builder),
                 new Reference(ChannelResolver::class),
                 $this->isReplyRequired,
+                new Reference(MessageBuilder::class),
                 $chainedMessageProcessorBuilder->getInterceptedInterface()?->getName() ?? '',
             ]
         );

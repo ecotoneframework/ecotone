@@ -8,7 +8,6 @@ use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\Attribute\InternalHandler;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Config\ConfigurationException;
@@ -25,7 +24,11 @@ final class ConsumerRunningAndAsynchronousChainTest extends TestCase
     public function test_running_an_event_driven_consumer_processes_the_message_immediately(): void
     {
         $handler = new DirectlyConsumedHandler();
-        $ecotone = EcotoneLite::bootstrapFlowTesting([DirectlyConsumedHandler::class], [$handler], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [DirectlyConsumedHandler::class],
+            [$handler],
+            enabledModules: [],
+        );
 
         $ecotone->sendDirectToChannel(DirectlyConsumedHandler::CHANNEL, 'a');
 
@@ -46,7 +49,11 @@ final class ConsumerRunningAndAsynchronousChainTest extends TestCase
 
     public function test_throws_when_running_a_consumer_that_does_not_exist(): void
     {
-        $ecotone = EcotoneLite::bootstrapFlowTesting([], [], configuration: ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]));
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [],
+            [],
+            enabledModules: [],
+        );
 
         $this->expectException(InvalidArgumentException::class);
 
@@ -60,7 +67,7 @@ final class ConsumerRunningAndAsynchronousChainTest extends TestCase
         EcotoneLite::bootstrap(
             [UnregisteredAsyncChannelHandler::class],
             [new UnregisteredAsyncChannelHandler()],
-            ServiceConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            enabledModules: [],
         );
     }
 
@@ -70,11 +77,11 @@ final class ConsumerRunningAndAsynchronousChainTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [TwoHopAsyncHandler::class],
             [$handler],
-            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
+            extensionObjects: [
                 SimpleMessageChannelBuilder::createQueueChannel(TwoHopAsyncHandler::CHANNEL_ONE),
                 SimpleMessageChannelBuilder::createQueueChannel(TwoHopAsyncHandler::CHANNEL_TWO),
-            ])
-                ->withEnabledModulePackageNames([]),
+            ],
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting(TwoHopAsyncHandler::ROUTING_KEY, 2);
@@ -92,12 +99,12 @@ final class ConsumerRunningAndAsynchronousChainTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [ThreeHopAsyncHandler::class],
             [$handler],
-            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
+            extensionObjects: [
                 SimpleMessageChannelBuilder::createQueueChannel(ThreeHopAsyncHandler::CHANNEL_ONE),
                 SimpleMessageChannelBuilder::createQueueChannel(ThreeHopAsyncHandler::CHANNEL_TWO),
                 SimpleMessageChannelBuilder::createQueueChannel(ThreeHopAsyncHandler::CHANNEL_THREE),
-            ])
-                ->withEnabledModulePackageNames([]),
+            ],
+            enabledModules: [],
         );
 
         $ecotone->sendCommandWithRouting(ThreeHopAsyncHandler::ROUTING_KEY, 2);
@@ -116,10 +123,8 @@ final class ConsumerRunningAndAsynchronousChainTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             [SingleHopAsyncHandler::class],
             [$handler],
-            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
-                SimpleMessageChannelBuilder::createQueueChannel(SingleHopAsyncHandler::CHANNEL),
-            ])
-                ->withEnabledModulePackageNames([]),
+            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel(SingleHopAsyncHandler::CHANNEL)],
+            enabledModules: [],
         );
     }
 }

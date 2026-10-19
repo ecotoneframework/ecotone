@@ -14,12 +14,15 @@ final class SpanAttribute
     public const MESSAGING_DESTINATION_NAME = 'messaging.destination.name';
     public const ENDPOINT_ID = 'ecotone.endpoint.id';
     public const PROJECTION_NAME = 'ecotone.projection.name';
+    public const PROJECTION_OPERATION = 'ecotone.projection.operation';
     public const TRACE_ROOT = 'ecotone.trace.root';
     public const TRACE_CARRIED = 'ecotone.trace.carried';
     public const TRACE_UNTRACKED = 'ecotone.trace.untracked';
     public const CODE_FUNCTION_NAME = 'code.function.name';
     public const CHANNEL_NAME = 'ecotone.channel.name';
     public const BATCH_DELIVERIES = 'ecotone.batch.deliveries';
+    public const ROUTE_UNDELIVERED = 'ecotone.route.undelivered';
+    public const ROUTE_COLLECTED = 'ecotone.route.collected';
 
     public const ECOTONE = 'ecotone';
     public const OPERATION_SEND = 'send';

@@ -17,7 +17,8 @@ final class MessageCollectorChannelInterceptor extends AbstractChannelIntercepto
 {
     public function __construct(
         private CollectorStorage $collectorStorage,
-        private LoggingGateway $logger
+        private LoggingGateway $logger,
+        private MessageCollectionObserver $observer,
     ) {
     }
 
@@ -25,6 +26,7 @@ final class MessageCollectorChannelInterceptor extends AbstractChannelIntercepto
     {
         if ($this->collectorStorage->isEnabled()) {
             $this->collectorStorage->collect($message, $this->logger);
+            $this->observer->collected($message);
 
             $message = null;
         }

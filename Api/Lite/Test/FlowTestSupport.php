@@ -17,6 +17,7 @@ use Ecotone\Api\Gateway\EventBus;
 use Ecotone\Api\Gateway\MessagePublisher;
 use Ecotone\Api\Gateway\QueryBus;
 use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
+use Ecotone\Api\Messaging\Flow\MessageFlowGraph;
 use Ecotone\Api\Messaging\Message;
 use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Api\Scheduling\DatePoint;
@@ -32,7 +33,7 @@ use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDef
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\Config\AggregateModule;
 use Ecotone\Modelling\Config\MessageBusChannel;
-use Ecotone\Projecting\ProjectionRegistry;
+use Ecotone\Projecting\ProjectionOperations;
 use Ecotone\Test\StaticPsrClock;
 use InvalidArgumentException;
 
@@ -307,7 +308,7 @@ final class FlowTestSupport
         Assert::allStrings($projectionName, '$projectionName must be single or collection of strings');
 
         foreach ($projectionName as $name) {
-            $this->getGateway(ProjectionRegistry::class)->get($name)->executeAll();
+            $this->getGateway(ProjectionOperations::class)->trigger($name);
         }
 
         return $this;
@@ -315,21 +316,21 @@ final class FlowTestSupport
 
     public function initializeProjection(string $projectionName): self
     {
-        $this->getGateway(ProjectionRegistry::class)->get($projectionName)->init();
+        $this->getGateway(ProjectionOperations::class)->initialize($projectionName);
 
         return $this;
     }
 
     public function resetProjection(string $projectionName): self
     {
-        $this->getGateway(ProjectionRegistry::class)->get($projectionName)->executeAllWithReset();
+        $this->getGateway(ProjectionOperations::class)->reset($projectionName);
 
         return $this;
     }
 
     public function deleteProjection(string $projectionName): self
     {
-        $this->getGateway(ProjectionRegistry::class)->get($projectionName)->delete();
+        $this->getGateway(ProjectionOperations::class)->delete($projectionName);
 
         return $this;
     }
@@ -525,6 +526,11 @@ final class FlowTestSupport
     public function getInMemoryConsoleWriter(): InMemoryConsoleWriter
     {
         return $this->configuredMessagingSystem->getServiceFromContainer(InMemoryConsoleWriter::class);
+    }
+
+    public function getMessageFlowGraph(): MessageFlowGraph
+    {
+        return $this->configuredMessagingSystem->getMessageFlowGraph();
     }
 
     /**

@@ -87,7 +87,7 @@ final class ImmutableConfigurationCopyTest extends TestCase
             'channelsForInvoiceIssued' => $map->getAllSubscriptionChannels('shop', 'invoice.issued'),
         ];
 
-        self::assertSame(['commandMapping', 'distributedBusAnnotations'], array_keys(get_object_vars($original)));
+        self::assertSame(['commandMapping', 'eventSubscriptions', 'distributedBusAnnotations'], array_keys(get_object_vars($original)));
         self::assertCopyChangesOnly(
             $original,
             fn (DistributedServiceMap $map) => $map->withCommandMapping('payments', 'payments_channel'),
@@ -97,7 +97,13 @@ final class ImmutableConfigurationCopyTest extends TestCase
         self::assertCopyChangesOnly(
             $original,
             fn (DistributedServiceMap $map) => $map->withEventMapping('invoices_channel', ['invoice.*']),
-            ['channelsForInvoiceIssued' => ['invoices_channel']],
+            [
+                'eventSubscriptions' => [
+                    'audit_channel' => ['keys' => ['order.*'], 'exclude' => [], 'include' => []],
+                    'invoices_channel' => ['keys' => ['invoice.*'], 'exclude' => [], 'include' => []],
+                ],
+                'channelsForInvoiceIssued' => ['invoices_channel'],
+            ],
             $observe,
         );
         self::assertCopyChangesOnly(

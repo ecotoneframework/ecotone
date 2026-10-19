@@ -15,6 +15,7 @@ use Ecotone\Api\Gateway\QueryBus;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
 use Ecotone\Api\Lite\Test\MessagingTestSupport;
 use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
+use Ecotone\Api\Messaging\Flow\MessageFlowGraph;
 use Ecotone\Api\Messaging\Message;
 use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Api\Messaging\MessageHeaders;
@@ -138,6 +139,11 @@ final class ConfiguredMessagingSystemWithTestSupport implements ConfiguredMessag
     public function getGatewayList(): array
     {
         return $this->configuredMessagingSystem->getGatewayList();
+    }
+
+    public function getMessageFlowGraph(): MessageFlowGraph
+    {
+        return $this->configuredMessagingSystem->getMessageFlowGraph();
     }
 
     public function replaceWith(ConfiguredMessagingSystem $messagingSystem): void

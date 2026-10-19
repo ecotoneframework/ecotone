@@ -14,15 +14,18 @@ use Ecotone\Api\Gateway\EventBus;
 use Ecotone\Api\Gateway\MessagePublisher;
 use Ecotone\Api\Gateway\QueryBus;
 use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
+use Ecotone\Api\Messaging\Flow\MessageFlowGraph;
 use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Messaging\Config\Container\ChannelReference;
 use Ecotone\Messaging\Config\Container\ConsoleCommandReference;
 use Ecotone\Messaging\Config\Container\EndpointRunnerReference;
 use Ecotone\Messaging\Config\Container\GatewayProxyMethodReference;
 use Ecotone\Messaging\Config\Container\GatewayProxyReference;
+use Ecotone\Messaging\Config\Flow\MessageFlowGraphBuilder;
 use Ecotone\Messaging\Endpoint\EndpointRunner;
 use Ecotone\Messaging\Handler\Gateway\Gateway;
 use Ecotone\Messaging\Support\InvalidArgumentException;
+use Ecotone\Messaging\Support\LicensingException;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -157,5 +160,14 @@ class MessagingSystemContainer implements ConfiguredMessagingSystem
         }
 
         return implode(', ', array_unique($described));
+    }
+
+    public function getMessageFlowGraph(): MessageFlowGraph
+    {
+        if (! $this->container->has(MessageFlowGraphBuilder::class)) {
+            throw LicensingException::create('The message flow graph (ConfiguredMessagingSystem::getMessageFlowGraph() and the ecotone:flow:dump console command) is part of Ecotone Enterprise. Provide your licence key as `licenceKey` in the Symfony, Laravel or Tempest Ecotone configuration, or as the `licenceKey:` argument of EcotoneLite, or start a trial at https://ecotone.tech/pricing. See https://docs.ecotone.tech/enterprise for details.');
+        }
+
+        return $this->container->get(MessageFlowGraphBuilder::class)->build();
     }
 }

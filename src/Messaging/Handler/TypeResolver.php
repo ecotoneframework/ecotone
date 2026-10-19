@@ -333,6 +333,10 @@ class TypeResolver
             return $this->useStatementsByFileName[$fileName];
         }
 
+        if (! is_file($fileName) || ! is_readable($fileName)) {
+            return [];
+        }
+
         $classContents = file_get_contents($fileName);
 
         return $this->useStatementsByFileName[$fileName] = array_merge($this->getSingleUseStatements($classContents), $this->getGroupUseStatements($classContents));

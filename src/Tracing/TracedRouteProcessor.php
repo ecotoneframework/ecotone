@@ -17,6 +17,8 @@ use Throwable;
  */
 final class TracedRouteProcessor implements MessageProcessor
 {
+    public const SPAN_NAME_PREFIX = 'route ';
+
     public function __construct(
         private string $routeName,
         private MessageProcessor $routeProcessor,
@@ -43,6 +45,9 @@ final class TracedRouteProcessor implements MessageProcessor
             throw $failure;
         }
 
+        if (! $span->hasStartedChildren() && ! ($span->attributes()[SpanAttribute::ROUTE_COLLECTED] ?? false)) {
+            $span->setAttribute(SpanAttribute::ROUTE_UNDELIVERED, true);
+        }
         $span->end();
 
         return $result;
@@ -52,10 +57,10 @@ final class TracedRouteProcessor implements MessageProcessor
     {
         $projectionName = ProjectingModule::projectionNameOfTriggerChannel($this->routeName);
         if ($projectionName !== null) {
-            return 'route ' . $projectionName;
+            return self::SPAN_NAME_PREFIX . $projectionName;
         }
 
-        return 'route ' . (BusRoutingMapBuilder::endpointIdOfDestinationChannel($this->routeName) ?? $this->routeName);
+        return self::SPAN_NAME_PREFIX . (BusRoutingMapBuilder::endpointIdOfDestinationChannel($this->routeName) ?? $this->routeName);
     }
 
     /**

@@ -56,6 +56,7 @@ use Ecotone\Projecting\StreamPage;
 use Ecotone\Projecting\StreamSource;
 use Ecotone\Projecting\Transaction;
 use Ecotone\Test\LicenceTesting;
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\RequiresPhpExtension;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -748,6 +749,33 @@ class ProjectingTest extends TestCase
         $ecotone->resetProjection('reset_replay_projection');
 
         self::assertCount(2, $projection->processedEvents, 'resetProjection() must replay previously processed events from scratch, not merely clear and re-init state');
+    }
+
+    public function test_operating_on_an_unknown_projection_names_the_registered_ones(): void
+    {
+        $projection = new #[Projection('known_projection'), FromStream('test_stream')] class {
+            #[EventHandler('*')]
+            public function handle(array $event): void
+            {
+            }
+        };
+        $ecotone = EcotoneLite::bootstrapFlowTesting([$projection::class], [$projection], enabledModules: [], licenceKey: LicenceTesting::VALID_LICENCE);
+
+        foreach ([
+            'trigger' => fn () => $ecotone->triggerProjection('unknown_projection'),
+            'reset' => fn () => $ecotone->resetProjection('unknown_projection'),
+            'initialize' => fn () => $ecotone->initializeProjection('unknown_projection'),
+            'delete' => fn () => $ecotone->deleteProjection('unknown_projection'),
+            'backfill' => fn () => $ecotone->runConsoleCommand('ecotone:projection:backfill', ['name' => 'unknown_projection']),
+            'rebuild' => fn () => $ecotone->runConsoleCommand('ecotone:projection:rebuild', ['name' => 'unknown_projection']),
+        ] as $operation => $operate) {
+            try {
+                $operate();
+                self::fail("{$operation} of an unknown projection was accepted");
+            } catch (InvalidArgumentException $exception) {
+                self::assertSame("There is no projection with name unknown_projection. Registered projections: [known_projection]. Use the name given in #[Projection] of the projection to {$operation}.", $exception->getMessage());
+            }
+        }
     }
 
     #[RequiresPhpExtension('pcntl')]

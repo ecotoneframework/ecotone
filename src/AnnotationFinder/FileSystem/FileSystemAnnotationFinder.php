@@ -569,7 +569,7 @@ class FileSystemAnnotationFinder implements AnnotationFinder
 
         foreach ($this->registeredClasses() as $class) {
             $filePath = (new ReflectionClass($class))->getFileName();
-            $fileSha .= $class . hash_file(self::FILE_CONTENT_HASH_ALGORITHM, $filePath);
+            $fileSha .= $class . ($filePath !== false && is_file($filePath) && is_readable($filePath) ? hash_file(self::FILE_CONTENT_HASH_ALGORITHM, $filePath) : '');
         }
 
         $composerLockPath = rtrim($pathToRootCatalog, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'composer.lock';

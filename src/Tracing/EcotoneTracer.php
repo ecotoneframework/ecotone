@@ -30,6 +30,8 @@ final class EcotoneTracer implements Tracer
 
     public function startSpan(string $name, SpanKind $kind, array $attributes = [], ?SpanContext $remoteParent = null): ActiveSpan
     {
+        $this->currentSpan()?->childStarted();
+
         return $this->start($name, $kind, $attributes, $remoteParent ?? $this->currentSpan()?->context());
     }
 

@@ -8,6 +8,7 @@ use Ecotone\Api\Gateway\DistributedBus;
 use Ecotone\Api\Gateway\EventBus;
 use Ecotone\Api\Gateway\MessagePublisher;
 use Ecotone\Api\Gateway\QueryBus;
+use Ecotone\Api\Messaging\Flow\MessageFlowGraph;
 use Ecotone\Messaging\Config\Container\GatewayProxyMethodReference;
 use Ecotone\Messaging\Config\Container\GatewayProxyReference;
 use Ecotone\Messaging\Handler\Gateway\Gateway;
@@ -31,6 +32,8 @@ interface ConfiguredMessagingSystem
      * @return GatewayProxyReference[]
      */
     public function getGatewayList(): array;
+
+    public function getMessageFlowGraph(): MessageFlowGraph;
 
     public function getNonProxyGatewayByName(GatewayProxyMethodReference $gatewayProxyMethodReference): Gateway;
 

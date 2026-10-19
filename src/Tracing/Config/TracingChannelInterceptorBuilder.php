@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Tracing\Config;
 
-use Ecotone\Api\Interceptor\Precedence;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\PrecedenceChannelInterceptor;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Tracing\MessageSpanAttributes;
 use Ecotone\Tracing\Tracer;
@@ -30,7 +30,7 @@ final class TracingChannelInterceptorBuilder implements ChannelInterceptorBuilde
 
     public function getPrecedence(): int
     {
-        return Precedence::DEFAULT_PRECEDENCE;
+        return PrecedenceChannelInterceptor::TRACING_PRECEDENCE;
     }
 
     public function compile(MessagingContainerBuilder $builder): Definition

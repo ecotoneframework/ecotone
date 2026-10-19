@@ -39,10 +39,11 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
 
     public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?Throwable $exception): bool
     {
-        if ($exception === null) {
-            return false;
-        }
+        return $exception !== null && $this->recover($message, $messageChannel, $exception) !== SendRecovery::Failed;
+    }
 
+    public function recover(Message $message, MessageChannel $messageChannel, Throwable $exception): SendRecovery
+    {
         $messageToRedeliver = $this->messageContainingOnlyFailedDeliveries($message, $exception);
 
         if ($exception !== null) {
@@ -58,7 +59,7 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
 
                     $messageChannel->send($messageToRedeliver);
 
-                    return true;
+                    return SendRecovery::Delivered;
                 } catch (Exception $exception) {
                     $messageToRedeliver = $this->messageContainingOnlyFailedDeliveries($messageToRedeliver, $exception);
                     $attempt++;
@@ -82,10 +83,10 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
                 );
             }
 
-            return true;
+            return SendRecovery::SentToErrorChannel;
         }
 
-        return false;
+        return SendRecovery::Failed;
     }
 
     /**

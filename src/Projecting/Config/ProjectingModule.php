@@ -39,6 +39,8 @@ use Ecotone\Projecting\PartitionBatchExecutorHandler;
 use Ecotone\Projecting\PartitionProviderRegistry;
 use Ecotone\Projecting\ProjectingHeaders;
 use Ecotone\Projecting\ProjectingManager;
+use Ecotone\Projecting\ProjectionOperationEndpoint;
+use Ecotone\Projecting\ProjectionOperations;
 use Ecotone\Projecting\ProjectionRegistry;
 use Ecotone\Projecting\ProjectionStateStorageRegistry;
 use Ecotone\Projecting\ProjectionTriggerEndpoint;
@@ -171,6 +173,28 @@ final class ProjectingModule implements AnnotationModule
                     ->withEndpointAnnotations([AttributeDefinition::fromObject(new ProjectionFlush())])
             );
 
+            foreach ([
+                ProjectionOperationEndpoint::INITIALIZE => ['init', []],
+                ProjectionOperationEndpoint::TRIGGER => ['executeAll', [ValueBuilder::create('manualInitialization', true)]],
+                ProjectionOperationEndpoint::RESET => ['executeAllWithReset', []],
+                ProjectionOperationEndpoint::BACKFILL => ['prepareBackfill', []],
+                ProjectionOperationEndpoint::REBUILD => ['prepareRebuild', []],
+                ProjectionOperationEndpoint::DELETE => ['delete', []],
+            ] as $operation => [$method, $parameterConverters]) {
+                $messagingConfiguration->registerMessageHandler(
+                    MessageProcessorActivatorBuilder::create()
+                        ->chainInterceptedProcessor(
+                            MethodInvokerBuilder::create(
+                                $projectingManagerReference,
+                                InterfaceToCallReference::create(ProjectingManager::class, $method),
+                                $parameterConverters,
+                            )
+                        )
+                        ->withInputChannelName(ProjectionOperationEndpoint::channelFor($projectionName, $operation))
+                        ->withEndpointAnnotations([AttributeDefinition::fromObject(new ProjectionOperationEndpoint($projectionName, $operation))])
+                );
+            }
+
             if ($projectionBuilder->asyncChannelName() !== null) {
                 $messagingConfiguration->registerAsynchronousEndpoint(
                     $projectionBuilder->asyncChannelName(),
@@ -216,7 +240,11 @@ final class ProjectingModule implements AnnotationModule
         );
 
         // Register console commands
-        $messagingConfiguration->registerServiceDefinition(ProjectingConsoleCommands::class, new Definition(ProjectingConsoleCommands::class, [new Reference(ProjectionRegistry::class)]));
+        $messagingConfiguration->registerServiceDefinition(
+            ProjectionOperations::class,
+            new Definition(ProjectionOperations::class, [new Reference(ProjectionRegistry::class), new Reference(MessagingEntrypointService::class)])
+        );
+        $messagingConfiguration->registerServiceDefinition(ProjectingConsoleCommands::class, new Definition(ProjectingConsoleCommands::class, [new Reference(ProjectionOperations::class)]));
     }
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions, ?InterfaceToCallRegistry $interfaceToCallRegistry = null): array

@@ -15,8 +15,12 @@ use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Api\Tracing\SpanAttribute;
 use Ecotone\Api\Tracing\SpanContext;
 use Ecotone\Api\Tracing\SpanKind;
+use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\Config\MessageBusChannel;
+use Ecotone\Projecting\Config\ProjectingModule;
+use Ecotone\Projecting\ProjectionOperationEndpoint;
 use Ecotone\Projecting\ProjectionTriggerEndpoint;
 use Throwable;
 
@@ -38,17 +42,26 @@ final class TracingInterceptor
 
     public function traceCommandBus(MethodInvocation $methodInvocation, Message $message): mixed
     {
-        return $this->traceEntry('send command', $methodInvocation, $message, SpanKind::Server, [SpanAttribute::MESSAGING_OPERATION_TYPE => SpanAttribute::OPERATION_SEND]);
+        return $this->traceEntry('send command', $methodInvocation, $message, SpanKind::Server, [
+            SpanAttribute::MESSAGING_OPERATION_TYPE => SpanAttribute::OPERATION_SEND,
+            SpanAttribute::MESSAGING_DESTINATION_NAME => self::busDestinationOf($message, MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME),
+        ]);
     }
 
     public function traceEventBus(MethodInvocation $methodInvocation, Message $message): mixed
     {
-        return $this->traceEntry('send event', $methodInvocation, $message, SpanKind::Server, [SpanAttribute::MESSAGING_OPERATION_TYPE => SpanAttribute::OPERATION_SEND]);
+        return $this->traceEntry('send event', $methodInvocation, $message, SpanKind::Server, [
+            SpanAttribute::MESSAGING_OPERATION_TYPE => SpanAttribute::OPERATION_SEND,
+            SpanAttribute::MESSAGING_DESTINATION_NAME => self::busDestinationOf($message, MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME),
+        ]);
     }
 
     public function traceQueryBus(MethodInvocation $methodInvocation, Message $message): mixed
     {
-        return $this->traceEntry('send query', $methodInvocation, $message, SpanKind::Server, [SpanAttribute::MESSAGING_OPERATION_TYPE => SpanAttribute::OPERATION_SEND]);
+        return $this->traceEntry('send query', $methodInvocation, $message, SpanKind::Server, [
+            SpanAttribute::MESSAGING_OPERATION_TYPE => SpanAttribute::OPERATION_SEND,
+            SpanAttribute::MESSAGING_DESTINATION_NAME => self::busDestinationOf($message, MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME),
+        ]);
     }
 
     public function traceCommandHandler(MethodInvocation $methodInvocation, Message $message, CommandHandler $endpoint): mixed
@@ -76,7 +89,7 @@ final class TracingInterceptor
         $headers = $message->getHeaders();
         $name = match (true) {
             $headers->containsKey(MessageHeaders::POLLED_CHANNEL_NAME) => 'receive ' . $headers->get(MessageHeaders::POLLED_CHANNEL_NAME),
-            $headers->containsKey(MessageHeaders::INBOUND_REQUEST_CHANNEL) => 'receive ' . $headers->get(MessageHeaders::INBOUND_REQUEST_CHANNEL),
+            $headers->containsKey(MessageHeaders::INBOUND_REQUEST_CHANNEL) && ! self::isPollOnlyChannel((string) $headers->get(MessageHeaders::INBOUND_REQUEST_CHANNEL)) => 'receive ' . $headers->get(MessageHeaders::INBOUND_REQUEST_CHANNEL),
             default => 'poll ' . $headers->get(MessageHeaders::CONSUMER_POLLING_METADATA)->getEndpointId(),
         };
 
@@ -94,6 +107,15 @@ final class TracingInterceptor
         return $this->trace('process ' . $trigger->projectionName, $methodInvocation, $message, SpanKind::Consumer, [
             SpanAttribute::MESSAGING_OPERATION_TYPE => SpanAttribute::OPERATION_PROCESS,
             SpanAttribute::PROJECTION_NAME => $trigger->projectionName,
+        ]);
+    }
+
+    public function traceProjectionOperation(MethodInvocation $methodInvocation, Message $message, ProjectionOperationEndpoint $endpoint): mixed
+    {
+        return $this->traceEntry($endpoint->operation . ' ' . $endpoint->projectionName, $methodInvocation, $message, SpanKind::Server, [
+            SpanAttribute::MESSAGING_OPERATION_TYPE => SpanAttribute::OPERATION_PROCESS,
+            SpanAttribute::PROJECTION_NAME => $endpoint->projectionName,
+            SpanAttribute::PROJECTION_OPERATION => $endpoint->operation,
         ]);
     }
 
@@ -245,6 +267,22 @@ final class TracingInterceptor
         $this->tracer->currentSpan()?->markUnitOfWorkRecovered();
 
         return $result;
+    }
+
+    private static function isPollOnlyChannel(string $inboundRequestChannel): bool
+    {
+        return $inboundRequestChannel === NullableMessageChannel::CHANNEL_NAME || ProjectingModule::projectionNameOfTriggerChannel($inboundRequestChannel) !== null;
+    }
+
+    private static function busDestinationOf(Message $message, string $routingKeyHeader): string
+    {
+        $headers = $message->getHeaders();
+        if ($headers->containsKey($routingKeyHeader)) {
+            return (string) $headers->get($routingKeyHeader);
+        }
+        $payload = $message->getPayload();
+
+        return is_object($payload) ? $payload::class : get_debug_type($payload);
     }
 
     private static function shortNameOf(string $classAndMethod): string

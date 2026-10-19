@@ -11,6 +11,8 @@ interface PrecedenceChannelInterceptor
 {
     public const DEFAULT_PRECEDENCE = 0;
 
+    public const TRACING_PRECEDENCE = -1000000;
+
     public const MESSAGE_SERIALIZATION = 2000;
 
     public const COLLECTOR_PRECEDENCE = self::MESSAGE_SERIALIZATION - 1;

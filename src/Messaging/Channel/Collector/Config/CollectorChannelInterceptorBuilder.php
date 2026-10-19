@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Channel\Collector\Config;
 
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
+use Ecotone\Messaging\Channel\Collector\MessageCollectionObserver;
 use Ecotone\Messaging\Channel\Collector\MessageCollectorChannelInterceptor;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
@@ -38,6 +39,7 @@ final class CollectorChannelInterceptorBuilder implements ChannelInterceptorBuil
             [
                 $this->collectorStorageReference,
                 new Reference(LoggingGateway::class),
+                new Reference(MessageCollectionObserver::class),
             ]
         );
     }

@@ -15,6 +15,8 @@ interface ActiveSpan
 {
     public function context(): SpanContext;
 
+    public function name(): string;
+
     /**
      * @return array<string, scalar>
      */
@@ -24,6 +26,12 @@ interface ActiveSpan
      * @param array<string, scalar|null> $attributes
      */
     public function addEvent(string $name, array $attributes = []): void;
+
+    public function setAttribute(string $key, int|float|string|bool $value): void;
+
+    public function childStarted(): void;
+
+    public function hasStartedChildren(): bool;
 
     public function end(): void;
 

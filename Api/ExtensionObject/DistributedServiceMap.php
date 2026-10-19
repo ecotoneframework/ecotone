@@ -33,7 +33,7 @@ final class DistributedServiceMap implements DefinedObject
     public function __construct(
         private readonly string $referenceName,
         public readonly array $commandMapping = [],
-        private readonly array $eventSubscriptions = [],
+        public readonly array $eventSubscriptions = [],
         public readonly array $distributedBusAnnotations = [],
     ) {
         Assert::allObjects($this->distributedBusAnnotations, 'Annotations passed to DistributedServiceMap, must all be objects');

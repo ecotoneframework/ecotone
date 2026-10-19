@@ -277,7 +277,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
             [new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()],
             extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
             enabledModules: [],
-            testConfiguration: TestConfiguration::createWithDefaults()->withFailOnQueryHandlerNotFound(false),
+            testConfiguration: TestConfiguration::createWithDefaults()->withFailOnNotFoundHandler(false),
             environment: 'test',
         );
 
@@ -325,7 +325,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
             [new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()],
             extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
             enabledModules: [],
-            testConfiguration: TestConfiguration::createWithDefaults()->withFailOnCommandHandlerNotFound(false),
+            testConfiguration: TestConfiguration::createWithDefaults()->withFailOnNotFoundHandler(false),
             environment: 'test',
         );
 
@@ -342,7 +342,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
             [new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()],
             extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
             enabledModules: [],
-            testConfiguration: TestConfiguration::createWithDefaults()->withFailOnCommandHandlerNotFound(true),
+            testConfiguration: TestConfiguration::createWithDefaults()->withFailOnNotFoundHandler(true),
             environment: 'test',
         );
 
@@ -358,7 +358,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
             [new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()],
             extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
             enabledModules: [],
-            testConfiguration: TestConfiguration::createWithDefaults()->withFailOnQueryHandlerNotFound(false),
+            testConfiguration: TestConfiguration::createWithDefaults()->withFailOnNotFoundHandler(false),
             environment: 'test',
         );
 
@@ -374,7 +374,7 @@ final class MessagingTestSupportFrameworkTest extends TestCase
             [new \Test\Ecotone\Modelling\Fixture\MetadataPropagating\OrderService()],
             extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
             enabledModules: [],
-            testConfiguration: TestConfiguration::createWithDefaults()->withFailOnQueryHandlerNotFound(true),
+            testConfiguration: TestConfiguration::createWithDefaults()->withFailOnNotFoundHandler(true),
             environment: 'test',
         );
 

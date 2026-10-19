@@ -32,9 +32,6 @@ class CronExpression
     public const MONTH = 3;
     public const WEEKDAY = 4;
 
-    /** @deprecated */
-    public const YEAR = 5;
-
     public const MAPPINGS = [
         '@yearly' => '0 0 1 1 *',
         '@annually' => '0 0 1 1 *',
@@ -66,15 +63,6 @@ class CronExpression
         self::HOUR,
         self::MINUTE,
     ];
-
-    /**
-     * @deprecated since version 3.0.2, use __construct instead.
-     */
-    public static function factory(string $expression): CronExpression
-    {
-        /** @phpstan-ignore-next-line */
-        return new static($expression);
-    }
 
     /**
      * Validate a CronExpression.

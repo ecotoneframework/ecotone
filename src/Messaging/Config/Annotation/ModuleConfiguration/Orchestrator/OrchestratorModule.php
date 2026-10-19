@@ -18,6 +18,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -27,8 +28,9 @@ use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayload
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\OrchestratorResultMessageConverter;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\LicensingException;
@@ -107,17 +109,16 @@ final class OrchestratorModule implements AnnotationModule
 
 
         if (count($orchestratorGateways) > 0) {
-            $messageHandlerBuilders[] = ServiceActivatorBuilder::createWithDefinition(
-                new Definition(OrchestratorGatewayEntrypoint::class, []),
-                'handle'
-            )
-                ->withInputChannelName(self::ORCHESTRATOR_GATEWAY_ENTRYPOINT_CHANNEL)
-                ->withMethodParameterConverters([
-                    HeaderBuilder::create('routingSlip', self::ORCHESTRATOR_ROUTING_SLIP_HEADER),
-                ])
-                ->withCustomResultToMessageConverter(
+            $messageHandlerBuilders[] = MessageProcessorActivatorBuilder::createForMethodInvoker(
+                MethodInvokerBuilder::create(
+                    new Definition(OrchestratorGatewayEntrypoint::class, []),
+                    new InterfaceToCallReference(OrchestratorGatewayEntrypoint::class, 'handle'),
+                    [HeaderBuilder::create('routingSlip', self::ORCHESTRATOR_ROUTING_SLIP_HEADER)],
+                )->withResultToMessageConverter(
                     new Definition(OrchestratorResultMessageConverter::class, [MessageHeaders::ROUTING_SLIP, Reference::to(MessageBuilder::class)])
-                );
+                )
+            )
+                ->withInputChannelName(self::ORCHESTRATOR_GATEWAY_ENTRYPOINT_CHANNEL);
         }
 
         return new self($messageHandlerBuilders, $orchestratorGateways);
@@ -217,12 +218,16 @@ final class OrchestratorModule implements AnnotationModule
         /** @var Orchestrator $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
-        return ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($annotationRegistration), $interfaceToCall)
-            ->withEndpointId($annotation->getEndpointId())
-            ->withInputChannelName($annotation->getInputChannelName())
-            ->withCustomResultToMessageConverter(
+        return MessageProcessorActivatorBuilder::createForMethodInvoker(
+            MethodInvokerBuilder::create(
+                AnnotatedDefinitionReference::getReferenceFor($annotationRegistration),
+                InterfaceToCallReference::fromInstance($interfaceToCall),
+            )->withResultToMessageConverter(
                 new Definition(OrchestratorResultMessageConverter::class, [MessageHeaders::ROUTING_SLIP, Reference::to(MessageBuilder::class)])
-            );
+            )
+        )
+            ->withEndpointId($annotation->getEndpointId())
+            ->withInputChannelName($annotation->getInputChannelName());
     }
 
     private function verifyOrchestratorLicense(Configuration $messagingConfiguration): void

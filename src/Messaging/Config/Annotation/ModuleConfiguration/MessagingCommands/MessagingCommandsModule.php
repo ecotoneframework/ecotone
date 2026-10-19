@@ -16,7 +16,7 @@ use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 
 #[ModuleAnnotation]
 /**
@@ -25,7 +25,7 @@ use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 final class MessagingCommandsModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public const ECOTONE_EXECUTE_CONSOLE_COMMAND_EXECUTOR = 'ecotone.consoleCommand.execute';
-    public const ECOTONE_CONSOLE_COMMAND_NAME = 'ecotone.consoleCommand.name';
+    public const ECOTONE_CONSOLE_COMMAND_NAME = 'ecotone_console_command_name';
 
     public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
@@ -36,7 +36,7 @@ final class MessagingCommandsModule extends NoExternalConfigurationModule implem
     {
         $messagingConfiguration->registerServiceDefinition(MessagingBaseCommand::class, new Definition(MessagingBaseCommand::class));
         $messagingConfiguration->registerMessageHandler(
-            ServiceActivatorBuilder::create(MessagingBaseCommand::class, new InterfaceToCallReference(MessagingBaseCommand::class, 'executeConsoleCommand'))
+            MessageProcessorActivatorBuilder::createForMethod(MessagingBaseCommand::class, new InterfaceToCallReference(MessagingBaseCommand::class, 'executeConsoleCommand'))
                 ->withMethodParameterConverters([
                     HeaderBuilder::create('commandName', self::ECOTONE_CONSOLE_COMMAND_NAME),
                     PayloadBuilder::create('parameters'),

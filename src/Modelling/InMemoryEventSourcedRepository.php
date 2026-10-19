@@ -6,6 +6,8 @@ namespace Ecotone\Modelling;
 
 use Ecotone\Api\Attribute\Repository;
 use Ecotone\Api\EventSourcing\Event;
+use Ecotone\Api\Modelling\EventSourcedRepository;
+use Ecotone\Api\Modelling\EventStream;
 
 /**
  * Class InMemoryEventSourcedRepository

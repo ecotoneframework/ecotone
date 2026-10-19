@@ -32,6 +32,11 @@ class IdentifiedAnnotation
         return $this->isGenerated;
     }
 
+    public function asynchronousExecutionRefusal(): ?string
+    {
+        return null;
+    }
+
     public function getEndpointId(): string
     {
         return $this->endpointId;

@@ -34,7 +34,7 @@ use function sprintf;
  */
 final class DecisionModelLoadedState
 {
-    public const HEADER_NAME = 'ecotone.modelling.decision_model.loaded_state';
+    public const HEADER_NAME = 'ecotone_modelling_decision_model_loaded_state';
 
     /**
      * @param array<string, object|null> $instancesByParameterName

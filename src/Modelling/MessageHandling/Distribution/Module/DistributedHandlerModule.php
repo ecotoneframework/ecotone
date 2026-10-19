@@ -28,7 +28,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilde
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Modelling\Config\Routing\BusRoutingMapBuilder;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributedMessageHandler;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributionEntrypoint;
@@ -107,7 +107,7 @@ final class DistributedHandlerModule implements AnnotationModule
             ])
         );
         $messagingConfiguration->registerMessageHandler(
-            ServiceActivatorBuilder::create(DistributedMessageHandler::class, $interfaceToCallRegistry->getFor(DistributedMessageHandler::class, 'handle'))
+            MessageProcessorActivatorBuilder::createForMethod(DistributedMessageHandler::class, $interfaceToCallRegistry->getFor(DistributedMessageHandler::class, 'handle'))
                 ->withInputChannelName(DistributedBusHeader::DISTRIBUTED_ROUTING_SLIP_VALUE)
                 ->withMethodParameterConverters([
                     PayloadBuilder::create('payload'),

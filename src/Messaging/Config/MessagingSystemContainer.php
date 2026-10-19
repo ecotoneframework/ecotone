@@ -4,6 +4,9 @@ namespace Ecotone\Messaging\Config;
 
 use function array_keys;
 
+use Ecotone\Api\Attribute\BusinessMethod;
+use Ecotone\Api\Attribute\ConsoleCommand;
+use Ecotone\Api\Attribute\MessageGateway;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
 use Ecotone\Api\Gateway\CommandBus;
 use Ecotone\Api\Gateway\DistributedBus;
@@ -16,14 +19,12 @@ use Ecotone\Messaging\Config\Container\ChannelReference;
 use Ecotone\Messaging\Config\Container\ConsoleCommandReference;
 use Ecotone\Messaging\Config\Container\EndpointRunnerReference;
 use Ecotone\Messaging\Config\Container\GatewayProxyMethodReference;
+use Ecotone\Messaging\Config\Container\GatewayProxyReference;
 use Ecotone\Messaging\Endpoint\EndpointRunner;
 use Ecotone\Messaging\Handler\Gateway\Gateway;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Psr\Container\ContainerInterface;
 
-/**
- * @TODO wrap with nice exceptions on not found
- */
 /**
  * licence Apache-2.0
  */
@@ -31,13 +32,25 @@ class MessagingSystemContainer implements ConfiguredMessagingSystem
 {
     /**
      * @param array<string, string> $pollingEndpoints a map of endpointId => consumer lifecycle runner reference id
+     * @param GatewayProxyReference[] $gatewayList
+     * @param string[] $consoleCommandNames
      */
-    public function __construct(private ContainerInterface $container, private array $pollingEndpoints, private array $gatewayList)
+    public function __construct(private ContainerInterface $container, private array $pollingEndpoints, private array $gatewayList, private array $consoleCommandNames)
     {
     }
 
     public function getGatewayByName(string $gatewayReferenceName): object
     {
+        if (! $this->container->has($gatewayReferenceName)) {
+            throw ConfigurationException::create(sprintf(
+                'Gateway `%s` is not registered. Registered gateways: %s. Register one by marking an interface method with #[%s] or #[%s], or fetch a registered gateway by its reference name.',
+                $gatewayReferenceName,
+                $this->describeRegisteredGateways(),
+                MessageGateway::class,
+                BusinessMethod::class,
+            ));
+        }
+
         return $this->container->get($gatewayReferenceName);
     }
 
@@ -50,7 +63,13 @@ class MessagingSystemContainer implements ConfiguredMessagingSystem
     {
         $consoleCommandReference = new ConsoleCommandReference($commandName);
         if (! $this->container->has($consoleCommandReference)) {
-            throw InvalidArgumentException::create("Trying to run not existing console command {$commandName}");
+            throw ConfigurationException::create(sprintf(
+                'Console command `%s` is not registered. Registered console commands: %s. Register one by marking a method with #[%s(\'%s\')], or run a registered command by its name.',
+                $commandName,
+                $this->consoleCommandNames === [] ? 'none' : '`' . implode('`, `', $this->consoleCommandNames) . '`',
+                ConsoleCommand::class,
+                $commandName,
+            ));
         }
         /** @var ConsoleCommandRunner $commandRunner */
         $commandRunner = $this->container->get($consoleCommandReference);
@@ -115,10 +134,28 @@ class MessagingSystemContainer implements ConfiguredMessagingSystem
 
         $this->container = $messagingSystem->container;
         $this->pollingEndpoints = $messagingSystem->pollingEndpoints;
+        $this->gatewayList = $messagingSystem->gatewayList;
+        $this->consoleCommandNames = $messagingSystem->consoleCommandNames;
     }
 
     public function getGatewayList(): array
     {
         return $this->gatewayList;
+    }
+
+    private function describeRegisteredGateways(): string
+    {
+        if ($this->gatewayList === []) {
+            return 'none';
+        }
+
+        $described = [];
+        foreach ($this->gatewayList as $gateway) {
+            $described[] = $gateway->getReferenceName() === $gateway->getInterfaceName()
+                ? '`' . $gateway->getReferenceName() . '`'
+                : sprintf('`%s` (%s)', $gateway->getReferenceName(), $gateway->getInterfaceName());
+        }
+
+        return implode(', ', array_unique($described));
     }
 }

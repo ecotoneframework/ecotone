@@ -57,7 +57,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Scheduling\Clock;
 use Ecotone\Projecting\InMemory\InMemoryEventStoreStreamSource;
 use Ecotone\Projecting\InMemory\InMemoryProjectionStateStorage;
@@ -185,24 +185,16 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
 
         $messagingConfiguration->registerServiceDefinition(AllowMissingDestination::class, new Definition(AllowMissingDestination::class));
         $allowMissingDestinationInterfaceToCall = $interfaceToCallRegistry->getFor(AllowMissingDestination::class, 'invoke');
-        /** @TODO Ecotone 2.0, reconsider if needed */
-        if (! $testConfiguration->failOnCommandHandlerNotFound) {
-            $messagingConfiguration
-                ->registerAroundMethodInterceptor(AroundInterceptorBuilder::create(
-                    AllowMissingDestination::class,
-                    $allowMissingDestinationInterfaceToCall,
-                    Precedence::DEFAULT_PRECEDENCE,
-                    CommandBus::class
-                ));
-        }
-        if (! $testConfiguration->failOnQueryHandlerNotFound) {
-            $messagingConfiguration
-                ->registerAroundMethodInterceptor(AroundInterceptorBuilder::create(
-                    AllowMissingDestination::class,
-                    $allowMissingDestinationInterfaceToCall,
-                    Precedence::DEFAULT_PRECEDENCE,
-                    QueryBus::class
-                ));
+        if (! $testConfiguration->failOnNotFoundHandler) {
+            foreach ([CommandBus::class, QueryBus::class] as $busWithOptionalDestination) {
+                $messagingConfiguration
+                    ->registerAroundMethodInterceptor(AroundInterceptorBuilder::create(
+                        AllowMissingDestination::class,
+                        $allowMissingDestinationInterfaceToCall,
+                        Precedence::DEFAULT_PRECEDENCE,
+                        $busWithOptionalDestination
+                    ));
+            }
         }
 
         if ($testConfiguration->pollableChannelMediaTypeConversion) {
@@ -269,7 +261,7 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
     {
         $configuration->registerServiceDefinition(DelayedMessageReleaseHandler::class, new Definition(DelayedMessageReleaseHandler::class));
         $configuration
-            ->registerMessageHandler(ServiceActivatorBuilder::create(
+            ->registerMessageHandler(MessageProcessorActivatorBuilder::createForMethod(
                 DelayedMessageReleaseHandler::class,
                 self::RELEASE_DELAYED_MESSAGES
             )
@@ -293,69 +285,69 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
     private function registerMessageCollector(Configuration $configuration, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         $configuration
-            ->registerMessageHandler(ServiceActivatorBuilder::create(
+            ->registerMessageHandler(MessageProcessorActivatorBuilder::createForMethod(
                 MessageCollectorHandler::class,
                 self::RECORD_EVENT
             )
                 ->withInputChannelName(self::inputChannelName(self::RECORD_EVENT)))
-            ->registerMessageHandler(ServiceActivatorBuilder::create(
+            ->registerMessageHandler(MessageProcessorActivatorBuilder::createForMethod(
                 MessageCollectorHandler::class,
                 self::RECORD_COMMAND
             )
                 ->withInputChannelName(self::inputChannelName(self::RECORD_COMMAND)))
-            ->registerMessageHandler(ServiceActivatorBuilder::create(
+            ->registerMessageHandler(MessageProcessorActivatorBuilder::createForMethod(
                 MessageCollectorHandler::class,
                 self::RECORD_QUERY
             )
                 ->withInputChannelName(self::inputChannelName(self::RECORD_QUERY)))
-            ->registerMessageHandler(ServiceActivatorBuilder::create(
+            ->registerMessageHandler(MessageProcessorActivatorBuilder::createForMethod(
                 MessageCollectorHandler::class,
                 self::POP_RECORDED_EVENTS
             )
                 ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_EVENTS)))
-            ->registerMessageHandler(ServiceActivatorBuilder::create(
+            ->registerMessageHandler(MessageProcessorActivatorBuilder::createForMethod(
                 MessageCollectorHandler::class,
                 self::POP_RECORDED_EVENT_MESSAGES
             )
                 ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_EVENT_MESSAGES)))
-            ->registerMessageHandler(ServiceActivatorBuilder::create(
+            ->registerMessageHandler(MessageProcessorActivatorBuilder::createForMethod(
                 MessageCollectorHandler::class,
                 self::POP_RECORDED_EVENT_MESSAGES_OF_TYPE
             )
                 ->withMethodParameterConverters([PayloadBuilder::create('className')])
                 ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_EVENT_MESSAGES_OF_TYPE)))
-            ->registerMessageHandler(ServiceActivatorBuilder::create(
+            ->registerMessageHandler(MessageProcessorActivatorBuilder::createForMethod(
                 MessageCollectorHandler::class,
                 self::POP_RECORDED_COMMAND_MESSAGES_OF_TYPE
             )
                 ->withMethodParameterConverters([PayloadBuilder::create('className')])
                 ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_COMMAND_MESSAGES_OF_TYPE)))
-            ->registerMessageHandler(ServiceActivatorBuilder::create(
+            ->registerMessageHandler(MessageProcessorActivatorBuilder::createForMethod(
                 MessageCollectorHandler::class,
                 self::POP_RECORDED_COMMANDS
             )
                 ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_COMMANDS)))
-            ->registerMessageHandler(ServiceActivatorBuilder::create(
+            ->registerMessageHandler(MessageProcessorActivatorBuilder::createForMethod(
                 MessageCollectorHandler::class,
                 self::POP_RECORDED_COMMAND_MESSAGES
             )
                 ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_COMMAND_MESSAGES)))
-            ->registerMessageHandler(ServiceActivatorBuilder::create(
+            ->registerMessageHandler(MessageProcessorActivatorBuilder::createForMethod(
                 MessageCollectorHandler::class,
                 self::POP_RECORDED_QUERIES
             )
                 ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_QUERIES)))
-            ->registerMessageHandler(ServiceActivatorBuilder::create(
+            ->registerMessageHandler(MessageProcessorActivatorBuilder::createForMethod(
                 MessageCollectorHandler::class,
                 self::POP_RECORDED_QUERY_MESSAGES
             )
                 ->withInputChannelName(self::inputChannelName(self::POP_RECORDED_QUERY_MESSAGES)))
-            ->registerMessageHandler(ServiceActivatorBuilder::create(
+            ->registerMessageHandler(MessageProcessorActivatorBuilder::createForMethod(
                 MessageCollectorHandler::class,
                 self::DISCARD_MESSAGES
             )
                 ->withInputChannelName(self::inputChannelName(self::DISCARD_MESSAGES)))
-            ->registerMessageHandler(ServiceActivatorBuilder::create(
+            ->registerMessageHandler(MessageProcessorActivatorBuilder::createForMethod(
                 MessageCollectorHandler::class,
                 self::POP_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS
             )
@@ -363,7 +355,7 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                     HeaderBuilder::create('channelName', 'ecotone.test_support_gateway.channel_name'),
                 ])
                 ->withInputChannelName(self::inputChannelName(self::POP_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS)))
-            ->registerMessageHandler(ServiceActivatorBuilder::create(
+            ->registerMessageHandler(MessageProcessorActivatorBuilder::createForMethod(
                 MessageCollectorHandler::class,
                 self::POP_SPIED_CHANNEL_RECORDED_MESSAGES
             )

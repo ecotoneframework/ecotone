@@ -13,7 +13,7 @@ use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 
 #[ModuleAnnotation]
 /**
@@ -38,7 +38,7 @@ final class MessageConsumerModule extends NoExternalConfigurationModule implemen
             $amqpConsumerAnnotation = $amqpConsumer->getAnnotationForMethod();
 
             $endpointId = $amqpConsumerAnnotation->getEndpointId();
-            $serviceActivators[] = ServiceActivatorBuilder::create($reference, $interfaceToCallRegistry->getFor($amqpConsumer->getClassName(), $amqpConsumer->getMethodName()))
+            $serviceActivators[] = MessageProcessorActivatorBuilder::createForMethod($reference, $interfaceToCallRegistry->getFor($amqpConsumer->getClassName(), $amqpConsumer->getMethodName()))
                 ->withEndpointId($endpointId . '.target')
                 ->withInputChannelName($endpointId)
                 ->withMethodParameterConverters($annotationParameterBuilder->createParameterWithDefaults(

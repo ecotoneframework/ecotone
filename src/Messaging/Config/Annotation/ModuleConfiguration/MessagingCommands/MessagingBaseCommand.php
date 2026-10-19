@@ -3,9 +3,9 @@
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingCommands;
 
 use Ecotone\Api\Attribute\ConsoleParameterOption;
+use Ecotone\Api\Console\ConsoleCommandResultSet;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
 use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
-use Ecotone\Messaging\Config\ConsoleCommandResultSet;
 
 /**
  * licence Apache-2.0

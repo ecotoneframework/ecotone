@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Ecotone\EventSourcing;
 
 use Ecotone\Api\Gateway\DocumentStore;
+use Ecotone\Api\Modelling\EventSourcedRepository;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
@@ -17,7 +18,6 @@ use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\ResolvedAggregate;
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
-use Ecotone\Modelling\EventSourcedRepository;
 use Ecotone\Modelling\EventSourcingExecutor\GroupedEventSourcingExecutor;
 use Ecotone\Modelling\Repository\AggregateRepository;
 
@@ -87,9 +87,9 @@ class EventSourcedRepositoryAdapter implements AggregateRepository
 
         $eventStream = $this->eventSourcedRepository->findBy($aggregateClassName, $identifiers, $aggregate === null ? 1 : ($aggregateVersion + 1));
 
-        if ($eventStream->getEvents()) {
-            $aggregateVersion = $eventStream->getAggregateVersion();
-            $aggregate = $this->applyMethodExecutor->fillFor($aggregateClassName, $aggregate, $eventStream->getEvents());
+        if ($eventStream->events) {
+            $aggregateVersion = $eventStream->aggregateVersion;
+            $aggregate = $this->applyMethodExecutor->fillFor($aggregateClassName, $aggregate, $eventStream->events);
         }
 
         if (! $aggregate) {

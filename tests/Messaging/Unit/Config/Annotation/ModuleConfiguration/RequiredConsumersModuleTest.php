@@ -8,6 +8,7 @@ use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\RequiredConsumersModule;
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\Container\ContainerConfig;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilder;
 use Ecotone\Messaging\Handler\InMemoryReferenceSearchService;
@@ -41,7 +42,10 @@ final class RequiredConsumersModuleTest extends AnnotationConfigurationTestCase
 
         $this->expectException(ConfigurationException::class);
 
-        $configuration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+        ContainerConfig::buildMessagingSystemInMemoryContainer(
+            $configuration,
+            InMemoryReferenceSearchService::createEmpty(),
+        );
     }
 
     public function test_not_throwing_exception_if_consumer_was_registered_as_inbound_channel()
@@ -62,7 +66,10 @@ final class RequiredConsumersModuleTest extends AnnotationConfigurationTestCase
             );
         $annotationConfiguration->prepare($configuration, [], ModuleReferenceSearchService::createEmpty(), InterfaceToCallRegistry::createEmpty());
 
-        $configuration->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+        ContainerConfig::buildMessagingSystemInMemoryContainer(
+            $configuration,
+            InMemoryReferenceSearchService::createEmpty(),
+        );
 
         $this->assertTrue(true);
     }

@@ -26,7 +26,7 @@ use Ecotone\Api\EventSourcing\Event;
  */
 final class MatchedTagSequences
 {
-    public const HEADER_NAME = 'ecotone.eventSourcing.tagging.matched_tag_sequences';
+    public const HEADER_NAME = 'ecotone_event_sourcing_tagging_matched_tag_sequences';
 
     /**
      * @param array<string, int> $sequencesByTagKey

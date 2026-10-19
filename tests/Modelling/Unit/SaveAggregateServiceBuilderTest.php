@@ -384,15 +384,15 @@ class SaveAggregateServiceBuilderTest extends TestCase
             ->sendCommand(new CreateAggregate($id = 1000));
 
         $eventStream = $repository->findBy(EventSourcingAggregateWithInternalRecorder::class, ['id' => $id]);
-        $this->assertCount(1, $eventStream->getEvents());
+        $this->assertCount(1, $eventStream->events);
         $this->assertSame($id, $ecotoneLite->getAggregate(EventSourcingAggregateWithInternalRecorder::class, ['id' => $id])->getId());
-        $this->assertSame(AggregateCreated::class, $eventStream->getEvents()[0]->eventName);
+        $this->assertSame(AggregateCreated::class, $eventStream->events[0]->eventName);
 
         $ecotoneLite->sendCommand(new CreateSomething($id, 2000));
 
         $eventStream = $repository->findBy(EventSourcingAggregateWithInternalRecorder::class, ['id' => $id]);
-        $this->assertCount(2, $eventStream->getEvents());
-        $this->assertSame('something_was_created', $eventStream->getEvents()[1]->eventName);
+        $this->assertCount(2, $eventStream->events);
+        $this->assertSame('something_was_created', $eventStream->events[1]->eventName);
     }
 
     public function test_storing_pure_event_sourced_aggregate_via_business_repository_for_first_time(): void

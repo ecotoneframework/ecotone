@@ -62,6 +62,8 @@ use ReflectionParameter;
  */
 final class MessageHandlerRoutingModule implements AnnotationModule
 {
+    public const EVENT_BUS_ROUTE_RESOLVER = 'ecotone.eventBus.routeResolver';
+
     public function __construct(
         private InterfaceToCallRegistry $interfaceToCallRegistry,
         private AnnotationFinder $annotationFinder,
@@ -171,12 +173,12 @@ final class MessageHandlerRoutingModule implements AnnotationModule
             ->registerMessageHandler(
                 MessageProcessorActivatorBuilder::create()
                     ->withInputChannelName(MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME)
-                    ->chain($this->buildRouterProcessor($commandBusRoutingConfig, MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME, $isRunningForFlowTesting))
+                    ->chain($this->buildRouterProcessor($messagingConfiguration, $commandBusRoutingConfig, MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME, $isRunningForFlowTesting))
             )
             ->registerMessageHandler(
                 MessageProcessorActivatorBuilder::create()
                     ->withInputChannelName(MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME)
-                    ->chain($this->buildRouterProcessor($queryBusRouting, MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME, $isRunningForFlowTesting))
+                    ->chain($this->buildRouterProcessor($messagingConfiguration, $queryBusRouting, MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME, $isRunningForFlowTesting))
             )
             ->registerMessageHandler(
                 MessageProcessorActivatorBuilder::create()
@@ -186,7 +188,7 @@ final class MessageHandlerRoutingModule implements AnnotationModule
                         MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME,
                         Reference::to(MessageBuilder::class),
                     ]))
-                    ->chain($this->buildRouterProcessor($eventBusRouting, MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME, $isRunningForFlowTesting, false))
+                    ->chain($this->buildRouterProcessor($messagingConfiguration, $eventBusRouting, MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME, $isRunningForFlowTesting, false))
             );
 
         $messagingConfiguration->registerServiceDefinition(
@@ -232,7 +234,7 @@ final class MessageHandlerRoutingModule implements AnnotationModule
             );
     }
 
-    private function buildRouterProcessor(BusRoutingMapBuilder $busRoutingConfig, string $channel, bool $isRunningForFlowTesting, bool $isResolutionRequired = true): Definition
+    private function buildRouterProcessor(Configuration $messagingConfiguration, BusRoutingMapBuilder $busRoutingConfig, string $channel, bool $isRunningForFlowTesting, bool $isResolutionRequired = true): Definition
     {
         $busRouteSelectorClass = match ($channel) {
             MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME => CommandBusRouteSelector::class,
@@ -249,10 +251,16 @@ final class MessageHandlerRoutingModule implements AnnotationModule
             $busRouteSelectorArguments[] = $isRunningForFlowTesting;
         }
 
+        $routeResolver = new Definition(RouteToChannelResolver::class, [new Reference(ChannelResolver::class)]);
+        if ($channel === MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME) {
+            $messagingConfiguration->registerServiceDefinition(self::EVENT_BUS_ROUTE_RESOLVER, $routeResolver);
+            $routeResolver = new Reference(self::EVENT_BUS_ROUTE_RESOLVER);
+        }
+
         return new Definition(RouterProcessor::class, [
             new Definition($busRouteSelectorClass, $busRouteSelectorArguments),
-            new Definition(RouteToChannelResolver::class, [new Reference(ChannelResolver::class)]),
-            $isResolutionRequired, // Single route if resolution is required
+            $routeResolver,
+            $isResolutionRequired,
         ]);
     }
 

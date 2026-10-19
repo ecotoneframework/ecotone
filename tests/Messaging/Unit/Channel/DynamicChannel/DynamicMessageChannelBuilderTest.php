@@ -9,6 +9,7 @@ use Ecotone\Api\ExtensionObject\PollingMetadata;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\Container\ContainerConfig;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
@@ -502,11 +503,13 @@ final class DynamicMessageChannelBuilderTest extends TestCase
         $messageChannelName = 'test';
         $messageHandler = NoReturnMessageHandler::create();
 
-        $messagingSystem = MessagingSystemConfiguration::prepareWithDefaultsForTesting()
+        $messagingSystem = ContainerConfig::buildMessagingSystemInMemoryContainer(
+            MessagingSystemConfiguration::prepareWithDefaultsForTesting()
             ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $messageChannelName))
             ->registerMessageChannel(DynamicMessageChannelBuilder::createWithSendOnlyStrategy(SimpleMessageChannelBuilder::createQueueChannel($messageChannelName)))
-            ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+            ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder()),
+            InMemoryReferenceSearchService::createEmpty(),
+        );
 
         $this->assertEmpty($messagingSystem->list());
     }
@@ -516,11 +519,13 @@ final class DynamicMessageChannelBuilderTest extends TestCase
         $messageChannelName = 'test';
         $messageHandler = NoReturnMessageHandler::create();
 
-        $messagingSystem = MessagingSystemConfiguration::prepareWithDefaultsForTesting()
+        $messagingSystem = ContainerConfig::buildMessagingSystemInMemoryContainer(
+            MessagingSystemConfiguration::prepareWithDefaultsForTesting()
             ->registerMessageHandler(DumbMessageHandlerBuilder::create($messageHandler, $messageChannelName))
             ->registerMessageChannel(DynamicMessageChannelBuilder::createWithSendOnlyStrategy(SimpleMessageChannelBuilder::createQueueChannel($messageChannelName)))
-            ->registerConsumerFactory(new PollingConsumerBuilder())
-            ->buildMessagingSystemFromConfiguration(InMemoryReferenceSearchService::createEmpty());
+            ->registerConsumerFactory(new PollingConsumerBuilder()),
+            InMemoryReferenceSearchService::createEmpty(),
+        );
 
         $this->assertEmpty($messagingSystem->list());
     }

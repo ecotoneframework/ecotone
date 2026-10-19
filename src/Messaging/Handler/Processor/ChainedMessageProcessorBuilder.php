@@ -47,9 +47,25 @@ class ChainedMessageProcessorBuilder implements CompilableBuilder
         return $this->chain($processor);
     }
 
+    public function getInterceptedProcessor(): ?InterceptedMessageProcessorBuilder
+    {
+        return $this->interceptedProcessor;
+    }
+
     public function getInterceptedInterface(): ?InterfaceToCallReference
     {
         return $this->interceptedProcessor?->getInterceptedInterface();
+    }
+
+    public function __clone(): void
+    {
+        foreach ($this->processors as $index => $processor) {
+            $clonedProcessor = clone $processor;
+            if ($processor === $this->interceptedProcessor) {
+                $this->interceptedProcessor = $clonedProcessor;
+            }
+            $this->processors[$index] = $clonedProcessor;
+        }
     }
 
     public function compileProcessor(MessagingContainerBuilder $builder, MethodInterceptorsConfiguration $interceptorsConfiguration): Definition|Reference

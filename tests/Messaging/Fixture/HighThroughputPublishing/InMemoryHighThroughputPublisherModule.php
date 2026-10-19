@@ -14,7 +14,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurat
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 
 #[ModuleAnnotation]
 /**
@@ -38,7 +38,7 @@ final class InMemoryHighThroughputPublisherModule extends NoExternalConfiguratio
         $messagingConfiguration
             ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel($publisherReference))
             ->registerMessageHandler(
-                ServiceActivatorBuilder::create(InMemoryHighThroughputOutboundAdapter::class, 'handle')
+                MessageProcessorActivatorBuilder::createForMethod(InMemoryHighThroughputOutboundAdapter::class, 'handle')
                     ->withInputChannelName($publisherReference)
                     ->withEndpointId($publisherReference . '.handler')
             );

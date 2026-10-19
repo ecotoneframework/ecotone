@@ -13,8 +13,8 @@ use Ecotone\Messaging\Handler\Type;
  */
 class SerializerHandler
 {
-    public const MEDIA_TYPE = 'ecotone.serializer.media_type';
-    public const TARGET_TYPE = 'ecotone.serializer.target_type';
+    public const MEDIA_TYPE = 'ecotone_serializer_media_type';
+    public const TARGET_TYPE = 'ecotone_serializer_target_type';
 
     private ConversionService $conversionService;
 

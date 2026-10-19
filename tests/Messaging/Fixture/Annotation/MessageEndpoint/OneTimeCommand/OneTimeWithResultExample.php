@@ -3,7 +3,7 @@
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand;
 
 use Ecotone\Api\Attribute\ConsoleCommand;
-use Ecotone\Messaging\Config\ConsoleCommandResultSet;
+use Ecotone\Api\Console\ConsoleCommandResultSet;
 
 /**
  * licence Apache-2.0

@@ -6,7 +6,7 @@ namespace Ecotone\Messaging\Channel\Manager;
 
 use Ecotone\Api\Attribute\ConsoleCommand;
 use Ecotone\Api\Attribute\ConsoleParameterOption;
-use Ecotone\Messaging\Config\ConsoleCommandResultSet;
+use Ecotone\Api\Console\ConsoleCommandResultSet;
 
 use function is_bool;
 

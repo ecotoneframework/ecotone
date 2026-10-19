@@ -98,7 +98,55 @@ final class DelayedRetryBackOffTest extends TestCase
         $ecotone->run('async', ExecutionPollingMetadata::createWithTestingSetup(stopOnError: false));
     }
 
-    private function bootstrapAlwaysFailingSender(StubLogger $logger, bool $deadLetter, int $maxRetries = 3)
+    public function test_dead_letter_log_counts_the_instant_retries_inside_each_failed_delivery(): void
+    {
+        $logger = StubLogger::create();
+        $sender = new class () {
+            public int $attempts = 0;
+
+            #[Asynchronous('async')]
+            #[EventHandler('order.completed', endpointId: 'sendOrderConfirmation')]
+            public function send(string $orderId): void
+            {
+                $this->attempts++;
+                throw new RuntimeException('SMTP connection refused');
+            }
+        };
+        $ecotone = EcotoneLite::bootstrapFlowTesting(
+            [$sender::class],
+            [$sender, 'logger' => $logger],
+            extensionObjects: [
+                ErrorHandlerConfiguration::createWithDeadLetterChannel('errorChannel', RetryTemplateBuilder::fixedBackOff(0)->maxRetries(3), 'deadLetter'),
+                InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(true, 3),
+                SimpleMessageChannelBuilder::createQueueChannel('deadLetter'),
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+                ServiceConfiguration::createWithDefaults()->withDefaultErrorChannel('errorChannel'),
+            ],
+            enabledModules: [],
+        );
+
+        $ecotone->publishEventWithRouting('order.completed', 'order-1');
+        $ecotone->run('async', ExecutionPollingMetadata::createWithTestingSetup(stopOnError: false));
+
+        $this->assertSame(16, $sender->attempts);
+        $deadLetterLines = array_values(array_filter($logger->getError(), fn (string $line) => str_contains($line, 'dead letter')));
+        $this->assertCount(1, $deadLetterLines);
+        $this->assertMatchesRegularExpression('/^Sending message `[^`]+` to dead letter channel after 4 failed deliveries \\(1 initial \\+ 3 retries\\), each delivery tried up to 4 times by instant retry \\(InstantRetryConfiguration\\): up to 16 handler invocations\\. Due to: SMTP connection refused$/', $deadLetterLines[0]);
+    }
+
+    public function test_exhausted_retries_without_dead_letter_name_the_instant_retries_inside_each_delivery(): void
+    {
+        $ecotone = $this->bootstrapAlwaysFailingSender(StubLogger::create(), deadLetter: false, maxRetries: 1, instantRetries: 2);
+
+        $ecotone->publishEventWithRouting('order.completed', 'order-1');
+
+        $this->expectException(MessageHandlingException::class);
+        $this->expectExceptionMessage('Message handling failed on channel `async` after 2 failed deliveries (1 initial + 1 retry), each delivery tried up to 3 times by instant retry (InstantRetryConfiguration): up to 6 handler invocations. RuntimeException: SMTP connection refused');
+
+        $ecotone->run('async', ExecutionPollingMetadata::createWithTestingSetup(stopOnError: false));
+    }
+
+    private function bootstrapAlwaysFailingSender(StubLogger $logger, bool $deadLetter, int $maxRetries = 3, int $instantRetries = 0)
     {
         $sender = new class () {
             #[Asynchronous('async')]
@@ -114,7 +162,7 @@ final class DelayedRetryBackOffTest extends TestCase
             [$sender, 'logger' => $logger],
             extensionObjects: [
                 $deadLetter ? ErrorHandlerConfiguration::createWithDeadLetterChannel('errorChannel', RetryTemplateBuilder::fixedBackOff(0)->maxRetries($maxRetries), 'deadLetter') : ErrorHandlerConfiguration::create('errorChannel', RetryTemplateBuilder::fixedBackOff(0)->maxRetries($maxRetries)),
-                InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
+                InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry($instantRetries > 0, max($instantRetries, 1)),
                 SimpleMessageChannelBuilder::createQueueChannel('deadLetter'),
                 SimpleMessageChannelBuilder::createQueueChannel('async'),
                 ServiceConfiguration::createWithDefaults()->withDefaultErrorChannel('errorChannel'),

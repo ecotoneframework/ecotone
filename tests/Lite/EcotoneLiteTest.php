@@ -2,12 +2,12 @@
 
 namespace Test\Ecotone\Lite;
 
+use Ecotone\Api\Console\ConsoleCommandResultSet;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\ExtensionObject\TestConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Messaging\Config\ConfigurationException;
-use Ecotone\Messaging\Config\ConsoleCommandResultSet;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Order\ChannelConfiguration;
 use Test\Ecotone\Modelling\Fixture\Order\OrderService;

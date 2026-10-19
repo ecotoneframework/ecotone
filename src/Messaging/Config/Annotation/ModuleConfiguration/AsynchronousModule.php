@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
+use Ecotone\AnnotationFinder\AnnotatedMethod;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\Attribute\CommandHandler;
@@ -18,6 +19,7 @@ use Ecotone\Api\ExtensionObject\PollingMetadata;
 use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Attribute\EndpointAnnotation;
+use Ecotone\Messaging\Attribute\IdentifiedAnnotation;
 use Ecotone\Messaging\Attribute\StreamBasedSource;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
@@ -71,6 +73,7 @@ final class AsynchronousModule implements AnnotationModule
                         $streamSourcesAsyncEndpoints[$annotationForMethod->getEndpointId()] = $asyncClass->getChannelName();
                     } else {
                         if ($annotationForMethod instanceof CommandHandler || $annotationForMethod instanceof EventHandler || $annotationForMethod instanceof InternalHandler) {
+                            self::refuseEndpointThatCannotRunAsynchronously($endpoint, $annotationForMethod);
                             if ($annotationForMethod->isEndpointIdGenerated()) {
                                 throw ConfigurationException::create("{$endpoint} should have endpointId defined for handling asynchronously");
                             }
@@ -93,6 +96,7 @@ final class AsynchronousModule implements AnnotationModule
                         continue;
                     }
                     if ($annotationForMethod instanceof CommandHandler || $annotationForMethod instanceof EventHandler || $annotationForMethod instanceof InternalHandler) {
+                        self::refuseEndpointThatCannotRunAsynchronously($endpoint, $annotationForMethod);
                         if ($annotationForMethod->isEndpointIdGenerated()) {
                             throw ConfigurationException::create("{$endpoint} should have endpointId defined for handling asynchronously");
                         }
@@ -115,9 +119,11 @@ final class AsynchronousModule implements AnnotationModule
         return $handlerChannelName;
     }
 
+    public const HANDLER_EXECUTION_CHANNEL_SUFFIX = '.execute';
+
     public static function getHandlerExecutionChannel(string $originalInputChannelName): string
     {
-        return $originalInputChannelName . '.execute';
+        return $originalInputChannelName . self::HANDLER_EXECUTION_CHANNEL_SUFFIX;
     }
 
     /**
@@ -258,6 +264,14 @@ final class AsynchronousModule implements AnnotationModule
                     );
                 }
             }
+        }
+    }
+
+    private static function refuseEndpointThatCannotRunAsynchronously(AnnotatedMethod $endpoint, IdentifiedAnnotation $annotation): void
+    {
+        $refusal = $annotation->asynchronousExecutionRefusal();
+        if ($refusal !== null) {
+            throw ConfigurationException::create(sprintf('#[%s] on %s::%s %s', substr((string) strrchr('\\' . $annotation::class, '\\'), 1), $endpoint->getClassName(), $endpoint->getMethodName(), $refusal));
         }
     }
 }

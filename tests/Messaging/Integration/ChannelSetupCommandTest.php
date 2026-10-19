@@ -28,7 +28,7 @@ final class ChannelSetupCommandTest extends TestCase
         $result = $runner->execute('ecotone:migration:channel:setup', []);
 
         self::assertNotNull($result);
-        $rows = $result->getRows();
+        $rows = $result->rows;
 
         // Find the in-memory channel in the results
         $inMemoryChannelRow = null;
@@ -84,7 +84,7 @@ final class ChannelSetupCommandTest extends TestCase
 
         // Should show status, not initialize
         self::assertNotNull($result);
-        self::assertEquals(['Channel', 'Initialized'], $result->getColumnHeaders());
+        self::assertEquals(['Channel', 'Initialized'], $result->columnHeaders);
     }
 
     public function test_channel_delete_respects_string_false_for_force(): void
@@ -98,7 +98,7 @@ final class ChannelSetupCommandTest extends TestCase
 
         // Should show warning, not delete
         self::assertNotNull($result);
-        self::assertEquals(['Channel', 'Warning'], $result->getColumnHeaders());
+        self::assertEquals(['Channel', 'Warning'], $result->columnHeaders);
     }
 
     private function bootstrapEcotone(): \Ecotone\Api\Lite\Test\FlowTestSupport

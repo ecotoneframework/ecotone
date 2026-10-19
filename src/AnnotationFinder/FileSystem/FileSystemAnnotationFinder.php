@@ -565,8 +565,6 @@ class FileSystemAnnotationFinder implements AnnotationFinder
         array $configurationVariables,
         bool $enableTesting
     ): string {
-        // this is temporary cache based on if files have changed
-        // get file contents based on class names, configuration and configuration variables
         $fileSha = '';
 
         foreach ($this->registeredClasses() as $class) {

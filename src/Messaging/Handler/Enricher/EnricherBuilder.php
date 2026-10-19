@@ -16,7 +16,7 @@ use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Symfony\Component\Uid\Uuid;
@@ -153,7 +153,7 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
             new Reference(MessageBuilder::class),
         ]);
 
-        return ServiceActivatorBuilder::createWithDefinition($internalEnrichingService, 'enrich')
+        return MessageProcessorActivatorBuilder::createForMethod($internalEnrichingService, 'enrich')
                 ->withEndpointId($this->getEndpointId())
                 ->withInputChannelName($this->getInputMessageChannelName())
                 ->withOutputMessageChannel($this->outputMessageChannelName)

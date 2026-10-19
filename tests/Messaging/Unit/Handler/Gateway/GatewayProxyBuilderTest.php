@@ -21,7 +21,7 @@ use Ecotone\Messaging\Handler\MessageHandlingException;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -101,7 +101,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                 )->withReplyChannel('replyChannel')
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withMessage')
+                MessageProcessorActivatorBuilder::createForMethod(ServiceExpectingOneArgument::create(), 'withMessage')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -138,7 +138,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                     ->withReplyChannel('replyChannel')
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(NoReturnMessageHandler::create(), 'handle')
+                MessageProcessorActivatorBuilder::createForMethod(NoReturnMessageHandler::create(), 'handle')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -176,7 +176,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                     ->withReplyChannel('replyChannel')
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingNoArguments::createWithReturnValue('test'), 'withReturnValue')
+                MessageProcessorActivatorBuilder::createForMethod(ServiceExpectingNoArguments::createWithReturnValue('test'), 'withReturnValue')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -207,7 +207,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                     )
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withMessage')
+                MessageProcessorActivatorBuilder::createForMethod(ServiceExpectingOneArgument::create(), 'withMessage')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -232,7 +232,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                     )
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withMessage')
+                MessageProcessorActivatorBuilder::createForMethod(ServiceExpectingOneArgument::create(), 'withMessage')
                     ->withInputChannelName($inputChannel)
                     ->withOutputMessageChannel($outputChannel)
             )
@@ -264,7 +264,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                     ->withReplyChannel($replyChannelName)
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withMessage')
+                MessageProcessorActivatorBuilder::createForMethod(ServiceExpectingOneArgument::create(), 'withMessage')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -293,7 +293,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                     ->withReplyChannel($replyChannelName)
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withMessage')
+                MessageProcessorActivatorBuilder::createForMethod(ServiceExpectingOneArgument::create(), 'withMessage')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -320,7 +320,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                     ->withReplyChannel($replyChannelName)
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withMessage')
+                MessageProcessorActivatorBuilder::createForMethod(ServiceExpectingOneArgument::create(), 'withMessage')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -350,7 +350,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                     ->withErrorChannel($errorChannelName)
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(NoReturnMessageHandler::create(), 'handle')
+                MessageProcessorActivatorBuilder::createForMethod(NoReturnMessageHandler::create(), 'handle')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -385,7 +385,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                     )
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(NoReturnMessageHandler::create(), 'handle')
+                MessageProcessorActivatorBuilder::createForMethod(NoReturnMessageHandler::create(), 'handle')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -413,7 +413,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                     )
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(NoReturnMessageHandler::create(), 'handle')
+                MessageProcessorActivatorBuilder::createForMethod(NoReturnMessageHandler::create(), 'handle')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -441,7 +441,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                     )
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(NoReturnMessageHandler::create(), 'handle')
+                MessageProcessorActivatorBuilder::createForMethod(NoReturnMessageHandler::create(), 'handle')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -469,7 +469,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                     )
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(NoReturnMessageHandler::create(), 'handle')
+                MessageProcessorActivatorBuilder::createForMethod(NoReturnMessageHandler::create(), 'handle')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -498,7 +498,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                     )
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(NoReturnMessageHandler::create(), 'handle')
+                MessageProcessorActivatorBuilder::createForMethod(NoReturnMessageHandler::create(), 'handle')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -566,7 +566,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                 )
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(CalculatingService::create(1), 'sum')
+                MessageProcessorActivatorBuilder::createForMethod(CalculatingService::create(1), 'sum')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -597,7 +597,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                     )
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(ExceptionMessageHandler::create(), 'handle')
+                MessageProcessorActivatorBuilder::createForMethod(ExceptionMessageHandler::create(), 'handle')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -636,7 +636,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                     )
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(NoReturnMessageHandler::create(), 'handle')
+                MessageProcessorActivatorBuilder::createForMethod(NoReturnMessageHandler::create(), 'handle')
                     ->withInputChannelName($inputChannel)
             )
             ->build();
@@ -680,7 +680,7 @@ class GatewayProxyBuilderTest extends MessagingTestCase
                 )
             )
             ->withMessageHandler(
-                ServiceActivatorBuilder::createWithDirectReference(ServiceExpectingOneArgument::create(), 'withMessage')
+                MessageProcessorActivatorBuilder::createForMethod(ServiceExpectingOneArgument::create(), 'withMessage')
                     ->withInputChannelName($inputChannel)
             )
             ->build();

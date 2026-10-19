@@ -37,7 +37,6 @@ use Ecotone\Messaging\Config\Container\Compiler\ContainerImplementation;
 use Ecotone\Messaging\Config\Container\Compiler\ModuleConfigurationCompilerPass;
 use Ecotone\Messaging\Config\Container\Compiler\RegisterSingletonMessagingServices;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
-use Ecotone\Messaging\Config\Container\ContainerConfig;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\GatewayProxyReference;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
@@ -760,9 +759,6 @@ final class MessagingSystemConfiguration implements Configuration
         );
     }
 
-    /**
-     * @TODO that method should stay private, require refactoring tests
-     */
     public static function prepareWithModuleRetrievingService(
         ModuleRetrievingService $moduleConfigurationRetrievingService,
         InterfaceToCallRegistry $preparationInterfaceRegistry,
@@ -1105,9 +1101,6 @@ final class MessagingSystemConfiguration implements Configuration
         }
         $messagingBuilder->register(LoggingGateway::class, $loggingService);
 
-        // TODO: some service configuration should be handled at runtime. Here they are all cached in the container
-        //        $messagingBuilder->register('config.defaultSerializationMediaType', MediaType::parseMediaType($this->applicationConfiguration->getDefaultSerializationMediaType()));
-
         $converters = [];
         foreach ($this->converterBuilders as $converterBuilder) {
             $converters[] = $converterBuilder->compile($messagingBuilder);
@@ -1190,7 +1183,7 @@ final class MessagingSystemConfiguration implements Configuration
             ]));
         }
 
-        $messagingBuilder->register(ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), $messagingBuilder->getPollingEndpoints(), $gatewayListReferences]));
+        $messagingBuilder->register(ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), $messagingBuilder->getPollingEndpoints(), $gatewayListReferences, array_map(fn (ConsoleCommandConfiguration $consoleCommandConfiguration) => $consoleCommandConfiguration->getName(), $this->consoleCommands)]));
         (new RegisterSingletonMessagingServices($this->bootstrapConfiguration))->process($builder);
         foreach ($this->compilerPasses as $compilerPass) {
             $compilerPass->process($builder);
@@ -1215,14 +1208,6 @@ final class MessagingSystemConfiguration implements Configuration
         }
 
         return $this->requiredReferences;
-    }
-
-    /**
-     * @deprecated
-     */
-    public function buildMessagingSystemFromConfiguration(?ContainerInterface $referenceSearchService = null): ConfiguredMessagingSystem
-    {
-        return ContainerConfig::buildMessagingSystemInMemoryContainer($this, $referenceSearchService);
     }
 
     public static function prepareCacheDirectory(ServiceCacheConfiguration $serviceCacheConfiguration): void

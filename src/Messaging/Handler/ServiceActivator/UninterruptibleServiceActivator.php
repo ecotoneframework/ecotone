@@ -14,13 +14,13 @@ use Ecotone\Messaging\Handler\ParameterConverterBuilder;
  */
 final class UninterruptibleServiceActivator implements MessageHandlerBuilderWithParameterConverters
 {
-    private function __construct(private ServiceActivatorBuilder $serviceActivatorBuilder)
+    private function __construct(private MessageProcessorActivatorBuilder $serviceActivatorBuilder)
     {
     }
 
     public static function create(Definition $objectToInvokeOn, string $methodName): self
     {
-        return new self(ServiceActivatorBuilder::createWithDefinition($objectToInvokeOn, $methodName));
+        return new self(MessageProcessorActivatorBuilder::createForMethod($objectToInvokeOn, $methodName));
     }
 
     /**

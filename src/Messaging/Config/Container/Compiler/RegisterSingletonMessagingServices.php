@@ -66,7 +66,7 @@ class RegisterSingletonMessagingServices implements CompilerPass
         $this->registerDefault($builder, ProxyFactory::class, new Definition(ProxyFactory::class, [new Reference(ServiceCacheConfiguration::REFERENCE_NAME)]));
         $this->registerDefault($builder, PropertyEditorAccessor::class, new Definition(PropertyEditorAccessor::class, [new Reference(ExpressionEvaluationService::REFERENCE)], 'create'));
         $this->registerDefault($builder, PropertyReaderAccessor::class, new Definition(PropertyReaderAccessor::class));
-        $this->registerDefault($builder, ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), [], []]));
+        $this->registerDefault($builder, ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), [], [], []]));
         $this->registerDefault($builder, EventMapper::class, new Definition(EventMapper::class, factory: 'createEmpty'));
         $this->registerDefault($builder, LicenceDecider::class, new Definition(LicenceDecider::class, [$this->bootstrapConfiguration->isRunningForEnterprise()]));
         $this->registerDefault($builder, PendingDeliveryRegistry::class, new Definition(PendingDeliveryRegistry::class, [new Reference(LoggingGateway::class)]));

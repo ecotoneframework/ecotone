@@ -6,7 +6,7 @@ use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Endpoint\PollingConsumer\RejectMessageException;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Test\StaticMessageBuilder;
 use InvalidArgumentException;
 
@@ -37,24 +37,24 @@ class DataReturningService implements DefinedObject
         $this->rejectException = $rejectException;
     }
 
-    public static function createServiceActivatorBuilder($dataToReturn): ServiceActivatorBuilder
+    public static function createServiceActivatorBuilder($dataToReturn): MessageProcessorActivatorBuilder
     {
-        return ServiceActivatorBuilder::createWithDirectReference(new self($dataToReturn, false, [], false), 'handle');
+        return MessageProcessorActivatorBuilder::createForMethod(new self($dataToReturn, false, [], false), 'handle');
     }
 
-    public static function createExceptionalServiceActivatorBuilder(): ServiceActivatorBuilder
+    public static function createExceptionalServiceActivatorBuilder(): MessageProcessorActivatorBuilder
     {
-        return (ServiceActivatorBuilder::createWithDirectReference(new self('', false, [], true), 'handle'));
+        return (MessageProcessorActivatorBuilder::createForMethod(new self('', false, [], true), 'handle'));
     }
 
-    public static function createServiceActivatorBuilderWithReturnMessage($payload, array $headers): ServiceActivatorBuilder
+    public static function createServiceActivatorBuilderWithReturnMessage($payload, array $headers): MessageProcessorActivatorBuilder
     {
-        return ServiceActivatorBuilder::createWithDirectReference(new self($payload, true, $headers, false), 'handle');
+        return MessageProcessorActivatorBuilder::createForMethod(new self($payload, true, $headers, false), 'handle');
     }
 
-    public static function createServiceActivatorBuilderWithRejectException(): ServiceActivatorBuilder
+    public static function createServiceActivatorBuilderWithRejectException(): MessageProcessorActivatorBuilder
     {
-        return ServiceActivatorBuilder::createWithDirectReference(new self('', true, [], true, true), 'handle');
+        return MessageProcessorActivatorBuilder::createForMethod(new self('', true, [], true, true), 'handle');
     }
 
     public function handle(Message $message)

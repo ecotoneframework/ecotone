@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Ecotone\EventSourcing;
 
+use Ecotone\Api\Modelling\EventSourcedRepository;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
@@ -14,7 +15,6 @@ use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\BaseEventSourcingConfiguration;
-use Ecotone\Modelling\EventSourcedRepository;
 use Ecotone\Modelling\EventSourcingExecutor\GroupedEventSourcingExecutor;
 use Ecotone\Modelling\Repository\AggregateRepositoryBuilder;
 

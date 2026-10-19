@@ -24,6 +24,7 @@ use Ecotone\Dbal\DocumentStore\DbalDocumentStoreModule;
 use Ecotone\Dbal\MultiTenant\Module\MultiTenantConnectionFactoryModule;
 use Ecotone\Dbal\ObjectManager\ObjectManagerModule;
 use Ecotone\Dbal\Recoverability\DbalDeadLetterModule;
+use Ecotone\Dbal\Tracing\DbalTracingModule;
 use Ecotone\EventSourcing\Config\EventSourcingModule;
 use Ecotone\EventSourcing\Config\EventSourcingProjectingModule;
 use Ecotone\EventSourcing\Tagging\Config\EventTaggingModule;
@@ -87,6 +88,7 @@ use Ecotone\Sqs\Configuration\SqsMessagePublisherModule;
 use Ecotone\Sqs\Configuration\SqsModule;
 use Ecotone\SymfonyBundle\Config\SymfonyConnectionModule;
 use Ecotone\Tempest\Config\TempestModule;
+use Ecotone\Tracing\Config\TracingModule;
 
 /**
  * licence Apache-2.0
@@ -116,6 +118,7 @@ class ModuleClassList
         RouterModule::class,
         ScheduledModule::class,
         CollectorModule::class,
+        TracingModule::class,
         DeliveryConfirmationModule::class,
         ChannelSetupModule::class,
         SerializerModule::class,
@@ -170,6 +173,7 @@ class ModuleClassList
         DbalBusinessMethodModule::class,
         MultiTenantConnectionFactoryModule::class,
         DatabaseSetupModule::class,
+        DbalTracingModule::class,
     ];
 
     public const REDIS_MODULES = [

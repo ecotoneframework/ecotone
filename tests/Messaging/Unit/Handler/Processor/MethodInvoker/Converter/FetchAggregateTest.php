@@ -460,7 +460,7 @@ class FetchAggregateTest extends TestCase
     {
         $command = new class () {
             #[ConsoleCommand('user:show')]
-            public function show(string $userId, #[Fetch("headers['ecotone.oneTimeCommand.userId']")] User $user): void
+            public function show(string $userId, #[Fetch("headers['ecotone_console_one_time_command_userId']")] User $user): void
             {
             }
         };

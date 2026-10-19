@@ -21,7 +21,6 @@ use Ecotone\Messaging\Handler\Type\UnionType;
 class DefaultHeaderMapper implements HeaderMapper
 {
     public const FALLBACK_HEADER_CONVERSION_MEDIA_TYPE = MediaType::APPLICATION_JSON;
-    public const CONVERTED_HEADERS_TO_DIFFERENT_FORMAT = 'ecotone.convertedKeys';
 
     /**
      * @param string[] $toMessageHeadersMapping

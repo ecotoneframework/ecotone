@@ -12,7 +12,6 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 class ConsoleCommandConfiguration implements DefinedObject
 {
     public const HEADER_PARAMETER_NAME = 'header';
-    public const HEADER_NAME = 'console_headers';
 
     private string $name;
     private string $channelName;

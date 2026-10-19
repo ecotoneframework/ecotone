@@ -10,6 +10,7 @@ use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\Container\ContainerConfig;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
@@ -17,7 +18,7 @@ use Ecotone\Messaging\Endpoint\PollingConsumer\PollOrThrow\PollOrThrowMessageHan
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Test\StaticMessageBuilder;
 use Exception;
@@ -321,15 +322,17 @@ final class MessagingBasicsTest extends TestCase
                     ->withInputChannelName('routeChannel')
             )
             ->registerMessageHandler(
-                ServiceActivatorBuilder::create(OrderProcessor::class, InterfaceToCall::create(OrderProcessor::class, 'processOrder'))
+                MessageProcessorActivatorBuilder::createForMethod(OrderProcessor::class, InterfaceToCall::create(OrderProcessor::class, 'processOrder'))
                     ->withInputChannelName($listenChannel)
                     ->withOutputMessageChannel('responseChannel')
                     ->withEndpointId('orderProcessor')
             );
 
-        return $config
+        return ContainerConfig::buildMessagingSystemInMemoryContainer(
+            $config
             ->registerConsumerFactory(new EventDrivenConsumerBuilder())
-            ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
-            ->buildMessagingSystemFromConfiguration($container);
+            ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder()),
+            $container,
+        );
     }
 }

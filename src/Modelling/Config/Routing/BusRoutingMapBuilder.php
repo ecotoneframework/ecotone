@@ -25,6 +25,8 @@ use function str_contains;
 
 class BusRoutingMapBuilder extends BusRoutingMap
 {
+    private const DESTINATION_CHANNEL_SUFFIX = '.target';
+
     /**
      * @param array<RoutingEventHandler> $routingEventHandlers
      */
@@ -63,11 +65,25 @@ class BusRoutingMapBuilder extends BusRoutingMap
     /**
      * @return string the destination channel name
      */
+    public static function destinationChannelFor(string $endpointId): string
+    {
+        return $endpointId . self::DESTINATION_CHANNEL_SUFFIX;
+    }
+
+    public static function endpointIdOfDestinationChannel(string $destinationChannel): ?string
+    {
+        if (! str_ends_with($destinationChannel, self::DESTINATION_CHANNEL_SUFFIX)) {
+            return null;
+        }
+
+        return substr($destinationChannel, 0, -strlen(self::DESTINATION_CHANNEL_SUFFIX));
+    }
+
     public function addRoutesFromAnnotatedFinding(AnnotatedFinding $registration, InterfaceToCallRegistry $interfaceToCallRegistry): ?string
     {
         /** @var InputOutputEndpointAnnotation $annotationForMethod */
         $annotationForMethod = $registration->getAnnotationForMethod();
-        $destinationChannel = $annotationForMethod->getEndpointId() . '.target';
+        $destinationChannel = self::destinationChannelFor($annotationForMethod->getEndpointId());
         $routes = $this->getRoutesFromAnnotatedFinding($registration, $interfaceToCallRegistry);
         $priority = PriorityBasedOnType::fromAnnotatedFinding($registration);
 

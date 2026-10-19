@@ -17,7 +17,7 @@ use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -55,7 +55,7 @@ final class DeferredPublishingGatewayRegistration
             )
             ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel($publishDeferredRequestChannel))
             ->registerMessageHandler(
-                ServiceActivatorBuilder::createWithDefinition(
+                MessageProcessorActivatorBuilder::createForMethod(
                     new Definition(DeferredPublishingGateway::class, [
                         $publisherReferenceName,
                         $nonBlockingConfirmationEnabled,

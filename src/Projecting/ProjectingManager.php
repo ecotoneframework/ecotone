@@ -179,7 +179,7 @@ class ProjectingManager
             [
                 ProjectingHeaders::PROJECTION_PARTITION_KEY => $partitionKeyValue,
                 ProjectingHeaders::PROJECTION_CAN_INITIALIZE => true,
-                'projection.shouldReset' => true,
+                ProjectingHeaders::PROJECTION_SHOULD_RESET => true,
             ],
             self::batchChannelFor($this->projectionName)
         );

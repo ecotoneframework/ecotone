@@ -42,6 +42,24 @@ class MethodInvokerBuilder implements InterceptedMessageProcessorBuilder
         return new self($definition, $interfaceToCallReference, $methodParametersConverterBuilders);
     }
 
+    /**
+     * @param array<ParameterConverterBuilder> $methodParametersConverterBuilders
+     */
+    public function withMethodParameterConverters(array $methodParametersConverterBuilders): self
+    {
+        $this->methodParametersConverterBuilders = $methodParametersConverterBuilders;
+
+        return $this;
+    }
+
+    /**
+     * @return array<ParameterConverterBuilder>
+     */
+    public function getMethodParameterConverters(): array
+    {
+        return $this->methodParametersConverterBuilders;
+    }
+
     public function withPassTroughMessageIfVoid(bool $shouldPassTroughMessageIfVoid): self
     {
         $this->shouldPassTroughMessageIfVoid = $shouldPassTroughMessageIfVoid;
@@ -92,7 +110,7 @@ class MethodInvokerBuilder implements InterceptedMessageProcessorBuilder
             $objectToInvokeOnResolver = $this->reference;
         } else {
             $objectToInvokeOnResolver = new Definition(MethodInvokerStaticObjectResolver::class, [
-                is_string($this->reference) && ! $interfaceToCall->isStaticallyCalled() ? Reference::to($this->reference) : $this->reference,
+                $this->objectToInvokeOn($interfaceToCall),
             ]);
         }
 
@@ -108,6 +126,19 @@ class MethodInvokerBuilder implements InterceptedMessageProcessorBuilder
     public function getInterceptedInterface(): InterfaceToCallReference
     {
         return $this->interfaceToCallReference;
+    }
+
+    private function objectToInvokeOn(InterfaceToCall $interfaceToCall): object|string
+    {
+        if (! $interfaceToCall->isStaticallyCalled()) {
+            return is_string($this->reference) ? Reference::to($this->reference) : $this->reference;
+        }
+
+        return match (true) {
+            $this->reference instanceof Reference => $this->reference->getId(),
+            $this->reference instanceof Definition => $this->reference->getClassName(),
+            default => $this->reference,
+        };
     }
 
     /**

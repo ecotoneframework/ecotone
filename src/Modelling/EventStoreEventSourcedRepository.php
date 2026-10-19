@@ -9,6 +9,8 @@ use Ecotone\Api\EventSourcing\EventStore;
 use Ecotone\Api\EventSourcing\MetadataMatcher;
 use Ecotone\Api\EventSourcing\Operator;
 use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Api\Modelling\EventSourcedRepository;
+use Ecotone\Api\Modelling\EventStream;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionResolver;

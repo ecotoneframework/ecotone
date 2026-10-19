@@ -17,6 +17,8 @@ use Ecotone\Api\Attribute\RelatedAggregate;
 use Ecotone\Api\Attribute\Repository;
 use Ecotone\Api\ExtensionObject\ModulePackageList;
 use Ecotone\Api\ExtensionObject\ServiceConfiguration;
+use Ecotone\Api\Modelling\EventSourcedRepository;
+use Ecotone\Api\Modelling\StateStoredRepository;
 use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
@@ -118,6 +120,10 @@ final class AggregateModule implements AnnotationModule, RoutingEventHandler
 
         $aggregateRepositoryReferenceNames = [];
         foreach ($aggregateRepositoryClasses as $aggregateRepositoryClass) {
+            if (interface_exists($aggregateRepositoryClass)) {
+                throw ConfigurationException::create(self::repositoryAttributeOnInterface($aggregateRepositoryClass));
+            }
+
             $aggregateRepositoryReferenceNames[$aggregateRepositoryClass] = AnnotatedDefinitionReference::getReferenceForClassName($annotationRegistrationService, $aggregateRepositoryClass);
         }
 
@@ -161,6 +167,14 @@ final class AggregateModule implements AnnotationModule, RoutingEventHandler
             $annotationRegistrationService->findAnnotatedMethods(Repository::class),
             EventMapper::createWith($fromClassToNameMapping, $fromNameToClassMapping)
         );
+    }
+
+    private static function repositoryAttributeOnInterface(string $interfaceName): string
+    {
+        return "#[Repository] is placed on the interface {$interfaceName}. "
+            . 'A class-level #[Repository] marks a custom repository implementation, a class implementing ' . StateStoredRepository::class . ' or ' . EventSourcedRepository::class . ', and an interface cannot be one. '
+            . "To have Ecotone generate the repository for {$interfaceName}, remove the class-level attribute and put #[Repository] on each of its methods, for example `#[Repository] public function save(Basket \$basket): void;` and `#[Repository] public function get(string \$basketId): ?Basket;`. "
+            . 'To provide your own storage, put the class-level #[Repository] on a class implementing one of those two interfaces instead.';
     }
 
     private function initChannelsToBridge(): void
@@ -307,7 +321,6 @@ final class AggregateModule implements AnnotationModule, RoutingEventHandler
 
     private function registerLoadAggregate(ClassDefinition $aggregateClassDefinition, bool $canReturnNull, Configuration $configuration, MessageProcessorActivatorBuilder $chainMessageHandlerBuilder, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
-        /** @TODO do not require method name in save service */
         $methodName = $aggregateClassDefinition->getPublicMethodNames() ? $aggregateClassDefinition->getPublicMethodNames()[0] : '__construct';
 
         $configuration->registerMessageHandler(

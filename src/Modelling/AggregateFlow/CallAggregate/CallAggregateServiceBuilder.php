@@ -4,7 +4,6 @@ namespace Ecotone\Modelling\AggregateFlow\CallAggregate;
 
 use Ecotone\Api\Attribute\EventSourcingAggregate;
 use Ecotone\Api\Attribute\EventSourcingSaga;
-use Ecotone\Api\Attribute\Version;
 use Ecotone\Api\Modelling\WithAggregateVersioning;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
@@ -21,6 +20,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\AggregateFlow\AggregateVersionProperty;
 
 /**
  * licence Apache-2.0
@@ -59,15 +59,7 @@ class CallAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
             $eventSourcingAttribute = $interfaceToCall->getSingleClassAnnotationOf($eventSourcedAggregateAnnotation);
         }
 
-        $aggregateVersionPropertyName = null;
-        $versionAnnotation             = Type::attribute(Version::class);
-        foreach ($aggregateClassDefinition->getProperties() as $property) {
-            if ($property->hasAnnotation($versionAnnotation)) {
-                $aggregateVersionPropertyName = $property->getName();
-                // TODO: should throw exception if more than one version property
-            }
-        }
-        $this->aggregateVersionProperty             = $aggregateVersionPropertyName;
+        $this->aggregateVersionProperty = AggregateVersionProperty::resolveFor($aggregateClassDefinition)?->propertyName;
 
         if ($this->isEventSourced) {
             Assert::isTrue((bool)$this->aggregateVersionProperty, "{$interfaceToCall->getInterfaceName()} is event sourced aggregate. Event Sourced aggregates are required to define version property. Make use of " . WithAggregateVersioning::class . ' or implement your own.');

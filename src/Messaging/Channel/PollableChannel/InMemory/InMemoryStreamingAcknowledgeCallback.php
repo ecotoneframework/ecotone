@@ -17,7 +17,7 @@ use RuntimeException;
  */
 final class InMemoryStreamingAcknowledgeCallback implements AcknowledgementCallback
 {
-    public const ECOTONE_IN_MEMORY_SHARED_ACK = 'ecotone.in_memory_shared.ack';
+    public const ECOTONE_IN_MEMORY_SHARED_ACK = 'ecotone_in_memory_shared_consumer_acknowledge';
 
     private int $requeueCount = 0;
 

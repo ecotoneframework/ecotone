@@ -111,8 +111,7 @@ final class ImmutableConfigurationCopyTest extends TestCase
     public function test_test_configuration_copy_changes_only_the_named_fields(): void
     {
         $original = TestConfiguration::createWithDefaults()
-            ->withFailOnCommandHandlerNotFound(false)
-            ->withFailOnQueryHandlerNotFound(false)
+            ->withFailOnNotFoundHandler(false)
             ->withMediaTypeConversion('orders', MediaType::createApplicationJson())
             ->withSpyOnChannel('audit')
             ->withInMemoryConsumerPositionTracker(false)
@@ -120,11 +119,10 @@ final class ImmutableConfigurationCopyTest extends TestCase
             ->withTimeAt(new DateTimeImmutable('2024-03-01 10:00:00'));
 
         self::assertSame(
-            ['failOnCommandHandlerNotFound', 'failOnQueryHandlerNotFound', 'pollableChannelMediaTypeConversion', 'channelToConvertOn', 'spiedChannelNames', 'inMemoryConsumerPositionTracker', 'databaseTablesSetUpOnBootstrap', 'timeAt'],
+            ['failOnNotFoundHandler', 'pollableChannelMediaTypeConversion', 'channelToConvertOn', 'spiedChannelNames', 'inMemoryConsumerPositionTracker', 'databaseTablesSetUpOnBootstrap', 'timeAt'],
             array_keys(get_object_vars($original)),
         );
-        self::assertCopyChangesOnly($original, fn (TestConfiguration $configuration) => $configuration->withFailOnCommandHandlerNotFound(true), ['failOnCommandHandlerNotFound' => true]);
-        self::assertCopyChangesOnly($original, fn (TestConfiguration $configuration) => $configuration->withFailOnQueryHandlerNotFound(true), ['failOnQueryHandlerNotFound' => true]);
+        self::assertCopyChangesOnly($original, fn (TestConfiguration $configuration) => $configuration->withFailOnNotFoundHandler(true), ['failOnNotFoundHandler' => true]);
         self::assertCopyChangesOnly(
             $original,
             fn (TestConfiguration $configuration) => $configuration->withMediaTypeConversion('payments', MediaType::createApplicationXml()),

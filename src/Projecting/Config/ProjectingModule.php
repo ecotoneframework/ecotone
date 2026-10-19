@@ -41,6 +41,7 @@ use Ecotone\Projecting\ProjectingHeaders;
 use Ecotone\Projecting\ProjectingManager;
 use Ecotone\Projecting\ProjectionRegistry;
 use Ecotone\Projecting\ProjectionStateStorageRegistry;
+use Ecotone\Projecting\ProjectionTriggerEndpoint;
 use Ecotone\Projecting\SinglePartitionProvider;
 use Ecotone\Projecting\StreamFilterRegistry;
 use Ecotone\Projecting\StreamSourceRegistry;
@@ -53,6 +54,8 @@ use Ecotone\Projecting\StreamSourceRegistry;
 #[ModuleAnnotation]
 final class ProjectingModule implements AnnotationModule
 {
+    private const PROJECTING_MANAGER_CHANNEL_PREFIX = 'projecting_manager_handler:';
+
     public static function getProjectorExecutorReference(string $projectionName): string
     {
         return 'projection_executor:' . $projectionName;
@@ -135,19 +138,19 @@ final class ProjectingModule implements AnnotationModule
                 ->withEndpointId(self::endpointIdForProjection($projectionName))
                 ->withInputChannelName(self::inputChannelForProjectingManager($projectionName));
 
+            $triggerEndpointAnnotations = [AttributeDefinition::fromObject(new ProjectionTriggerEndpoint($projectionName))];
             $asyncAttribute = $projectionBuilder instanceof EcotoneProjectionExecutorBuilder ? $projectionBuilder->getAsyncAttribute() : null;
             if ($asyncAttribute !== null) {
                 $endpointAnnotations = $asyncAttribute->asynchronousExecution;
                 if ($messagingConfiguration->isRunningForEnterpriseLicence()) {
                     $endpointAnnotations = array_merge($endpointAnnotations, [new WithoutDatabaseTransaction(), new WithoutMessageCollector()]);
                 }
-                $handlerBuilder = $handlerBuilder->withEndpointAnnotations([
-                    AttributeDefinition::fromObject(new Asynchronous(
-                        $asyncAttribute->getChannelName(),
-                        $endpointAnnotations,
-                    )),
-                ]);
+                $triggerEndpointAnnotations[] = AttributeDefinition::fromObject(new Asynchronous(
+                    $asyncAttribute->getChannelName(),
+                    $endpointAnnotations,
+                ));
             }
+            $handlerBuilder = $handlerBuilder->withEndpointAnnotations($triggerEndpointAnnotations);
 
             $messagingConfiguration->registerMessageHandler($handlerBuilder);
 
@@ -160,7 +163,7 @@ final class ProjectingModule implements AnnotationModule
                             [
                                 HeaderBuilder::createOptional('partitionKeyValue', ProjectingHeaders::PROJECTION_PARTITION_KEY),
                                 HeaderBuilder::create('canInitialize', ProjectingHeaders::PROJECTION_CAN_INITIALIZE),
-                                HeaderBuilder::createOptional('shouldReset', 'projection.shouldReset'),
+                                HeaderBuilder::createOptional('shouldReset', ProjectingHeaders::PROJECTION_SHOULD_RESET),
                             ],
                         )
                     )
@@ -233,6 +236,15 @@ final class ProjectingModule implements AnnotationModule
 
     public static function inputChannelForProjectingManager(string $projectionName): string
     {
-        return 'projecting_manager_handler:' . $projectionName;
+        return self::PROJECTING_MANAGER_CHANNEL_PREFIX . $projectionName;
+    }
+
+    public static function projectionNameOfTriggerChannel(string $channelName): ?string
+    {
+        if (! str_starts_with($channelName, self::PROJECTING_MANAGER_CHANNEL_PREFIX)) {
+            return null;
+        }
+
+        return substr($channelName, strlen(self::PROJECTING_MANAGER_CHANNEL_PREFIX));
     }
 }

@@ -13,10 +13,12 @@ use Ecotone\Api\Attribute\Saga;
 use Ecotone\Api\ExtensionObject\ModulePackageList;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\LicensingException;
 
@@ -68,13 +70,17 @@ class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
         /** @var InternalHandler $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
-        return ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($annotationRegistration), $interfaceToCallRegistry->getFor($annotationRegistration->getClassName(), $annotationRegistration->getMethodName()))
+        return MessageProcessorActivatorBuilder::createForMethodInvoker(
+            MethodInvokerBuilder::create(
+                AnnotatedDefinitionReference::getReferenceFor($annotationRegistration),
+                new InterfaceToCallReference($annotationRegistration->getClassName(), $annotationRegistration->getMethodName()),
+            )->withChangeHeaders($annotation->changingHeaders)
+        )
             ->withEndpointId($annotation->getEndpointId())
             ->withRequiredReply($annotation->requiresReply)
             ->withOutputMessageChannel($annotation->getOutputChannelName())
             ->withInputChannelName($annotation->getInputChannelName())
-            ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames())
-            ->withChangingHeaders($annotation->changingHeaders);
+            ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames());
     }
 
     /**

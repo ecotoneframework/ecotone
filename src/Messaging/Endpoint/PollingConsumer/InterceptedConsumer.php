@@ -77,8 +77,6 @@ class InterceptedConsumer implements ConsumerLifecycle
                 }
             }
         } finally {
-            // @TODO Message Poller for same class may have multiple definitions, therefore onConsumer attribute wont work
-            // Needed some more sophisticated way to use attributes in that case
             $this->messagePoller->onConsumerStop();
 
             $this->messagingEntrypoint->sendWithHeaders(

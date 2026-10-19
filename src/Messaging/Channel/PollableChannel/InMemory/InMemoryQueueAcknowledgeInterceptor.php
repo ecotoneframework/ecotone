@@ -20,7 +20,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 final class InMemoryQueueAcknowledgeInterceptor extends AbstractChannelInterceptor implements ChannelInterceptor
 {
-    public const ECOTONE_IN_MEMORY_QUEUE_ACK = 'ecotone.in_memory_queue.ack';
+    public const ECOTONE_IN_MEMORY_QUEUE_ACK = 'ecotone_in_memory_queue_consumer_acknowledge';
 
     public function __construct(private FinalFailureStrategy $finalFailureStrategy, private bool $isAutoAcked, private MessageBuilder $messageBuilder)
     {

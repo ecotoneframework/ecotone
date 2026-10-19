@@ -1,12 +1,7 @@
 <?php
 
-namespace Ecotone\Modelling;
+namespace Ecotone\Api\Modelling;
 
-/**
- * Interface EventSourcedRepository
- * @package Ecotone\Modelling
- * @author Dariusz Gafka <support@simplycodedsoftware.com>
- */
 /**
  * licence Apache-2.0
  */

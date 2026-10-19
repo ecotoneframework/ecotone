@@ -41,7 +41,6 @@ final class CustomSendingStrategy implements ChannelSendingStrategy
     public function decideFor(Message $message): string
     {
         $channelName = $this->messagingEntrypoint->send(
-            /** This need to be removed in order to return the Message correctly (order routing_slip, replyChannel) */
             $this->messageBuilder->fromMessage($message)
                 ->removeHeader(MessageHeaders::ROUTING_SLIP),
             $this->channelNameToResolveSendingMessageChannel

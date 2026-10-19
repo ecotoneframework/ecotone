@@ -14,7 +14,7 @@ use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 
 /**
  * Class SerializerHandlerBuilder
@@ -56,7 +56,7 @@ class SerializerHandlerBuilder extends InputOutputMessageHandlerBuilder implemen
             ]));
         }
         $interfaceToCall = $builder->getInterfaceToCall(new InterfaceToCallReference(SerializerHandler::class, $this->methodName));
-        return ServiceActivatorBuilder::create(SerializerHandler::class, $interfaceToCall)
+        return MessageProcessorActivatorBuilder::createForMethod(SerializerHandler::class, $interfaceToCall)
             ->compile($builder);
     }
 }

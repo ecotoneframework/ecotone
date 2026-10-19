@@ -10,11 +10,11 @@ use Ecotone\Api\Attribute\AggregateType;
 use Ecotone\Api\Attribute\EventSourcingAggregate;
 use Ecotone\Api\Attribute\Identifier;
 use Ecotone\Api\Attribute\IdentifierMethod;
-use Ecotone\Api\Attribute\Version;
 use Ecotone\Api\EventSourcing\Stream;
 use Ecotone\Messaging\Handler\ClassDefinition;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Type;
+use Ecotone\Modelling\AggregateFlow\AggregateVersionProperty;
 use Ecotone\Modelling\NoCorrectIdentifierDefinedException;
 
 /**
@@ -143,18 +143,8 @@ final class AggregateDefinitionResolver
 
     private static function resolveAggregateVersionProperty(ClassDefinition $aggregateClassDefinition): array
     {
-        $aggregateVersionPropertyName = null;
-        $isAggregateVersionAutomaticallyIncreased = false;
-        $versionAnnotation = Type::attribute(Version::class);
-        foreach ($aggregateClassDefinition->getProperties() as $property) {
-            if ($property->hasAnnotation($versionAnnotation)) {
-                $aggregateVersionPropertyName = $property->getName();
-                /** @var Version $annotation */
-                $annotation = $property->getAnnotation($versionAnnotation);
-                $isAggregateVersionAutomaticallyIncreased = $annotation->autoIncrease;
-            }
-        }
+        $versionProperty = AggregateVersionProperty::resolveFor($aggregateClassDefinition);
 
-        return [$aggregateVersionPropertyName, $isAggregateVersionAutomaticallyIncreased];
+        return [$versionProperty?->propertyName, $versionProperty?->autoIncrease ?? false];
     }
 }

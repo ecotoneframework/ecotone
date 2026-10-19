@@ -25,6 +25,7 @@ class DelayedRetryErrorHandler
     public function __construct(
         private RetryTemplate $delayedRetryTemplate,
         private bool $hasDeadLetterOutput,
+        private int $instantRetriesPerDelivery,
         private LoggingGateway $loggingGateway,
         private MessageBuilder $messageBuilder,
     ) {
@@ -127,8 +128,20 @@ class DelayedRetryErrorHandler
     private function describeFailedDeliveries(int $failedDeliveries): string
     {
         $retries = $failedDeliveries - 1;
+        $description = sprintf('%d failed deliveries (1 initial + %d %s)', $failedDeliveries, $retries, $retries === 1 ? 'retry' : 'retries');
 
-        return sprintf('%d failed deliveries (1 initial + %d %s)', $failedDeliveries, $retries, $retries === 1 ? 'retry' : 'retries');
+        if ($this->instantRetriesPerDelivery === 0) {
+            return $description;
+        }
+
+        $invocationsPerDelivery = $this->instantRetriesPerDelivery + 1;
+
+        return sprintf(
+            '%s, each delivery tried up to %d times by instant retry (InstantRetryConfiguration): up to %d handler invocations',
+            $description,
+            $invocationsPerDelivery,
+            $failedDeliveries * $invocationsPerDelivery,
+        );
     }
 
     private function shouldBeSendToDeadLetter(int $retryNumber): bool

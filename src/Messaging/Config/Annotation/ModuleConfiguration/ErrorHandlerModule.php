@@ -10,6 +10,7 @@ use Ecotone\Api\Attribute\DelayedRetry;
 use Ecotone\Api\Attribute\ErrorChannel;
 use Ecotone\Api\Attribute\ModuleAnnotation;
 use Ecotone\Api\ExtensionObject\ErrorHandlerConfiguration;
+use Ecotone\Api\ExtensionObject\InstantRetryConfiguration;
 use Ecotone\Api\ExtensionObject\ModulePackageList;
 use Ecotone\Api\ExtensionObject\RetryTemplateBuilder;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
@@ -29,7 +30,7 @@ use Ecotone\Messaging\Handler\Recoverability\DelayedRetryErrorHandler;
 use Ecotone\Messaging\Handler\Recoverability\RetryRunner;
 use Ecotone\Messaging\Handler\Router\HeaderRouter;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 #[ModuleAnnotation]
@@ -151,6 +152,8 @@ final class ErrorHandlerModule extends NoExternalConfigurationModule implements 
             $extensionObjects = [ErrorHandlerConfiguration::createDefault()];
         }
         $extensionObjects = array_merge($extensionObjects, $this->perHandlerRetryConfigurations);
+        $instantRetryConfiguration = ExtensionObjectResolver::resolveUnique(InstantRetryConfiguration::class, $extensionObjects, InstantRetryConfiguration::createWithDefaults());
+        $instantRetriesPerDelivery = $instantRetryConfiguration->isEnabledForAsynchronousEndpoints ? $instantRetryConfiguration->asynchronousRetryTimes : 0;
 
         $messagingConfiguration->registerServiceDefinition(RetryRunner::class, [new Reference(EcotoneClockInterface::class), new Reference(LoggingGateway::class)]);
 
@@ -163,10 +166,11 @@ final class ErrorHandlerModule extends NoExternalConfigurationModule implements 
             }
             $hasAnyErrorHandlerConfiguration = true;
 
-            $errorHandler = ServiceActivatorBuilder::createWithDefinition(
+            $errorHandler = MessageProcessorActivatorBuilder::createForMethod(
                 new Definition(DelayedRetryErrorHandler::class, [
                     $extensionObject->delayedRetryTemplate,
                     (bool)$extensionObject->deadLetterChannel,
+                    $instantRetriesPerDelivery,
                     Reference::to(LoggingGateway::class),
                     Reference::to(MessageBuilder::class),
                 ]),

@@ -235,6 +235,12 @@ parameters:
 			path: src/Messaging/Config/ModuleClassList.php
 
 		-
+			message: '#^Class Ecotone\\Dbal\\Tracing\\DbalTracingModule not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Messaging/Config/ModuleClassList.php
+
+		-
 			message: '#^Class Ecotone\\EventSourcing\\Config\\EventSourcingModule not found\.$#'
 			identifier: class.notFound
 			count: 1
@@ -335,36 +341,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: src/Messaging/Endpoint/PollingConsumer/InterceptedConsumer.php
-
-		-
-			message: '#^Return type \(Ecotone\\Messaging\\Handler\\ServiceActivator\\ServiceActivatorBuilder\) of method Ecotone\\Messaging\\Handler\\Bridge\\BridgeBuilder\:\:withEndpointAnnotations\(\) should be compatible with return type \(static\(Ecotone\\Messaging\\Handler\\InterceptedEndpoint\)\) of method Ecotone\\Messaging\\Handler\\InterceptedEndpoint\:\:withEndpointAnnotations\(\)$#'
-			identifier: method.childReturnType
-			count: 2
-			path: src/Messaging/Handler/Bridge/BridgeBuilder.php
-
-		-
-			message: '#^Return type \(Ecotone\\Messaging\\Handler\\ServiceActivator\\ServiceActivatorBuilder\) of method Ecotone\\Messaging\\Handler\\Bridge\\BridgeBuilder\:\:withEndpointId\(\) should be compatible with return type \(static\(Ecotone\\Messaging\\Handler\\MessageHandlerBuilder\)\) of method Ecotone\\Messaging\\Handler\\MessageHandlerBuilder\:\:withEndpointId\(\)$#'
-			identifier: method.childReturnType
-			count: 2
-			path: src/Messaging/Handler/Bridge/BridgeBuilder.php
-
-		-
-			message: '#^Return type \(Ecotone\\Messaging\\Handler\\ServiceActivator\\ServiceActivatorBuilder\) of method Ecotone\\Messaging\\Handler\\Bridge\\BridgeBuilder\:\:withInputChannelName\(\) should be compatible with return type \(static\(Ecotone\\Messaging\\Handler\\MessageHandlerBuilder\)\) of method Ecotone\\Messaging\\Handler\\MessageHandlerBuilder\:\:withInputChannelName\(\)$#'
-			identifier: method.childReturnType
-			count: 2
-			path: src/Messaging/Handler/Bridge/BridgeBuilder.php
-
-		-
-			message: '#^Return type \(Ecotone\\Messaging\\Handler\\ServiceActivator\\ServiceActivatorBuilder\) of method Ecotone\\Messaging\\Handler\\Bridge\\BridgeBuilder\:\:withOutputMessageChannel\(\) should be compatible with return type \(static\(Ecotone\\Messaging\\Handler\\MessageHandlerBuilderWithOutputChannel\)\) of method Ecotone\\Messaging\\Handler\\MessageHandlerBuilderWithOutputChannel\:\:withOutputMessageChannel\(\)$#'
-			identifier: method.childReturnType
-			count: 1
-			path: src/Messaging/Handler/Bridge/BridgeBuilder.php
-
-		-
-			message: '#^Return type \(Ecotone\\Messaging\\Handler\\ServiceActivator\\ServiceActivatorBuilder\) of method Ecotone\\Messaging\\Handler\\Bridge\\BridgeBuilder\:\:withRequiredInterceptorNames\(\) should be compatible with return type \(static\(Ecotone\\Messaging\\Handler\\InterceptedEndpoint\)\) of method Ecotone\\Messaging\\Handler\\InterceptedEndpoint\:\:withRequiredInterceptorNames\(\)$#'
-			identifier: method.childReturnType
-			count: 2
-			path: src/Messaging/Handler/Bridge/BridgeBuilder.php
 
 		-
 			message: '#^PHPDoc tag @param for parameter \$className with type class\-string\|Ecotone\\Messaging\\Handler\\Type is not subtype of native type Ecotone\\Messaging\\Handler\\Type\\ObjectType\|string\.$#'

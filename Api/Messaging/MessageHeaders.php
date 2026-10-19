@@ -39,7 +39,7 @@ final class MessageHeaders
      * List of channels comma separated, where to is next endpoint
      */
     public const ROUTING_SLIP = 'routingSlip';
-    public const REPLY_CHANNEL = 'replyChannel';
+    public const REPLY_CHANNEL = 'ecotone_messaging_reply_channel';
     public const ERROR_CHANNEL = 'errorChannel';
     public const SEQUENCE_NUMBER = 'sequenceNumber';
     public const SEQUENCE_SIZE = 'sequenceSize';
@@ -53,7 +53,7 @@ final class MessageHeaders
      * Delivery delay in milliseconds
      */
     public const DELIVERY_DELAY = 'deliveryDelay';
-    public const CONSUMER_ACK_HEADER_LOCATION = 'consumerAcknowledgeCallbackHeader';
+    public const CONSUMER_ACK_HEADER_LOCATION = 'ecotone_messaging_consumer_acknowledge_header';
     /**
      * Consumed channel name (set when the Message originates from a pollable Message Channel)
      */
@@ -64,15 +64,14 @@ final class MessageHeaders
      * is dispatched after polling, so it can be replayed back to the same handler.
      */
     public const INBOUND_REQUEST_CHANNEL = 'inboundRequestChannel';
-    public const CONSUMER_POLLING_METADATA = 'consumerPollingMetadata';
-    public const REPLY_CONTENT_TYPE = 'replyContentType';
+    public const CONSUMER_POLLING_METADATA = 'ecotone_messaging_consumer_polling_metadata';
+    public const REPLY_CONTENT_TYPE = 'ecotone_messaging_reply_content_type';
     public const REVISION = 'revision';
 
-    public const STREAM_BASED_SOURCED = 'streamBasedSourced';
-
-    public const CHANNEL_SEND_RETRY_NUMBER = 'channelSendRetryNumber';
-
-    public const TEMPORARY_SPAN_CONTEXT_HEADER = 'ecotone.temporarySpanContext';
+    public const TRACING_ID = 'tracingId';
+    public const TRACEPARENT = 'traceparent';
+    public const TRACESTATE = 'tracestate';
+    public const TRACING_DELIVERY = 'ecotone_tracing_delivery';
 
     public const EVENT_AGGREGATE_TYPE = '_aggregate_type';
 

@@ -41,7 +41,6 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
         $metadata[ProjectingHeaders::PROJECTION_EVENT_NAME] = $event->eventName;
         $metadata = $this->withProjectionName($metadata);
         $metadata[ProjectingHeaders::PROJECTION_LIVE] = $this->isLive && ! $isRebuilding;
-        $metadata[MessageHeaders::STREAM_BASED_SOURCED] = true; // this one is required for correct header propagation in EventStreamEmitter...
         $metadata[MessageHeaders::REPLY_CHANNEL] = $responseQueue = new QueueChannel('response_channel');
 
         $requestMessage = $this->messageBuilder->withPayload($event->getPayload())
@@ -87,7 +86,6 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
         $headers = $this->withProjectionName([
             ProjectingHeaders::PROJECTION_STATE => $userState,
             ProjectingHeaders::PROJECTION_LIVE => $this->isLive && ! $isRebuilding,
-            MessageHeaders::STREAM_BASED_SOURCED => true,
         ]);
 
         $requestMessage = $this->messageBuilder->withPayload([])

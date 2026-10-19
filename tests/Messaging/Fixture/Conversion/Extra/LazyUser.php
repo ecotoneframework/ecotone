@@ -20,6 +20,5 @@ class LazyUser implements BlackListedUser
      */
     public function bannedBy(): Admin
     {
-        // TODO: Implement bannedBy() method.
     }
 }

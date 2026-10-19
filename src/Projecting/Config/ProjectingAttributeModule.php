@@ -42,7 +42,6 @@ use Ecotone\Messaging\Endpoint\InboundChannelAdapter\InboundChannelAdapterBuilde
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Projecting\EventStoreAdapter\PollingProjectionChannelAdapter;
@@ -261,7 +260,7 @@ final class ProjectingAttributeModule implements AnnotationModule
             );
 
             $messagingConfiguration->registerMessageHandler(
-                ServiceActivatorBuilder::create(
+                MessageProcessorActivatorBuilder::createForMethod(
                     $handlerReference,
                     InterfaceToCallReference::create(StreamingProjectionMessageHandler::class, 'handle')
                 )

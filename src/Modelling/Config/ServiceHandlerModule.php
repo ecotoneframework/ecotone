@@ -17,7 +17,7 @@ use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAn
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
 use Ecotone\Modelling\Config\Routing\RoutingEvent;
 use Ecotone\Modelling\Config\Routing\RoutingEventHandler;
@@ -73,7 +73,7 @@ final class ServiceHandlerModule implements AnnotationModule, RoutingEventHandle
 
         $handler = $registration->hasMethodAnnotation(ChangingHeaders::class)
             ? TransformerBuilder::create(AnnotatedDefinitionReference::getReferenceFor($registration), $this->interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName()))
-            : ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($registration), $this->interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName()));
+            : MessageProcessorActivatorBuilder::createForMethod(AnnotatedDefinitionReference::getReferenceFor($registration), $this->interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName()));
 
         $event->getBusRoutingMapBuilder()->getMessagingConfiguration()->registerMessageHandler(
             $handler

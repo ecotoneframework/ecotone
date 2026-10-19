@@ -19,7 +19,6 @@ class OnlineShop extends GamesShop implements Shop
      */
     public function buy($productId): void
     {
-        // TODO: Implement buy() method.
     }
 
     /**
@@ -27,6 +26,5 @@ class OnlineShop extends GamesShop implements Shop
      */
     public function findGames($gameId)
     {
-        // TODO: Implement findGame() method.
     }
 }

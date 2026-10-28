@@ -29,6 +29,11 @@ final class OpenCoreInMemoryTagCollaborator implements InMemoryTagCollaborator
     {
     }
 
+    public function valuesOfTag(string $tagName): array
+    {
+        throw DynamicConsistencyBoundaryDisabled::exception();
+    }
+
     public function bumpTagsGuarded(AppendCondition $appendCondition): void
     {
         throw DynamicConsistencyBoundaryDisabled::exception();

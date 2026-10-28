@@ -7,6 +7,8 @@ namespace Ecotone\Modelling\Config;
  */
 class MessageBusChannel
 {
+    public const ROUTING_KEY_HEADER = 'ecotone_modelling_bus_routing_key';
+
     public const COMMAND_CHANNEL_NAME_BY_OBJECT = self::COMMAND_CHANNEL_NAME_BY_NAME;
     public const COMMAND_CHANNEL_NAME_BY_NAME   = 'ecotone.modelling.bus.command_by_name';
 

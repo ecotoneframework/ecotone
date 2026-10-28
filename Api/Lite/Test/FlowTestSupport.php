@@ -299,7 +299,10 @@ final class FlowTestSupport
         return $this;
     }
 
-    public function triggerProjection(string|array $projectionName): self
+    /**
+     * @param array<string, mixed> $metadata
+     */
+    public function triggerProjection(string|array $projectionName, array $metadata = []): self
     {
         if (is_string($projectionName)) {
             $projectionName = [$projectionName];
@@ -308,15 +311,18 @@ final class FlowTestSupport
         Assert::allStrings($projectionName, '$projectionName must be single or collection of strings');
 
         foreach ($projectionName as $name) {
-            $this->getGateway(ProjectionOperations::class)->trigger($name);
+            $this->getGateway(ProjectionOperations::class)->trigger($name, $metadata);
         }
 
         return $this;
     }
 
-    public function initializeProjection(string $projectionName): self
+    /**
+     * @param array<string, mixed> $metadata
+     */
+    public function initializeProjection(string $projectionName, array $metadata = []): self
     {
-        $this->getGateway(ProjectionOperations::class)->initialize($projectionName);
+        $this->getGateway(ProjectionOperations::class)->initialize($projectionName, $metadata);
 
         return $this;
     }

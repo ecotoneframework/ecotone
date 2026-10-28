@@ -30,7 +30,9 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\LicensingException;
+use Ecotone\Modelling\MessageHandling\Distribution\DistributedMessageHandler;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributedOutboundRouter;
+use Ecotone\Modelling\MessageHandling\Distribution\DistributedReplyRouter;
 
 #[ModuleAnnotation]
 /**
@@ -65,6 +67,8 @@ final class DistributedBusWithServiceMapModule extends NoExternalConfigurationMo
         $messageChannels = ExtensionObjectResolver::resolve(MessageChannelBuilder::class, $extensionObjects);
         $applicationConfiguration = ExtensionObjectResolver::resolveUnique(ServiceConfiguration::class, $extensionObjects, ServiceConfiguration::createWithDefaults());
 
+        $this->registerReplyRouter($applicationConfiguration, $messagingConfiguration, $distributedServiceMaps, $interfaceToCallRegistry);
+
         foreach ($distributedServiceMaps as $distributedServiceMap) {
             if (! $messagingConfiguration->isRunningForEnterpriseLicence()) {
                 throw LicensingException::create('Distributed Bus with Service Map is available only as part of Ecotone Enterprise. See https://docs.ecotone.tech/enterprise for details.');
@@ -94,7 +98,7 @@ final class DistributedBusWithServiceMapModule extends NoExternalConfigurationMo
     {
         Assert::isFalse($applicationConfiguration->serviceName === ServiceConfiguration::DEFAULT_SERVICE_NAME, 'Service name must be provided in ServiceConfiguration to make use of Distributed Bus', true);
 
-        $distributedChannelName = $distributedServiceMap->getReferenceName() . '_outboundDistribution';
+        $distributedChannelName = self::outboundDistributionChannelFor($distributedServiceMap);
         $outboundRouterReference = $distributedServiceMap->getReferenceName() . '_' . DistributedOutboundRouter::class;
 
         $configuration->registerServiceDefinition(
@@ -191,8 +195,9 @@ final class DistributedBusWithServiceMapModule extends NoExternalConfigurationMo
                             GatewayPayloadBuilder::create('payload'),
                             GatewayHeadersBuilder::create('metadata'),
                             GatewayHeaderBuilder::create('sourceMediaType', MessageHeaders::CONTENT_TYPE),
-                            GatewayHeaderBuilder::create('targetChannelName', DistributedBusHeader::DISTRIBUTED_ROUTING_KEY),
+                            GatewayHeaderBuilder::create('routingKey', DistributedBusHeader::DISTRIBUTED_ROUTING_KEY),
                             GatewayHeaderBuilder::create('targetServiceName', DistributedBusHeader::DISTRIBUTED_TARGET_SERVICE_NAME),
+                            GatewayHeaderBuilder::create('replyRoutingKey', DistributedBusHeader::DISTRIBUTED_REPLY_ROUTING_KEY),
                             GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_SOURCE_SERVICE_NAME, $applicationConfiguration->serviceName),
                             GatewayHeaderValueBuilder::create(DistributedBusHeader::DISTRIBUTED_PAYLOAD_TYPE, 'message'),
                             GatewayHeaderValueBuilder::create(MessageHeaders::ROUTING_SLIP, DistributedBusHeader::DISTRIBUTED_ROUTING_SLIP_VALUE),
@@ -200,6 +205,35 @@ final class DistributedBusWithServiceMapModule extends NoExternalConfigurationMo
                     )
                     ->withEndpointAnnotations($distributedServiceMap->distributedBusAnnotations)
             );
+    }
+
+    /**
+     * @param DistributedServiceMap[] $distributedServiceMaps
+     */
+    private function registerReplyRouter(ServiceConfiguration $applicationConfiguration, Configuration $configuration, array $distributedServiceMaps, InterfaceToCallRegistry $interfaceToCallRegistry): void
+    {
+        $serviceMapsByOutboundChannel = [];
+        foreach ($distributedServiceMaps as $distributedServiceMap) {
+            $serviceMapsByOutboundChannel[self::outboundDistributionChannelFor($distributedServiceMap)] = $distributedServiceMap;
+        }
+
+        $configuration->registerServiceDefinition(
+            DistributedReplyRouter::class,
+            Definition::createFor(DistributedReplyRouter::class, [$serviceMapsByOutboundChannel, $applicationConfiguration->serviceName])
+        );
+        $configuration->registerMessageHandler(
+            RouterBuilder::create(DistributedReplyRouter::class, $interfaceToCallRegistry->getFor(DistributedReplyRouter::class, 'route'))
+                ->withInputChannelName(DistributedMessageHandler::REPLY_ROUTING_CHANNEL)
+                ->withMethodParameterConverters([
+                    HeaderBuilder::createOptional('targetedServiceName', DistributedBusHeader::DISTRIBUTED_TARGET_SERVICE_NAME),
+                    HeaderBuilder::create('replyRoutingKey', DistributedBusHeader::DISTRIBUTED_ROUTING_KEY),
+                ])
+        );
+    }
+
+    private static function outboundDistributionChannelFor(DistributedServiceMap $distributedServiceMap): string
+    {
+        return $distributedServiceMap->getReferenceName() . '_outboundDistribution';
     }
 
     public function isMessageChannelAvailable(array $messageChannels, mixed $channelName): bool

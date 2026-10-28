@@ -23,6 +23,7 @@ final class StreamFilter
         public readonly ?string $aggregateType = null,
         public readonly ?string $eventStoreReferenceName = EventStore::class,
         public readonly array $eventNames = [],
+        public readonly ?string $tag = null,
     ) {
     }
 }

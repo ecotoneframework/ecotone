@@ -22,6 +22,7 @@ use Ecotone\Dbal\DbalTransaction\DbalTransactionModule;
 use Ecotone\Dbal\Deduplication\DeduplicationModule;
 use Ecotone\Dbal\DocumentStore\DbalDocumentStoreModule;
 use Ecotone\Dbal\MultiTenant\Module\MultiTenantConnectionFactoryModule;
+use Ecotone\Dbal\MultiTenant\Pulse\PulseTenancyModule;
 use Ecotone\Dbal\ObjectManager\ObjectManagerModule;
 use Ecotone\Dbal\Recoverability\DbalDeadLetterModule;
 use Ecotone\Dbal\Tracing\DbalTracingModule;
@@ -71,6 +72,7 @@ use Ecotone\Modelling\Config\ServiceHandlerModule;
 use Ecotone\Modelling\DecisionModel\Config\DecisionModelModule;
 use Ecotone\Modelling\MessageHandling\Distribution\Module\DistributedBusWithServiceMapModule;
 use Ecotone\Modelling\MessageHandling\Distribution\Module\DistributedHandlerModule;
+use Ecotone\Modelling\MessageHandling\Distribution\Pulse\PulseModule;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Ecotone\OpenTelemetry\Configuration\OpenTelemetryModule;
 use Ecotone\Projecting\Config\PartitionProviderRegistryModule;
@@ -99,6 +101,7 @@ class ModuleClassList
     public const CORE_MODULES = [
         DistributedHandlerModule::class,
         DistributedBusWithServiceMapModule::class,
+        PulseModule::class,
         AggregateModule::class,
         ServiceHandlerModule::class,
         EventTaggingModule::class,
@@ -174,6 +177,7 @@ class ModuleClassList
         DbalPublisherModule::class,
         DbalBusinessMethodModule::class,
         MultiTenantConnectionFactoryModule::class,
+        PulseTenancyModule::class,
         DatabaseSetupModule::class,
         DbalTracingModule::class,
     ];

@@ -28,7 +28,7 @@ final class ConsoleInvocationResolver
         return null;
     }
 
-    private static function isPackageActive(BootstrapConfiguration $bootstrapConfiguration, string $packageName): bool
+    public static function isPackageActive(BootstrapConfiguration $bootstrapConfiguration, string $packageName): bool
     {
         if (! $bootstrapConfiguration->isModulePackageEnabled($packageName)) {
             return false;

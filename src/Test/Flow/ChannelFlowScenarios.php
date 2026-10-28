@@ -125,7 +125,7 @@ final class ChannelFlowScenarios
                 )
                 ->withNoOtherSpans()
                 ->leavingWorkPending(),
-            FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('orders', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 2)))
+            FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('orders', ExecutionPollingMetadata::createWithFinishWhenNoMessages()))
                 ->expect(
                     ExpectedSpan::named('send orders_a')->containing(ExpectedSpan::named('receive orders')->withAttributes(['flowId' => '1'])->containing(ExpectedSpan::named('process class@anonymous::place'))),
                     ExpectedSpan::named('send orders_b')->containing(ExpectedSpan::named('receive orders')->withAttributes(['flowId' => '2'])->containing(ExpectedSpan::named('process class@anonymous::place'))),

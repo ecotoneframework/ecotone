@@ -59,8 +59,11 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Scheduling\Clock;
+use Ecotone\Projecting\Config\StreamFilterRegistryModule;
 use Ecotone\Projecting\InMemory\InMemoryEventStoreStreamSource;
 use Ecotone\Projecting\InMemory\InMemoryProjectionStateStorage;
+use Ecotone\Projecting\InMemory\InMemoryTagPartitionProvider;
+use Ecotone\Projecting\PartitionProviderReference;
 use Ecotone\Projecting\ProjectionStateStorageReference;
 use Ecotone\Projecting\StreamSourceReference;
 use Ecotone\Test\StaticPsrClock;
@@ -88,7 +91,10 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
     public const POP_SPIED_CHANNEL_RECORDED_MESSAGE_PAYLOADS = 'popRecordedMessagePayloadsFrom';
     public const POP_SPIED_CHANNEL_RECORDED_MESSAGES = 'popRecordedMessagesFrom';
 
-    private function __construct(private array $spiedChannels)
+    /**
+     * @param string[] $tagPartitionedProjectionNames
+     */
+    private function __construct(private array $spiedChannels, private array $tagPartitionedProjectionNames)
     {
 
     }
@@ -121,7 +127,7 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
             }
         }
 
-        return new self($spiedChannels);
+        return new self($spiedChannels, StreamFilterRegistryModule::tagPartitionedProjectionNames($annotationRegistrationService));
     }
 
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
@@ -244,7 +250,11 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
             return [];
         }
 
-        return [new StreamSourceReference(InMemoryEventStoreStreamSource::class), new ProjectionStateStorageReference(InMemoryProjectionStateStorage::class)];
+        return [
+            new StreamSourceReference(InMemoryEventStoreStreamSource::class),
+            new ProjectionStateStorageReference(InMemoryProjectionStateStorage::class),
+            ...($this->tagPartitionedProjectionNames === [] ? [] : [new PartitionProviderReference(InMemoryTagPartitionProvider::class, $this->tagPartitionedProjectionNames)]),
+        ];
     }
 
     public function getModulePackageName(): string
@@ -500,6 +510,18 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
                 InMemoryEventStoreStreamSource::class,
                 new Definition(InMemoryEventStoreStreamSource::class, [
                     new Reference(InMemoryEventStore::class),
+                    null,
+                    null,
+                    null,
+                    [],
+                    $this->tagPartitionedProjectionNames,
+                ])
+            );
+            $messagingConfiguration->registerServiceDefinition(
+                InMemoryTagPartitionProvider::class,
+                new Definition(InMemoryTagPartitionProvider::class, [
+                    new Reference(InMemoryEventStore::class),
+                    $this->tagPartitionedProjectionNames,
                 ])
             );
         }

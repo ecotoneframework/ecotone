@@ -18,9 +18,9 @@ class ProjectionStateHandler
         ?string $aggregateId = null,
         ?string $streamName = null,
         ?string $aggregateType = null,
+        ?string $partitionKey = null,
     ): mixed {
-        $partitionKey = null;
-        if ($aggregateId !== null && $streamName !== null && $aggregateType !== null) {
+        if ($partitionKey === null && $aggregateId !== null && $streamName !== null && $aggregateType !== null) {
             $partitionKey = AggregatePartitionKey::compose($streamName, $aggregateType, $aggregateId);
         }
 

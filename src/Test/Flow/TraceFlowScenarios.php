@@ -85,7 +85,7 @@ final class TraceFlowScenarios
         return new FlowScenario('two asynchronous commands consumed in one run keep their own traces', [$users::class], [$users], [SimpleMessageChannelBuilder::createQueueChannel('users')], [
             $send('1'),
             $send('2'),
-            FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('users', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 2)))
+            FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('users', ExecutionPollingMetadata::createWithFinishWhenNoMessages()))
                 ->expect($consumed('1'), $consumed('2')),
         ]);
     }
@@ -98,7 +98,7 @@ final class TraceFlowScenarios
         return new FlowScenario('user headers travel into every span, non-scalar ones and the trace carrier do not', [$users::class], [$users], [SimpleMessageChannelBuilder::createQueueChannel('users')], [
             FlowStage::when(fn (FlowTestSupport $ecotone, array $metadata) => $ecotone->sendCommandWithRouting('user.register', '1', metadata: [...$metadata, 'user_id' => '123', 'tokens' => ['123'], 'user' => new stdClass()]))->leavingWorkPending()
                 ->expect($carrying('send command')->containing($carrying('send users'))),
-            FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('users', ExecutionPollingMetadata::createWithTestingSetup()))
+            FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('users', ExecutionPollingMetadata::createWithFinishWhenNoMessages()))
                 ->expect($carrying('receive users')->containing($carrying('process class@anonymous::register'))),
         ]);
     }
@@ -187,7 +187,7 @@ final class TraceFlowScenarios
 
         return new FlowScenario('logs become events of the span they were written in', [$users::class, $notifier::class], [$users, $notifier], [SimpleMessageChannelBuilder::createQueueChannel('users')], [
             FlowStage::when(fn (FlowTestSupport $ecotone, array $metadata) => $ecotone->sendCommandWithRouting('user.register', '1', metadata: $metadata))->leavingWorkPending(),
-            FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('users', ExecutionPollingMetadata::createWithTestingSetup()))
+            FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('users', ExecutionPollingMetadata::createWithFinishWhenNoMessages()))
                 ->expect(
                     ExpectedSpan::named('receive users')->containing(
                         ExpectedSpan::named('process class@anonymous::register')->containing(
@@ -290,7 +290,7 @@ final class TraceFlowScenarios
         return new FlowScenario('asynchronous consumer keeps the identity of the message it received', [$users::class], [$users], [SimpleMessageChannelBuilder::createQueueChannel('users')], [
             FlowStage::when(fn (FlowTestSupport $ecotone, array $metadata) => $ecotone->sendCommandWithRouting('user.register', '1', metadata: [...$metadata, ...self::identity($messageId, $correlationId)]))->leavingWorkPending()
                 ->expect($identified('send command')->containing(ExpectedSpan::named('send users'))),
-            FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('users', ExecutionPollingMetadata::createWithTestingSetup()))
+            FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('users', ExecutionPollingMetadata::createWithFinishWhenNoMessages()))
                 ->expect($identified('receive users')->containing($identified('process class@anonymous::register'))),
         ]);
     }

@@ -69,6 +69,16 @@ class ProjectingManager
         } while ($processedEvents > 0 && $this->terminationListener->shouldTerminate() !== true);
     }
 
+    /**
+     * @param string[] $partitionKeyValues
+     */
+    public function executeForPartitions(array $partitionKeyValues, bool $manualInitialization = false): void
+    {
+        foreach ($partitionKeyValues as $partitionKeyValue) {
+            $this->execute($partitionKeyValue, $manualInitialization);
+        }
+    }
+
     public function executePartitionBatch(?string $partitionKeyValue = null, bool $canInitialize = false, bool $shouldReset = false): int
     {
         if ($canInitialize) {
@@ -134,7 +144,7 @@ class ProjectingManager
         return 'projecting_manager_batch:' . $projectionName;
     }
 
-    public function loadState(?string $partitionKey = null): ProjectionPartitionState
+    public function loadState(?string $partitionKey = null): ?ProjectionPartitionState
     {
         return $this->getProjectionStateStorage()->loadPartition($this->projectionName, $partitionKey);
     }
@@ -142,6 +152,26 @@ class ProjectingManager
     public function getPartitionProvider(): PartitionProvider
     {
         return $this->partitionProviderRegistry->getPartitionProviderFor($this->projectionName);
+    }
+
+    public function rebuildsAsynchronously(): bool
+    {
+        return $this->rebuildAsyncChannelName !== null;
+    }
+
+    public function backfillsAsynchronously(): bool
+    {
+        return $this->backfillAsyncChannelName !== null;
+    }
+
+    public function isPartitioned(): bool
+    {
+        return $this->partitioned;
+    }
+
+    public function isSetUp(): bool
+    {
+        return $this->getProjectionStateStorage()->loadPartition($this->projectionName, null, lock: false) !== null;
     }
 
     public function getProjectionName(): string
@@ -216,19 +246,32 @@ class ProjectingManager
 
     private function preparePartitionBatches(int $partitionBatchSize, ?string $asyncChannelName, bool $shouldReset): void
     {
-        $streamFilters = $this->streamFilterRegistry->provide($this->projectionName);
-
-        foreach ($streamFilters as $streamFilter) {
+        $partitionsPerStreamFilter = [];
+        foreach ($this->streamFilterRegistry->provide($this->projectionName) as $streamFilter) {
             $totalPartitions = $this->getPartitionProvider()->count($streamFilter);
-
-            if ($totalPartitions === 0) {
-                continue;
+            if ($totalPartitions > 0) {
+                $partitionsPerStreamFilter[] = [$streamFilter, $totalPartitions];
             }
+        }
 
-            $numberOfBatches = (int) ceil($totalPartitions / $partitionBatchSize);
+        $totalPartitions = array_sum(array_column($partitionsPerStreamFilter, 1));
+        $totalBatches = array_sum(array_map(fn (array $counted): int => (int) ceil($counted[1] / $partitionBatchSize), $partitionsPerStreamFilter));
+        $batchNumber = 0;
+
+        if ($totalBatches === 0) {
+            $this->sendPartitionBatchMessage([
+                ProjectingHeaders::REBUILD_BATCH_NUMBER => 0,
+                ProjectingHeaders::REBUILD_BATCH_COUNT => 0,
+                ProjectingHeaders::REBUILD_PARTITION_COUNT => 0,
+            ], null);
+        }
+
+        foreach ($partitionsPerStreamFilter as [$streamFilter, $partitionsOfFilter]) {
+            $numberOfBatches = (int) ceil($partitionsOfFilter / $partitionBatchSize);
 
             for ($batch = 0; $batch < $numberOfBatches; $batch++) {
                 $offset = $batch * $partitionBatchSize;
+                $batchNumber++;
 
                 $headers = [
                     'partitionBatch.limit' => $partitionBatchSize,
@@ -236,7 +279,11 @@ class ProjectingManager
                     'partitionBatch.streamName' => $streamFilter->streamName,
                     'partitionBatch.aggregateType' => $streamFilter->aggregateType,
                     'partitionBatch.eventStoreReferenceName' => $streamFilter->eventStoreReferenceName,
+                    'partitionBatch.tag' => $streamFilter->tag,
                     'partitionBatch.shouldReset' => $shouldReset,
+                    ProjectingHeaders::REBUILD_BATCH_NUMBER => $batchNumber,
+                    ProjectingHeaders::REBUILD_BATCH_COUNT => $totalBatches,
+                    ProjectingHeaders::REBUILD_PARTITION_COUNT => $totalPartitions,
                 ];
 
                 $this->sendPartitionBatchMessage($headers, $asyncChannelName);

@@ -7,6 +7,7 @@ namespace Ecotone\Test\Flow;
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\Attribute\Distributed;
 use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Api\Attribute\InternalHandler;
 use Ecotone\Api\ExtensionObject\DistributedServiceMap;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
 use Ecotone\Api\ExtensionObject\ServiceConfiguration;
@@ -28,6 +29,7 @@ final class DistributedFlowScenarios
         return [
             self::distributedCommandConsumedByTheTargetService(),
             self::distributedEventDeliveredToEverySubscribedChannel(),
+            self::distributedMessageAnsweredOnItsReplyToChannel(),
         ];
     }
 
@@ -108,6 +110,59 @@ final class DistributedFlowScenarios
                                     ExpectedSpan::named('route billing.updating')->containing(
                                         ExpectedSpan::named('process class@anonymous::update')->withAttributes([SpanAttribute::ENDPOINT_ID => 'billing.updating']),
                                     ),
+                                ),
+                            ),
+                        ),
+                    ),
+            ],
+        );
+    }
+
+    private static function distributedMessageAnsweredOnItsReplyToChannel(): FlowScenario
+    {
+        $tickets = new class () {
+            #[Distributed]
+            #[InternalHandler('ticket.create', endpointId: 'ticket.creation')]
+            public function create(string $description): string
+            {
+                return 'ticket for: ' . $description;
+            }
+
+            #[Distributed]
+            #[InternalHandler('ticket.created', endpointId: 'ticket.confirmation')]
+            public function confirm(string $ticket): void
+            {
+            }
+        };
+
+        return new FlowScenario(
+            'distributed message answered on its reply routing key',
+            [$tickets::class],
+            [$tickets],
+            [
+                SimpleMessageChannelBuilder::createQueueChannel('distributed_channel'),
+                DistributedServiceMap::initialize()->withCommandMapping(targetServiceName: 'ticket_service', channelName: 'distributed_channel'),
+                ServiceConfiguration::createWithDefaults()->withServiceName('ticket_service'),
+            ],
+            [
+                FlowStage::when(fn (FlowTestSupport $ecotone, array $metadata) => $ecotone->getDistributedBus()->sendMessage('ticket_service', 'ticket.create', 'Printer is broken', metadata: $metadata, replyRoutingKey: 'ticket.created'))->leavingWorkPending()
+                    ->expect(ExpectedSpan::named('send distributed')->ofKind(SpanKind::Producer)->containing(ExpectedSpan::named('send distributed_channel')->ofKind(SpanKind::Producer)))
+                    ->withNoOtherSpans(),
+                FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('distributed_channel', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 1)))->leavingWorkPending()
+                    ->expect(
+                        ExpectedSpan::named('receive distributed_channel')->ofKind(SpanKind::Consumer)->containing(
+                            ExpectedSpan::named('process class@anonymous::create')->withAttributes([SpanAttribute::ENDPOINT_ID => 'ticket.creation']),
+                            ExpectedSpan::named('send distributed_channel')->ofKind(SpanKind::Producer),
+                        ),
+                    )
+                    ->withNoOtherSpans(),
+                FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('distributed_channel', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 1)))
+                    ->expect(
+                        ExpectedSpan::named('receive distributed_channel')->ofKind(SpanKind::Consumer)->containing(
+                            ExpectedSpan::named('process class@anonymous::create')->withAttributes([SpanAttribute::ENDPOINT_ID => 'ticket.creation']),
+                            ExpectedSpan::named('send distributed_channel')->ofKind(SpanKind::Producer)->containing(
+                                ExpectedSpan::named('receive distributed_channel')->ofKind(SpanKind::Consumer)->containing(
+                                    ExpectedSpan::named('process class@anonymous::confirm')->withAttributes([SpanAttribute::ENDPOINT_ID => 'ticket.confirmation']),
                                 ),
                             ),
                         ),

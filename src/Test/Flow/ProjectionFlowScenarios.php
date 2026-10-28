@@ -62,7 +62,7 @@ final class ProjectionFlowScenarios
             })
                 ->expect(
                     ExpectedSpan::named($operation . ' orders')->asRoot()->ofKind(SpanKind::Server)->withAttributes([SpanAttribute::PROJECTION_NAME => 'orders', SpanAttribute::PROJECTION_OPERATION => $operation])->containing(
-                        ExpectedSpan::named('process class@anonymous::whenPlaced'),
+                        self::projectionHandled($operation),
                     ),
                 )
                 ->withNoOtherSpans(),
@@ -110,11 +110,21 @@ final class ProjectionFlowScenarios
             FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run($operation, ExecutionPollingMetadata::createWithTestingSetup()))
                 ->expect(
                     ExpectedSpan::named('receive ' . $operation)->ofKind(SpanKind::Consumer)->containing(
-                        ExpectedSpan::named('process class@anonymous::whenPlaced'),
+                        self::projectionHandled($operation),
                     ),
                 )
                 ->withNoOtherSpans(),
         ]);
+    }
+
+    private static function projectionHandled(string $operation): ExpectedSpan
+    {
+        $handled = ExpectedSpan::named('process class@anonymous::whenPlaced');
+        if (! in_array($operation, [ProjectionOperationEndpoint::BACKFILL, ProjectionOperationEndpoint::REBUILD], true)) {
+            return $handled;
+        }
+
+        return ExpectedSpan::named('process partition batch orders')->ofKind(SpanKind::Internal)->withAttributes([SpanAttribute::PROJECTION_NAME => 'orders'])->containing($handled);
     }
 
     private static function projectionInitializedAndDeleted(): FlowScenario

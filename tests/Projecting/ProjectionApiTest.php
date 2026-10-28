@@ -157,7 +157,7 @@ final class ProjectionApiTest extends TestCase
         };
 
         $this->expectException(ConfigurationException::class);
-        $this->expectExceptionMessage("Projection 'non_streaming_projection' must have at least one #[FromStream] or #[FromAggregateStream] attribute");
+        $this->expectExceptionMessage("Projection 'non_streaming_projection' must have at least one #[FromStream], #[FromAggregateStream] or #[FromTaggedStream] attribute");
 
         EcotoneLite::bootstrapFlowTesting(
             [$projection::class],

@@ -583,7 +583,7 @@ class ProjectingTest extends TestCase
     public function test_it_throws_exception_when_no_stream_defined(): void
     {
         $this->expectException(ConfigurationException::class);
-        $this->expectExceptionMessage("Projection 'test_no_stream' must have at least one #[FromStream] or #[FromAggregateStream] attribute defined");
+        $this->expectExceptionMessage("Projection 'test_no_stream' must have at least one #[FromStream], #[FromAggregateStream] or #[FromTaggedStream] attribute defined");
 
         $projection = new #[Projection('test_no_stream')] class {
             #[EventHandler('*')]

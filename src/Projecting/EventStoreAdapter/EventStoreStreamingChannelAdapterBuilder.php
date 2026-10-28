@@ -62,6 +62,11 @@ class EventStoreStreamingChannelAdapterBuilder implements ProjectionExecutorBuil
         return null;
     }
 
+    public function partitionTag(): ?string
+    {
+        return null;
+    }
+
     public function automaticInitialization(): bool
     {
         return true;

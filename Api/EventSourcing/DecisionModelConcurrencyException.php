@@ -23,17 +23,16 @@ final class DecisionModelConcurrencyException extends ConcurrencyException
 
     public const CONFLICT_EXPECTED_VERSION_FIELD = 'ecotone.dcb.conflict.expected_version';
 
-    public const CONFLICT_CURRENT_VERSION_FIELD = 'ecotone.dcb.conflict.current_version';
-
     public const CONFLICT_MODEL_FIELD = 'ecotone.dcb.conflict.model';
+
+    private const RETRY_INSTRUCTION = 'Otherwise retry the command: InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 3, [DecisionModelConcurrencyException::class]) '
+        . 'in a #[ServiceContext], or #[InstantRetry(retryTimes: 3, exceptions: [DecisionModelConcurrencyException::class])] on a command bus interface.';
 
     private string $conflictingTagName = '';
 
     private string $conflictingTagValue = '';
 
     private int $expectedVersion = 0;
-
-    private int $currentVersion = 0;
 
     /**
      * @var string[]
@@ -43,40 +42,38 @@ final class DecisionModelConcurrencyException extends ConcurrencyException
     /**
      * @param string[] $decidedBy
      */
-    public static function forConflict(string $tagName, string $tagValue, int $expectedVersion, int $currentVersion, array $decidedBy = []): self
+    public static function forConflict(string $tagName, string $tagValue, int $expectedVersion, array $decidedBy = []): self
     {
         $message = sprintf(
-            'Concurrent append conflict on tag %s:%s (expected version %d, current version %d)',
+            'Concurrent append conflict on tag %s:%s (expected version %d, moved since it was read)',
             $tagName,
             $tagValue,
             $expectedVersion,
-            $currentVersion,
         );
 
         if ($decidedBy !== []) {
             $message .= sprintf(' while deciding %s', implode(', ', $decidedBy));
         }
 
-        $message .= '. The tag moved after it was read: another transaction committed to it, or an earlier append in the same '
+        $message .= '. The tag moved after it was read: another transaction appended an event carrying it, or an earlier append in the same '
             . 'transaction did (for example a command sent from inside the handler whose own handler appends to the same tag) '
-            . '-- the latter fails on every retry, so decide both in one handler instead.';
+            . '-- the latter fails on every retry, so decide both in one handler instead. ' . self::RETRY_INSTRUCTION;
 
-        return self::describing(self::create($message), $tagName, $tagValue, $expectedVersion, $currentVersion, $decidedBy);
+        return self::describing(self::create($message), $tagName, $tagValue, $expectedVersion, $decidedBy);
     }
 
-    public static function forAggregateConflict(string $aggregateType, string $aggregateId, int $expectedVersion, int $currentVersion): self
+    public static function forAggregateConflict(string $aggregateType, string $aggregateId, int $expectedVersion): self
     {
         $exception = self::create(sprintf(
-            '%s %s changed since it was loaded (it was at change %d when read, it is at change %d now): another transaction saved it, '
-            . 'or an earlier save in the same transaction did (for example a command sent from inside the handler whose own handler saves the same aggregate) '
-            . '-- the latter fails on every retry, so decide both in one handler instead.',
+            '%s %s changed since it was loaded at change %d: another transaction saved it or appended a #[DecisionModel(aggregate:)] decision over it, '
+            . 'or an earlier one in the same transaction did (for example a command sent from inside the handler whose own handler saves the same aggregate) '
+            . '-- the latter fails on every retry, so decide both in one handler instead. Fetching it read-only with #[Fetch] never changes it. ' . self::RETRY_INSTRUCTION,
             $aggregateType,
             $aggregateId,
             $expectedVersion,
-            $currentVersion,
         ));
 
-        return self::describing($exception, AggregateCounterTag::nameFor($aggregateType), $aggregateId, $expectedVersion, $currentVersion, []);
+        return self::describing($exception, AggregateCounterTag::nameFor($aggregateType), $aggregateId, $expectedVersion, []);
     }
 
     /**
@@ -87,7 +84,6 @@ final class DecisionModelConcurrencyException extends ConcurrencyException
         return [
             self::CONFLICT_TAG_FIELD => $this->conflictingTagName . ':' . $this->conflictingTagValue,
             self::CONFLICT_EXPECTED_VERSION_FIELD => $this->expectedVersion,
-            self::CONFLICT_CURRENT_VERSION_FIELD => $this->currentVersion,
             self::CONFLICT_MODEL_FIELD => implode(', ', $this->decidedBy),
         ];
     }
@@ -107,11 +103,6 @@ final class DecisionModelConcurrencyException extends ConcurrencyException
         return $this->expectedVersion;
     }
 
-    public function currentVersion(): int
-    {
-        return $this->currentVersion;
-    }
-
     /**
      * @return string[]
      */
@@ -123,12 +114,11 @@ final class DecisionModelConcurrencyException extends ConcurrencyException
     /**
      * @param string[] $decidedBy
      */
-    private static function describing(self $exception, string $tagName, string $tagValue, int $expectedVersion, int $currentVersion, array $decidedBy): self
+    private static function describing(self $exception, string $tagName, string $tagValue, int $expectedVersion, array $decidedBy): self
     {
         $exception->conflictingTagName = $tagName;
         $exception->conflictingTagValue = $tagValue;
         $exception->expectedVersion = $expectedVersion;
-        $exception->currentVersion = $currentVersion;
         $exception->decidedBy = $decidedBy;
 
         return $exception;

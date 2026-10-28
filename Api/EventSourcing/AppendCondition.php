@@ -12,7 +12,7 @@ use Ecotone\EventSourcing\Tagging\TagKey;
 final class AppendCondition
 {
     /**
-     * @param array<string, array{name: string, value: string, expectedVersion: int, decidedBy?: string[]}> $expectedTagVersions
+     * @param array<string, array{name: string, value: string, expectedVersion: int, decidedBy?: string[], bumpedOnAppend?: bool}> $expectedTagVersions
      * @param array{aggregateType: string, aggregateId: string, expectedVersion: int}|null $aggregateExpectation
      */
     private function __construct(
@@ -63,6 +63,21 @@ final class AppendCondition
         return new self($expectedTagVersions, $this->aggregateExpectation);
     }
 
+    /**
+     * @param string[] $tagKeys
+     */
+    public function withTagsBumpedOnAppend(array $tagKeys): self
+    {
+        $expectedTagVersions = $this->expectedTagVersions;
+        foreach ($tagKeys as $tagKey) {
+            if (isset($expectedTagVersions[$tagKey])) {
+                $expectedTagVersions[$tagKey]['bumpedOnAppend'] = true;
+            }
+        }
+
+        return new self($expectedTagVersions, $this->aggregateExpectation);
+    }
+
     public function mergeWith(self $other): self
     {
         return new self(
@@ -72,7 +87,7 @@ final class AppendCondition
     }
 
     /**
-     * @return array<array{name: string, value: string, expectedVersion: int, decidedBy?: string[]}>
+     * @return array<array{name: string, value: string, expectedVersion: int, decidedBy?: string[], bumpedOnAppend?: bool}>
      */
     public function expectedTagVersions(): array
     {

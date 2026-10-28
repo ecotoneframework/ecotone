@@ -48,6 +48,20 @@ final class ErrorChannelExceptionMessages
             . 'Please add one of them, so Message can be routed back to the original channel.';
     }
 
+    public static function cannotReplayToUnknownChannel(string $targetChannel): string
+    {
+        return "Can not replay dead letter messages to channel `{$targetChannel}`, as no channel or handler with that name exists. "
+            . 'Pass the name of an existing message channel or of a handler input channel (e.g. the routing key of a #[CommandHandler] or the inputChannelName of an #[InternalHandler]), '
+            . 'or omit the target channel to replay each message to the channel it was polled from.';
+    }
+
+    public static function cannotReplayToNonAsynchronousChannel(string $targetChannel): string
+    {
+        return "Can not replay dead letter messages to channel `{$targetChannel}`, as it is not an asynchronous (pollable) channel. The target channel is the queue the replayed message is sent through: once that queue is consumed, the message runs its original handler. "
+            . 'Pass the name of one of the asynchronous channels of the service (e.g. the channel of an #[Asynchronous] handler, or a channel registered with SimpleMessageChannelBuilder::createQueueChannel()), '
+            . 'or omit the target channel to replay each message to the channel it was polled from.';
+    }
+
     public static function delayedRetryRequiresPolledChannelName(string $originalErrorMessage): string
     {
         return 'Failed to handle Error Message via Retry Configuration, as it does not contain information about origination channel from which it was polled. Original error message: '

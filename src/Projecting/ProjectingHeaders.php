@@ -21,5 +21,8 @@ class ProjectingHeaders
     public const PROJECTION_PARTITION_KEY = 'ecotone_projection_partition_key';
     public const PROJECTION_CAN_INITIALIZE = 'ecotone_projection_can_initialize';
     public const PROJECTION_SHOULD_RESET = 'ecotone_projection_should_reset';
+    public const REBUILD_BATCH_NUMBER = 'ecotone_projecting_rebuild_batch_number';
+    public const REBUILD_BATCH_COUNT = 'ecotone_projecting_rebuild_batch_count';
+    public const REBUILD_PARTITION_COUNT = 'ecotone_projecting_rebuild_partition_count';
     public const REBUILD_PARTITION_KEY = 'projection.rebuild.partitionKey';
 }

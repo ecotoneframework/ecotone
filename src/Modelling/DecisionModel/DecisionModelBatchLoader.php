@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Modelling\DecisionModel;
 
 use function array_filter;
+use function array_keys;
 use function array_values;
 use function count;
 
@@ -89,9 +90,9 @@ final class DecisionModelBatchLoader
             ...$this->foldAggregateBackedInstances($aggregateInstancesByParameterName, $pendingSnapshots, $foldedEventCount),
         ];
 
-        $appendCondition = $loadedEvents->appendCondition->withDecidingScopes(
-            $this->decidingScopeNamesByTagKey($criteriaByParameterName, $boundaryCriteriaByLabel),
-        );
+        $appendCondition = $loadedEvents->appendCondition
+            ->withDecidingScopes($this->decidingScopeNamesByTagKey($criteriaByParameterName, $boundaryCriteriaByLabel))
+            ->withTagsBumpedOnAppend($this->counterTagKeysOf($aggregateInstancesByParameterName));
 
         return [DecisionModelLoadedState::HEADER_NAME => new DecisionModelLoadedState($instancesByParameterName, $appendCondition, $pendingSnapshots, $foldedEventCount)];
     }
@@ -220,6 +221,20 @@ final class DecisionModelBatchLoader
         }
 
         return $criteriaByParameterName;
+    }
+
+    /**
+     * @param array<string, ?AggregateBackedDecisionModelInstance> $instancesByParameterName
+     * @return string[]
+     */
+    private function counterTagKeysOf(array $instancesByParameterName): array
+    {
+        $counterTagKeys = [];
+        foreach ($this->captureCriteriaOf($instancesByParameterName) as $captureCriteria) {
+            $counterTagKeys = [...$counterTagKeys, ...array_keys($this->tagResolver->tagsOfCriteria($captureCriteria))];
+        }
+
+        return $counterTagKeys;
     }
 
     /**

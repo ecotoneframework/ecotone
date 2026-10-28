@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Projecting;
 
+use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 
 use function implode;
@@ -21,9 +22,12 @@ final class ProjectionOperations
     ) {
     }
 
-    public function initialize(string $projectionName): void
+    /**
+     * @param array<string, mixed> $headers
+     */
+    public function initialize(string $projectionName, array $headers = []): void
     {
-        $this->run($projectionName, ProjectionOperationEndpoint::INITIALIZE);
+        $this->run($projectionName, ProjectionOperationEndpoint::INITIALIZE, $headers);
     }
 
     public function initializeAll(): void
@@ -33,9 +37,12 @@ final class ProjectionOperations
         }
     }
 
-    public function trigger(string $projectionName): void
+    /**
+     * @param array<string, mixed> $headers
+     */
+    public function trigger(string $projectionName, array $headers = []): void
     {
-        $this->run($projectionName, ProjectionOperationEndpoint::TRIGGER);
+        $this->run($projectionName, ProjectionOperationEndpoint::TRIGGER, $headers);
     }
 
     public function reset(string $projectionName): void
@@ -53,12 +60,25 @@ final class ProjectionOperations
         $this->run($projectionName, ProjectionOperationEndpoint::REBUILD);
     }
 
+    public function rebuildTrackedBy(string $projectionName, string $tracingId): void
+    {
+        $this->run($projectionName, ProjectionOperationEndpoint::REBUILD, [MessageHeaders::TRACING_ID => $tracingId]);
+    }
+
+    public function backfillTrackedBy(string $projectionName, string $tracingId): void
+    {
+        $this->run($projectionName, ProjectionOperationEndpoint::BACKFILL, [MessageHeaders::TRACING_ID => $tracingId]);
+    }
+
     public function delete(string $projectionName): void
     {
         $this->run($projectionName, ProjectionOperationEndpoint::DELETE);
     }
 
-    private function run(string $projectionName, string $operation): void
+    /**
+     * @param array<string, mixed> $headers
+     */
+    private function run(string $projectionName, string $operation, array $headers = []): void
     {
         if (! $this->registry->has($projectionName)) {
             $registered = implode(', ', [...$this->registry->projectionNames()]);
@@ -66,6 +86,6 @@ final class ProjectionOperations
             throw new InvalidArgumentException("There is no projection with name {$projectionName}. Registered projections: [{$registered}]. Use the name given in #[Projection] of the projection to {$operation}.");
         }
 
-        $this->messagingEntrypoint->send([], ProjectionOperationEndpoint::channelFor($projectionName, $operation));
+        $this->messagingEntrypoint->sendWithHeaders([], $headers, ProjectionOperationEndpoint::channelFor($projectionName, $operation));
     }
 }

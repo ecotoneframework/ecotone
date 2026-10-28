@@ -91,4 +91,40 @@ final class EventCriteriaTest extends TestCase
 
         $combined->ofTypes(self::class);
     }
+
+    public function test_limiting_an_or_combination_is_rejected_instead_of_limiting_one_branch(): void
+    {
+        $combined = EventCriteria::tag('course', 'course-1')->or(EventCriteria::tag('course', 'course-2'));
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('EventCriteria::limit() cannot narrow an or() combination');
+
+        $combined->limit(10);
+    }
+
+    public function test_combining_a_limited_criterion_with_or_is_rejected_instead_of_dropping_its_limit(): void
+    {
+        $limited = EventCriteria::tag('course', 'course-1')->limit(10);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('EventCriteria::or() cannot combine a criterion limited with limit(10)');
+
+        $limited->or(EventCriteria::tag('course', 'course-2'));
+    }
+
+    public function test_a_limit_below_one_is_rejected(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('EventCriteria::limit() needs at least 1 event, 0 given');
+
+        EventCriteria::tag('course', 'course-1')->limit(0);
+    }
+
+    public function test_narrowing_a_limited_criterion_keeps_its_limit(): void
+    {
+        $criteria = EventCriteria::tag('course', 'course-1')->limit(5)->ofTypes(self::class)->afterTagSequence(3);
+
+        self::assertSame(5, $criteria->limit);
+        self::assertSame(3, $criteria->tagSequenceLowerBound);
+    }
 }

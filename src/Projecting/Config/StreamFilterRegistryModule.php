@@ -18,18 +18,22 @@ use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Projecting\EventStreamingChannelAdapter;
 use Ecotone\Api\Projecting\FromAggregateStream;
 use Ecotone\Api\Projecting\FromStream;
+use Ecotone\Api\Projecting\FromTaggedStream;
 use Ecotone\Api\Projecting\Projection;
 use Ecotone\Api\Projecting\Streaming;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionResolver;
 use Ecotone\Modelling\Config\Routing\BusRoutingMapBuilder;
 use Ecotone\Projecting\StreamFilter;
 use Ecotone\Projecting\StreamFilterRegistry;
+use Ecotone\Projecting\StreamSourceReference;
+use Ecotone\Projecting\TaggedStream\TagStreamSource;
 
 #[ModuleAnnotation]
 final class StreamFilterRegistryModule implements AnnotationModule
@@ -74,10 +78,14 @@ final class StreamFilterRegistryModule implements AnnotationModule
                 $streamFilters[$projectionName][] = self::resolveFromAggregateStream($annotationFinder, $aggregateStreamAttribute, $projectionName, $eventNames);
             }
 
+            foreach ($annotationFinder->getAnnotationsForClass($classname, FromTaggedStream::class) as $taggedStreamAttribute) {
+                $streamFilters[$projectionName][] = new StreamFilter('', null, $taggedStreamAttribute->eventStoreReferenceName, $eventNames, $taggedStreamAttribute->tag);
+            }
+
             $isStreamingProjection = $annotationFinder->findAttributeForClass($classname, Streaming::class) !== null;
             if (! $isStreamingProjection && (! isset($streamFilters[$projectionName]) || $streamFilters[$projectionName] === [])) {
                 throw ConfigurationException::create(
-                    "Projection '{$projectionName}' must have at least one #[FromStream] or #[FromAggregateStream] attribute defined on class {$classname}."
+                    "Projection '{$projectionName}' must have at least one #[FromStream], #[FromAggregateStream] or #[FromTaggedStream] attribute defined on class {$classname}."
                 );
             }
         }
@@ -193,6 +201,7 @@ final class StreamFilterRegistryModule implements AnnotationModule
                     $filter->aggregateType,
                     $filter->eventStoreReferenceName,
                     $filter->eventNames,
+                    $filter->tag,
                 ]);
             }
         }
@@ -215,11 +224,50 @@ final class StreamFilterRegistryModule implements AnnotationModule
             StreamFilterRegistry::class,
             new Definition(StreamFilterRegistry::class, [$filtersDefinition])
         );
+
+        $tagPartitionedProjectionNames = self::tagPartitionedProjectionNamesOf($this->streamFilters);
+        if ($tagPartitionedProjectionNames !== []) {
+            $messagingConfiguration->registerServiceDefinition(
+                TagStreamSource::class,
+                new Definition(TagStreamSource::class, [
+                    new Reference(EventStore::class),
+                    new Reference(StreamFilterRegistry::class),
+                    $tagPartitionedProjectionNames,
+                ])
+            );
+        }
+    }
+
+    /**
+     * @return string[]
+     */
+    public static function tagPartitionedProjectionNames(AnnotationFinder $annotationFinder): array
+    {
+        return self::tagPartitionedProjectionNamesOf(self::collectStreamFilters($annotationFinder));
+    }
+
+    /**
+     * @param array<string, StreamFilter[]> $streamFilters
+     * @return string[]
+     */
+    private static function tagPartitionedProjectionNamesOf(array $streamFilters): array
+    {
+        $names = [];
+        foreach ($streamFilters as $projectionName => $filters) {
+            foreach ($filters as $filter) {
+                if ($filter->tag !== null) {
+                    $names[] = $projectionName;
+                    break;
+                }
+            }
+        }
+
+        return $names;
     }
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions, ?InterfaceToCallRegistry $interfaceToCallRegistry = null): array
     {
-        return [];
+        return self::tagPartitionedProjectionNamesOf($this->streamFilters) === [] ? [] : [new StreamSourceReference(TagStreamSource::class)];
     }
 
     public function getModulePackageName(): string

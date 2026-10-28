@@ -557,6 +557,7 @@ final class MessagingSystemConfiguration implements Configuration
                                     MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME,
                                 ],
                                 Reference::to(MessageBuilder::class),
+                                MessageBusChannel::ROUTING_KEY_HEADER,
                             ]),
                             'transform',
                         )

@@ -9,6 +9,7 @@ namespace Ecotone\Projecting;
 
 use Ecotone\Api\EventSourcing\Event;
 use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Api\Projecting\PartitionTagValue;
 use Ecotone\Messaging\Channel\QueueChannel;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\MessageProcessor;
@@ -31,6 +32,7 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
         private ?string $flushChannel = null,
         private bool $isLive = true,
         private ?string $resetChannel = null,
+        private bool $partitionedByTag = false,
     ) {
     }
 
@@ -108,6 +110,9 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
 
             if ($partitionKey !== null) {
                 $headers[ProjectingHeaders::REBUILD_PARTITION_KEY] = $partitionKey;
+                if ($this->partitionedByTag) {
+                    $headers[PartitionTagValue::HEADER_NAME] = $partitionKey;
+                }
 
                 $decomposed = AggregatePartitionKey::decompose($partitionKey);
                 if ($decomposed !== null) {

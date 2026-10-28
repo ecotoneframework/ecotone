@@ -17,5 +17,5 @@ interface DistributedBus
 
     public function convertAndPublishEvent(string $routingKey, object|array $event, array $metadata = []): void;
 
-    public function sendMessage(string $targetServiceName, string $targetChannelName, string $payload, string $sourceMediaType = MediaType::TEXT_PLAIN, array $metadata = []): void;
+    public function sendMessage(string $targetServiceName, string $routingKey, string $payload, string $sourceMediaType = MediaType::TEXT_PLAIN, array $metadata = [], ?string $replyRoutingKey = null): void;
 }

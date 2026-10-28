@@ -63,7 +63,7 @@ final class EnterpriseInMemoryTagCollaborator implements InMemoryTagCollaborator
         $firstEventNo = $eventStore->nextEventNumber($streamName);
         $eventStore->appendEventsUnconditionally($streamName, $events);
         $this->versions->bump($expected);
-        $this->index->record($streamName, $firstEventNo, $appended->sequencedAfterBump($expected));
+        $this->index->record($streamName, $firstEventNo, $appended->sequencedAfterBump($expected, $this->versions->currentVersions($appended->incremented())));
     }
 
     public function deleteTagIndexFor(string $streamName): void
@@ -71,9 +71,14 @@ final class EnterpriseInMemoryTagCollaborator implements InMemoryTagCollaborator
         $this->index->deleteStream($streamName);
     }
 
+    public function valuesOfTag(string $tagName): array
+    {
+        return $this->index->valuesOf($tagName);
+    }
+
     public function bumpTagsGuarded(AppendCondition $appendCondition): void
     {
-        $appended = $this->tagResolver->resolveAppend([], $appendCondition);
+        $appended = $this->tagResolver->resolveGuardedBump($appendCondition);
         $expected = $appended->expectedVersions($this->versions->capture($appended->needingCapture()));
 
         $this->versions->assertUnchanged($expected);

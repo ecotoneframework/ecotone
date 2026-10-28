@@ -43,6 +43,8 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Handler\Router\RouterProcessor;
 use Ecotone\Messaging\Handler\Router\RouteToChannelResolver;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
+use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
+use Ecotone\Messaging\Handler\Transformer\TransformerProcessorBuilder;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Config\Routing\BusRouteSelector;
@@ -138,10 +140,13 @@ final class MessageHandlerRoutingModule implements AnnotationModule
             $commandHandler = $registration->getAnnotationForMethod();
             if ($commandHandler->getInputChannelName() && $destinationChannel) {
                 $messagingConfiguration->registerMessageHandler(
-                    BridgeBuilder::create()
+                    MessageProcessorActivatorBuilder::create()
                         ->withInputChannelName($commandHandler->getInputChannelName())
                         ->withOutputMessageChannel($destinationChannel)
                         ->withEndpointAnnotations([PriorityBasedOnType::fromAnnotatedFinding($registration)->toAttributeDefinition()])
+                        ->chain(TransformerProcessorBuilder::create(
+                            TransformerBuilder::createHeaderEnricher([MessageBusChannel::ROUTING_KEY_HEADER => $commandHandler->getInputChannelName()])
+                        ))
                 );
             }
         }

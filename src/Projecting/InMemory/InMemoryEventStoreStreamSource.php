@@ -33,11 +33,16 @@ class InMemoryEventStoreStreamSource implements StreamSource
         private ?string $streamName = null,
         private ?string $partitionHeader = null,
         private array $eventNames = [],
+        private array $tagPartitionedProjectionNames = [],
     ) {
     }
 
     public function canHandle(string $projectionName): bool
     {
+        if (in_array($projectionName, $this->tagPartitionedProjectionNames, true)) {
+            return false;
+        }
+
         return $this->projectionNames === null || in_array($projectionName, $this->projectionNames, true);
     }
 

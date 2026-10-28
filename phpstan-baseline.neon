@@ -223,6 +223,12 @@ parameters:
 			path: src/Messaging/Config/ModuleClassList.php
 
 		-
+			message: '#^Class Ecotone\\Dbal\\MultiTenant\\Pulse\\PulseTenancyModule not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: src/Messaging/Config/ModuleClassList.php
+
+		-
 			message: '#^Class Ecotone\\Dbal\\ObjectManager\\ObjectManagerModule not found\.$#'
 			identifier: class.notFound
 			count: 1

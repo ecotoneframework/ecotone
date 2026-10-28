@@ -59,8 +59,8 @@ final class DecisionModelConflictNamingTest extends TestCase
             $ecotone->sendCommand(new EnrolForConflictNaming('course-1'));
             $this->fail('Expected a DecisionModelConcurrencyException');
         } catch (DecisionModelConcurrencyException $exception) {
-            $this->assertStringContainsString('on tag course:course-1', $exception->getMessage());
-            $this->assertStringContainsString('while deciding ' . SeatCountForConflictNaming::class, $exception->getMessage());
+            $this->assertStringContainsString('on tag course:course-1 (expected version 0, moved since it was read) while deciding ' . SeatCountForConflictNaming::class, $exception->getMessage());
+            $this->assertStringContainsString('retry the command: InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 3, [DecisionModelConcurrencyException::class])', $exception->getMessage());
         }
     }
 
@@ -117,7 +117,8 @@ final class DecisionModelConflictNamingTest extends TestCase
             $ecotone->sendCommand(new SpendWhileAnotherSpendLandsForConflictNaming('p-1'));
             $this->fail('Expected a DecisionModelConcurrencyException');
         } catch (DecisionModelConcurrencyException $exception) {
-            $this->assertStringContainsString('ConflictPurse p-1 changed since it was loaded', $exception->getMessage());
+            $this->assertStringContainsString('ConflictPurse p-1 changed since it was loaded at change 1', $exception->getMessage());
+            $this->assertStringContainsString('retry the command: InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 3, [DecisionModelConcurrencyException::class])', $exception->getMessage());
             $this->assertStringNotContainsString('while deciding', $exception->getMessage());
         }
     }
@@ -141,7 +142,6 @@ final class DecisionModelConflictNamingTest extends TestCase
         $this->assertSame([[
             DecisionModelConcurrencyException::CONFLICT_TAG_FIELD => 'course:course-1',
             DecisionModelConcurrencyException::CONFLICT_EXPECTED_VERSION_FIELD => 0,
-            DecisionModelConcurrencyException::CONFLICT_CURRENT_VERSION_FIELD => 1,
             DecisionModelConcurrencyException::CONFLICT_MODEL_FIELD => SeatCountForConflictNaming::class,
         ]], $conflictRecorder->conflicts);
     }

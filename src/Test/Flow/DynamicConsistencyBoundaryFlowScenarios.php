@@ -126,7 +126,6 @@ final class DynamicConsistencyBoundaryFlowScenarios
                         self::conditionalAppend(SpanStatus::Error)->withEventStartingWith(DynamicConsistencyBoundarySpanAttributes::CONFLICT_EVENT_NAME, [
                             DecisionModelConcurrencyException::CONFLICT_TAG_FIELD => 'course:course-1',
                             DecisionModelConcurrencyException::CONFLICT_EXPECTED_VERSION_FIELD => 0,
-                            DecisionModelConcurrencyException::CONFLICT_CURRENT_VERSION_FIELD => 1,
                             DecisionModelConcurrencyException::CONFLICT_MODEL_FIELD => FlowCourseCapacity::class,
                         ]),
                     ),

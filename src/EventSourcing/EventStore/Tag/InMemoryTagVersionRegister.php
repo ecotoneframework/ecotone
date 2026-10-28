@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\EventSourcing\EventStore\Tag;
 
 use Ecotone\Api\EventSourcing\DecisionModelConcurrencyException;
+use Ecotone\EventSourcing\Tagging\TagVersionChange;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 
 /**
@@ -51,16 +52,30 @@ final class InMemoryTagVersionRegister
     }
 
     /**
-     * @param array<string, array{name: string, value: string, expectedVersion: int, aggregateType?: string, decidedBy?: string[]}> $expectedVersions
+     * @param array<string, array{name: string, value: string}> $tags
+     * @return array<string, int>
+     */
+    public function currentVersions(array $tags): array
+    {
+        $versions = [];
+        foreach (array_keys($tags) as $key) {
+            $versions[$key] = $this->versions[$key] ?? 0;
+        }
+
+        return $versions;
+    }
+
+    /**
+     * @param array<string, array{name: string, value: string, change: TagVersionChange, expectedVersion: ?int, aggregateType?: string, decidedBy?: string[]}> $expectedVersions
      */
     public function assertUnchanged(array $expectedVersions): void
     {
         foreach ($expectedVersions as $key => $expected) {
             $current = $this->versions[$key] ?? 0;
-            if ($current !== $expected['expectedVersion']) {
+            if ($expected['change'] !== TagVersionChange::Increment && $current !== $expected['expectedVersion']) {
                 $conflict = isset($expected['aggregateType'])
-                    ? DecisionModelConcurrencyException::forAggregateConflict($expected['aggregateType'], $expected['value'], $expected['expectedVersion'], $current)
-                    : DecisionModelConcurrencyException::forConflict($expected['name'], $expected['value'], $expected['expectedVersion'], $current, $expected['decidedBy'] ?? []);
+                    ? DecisionModelConcurrencyException::forAggregateConflict($expected['aggregateType'], $expected['value'], $expected['expectedVersion'])
+                    : DecisionModelConcurrencyException::forConflict($expected['name'], $expected['value'], $expected['expectedVersion'], $expected['decidedBy'] ?? []);
 
                 $this->logger->notice(DecisionModelConcurrencyException::LOG_MESSAGE, $conflict->conflictFields());
 
@@ -70,12 +85,14 @@ final class InMemoryTagVersionRegister
     }
 
     /**
-     * @param array<string, array{name: string, value: string, expectedVersion: int}> $expectedVersions
+     * @param array<string, array{name: string, value: string, change: TagVersionChange, expectedVersion: ?int}> $expectedVersions
      */
     public function bump(array $expectedVersions): void
     {
-        foreach (array_keys($expectedVersions) as $key) {
-            $this->versions[$key] = ($this->versions[$key] ?? 0) + 1;
+        foreach ($expectedVersions as $key => $expected) {
+            if ($expected['change'] !== TagVersionChange::Check) {
+                $this->versions[$key] = ($this->versions[$key] ?? 0) + 1;
+            }
         }
     }
 }

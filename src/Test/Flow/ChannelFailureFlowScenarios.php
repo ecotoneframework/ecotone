@@ -326,7 +326,7 @@ final class ChannelFailureFlowScenarios
             ServiceConfiguration::createWithDefaults()->withDefaultErrorChannel('error_channel'),
         ], [
             self::registrationSentToTheQueue(),
-            FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('users', ExecutionPollingMetadata::createWithTestingSetup(stopOnError: false)))
+            FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('users', ExecutionPollingMetadata::createWithFinishWhenNoMessages(stopOnError: false)))
                 ->failingWith('Exception on send')
                 ->expect(
                     ExpectedSpan::named('receive users')->ofKind(SpanKind::Consumer)->withStatus(SpanStatus::Error)->containing(

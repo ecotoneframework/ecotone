@@ -128,6 +128,7 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
                 Reference::to(ErrorChannelService::class),
                 new Reference(ChannelResolver::class),
                 new Reference(AsyncEndpointAnnotationContext::class),
+                Reference::to(PolledMessageFailureAnswer::class),
             ]));
         }
         return AroundInterceptorBuilder::create(

@@ -262,8 +262,22 @@ final class MessageFlowDiscovery
             $annotation = $registration->getAnnotationForMethod();
             $handlerId = $this->registerHandler($registration, FlowNodeKind::INTERNAL_HANDLER, ['inputChannel' => $annotation->getInputChannelName()]);
             $this->edges[] = new FlowEdge($this->channelNode($annotation->getInputChannelName())->id, $handlerId, FlowEdgeKind::INPUT);
+            if ($registration->hasAnnotation(Distributed::class)) {
+                $this->registerDistributedChannelHandler($handlerId, $annotation->getInputChannelName(), $registration);
+            }
             $this->registerOutput($handlerId, $annotation->getOutputChannelName());
             $this->registerAsynchronous($handlerId, $registration);
+        }
+    }
+
+    private function registerDistributedChannelHandler(string $handlerId, string $inputChannelName, AnnotatedFinding $registration): void
+    {
+        /** @var Distributed $distributedAttribute */
+        $distributedAttribute = $registration->getAnnotationsByImportanceOrder(Distributed::class)[0];
+        $busId = $this->distributedBusNode($distributedAttribute->distributionReference)->id;
+        $this->edges[] = new FlowEdge($busId, $this->channelNode($inputChannelName)->id, FlowEdgeKind::DISTRIBUTES);
+        if ($this->interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName())->canReturnValue()) {
+            $this->edges[] = new FlowEdge($handlerId, $busId, FlowEdgeKind::SENDS_TO, ['via' => 'replyRoutingKey']);
         }
     }
 

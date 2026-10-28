@@ -37,6 +37,7 @@ final class EventCriteria
         public readonly array $eventTypes = [],
         private readonly array $branches = [],
         public readonly int $tagSequenceLowerBound = 0,
+        public readonly ?int $limit = null,
     ) {
     }
 
@@ -74,25 +75,47 @@ final class EventCriteria
     {
         $this->assertNarrowsASingleCriterion('andTag');
 
-        return new self([...$this->tags, ['name' => $name, 'value' => $value]], $this->eventTypes, [], $this->tagSequenceLowerBound);
+        return new self([...$this->tags, ['name' => $name, 'value' => $value]], $this->eventTypes, [], $this->tagSequenceLowerBound, $this->limit);
     }
 
     public function ofTypes(string ...$eventTypes): self
     {
         $this->assertNarrowsASingleCriterion('ofTypes');
 
-        return new self($this->tags, $eventTypes, [], $this->tagSequenceLowerBound);
+        return new self($this->tags, $eventTypes, [], $this->tagSequenceLowerBound, $this->limit);
     }
 
     public function afterTagSequence(int $tagSequence): self
     {
         $this->assertNarrowsASingleCriterion('afterTagSequence');
 
-        return new self($this->tags, $this->eventTypes, [], $tagSequence);
+        return new self($this->tags, $this->eventTypes, [], $tagSequence, $this->limit);
+    }
+
+    public function limit(int $count): self
+    {
+        $this->assertNarrowsASingleCriterion('limit');
+        if ($count < 1) {
+            throw new InvalidArgumentException(sprintf(
+                'EventCriteria::limit() needs at least 1 event, %d given. Pass the number of events a page should hold, or leave limit() out to load every matching event.',
+                $count,
+            ));
+        }
+
+        return new self($this->tags, $this->eventTypes, [], $this->tagSequenceLowerBound, $count);
     }
 
     public function or(self $other): self
     {
+        foreach ([...$this->branches(), ...$other->branches()] as $branch) {
+            if ($branch->limit !== null) {
+                throw new InvalidArgumentException(sprintf(
+                    'EventCriteria::or() cannot combine a criterion limited with limit(%d) -- a limit counts the events of one criterion in its tag sequence, and the combined branches share no sequence to count in. Load each limited criterion on its own, or drop limit() before combining with or().',
+                    $branch->limit,
+                ));
+            }
+        }
+
         return new self([], [], [...$this->branches(), ...$other->branches()]);
     }
 

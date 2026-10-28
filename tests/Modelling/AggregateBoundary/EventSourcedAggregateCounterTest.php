@@ -65,7 +65,7 @@ final class EventSourcedAggregateCounterTest extends TestCase
         $captured = $this->eventStore($ecotone)->loadByCriteria(EventCriteria::tag('aggregate_LedgerWallet', 'w-1'))->appendCondition;
         $this->eventStore($ecotone)->appendTo('ecotone_event_stream', [new LedgerWalletAudited('w-1')], $captured);
 
-        $this->assertSame(2, $this->counterOf($ecotone, 'w-1'));
+        $this->assertSame(1, $this->counterOf($ecotone, 'w-1'));
     }
 
     public function test_a_decision_on_a_captured_aggregate_counter_fails_after_the_aggregate_is_saved_and_the_conflict_names_the_aggregate(): void
@@ -95,7 +95,7 @@ final class EventSourcedAggregateCounterTest extends TestCase
         $ecotone->sendCommandWithRouting('ledgerWallet.deposit', ['walletId' => 'w-2', 'amount' => 50]);
         $this->eventStore($ecotone)->appendTo('ecotone_event_stream', [new LedgerWalletAudited('w-1')], $captured);
 
-        $this->assertSame(2, $this->counterOf($ecotone, 'w-1'));
+        $this->assertSame(1, $this->counterOf($ecotone, 'w-1'));
         $this->assertSame(2, $this->counterOf($ecotone, 'w-2'));
     }
 

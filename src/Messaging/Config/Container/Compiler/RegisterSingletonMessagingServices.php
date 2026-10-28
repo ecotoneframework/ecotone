@@ -18,6 +18,8 @@ use Ecotone\Messaging\Config\MessagingSystemContainer;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
 use Ecotone\Messaging\Console\DelegatingConsoleWriter;
 use Ecotone\Messaging\Console\PlainConsoleWriter;
+use Ecotone\Messaging\Endpoint\PollingConsumer\NoPolledMessageFailureAnswer;
+use Ecotone\Messaging\Endpoint\PollingConsumer\PolledMessageFailureAnswer;
 use Ecotone\Messaging\Handler\Bridge\Bridge;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
@@ -69,6 +71,7 @@ class RegisterSingletonMessagingServices implements CompilerPass
         $this->registerDefault($builder, ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), [], [], []]));
         $this->registerDefault($builder, EventMapper::class, new Definition(EventMapper::class, factory: 'createEmpty'));
         $this->registerDefault($builder, LicenceDecider::class, new Definition(LicenceDecider::class, [$this->bootstrapConfiguration->isRunningForEnterprise()]));
+        $this->registerDefault($builder, PolledMessageFailureAnswer::class, new Definition(NoPolledMessageFailureAnswer::class));
         $this->registerDefault($builder, PendingDeliveryRegistry::class, new Definition(PendingDeliveryRegistry::class, [new Reference(LoggingGateway::class)]));
     }
 

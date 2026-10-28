@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Ecotone\EventSourcing\Tagging;
 
 use function array_diff_key;
+use function array_slice;
+use function count;
 
 use Ecotone\Api\EventSourcing\AppendCondition;
 use Ecotone\Api\EventSourcing\Event;
@@ -59,19 +61,12 @@ final class TagResolver
      */
     public function resolveAppend(array $events, ?AppendCondition $appendCondition): AppendedTags
     {
-        $conditionVersions = [];
-        foreach ($appendCondition?->expectedTagVersions() ?? [] as $expected) {
-            $conditionVersions[TagKey::of($expected['name'], $expected['value'])] = $expected;
-        }
+        return $this->resolve($events, $appendCondition, bumpsEveryConditionTag: false, incrementsUncapturedTags: $appendCondition?->hasTagCondition() ?? false);
+    }
 
-        $aggregateCounterTags = $this->counterTagOfSavedAggregate($appendCondition);
-
-        return new AppendedTags(
-            $this->resolveEvents($events),
-            $conditionVersions,
-            $aggregateCounterTags,
-            $this->aggregateTypesOfCounterTags([...$conditionVersions, ...$aggregateCounterTags]),
-        );
+    public function resolveGuardedBump(AppendCondition $appendCondition): AppendedTags
+    {
+        return $this->resolve([], $appendCondition, bumpsEveryConditionTag: true, incrementsUncapturedTags: false);
     }
 
     /**
@@ -145,6 +140,31 @@ final class TagResolver
     }
 
     /**
+     * @param Event[] $eventsInSequenceOrder
+     * @return Event[]
+     */
+    public function pageOf(array $eventsInSequenceOrder, EventCriteria $criteria): array
+    {
+        if ($criteria->limit === null || count($eventsInSequenceOrder) <= $criteria->limit) {
+            return $eventsInSequenceOrder;
+        }
+
+        $positionTag = $this->positionTagOf($criteria);
+        $positionTagKey = TagKey::of($positionTag['name'], $positionTag['value']);
+        $page = array_slice($eventsInSequenceOrder, 0, $criteria->limit);
+        $lastSequenceOfPage = MatchedTagSequences::of($page[$criteria->limit - 1], $positionTagKey);
+
+        foreach (array_slice($eventsInSequenceOrder, $criteria->limit) as $event) {
+            if (MatchedTagSequences::of($event, $positionTagKey) !== $lastSequenceOfPage) {
+                break;
+            }
+            $page[] = $event;
+        }
+
+        return $page;
+    }
+
+    /**
      * @param Event[] $events
      * @return Event[]
      */
@@ -167,6 +187,28 @@ final class TagResolver
         }
 
         return $matching;
+    }
+
+    /**
+     * @param array<object|array> $events
+     */
+    private function resolve(array $events, ?AppendCondition $appendCondition, bool $bumpsEveryConditionTag, bool $incrementsUncapturedTags): AppendedTags
+    {
+        $conditionVersions = [];
+        foreach ($appendCondition?->expectedTagVersions() ?? [] as $expected) {
+            $conditionVersions[TagKey::of($expected['name'], $expected['value'])] = $expected;
+        }
+
+        $aggregateCounterTags = $this->counterTagOfSavedAggregate($appendCondition);
+
+        return new AppendedTags(
+            $this->resolveEvents($events),
+            $conditionVersions,
+            $aggregateCounterTags,
+            $this->aggregateTypesOfCounterTags([...$conditionVersions, ...$aggregateCounterTags]),
+            $bumpsEveryConditionTag,
+            $incrementsUncapturedTags,
+        );
     }
 
     /**

@@ -29,6 +29,8 @@ use Throwable;
  */
 final class TracingInterceptor
 {
+    public const DISTRIBUTED_SEND_SPAN = 'send distributed';
+
     /**
      * @param array<string, string> $endpointIdsByHandler
      */
@@ -110,6 +112,16 @@ final class TracingInterceptor
         ]);
     }
 
+    public function traceProjectionBatch(MethodInvocation $methodInvocation, Message $message): mixed
+    {
+        $projectionName = (string) $message->getPayload();
+
+        return $this->trace('process partition batch ' . $projectionName, $methodInvocation, $message, SpanKind::Internal, [
+            SpanAttribute::MESSAGING_OPERATION_TYPE => SpanAttribute::OPERATION_PROCESS,
+            SpanAttribute::PROJECTION_NAME => $projectionName,
+        ]);
+    }
+
     public function traceProjectionOperation(MethodInvocation $methodInvocation, Message $message, ProjectionOperationEndpoint $endpoint): mixed
     {
         return $this->traceEntry($endpoint->operation . ' ' . $endpoint->projectionName, $methodInvocation, $message, SpanKind::Server, [
@@ -134,7 +146,7 @@ final class TracingInterceptor
 
     public function traceDistributedBus(MethodInvocation $methodInvocation, Message $message): mixed
     {
-        return $this->traceEntry('send distributed', $methodInvocation, $message, SpanKind::Producer, [SpanAttribute::MESSAGING_OPERATION_TYPE => SpanAttribute::OPERATION_SEND]);
+        return $this->traceEntry(self::DISTRIBUTED_SEND_SPAN, $methodInvocation, $message, SpanKind::Producer, [SpanAttribute::MESSAGING_OPERATION_TYPE => SpanAttribute::OPERATION_SEND]);
     }
 
     public function provideContextForDistributedBus(Message $message): Message

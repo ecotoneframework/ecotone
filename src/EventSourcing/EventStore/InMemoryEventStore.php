@@ -71,6 +71,14 @@ final class InMemoryEventStore implements EventStore, AppendableStore, GuardedTa
         return $this->tagCollaborator->loadByCriteria($this, $criteria);
     }
 
+    /**
+     * @return string[]
+     */
+    public function valuesOfTag(string $tagName): array
+    {
+        return $this->tagCollaborator->valuesOfTag($tagName);
+    }
+
     public function delete(string $streamName): void
     {
         unset($this->streams[$streamName]);

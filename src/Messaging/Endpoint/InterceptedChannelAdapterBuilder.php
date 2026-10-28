@@ -17,6 +17,7 @@ use Ecotone\Messaging\Endpoint\Interceptor\PcntlTerminationListener;
 use Ecotone\Messaging\Endpoint\PollingConsumer\AsyncEndpointAnnotationContext;
 use Ecotone\Messaging\Endpoint\PollingConsumer\AsyncHandlerAnnotationRegistry;
 use Ecotone\Messaging\Endpoint\PollingConsumer\InterceptedConsumerRunner;
+use Ecotone\Messaging\Endpoint\PollingConsumer\PolledMessageFailureAnswer;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerErrorChannelInterceptor;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\ChannelResolver;
@@ -88,6 +89,7 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
                 Reference::to(ErrorChannelService::class),
                 Reference::to(ChannelResolver::class),
                 Reference::to(AsyncEndpointAnnotationContext::class),
+                Reference::to(PolledMessageFailureAnswer::class),
             ]));
         }
         return AroundInterceptorBuilder::create(

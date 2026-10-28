@@ -22,6 +22,7 @@ class PollingConsumerErrorChannelInterceptor
         private ErrorChannelService $errorChannelService,
         private ChannelResolver $channelResolver,
         private AsyncEndpointAnnotationContext $asyncEndpointAnnotationContext,
+        private PolledMessageFailureAnswer $failureAnswer,
     ) {
     }
 
@@ -30,6 +31,10 @@ class PollingConsumerErrorChannelInterceptor
         try {
             return $methodInvocation->proceed();
         } catch (Throwable $exception) {
+            if ($this->failureAnswer->answered($requestMessage, $exception)) {
+                return;
+            }
+
             if (! $this->tryToSendToErrorChannel($exception, $requestMessage)) {
                 throw $exception;
             }

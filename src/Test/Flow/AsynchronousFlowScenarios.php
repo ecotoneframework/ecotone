@@ -151,7 +151,7 @@ final class AsynchronousFlowScenarios
                     )
                     ->expectNoSpanNamed('process class@anonymous::register')
                     ->withNoOtherSpans(),
-                FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('async_channel', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 2)))
+                FlowStage::when(fn (FlowTestSupport $ecotone) => $ecotone->run('async_channel', ExecutionPollingMetadata::createWithFinishWhenNoMessages()))
                     ->expect(
                         ExpectedSpan::named('receive async_channel')->ofKind(SpanKind::Consumer)->containing(
                             ExpectedSpan::named('process class@anonymous::register')->withAttributes([SpanAttribute::ENDPOINT_ID => 'user.registration'])->containing(

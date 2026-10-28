@@ -24,5 +24,10 @@ interface InMemoryTagCollaborator
 
     public function deleteTagIndexFor(string $streamName): void;
 
+    /**
+     * @return string[]
+     */
+    public function valuesOfTag(string $tagName): array;
+
     public function bumpTagsGuarded(AppendCondition $appendCondition): void;
 }

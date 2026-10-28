@@ -58,6 +58,8 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         private ?string $rebuildAsyncChannelName = null,
         private bool    $hasRebuild = false,
         private bool    $hasDeployment = false,
+        private bool    $polling = false,
+        private ?string $partitionTag = null,
     ) {
         if ($this->partitionHeader && ! $this->automaticInitialization) {
             throw new ConfigurationException("Cannot set partition header for projection {$this->projectionName} with automatic initialization disabled");
@@ -77,6 +79,11 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
     public function partitionHeader(): ?string
     {
         return $this->partitionHeader;
+    }
+
+    public function partitionTag(): ?string
+    {
+        return $this->partitionTag;
     }
 
     public function asyncChannelName(): ?string
@@ -125,6 +132,11 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
     public function getAsyncAttribute(): ?Asynchronous
     {
         return $this->asyncAttribute;
+    }
+
+    public function isPolling(): bool
+    {
+        return $this->polling;
     }
 
     public function automaticInitialization(): bool
@@ -180,6 +192,7 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
             $this->flushChannel,
             $this->isLive,
             $this->resetChannel,
+            $this->partitionTag !== null,
         ]);
     }
 

@@ -2,13 +2,12 @@
 
 namespace Ecotone\Messaging\Handler\Router;
 
-use Ecotone\Api\Messaging\Message;
-use Stringable;
+use Ecotone\Messaging\Message;
 
 /**
  * licence Apache-2.0
  */
-interface RouteSelector extends Stringable
+interface RouteSelector
 {
     /**
      * @param Message $message

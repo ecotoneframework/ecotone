@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
-use Ecotone\Api\Attribute\Around;
+use Ecotone\Messaging\Attribute\Interceptor\Around;
 use Ecotone\Messaging\Handler\ReferenceSearchService;
 
 /**

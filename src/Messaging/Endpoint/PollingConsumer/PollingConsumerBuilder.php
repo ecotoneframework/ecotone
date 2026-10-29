@@ -7,10 +7,8 @@ namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 use Ecotone\Messaging\Config\Container\ChannelReference;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
-use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Endpoint\PollingConsumer\MessagePoller\PollableChannelPollerAdapter;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
-use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * This class is stateless Service which creates Message Consumers for Message Handlers.
@@ -26,7 +24,6 @@ class PollingConsumerBuilder extends InterceptedPollingConsumerBuilder
         return new Definition(PollableChannelPollerAdapter::class, [
             $messageHandlerBuilder->getInputMessageChannelName(),
             new ChannelReference($messageHandlerBuilder->getInputMessageChannelName()),
-            new Reference(MessageBuilder::class),
         ]);
     }
 }

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config;
 
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 
 /**
@@ -27,6 +26,12 @@ interface Module
      */
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void;
 
+    /**
+     * @param $extensionObject
+     *
+     * @return bool
+     */
+    public function canHandle($extensionObject): bool;
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions /* , InterfaceToCallRegistry $interfaceToCallRegistry  */): array;
 

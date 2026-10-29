@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Channel\DeliveryConfirmation;
 
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Lite\Test\FlowTestSupport;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Lite\Test\FlowTestSupport;
 use Ecotone\Messaging\Channel\PollableChannel\PollableChannelConfiguration;
-use Ecotone\Test\ChannelTestSupport;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\HighThroughputPublishing\AsyncOrderSubscriber;
 use Test\Ecotone\Messaging\Fixture\HighThroughputPublishing\FakeTransactionModule;
@@ -27,7 +27,7 @@ final class HighThroughputPublishingCollectorMatrixTest extends TestCase
         $operationsLog = new OperationsLog();
         $ecotoneLite = $this->bootstrapEcotone($operationsLog, collectorEnabled: false);
 
-        $ecotoneLite->sendCommandWithRouting('order.place', 'espresso');
+        $ecotoneLite->sendCommandWithRoutingKey('order.place', 'espresso');
 
         $this->assertSame(
             [
@@ -48,16 +48,16 @@ final class HighThroughputPublishingCollectorMatrixTest extends TestCase
         foreach ([true, false] as $collectorEnabled) {
             $ecotoneLite = $this->bootstrapEcotone(new OperationsLog(), $collectorEnabled);
 
-            $ecotoneLite->sendCommandWithRouting('order.place', 'espresso');
+            $ecotoneLite->sendCommandWithRoutingKey('order.place', 'espresso');
 
             $this->assertEquals(
                 [new OrderWasPlaced('espresso-1'), new OrderWasPlaced('espresso-2')],
                 [
-                    ChannelTestSupport::of($ecotoneLite)->receiveMessageFrom('async_orders')->getPayload(),
-                    ChannelTestSupport::of($ecotoneLite)->receiveMessageFrom('async_orders')->getPayload(),
+                    $ecotoneLite->receiveMessageFrom('async_orders')->getPayload(),
+                    $ecotoneLite->receiveMessageFrom('async_orders')->getPayload(),
                 ],
             );
-            $this->assertNull(ChannelTestSupport::of($ecotoneLite)->receiveMessageFrom('async_orders'));
+            $this->assertNull($ecotoneLite->receiveMessageFrom('async_orders'));
         }
     }
 
@@ -66,11 +66,12 @@ final class HighThroughputPublishingCollectorMatrixTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, AsyncOrderSubscriber::class, FakeTransactionModule::class],
             [new OrderService($operationsLog), new AsyncOrderSubscriber(), OperationsLog::class => $operationsLog],
-            extensionObjects: [
+            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
                 PollableChannelConfiguration::neverRetry('async_orders')->withCollector($collectorEnabled),
+            ]),
+            enableAsynchronousProcessing: [
                 InMemoryHighThroughputPublishingChannelBuilder::create('async_orders'),
             ],
-            enabledModules: [],
         );
     }
 }

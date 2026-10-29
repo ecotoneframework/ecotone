@@ -84,7 +84,9 @@ $notifier = new InMemoryNotificationSender();
 $ecotone = EcotoneLite::bootstrapFlowTesting(
     [OrderService::class, NotificationService::class],
     [NotificationSender::class => $notifier],
-    extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('notifications')],
+    enableAsynchronousProcessing: [
+        SimpleMessageChannelBuilder::createQueueChannel('notifications')
+    ]
 );
 
 $ecotone

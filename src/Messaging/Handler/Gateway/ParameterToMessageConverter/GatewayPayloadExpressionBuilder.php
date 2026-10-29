@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
-use Ecotone\Api\Attribute\Payload;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\ExpressionLocation;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverterBuilder;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -61,7 +59,6 @@ class GatewayPayloadExpressionBuilder implements GatewayParameterConverterBuilde
                 new Reference(ExpressionEvaluationService::REFERENCE),
                 $this->parameterName,
                 $this->expression,
-                ExpressionLocation::definitionForParameter(Payload::class, $this->parameterName, $interfaceToCall->getInterfaceName(), $interfaceToCall->getMethodName(), $this->expression),
             ]
         );
     }

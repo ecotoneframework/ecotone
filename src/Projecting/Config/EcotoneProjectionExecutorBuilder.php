@@ -8,7 +8,7 @@ declare(strict_types=1);
 namespace Ecotone\Projecting\Config;
 
 use Ecotone\AnnotationFinder\AnnotatedDefinition;
-use Ecotone\Api\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
@@ -18,16 +18,12 @@ use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Router\RouterProcessor;
 use Ecotone\Messaging\Handler\Router\RouteToChannelResolver;
-use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Config\Routing\BusRouteSelector;
 use Ecotone\Modelling\Config\Routing\BusRoutingKeyResolver;
 use Ecotone\Modelling\Config\Routing\BusRoutingMapBuilder;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 use Ecotone\Projecting\EcotoneProjectorExecutor;
-use Ecotone\Projecting\EnterpriseProjectionNameHeader;
-use Ecotone\Projecting\OpenCoreProjectionNameHeader;
 use Ecotone\Projecting\ProjectingHeaders;
-use Ecotone\Projecting\ProjectionNameHeader;
 
 class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
 {
@@ -58,8 +54,6 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         private ?string $rebuildAsyncChannelName = null,
         private bool    $hasRebuild = false,
         private bool    $hasDeployment = false,
-        private bool    $polling = false,
-        private ?string $partitionTag = null,
     ) {
         if ($this->partitionHeader && ! $this->automaticInitialization) {
             throw new ConfigurationException("Cannot set partition header for projection {$this->projectionName} with automatic initialization disabled");
@@ -79,11 +73,6 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
     public function partitionHeader(): ?string
     {
         return $this->partitionHeader;
-    }
-
-    public function partitionTag(): ?string
-    {
-        return $this->partitionTag;
     }
 
     public function asyncChannelName(): ?string
@@ -134,11 +123,6 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         return $this->asyncAttribute;
     }
 
-    public function isPolling(): bool
-    {
-        return $this->polling;
-    }
-
     public function automaticInitialization(): bool
     {
         return $this->automaticInitialization;
@@ -185,14 +169,12 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
             new Reference(MessageHeadersPropagatorInterceptor::class),
             $this->projectionName,
             $routerProcessor,
-            LicenceDecider::prepareDefinition(ProjectionNameHeader::class, OpenCoreProjectionNameHeader::class, EnterpriseProjectionNameHeader::class),
-            new Reference(MessageBuilder::class),
+            Reference::to(LicenceDecider::class),
             $this->initChannel,
             $this->deleteChannel,
             $this->flushChannel,
             $this->isLive,
             $this->resetChannel,
-            $this->partitionTag !== null,
         ]);
     }
 

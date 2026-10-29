@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Channel\Serialization;
 
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Lite\Test\FlowTestSupport;
-use Ecotone\Test\ChannelTestSupport;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Lite\Test\FlowTestSupport;
+use Ecotone\Messaging\Channel\MessageChannelBuilder;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Conversion\MediaType;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Order\OrderService;
 use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
@@ -40,7 +40,7 @@ final class PollableChannelSerializationModuleTest extends TestCase
 
         $this->assertSame(
             addslashes(serialize(new PlaceOrder('1'))),
-            ChannelTestSupport::of($ecotoneLite)->getMessageChannel('orders')->receive()->getPayload()
+            $ecotoneLite->getMessageChannel('orders')->receive()->getPayload()
         );
     }
 
@@ -55,8 +55,9 @@ final class PollableChannelSerializationModuleTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             $classesToResolve,
             $services,
-            extensionObjects: array_merge($extensionObjects, $channelBuilders),
-            enabledModules: [],
+            ServiceConfiguration::createWithDefaults()
+                ->withExtensionObjects($extensionObjects),
+            enableAsynchronousProcessing: $channelBuilders
         );
     }
 }

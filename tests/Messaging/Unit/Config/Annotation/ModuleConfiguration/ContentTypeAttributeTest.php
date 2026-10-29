@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\Api\Attribute\Asynchronous;
-use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\Attribute\ContentType;
-use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Test\ChannelTestSupport;
-use Ecotone\Test\StaticMessageBuilder;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\Endpoint\ContentType;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\Attribute\CommandHandler;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\Handler\HeaderConversion\JsonConverter;
 
@@ -39,13 +38,14 @@ final class ContentTypeAttributeTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [get_class($orderService), JsonConverter::class],
             [$orderService, new JsonConverter()],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
-            enabledModules: [],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ],
         );
 
-        ChannelTestSupport::of($ecotoneLite)->sendMessageDirectToChannel(
+        $ecotoneLite->sendMessageDirectToChannel(
             'order.place',
-            StaticMessageBuilder::withPayload('{"product":"Book"}')->build(),
+            MessageBuilder::withPayload('{"product":"Book"}')->build(),
         );
         $ecotoneLite->run('async', ExecutionPollingMetadata::createWithTestingSetup());
 
@@ -69,13 +69,14 @@ final class ContentTypeAttributeTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [get_class($orderService), JsonConverter::class],
             [$orderService, new JsonConverter()],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
-            enabledModules: [],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ],
         );
 
-        ChannelTestSupport::of($ecotoneLite)->sendMessageDirectToChannel(
+        $ecotoneLite->sendMessageDirectToChannel(
             'order.place',
-            StaticMessageBuilder::withPayload(serialize(['product' => 'Chair']))
+            MessageBuilder::withPayload(serialize(['product' => 'Chair']))
                 ->setContentType(MediaType::createApplicationXPHPSerialized())
                 ->build(),
         );
@@ -101,13 +102,14 @@ final class ContentTypeAttributeTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [get_class($orderService), JsonConverter::class],
             [$orderService, new JsonConverter()],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
-            enabledModules: [],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ],
         );
 
-        ChannelTestSupport::of($ecotoneLite)->sendMessageDirectToChannel(
+        $ecotoneLite->sendMessageDirectToChannel(
             'order.place',
-            StaticMessageBuilder::withPayload('{"product":"Table"}')
+            MessageBuilder::withPayload('{"product":"Table"}')
                 ->setContentType(MediaType::createApplicationXPHPSerialized())
                 ->build(),
         );

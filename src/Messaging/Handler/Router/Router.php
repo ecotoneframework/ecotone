@@ -2,11 +2,11 @@
 
 namespace Ecotone\Messaging\Handler\Router;
 
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\DestinationResolutionException;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -25,8 +25,7 @@ final class Router implements MessageHandler
         private RouteSelector   $routeSelector,
         private bool            $isResolutionRequired,
         private ?string         $defaultResolutionChannelName,
-        private bool            $applySequence,
-        private MessageBuilder  $messageBuilder,
+        private bool            $applySequence
     ) {
     }
 
@@ -51,7 +50,7 @@ final class Router implements MessageHandler
             $outputChannel = $this->channelResolver->resolve($resolutionChannel);
 
             $messageToSend = $this->applySequence
-                                ? $this->messageBuilder->fromMessage($message)
+                                ? MessageBuilder::fromMessage($message)
                                     ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber)
                                     ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
                                     ->build()
@@ -62,7 +61,10 @@ final class Router implements MessageHandler
         }
     }
 
-    public function __toString(): string
+    /**
+     * @return string
+     */
+    public function __toString()
     {
         return 'Router - ' . $this->routeSelector;
     }

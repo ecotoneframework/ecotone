@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Logger;
 
-use Ecotone\Api\Attribute\LogAfter;
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\Logging\LoggingLevel;
-use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Conversion\ArrayToJson\ArrayToJsonConverter;
 use Ecotone\Messaging\Conversion\AutoCollectionConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Conversion\ObjectToSerialized\SerializingConverter;
+use Ecotone\Messaging\Handler\Logger\Annotation\LogAfter;
 use Ecotone\Messaging\Handler\Logger\LoggingInterceptor;
+use Ecotone\Messaging\Handler\Logger\LoggingLevel;
 use Ecotone\Messaging\Handler\Logger\StubLoggingGateway;
+use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Test\StaticMessageBuilder;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 use function json_encode;
 
@@ -50,9 +51,9 @@ class LoggingInterceptorTest extends TestCase
         ]));
 
         $payload = ['some'];
-        $message = StaticMessageBuilder::withPayload($payload)->build();
+        $message = MessageBuilder::withPayload($payload)->build();
 
-        $loggingInterceptor->logAfter($message, new LogAfter(LogLevel::DEBUG, false));
+        $loggingInterceptor->log($message, new LogAfter(LogLevel::DEBUG, false));
 
         $logs = $loggingService->getLogs();
         $this->assertCount(1, $logs);
@@ -68,9 +69,9 @@ class LoggingInterceptorTest extends TestCase
         ]));
 
         $payload = Uuid::uuid4();
-        $message = StaticMessageBuilder::withPayload($payload)->build();
+        $message = MessageBuilder::withPayload($payload)->build();
 
-        $loggingInterceptor->logAfter($message, new LogAfter(LogLevel::DEBUG, false));
+        $loggingInterceptor->log($message, new LogAfter(LogLevel::DEBUG, false));
         $logs = $loggingService->getLogs();
         $this->assertCount(1, $logs);
         $this->assertEquals(LogLevel::DEBUG, $logs[0]->level);
@@ -85,11 +86,11 @@ class LoggingInterceptorTest extends TestCase
         ]));
 
         $payload = ['some'];
-        $message = StaticMessageBuilder::withPayload($payload)
-                    ->setContentType(MediaType::createApplicationXPHPWithTypeParameter('array'))
+        $message = MessageBuilder::withPayload($payload)
+                    ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(Type::ARRAY))
                     ->build();
 
-        $loggingInterceptor->logAfter($message, new LogAfter(LogLevel::DEBUG, false));
+        $loggingInterceptor->log($message, new LogAfter(LogLevel::DEBUG, false));
         $logs = $loggingService->getLogs();
         $this->assertCount(1, $logs);
         $this->assertEquals(LogLevel::DEBUG, $logs[0]->level);
@@ -104,17 +105,17 @@ class LoggingInterceptorTest extends TestCase
         ]));
 
         $payload = 'some';
-        $message = StaticMessageBuilder::withPayload($payload)->build();
+        $message = MessageBuilder::withPayload($payload)->build();
 
-        $loggingInterceptor->logAfter($message, new LogAfter(LogLevel::DEBUG, true));
+        $loggingInterceptor->log($message, new LogAfter(LogLevel::DEBUG, true));
         $logs = $loggingService->getLogs();
         $this->assertCount(1, $logs);
         $this->assertEquals(LogLevel::DEBUG, $logs[0]->level);
         $this->assertEquals($payload, $logs[0]->message);
         $this->assertEquals([
             'headers' => json_encode([
-                'timestamp' => $message->getHeaders()->get(MessageHeaders::TIMESTAMP),
                 'id' => $message->getHeaders()->get(MessageHeaders::MESSAGE_ID),
+                'timestamp' => $message->getHeaders()->get(MessageHeaders::TIMESTAMP),
                 'correlationId' => $message->getHeaders()->getCorrelationId(),
             ]),
         ], $logs[0]->context);

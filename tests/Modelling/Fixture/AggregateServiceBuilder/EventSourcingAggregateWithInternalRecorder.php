@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder;
 
-use Ecotone\Api\Attribute\Apply;
-use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\Attribute\EventSourcingAggregate;
-use Ecotone\Api\Attribute\Identifier;
-use Ecotone\Api\Modelling\WithAggregateVersioning;
-use Ecotone\Api\Modelling\WithEvents;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingHandler;
+use Ecotone\Modelling\Attribute\Identifier;
+use Ecotone\Modelling\WithAggregateVersioning;
+use Ecotone\Modelling\WithEvents;
 
 #[EventSourcingAggregate(true)]
 /**
@@ -47,13 +47,13 @@ final class EventSourcingAggregateWithInternalRecorder
         return new Something($command->somethingId);
     }
 
-    #[Apply]
+    #[EventSourcingHandler]
     public function applyAggregateCreated(AggregateCreated $event): void
     {
         $this->id = $event->id;
     }
 
-    #[Apply]
+    #[EventSourcingHandler]
     public function applySomethingWasDone(SomethingWasDone $event): void
     {
         $this->somethingWasDone = true;
@@ -64,7 +64,7 @@ final class EventSourcingAggregateWithInternalRecorder
         return $this->id;
     }
 
-    public function getAggregateVersion(): int
+    public function getVersion(): int
     {
         return $this->version;
     }

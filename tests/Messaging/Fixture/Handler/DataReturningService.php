@@ -2,12 +2,12 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Endpoint\PollingConsumer\RejectMessageException;
-use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
-use Ecotone\Test\StaticMessageBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\MessageBuilder;
 use InvalidArgumentException;
 
 /**
@@ -37,24 +37,24 @@ class DataReturningService implements DefinedObject
         $this->rejectException = $rejectException;
     }
 
-    public static function createServiceActivatorBuilder($dataToReturn): MessageProcessorActivatorBuilder
+    public static function createServiceActivatorBuilder($dataToReturn): ServiceActivatorBuilder
     {
-        return MessageProcessorActivatorBuilder::createForMethod(new self($dataToReturn, false, [], false), 'handle');
+        return ServiceActivatorBuilder::createWithDirectReference(new self($dataToReturn, false, [], false), 'handle');
     }
 
-    public static function createExceptionalServiceActivatorBuilder(): MessageProcessorActivatorBuilder
+    public static function createExceptionalServiceActivatorBuilder(): ServiceActivatorBuilder
     {
-        return (MessageProcessorActivatorBuilder::createForMethod(new self('', false, [], true), 'handle'));
+        return (ServiceActivatorBuilder::createWithDirectReference(new self('', false, [], true), 'handle'));
     }
 
-    public static function createServiceActivatorBuilderWithReturnMessage($payload, array $headers): MessageProcessorActivatorBuilder
+    public static function createServiceActivatorBuilderWithReturnMessage($payload, array $headers): ServiceActivatorBuilder
     {
-        return MessageProcessorActivatorBuilder::createForMethod(new self($payload, true, $headers, false), 'handle');
+        return ServiceActivatorBuilder::createWithDirectReference(new self($payload, true, $headers, false), 'handle');
     }
 
-    public static function createServiceActivatorBuilderWithRejectException(): MessageProcessorActivatorBuilder
+    public static function createServiceActivatorBuilderWithRejectException(): ServiceActivatorBuilder
     {
-        return MessageProcessorActivatorBuilder::createForMethod(new self('', true, [], true, true), 'handle');
+        return ServiceActivatorBuilder::createWithDirectReference(new self('', true, [], true, true), 'handle');
     }
 
     public function handle(Message $message)
@@ -68,7 +68,7 @@ class DataReturningService implements DefinedObject
         }
 
         if ($this->asAMessage) {
-            return StaticMessageBuilder::fromMessage($message)
+            return MessageBuilder::fromMessage($message)
                         ->setMultipleHeaders($this->headers)
                         ->setPayload($this->data)
                         ->build();

@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Service\ServiceInterface;
 
-use Ecotone\Api\Messaging\Future;
+use Ecotone\Messaging\Future;
 
 /**
  * Interface ServiceInterfaceWithFutureReceive

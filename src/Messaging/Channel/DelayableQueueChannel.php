@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Channel;
 
 use DateTimeInterface;
-use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\Messaging\BatchMessage;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageHeaders;
-use Ecotone\Api\Messaging\PollableChannel;
-use Ecotone\Api\Scheduling\DatePoint;
-use Ecotone\Api\Scheduling\TimeSpan;
+use Ecotone\Messaging\BatchMessage;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Support\GenericMessage;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Scheduling\DatePoint;
+use Ecotone\Messaging\Scheduling\TimeSpan;
 use Ecotone\Messaging\Support\LicensingException;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -47,11 +47,13 @@ final class DelayableQueueChannel implements PollableChannel, DefinedObject
         $payload = $message->getPayload();
         if ($payload instanceof BatchMessage) {
             if (! $this->batchMessagesSupport) {
-                throw LicensingException::create('Sending BatchMessage is available only with Ecotone Enterprise licence. See https://docs.ecotone.tech/enterprise for details.');
+                throw LicensingException::create('Sending BatchMessage is available only with Ecotone Enterprise licence.');
             }
 
-            foreach ($payload->entries as $entry) {
-                $this->queue[] = GenericMessage::createWithArrayHeaders($entry['payload'], [MessageHeaders::TIMESTAMP => $message->getHeaders()->getTimestamp(), ...$entry['headers']]);
+            foreach ($payload->getEntries() as $entry) {
+                $this->queue[] = MessageBuilder::withPayload($entry['payload'])
+                    ->setMultipleHeaders($entry['headers'])
+                    ->build();
             }
 
             return;
@@ -70,46 +72,26 @@ final class DelayableQueueChannel implements PollableChannel, DefinedObject
      */
     public function receive(): ?Message
     {
-        $earliestDuePosition = null;
-        $earliestDueAt = null;
-        foreach ($this->queue as $position => $message) {
-            if (! $this->isDue($message)) {
-                continue;
+        $message = array_shift($this->queue);
+
+        if ($message !== null && $message->getHeaders()->containsKey(MessageHeaders::DELIVERY_DELAY)) {
+            if ($message->getHeaders()->get(MessageHeaders::DELIVERY_DELAY) > $this->getCurrentDeliveryTimeShift($message)) {
+                $nextAvailableMessage = $this->receive();
+                array_unshift($this->queue, $message);
+
+                if ($nextAvailableMessage === null) {
+                    return null;
+                }
+
+                $message = $nextAvailableMessage;
             }
 
-            $dueAt = $this->dueAtInMilliseconds($message);
-            if ($earliestDueAt === null || $dueAt < $earliestDueAt) {
-                $earliestDuePosition = $position;
-                $earliestDueAt = $dueAt;
-            }
+            return MessageBuilder::fromMessage($message)
+                ->removeHeader(MessageHeaders::DELIVERY_DELAY)
+                ->build();
         }
 
-        if ($earliestDuePosition === null) {
-            return null;
-        }
-
-        $message = array_splice($this->queue, $earliestDuePosition, 1)[0];
-        if (! $message->getHeaders()->containsKey(MessageHeaders::DELIVERY_DELAY)) {
-            return $message;
-        }
-
-        $headers = $message->getHeaders()->headers();
-        unset($headers[MessageHeaders::DELIVERY_DELAY]);
-
-        return GenericMessage::createWithArrayHeaders($message->getPayload(), $headers);
-    }
-
-    private function isDue(Message $message): bool
-    {
-        return ! $message->getHeaders()->containsKey(MessageHeaders::DELIVERY_DELAY)
-            || $message->getHeaders()->get(MessageHeaders::DELIVERY_DELAY) <= $this->getCurrentDeliveryTimeShift($message);
-    }
-
-    private function dueAtInMilliseconds(Message $message): int
-    {
-        $delay = $message->getHeaders()->containsKey(MessageHeaders::DELIVERY_DELAY) ? $message->getHeaders()->get(MessageHeaders::DELIVERY_DELAY) : 0;
-
-        return $message->getHeaders()->getTimestamp() * 1000 + $delay;
+        return $message;
     }
 
     /**

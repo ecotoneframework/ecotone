@@ -19,6 +19,7 @@ class InterceptedGateway implements NonProxyGateway
 
     public function execute(array $methodArgumentValues)
     {
+        // TODO: from original code, "postSend" interceptors are executed before sending to gateway
         foreach ($this->interceptors as $consumerInterceptor) {
             $consumerInterceptor->postSend();
         }

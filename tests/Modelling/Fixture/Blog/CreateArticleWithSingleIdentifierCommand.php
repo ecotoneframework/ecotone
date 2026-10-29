@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Blog;
 
-use Ecotone\Api\Attribute\TargetIdentifier;
+use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
 
 /**
  * Command that provides only one identifier for Article creation
@@ -10,7 +10,7 @@ use Ecotone\Api\Attribute\TargetIdentifier;
  */
 class CreateArticleWithSingleIdentifierCommand
 {
-    #[TargetIdentifier]
+    #[TargetAggregateIdentifier]
     private string $author;
     private string $content;
 

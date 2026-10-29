@@ -2,14 +2,14 @@
 
 namespace Test\Ecotone\Modelling\Fixture\AggregateIdFromMethod;
 
-use Ecotone\Api\Attribute\Repository;
-use Ecotone\Api\Modelling\StateStoredRepository;
+use Ecotone\Modelling\Attribute\Repository;
+use Ecotone\Modelling\StandardRepository;
 
 #[Repository]
 /**
  * licence Apache-2.0
  */
-class UserRepository implements StateStoredRepository
+class UserRepository implements StandardRepository
 {
     private array $users;
 

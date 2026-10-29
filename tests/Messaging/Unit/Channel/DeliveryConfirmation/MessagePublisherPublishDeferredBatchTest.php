@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Channel\DeliveryConfirmation;
 
-use Ecotone\Api\Gateway\MessagePublisher;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Messaging\BatchMessage;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\BatchMessage;
+use Ecotone\Messaging\MessagePublisher;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\HighThroughputPublishing\InMemoryHighThroughputOutboundAdapter;
 use Test\Ecotone\Messaging\Fixture\HighThroughputPublishing\InMemoryHighThroughputPublisherModule;
@@ -36,7 +36,7 @@ final class MessagePublisherPublishDeferredBatchTest extends TestCase
                 ['payload' => 'first order', 'headers' => []],
                 ['payload' => 'second order', 'headers' => ['priority' => 5]],
             ],
-            $batchPayload->entries,
+            $batchPayload->getEntries(),
         );
         $this->assertSame(0, $outboundAdapter->awaitedDeliveriesCount());
 
@@ -61,7 +61,6 @@ final class MessagePublisherPublishDeferredBatchTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [InMemoryHighThroughputPublisherModule::class, InMemoryHighThroughputOutboundAdapter::class],
             [$outboundAdapter],
-            enabledModules: [],
         );
 
         return $ecotoneLite->getGateway(InMemoryHighThroughputPublisherModule::PUBLISHER_REFERENCE);

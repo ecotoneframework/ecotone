@@ -2,14 +2,14 @@
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
-use Ecotone\Modelling\InMemoryStateStoredRepository;
+use Ecotone\Modelling\InMemoryStandardRepository;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Blog\Article;
-use Test\Ecotone\Modelling\Fixture\Blog\InMemoryArticleStateStoredRepository;
+use Test\Ecotone\Modelling\Fixture\Blog\InMemoryArticleStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Blog\PublishArticleCommand;
 use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\Job;
 use Test\Ecotone\Modelling\Fixture\EventSourcedAggregateWithInternalEventRecorder\StartJob;
@@ -17,7 +17,7 @@ use Test\Ecotone\Modelling\Fixture\Order\PlaceOrder;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\Order;
 use Test\Ecotone\Modelling\Fixture\Renter\Appointment;
 use Test\Ecotone\Modelling\Fixture\Renter\AppointmentRepositoryBuilder;
-use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStateStoredRepository;
+use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
 
 /**
@@ -33,15 +33,12 @@ class AggregateRepositoriesTest extends TestCase
     {
         self::assertNotNull(
             EcotoneLite::bootstrapFlowTesting(
-                [Order::class, InMemoryStateStoredRepository::class],
-                [InMemoryStateStoredRepository::class => InMemoryStateStoredRepository::createEmpty()],
-                extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
-                enabledModules: [],
+                [Order::class, InMemoryStandardRepository::class],
+                [InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty()],
                 addInMemoryStateStoredRepository: false,
                 addInMemoryEventSourcedRepository: false,
             )
-            ->sendCommandWithRouting('order.register', new PlaceOrder('123'))
-            ->run('orders')
+            ->sendCommandWithRoutingKey('order.register', new PlaceOrder('123'))
             ->getAggregate(Order::class, '123')
         );
     }
@@ -52,7 +49,6 @@ class AggregateRepositoriesTest extends TestCase
             EcotoneLite::bootstrapFlowTesting(
                 [Job::class, InMemoryEventSourcedRepository::class],
                 [InMemoryEventSourcedRepository::class => InMemoryEventSourcedRepository::createEmpty()],
-                enabledModules: [],
                 addInMemoryStateStoredRepository: false,
                 addInMemoryEventSourcedRepository: false,
             )
@@ -64,9 +60,8 @@ class AggregateRepositoriesTest extends TestCase
     public function test_throwing_if_no_event_sourced_repository_available_and_multiple_state_based_repositories_are(): void
     {
         $ecotone = EcotoneLite::bootstrapFlowTesting(
-            [Job::class, InMemoryStateStoredRepository::class],
-            [InMemoryStateStoredRepository::class => InMemoryStateStoredRepository::createEmpty()],
-            enabledModules: [],
+            [Job::class, InMemoryStandardRepository::class],
+            [InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty()],
             addInMemoryEventSourcedRepository: false,
         );
 
@@ -80,16 +75,12 @@ class AggregateRepositoriesTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [Order::class, InMemoryEventSourcedRepository::class],
             [InMemoryEventSourcedRepository::class => InMemoryEventSourcedRepository::createEmpty()],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
-            enabledModules: [],
             addInMemoryStateStoredRepository: false,
         );
 
         self::expectException(InvalidArgumentException::class);
 
-        $ecotone
-            ->sendCommandWithRouting('order.register', new PlaceOrder('123'))
-            ->run('orders');
+        $ecotone->sendCommandWithRoutingKey('order.register', new PlaceOrder('123'));
     }
 
     public function test_throwing_exception_if_only_event_soured_repository_available_for_standard_aggregate()
@@ -99,13 +90,10 @@ class AggregateRepositoriesTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [Order::class, InMemoryEventSourcedRepository::class],
             [InMemoryEventSourcedRepository::class => InMemoryEventSourcedRepository::createEmpty()],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
-            enabledModules: [],
             addInMemoryStateStoredRepository: false,
             addInMemoryEventSourcedRepository: false,
         )
-            ->sendCommandWithRouting('order.register', new PlaceOrder('123'))
-            ->run('orders');
+            ->sendCommandWithRoutingKey('order.register', new PlaceOrder('123'));
     }
 
     public function test_throwing_exception_if_only_standard_repository_available_for_event_sourced_aggregate()
@@ -113,9 +101,8 @@ class AggregateRepositoriesTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         EcotoneLite::bootstrapFlowTesting(
-            [Job::class, InMemoryStateStoredRepository::class],
-            [InMemoryStateStoredRepository::class => InMemoryStateStoredRepository::createEmpty()],
-            enabledModules: [],
+            [Job::class, InMemoryStandardRepository::class],
+            [InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty()],
             addInMemoryStateStoredRepository: false,
             addInMemoryEventSourcedRepository: false,
         )
@@ -126,18 +113,15 @@ class AggregateRepositoriesTest extends TestCase
     {
         self::assertNotNull(
             EcotoneLite::bootstrapFlowTesting(
-                [Order::class, InMemoryStateStoredRepository::class, InMemoryEventSourcedRepository::class],
+                [Order::class, InMemoryStandardRepository::class, InMemoryEventSourcedRepository::class],
                 [
-                    InMemoryStateStoredRepository::class => InMemoryStateStoredRepository::createEmpty(),
+                    InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty(),
                     InMemoryEventSourcedRepository::class => InMemoryEventSourcedRepository::createEmpty(),
                 ],
-                extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
-                enabledModules: [],
                 addInMemoryStateStoredRepository: false,
                 addInMemoryEventSourcedRepository: false,
             )
-                ->sendCommandWithRouting('order.register', new PlaceOrder('123'))
-                ->run('orders')
+                ->sendCommandWithRoutingKey('order.register', new PlaceOrder('123'))
                 ->getAggregate(Order::class, '123')
         );
     }
@@ -146,33 +130,29 @@ class AggregateRepositoriesTest extends TestCase
     {
         self::assertNotNull(
             EcotoneLite::bootstrapFlowTesting(
-                [Order::class, InMemoryStateStoredRepository::class, InMemoryEventSourcedRepository::class],
+                [Order::class, InMemoryStandardRepository::class, InMemoryEventSourcedRepository::class],
                 [
-                    InMemoryStateStoredRepository::class => InMemoryStateStoredRepository::createEmpty(),
+                    InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty(),
                     InMemoryEventSourcedRepository::class => InMemoryEventSourcedRepository::createEmpty(),
                 ],
-                extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
-                enabledModules: [],
                 addInMemoryStateStoredRepository: false,
                 addInMemoryEventSourcedRepository: false,
             )
-                ->sendCommandWithRouting('order.register', new PlaceOrder('123'))
-                ->run('orders')
+                ->sendCommandWithRoutingKey('order.register', new PlaceOrder('123'))
                 ->getAggregate(Order::class, '123')
         );
     }
 
     public function test_retrieving_correct_repository_according_to_handled_aggregates()
     {
-        $articleRepository = InMemoryArticleStateStoredRepository::createWith([Article::createWith(PublishArticleCommand::createWith('test', 'title', 'test'))]);
+        $articleRepository = InMemoryArticleStandardRepository::createWith([Article::createWith(PublishArticleCommand::createWith('test', 'title', 'test'))]);
 
         EcotoneLite::bootstrapFlowTesting(
-            [Article::class, AppointmentStateStoredRepository::class, InMemoryArticleStateStoredRepository::class],
+            [Article::class, AppointmentStandardRepository::class, InMemoryArticleStandardRepository::class],
             [
-                AppointmentStateStoredRepository::class => AppointmentStateStoredRepository::createEmpty(),
-                InMemoryArticleStateStoredRepository::class => $articleRepository,
+                AppointmentStandardRepository::class => AppointmentStandardRepository::createEmpty(),
+                InMemoryArticleStandardRepository::class => $articleRepository,
             ],
-            enabledModules: [],
             addInMemoryStateStoredRepository: false,
             addInMemoryEventSourcedRepository: false,
         )
@@ -188,18 +168,15 @@ class AggregateRepositoriesTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         EcotoneLite::bootstrapFlowTesting(
-            [Order::class, AppointmentStateStoredRepository::class, InMemoryArticleStateStoredRepository::class],
+            [Order::class, AppointmentStandardRepository::class, InMemoryArticleStandardRepository::class],
             [
-                AppointmentStateStoredRepository::class => AppointmentStateStoredRepository::createEmpty(),
-                InMemoryArticleStateStoredRepository::class => InMemoryArticleStateStoredRepository::createEmpty(),
+                AppointmentStandardRepository::class => AppointmentStandardRepository::createEmpty(),
+                InMemoryArticleStandardRepository::class => InMemoryArticleStandardRepository::createEmpty(),
             ],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('orders')],
-            enabledModules: [],
             addInMemoryStateStoredRepository: false,
             addInMemoryEventSourcedRepository: false,
         )
-            ->sendCommandWithRouting('order.register', new PlaceOrder('123'))
-            ->run('orders')
+            ->sendCommandWithRoutingKey('order.register', new PlaceOrder('123'))
         ;
     }
 
@@ -208,8 +185,8 @@ class AggregateRepositoriesTest extends TestCase
         self::assertNotNull(
             EcotoneLite::bootstrapFlowTesting(
                 [Appointment::class],
-                extensionObjects: [AppointmentRepositoryBuilder::createEmpty()],
-                enabledModules: [],
+                configuration: ServiceConfiguration::createWithDefaults()
+                    ->withExtensionObjects([AppointmentRepositoryBuilder::createEmpty()]),
                 addInMemoryStateStoredRepository: false,
                 addInMemoryEventSourcedRepository: false,
             )
@@ -217,5 +194,4 @@ class AggregateRepositoriesTest extends TestCase
                 ->getAggregate(Appointment::class, '123')
         );
     }
-
 }

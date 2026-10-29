@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Async;
 
-use Ecotone\Api\Attribute\Asynchronous;
-use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\ServiceActivator;
 
 /**
  * licence Apache-2.0
@@ -11,7 +11,7 @@ use Ecotone\Api\Attribute\InternalHandler;
 class AsyncMethodExample
 {
     #[Asynchronous('asyncChannel')]
-    #[InternalHandler('inputChannel', endpointId: 'asyncServiceActivator')]
+    #[ServiceActivator('inputChannel', 'asyncServiceActivator')]
     public function doSomething(): void
     {
     }

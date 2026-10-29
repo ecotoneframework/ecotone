@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Blog;
 
-use Ecotone\Api\Attribute\TargetIdentifier;
+use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
 
 /**
  * Command that provides both identifiers but one is null for Article creation
@@ -10,9 +10,9 @@ use Ecotone\Api\Attribute\TargetIdentifier;
  */
 class CreateArticleWithNullIdentifierCommand
 {
-    #[TargetIdentifier]
+    #[TargetAggregateIdentifier]
     private string $author;
-    #[TargetIdentifier]
+    #[TargetAggregateIdentifier]
     private ?string $title;
     private string $content;
 

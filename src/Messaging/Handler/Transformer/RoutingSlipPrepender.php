@@ -2,7 +2,9 @@
 
 namespace Ecotone\Messaging\Handler\Transformer;
 
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Config\Container\DefinedObject;
+use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -14,31 +16,36 @@ use Ecotone\Messaging\Support\MessageBuilder;
 /**
  * licence Apache-2.0
  */
-final class RoutingSlipPrepender
+final class RoutingSlipPrepender implements DefinedObject
 {
     /**
      * HeaderEnricher constructor.
      * @param string[] $routingSlip
-     * @param string[] $unsetHeaders
      */
-    public function __construct(private array $routingSlip, private array $unsetHeaders, private MessageBuilder $messageBuilder, private string $routingKeyHeader)
+    private function __construct(private array $routingSlip, private array $unsetHeaders)
     {
+    }
+
+    public static function create(array $routingSlip, array $unsetHeaders): self
+    {
+        return new self($routingSlip, $unsetHeaders);
     }
 
     public function transform(Message $message): Message
     {
-        $messageToBuild = $this->messageBuilder->fromMessage($message);
-
-        foreach ($this->unsetHeaders as $busRoutingHeader) {
-            if ($message->getHeaders()->containsKey($busRoutingHeader)) {
-                $messageToBuild = $messageToBuild->setHeader($this->routingKeyHeader, $message->getHeaders()->get($busRoutingHeader));
-                break;
-            }
-        }
+        $messageToBuild = MessageBuilder::fromMessage($message);
 
         return $messageToBuild
                 ->prependRoutingSlip($this->routingSlip)
                 ->removeHeaders($this->unsetHeaders)
                 ->build();
+    }
+
+    public function getDefinition(): Definition
+    {
+        return new Definition(self::class, [
+            $this->routingSlip,
+            $this->unsetHeaders,
+        ], 'create');
     }
 }

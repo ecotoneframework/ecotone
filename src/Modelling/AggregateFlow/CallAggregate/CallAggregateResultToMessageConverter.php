@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\AggregateFlow\CallAggregate;
 
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\ResultToMessageConverter;
 use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateMessage;
 
@@ -24,13 +24,12 @@ final class CallAggregateResultToMessageConverter implements ResultToMessageConv
         private bool                   $isCommandHandler,
         private bool                   $isFactoryMethod,
         private ?string                $aggregateVersionProperty,
-        private MessageBuilder         $messageBuilder,
     ) {
     }
 
     public function convertToMessage(Message $requestMessage, mixed $result): ?Message
     {
-        $resultMessage = $this->messageBuilder->fromMessage($requestMessage);
+        $resultMessage = MessageBuilder::fromMessage($requestMessage);
 
         $resultType = Type::createFromVariable($result);
         if ($resultType->isIterable() && $this->returnType?->isCollection()) {

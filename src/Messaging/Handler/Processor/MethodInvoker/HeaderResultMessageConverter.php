@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -11,20 +11,20 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class HeaderResultMessageConverter implements ResultToMessageConverter
 {
-    public function __construct(private string $interfaceToCallName, private MessageBuilder $messageBuilder)
+    public function __construct(private string $interfaceToCallName)
     {
     }
 
     public function convertToMessage(Message $requestMessage, mixed $result): ?Message
     {
         if (is_null($result)) {
-            return $requestMessage;
+            return null;
         }
 
         Assert::isFalse($result instanceof Message, 'Message should not be returned when changing headers in ' . $this->interfaceToCallName);
         Assert::isTrue(is_array($result), 'Result should be an array when changing headers in ' . $this->interfaceToCallName);
 
-        return $this->messageBuilder->fromMessage($requestMessage)
+        return MessageBuilder::fromMessage($requestMessage)
             ->setMultipleHeaders($result)
             ->build();
     }

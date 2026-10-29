@@ -10,15 +10,13 @@ use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\ExpressionLocation;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
-use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Messaging\Support\MessageBuilder;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -149,11 +147,9 @@ class EnricherBuilder extends InputOutputMessageHandlerBuilder implements Messag
             $propertySetters,
             $this->requestPayloadExpression,
             $this->requestHeaders,
-            ExpressionLocation::definitionForEndpoint('Enricher request payload', $this->getInputMessageChannelName(), $this->requestPayloadExpression ?? ''),
-            new Reference(MessageBuilder::class),
         ]);
 
-        return MessageProcessorActivatorBuilder::createForMethod($internalEnrichingService, 'enrich')
+        return ServiceActivatorBuilder::createWithDefinition($internalEnrichingService, 'enrich')
                 ->withEndpointId($this->getEndpointId())
                 ->withInputChannelName($this->getInputMessageChannelName())
                 ->withOutputMessageChannel($this->outputMessageChannelName)

@@ -2,12 +2,9 @@
 
 namespace Ecotone\Messaging\Config\Container\Compiler;
 
-use Ecotone\Api\Console\ConsoleWriter;
-use Ecotone\Api\Gateway\EcotoneClockInterface;
-use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
 use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PendingDeliveryRegistry;
-use Ecotone\Messaging\Config\BootstrapConfiguration;
+use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Config\Container\ChannelResolverWithContainer;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
@@ -15,11 +12,12 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\Container\ReferenceSearchServiceWithContainer;
 use Ecotone\Messaging\Config\LicenceDecider;
 use Ecotone\Messaging\Config\MessagingSystemContainer;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
+use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Console\ConsoleWriter;
 use Ecotone\Messaging\Console\DelegatingConsoleWriter;
 use Ecotone\Messaging\Console\PlainConsoleWriter;
-use Ecotone\Messaging\Endpoint\PollingConsumer\NoPolledMessageFailureAnswer;
-use Ecotone\Messaging\Endpoint\PollingConsumer\PolledMessageFailureAnswer;
 use Ecotone\Messaging\Handler\Bridge\Bridge;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
@@ -31,8 +29,7 @@ use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\SymfonyExpressionEvaluationAdapter;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Scheduling\Clock;
-use Ecotone\Messaging\Scheduling\NativeClock;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
 
@@ -42,7 +39,7 @@ use Psr\Container\ContainerInterface;
 class RegisterSingletonMessagingServices implements CompilerPass
 {
     public function __construct(
-        private BootstrapConfiguration $bootstrapConfiguration,
+        private ServiceConfiguration $serviceConfiguration,
     ) {
     }
 
@@ -57,21 +54,19 @@ class RegisterSingletonMessagingServices implements CompilerPass
             Clock::class,
             [
                 new Reference(ClockInterface::class, ContainerImplementation::NULL_ON_INVALID_REFERENCE),
-                new Definition(NativeClock::class),
+                $this->serviceConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE),
             ],
-            factory: [Clock::class, 'createWithFallback']
+            factory: [Clock::class, 'createBasedOnConfig']
         ));
-        $this->registerDefault($builder, MessageBuilder::class, new Definition(MessageBuilder::class, [new Reference(EcotoneClockInterface::class)]));
         $this->registerDefault($builder, ChannelResolver::class, new Definition(ChannelResolverWithContainer::class, [new Reference(ContainerInterface::class)]));
         $this->registerDefault($builder, ReferenceSearchService::class, new Definition(ReferenceSearchServiceWithContainer::class, [new Reference(ContainerInterface::class)]));
         $this->registerDefault($builder, ExpressionEvaluationService::REFERENCE, new Definition(SymfonyExpressionEvaluationAdapter::class, [new Reference(ReferenceSearchService::class)], 'create'));
         $this->registerDefault($builder, ProxyFactory::class, new Definition(ProxyFactory::class, [new Reference(ServiceCacheConfiguration::REFERENCE_NAME)]));
         $this->registerDefault($builder, PropertyEditorAccessor::class, new Definition(PropertyEditorAccessor::class, [new Reference(ExpressionEvaluationService::REFERENCE)], 'create'));
         $this->registerDefault($builder, PropertyReaderAccessor::class, new Definition(PropertyReaderAccessor::class));
-        $this->registerDefault($builder, ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), [], [], []]));
+        $this->registerDefault($builder, ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), [], []]));
         $this->registerDefault($builder, EventMapper::class, new Definition(EventMapper::class, factory: 'createEmpty'));
-        $this->registerDefault($builder, LicenceDecider::class, new Definition(LicenceDecider::class, [$this->bootstrapConfiguration->isRunningForEnterprise()]));
-        $this->registerDefault($builder, PolledMessageFailureAnswer::class, new Definition(NoPolledMessageFailureAnswer::class));
+        $this->registerDefault($builder, LicenceDecider::class, new Definition(LicenceDecider::class, [$this->serviceConfiguration->isRunningForEnterprise()]));
         $this->registerDefault($builder, PendingDeliveryRegistry::class, new Definition(PendingDeliveryRegistry::class, [new Reference(LoggingGateway::class)]));
     }
 

@@ -2,12 +2,10 @@
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
-use Ecotone\Api\Attribute\AsynchronousRunningEndpoint;
-use Ecotone\Api\ExtensionObject\DynamicMessageChannelBuilder;
-use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
-use Ecotone\Api\Gateway\EcotoneClockInterface;
-use Ecotone\Api\Interceptor\Precedence;
+use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Channel\DirectChannel;
+use Ecotone\Messaging\Channel\DynamicChannel\DynamicMessageChannelBuilder;
+use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\ChannelReference;
 use Ecotone\Messaging\Config\Container\Definition;
@@ -28,7 +26,8 @@ use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\MessageHandlerBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Recoverability\RetryRunner;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Precedence;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Symfony\Component\Uid\Uuid;
 
 /**
@@ -116,7 +115,6 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
             new Reference(ExpressionEvaluationService::REFERENCE),
             new Reference(AsyncHandlerAnnotationRegistry::class),
             new Reference(AsyncEndpointAnnotationContext::class),
-            new Reference(MessageBuilder::class),
         ]);
         $builder->registerPollingEndpoint($endpointId, $consumerRunner, $this->withContinuesPolling());
     }
@@ -128,7 +126,6 @@ abstract class InterceptedPollingConsumerBuilder implements MessageHandlerConsum
                 Reference::to(ErrorChannelService::class),
                 new Reference(ChannelResolver::class),
                 new Reference(AsyncEndpointAnnotationContext::class),
-                Reference::to(PolledMessageFailureAnswer::class),
             ]));
         }
         return AroundInterceptorBuilder::create(

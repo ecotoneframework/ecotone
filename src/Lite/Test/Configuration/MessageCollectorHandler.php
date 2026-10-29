@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Lite\Test\Configuration;
 
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Message;
 
 /**
  * licence Apache-2.0
@@ -35,12 +35,12 @@ final class MessageCollectorHandler
         $this->sentQueries[] = $query;
     }
 
-    public function popRecordedEvents(): array
+    public function getRecordedEvents(): array
     {
-        return array_map(fn (Message $message) => $message->getPayload(), $this->popRecordedEventMessages());
+        return array_map(fn (Message $message) => $message->getPayload(), $this->getRecordedEventMessages());
     }
 
-    public function popRecordedEventMessages(): array
+    public function getRecordedEventMessages(): array
     {
         $events = array_values($this->publishedEvents);
         $this->publishedEvents = [];
@@ -48,34 +48,12 @@ final class MessageCollectorHandler
         return $events;
     }
 
-    /**
-     * @return Message[]
-     */
-    public function popRecordedEventMessagesOfType(string $className): array
+    public function getRecordedCommands(): array
     {
-        $popped = array_filter($this->publishedEvents, fn (Message $event) => $event->getPayload() instanceof $className);
-        $this->publishedEvents = array_diff_key($this->publishedEvents, $popped);
-
-        return array_values($popped);
+        return array_map(fn (Message $message) => $message->getPayload(), $this->getRecordedCommandMessages());
     }
 
-    /**
-     * @return Message[]
-     */
-    public function popRecordedCommandMessagesOfType(string $className): array
-    {
-        $popped = array_filter($this->sentCommands, fn (Message $command) => $command->getPayload() instanceof $className);
-        $this->sentCommands = array_values(array_diff_key($this->sentCommands, $popped));
-
-        return array_values($popped);
-    }
-
-    public function popRecordedCommands(): array
-    {
-        return array_map(fn (Message $message) => $message->getPayload(), $this->popRecordedCommandMessages());
-    }
-
-    public function popRecordedCommandMessages(): array
+    public function getRecordedCommandMessages(): array
     {
         $commands = array_values($this->sentCommands);
         $this->sentCommands = [];
@@ -83,12 +61,12 @@ final class MessageCollectorHandler
         return $commands;
     }
 
-    public function popRecordedQueries(): array
+    public function getRecordedQueries(): array
     {
-        return array_map(fn (Message $message) => $message->getPayload(), $this->popRecordedQueryMessages());
+        return array_map(fn (Message $message) => $message->getPayload(), $this->getRecordedQueryMessages());
     }
 
-    public function popRecordedQueryMessages(): array
+    public function getRecordedQueryMessages(): array
     {
         $queries = $this->sentQueries;
         $this->sentQueries = [];
@@ -104,15 +82,15 @@ final class MessageCollectorHandler
     /**
      * @return mixed[]
      */
-    public function popRecordedMessagePayloadsFrom(string $channelName): array
+    public function getRecordedMessagePayloadsFrom(string $channelName): array
     {
-        return array_map(fn (Message $message) => $message->getPayload(), $this->popRecordedMessagesFrom($channelName));
+        return array_map(fn (Message $message) => $message->getPayload(), $this->getRecordedEcotoneMessagesFrom($channelName));
     }
 
     /**
      * @return Message[]
      */
-    public function popRecordedMessagesFrom(string $channelName): array
+    public function getRecordedEcotoneMessagesFrom(string $channelName): array
     {
         if (! isset($this->spiedChannelsMessages[$channelName])) {
             return [];

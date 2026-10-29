@@ -6,9 +6,6 @@ namespace Ecotone\Messaging\Scheduling;
 
 use DateTimeInterface;
 use DateTimeZone;
-use Ecotone\Api\Gateway\EcotoneClockInterface;
-use Ecotone\Api\Scheduling\DatePoint;
-use Ecotone\Api\Scheduling\Duration;
 
 /**
  * @package Ecotone\Messaging\Scheduling

@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Api\Attribute\ModuleAnnotation;
-use Ecotone\Api\ExtensionObject\ModulePackageList;
 use Ecotone\Messaging\Attribute\MessageConsumer;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
 #[ModuleAnnotation]
 /**
@@ -38,7 +38,7 @@ final class MessageConsumerModule extends NoExternalConfigurationModule implemen
             $amqpConsumerAnnotation = $amqpConsumer->getAnnotationForMethod();
 
             $endpointId = $amqpConsumerAnnotation->getEndpointId();
-            $serviceActivators[] = MessageProcessorActivatorBuilder::createForMethod($reference, $interfaceToCallRegistry->getFor($amqpConsumer->getClassName(), $amqpConsumer->getMethodName()))
+            $serviceActivators[] = ServiceActivatorBuilder::create($reference, $interfaceToCallRegistry->getFor($amqpConsumer->getClassName(), $amqpConsumer->getMethodName()))
                 ->withEndpointId($endpointId . '.target')
                 ->withInputChannelName($endpointId)
                 ->withMethodParameterConverters($annotationParameterBuilder->createParameterWithDefaults(
@@ -54,6 +54,11 @@ final class MessageConsumerModule extends NoExternalConfigurationModule implemen
         foreach ($this->serviceActivators as $serviceActivator) {
             $messagingConfiguration->registerMessageHandler($serviceActivator);
         }
+    }
+
+    public function canHandle($extensionObject): bool
+    {
+        return false;
     }
 
     public function getModulePackageName(): string

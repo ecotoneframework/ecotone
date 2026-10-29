@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 
-use Ecotone\Api\Attribute\TargetIdentifier;
+use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
 
 /**
  * Class ChangeShippingAddressCommand
@@ -14,7 +14,7 @@ use Ecotone\Api\Attribute\TargetIdentifier;
  */
 class ChangeShippingAddressCommand implements RegisterWithShipping
 {
-    #[TargetIdentifier]
+    #[TargetAggregateIdentifier]
     private $orderId;
     /**
      * @var int
@@ -54,7 +54,7 @@ class ChangeShippingAddressCommand implements RegisterWithShipping
     /**
      * @return int
      */
-    public function getAggregateVersion(): int
+    public function getVersion(): int
     {
         return $this->version;
     }

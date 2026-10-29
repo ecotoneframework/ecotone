@@ -2,17 +2,16 @@
 
 namespace Ecotone\Messaging\Handler\Splitter;
 
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageChannel;
-use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageDeliveryException;
 use Ecotone\Messaging\MessageHandler;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Messaging\Support\MessageDescription;
 
 /**
  * @licence Apache-2.0
@@ -23,7 +22,6 @@ class SplitterHandler implements MessageHandler
         private ?MessageChannel  $outputChannel,
         private MessageProcessor $messageProcessor,
         private ChannelResolver  $channelResolver,
-        private MessageBuilder   $messageBuilder,
         private string           $name = '',
     ) {
     }
@@ -39,7 +37,7 @@ class SplitterHandler implements MessageHandler
         $replyData = $replyMessage->getPayload();
 
         if (! is_iterable($replyData)) {
-            throw MessageDeliveryException::createWithFailedMessage("Can't split message " . MessageDescription::of($message) . ", payload to split is not iterable in {$this}", $message);
+            throw MessageDeliveryException::createWithFailedMessage("Can't split message {$message}, payload to split is not iterable in {$this}", $message);
         }
 
         $sequenceSize = count($replyData);
@@ -47,12 +45,12 @@ class SplitterHandler implements MessageHandler
             $payload = $replyData[$sequenceNumber];
 
             $messageToSend = $payload instanceof Message
-                ? $this->messageBuilder->fromMessage($payload)
+                ? MessageBuilder::fromMessage($payload)
                     ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $message->getHeaders()->getCorrelationId())
                     ->setHeader(MessageHeaders::SEQUENCE_NUMBER, $sequenceNumber + 1)
                     ->setHeader(MessageHeaders::SEQUENCE_SIZE, $sequenceSize)
                     ->build()
-                : $this->messageBuilder->fromParentMessage($replyMessage)
+                : MessageBuilder::fromParentMessage($replyMessage)
                     ->setPayload($payload)
                     ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(Type::createFromVariable($payload)->toString()))
                     ->setHeader(MessageHeaders::MESSAGE_CORRELATION_ID, $message->getHeaders()->getCorrelationId())
@@ -85,7 +83,7 @@ class SplitterHandler implements MessageHandler
         $nextStep = array_shift($routingSlip);
         $targetChannel = $this->channelResolver->resolve($nextStep);
 
-        $messageToSend = $this->messageBuilder->fromMessage($message)
+        $messageToSend = MessageBuilder::fromMessage($message)
             ->setRoutingSlip($routingSlip)
             ->build();
 

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use Ecotone\Api\Attribute\Asynchronous;
-use Ecotone\Api\Attribute\InternalHandler;
-use Ecotone\Api\Attribute\QueryHandler;
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\ServiceActivator;
+use Ecotone\Messaging\Message;
+use Ecotone\Modelling\Attribute\QueryHandler;
 
 /**
  * licence Apache-2.0
@@ -18,7 +18,7 @@ final class SuccessServiceActivator
     private Message $lastCalledMessage;
 
     #[Asynchronous('async_channel')]
-    #[InternalHandler('handle_channel', endpointId: 'success_service_activator')]
+    #[ServiceActivator('handle_channel', 'success_service_activator')]
     public function handle(Message $message): void
     {
         $this->lastCalledMessage = $message;

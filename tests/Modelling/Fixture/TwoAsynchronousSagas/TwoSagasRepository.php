@@ -2,12 +2,12 @@
 
 namespace Test\Ecotone\Modelling\Fixture\TwoAsynchronousSagas;
 
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStateStoredRepository;
+use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 
-#[\Ecotone\Api\Attribute\Repository]
+#[\Ecotone\Modelling\Attribute\Repository]
 /**
  * licence Apache-2.0
  */
-class TwoSagasRepository extends InMemoryStateStoredRepository
+class TwoSagasRepository extends InMemoryStandardRepository
 {
 }

@@ -4,23 +4,23 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit;
 
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Messaging\PollableChannel;
+use Ecotone\Lite\EcotoneLite;
 use Ecotone\Lite\InMemoryPSRContainer;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\QueueChannel;
-use Ecotone\Messaging\Config\Container\ContainerConfig;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\ServiceCacheConfiguration;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\EventDriven\EventDrivenConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollOrThrow\PollOrThrowMessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
-use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
-use Ecotone\Test\StaticMessageBuilder;
+use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\Behat\Booking\Booking;
@@ -64,11 +64,11 @@ final class MessagingBasicsTest extends TestCase
             InMemoryPSRContainer::createFromObjects([
                 Booking::class => new Booking(),
             ]),
-            extensionObjects: [\Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false)],
-            enabledModules: [],
-            pathToRootCatalog: __DIR__ . '/../../..',
-            namespaces: ['Test\Ecotone\Messaging\Fixture\Behat\Booking'],
-            environment: 'prod',
+            ServiceConfiguration::createWithAsynchronicityOnly()
+                ->withEnvironment('prod')
+                ->withFailFast(false)
+                ->withNamespaces(['Test\Ecotone\Messaging\Fixture\Behat\Booking']),
+            pathToRootCatalog: __DIR__ . '/../../..'
         );
 
         $gateway = $messagingSystem->getGatewayByName(BookingService::class);
@@ -84,11 +84,11 @@ final class MessagingBasicsTest extends TestCase
                 \Test\Ecotone\Messaging\Fixture\Behat\Shopping\Bookshop::class => new \Test\Ecotone\Messaging\Fixture\Behat\Shopping\Bookshop(),
                 \Test\Ecotone\Messaging\Fixture\Behat\Shopping\ToReservationRequestTransformer::class => new \Test\Ecotone\Messaging\Fixture\Behat\Shopping\ToReservationRequestTransformer(),
             ]),
-            extensionObjects: [\Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false)],
-            enabledModules: [],
-            pathToRootCatalog: __DIR__ . '/../../..',
-            namespaces: ['Test\Ecotone\Messaging\Fixture\Behat\Shopping'],
-            environment: 'prod',
+            ServiceConfiguration::createWithAsynchronicityOnly()
+                ->withEnvironment('prod')
+                ->withFailFast(false)
+                ->withNamespaces(['Test\Ecotone\Messaging\Fixture\Behat\Shopping']),
+            pathToRootCatalog: __DIR__ . '/../../..'
         );
 
         $gateway = $messagingSystem->getGatewayByName(ShoppingService::class);
@@ -242,7 +242,7 @@ final class MessagingBasicsTest extends TestCase
             ]
         );
 
-        $requestMessage = StaticMessageBuilder::withPayload(2)->build();
+        $requestMessage = MessageBuilder::withPayload(2)->build();
         $replyMessage = $messagingSystem->getGatewayByName(CalculateGatewayExampleWithMessages::class)->calculate($requestMessage);
         $this->assertEquals(76, $replyMessage->getPayload());
     }
@@ -280,20 +280,20 @@ final class MessagingBasicsTest extends TestCase
         $this->assertEquals(160, $gateway->getInterceptedData());
     }
 
-    private function bootstrapForNamespace(string $namespace, array $objects): \Ecotone\Api\Messaging\ConfiguredMessagingSystem
+    private function bootstrapForNamespace(string $namespace, array $objects): \Ecotone\Messaging\Config\ConfiguredMessagingSystem
     {
         return EcotoneLite::bootstrap(
             [],
             InMemoryPSRContainer::createFromObjects($objects),
-            extensionObjects: [\Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false)],
-            enabledModules: [],
-            pathToRootCatalog: __DIR__ . '/../../..',
-            namespaces: [$namespace],
-            environment: 'prod',
+            ServiceConfiguration::createWithAsynchronicityOnly()
+                ->withEnvironment('prod')
+                ->withFailFast(false)
+                ->withNamespaces([$namespace]),
+            pathToRootCatalog: __DIR__ . '/../../..'
         );
     }
 
-    private function buildOrderingSystem(bool $isAsync, string $listenChannel): \Ecotone\Api\Messaging\ConfiguredMessagingSystem
+    private function buildOrderingSystem(bool $isAsync, string $listenChannel): \Ecotone\Messaging\Config\ConfiguredMessagingSystem
     {
         $container = InMemoryPSRContainer::createEmpty();
         $container->set(ServiceCacheConfiguration::REFERENCE_NAME, ServiceCacheConfiguration::noCache());
@@ -322,17 +322,15 @@ final class MessagingBasicsTest extends TestCase
                     ->withInputChannelName('routeChannel')
             )
             ->registerMessageHandler(
-                MessageProcessorActivatorBuilder::createForMethod(OrderProcessor::class, InterfaceToCall::create(OrderProcessor::class, 'processOrder'))
+                ServiceActivatorBuilder::create(OrderProcessor::class, InterfaceToCall::create(OrderProcessor::class, 'processOrder'))
                     ->withInputChannelName($listenChannel)
                     ->withOutputMessageChannel('responseChannel')
                     ->withEndpointId('orderProcessor')
             );
 
-        return ContainerConfig::buildMessagingSystemInMemoryContainer(
-            $config
+        return $config
             ->registerConsumerFactory(new EventDrivenConsumerBuilder())
-            ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder()),
-            $container,
-        );
+            ->registerConsumerFactory(new PollOrThrowMessageHandlerConsumerBuilder())
+            ->buildMessagingSystemFromConfiguration($container);
     }
 }

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\PollableChannel\InMemory;
 
-use Ecotone\Api\ExtensionObject\FinalFailureStrategy;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageChannel;
-use Ecotone\Api\Messaging\MessageHeaders;
-use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Channel\AbstractChannelInterceptor;
 use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Channel\InMemoryStreamingChannel;
+use Ecotone\Messaging\Endpoint\FinalFailureStrategy;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -20,10 +20,11 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 final class InMemoryQueueAcknowledgeInterceptor extends AbstractChannelInterceptor implements ChannelInterceptor
 {
-    public const ECOTONE_IN_MEMORY_QUEUE_ACK = 'ecotone_in_memory_queue_consumer_acknowledge';
+    public const ECOTONE_IN_MEMORY_QUEUE_ACK = 'ecotone.in_memory_queue.ack';
 
-    public function __construct(private FinalFailureStrategy $finalFailureStrategy, private bool $isAutoAcked, private MessageBuilder $messageBuilder)
+    public function __construct(private FinalFailureStrategy $finalFailureStrategy, private bool $isAutoAcked)
     {
+
     }
 
     /**
@@ -42,7 +43,7 @@ final class InMemoryQueueAcknowledgeInterceptor extends AbstractChannelIntercept
             return $message;
         }
 
-        return $this->messageBuilder->fromMessage($message)
+        return MessageBuilder::fromMessage($message)
             ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, self::ECOTONE_IN_MEMORY_QUEUE_ACK)
             ->setHeader(self::ECOTONE_IN_MEMORY_QUEUE_ACK, new InMemoryAcknowledgeCallback(queueChannel: $messageChannel, message: $message, failureStrategy: $this->finalFailureStrategy, isAutoAcked: $this->isAutoAcked))
             ->build();

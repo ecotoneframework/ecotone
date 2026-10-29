@@ -2,10 +2,7 @@
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
-use Ecotone\Api\Attribute\OnConsumerStop;
-use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\Gateway\EcotoneClockInterface;
-use Ecotone\Api\Messaging\MessagePoller;
+use Ecotone\Messaging\Attribute\OnConsumerStop;
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 use Ecotone\Messaging\Endpoint\Interceptor\ConnectionExceptionRetryInterceptor;
@@ -16,7 +13,10 @@ use Ecotone\Messaging\Endpoint\Interceptor\LimitMemoryUsageInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\PcntlTerminationListener;
 use Ecotone\Messaging\Endpoint\Interceptor\SignalInterceptor;
 use Ecotone\Messaging\Endpoint\Interceptor\TimeLimitInterceptor;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
+use Ecotone\Messaging\MessagePoller;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -77,6 +77,8 @@ class InterceptedConsumer implements ConsumerLifecycle
                 }
             }
         } finally {
+            // @TODO Message Poller for same class may have multiple definitions, therefore onConsumer attribute wont work
+            // Needed some more sophisticated way to use attributes in that case
             $this->messagePoller->onConsumerStop();
 
             $this->messagingEntrypoint->sendWithHeaders(
@@ -106,25 +108,25 @@ class InterceptedConsumer implements ConsumerLifecycle
     public static function createInterceptorsForPollingMetadata(PollingMetadata $pollingMetadata, LoggerInterface $logger, EcotoneClockInterface $clock, PcntlTerminationListener $pcntlTerminationListener): array
     {
         $interceptors = [];
-        if ($pollingMetadata->handledMessageLimit > 0) {
-            $interceptors[] = new LimitConsumedMessagesInterceptor($pollingMetadata->handledMessageLimit);
+        if ($pollingMetadata->getHandledMessageLimit() > 0) {
+            $interceptors[] = new LimitConsumedMessagesInterceptor($pollingMetadata->getHandledMessageLimit());
         }
-        if ($pollingMetadata->memoryLimitInMegabytes !== 0) {
-            $interceptors[] = new LimitMemoryUsageInterceptor($pollingMetadata->memoryLimitInMegabytes);
+        if ($pollingMetadata->getMemoryLimitInMegabytes() !== 0) {
+            $interceptors[] = new LimitMemoryUsageInterceptor($pollingMetadata->getMemoryLimitInMegabytes());
         }
-        if ($pollingMetadata->withSignalInterceptors) {
+        if ($pollingMetadata->isWithSignalInterceptors()) {
             $interceptors[] = new SignalInterceptor($pcntlTerminationListener);
         }
-        if ($pollingMetadata->executionAmountLimit > 0) {
-            $interceptors[] = new LimitExecutionAmountInterceptor($pollingMetadata->executionAmountLimit);
+        if ($pollingMetadata->getExecutionAmountLimit() > 0) {
+            $interceptors[] = new LimitExecutionAmountInterceptor($pollingMetadata->getExecutionAmountLimit());
         }
-        if ($pollingMetadata->executionTimeLimitInMilliseconds > 0) {
-            $interceptors[] = new TimeLimitInterceptor($clock, $pollingMetadata->executionTimeLimitInMilliseconds);
+        if ($pollingMetadata->getExecutionTimeLimitInMilliseconds() > 0) {
+            $interceptors[] = new TimeLimitInterceptor($clock, $pollingMetadata->getExecutionTimeLimitInMilliseconds());
         }
-        if ($pollingMetadata->finishWhenNoMessages) {
+        if ($pollingMetadata->finishWhenNoMessages()) {
             $interceptors[] = new FinishWhenNoMessagesInterceptor($clock);
         }
-        $interceptors[] = new ConnectionExceptionRetryInterceptor($clock, $logger, $pollingMetadata->connectionRetryTemplate, $pollingMetadata->stopOnError);
+        $interceptors[] = new ConnectionExceptionRetryInterceptor($clock, $logger, $pollingMetadata->getConnectionRetryTemplate(), $pollingMetadata->isStoppedOnError());
 
         return $interceptors;
     }

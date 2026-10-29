@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Api\Attribute\ModuleAnnotation;
-use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\Gateway\SerializerGateway;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Gateway\Converter\Serializer;
 use Ecotone\Messaging\Gateway\Converter\SerializerHandler;
 use Ecotone\Messaging\Gateway\Converter\SerializerHandlerBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -22,7 +22,7 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 /**
  * licence Apache-2.0
  */
-final class SerializerModule extends NoExternalConfigurationModule implements AnnotationModule
+class SerializerModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public const MODULE_NAME = 'gatewaySerializerModule';
     public const ECOTONE_FROM_PHP_CHANNEL = 'ecotone.serializer.convert_from';
@@ -44,8 +44,8 @@ final class SerializerModule extends NoExternalConfigurationModule implements An
         $messagingConfiguration
             ->registerGatewayBuilder(
                 GatewayProxyBuilder::create(
-                    SerializerGateway::class,
-                    SerializerGateway::class,
+                    Serializer::class,
+                    Serializer::class,
                     'convertFromPHP',
                     self::ECOTONE_FROM_PHP_CHANNEL
                 )->withParameterConverters([
@@ -55,8 +55,8 @@ final class SerializerModule extends NoExternalConfigurationModule implements An
             )
             ->registerGatewayBuilder(
                 GatewayProxyBuilder::create(
-                    SerializerGateway::class,
-                    SerializerGateway::class,
+                    Serializer::class,
+                    Serializer::class,
                     'convertToPHP',
                     self::ECOTONE_TO_PHP_CHANNEL
                 )->withParameterConverters([
@@ -79,6 +79,11 @@ final class SerializerModule extends NoExternalConfigurationModule implements An
     /**
      * @inheritDoc
      */
+    public function canHandle($extensionObject): bool
+    {
+        return false;
+    }
+
     public function getModulePackageName(): string
     {
         return ModulePackageList::CORE_PACKAGE;

@@ -4,21 +4,19 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver;
 
-use Ecotone\Api\EventSourcing\AppendCondition;
-use Ecotone\Api\EventSourcing\Event;
-use Ecotone\Api\Gateway\EcotoneClockInterface;
-use Ecotone\Api\Messaging\Message;
 use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\SaveAggregateServiceTemplate;
 use Ecotone\Modelling\AggregateMessage;
+use Ecotone\Modelling\Event;
 use Ecotone\Modelling\EventSourcingExecutor\GroupedEventSourcingExecutor;
 
 /**
@@ -34,8 +32,6 @@ final class AggregateResolver
         private ConversionService $conversionService,
         private HeaderMapper $headerMapper,
         private EventMapper $eventMapper,
-        private EcotoneClockInterface $clock,
-        private MessageBuilder $messageBuilder,
     ) {
 
     }
@@ -115,12 +111,12 @@ final class AggregateResolver
         $returnType = Type::createFromVariable($message->getPayload());
         if ($this->isNewAggregateInstanceReturned($returnType)) {
             $returnedResolvedAggregates = $this->resolveMultipleAggregates(
-                $this->messageBuilder->fromMessage($message)
+                MessageBuilder::fromMessage($message)
                     ->setPayload([])
                     ->setHeader(AggregateMessage::CALLED_AGGREGATE_INSTANCE, $message->getPayload())
                     ->setHeader(AggregateMessage::CALLED_AGGREGATE_CLASS, $returnType->getTypeHint())
                     ->setHeader(AggregateMessage::TARGET_VERSION, 0)
-                    ->removeHeaders([AggregateMessage::AGGREGATE_ID, AggregateMessage::NULL_EXECUTION_RESULT, AggregateMessage::CALLED_AGGREGATE_COUNTER_CAPTURED_AT_LOAD])
+                    ->removeHeaders([AggregateMessage::AGGREGATE_ID, AggregateMessage::NULL_EXECUTION_RESULT])
                     ->build(),
                 true,
             );
@@ -146,7 +142,6 @@ final class AggregateResolver
             $this->headerMapper,
             $this->conversionService,
             $this->eventMapper,
-            $this->clock,
         );
 
         if ($this->hasReturnedNoEvents($aggregateDefinition, $events)) {
@@ -180,17 +175,13 @@ final class AggregateResolver
             aggregateDefinition: $aggregateDefinition
         );
 
-        return (new ResolvedAggregate(
+        return new ResolvedAggregate(
             $aggregateDefinition,
             $isNewInstance,
             $instance,
             $versionBeforeHandling,
             $identifiers,
             $enrichedEvents,
-        ))->withCounterCapturedAtLoad(
-            $message->getHeaders()->containsKey(AggregateMessage::CALLED_AGGREGATE_COUNTER_CAPTURED_AT_LOAD)
-                ? $message->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_COUNTER_CAPTURED_AT_LOAD)
-                : AppendCondition::empty()
         );
     }
 

@@ -2,8 +2,6 @@
 
 namespace Ecotone\Messaging\Endpoint;
 
-use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-
 /**
  * licence Apache-2.0
  */

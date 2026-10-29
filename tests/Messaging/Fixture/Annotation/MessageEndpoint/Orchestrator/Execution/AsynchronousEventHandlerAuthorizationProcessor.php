@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\Orchestrator\Execution;
 
-use Ecotone\Api\Attribute\Asynchronous;
-use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Modelling\Attribute\EventHandler;
 
 class AsynchronousEventHandlerAuthorizationProcessor
 {

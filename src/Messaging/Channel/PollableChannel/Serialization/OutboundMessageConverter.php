@@ -3,17 +3,16 @@
 namespace Ecotone\Messaging\Channel\PollableChannel\Serialization;
 
 use DateTimeInterface;
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageHeaders;
-use Ecotone\Api\Scheduling\DatePoint;
-use Ecotone\Api\Scheduling\Duration;
-use Ecotone\Api\Scheduling\TimeSpan;
 use Ecotone\Messaging\Conversion\ConversionException;
 use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
-use Ecotone\Messaging\Support\FrameworkHeaders;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Scheduling\DatePoint;
+use Ecotone\Messaging\Scheduling\Duration;
+use Ecotone\Messaging\Scheduling\TimeSpan;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -23,7 +22,6 @@ class OutboundMessageConverter
 {
     public function __construct(
         private HeaderMapper $headerMapper,
-        private MessageBuilder $messageBuilder,
         private ?MediaType $defaultConversionMediaType = null,
         private ?int $defaultDeliveryDelay = null,
         private ?int $defaultTimeToLive = null,
@@ -45,13 +43,13 @@ class OutboundMessageConverter
 
         if (! is_string($payload) || ! isset($headers[MessageHeaders::MESSAGE_ID], $headers[MessageHeaders::TIMESTAMP])) {
             return $this->prepare(
-                $this->messageBuilder->withPayload($payload)->setMultipleHeaders($headers)->build(),
+                MessageBuilder::withPayload($payload)->setMultipleHeaders($headers)->build(),
                 $conversionService,
             );
         }
 
-        $applicationHeaders = FrameworkHeaders::unsetAggregateKeys($headers);
-        $applicationHeaders = FrameworkHeaders::unsetEnqueueMetadata($applicationHeaders);
+        $applicationHeaders = MessageHeaders::unsetAggregateKeys($headers);
+        $applicationHeaders = MessageHeaders::unsetEnqueueMetadata($applicationHeaders);
         $applicationHeaders = $this->headerMapper->mapFromMessageHeaders($applicationHeaders, $conversionService);
         $applicationHeaders[MessageHeaders::MESSAGE_ID] = $headers[MessageHeaders::MESSAGE_ID];
         $applicationHeaders[MessageHeaders::TIMESTAMP] = $headers[MessageHeaders::TIMESTAMP];
@@ -82,8 +80,8 @@ class OutboundMessageConverter
         $messagePayload = $messageToConvert->getPayload();
 
         $applicationHeaders = $messageToConvert->getHeaders()->headers() ?? [];
-        $applicationHeaders = FrameworkHeaders::unsetAggregateKeys($applicationHeaders);
-        $applicationHeaders = FrameworkHeaders::unsetEnqueueMetadata($applicationHeaders);
+        $applicationHeaders = MessageHeaders::unsetAggregateKeys($applicationHeaders);
+        $applicationHeaders = MessageHeaders::unsetEnqueueMetadata($applicationHeaders);
 
         $applicationHeaders                             = $this->headerMapper->mapFromMessageHeaders($applicationHeaders, $conversionService);
         $applicationHeaders[MessageHeaders::MESSAGE_ID] = $messageToConvert->getHeaders()->getMessageId();
@@ -98,12 +96,12 @@ class OutboundMessageConverter
                 throw new ConversionException("Can't send outside of application. Payload has incorrect type, that can't be converted: " . Type::createFromVariable($messagePayload)->toString());
             }
 
-            $sourceType      = $sourceMediaType->hasTypeParameter() ? Type::create($sourceMediaType->getParameter(MediaType::TYPE_PARAMETER)) : Type::createFromVariable($messagePayload);
+            $sourceType      = $sourceMediaType->hasTypeParameter() ? $sourceMediaType->getTypeParameter() : Type::createFromVariable($messagePayload);
             $sourceMediaType = $sourceMediaType->withoutTypeParameter();
             $targetConversionMediaType = $this->defaultConversionMediaType ?: MediaType::createApplicationXPHPSerialized();
             $targetType = Type::string();
             if ($targetConversionMediaType->hasTypeParameter()) {
-                $targetType = Type::create($targetConversionMediaType->getParameter(MediaType::TYPE_PARAMETER));
+                $targetType = $targetConversionMediaType->getTypeParameter();
             } elseif ($targetConversionMediaType->isCompatibleWith(MediaType::createApplicationXPHP())) {
                 $targetType = Type::anything();
             }

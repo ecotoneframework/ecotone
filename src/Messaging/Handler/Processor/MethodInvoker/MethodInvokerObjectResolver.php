@@ -6,7 +6,7 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Message;
 
 interface MethodInvokerObjectResolver
 {

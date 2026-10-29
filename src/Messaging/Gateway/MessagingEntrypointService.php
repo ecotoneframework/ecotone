@@ -2,13 +2,13 @@
 
 namespace Ecotone\Messaging\Gateway;
 
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageChannel;
-use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 
@@ -23,7 +23,6 @@ class MessagingEntrypointService
     public function __construct(
         private ChannelResolver $channelResolver,
         private MessageHeadersPropagatorInterceptor $messageHeadersPropagator,
-        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -117,7 +116,7 @@ class MessagingEntrypointService
     public function sendMessage(Message $message): mixed
     {
         $replyChannel = QueueChannel::create('messaging-entrypoint-reply');
-        $message = $this->messageBuilder->fromMessage($message)
+        $message = MessageBuilder::fromMessage($message)
             ->setReplyChannel($replyChannel)
             ->build();
 
@@ -133,7 +132,7 @@ class MessagingEntrypointService
 
     private function createMessageBuilder(mixed $payload, array $headers, string $targetChannel): MessageBuilder
     {
-        return $this->messageBuilder->withPayload($payload)
+        return MessageBuilder::withPayload($payload)
             ->setContentTypeIfAbsent(MediaType::createApplicationXPHPWithTypeParameter(Type::createFromVariable($payload)->getTypeHint()))
             ->setMultipleHeaders($headers)
             ->setHeader(self::ENTRYPOINT, $targetChannel);

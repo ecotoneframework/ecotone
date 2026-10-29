@@ -14,7 +14,6 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\Processor\InterceptedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundMessageProcessor;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\PayloadResultMessageConverter;
-use Ecotone\Messaging\Support\MessageBuilder;
 
 class GatewayInternalProcessorBuilder implements InterceptedMessageProcessorBuilder
 {
@@ -44,13 +43,12 @@ class GatewayInternalProcessorBuilder implements InterceptedMessageProcessorBuil
             $routingSlipChannels,
             $this->replyChannelName ? new ChannelReference($this->replyChannelName) : null,
             $this->replyMilliSecondsTimeout,
-            Reference::to(MessageBuilder::class),
         ]);
 
         if ($aroundInterceptors) {
             return new Definition(AroundMessageProcessor::class, [
                 $gatewayInternalProcessor,
-                new Definition(PayloadResultMessageConverter::class, [$interfaceToCall->getReturnType(), Reference::to(MessageBuilder::class)]),
+                new Definition(PayloadResultMessageConverter::class, [$interfaceToCall->getReturnType()]),
                 $aroundInterceptors,
             ]);
         } else {

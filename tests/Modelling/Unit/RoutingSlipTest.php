@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Config\ModulePackageList;
+use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\MessageHeaders;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\AuditLog;
 use Test\Ecotone\Modelling\Fixture\CommandEventFlow\CreateMerchant;
@@ -33,7 +35,8 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [User::class, AuditLog::class],
             [new AuditLog()],
-            enabledModules: [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
         );
 
         $ecotoneLite->sendDirectToChannel(
@@ -52,7 +55,8 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Merchant::class, MerchantSubscriber::class, AuditLog::class, User::class],
             [new MerchantSubscriber(), new AuditLog()],
-            enabledModules: [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
         );
 
         $ecotoneLite->sendDirectToChannel(
@@ -77,7 +81,8 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Merchant::class, MerchantSubscriber::class, AuditLog::class, User::class],
             [new MerchantSubscriber(), new AuditLog()],
-            enabledModules: [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
         );
 
         $ecotoneLite->sendCommand(
@@ -95,7 +100,8 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Merchant::class, MerchantSubscriber::class, AuditLog::class, User::class, ExtendedCommandBus::class],
             [new MerchantSubscriber(), new AuditLog()],
-            enabledModules: [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
         );
 
         /** @var ExtendedCommandBus $commandBus */
@@ -115,7 +121,8 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Merchant::class, MerchantSubscriber::class, AuditLog::class, User::class],
             [new MerchantSubscriber(), new AuditLog()],
-            enabledModules: [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
         );
 
         $ecotoneLite->sendQueryWithRouting(
@@ -133,7 +140,8 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [CreateMerchantService::class, Merchant::class, MerchantSubscriber::class, AuditLog::class, User::class],
             [new MerchantSubscriber(), new AuditLog()],
-            enabledModules: [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
         );
 
         /** @var CreateMerchantService $gateway */
@@ -153,7 +161,8 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [MerchantSubscriber::class, AuditLog::class, User::class],
             [new MerchantSubscriber(), new AuditLog()],
-            enabledModules: [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
         );
 
         $ecotoneLite->publishEvent(
@@ -172,7 +181,8 @@ final class RoutingSlipTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Article::class, ArticleRepository::class, RepositoryBusinessInterface::class, Page::class, Author::class, AuditLog::class, ArticleService::class],
             [ArticleRepository::class => $articleRepository, new AuditLog(), new ArticleService()],
-            enabledModules: [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
             addInMemoryStateStoredRepository: false,
         );
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\CommandEventFlow;
 
-use Ecotone\Api\Gateway\CommandBus;
+use Ecotone\Modelling\CommandBus;
 
 interface ExtendedCommandBus extends CommandBus
 {

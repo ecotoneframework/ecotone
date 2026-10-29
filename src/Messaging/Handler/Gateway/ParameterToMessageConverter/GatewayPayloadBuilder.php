@@ -6,11 +6,9 @@ namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
-use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverterBuilder;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
-use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class PayloadToMessageConverterBuilder
@@ -54,7 +52,6 @@ class GatewayPayloadBuilder implements GatewayParameterConverterBuilder
             [
                 $this->parameterName,
                 GatewayPayloadConverter::getParameterTypeDescriptor($interfaceToCall->getParameterWithName($this->parameterName)),
-                Reference::to(MessageBuilder::class),
             ]
         );
     }

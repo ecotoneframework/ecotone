@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\IdentifierMapping\UnionType;
 
-use Ecotone\Api\Attribute\TargetIdentifier;
+use Ecotone\Modelling\Attribute\TargetIdentifier;
 
 /**
  * licence Apache-2.0

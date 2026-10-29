@@ -11,7 +11,6 @@ use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorBuilder;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\ExpressionLocation;
 
 /**
  * Class ExpressionSetterBuilder
@@ -88,7 +87,6 @@ class EnrichPayloadWithExpressionBuilder implements PropertyEditorBuilder
             new Definition(PropertyPath::class, [$this->propertyPath], 'createWith'),
             $this->expression,
             $this->nullResultExpression,
-            ExpressionLocation::definitionForPropertyEditor('payload', $this->propertyPath, $this->expression),
         ]);
     }
 }

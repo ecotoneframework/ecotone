@@ -4,17 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config\Container\Compiler;
 
-use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-use Ecotone\Lite\Test\Configuration\ProvidedReferences;
-use Ecotone\Lite\Test\Configuration\ResolvesExtensionObjectsForFlowTesting;
-use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
-use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
 use Ecotone\Messaging\Config\MessagingSystemConfiguration;
 use Ecotone\Messaging\Config\Module;
-use Ecotone\Messaging\Config\ModuleDefaultSerializationMediaType;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 
 /**
  * licence Apache-2.0
@@ -29,7 +23,6 @@ final class ModuleConfigurationCompilerPass implements CompilerPass
         private array $modules,
         private $extensionObjects,
         private ServiceConfiguration $serviceConfiguration,
-        private BootstrapConfiguration $bootstrapConfiguration,
         private MessagingSystemConfiguration $configuration,
         private ModuleReferenceSearchService $moduleReferenceSearchService
     ) {
@@ -38,61 +31,28 @@ final class ModuleConfigurationCompilerPass implements CompilerPass
 
     public function process(ContainerBuilder $builder): void
     {
-        $serviceExtensions = $this->resolveForFlowTesting($this->extensionObjects);
-        $extensionObjects = $serviceExtensions;
+        $extensionObjects = $this->extensionObjects;
         foreach ($this->modules as $module) {
-            $extensionObjects = array_merge($extensionObjects, $module->getModuleExtensions($this->serviceConfiguration, $serviceExtensions, $this->configuration->getInterfaceToCallRegistry()));
+            $extensionObjects = array_merge($extensionObjects, $module->getModuleExtensions($this->serviceConfiguration, $this->extensionObjects, $this->configuration->getInterfaceToCallRegistry()));
         }
 
-        $extensionObjects = $this->withResolvedSerializationMediaType($extensionObjects);
+        $moduleExtensions = [];
+        foreach ($this->modules as $module) {
+            $moduleExtensions[get_class($module)] = [];
+            foreach ($extensionObjects as $extensionObject) {
+                if ($module->canHandle($extensionObject)) {
+                    $moduleExtensions[get_class($module)][] = $extensionObject;
+                }
+            }
+        }
 
         foreach ($this->modules as $module) {
             $module->prepare(
                 $this->configuration,
-                $extensionObjects,
+                $moduleExtensions[get_class($module)],
                 $this->moduleReferenceSearchService,
                 $this->configuration->getInterfaceToCallRegistry(),
             );
         }
-    }
-
-    /**
-     * @param object[] $extensionObjects
-     * @return object[]
-     */
-    private function withResolvedSerializationMediaType(array $extensionObjects): array
-    {
-        if ($this->serviceConfiguration->defaultSerializationMediaType !== null) {
-            return $extensionObjects;
-        }
-
-        $moduleDefaults = ExtensionObjectResolver::resolve(ModuleDefaultSerializationMediaType::class, $extensionObjects);
-        $serviceConfiguration = $this->serviceConfiguration->withDefaultSerializationMediaType($moduleDefaults[0]->mediaType ?? ServiceConfiguration::DEFAULT_SERIALIZATION_MEDIA_TYPE);
-        $this->configuration->replaceServiceConfiguration($serviceConfiguration);
-
-        return array_map(
-            fn (object $extensionObject): object => $extensionObject instanceof ServiceConfiguration ? $serviceConfiguration : $extensionObject,
-            $extensionObjects,
-        );
-    }
-
-    /**
-     * @param object[] $extensionObjects
-     * @return object[]
-     */
-    private function resolveForFlowTesting(array $extensionObjects): array
-    {
-        $externalContainer = $this->configuration->getExternalContainer();
-        if ($externalContainer === null || ! $this->bootstrapConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
-            return $extensionObjects;
-        }
-
-        foreach ($this->modules as $module) {
-            if ($module instanceof ResolvesExtensionObjectsForFlowTesting) {
-                $extensionObjects = $module->resolveForFlowTesting($extensionObjects, new ProvidedReferences($externalContainer, $extensionObjects));
-            }
-        }
-
-        return $extensionObjects;
     }
 }

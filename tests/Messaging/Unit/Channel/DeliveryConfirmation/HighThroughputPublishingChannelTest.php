@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Channel\DeliveryConfirmation;
 
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Lite\Test\FlowTestSupport;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Lite\Test\FlowTestSupport;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PublishingFailedException;
 use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
-use Ecotone\Test\ChannelTestSupport;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\HighThroughputPublishing\AsyncOrderSubscriber;
 use Test\Ecotone\Messaging\Fixture\HighThroughputPublishing\FakeTransactionModule;
@@ -27,7 +26,7 @@ final class HighThroughputPublishingChannelTest extends TestCase
         $operationsLog = new OperationsLog();
         $ecotoneLite = $this->bootstrapEcotone($operationsLog);
 
-        $ecotoneLite->sendCommandWithRouting('order.place', 'espresso');
+        $ecotoneLite->sendCommandWithRoutingKey('order.place', 'espresso');
 
         $this->assertSame(
             [
@@ -45,13 +44,13 @@ final class HighThroughputPublishingChannelTest extends TestCase
     {
         $operationsLog = new OperationsLog();
         $ecotoneLite = $this->bootstrapEcotone($operationsLog);
-        $channel = ChannelTestSupport::of($ecotoneLite)->getMessageChannel('async_orders');
+        $channel = $ecotoneLite->getMessageChannel('async_orders');
         assert($channel instanceof MessageChannelInterceptorAdapter);
         $channel->getInternalMessageChannel()->failDeliveriesWith('broker not available');
 
         $commandException = null;
         try {
-            $ecotoneLite->sendCommandWithRouting('order.place', 'espresso');
+            $ecotoneLite->sendCommandWithRoutingKey('order.place', 'espresso');
         } catch (PublishingFailedException $exception) {
             $commandException = $exception;
         }
@@ -75,8 +74,9 @@ final class HighThroughputPublishingChannelTest extends TestCase
         return EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, AsyncOrderSubscriber::class, FakeTransactionModule::class],
             [new OrderService($operationsLog), new AsyncOrderSubscriber(), OperationsLog::class => $operationsLog],
-            extensionObjects: [InMemoryHighThroughputPublishingChannelBuilder::create('async_orders')],
-            enabledModules: [],
+            enableAsynchronousProcessing: [
+                InMemoryHighThroughputPublishingChannelBuilder::create('async_orders'),
+            ],
         );
     }
 }

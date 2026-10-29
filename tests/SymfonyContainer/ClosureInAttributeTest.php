@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\SymfonyContainer;
 
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Config\ModulePackageList;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\Attributes\RequiresPhp;
 use PHPUnit\Framework\TestCase;
@@ -25,10 +27,9 @@ final class ClosureInAttributeTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, LockingInterceptor::class],
             [new OrderService(), $lockingInterceptor],
-            enabledModules: [],
         );
 
-        $ecotoneLite->sendCommandWithRouting('order.place', 'coffee');
+        $ecotoneLite->sendCommandWithRoutingKey('order.place', 'coffee');
 
         $this->assertSame(['coffee'], $ecotoneLite->sendQueryWithRouting('order.getOrders'));
         $this->assertSame(['order-lock'], $lockingInterceptor->getLockedResources());
@@ -37,15 +38,17 @@ final class ClosureInAttributeTest extends TestCase
     public function test_closure_expression_receiving_attribute_declared_on_handler_using_dumped_container(): void
     {
         $cacheDirectory = sys_get_temp_dir() . '/ecotone_policy_driven_closure/' . uniqid('', true);
+        $configuration = ServiceConfiguration::createWithDefaults()
+            ->withCacheDirectoryPath($cacheDirectory)
+            ->withSkippedModulePackageNames(ModulePackageList::allPackages());
         $tokenService = new PolicyDrivenTokenService();
         $availableServices = [PolicyDrivenTokenService::class => $tokenService];
 
         $messagingSystem = EcotoneLite::bootstrap(
             [PolicyDrivenTokenService::class],
             $availableServices,
-            enabledModules: [],
+            $configuration,
             useCachedVersion: true,
-            cacheDirectoryPath: $cacheDirectory,
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
         $messagingSystem->getCommandBus()->sendWithRouting('policyToken.store', metadata: ['token' => 'coffee']);
@@ -53,9 +56,8 @@ final class ClosureInAttributeTest extends TestCase
         $warmBootedMessagingSystem = EcotoneLite::bootstrap(
             [PolicyDrivenTokenService::class],
             $availableServices,
-            enabledModules: [],
+            $configuration,
             useCachedVersion: true,
-            cacheDirectoryPath: $cacheDirectory,
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
         $warmBootedMessagingSystem->getCommandBus()->sendWithRouting('policyToken.store', metadata: ['token' => 'tea']);
@@ -70,6 +72,9 @@ final class ClosureInAttributeTest extends TestCase
     public function test_intercepting_handler_with_attribute_containing_closure_using_dumped_container(): void
     {
         $cacheDirectory = sys_get_temp_dir() . '/ecotone_closure_in_attribute/' . uniqid('', true);
+        $configuration = ServiceConfiguration::createWithDefaults()
+            ->withCacheDirectoryPath($cacheDirectory)
+            ->withSkippedModulePackageNames(ModulePackageList::allPackages());
         $lockingInterceptor = new LockingInterceptor();
         $availableServices = [
             OrderService::class => new OrderService(),
@@ -79,18 +84,16 @@ final class ClosureInAttributeTest extends TestCase
         $messagingSystem = EcotoneLite::bootstrap(
             [OrderService::class, LockingInterceptor::class],
             $availableServices,
-            enabledModules: [],
+            $configuration,
             useCachedVersion: true,
-            cacheDirectoryPath: $cacheDirectory,
         );
         $messagingSystem->getCommandBus()->sendWithRouting('order.place', 'coffee');
 
         $warmBootedMessagingSystem = EcotoneLite::bootstrap(
             [OrderService::class, LockingInterceptor::class],
             $availableServices,
-            enabledModules: [],
+            $configuration,
             useCachedVersion: true,
-            cacheDirectoryPath: $cacheDirectory,
         );
         $warmBootedMessagingSystem->getCommandBus()->sendWithRouting('order.place', 'tea');
 

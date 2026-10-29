@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\EventSourcing\CustomRepository;
 
-use Ecotone\Api\Attribute\Repository;
-use Ecotone\Api\Modelling\EventSourcedRepository;
+use Ecotone\Modelling\Attribute\Repository;
+use Ecotone\Modelling\EventSourcedRepository;
 use Ecotone\Modelling\InMemoryEventSourcedRepository;
 use Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder\EventSourcingAggregateWithInternalRecorder;
 

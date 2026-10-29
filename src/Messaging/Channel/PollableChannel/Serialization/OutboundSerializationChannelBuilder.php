@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\PollableChannel\Serialization;
 
-use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
 use Ecotone\Messaging\PrecedenceChannelInterceptor;
-use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -41,11 +40,9 @@ final class OutboundSerializationChannelBuilder implements ChannelInterceptorBui
         return new Definition(OutboundSerializationChannelInterceptor::class, [
             new Definition(OutboundMessageConverter::class, [
                 $this->headerMapper,
-                Reference::to(MessageBuilder::class),
-                $this->channelConversionMediaType ?: MediaType::parseMediaType($builder->getServiceConfiguration()->defaultSerializationMediaType),
+                $this->channelConversionMediaType ?: MediaType::parseMediaType($builder->getServiceConfiguration()->getDefaultSerializationMediaType()),
             ]),
             Reference::to(ConversionService::REFERENCE_NAME),
-            Reference::to(MessageBuilder::class),
         ]);
     }
 }

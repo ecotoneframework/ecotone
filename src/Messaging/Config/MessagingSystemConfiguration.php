@@ -8,23 +8,16 @@ use function array_map;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationFinderFactory;
-use Ecotone\Api\Attribute\Asynchronous;
-use Ecotone\Api\Attribute\AsynchronousRunningEndpoint;
-use Ecotone\Api\ExtensionObject\CombinedMessageChannel;
-use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
-use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\ExtensionObject\RetryTemplateBuilder;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\ExtensionObject\TestConfiguration;
-use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
-use Ecotone\Api\Messaging\PollableChannel;
+use Ecotone\Lite\Test\TestConfiguration;
+use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
+use Ecotone\Messaging\Channel\CombinedMessageChannel;
 use Ecotone\Messaging\Channel\EventDrivenChannelInterceptorAdapter;
+use Ecotone\Messaging\Channel\MessageChannelBuilder;
 use Ecotone\Messaging\Channel\OutboxForwardingChannel;
 use Ecotone\Messaging\Channel\PollableChannelInterceptorAdapter;
-use Ecotone\Messaging\Channel\WrongHandlerAmountException;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModuleRetrievingService;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
@@ -37,6 +30,7 @@ use Ecotone\Messaging\Config\Container\Compiler\ContainerImplementation;
 use Ecotone\Messaging\Config\Container\Compiler\ModuleConfigurationCompilerPass;
 use Ecotone\Messaging\Config\Container\Compiler\RegisterSingletonMessagingServices;
 use Ecotone\Messaging\Config\Container\ContainerBuilder;
+use Ecotone\Messaging\Config\Container\ContainerConfig;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\GatewayProxyReference;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
@@ -50,6 +44,7 @@ use Ecotone\Messaging\Endpoint\ChannelAdapterConsumerBuilder;
 use Ecotone\Messaging\Endpoint\MessageHandlerConsumerBuilder;
 use Ecotone\Messaging\Endpoint\PollingConsumer\AsyncEndpointAnnotationContext;
 use Ecotone\Messaging\Endpoint\PollingConsumer\AsyncHandlerAnnotationRegistry;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -63,15 +58,16 @@ use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\InterceptorWithPointCut;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
+use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\UninterruptibleServiceActivator;
 use Ecotone\Messaging\Handler\Transformer\RoutingSlipPrepender;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\InMemoryConfigurationVariableService;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\NullableMessageChannel;
+use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\LicensingException;
-use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Config\MessageBusChannel;
 use Exception;
 
@@ -141,6 +137,10 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private array $converterBuilders = [];
     private ?Definition $conversionServiceDecoratorBuilder = null;
+    /**
+     * @var string[]
+     */
+    private array $messageConverterReferenceNames = [];
     private ?ModuleReferenceSearchService $moduleReferenceSearchService;
     private array $asynchronousEndpoints = [];
     /**
@@ -156,7 +156,6 @@ final class MessagingSystemConfiguration implements Configuration
      */
     private array $plainCombinedChannelUsages = [];
     private ServiceConfiguration $applicationConfiguration;
-    private BootstrapConfiguration $bootstrapConfiguration;
     /**
      * @var string[]
      */
@@ -193,30 +192,32 @@ final class MessagingSystemConfiguration implements Configuration
     /**
      * @param object[] $extensionObjects
      */
-    private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, InterfaceToCallRegistry $preparationInterfaceRegistry, BootstrapConfiguration $bootstrapConfiguration)
+    private function __construct(ModuleRetrievingService $moduleConfigurationRetrievingService, array $extensionObjects, InterfaceToCallRegistry $preparationInterfaceRegistry, ServiceConfiguration $serviceConfiguration)
     {
-        $serviceConfiguration = self::resolveServiceConfiguration($extensionObjects, $bootstrapConfiguration->extensionObjects);
-        $extensionObjects = array_merge(
-            array_filter($extensionObjects, fn (?object $extensionObject): bool => ! $extensionObject instanceof ServiceConfigurationFromServiceContext),
-            $bootstrapConfiguration->extensionObjects,
-        );
+        $extensionObjects = array_merge($extensionObjects, $serviceConfiguration->getExtensionObjects());
+        $extensionApplicationConfiguration = [];
+        foreach ($extensionObjects as $extensionObject) {
+            if ($extensionObject instanceof ServiceConfiguration) {
+                $extensionApplicationConfiguration[] = $extensionObject;
+            }
+        }
+        $serviceConfiguration = $serviceConfiguration->mergeWith($extensionApplicationConfiguration);
 
-        if (! $serviceConfiguration->connectionRetryTemplate) {
-            if ($bootstrapConfiguration->isProductionConfiguration()) {
-                $serviceConfiguration = $serviceConfiguration->withConnectionRetryTemplate(
-                    RetryTemplateBuilder::exponentialBackOff(1000, 3)
-                        ->maxRetries(5)
+        if (! $serviceConfiguration->getConnectionRetryTemplate()) {
+            if ($serviceConfiguration->isProductionConfiguration()) {
+                $serviceConfiguration->withConnectionRetryTemplate(
+                    RetryTemplateBuilder::exponentialBackoff(1000, 3)
+                        ->maxRetryAttempts(5)
                 );
             } else {
-                $serviceConfiguration = $serviceConfiguration->withConnectionRetryTemplate(
-                    RetryTemplateBuilder::exponentialBackOff(100, 3)
-                        ->maxRetries(3)
+                $serviceConfiguration->withConnectionRetryTemplate(
+                    RetryTemplateBuilder::exponentialBackoff(100, 3)
+                        ->maxRetryAttempts(3)
                 );
             }
         }
 
         $this->applicationConfiguration = $serviceConfiguration;
-        $this->bootstrapConfiguration = $bootstrapConfiguration;
         $this->interfaceToCallRegistry = $preparationInterfaceRegistry;
 
         $extensionObjects = array_filter(
@@ -239,56 +240,31 @@ final class MessagingSystemConfiguration implements Configuration
                     $extensionObjects[] = $combinedMessageChannel->getEmbeddedSourceChannelBuilder();
                 }
             } else {
-                $this->plainCombinedChannelUsages[$combinedMessageChannel->getReferenceName()] = $combinedMessageChannel->combinedChannels;
+                $this->plainCombinedChannelUsages[$combinedMessageChannel->getReferenceName()] = $combinedMessageChannel->getCombinedChannels();
             }
         }
 
         $extensionObjects[] = $serviceConfiguration;
-        $extensionObjects[] = $bootstrapConfiguration;
 
-        if ($bootstrapConfiguration->licenceKey !== null) {
-            (new LicenceService())->validate($bootstrapConfiguration->licenceKey);
+        if ($serviceConfiguration->getLicenceKey() !== null) {
+            (new LicenceService())->validate($serviceConfiguration->getLicenceKey());
             $this->isRunningForEnterpriseLicence = true;
         }
 
-        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $serviceConfiguration, $bootstrapConfiguration);
+        $this->initialize($moduleConfigurationRetrievingService, $extensionObjects, $serviceConfiguration);
     }
 
     /**
-     * @param object[] $serviceContextExtensionObjects
-     * @param object[] $bootstrapExtensionObjects
+     * @param string[] $skippedModulesPackages
      */
-    private static function resolveServiceConfiguration(array $serviceContextExtensionObjects, array $bootstrapExtensionObjects): ServiceConfiguration
-    {
-        $fromServiceContext = ExtensionObjectResolver::resolve(ServiceConfigurationFromServiceContext::class, $serviceContextExtensionObjects);
-        $fromBootstrap = ExtensionObjectResolver::resolve(ServiceConfiguration::class, $bootstrapExtensionObjects);
-
-        if (count($fromBootstrap) > 1) {
-            throw ConfigurationException::create(
-                'Ecotone was given more than one ServiceConfiguration in the extensionObjects passed to EcotoneLite. '
-                . ServiceConfigurationFromServiceContext::ONLY_ONE_IS_READ
-                . 'Keep one of them and move every with*() call onto it.'
-            );
-        }
-        if ($fromBootstrap !== [] && $fromServiceContext !== []) {
-            throw ConfigurationException::create(
-                'Ecotone was given more than one ServiceConfiguration: one in the extensionObjects passed to EcotoneLite and one returned from ' . $fromServiceContext[0]->origin() . '. '
-                . ServiceConfigurationFromServiceContext::ONLY_ONE_IS_READ
-                . 'Keep one of them and move every with*() call onto it.'
-            );
-        }
-
-        return $fromBootstrap[0] ?? ($fromServiceContext === [] ? ServiceConfiguration::createWithDefaults() : $fromServiceContext[0]->serviceConfiguration);
-    }
-
-    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $serviceExtensions, ServiceConfiguration $serviceConfiguration, BootstrapConfiguration $bootstrapConfiguration): void
+    private function initialize(ModuleRetrievingService $moduleConfigurationRetrievingService, array $serviceExtensions, ServiceConfiguration $serviceConfiguration): void
     {
         $moduleReferenceSearchService = ModuleReferenceSearchService::createEmpty();
 
-        $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations(array_diff(ModuleClassList::packageNames(), $bootstrapConfiguration->getEnabledModulePackageNames()));
+        $modules = $moduleConfigurationRetrievingService->findAllModuleConfigurations($serviceConfiguration->getSkippedModulesPackages());
 
         /** This will allow to delay all configuration when everything is already added to the MessagingConfiguration */
-        $this->moduleConfigurationCompilerPass = new ModuleConfigurationCompilerPass($modules, $serviceExtensions, $serviceConfiguration, $bootstrapConfiguration, $this, $moduleReferenceSearchService);
+        $this->moduleConfigurationCompilerPass = new ModuleConfigurationCompilerPass($modules, $serviceExtensions, $serviceConfiguration, $this, $moduleReferenceSearchService);
         $this->moduleReferenceSearchService = $moduleReferenceSearchService;
     }
 
@@ -297,29 +273,27 @@ final class MessagingSystemConfiguration implements Configuration
         return $this->interfaceToCallRegistry;
     }
 
-    public function replaceServiceConfiguration(ServiceConfiguration $serviceConfiguration): void
-    {
-        $this->applicationConfiguration = $serviceConfiguration;
-    }
-
-    public static function getModuleClassesFor(BootstrapConfiguration $bootstrapConfiguration): array
+    public static function getModuleClassesFor(ServiceConfiguration $serviceConfiguration): array
     {
         $modulesClasses = [];
-        foreach (array_intersect(ModuleClassList::packageNames(), $bootstrapConfiguration->getEnabledModulePackageNames()) as $availablePackage) {
-            $modulesClasses = array_merge($modulesClasses, ModuleClassList::forPackage($availablePackage));
+        foreach (array_diff(array_merge(ModulePackageList::allPackages(), [ModulePackageList::TEST_PACKAGE]), $serviceConfiguration->getSkippedModulesPackages()) as $availablePackage) {
+            $modulesClasses = array_merge($modulesClasses, ModulePackageList::getModuleClassesForPackage($availablePackage));
         }
 
         return array_filter($modulesClasses, fn (string $moduleClassName): bool => class_exists($moduleClassName) || interface_exists($moduleClassName));
     }
 
-    public static function addCorePackage(BootstrapConfiguration $bootstrapConfiguration, bool $enableTestPackage): BootstrapConfiguration
+    public static function addCorePackage(ServiceConfiguration $serviceConfiguration, bool $enableTestPackage): ServiceConfiguration
     {
-        $enabledModulePackageNames = array_diff($bootstrapConfiguration->getEnabledModulePackageNames(), [ModulePackageList::TEST_PACKAGE]);
+        $requiredModules = [ModulePackageList::CORE_PACKAGE];
+        $skippedPackages = $serviceConfiguration->getSkippedModulesPackages();
         if ($enableTestPackage) {
-            $enabledModulePackageNames[] = ModulePackageList::TEST_PACKAGE;
+            $requiredModules[] = ModulePackageList::TEST_PACKAGE;
+        } else {
+            $skippedPackages[] = ModulePackageList::TEST_PACKAGE;
         }
 
-        return $bootstrapConfiguration->withEnabledModulePackageNames($enabledModulePackageNames);
+        return $serviceConfiguration->withSkippedModulePackageNames(array_diff($skippedPackages, $requiredModules));
     }
 
     private function prepareAndOptimizeConfiguration(InterfaceToCallRegistry $interfaceToCallRegistry): void
@@ -367,7 +341,6 @@ final class MessagingSystemConfiguration implements Configuration
 
         $this->configureDefaultMessageChannels();
         $this->configureAsynchronousEndpoints($interfaceToCallRegistry);
-        $this->refuseHandlersSharingADirectChannel();
 
         foreach ($this->requiredConsumerEndpointIds as $requiredConsumerEndpointId) {
             if (! array_key_exists($requiredConsumerEndpointId, $this->messageHandlerBuilders) && ! array_key_exists($requiredConsumerEndpointId, $this->channelAdapters)) {
@@ -381,6 +354,10 @@ final class MessagingSystemConfiguration implements Configuration
             if ($pollingMetadata->getErrorChannelName() && ! isset($this->channelBuilders[$pollingMetadata->getErrorChannelName()])) {
                 throw ConfigurationException::create("Trying to register polling meta data for non existing error channel `{$pollingMetadata->getErrorChannelName()}` for endpoint `{$pollingMetadata->getEndpointId()}`");
             }
+        }
+
+        foreach ($this->gatewayBuilders as $gatewayBuilder) {
+            $gatewayBuilder->withMessageConverters($this->messageConverterReferenceNames);
         }
     }
 
@@ -458,7 +435,7 @@ final class MessagingSystemConfiguration implements Configuration
         $asyncHandlerAnnotations = [];
 
         if ($this->batchForwardingSourceChannels !== [] && ! $this->isRunningForEnterpriseLicence) {
-            throw LicensingException::create(sprintf('Batch forwarding for Message Channel `%s` is available only with Ecotone Enterprise licence. See https://docs.ecotone.tech/enterprise for details.', array_key_first($this->batchForwardingSourceChannels)));
+            throw LicensingException::create(sprintf('Batch forwarding for Message Channel `%s` is available only with Ecotone Enterprise licence.', array_key_first($this->batchForwardingSourceChannels)));
         }
         foreach ($this->declaredBatchForwardingChannels as $declaredBatchForwardingChannel) {
             if (! isset($this->batchForwardingSourceChannels[$declaredBatchForwardingChannel])) {
@@ -475,7 +452,7 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->asynchronousEndpoints as $targetEndpointId => $asynchronousMessageChannels) {
             $asynchronousMessageChannel = array_shift($asynchronousMessageChannels);
             if (! isset($this->channelBuilders[$asynchronousMessageChannel]) && ! isset($this->defaultChannelBuilders[$asynchronousMessageChannel])) {
-                throw ConfigurationException::create("Registered asynchronous endpoint `{$targetEndpointId}`, however channel configuration for `{$asynchronousMessageChannel}` was not provided. Register it with SimpleMessageChannelBuilder::createQueueChannel('{$asynchronousMessageChannel}') as a ServiceConfiguration extension object or from a #[ServiceContext] method.");
+                throw ConfigurationException::create("Registered asynchronous endpoint `{$targetEndpointId}`, however channel configuration for `{$asynchronousMessageChannel}` was not provided.");
             }
 
             $foundEndpoint = false;
@@ -497,7 +474,7 @@ final class MessagingSystemConfiguration implements Configuration
                             }
                         }
                     }
-                    $endpointAnnotations = $asyncAttribute ? $asyncAttribute->asynchronousExecution : [];
+                    $endpointAnnotations = $asyncAttribute ? $asyncAttribute->getAsynchronousExecution() : [];
                     if ($endpointAnnotations && ! $this->isRunningForEnterpriseLicence) {
                         throw LicensingException::create(Annotation\ModuleConfiguration\ErrorChannelExceptionMessages::asynchronousExecutionRequiresEnterprise($targetEndpointId));
                     }
@@ -505,9 +482,9 @@ final class MessagingSystemConfiguration implements Configuration
                     $hasErrorChannel = false;
                     $hasDelayedRetry = false;
                     foreach ($endpointAnnotations as $endpointAnnotation) {
-                        if ($endpointAnnotation instanceof \Ecotone\Api\Attribute\ErrorChannel) {
+                        if ($endpointAnnotation instanceof \Ecotone\Messaging\Attribute\ErrorChannel) {
                             $hasErrorChannel = true;
-                        } elseif ($endpointAnnotation instanceof \Ecotone\Api\Attribute\DelayedRetry) {
+                        } elseif ($endpointAnnotation instanceof \Ecotone\Messaging\Attribute\DelayedRetry) {
                             $hasDelayedRetry = true;
                         }
                     }
@@ -518,12 +495,12 @@ final class MessagingSystemConfiguration implements Configuration
                     }
 
                     foreach ($handlerInterface->getMethodAnnotations() as $methodAnnotation) {
-                        if ($methodAnnotation instanceof \Ecotone\Api\Attribute\ErrorChannel) {
+                        if ($methodAnnotation instanceof \Ecotone\Messaging\Attribute\ErrorChannel) {
                             throw ConfigurationException::create(
                                 Annotation\ModuleConfiguration\ErrorChannelExceptionMessages::errorChannelDirectlyOnAsyncHandlerMethod($targetEndpointId)
                             );
                         }
-                        if ($methodAnnotation instanceof \Ecotone\Api\Attribute\DelayedRetry) {
+                        if ($methodAnnotation instanceof \Ecotone\Messaging\Attribute\DelayedRetry) {
                             throw ConfigurationException::create(
                                 Annotation\ModuleConfiguration\ErrorChannelExceptionMessages::delayedRetryDirectlyOnAsyncHandlerMethod($targetEndpointId)
                             );
@@ -550,15 +527,13 @@ final class MessagingSystemConfiguration implements Configuration
                     $generatedEndpointId = Uuid::v7()->toRfc4122();
                     $this->registerMessageHandler(
                         UninterruptibleServiceActivator::create(
-                            new Definition(RoutingSlipPrepender::class, [
+                            RoutingSlipPrepender::create(
                                 $consequentialChannels,
                                 [
                                     MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME,
                                     MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME,
-                                ],
-                                Reference::to(MessageBuilder::class),
-                                MessageBusChannel::ROUTING_KEY_HEADER,
-                            ]),
+                                ]
+                            ),
                             'transform',
                         )
                             ->withEndpointId($generatedEndpointId)
@@ -640,24 +615,6 @@ final class MessagingSystemConfiguration implements Configuration
         }
     }
 
-    private function refuseHandlersSharingADirectChannel(): void
-    {
-        $subscribedHandlers = [];
-        foreach ($this->messageHandlerBuilders as $messageHandlerBuilder) {
-            $channelName = $messageHandlerBuilder->getInputMessageChannelName();
-            $channelBuilder = $this->channelBuilders[$channelName] ?? null;
-            if (! $channelBuilder instanceof SimpleMessageChannelBuilder || ! $channelBuilder->isDirect()) {
-                continue;
-            }
-
-            if (isset($subscribedHandlers[$channelName])) {
-                throw WrongHandlerAmountException::forDirectChannelSharedBy($channelName, (string) $subscribedHandlers[$channelName], (string) $messageHandlerBuilder);
-            }
-
-            $subscribedHandlers[$channelName] = $messageHandlerBuilder;
-        }
-    }
-
     /**
      * @return void
      */
@@ -704,12 +661,12 @@ final class MessagingSystemConfiguration implements Configuration
 
     public static function prepareWithDefaultsForTesting(
         array $extensionObjects = [],
-        ?BootstrapConfiguration $bootstrapConfiguration = null
+        ?ServiceConfiguration $serviceConfiguration = null
     ): Configuration {
         return self::prepare(
             __DIR__ .'/../../../',
             InMemoryConfigurationVariableService::createEmpty(),
-            $bootstrapConfiguration ?? BootstrapConfiguration::createWithDefaults()->withEnabledModulePackageNames([]),
+            $serviceConfiguration ?? ServiceConfiguration::createWithAsynchronicityOnly(),
             $extensionObjects,
             true,
         );
@@ -718,24 +675,24 @@ final class MessagingSystemConfiguration implements Configuration
     public static function prepare(
         string $rootPathToSearchConfigurationFor,
         ConfigurationVariableService $configurationVariableService,
-        BootstrapConfiguration $bootstrapConfiguration,
+        ServiceConfiguration $serviceConfiguration,
         array $userLandClassesToRegister = [],
         bool $enableTestPackage = false,
     ): Configuration {
-        $bootstrapConfiguration = self::addCorePackage($bootstrapConfiguration, $enableTestPackage);
+        $serviceConfiguration = self::addCorePackage($serviceConfiguration, $enableTestPackage);
 
         return self::prepareWithAnnotationFinder(
             AnnotationFinderFactory::createForAttributes(
                 realpath($rootPathToSearchConfigurationFor),
-                $bootstrapConfiguration->namespaces,
-                $bootstrapConfiguration->environment,
-                $bootstrapConfiguration->loadCatalog,
-                self::getModuleClassesFor($bootstrapConfiguration),
+                $serviceConfiguration->getNamespaces(),
+                $serviceConfiguration->getEnvironment(),
+                $serviceConfiguration->getLoadedCatalog() ?? '',
+                self::getModuleClassesFor($serviceConfiguration),
                 $userLandClassesToRegister,
                 $enableTestPackage
             ),
             $configurationVariableService,
-            $bootstrapConfiguration,
+            $serviceConfiguration,
             $enableTestPackage,
         );
     }
@@ -743,10 +700,10 @@ final class MessagingSystemConfiguration implements Configuration
     public static function prepareWithAnnotationFinder(
         AnnotationFinder $annotationFinder,
         ConfigurationVariableService $configurationVariableService,
-        BootstrapConfiguration $bootstrapConfiguration,
+        ServiceConfiguration $serviceConfiguration,
         bool $enableTestPackage = false,
     ): Configuration {
-        $bootstrapConfiguration = self::addCorePackage($bootstrapConfiguration, $enableTestPackage);
+        $serviceConfiguration = self::addCorePackage($serviceConfiguration, $enableTestPackage);
 
         $preparationInterfaceRegistry = InterfaceToCallRegistry::createWith($annotationFinder);
         return self::prepareWithModuleRetrievingService(
@@ -756,20 +713,23 @@ final class MessagingSystemConfiguration implements Configuration
                 $configurationVariableService
             ),
             $preparationInterfaceRegistry,
-            $bootstrapConfiguration,
+            $serviceConfiguration,
         );
     }
 
+    /**
+     * @TODO that method should stay private, require refactoring tests
+     */
     public static function prepareWithModuleRetrievingService(
         ModuleRetrievingService $moduleConfigurationRetrievingService,
         InterfaceToCallRegistry $preparationInterfaceRegistry,
-        BootstrapConfiguration $bootstrapConfiguration,
+        ServiceConfiguration $applicationConfiguration,
     ): MessagingSystemConfiguration {
         return new self(
             $moduleConfigurationRetrievingService,
             $moduleConfigurationRetrievingService->findAllExtensionObjects(),
             $preparationInterfaceRegistry,
-            $bootstrapConfiguration,
+            $applicationConfiguration,
         );
     }
 
@@ -792,11 +752,6 @@ final class MessagingSystemConfiguration implements Configuration
         $this->externalContainer = $externalContainer;
 
         return $this;
-    }
-
-    public function getExternalContainer(): ?ContainerInterface
-    {
-        return $this->externalContainer;
     }
 
     /**
@@ -1031,6 +986,16 @@ final class MessagingSystemConfiguration implements Configuration
         return $this;
     }
 
+    /**
+     * @inheritDoc
+     */
+    public function registerMessageConverter(string $referenceName): Configuration
+    {
+        $this->messageConverterReferenceNames[] = $referenceName;
+
+        return $this;
+    }
+
     public function registerServiceDefinition(string|Reference $id, Definition|Reference|array $definition = []): Configuration
     {
         if (! isset($this->serviceDefinitions[(string) $id])) {
@@ -1071,7 +1036,6 @@ final class MessagingSystemConfiguration implements Configuration
             $builder,
             $this->interfaceToCallRegistry,
             $this->applicationConfiguration,
-            $this->bootstrapConfiguration,
             $this->pollingMetadata,
             $this->beforeCallMethodInterceptors,
             $this->aroundMethodInterceptors,
@@ -1095,12 +1059,14 @@ final class MessagingSystemConfiguration implements Configuration
             $messagingBuilder->register($id, $definition);
         }
 
-        $loggingService = (new Definition(LoggingService::class))
-            ->addMethodCall('registerLogger', [new Reference('logger', ContainerImplementation::NULL_ON_INVALID_REFERENCE)]);
-        foreach ($this->applicationConfiguration->headersInLogContext as $headerName) {
-            $loggingService->addMethodCall('includeHeaderInLogContext', [$headerName]);
-        }
-        $messagingBuilder->register(LoggingGateway::class, $loggingService);
+        $messagingBuilder->register(
+            LoggingGateway::class,
+            (new Definition(LoggingService::class))
+                ->addMethodCall('registerLogger', [new Reference('logger', ContainerImplementation::NULL_ON_INVALID_REFERENCE)])
+        );
+
+        // TODO: some service configuration should be handled at runtime. Here they are all cached in the container
+        //        $messagingBuilder->register('config.defaultSerializationMediaType', MediaType::parseMediaType($this->applicationConfiguration->getDefaultSerializationMediaType()));
 
         $converters = [];
         foreach ($this->converterBuilders as $converterBuilder) {
@@ -1184,17 +1150,16 @@ final class MessagingSystemConfiguration implements Configuration
             ]));
         }
 
-        $messagingBuilder->register(ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), $messagingBuilder->getPollingEndpoints(), $gatewayListReferences, array_map(fn (ConsoleCommandConfiguration $consoleCommandConfiguration) => $consoleCommandConfiguration->getName(), $this->consoleCommands)]));
-        (new RegisterSingletonMessagingServices($this->bootstrapConfiguration))->process($builder);
+        $messagingBuilder->register(ConfiguredMessagingSystem::class, new Definition(MessagingSystemContainer::class, [new Reference(ContainerInterface::class), $messagingBuilder->getPollingEndpoints(), $gatewayListReferences]));
+        (new RegisterSingletonMessagingServices($this->applicationConfiguration))->process($builder);
         foreach ($this->compilerPasses as $compilerPass) {
             $compilerPass->process($builder);
         }
-        (new Container\Compiler\VerifyEnterpriseLicenceForFetchedAggregates($this->isRunningForEnterpriseLicence))->process($builder);
         (new Container\Compiler\VerifyEnterpriseLicenceForClosureExpressions($this->isRunningForEnterpriseLicence))->process($builder);
 
         (new Container\Compiler\ValidateRequiredReferencesPass(
             $this->requiredReferences,
-            $this->bootstrapConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE),
+            $this->applicationConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE),
             $this->externalContainer
         ))->process($builder);
     }
@@ -1204,11 +1169,19 @@ final class MessagingSystemConfiguration implements Configuration
      */
     public function getRequiredReferencesForValidation(): array
     {
-        if ($this->bootstrapConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
+        if ($this->applicationConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
             return [];
         }
 
         return $this->requiredReferences;
+    }
+
+    /**
+     * @deprecated
+     */
+    public function buildMessagingSystemFromConfiguration(?ContainerInterface $referenceSearchService = null): ConfiguredMessagingSystem
+    {
+        return ContainerConfig::buildMessagingSystemInMemoryContainer($this, $referenceSearchService);
     }
 
     public static function prepareCacheDirectory(ServiceCacheConfiguration $serviceCacheConfiguration): void

@@ -4,26 +4,25 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Router;
 
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Handler\DestinationResolutionException;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\Router\RouterBuilder;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Test\ChannelTestSupport;
+use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Test\ComponentTestBuilder;
-use Ecotone\Test\StaticMessageBuilder;
 use Exception;
 use stdClass;
 use Test\Ecotone\Messaging\Fixture\Router\MultipleChannelRouter;
 use Test\Ecotone\Messaging\Fixture\Router\Order;
+use Test\Ecotone\Messaging\Fixture\Router\SingleChannelRouter;
 use Test\Ecotone\Messaging\Unit\MessagingTestCase;
 
 /**
- * RouterBuilder::create() (custom-router-method) is covered by RouterAttributeTest via
- * the real #[Router] attribute. The specialized factory methods below
- * (createPayloadTypeRouter*, createHeaderMappingRouter, createRecipientListRouter) have
- * no #[Router] attribute option exposing them -- they are only reachable by constructing
- * RouterBuilder directly, so they stay covered here.
+ * Class RouterBuilderTest
+ * @package Ecotone\Messaging\Handler\Router
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
  *
  * @internal
  */
@@ -33,6 +32,103 @@ use Test\Ecotone\Messaging\Unit\MessagingTestCase;
  */
 class RouterBuilderTest extends MessagingTestCase
 {
+    /**
+     * @throws Exception
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_routing_message_to_single_channel()
+    {
+        $chanelName = 'buyChannel';
+        $objectToInvokeReference = 'service-a';
+
+        $messaging = ComponentTestBuilder::create()
+            ->withChannel(SimpleMessageChannelBuilder::createQueueChannel($chanelName))
+            ->withReference($objectToInvokeReference, SingleChannelRouter::createWithChosenChannelName($chanelName))
+            ->withMessageHandler(
+                RouterBuilder::create($objectToInvokeReference, InterfaceToCall::create(SingleChannelRouter::class, 'pick'))
+                    ->withInputChannelName('inputChannel')
+            )
+            ->build();
+
+        $messaging->sendDirectToChannel('inputChannel', 'some');
+
+        $this->assertNotNull($messaging->receiveMessageFrom($chanelName));
+        ;
+    }
+
+    /**
+     * @throws Exception
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_routing_message_to_multiple_channels()
+    {
+        $objectToInvokeReference = 'service-a';
+        $messaging = ComponentTestBuilder::create()
+            ->withChannel(SimpleMessageChannelBuilder::createQueueChannel('channel1'))
+            ->withChannel(SimpleMessageChannelBuilder::createQueueChannel('channel2'))
+            ->withReference($objectToInvokeReference, MultipleChannelRouter::createWithChosenChannelName([
+                'channel1',
+                'channel2',
+            ]))
+            ->withMessageHandler(
+                RouterBuilder::create($objectToInvokeReference, InterfaceToCall::create(MultipleChannelRouter::class, 'pick'))
+                    ->withInputChannelName('inputChannel')
+            )
+            ->build();
+
+        $messaging->sendDirectToChannel('inputChannel', 'some');
+
+        $this->assertNotNull($messaging->receiveMessageFrom('channel1'));
+        $this->assertNotNull($messaging->receiveMessageFrom('channel2'));
+    }
+
+    /**
+     * @throws Exception
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_throwing_exception_if_resolution_is_required()
+    {
+        $chanelName = 'buyChannel';
+        $objectToInvokeReference = 'service-a';
+
+        $messaging = ComponentTestBuilder::create()
+            ->withChannel(SimpleMessageChannelBuilder::createQueueChannel($chanelName))
+            ->withReference($objectToInvokeReference, MultipleChannelRouter::createWithChosenChannelName([]))
+            ->withMessageHandler(
+                RouterBuilder::create($objectToInvokeReference, InterfaceToCall::create(MultipleChannelRouter::class, 'pick'))
+                    ->withInputChannelName('inputChannel')
+            )
+            ->build();
+
+        $this->expectException(DestinationResolutionException::class);
+
+        $messaging->sendDirectToChannel('inputChannel', 'some');
+    }
+
+    /**
+     * @throws Exception
+     * @throws \Ecotone\Messaging\MessagingException
+     */
+    public function test_if_no_resolution_required_not_throwing_exception_when_no_resolution()
+    {
+        $chanelName = 'buyChannel';
+        $objectToInvokeReference = 'service-a';
+
+        $messaging = ComponentTestBuilder::create()
+            ->withChannel(SimpleMessageChannelBuilder::createQueueChannel($chanelName))
+            ->withReference($objectToInvokeReference, MultipleChannelRouter::createWithChosenChannelName([]))
+            ->withMessageHandler(
+                RouterBuilder::create($objectToInvokeReference, InterfaceToCall::create(MultipleChannelRouter::class, 'pick'))
+                    ->withInputChannelName('inputChannel')
+                    ->setResolutionRequired(false)
+            )
+            ->build();
+
+        $messaging->sendDirectToChannel('inputChannel', 'some');
+
+        $this->assertNull($messaging->receiveMessageFrom($chanelName));
+    }
+
     /**
      * @throws Exception
      * @throws \Ecotone\Messaging\MessagingException
@@ -53,8 +149,8 @@ class RouterBuilderTest extends MessagingTestCase
 
         $messaging->sendDirectToChannel('inputChannel', new stdClass());
 
-        $this->assertNotNull(ChannelTestSupport::of($messaging)->receiveMessageFrom('channel1'));
-        $this->assertNull(ChannelTestSupport::of($messaging)->receiveMessageFrom('channel2'));
+        $this->assertNotNull($messaging->receiveMessageFrom('channel1'));
+        $this->assertNull($messaging->receiveMessageFrom('channel2'));
     }
 
     /**
@@ -76,8 +172,8 @@ class RouterBuilderTest extends MessagingTestCase
 
         $messaging->sendDirectToChannel('inputChannel', new stdClass());
 
-        $this->assertNull(ChannelTestSupport::of($messaging)->receiveMessageFrom('channel1'));
-        $this->assertNotNull(ChannelTestSupport::of($messaging)->receiveMessageFrom($defaultResolutionChannel));
+        $this->assertNull($messaging->receiveMessageFrom('channel1'));
+        $this->assertNotNull($messaging->receiveMessageFrom($defaultResolutionChannel));
     }
 
     /**
@@ -97,7 +193,7 @@ class RouterBuilderTest extends MessagingTestCase
 
         $messaging->sendDirectToChannel('inputChannel', new stdClass());
 
-        $this->assertNotNull(ChannelTestSupport::of($messaging)->receiveMessageFrom($channelName));
+        $this->assertNotNull($messaging->receiveMessageFrom($channelName));
     }
 
     /**
@@ -118,15 +214,15 @@ class RouterBuilderTest extends MessagingTestCase
             )
             ->build();
 
-        ChannelTestSupport::of($messaging)->sendMessageDirectToChannel(
+        $messaging->sendMessageDirectToChannel(
             'inputChannel',
-            StaticMessageBuilder::withPayload('some')
+            MessageBuilder::withPayload('some')
                 ->setHeader($headerName, 'private')
                 ->build()
         );
 
-        $this->assertNotNull(ChannelTestSupport::of($messaging)->receiveMessageFrom($privateChannelName));
-        $this->assertNull(ChannelTestSupport::of($messaging)->receiveMessageFrom($publicChannelName));
+        $this->assertNotNull($messaging->receiveMessageFrom($privateChannelName));
+        $this->assertNull($messaging->receiveMessageFrom($publicChannelName));
     }
 
     /**
@@ -164,8 +260,8 @@ class RouterBuilderTest extends MessagingTestCase
 
         $messaging->sendDirectToChannel('inputChannel', 'some');
 
-        $this->assertNotNull(ChannelTestSupport::of($messaging)->receiveMessageFrom($privateChannelName));
-        $this->assertNotNull(ChannelTestSupport::of($messaging)->receiveMessageFrom($publicChannelName));
+        $this->assertNotNull($messaging->receiveMessageFrom($privateChannelName));
+        $this->assertNotNull($messaging->receiveMessageFrom($publicChannelName));
     }
 
     /**
@@ -186,21 +282,24 @@ class RouterBuilderTest extends MessagingTestCase
 
         $messaging->sendDirectToChannel('inputChannel', [1, 2]);
 
-        $firstMessage = ChannelTestSupport::of($messaging)->receiveMessageFrom('channel1');
+        $firstMessage = $messaging->receiveMessageFrom('channel1');
         $this->assertEquals(1, $firstMessage->getHeaders()->get(MessageHeaders::SEQUENCE_NUMBER));
         $this->assertEquals(2, $firstMessage->getHeaders()->get(MessageHeaders::SEQUENCE_SIZE));
-        $secondMessage = ChannelTestSupport::of($messaging)->receiveMessageFrom('channel2');
+        $secondMessage = $messaging->receiveMessageFrom('channel2');
         $this->assertEquals(2, $secondMessage->getHeaders()->get(MessageHeaders::SEQUENCE_NUMBER));
         $this->assertEquals(2, $secondMessage->getHeaders()->get(MessageHeaders::SEQUENCE_SIZE));
     }
 
-    public function test_converting_to_string_names_the_routing_method()
+    public function test_converting_to_string()
     {
+        $inputChannelName = 'inputChannel';
+        $endpointName = 'someName';
+
         $this->assertEquals(
             RouterBuilder::create('ref-name', InterfaceToCall::create(MultipleChannelRouter::class, 'pick'))
-                ->withInputChannelName('inputChannel')
-                ->withEndpointId('someName'),
-            'Router - invocation of ' . MultipleChannelRouter::class . '::pick'
+                ->withInputChannelName($inputChannelName)
+                ->withEndpointId($endpointName),
+            sprintf('Router for input channel `%s` with name `%s`', $inputChannelName, $endpointName)
         );
     }
 }

@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\InterceptedBridge;
 
-use Ecotone\Api\Attribute\Around;
-use Ecotone\Api\Attribute\InternalHandler;
-use Ecotone\Api\Interceptor\MethodInvocation;
+use Ecotone\Messaging\Attribute\Interceptor\Around;
+use Ecotone\Messaging\Attribute\ServiceActivator;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 /**
  * licence Apache-2.0
  */
 final class BridgeExample
 {
-    #[InternalHandler('bridgeExample', outputChannelName: 'bridgeSum')]
+    #[ServiceActivator('bridgeExample', outputChannelName: 'bridgeSum')]
     public function result(int $result): int
     {
         return $result;
     }
 
-    #[InternalHandler('bridgeSum')]
+    #[ServiceActivator('bridgeSum')]
     public function sum(int $amount): int
     {
         return $amount + 1;

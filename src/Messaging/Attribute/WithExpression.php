@@ -11,7 +11,6 @@ use Closure;
  */
 /**
  * licence Apache-2.0
- * @internal
  */
 interface WithExpression
 {

@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Blog;
 
-use Ecotone\Api\Attribute\TargetIdentifier;
+use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
 
 /**
  * Command where one identifier comes from command metadata and factory method generates the other
@@ -10,9 +10,9 @@ use Ecotone\Api\Attribute\TargetIdentifier;
  */
 class CreateArticleWithFactoryAssignedNullCommand
 {
-    #[TargetIdentifier]
+    #[TargetAggregateIdentifier]
     private string $author;
-    #[TargetIdentifier]
+    #[TargetAggregateIdentifier]
     private ?string $title;
     private string $content;
 

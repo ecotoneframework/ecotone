@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
-use Ecotone\Api\Attribute\ClassReference;
+use Ecotone\Messaging\Attribute\ClassReference;
 
 #[ClassReference('methodInterceptor')]
 /**

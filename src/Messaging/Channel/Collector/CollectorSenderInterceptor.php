@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\Collector;
 
-use Ecotone\Api\Attribute\Reference;
-use Ecotone\Api\Attribute\WithoutMessageCollector;
-use Ecotone\Api\Interceptor\MethodInvocation;
-use Ecotone\Api\Messaging\BatchMessage;
-use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageChannel;
+use Ecotone\Messaging\Attribute\Parameter\Reference;
+use Ecotone\Messaging\Attribute\WithoutMessageCollector;
+use Ecotone\Messaging\BatchMessage;
 use Ecotone\Messaging\Channel\BatchSupportingMessageChannel;
 use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
+use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -30,7 +30,6 @@ final class CollectorSenderInterceptor
         Message $message,
         #[Reference] ConfiguredMessagingSystem $configuredMessagingSystem,
         #[Reference] LoggingGateway $logger,
-        #[Reference] MessageBuilder $messageBuilder,
         ?WithoutMessageCollector $withoutMessageCollector = null,
     ): mixed {
         if ($withoutMessageCollector !== null) {
@@ -50,7 +49,7 @@ final class CollectorSenderInterceptor
 
                 if ($this->supportsBatchMessages($messageChannel)) {
                     $messageChannel->send(
-                        $messageBuilder->withPayload($this->combineIntoBatch($collectedMessages))->build()
+                        MessageBuilder::withPayload($this->combineIntoBatch($collectedMessages))->build()
                     );
                 } else {
                     foreach ($collectedMessages as $collectedMessage) {
@@ -88,7 +87,7 @@ final class CollectorSenderInterceptor
         foreach ($collectedMessages as $collectedMessage) {
             $payload = $collectedMessage->getPayload();
             if ($payload instanceof BatchMessage) {
-                foreach ($payload->entries as $entry) {
+                foreach ($payload->getEntries() as $entry) {
                     $entries[] = $entry;
                 }
 

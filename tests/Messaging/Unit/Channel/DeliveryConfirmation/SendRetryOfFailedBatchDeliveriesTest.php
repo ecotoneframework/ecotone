@@ -4,22 +4,21 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Channel\DeliveryConfirmation;
 
-use Ecotone\Api\ExtensionObject\RetryTemplateBuilder;
-use Ecotone\Api\Messaging\BatchMessage;
-use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageChannel;
+use Ecotone\Messaging\BatchMessage;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\FailedDelivery;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PublishingFailedException;
 use Ecotone\Messaging\Channel\PollableChannel\SendRetries\SendRetryChannelInterceptor;
 use Ecotone\Messaging\Channel\PollableChannel\Serialization\OutboundMessageConverter;
+use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Gateway\ErrorChannelService;
 use Ecotone\Messaging\Handler\Logger\LoggingService;
+use Ecotone\Messaging\Handler\Recoverability\RetryTemplateBuilder;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\Scheduling\StubUTCClock;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
-use Ecotone\Test\StaticMessageBuilder;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 
@@ -33,7 +32,7 @@ final class SendRetryOfFailedBatchDeliveriesTest extends TestCase
         $channel = $this->createRecordingChannel();
         $interceptor = $this->createInterceptor();
 
-        $batchMessage = StaticMessageBuilder::withPayload(
+        $batchMessage = MessageBuilder::withPayload(
             BatchMessage::constructEmpty()
                 ->append('first delivered order')
                 ->append('poison order')
@@ -44,7 +43,7 @@ final class SendRetryOfFailedBatchDeliveriesTest extends TestCase
             $batchMessage,
             $channel,
             PublishingFailedException::withFailedDeliveries([
-                new FailedDelivery(StaticMessageBuilder::withPayload('poison order')->build(), 'nacked by broker', 'orders'),
+                new FailedDelivery(MessageBuilder::withPayload('poison order')->build(), 'nacked by broker', 'orders'),
             ]),
         );
 
@@ -56,7 +55,7 @@ final class SendRetryOfFailedBatchDeliveriesTest extends TestCase
         $channel = $this->createRecordingChannel();
         $interceptor = $this->createInterceptor();
 
-        $singleMessage = StaticMessageBuilder::withPayload('failed order')->build();
+        $singleMessage = MessageBuilder::withPayload('failed order')->build();
 
         $interceptor->afterSendCompletion(
             $singleMessage,
@@ -71,23 +70,19 @@ final class SendRetryOfFailedBatchDeliveriesTest extends TestCase
 
     private function createInterceptor(): SendRetryChannelInterceptor
     {
-        $clock = StubUTCClock::createWithCurrentTime('2025-01-01 00:00:00');
-
         return new SendRetryChannelInterceptor(
             'orders',
-            RetryTemplateBuilder::fixedBackOff(1)->maxRetries(1)->build(),
+            RetryTemplateBuilder::fixedBackOff(1)->maxRetryAttempts(1)->build(),
             null,
             new ErrorChannelService(
                 new LoggingService(),
                 $this->createStub(OutboundMessageConverter::class),
                 $this->createStub(ConversionService::class),
                 new MessageHeadersPropagatorInterceptor(),
-                new MessageBuilder($clock),
             ),
             $this->createStub(ConfiguredMessagingSystem::class),
             new NullLogger(),
-            $clock,
-            new MessageBuilder($clock),
+            StubUTCClock::createWithCurrentTime('2025-01-01 00:00:00'),
         );
     }
 
@@ -101,13 +96,8 @@ final class SendRetryOfFailedBatchDeliveriesTest extends TestCase
             {
                 $payload = $message->getPayload();
                 $this->sentBatchPayloads[] = $payload instanceof BatchMessage
-                    ? array_map(fn (array $entry): mixed => $entry['payload'], $payload->entries)
+                    ? array_map(fn (array $entry): mixed => $entry['payload'], $payload->getEntries())
                     : [$payload];
-            }
-
-            public function __toString(): string
-            {
-                return 'recording';
             }
         };
     }

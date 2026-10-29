@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint;
 
-use Ecotone\Api\Gateway\EcotoneClockInterface;
-use Ecotone\Api\Interceptor\Precedence;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
@@ -17,7 +15,6 @@ use Ecotone\Messaging\Endpoint\Interceptor\PcntlTerminationListener;
 use Ecotone\Messaging\Endpoint\PollingConsumer\AsyncEndpointAnnotationContext;
 use Ecotone\Messaging\Endpoint\PollingConsumer\AsyncHandlerAnnotationRegistry;
 use Ecotone\Messaging\Endpoint\PollingConsumer\InterceptedConsumerRunner;
-use Ecotone\Messaging\Endpoint\PollingConsumer\PolledMessageFailureAnswer;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PollingConsumerErrorChannelInterceptor;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\ChannelResolver;
@@ -29,7 +26,8 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Recoverability\RetryRunner;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Precedence;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 
 /**
  * Class InterceptedConsumerBuilder
@@ -77,7 +75,6 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
             new Reference(ExpressionEvaluationService::REFERENCE),
             new Reference(AsyncHandlerAnnotationRegistry::class),
             new Reference(AsyncEndpointAnnotationContext::class),
-            new Reference(MessageBuilder::class),
         ]);
         $builder->registerPollingEndpoint($this->endpointId, $consumerRunner, $this->withContinuesPolling());
     }
@@ -89,7 +86,6 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
                 Reference::to(ErrorChannelService::class),
                 Reference::to(ChannelResolver::class),
                 Reference::to(AsyncEndpointAnnotationContext::class),
-                Reference::to(PolledMessageFailureAnswer::class),
             ]));
         }
         return AroundInterceptorBuilder::create(

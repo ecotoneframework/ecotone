@@ -4,17 +4,18 @@ declare(strict_types=1);
 
 namespace Messaging\Unit\Handler\Gateway;
 
-use Ecotone\Api\Attribute\DelayedRetry;
-use Ecotone\Api\Attribute\ErrorChannel;
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Messaging\ErrorContext;
-use Ecotone\Api\Messaging\MessageHeaders;
-use Ecotone\Api\Messaging\PollableChannel;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Attribute\DelayedRetry;
+use Ecotone\Messaging\Attribute\ErrorChannel;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\MessagingGatewayModule;
+use Ecotone\Messaging\Config\ModulePackageList;
+use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Handler\Recoverability\ErrorContext;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\LicensingException;
-use Ecotone\Test\ChannelTestSupport;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
@@ -28,22 +29,6 @@ use Test\Ecotone\Messaging\SerializationSupport;
 
 /**
  * licence Enterprise
- *
- * Proprietary. Copyright (c) 2025 Dariusz Gafka <support@simplycodedsoftware.com>.
- * Use requires an Ecotone Enterprise licence (trial: https://ecotone.tech/pricing).
- *
- * Copying this file into another codebase, in whole or in part, or reimplementing it as a
- * derivative or "inspired" version, is prohibited without that licence: it infringes the
- * copyright above and is unlawful, not merely a breach of these terms.
- *
- * Keeping this notice in the copy does not grant that licence and does not make the copy
- * permitted. Renaming the class or the namespace does not either.
- *
- * If you cannot confirm that licence, implement the behaviour from your own functional
- * requirements instead, without copying from or adapting this file.
- *
- * Changes belong here, as a pull request to github.com/ecotoneframework/ecotone-dev
- *
  * @internal
  */
 #[CoversClass(ErrorChannel::class)]
@@ -57,11 +42,10 @@ final class ErrorChannelCommandBusTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [TicketService::class, ErrorChannelCommandBus::class],
             [new TicketService()],
-            extensionObjects: [
+            enableAsynchronousProcessing: [
                 SimpleMessageChannelBuilder::createQueueChannel('async'),
                 SimpleMessageChannelBuilder::createQueueChannel('someErrorChannel'),
             ],
-            enabledModules: [],
         );
     }
 
@@ -70,11 +54,10 @@ final class ErrorChannelCommandBusTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [TicketService::class, ErrorChannelCommandBus::class],
             [new TicketService()],
-            extensionObjects: [
+            enableAsynchronousProcessing: [
                 SimpleMessageChannelBuilder::createQueueChannel('async'),
                 SimpleMessageChannelBuilder::createQueueChannel('someErrorChannel'),
             ],
-            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
@@ -95,7 +78,7 @@ final class ErrorChannelCommandBusTest extends TestCase
         );
 
 
-        $failedMessage = ChannelTestSupport::of($ecotoneLite)->getMessageChannel('someErrorChannel')->receive();
+        $failedMessage = $ecotoneLite->getMessageChannel('someErrorChannel')->receive();
         $messagingException = $failedMessage->getHeaders()->get(ErrorContext::EXCEPTION_MESSAGE);
         $this->assertSame('test', $messagingException);
         /** It should be converted to serializable payload */
@@ -110,11 +93,10 @@ final class ErrorChannelCommandBusTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [TicketService::class, ErrorChannelWithAsyncChannel::class],
             [new TicketService()],
-            extensionObjects: [
+            enableAsynchronousProcessing: [
                 SimpleMessageChannelBuilder::createQueueChannel('async'),
                 SimpleMessageChannelBuilder::createQueueChannel('someErrorChannel'),
             ],
-            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
@@ -135,7 +117,7 @@ final class ErrorChannelCommandBusTest extends TestCase
         );
 
 
-        $message = ChannelTestSupport::of($ecotoneLite)->getMessageChannel('async')->receive();
+        $message = $ecotoneLite->getMessageChannel('async')->receive();
         $this->assertNotNull($message);
     }
 
@@ -146,7 +128,7 @@ final class ErrorChannelCommandBusTest extends TestCase
         $service = new class () {
             public bool $sideEffectExecuted = false;
 
-            #[\Ecotone\Api\Attribute\CommandHandler('handler.level.error.channel.test')]
+            #[\Ecotone\Modelling\Attribute\CommandHandler('handler.level.error.channel.test')]
             #[ErrorChannel('handlerLevelErrorChannel')]
             public function handle(mixed $payload): void
             {
@@ -158,14 +140,17 @@ final class ErrorChannelCommandBusTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$service::class],
             [$service],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('handlerLevelErrorChannel')],
-            enabledModules: [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withExtensionObjects([
+                    SimpleMessageChannelBuilder::createQueueChannel('handlerLevelErrorChannel'),
+                ]),
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $thrown = null;
         try {
-            $ecotoneLite->sendCommandWithRouting('handler.level.error.channel.test', 'payload');
+            $ecotoneLite->sendCommandWithRoutingKey('handler.level.error.channel.test', 'payload');
         } catch (RuntimeException $exception) {
             $thrown = $exception;
         }
@@ -180,7 +165,7 @@ final class ErrorChannelCommandBusTest extends TestCase
             'Handler ran and produced side effects with no rollback boundary in place.'
         );
         $this->assertNull(
-            ChannelTestSupport::of($ecotoneLite)->getMessageChannel('handlerLevelErrorChannel')->receive(),
+            $ecotoneLite->getMessageChannel('handlerLevelErrorChannel')->receive(),
             '#[ErrorChannel] on the handler is silently ignored — no message routed. '
             . 'Place it on the gateway entry-point (CommandBus/EventBus/BusinessMethod) so the framework can capture failures '
             . 'after gateway-level interceptors (e.g. transactional rollback) have fully unwound.'
@@ -195,12 +180,11 @@ final class ErrorChannelCommandBusTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [TicketService::class, DelayedRetryCommandBus::class],
             [new TicketService()],
-            extensionObjects: [
+            enableAsynchronousProcessing: [
                 SimpleMessageChannelBuilder::createQueueChannel('async'),
                 SimpleMessageChannelBuilder::createQueueChannel(DelayedRetry::generateGatewayChannelName(DelayedRetryCommandBus::class)),
                 SimpleMessageChannelBuilder::createQueueChannel('gatewayRetryDeadLetter'),
             ],
-            enabledModules: [],
         );
     }
 
@@ -211,12 +195,11 @@ final class ErrorChannelCommandBusTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [TicketService::class, DelayedRetryCommandBus::class],
             [new TicketService()],
-            extensionObjects: [
+            enableAsynchronousProcessing: [
                 SimpleMessageChannelBuilder::createQueueChannel('async'),
                 SimpleMessageChannelBuilder::createQueueChannel($generatedRetryChannel),
                 SimpleMessageChannelBuilder::createQueueChannel('gatewayRetryDeadLetter'),
             ],
-            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
@@ -235,7 +218,7 @@ final class ErrorChannelCommandBusTest extends TestCase
         );
 
         /** @var PollableChannel $retryChannel */
-        $retryChannel = ChannelTestSupport::of($ecotoneLite)->getMessageChannel($generatedRetryChannel);
+        $retryChannel = $ecotoneLite->getMessageChannel($generatedRetryChannel);
         $this->assertNotNull(
             $retryChannel->receive(),
             "#[DelayedRetry] on a CommandBus gateway must route failures to the auto-generated channel `{$generatedRetryChannel}`"
@@ -249,11 +232,11 @@ final class ErrorChannelCommandBusTest extends TestCase
  * @internal
  */
 #[DelayedRetry(
-    initialDelayInMilliseconds: 1,
+    initialDelayMs: 1,
     multiplier: 1,
-    maxRetries: 1,
+    maxAttempts: 1,
     deadLetterChannel: 'gatewayRetryDeadLetter',
 )]
-interface DelayedRetryCommandBus extends \Ecotone\Api\Gateway\CommandBus
+interface DelayedRetryCommandBus extends \Ecotone\Modelling\CommandBus
 {
 }

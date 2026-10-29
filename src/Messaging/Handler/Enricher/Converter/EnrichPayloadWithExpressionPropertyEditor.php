@@ -4,14 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher\Converter;
 
-use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditor;
 use Ecotone\Messaging\Handler\Enricher\PropertyEditorAccessor;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
-use Ecotone\Messaging\Handler\ExpressionEvaluationException;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\ExpressionLocation;
-use Throwable;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
+use Ecotone\Messaging\Message;
 
 /**
  * Class ExpressionSetter
@@ -34,12 +32,14 @@ class EnrichPayloadWithExpressionPropertyEditor implements PropertyEditor
      * ExpressionSetter constructor.
      *
      * @param ExpressionEvaluationService $expressionEvaluationService
+     * @param ReferenceSearchService $referenceSearchService
      * @param PropertyEditorAccessor $dataSetter
      * @param PropertyPath $propertyPath
      * @param string $expression
      * @param string $nullResultExpression
+     * @param string $mappingExpression
      */
-    public function __construct(ExpressionEvaluationService $expressionEvaluationService, PropertyEditorAccessor $dataSetter, PropertyPath $propertyPath, string $expression, string $nullResultExpression, private ExpressionLocation $location)
+    public function __construct(ExpressionEvaluationService $expressionEvaluationService, PropertyEditorAccessor $dataSetter, PropertyPath $propertyPath, string $expression, string $nullResultExpression)
     {
         $this->expressionEvaluationService = $expressionEvaluationService;
         $this->propertyPath                = $propertyPath;
@@ -55,23 +55,19 @@ class EnrichPayloadWithExpressionPropertyEditor implements PropertyEditor
     {
         $evaluateAgainst = $this->canNullExpressionBeUsed($replyMessage) ? $this->nullResultExpression : $this->expression;
 
-        try {
-            $dataToEnrich = $this->expressionEvaluationService->evaluate(
-                $evaluateAgainst,
-                [
-                    'payload' => $replyMessage ? $replyMessage->getPayload() : null,
-                    'headers' => $replyMessage ? $replyMessage->getHeaders()->headers() : null,
-                    'request' => [
-                        'payload' => $enrichMessage->getPayload(),
-                        'headers' => $enrichMessage->getHeaders(),
-                    ],
+        $dataToEnrich = $this->expressionEvaluationService->evaluate(
+            $evaluateAgainst,
+            [
+                'payload' => $replyMessage ? $replyMessage->getPayload() : null,
+                'headers' => $replyMessage ? $replyMessage->getHeaders()->headers() : null,
+                'request' => [
+                    'payload' => $enrichMessage->getPayload(),
+                    'headers' => $enrichMessage->getHeaders(),
                 ],
-            );
+            ],
+        );
 
-            return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichMessage->getPayload(), $dataToEnrich, $enrichMessage, $replyMessage);
-        } catch (Throwable $exception) {
-            throw ExpressionEvaluationException::wrapping($this->location, $exception);
-        }
+        return $this->dataSetter->enrichDataWith($this->propertyPath, $enrichMessage->getPayload(), $dataToEnrich, $enrichMessage, $replyMessage);
     }
 
     /**

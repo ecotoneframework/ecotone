@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\VerifyAccessToSavingLogs;
 
-use Ecotone\Api\Attribute\Around;
-use Ecotone\Api\Interceptor\MethodInvocation;
+use Ecotone\Messaging\Attribute\Interceptor\Around;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use InvalidArgumentException;
 use Test\Ecotone\Modelling\Fixture\InterceptedEventAggregate\Logger;
 

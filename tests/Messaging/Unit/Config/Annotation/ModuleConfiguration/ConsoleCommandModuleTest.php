@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\AnnotationFinder\InMemory\InMemoryAnnotationFinder;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ConsoleCommandModule;
+use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand\ConsoleCommandWithArrayOptions;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand\ConsoleCommandWithMessageHeaders;
@@ -28,10 +31,11 @@ final class ConsoleCommandModuleTest extends AnnotationConfigurationTestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        EcotoneLite::bootstrapFlowTesting(
-            [OneTimeWithIncorrectResultSet::class],
-            [new OneTimeWithIncorrectResultSet()],
-            enabledModules: [],
+        ConsoleCommandModule::create(
+            InMemoryAnnotationFinder::createFrom([
+                OneTimeWithIncorrectResultSet::class,
+            ]),
+            InterfaceToCallRegistry::createEmpty()
         );
     }
 
@@ -40,8 +44,7 @@ final class ConsoleCommandModuleTest extends AnnotationConfigurationTestCase
         $consoleCommand = new ConsoleCommandWithArrayOptions();
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConsoleCommandWithArrayOptions::class],
-            [$consoleCommand],
-            enabledModules: [],
+            [$consoleCommand]
         );
 
         $ecotoneLite->runConsoleCommand('cli-command:array-options', [
@@ -59,8 +62,7 @@ final class ConsoleCommandModuleTest extends AnnotationConfigurationTestCase
         $consoleCommand = new ConsoleCommandWithArrayOptions();
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConsoleCommandWithArrayOptions::class],
-            [$consoleCommand],
-            enabledModules: [],
+            [$consoleCommand]
         );
 
         $ecotoneLite->runConsoleCommand('cli-command:array-options-and-argument', [
@@ -80,8 +82,7 @@ final class ConsoleCommandModuleTest extends AnnotationConfigurationTestCase
         $stdClassConverter = new StdClassConverter();
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConsoleCommandWithMessageHeaders::class, StdClassConverter::class],
-            [$consoleCommand, $stdClassConverter],
-            enabledModules: [],
+            [$consoleCommand, $stdClassConverter]
         );
 
         $ecotoneLite->runConsoleCommand('cli-command:with-headers', [
@@ -101,8 +102,7 @@ final class ConsoleCommandModuleTest extends AnnotationConfigurationTestCase
         $stdClassConverter = new StdClassConverter();
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConsoleCommandWithMessageHeaders::class, StdClassConverter::class],
-            [$consoleCommand, $stdClassConverter],
-            enabledModules: [],
+            [$consoleCommand, $stdClassConverter]
         );
 
         $ecotoneLite->runConsoleCommand('cli-command:with-multiple-headers', [
@@ -122,8 +122,7 @@ final class ConsoleCommandModuleTest extends AnnotationConfigurationTestCase
         $stdClassConverter = new StdClassConverter();
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConsoleCommandWithMessageHeaders::class, StdClassConverter::class],
-            [$consoleCommand, $stdClassConverter],
-            enabledModules: [],
+            [$consoleCommand, $stdClassConverter]
         );
 
         $this->expectException(InvalidArgumentException::class);

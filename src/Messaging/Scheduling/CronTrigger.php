@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
 
-use Ecotone\Api\Gateway\EcotoneClockInterface;
-use Ecotone\Api\Scheduling\DatePoint;
 use Ecotone\Messaging\Scheduling\CronIntegration\CronExpression;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 
@@ -40,9 +38,9 @@ class CronTrigger implements Trigger
     /**
      * @inheritDoc
      */
-    public function nextExecutionTime(EcotoneClockInterface $clock, SimpleTriggerContext $triggerContext): DatePoint
+    public function nextExecutionTime(EcotoneClockInterface $clock, TriggerContext $triggerContext): DatePoint
     {
-        $cron = new CronExpression($this->cronExpression);
+        $cron = CronExpression::factory($this->cronExpression);
 
         if (! $triggerContext->lastActualExecutionTime() && $triggerContext->lastScheduledTime()) {
             return $triggerContext->lastScheduledTime();
@@ -76,10 +74,10 @@ class CronTrigger implements Trigger
     }
 
     /**
-     * @param SimpleTriggerContext $triggerContext
+     * @param TriggerContext $triggerContext
      * @return bool
      */
-    private function hasScheduledButNotYetExecuted(SimpleTriggerContext $triggerContext): bool
+    private function hasScheduledButNotYetExecuted(TriggerContext $triggerContext): bool
     {
         return
             ($triggerContext->lastActualExecutionTime() && $triggerContext->lastScheduledTime())

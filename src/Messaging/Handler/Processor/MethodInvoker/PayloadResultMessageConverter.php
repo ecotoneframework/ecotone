@@ -2,10 +2,10 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Handler\Type\UnionType;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -15,7 +15,6 @@ class PayloadResultMessageConverter implements ResultToMessageConverter
 {
     public function __construct(
         private Type $returnType,
-        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -27,7 +26,7 @@ class PayloadResultMessageConverter implements ResultToMessageConverter
 
         $returnType = $this->getReturnTypeFromResult($result);
 
-        return $this->messageBuilder->fromMessage($requestMessage)
+        return MessageBuilder::fromMessage($requestMessage)
             ->setContentType(MediaType::createApplicationXPHPWithTypeParameter($returnType->toString()))
             ->setPayload($result)
             ->build();

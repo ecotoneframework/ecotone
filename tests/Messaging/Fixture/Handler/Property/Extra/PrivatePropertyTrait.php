@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Property\Extra;
 
-use Ecotone\Api\Attribute\Identifier;
+use Ecotone\Modelling\Attribute\Identifier;
 
 trait PrivatePropertyTrait
 {

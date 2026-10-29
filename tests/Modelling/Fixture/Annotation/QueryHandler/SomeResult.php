@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler;
 
-use Ecotone\Api\Attribute\TargetIdentifier;
+use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
 
 /**
  * Class SomeResult
@@ -14,6 +14,6 @@ use Ecotone\Api\Attribute\TargetIdentifier;
  */
 class SomeResult
 {
-    #[TargetIdentifier]
+    #[TargetAggregateIdentifier]
     private $aggregateId;
 }

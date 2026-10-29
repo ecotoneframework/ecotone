@@ -8,35 +8,31 @@ declare(strict_types=1);
 namespace Ecotone\Projecting\Config;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Api\Attribute\EventHandler;
-use Ecotone\Api\Attribute\EventSourcingAggregate;
-use Ecotone\Api\Attribute\ModuleAnnotation;
-use Ecotone\Api\Attribute\NamedEvent;
-use Ecotone\Api\EventSourcing\EventStore;
-use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-use Ecotone\Api\Projecting\EventStreamingChannelAdapter;
-use Ecotone\Api\Projecting\FromAggregateStream;
-use Ecotone\Api\Projecting\FromStream;
-use Ecotone\Api\Projecting\FromTaggedStream;
-use Ecotone\Api\Projecting\Projection;
-use Ecotone\Api\Projecting\Streaming;
+use Ecotone\EventSourcing\Attribute\FromAggregateStream;
+use Ecotone\EventSourcing\Attribute\FromStream;
+use Ecotone\EventSourcing\EventStore;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionResolver;
+use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Attribute\NamedEvent;
 use Ecotone\Modelling\Config\Routing\BusRoutingMapBuilder;
+use Ecotone\Projecting\Attribute\ProjectionV2;
+use Ecotone\Projecting\Attribute\Streaming;
+use Ecotone\Projecting\EventStoreAdapter\EventStreamingChannelAdapter;
 use Ecotone\Projecting\StreamFilter;
 use Ecotone\Projecting\StreamFilterRegistry;
-use Ecotone\Projecting\StreamSourceReference;
-use Ecotone\Projecting\TaggedStream\TagStreamSource;
 
 #[ModuleAnnotation]
-final class StreamFilterRegistryModule implements AnnotationModule
+class StreamFilterRegistryModule implements AnnotationModule
 {
     /** @param array<string, StreamFilter[]> $streamFilters */
     public function __construct(private array $streamFilters)
@@ -59,13 +55,12 @@ final class StreamFilterRegistryModule implements AnnotationModule
 
         $streamFilters = [];
 
-        foreach ($annotationFinder->findAnnotatedClasses(Projection::class) as $classname) {
-            $projectionAttribute = $annotationFinder->getAttributeForClass($classname, Projection::class);
+        foreach ($annotationFinder->findAnnotatedClasses(ProjectionV2::class) as $classname) {
+            $projectionAttribute = $annotationFinder->getAttributeForClass($classname, ProjectionV2::class);
             $projectionName = $projectionAttribute->name;
             $eventNames = $projectionEventNames[$projectionName] ?? [];
 
             foreach ($annotationFinder->getAnnotationsForClass($classname, FromStream::class) as $streamAttribute) {
-                self::assertIsNotAggregateClass($annotationFinder, $streamAttribute->stream, $projectionName, $classname);
                 $streamFilters[$projectionName][] = new StreamFilter(
                     $streamAttribute->stream,
                     $streamAttribute->aggregateType,
@@ -78,14 +73,10 @@ final class StreamFilterRegistryModule implements AnnotationModule
                 $streamFilters[$projectionName][] = self::resolveFromAggregateStream($annotationFinder, $aggregateStreamAttribute, $projectionName, $eventNames);
             }
 
-            foreach ($annotationFinder->getAnnotationsForClass($classname, FromTaggedStream::class) as $taggedStreamAttribute) {
-                $streamFilters[$projectionName][] = new StreamFilter('', null, $taggedStreamAttribute->eventStoreReferenceName, $eventNames, $taggedStreamAttribute->tag);
-            }
-
             $isStreamingProjection = $annotationFinder->findAttributeForClass($classname, Streaming::class) !== null;
             if (! $isStreamingProjection && (! isset($streamFilters[$projectionName]) || $streamFilters[$projectionName] === [])) {
                 throw ConfigurationException::create(
-                    "Projection '{$projectionName}' must have at least one #[FromStream], #[FromAggregateStream] or #[FromTaggedStream] attribute defined on class {$classname}."
+                    "Projection '{$projectionName}' must have at least one #[FromStream] or #[FromAggregateStream] attribute defined on class {$classname}."
                 );
             }
         }
@@ -94,6 +85,7 @@ final class StreamFilterRegistryModule implements AnnotationModule
     }
 
     /**
+     * @param array<class-string, string> $namedEvents Map of class name to named event name
      * @return array<string, array<string>> Map of projection name to event names (empty array means no filtering)
      */
     public static function collectProjectionEventNames(
@@ -110,8 +102,8 @@ final class StreamFilterRegistryModule implements AnnotationModule
         $disabledFiltering = [];
         $routingMapBuilder = new BusRoutingMapBuilder();
 
-        foreach ($annotationFinder->findCombined(Projection::class, EventHandler::class) as $projectionEventHandler) {
-            /** @var Projection $projectionAttribute */
+        foreach ($annotationFinder->findCombined(ProjectionV2::class, EventHandler::class) as $projectionEventHandler) {
+            /** @var ProjectionV2 $projectionAttribute */
             $projectionAttribute = $projectionEventHandler->getAnnotationForClass();
             $projectionName = $projectionAttribute->name;
 
@@ -155,22 +147,6 @@ final class StreamFilterRegistryModule implements AnnotationModule
         return $projectionEventNames;
     }
 
-    private static function assertIsNotAggregateClass(AnnotationFinder $annotationFinder, string $streamName, string $projectionName, string $projectionClassName): void
-    {
-        if (! class_exists($streamName)) {
-            return;
-        }
-
-        if ($annotationFinder->findAttributeForClass($streamName, EventSourcingAggregate::class) === null) {
-            return;
-        }
-
-        throw ConfigurationException::create(
-            "Projection '{$projectionName}' on {$projectionClassName} uses #[FromStream({$streamName}::class)] pointing to an Event Sourcing Aggregate. "
-            . "Use #[FromAggregateStream({$streamName}::class)] instead, so events are filtered by aggregate type."
-        );
-    }
-
     public static function resolveFromAggregateStream(
         AnnotationFinder $annotationFinder,
         FromAggregateStream $attribute,
@@ -201,7 +177,6 @@ final class StreamFilterRegistryModule implements AnnotationModule
                     $filter->aggregateType,
                     $filter->eventStoreReferenceName,
                     $filter->eventNames,
-                    $filter->tag,
                 ]);
             }
         }
@@ -224,50 +199,16 @@ final class StreamFilterRegistryModule implements AnnotationModule
             StreamFilterRegistry::class,
             new Definition(StreamFilterRegistry::class, [$filtersDefinition])
         );
-
-        $tagPartitionedProjectionNames = self::tagPartitionedProjectionNamesOf($this->streamFilters);
-        if ($tagPartitionedProjectionNames !== []) {
-            $messagingConfiguration->registerServiceDefinition(
-                TagStreamSource::class,
-                new Definition(TagStreamSource::class, [
-                    new Reference(EventStore::class),
-                    new Reference(StreamFilterRegistry::class),
-                    $tagPartitionedProjectionNames,
-                ])
-            );
-        }
     }
 
-    /**
-     * @return string[]
-     */
-    public static function tagPartitionedProjectionNames(AnnotationFinder $annotationFinder): array
+    public function canHandle($extensionObject): bool
     {
-        return self::tagPartitionedProjectionNamesOf(self::collectStreamFilters($annotationFinder));
-    }
-
-    /**
-     * @param array<string, StreamFilter[]> $streamFilters
-     * @return string[]
-     */
-    private static function tagPartitionedProjectionNamesOf(array $streamFilters): array
-    {
-        $names = [];
-        foreach ($streamFilters as $projectionName => $filters) {
-            foreach ($filters as $filter) {
-                if ($filter->tag !== null) {
-                    $names[] = $projectionName;
-                    break;
-                }
-            }
-        }
-
-        return $names;
+        return $extensionObject instanceof EventStreamingChannelAdapter;
     }
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions, ?InterfaceToCallRegistry $interfaceToCallRegistry = null): array
     {
-        return self::tagPartitionedProjectionNamesOf($this->streamFilters) === [] ? [] : [new StreamSourceReference(TagStreamSource::class)];
+        return [];
     }
 
     public function getModulePackageName(): string

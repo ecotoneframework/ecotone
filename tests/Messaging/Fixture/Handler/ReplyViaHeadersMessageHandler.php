@@ -2,11 +2,11 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler;
 
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageChannel;
-use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHandler;
-use Ecotone\Test\StaticMessageBuilder;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * Class DumbMessageHandler
@@ -109,7 +109,7 @@ class ReplyViaHeadersMessageHandler implements MessageHandler
                         return;
                     }
 
-                    $replyChannel->send(StaticMessageBuilder::fromMessage($message)->setPayload($replyData)->build());
+                    $replyChannel->send(MessageBuilder::fromMessage($message)->setPayload($replyData)->build());
                 }
             }
         }

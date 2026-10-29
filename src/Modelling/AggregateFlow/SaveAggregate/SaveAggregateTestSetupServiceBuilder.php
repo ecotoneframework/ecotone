@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\AggregateFlow\SaveAggregate;
 
-use Ecotone\Api\Gateway\EcotoneClockInterface;
 use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
@@ -13,7 +12,6 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\MessageConverter\DefaultHeaderMapper;
-use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\Repository\AllAggregateRepository;
 
@@ -36,8 +34,6 @@ final class SaveAggregateTestSetupServiceBuilder implements CompilableBuilder
             DefaultHeaderMapper::createAllHeadersMapping()->getDefinition(),
             Reference::to(EventMapper::class),
             new Reference(AllAggregateRepository::class),
-            Reference::to(EcotoneClockInterface::class),
-            Reference::to(MessageBuilder::class),
         ]);
     }
 

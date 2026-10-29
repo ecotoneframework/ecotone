@@ -13,7 +13,6 @@ use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\InterceptedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvokerProcessor;
-use Ecotone\Messaging\Support\MessageBuilder;
 
 use function is_string;
 
@@ -40,24 +39,6 @@ class MethodInvokerBuilder implements InterceptedMessageProcessorBuilder
     public static function create(object|string $definition, InterfaceToCallReference $interfaceToCallReference, array $methodParametersConverterBuilders = []): self
     {
         return new self($definition, $interfaceToCallReference, $methodParametersConverterBuilders);
-    }
-
-    /**
-     * @param array<ParameterConverterBuilder> $methodParametersConverterBuilders
-     */
-    public function withMethodParameterConverters(array $methodParametersConverterBuilders): self
-    {
-        $this->methodParametersConverterBuilders = $methodParametersConverterBuilders;
-
-        return $this;
-    }
-
-    /**
-     * @return array<ParameterConverterBuilder>
-     */
-    public function getMethodParameterConverters(): array
-    {
-        return $this->methodParametersConverterBuilders;
     }
 
     public function withPassTroughMessageIfVoid(bool $shouldPassTroughMessageIfVoid): self
@@ -88,10 +69,9 @@ class MethodInvokerBuilder implements InterceptedMessageProcessorBuilder
         $messageConverter = match (true) {
             $this->resultToMessageConverter !== null => $this->resultToMessageConverter->compile($builder),
             $this->shouldPassTroughMessageIfVoid && $interfaceToCall->getReturnType()->isVoid() => new Definition(PassthroughMessageConverter::class),
-            $this->changeHeaders => new Definition(HeaderResultMessageConverter::class, [(string) $interfaceToCall, Reference::to(MessageBuilder::class)]),
+            $this->changeHeaders => new Definition(HeaderResultMessageConverter::class, [(string) $interfaceToCall]),
             default => new Definition(PayloadResultMessageConverter::class, [
                 $interfaceToCall->getReturnType(),
-                Reference::to(MessageBuilder::class),
             ])
         };
 
@@ -110,7 +90,7 @@ class MethodInvokerBuilder implements InterceptedMessageProcessorBuilder
             $objectToInvokeOnResolver = $this->reference;
         } else {
             $objectToInvokeOnResolver = new Definition(MethodInvokerStaticObjectResolver::class, [
-                $this->objectToInvokeOn($interfaceToCall),
+                is_string($this->reference) && ! $interfaceToCall->isStaticallyCalled() ? Reference::to($this->reference) : $this->reference,
             ]);
         }
 
@@ -126,19 +106,6 @@ class MethodInvokerBuilder implements InterceptedMessageProcessorBuilder
     public function getInterceptedInterface(): InterfaceToCallReference
     {
         return $this->interfaceToCallReference;
-    }
-
-    private function objectToInvokeOn(InterfaceToCall $interfaceToCall): object|string
-    {
-        if (! $interfaceToCall->isStaticallyCalled()) {
-            return is_string($this->reference) ? Reference::to($this->reference) : $this->reference;
-        }
-
-        return match (true) {
-            $this->reference instanceof Reference => $this->reference->getId(),
-            $this->reference instanceof Definition => $this->reference->getClassName(),
-            default => $this->reference,
-        };
     }
 
     /**

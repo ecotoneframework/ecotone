@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler;
 
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
-use Stringable;
 
 /**
  * Interface MessageHandlerBuilder
@@ -15,7 +14,7 @@ use Stringable;
 /**
  * licence Apache-2.0
  */
-interface MessageHandlerBuilder extends CompilableBuilder, Stringable
+interface MessageHandlerBuilder extends CompilableBuilder
 {
     /**
      * @param string $inputChannelName

@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Annotation\QueryHandler\Service;
 
-use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Modelling\Attribute\QueryHandler;
 use stdClass;
 
 /**

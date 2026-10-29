@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\PollableChannel\InMemory;
 
-use Ecotone\Api\ExtensionObject\FinalFailureStrategy;
 use Ecotone\Messaging\Consumer\ConsumerPositionTracker;
 use Ecotone\Messaging\Endpoint\AcknowledgementCallback;
+use Ecotone\Messaging\Endpoint\FinalFailureStrategy;
 use Ecotone\Messaging\Support\Assert;
 use RuntimeException;
 
@@ -17,7 +17,7 @@ use RuntimeException;
  */
 final class InMemoryStreamingAcknowledgeCallback implements AcknowledgementCallback
 {
-    public const ECOTONE_IN_MEMORY_SHARED_ACK = 'ecotone_in_memory_shared_consumer_acknowledge';
+    public const ECOTONE_IN_MEMORY_SHARED_ACK = 'ecotone.in_memory_shared.ack';
 
     private int $requeueCount = 0;
 

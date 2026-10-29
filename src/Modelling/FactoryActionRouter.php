@@ -2,7 +2,7 @@
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Message;
 
 /**
  * licence Apache-2.0

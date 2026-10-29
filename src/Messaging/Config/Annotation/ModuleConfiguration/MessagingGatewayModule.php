@@ -5,18 +5,18 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Api\Attribute\Asynchronous;
-use Ecotone\Api\Attribute\ErrorChannel;
-use Ecotone\Api\Attribute\Header;
-use Ecotone\Api\Attribute\Headers;
-use Ecotone\Api\Attribute\MessageGateway;
-use Ecotone\Api\Attribute\ModuleAnnotation;
-use Ecotone\Api\Attribute\Payload;
-use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\ErrorChannel;
+use Ecotone\Messaging\Attribute\MessageGateway;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Messaging\Attribute\Parameter\Header;
+use Ecotone\Messaging\Attribute\Parameter\Headers;
+use Ecotone\Messaging\Attribute\Parameter\Payload;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
@@ -33,7 +33,7 @@ use Ecotone\Messaging\Support\LicensingException;
 /**
  * licence Apache-2.0
  */
-final class MessagingGatewayModule extends NoExternalConfigurationModule implements AnnotationModule
+class MessagingGatewayModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     public const MODULE_NAME = 'gatewayModule';
 
@@ -72,11 +72,11 @@ final class MessagingGatewayModule extends NoExternalConfigurationModule impleme
                 }
             }
 
-            $gatewayProxyBuilder = GatewayProxyBuilder::create($referenceName, $annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $annotation->requestChannel)
+            $gatewayProxyBuilder = GatewayProxyBuilder::create($referenceName, $annotationRegistration->getClassName(), $annotationRegistration->getMethodName(), $annotation->getRequestChannel())
                 ->withErrorChannel($annotation->getErrorChannel())
                 ->withParameterConverters($parameterConverters)
                 ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames())
-                ->withReplyMillisecondTimeout($annotation->replyTimeoutInMilliseconds);
+                ->withReplyMillisecondTimeout($annotation->getReplyTimeoutInMilliseconds());
 
             if ($annotation->getReplyContentType()) {
                 $gatewayProxyBuilder = $gatewayProxyBuilder->withReplyContentType($annotation->getReplyContentType());
@@ -116,6 +116,11 @@ final class MessagingGatewayModule extends NoExternalConfigurationModule impleme
     /**
      * @inheritDoc
      */
+    public function canHandle($extensionObject): bool
+    {
+        return false;
+    }
+
     /**
      * @inheritDoc
      */
@@ -125,13 +130,13 @@ final class MessagingGatewayModule extends NoExternalConfigurationModule impleme
             /** @var Asynchronous[] $asynchronous */
             $asynchronous = $interfaceToCallRegistry->getFor($gatewayBuilder->getInterfaceName(), $gatewayBuilder->getRelatedMethodName())->getAnnotationsByImportanceOrder(Type::attribute(Asynchronous::class));
             if ($asynchronous && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
-                throw LicensingException::create("Gateway {$gatewayBuilder->getInterfaceName()}::{$gatewayBuilder->getRelatedMethodName()} is marked as asynchronous. This functionality is available as part of Ecotone Enterprise. See https://docs.ecotone.tech/enterprise for details.");
+                throw LicensingException::create("Gateway {$gatewayBuilder->getInterfaceName()}::{$gatewayBuilder->getRelatedMethodName()} is marked as asynchronous. This functionality is available as part of Ecotone Enterprise.");
             }
             $errorChannel = $interfaceToCallRegistry->getFor($gatewayBuilder->getInterfaceName(), $gatewayBuilder->getRelatedMethodName())->getAnnotationsByImportanceOrder(Type::attribute(ErrorChannel::class));
             if ($errorChannel && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
                 throw LicensingException::create(ErrorChannelExceptionMessages::gatewayErrorChannelRequiresEnterprise($gatewayBuilder->getInterfaceName(), $gatewayBuilder->getRelatedMethodName()));
             }
-            $delayedRetry = $interfaceToCallRegistry->getFor($gatewayBuilder->getInterfaceName(), $gatewayBuilder->getRelatedMethodName())->getAnnotationsByImportanceOrder(Type::attribute(\Ecotone\Api\Attribute\DelayedRetry::class));
+            $delayedRetry = $interfaceToCallRegistry->getFor($gatewayBuilder->getInterfaceName(), $gatewayBuilder->getRelatedMethodName())->getAnnotationsByImportanceOrder(Type::attribute(\Ecotone\Messaging\Attribute\DelayedRetry::class));
             if ($delayedRetry && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
                 throw LicensingException::create(ErrorChannelExceptionMessages::gatewayDelayedRetryRequiresEnterprise($gatewayBuilder->getInterfaceName(), $gatewayBuilder->getRelatedMethodName()));
             }

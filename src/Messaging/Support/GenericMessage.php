@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Support;
 
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
+
+use function json_decode;
+use function json_encode;
 
 /**
  * Class GenericMessage
@@ -74,6 +77,15 @@ final class GenericMessage implements Message
     }
 
     /**
+     * @param mixed $payload
+     * @return Message
+     */
+    public static function createWithEmptyHeaders($payload): Message
+    {
+        return new static($payload, MessageHeaders::createEmpty());
+    }
+
+    /**
      * @inheritDoc
      */
     public function getPayload(): mixed
@@ -83,6 +95,9 @@ final class GenericMessage implements Message
 
     public function __toString()
     {
-        return MessageDescription::of($this);
+        return json_encode([
+            'payload' => $this->payload,
+            'headers' => json_decode((string)$this->getHeaders(), true),
+        ]);
     }
 }

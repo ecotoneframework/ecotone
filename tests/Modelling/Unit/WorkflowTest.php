@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Modelling\Unit;
 
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\Workflow\Saga\AsynchronousPaymentHandler;
 use Test\Ecotone\Modelling\Fixture\Workflow\Saga\Command\TakePayment;
@@ -28,8 +28,7 @@ final class WorkflowTest extends TestCase
             [OrderProcessSaga::class, PaymentHandler::class],
             [
                 PaymentHandler::class => new PaymentHandler(),
-            ],
-            enabledModules: [],
+            ]
         );
 
         $orderId = '123';
@@ -41,7 +40,7 @@ final class WorkflowTest extends TestCase
 
         $this->assertEquals(
             [new TakePayment($orderId)],
-            $ecotoneLite->popRecordedMessagePayloadsFrom('takePayment')
+            $ecotoneLite->getRecordedMessagePayloadsFrom('takePayment')
         );
     }
 
@@ -51,8 +50,7 @@ final class WorkflowTest extends TestCase
             [OrderProcessSaga::class, PaymentHandler::class],
             [
                 PaymentHandler::class => new PaymentHandler(),
-            ],
-            enabledModules: [],
+            ]
         );
 
         $orderId = '123';
@@ -70,8 +68,9 @@ final class WorkflowTest extends TestCase
             [
                 AsynchronousPaymentHandler::class => new AsynchronousPaymentHandler(),
             ],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
-            enabledModules: [],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ]
         );
 
         $orderId = '123';
@@ -83,7 +82,7 @@ final class WorkflowTest extends TestCase
 
         $this->assertEquals(
             [new TakePayment($orderId)],
-            $ecotoneLite->popRecordedMessagePayloadsFrom('takePayment')
+            $ecotoneLite->getRecordedMessagePayloadsFrom('takePayment')
         );
 
         $this->assertTrue(
@@ -95,7 +94,9 @@ final class WorkflowTest extends TestCase
 
     public function test_workflow_with_separated_output_command_handler(): void
     {
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([OrderProcessSaga::class], enabledModules: []);
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [OrderProcessSaga::class]
+        );
 
         $orderId = '123';
 
@@ -103,7 +104,7 @@ final class WorkflowTest extends TestCase
             [new TakePayment($orderId)],
             $ecotoneLite
                 ->publishEvent(new OrderWasPlaced($orderId))
-                ->popRecordedMessagePayloadsFrom('takePayment')
+                ->getRecordedMessagePayloadsFrom('takePayment')
         );
     }
 }

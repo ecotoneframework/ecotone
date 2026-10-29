@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Endpoint\PollingConsumer;
 
-use Ecotone\Api\Attribute\Asynchronous;
-use Ecotone\Api\Attribute\InternalHandler;
-use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\ServiceActivator;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -24,8 +24,9 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [TestMessageHandler::class],
             [$messageHandler],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
-            enabledModules: [],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ]
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', 'test-message');
@@ -33,8 +34,8 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite->run(
             'async',
             ExecutionPollingMetadata::createWithTestingSetup(
-                handledMessageLimit: 1,
-                executionTimeLimitInMilliseconds: 1000
+                amountOfMessagesToHandle: 1,
+                maxExecutionTimeInMilliseconds: 1000
             )
         );
 
@@ -48,8 +49,9 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [TestMessageHandler::class],
             [$messageHandler],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
-            enabledModules: [],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ]
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', 'message-1');
@@ -59,8 +61,8 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite->run(
             'async',
             ExecutionPollingMetadata::createWithTestingSetup(
-                handledMessageLimit: 10,
-                executionTimeLimitInMilliseconds: 50
+                amountOfMessagesToHandle: 10,
+                maxExecutionTimeInMilliseconds: 50
             )
         );
 
@@ -75,8 +77,9 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [TestMessageHandler::class],
             [$messageHandler],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
-            enabledModules: [],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ]
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', 'message-1');
@@ -86,8 +89,8 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite->run(
             'async',
             ExecutionPollingMetadata::createWithTestingSetup(
-                handledMessageLimit: 3,
-                executionTimeLimitInMilliseconds: 0
+                amountOfMessagesToHandle: 3,
+                maxExecutionTimeInMilliseconds: 0
             )
         );
 
@@ -101,8 +104,9 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [SignalSendingMessageHandler::class],
             [$signalHandler],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
-            enabledModules: [],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ]
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', 'message-1');
@@ -112,8 +116,8 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite->run(
             'async',
             ExecutionPollingMetadata::createWithTestingSetup(
-                handledMessageLimit: 10,
-                executionTimeLimitInMilliseconds: 30000
+                amountOfMessagesToHandle: 10,
+                maxExecutionTimeInMilliseconds: 30000
             )
         );
 
@@ -127,8 +131,9 @@ final class MessageConsumerSignalHandlingTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [SignalSendingMessageHandler::class],
             [$signalHandler],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
-            enabledModules: [],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ]
         );
 
         $ecotoneLite->sendDirectToChannel('handle_channel', 'message-1');
@@ -149,7 +154,7 @@ class TestMessageHandler
     private array $processedMessages = [];
 
     #[Asynchronous('async')]
-    #[InternalHandler('handle_channel', endpointId: 'test_handler')]
+    #[ServiceActivator('handle_channel', 'test_handler')]
     public function handle(string $message): void
     {
         $this->processedMessages[] = $message;
@@ -167,7 +172,7 @@ class SignalSendingMessageHandler
     private array $processedMessages = [];
 
     #[Asynchronous('async')]
-    #[InternalHandler('handle_channel', endpointId: 'signal_handler')]
+    #[ServiceActivator('handle_channel', 'signal_handler')]
     public function handle(string $message): void
     {
         $this->processedMessages[] = $message;

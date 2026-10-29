@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Async;
 
-use Ecotone\Api\Attribute\Asynchronous;
-use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\ServiceActivator;
 
 #[Asynchronous(channelName: 'asyncChannel2')]
 /**
@@ -11,13 +11,13 @@ use Ecotone\Api\Attribute\InternalHandler;
  */
 class AsyncClassExample
 {
-    #[InternalHandler('inputChannel', endpointId: 'asyncServiceActivator2')]
+    #[ServiceActivator('inputChannel', 'asyncServiceActivator2')]
     public function doSomething2(): void
     {
     }
 
     #[Asynchronous('asyncChannel1')]
-    #[InternalHandler('inputChannel', endpointId: 'asyncServiceActivator1')]
+    #[ServiceActivator('inputChannel', 'asyncServiceActivator1')]
     public function doSomething1(): void
     {
     }

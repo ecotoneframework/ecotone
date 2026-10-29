@@ -11,6 +11,9 @@ use RuntimeException;
 
 final class ProjectionStateStorageRegistry
 {
+    /**
+     * @param ProjectionStateStorage[] $storages
+     */
     public function __construct(
         private array $userlandStorages,
         private array $builtinStorages,

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -23,8 +23,17 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class GatewayPayloadConverter implements GatewayParameterConverter
 {
-    public function __construct(private string $parameterName, private ?Type $parameterType, private MessageBuilder $messageBuilder)
+    public function __construct(private string $parameterName, private ?Type $parameterType)
     {
+    }
+
+    /**
+     * @param string $parameterName
+     * @return GatewayPayloadConverter
+     */
+    public static function create(InterfaceParameter $parameter): self
+    {
+        return new self($parameter->getName(), self::getParameterTypeDescriptor($parameter));
     }
 
     public static function getParameterTypeDescriptor(InterfaceParameter $parameter): ?Type
@@ -59,6 +68,6 @@ class GatewayPayloadConverter implements GatewayParameterConverter
 
         $messageBuilder->setContentTypeIfAbsent(MediaType::createApplicationXPHPWithTypeParameter($type));
 
-        return $methodArgument->value() instanceof Message ? $this->messageBuilder->fromMessage($methodArgument->value()) : $messageBuilder->setPayload($methodArgument->value());
+        return $methodArgument->value() instanceof Message ? MessageBuilder::fromMessage($methodArgument->value()) : $messageBuilder->setPayload($methodArgument->value());
     }
 }

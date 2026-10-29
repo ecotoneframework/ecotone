@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Blog;
 
-use Ecotone\Api\Attribute\TargetIdentifier;
+use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
 
 /**
  * Class DeleteArticleCommand
@@ -14,13 +14,13 @@ use Ecotone\Api\Attribute\TargetIdentifier;
  */
 class CloseArticleCommand
 {
-    #[TargetIdentifier('author')]
+    #[TargetAggregateIdentifier('author')]
     private $authorName;
-    #[TargetIdentifier('title')]
+    #[TargetAggregateIdentifier('title')]
     private $titleName;
-    #[TargetIdentifier('additionalUnusedIdentifier')]
+    #[TargetAggregateIdentifier('additionalUnusedIdentifier')]
     private $additionalUnusedIdentifier;
-    #[TargetIdentifier('isPublished')]
+    #[TargetAggregateIdentifier('isPublished')]
     private $isPublished;
 
     /**

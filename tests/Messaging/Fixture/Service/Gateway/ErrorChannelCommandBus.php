@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Service\Gateway;
 
-use Ecotone\Api\Attribute\ErrorChannel;
-use Ecotone\Api\Gateway\CommandBus;
+use Ecotone\Messaging\Attribute\ErrorChannel;
+use Ecotone\Modelling\CommandBus;
 
 /**
  * Recommended pattern: extend CommandBus and place #[ErrorChannel] on the

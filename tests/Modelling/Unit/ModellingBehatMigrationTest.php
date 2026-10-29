@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\Gateway\CommandBus;
-use Ecotone\Api\Gateway\EventBus;
-use Ecotone\Api\Gateway\QueryBus;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Modelling\AggregateNotFoundException;
+use Ecotone\Lite\EcotoneLite;
 use Ecotone\Lite\InMemoryPSRContainer;
+use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Modelling\AggregateMessage;
+use Ecotone\Modelling\AggregateNotFoundException;
+use Ecotone\Modelling\CommandBus;
+use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributionEntrypoint;
+use Ecotone\Modelling\QueryBus;
 use Exception;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -20,7 +21,7 @@ use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\ChangeShippingAddres
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\CreateOrderCommand;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetOrderAmountQuery;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\GetShippingAddressQuery;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStateStoredRepository;
+use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\OrderNotificator;
 use Test\Ecotone\Modelling\Fixture\DistributedCommandHandler\ShoppingCenter;
 use Test\Ecotone\Modelling\Fixture\DistributedEventHandler\ShoppingRecord;
@@ -55,7 +56,7 @@ use Test\Ecotone\Modelling\Fixture\OrderAggregate\AddUserId\AddUserIdService;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\LoggingService;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\OrderErrorHandler;
 use Test\Ecotone\Modelling\Fixture\OrderAggregate\OrderRepository;
-use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStateStoredRepository;
+use Test\Ecotone\Modelling\Fixture\Renter\AppointmentStandardRepository;
 use Test\Ecotone\Modelling\Fixture\Renter\CreateAppointmentCommand;
 use Test\Ecotone\Modelling\Fixture\Renter\RentCalendar;
 use Test\Ecotone\Modelling\Fixture\RepositoryShortcut\Twitter;
@@ -84,7 +85,7 @@ final class ModellingBehatMigrationTest extends TestCase
             'Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate',
             [
                 OrderNotificator::class => new OrderNotificator(),
-                InMemoryStateStoredRepository::class => InMemoryStateStoredRepository::createEmpty(),
+                InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty(),
             ]
         );
 
@@ -111,7 +112,7 @@ final class ModellingBehatMigrationTest extends TestCase
             'Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate',
             [
                 OrderNotificator::class => new OrderNotificator(),
-                InMemoryStateStoredRepository::class => InMemoryStateStoredRepository::createEmpty(),
+                InMemoryStandardRepository::class => InMemoryStandardRepository::createEmpty(),
             ]
         );
 
@@ -133,7 +134,7 @@ final class ModellingBehatMigrationTest extends TestCase
             'Test\Ecotone\Modelling\Fixture\Renter',
             [
                 RentCalendar::class => new RentCalendar(),
-                AppointmentStateStoredRepository::class => AppointmentStateStoredRepository::createEmpty(),
+                AppointmentStandardRepository::class => AppointmentStandardRepository::createEmpty(),
             ]
         );
 
@@ -780,15 +781,16 @@ final class ModellingBehatMigrationTest extends TestCase
         $this->assertNotNull($result);
     }
 
-    private function bootstrapForNamespace(string $namespace, array $objects): \Ecotone\Api\Messaging\ConfiguredMessagingSystem
+    private function bootstrapForNamespace(string $namespace, array $objects): \Ecotone\Messaging\Config\ConfiguredMessagingSystem
     {
         return EcotoneLite::bootstrap(
             [],
             InMemoryPSRContainer::createFromObjects($objects),
-            enabledModules: [],
-            pathToRootCatalog: __DIR__ . '/../../..',
-            namespaces: [$namespace],
-            environment: 'prod',
+            ServiceConfiguration::createWithAsynchronicityOnly()
+                ->withEnvironment('prod')
+                ->withFailFast(false)
+                ->withNamespaces([$namespace]),
+            pathToRootCatalog: __DIR__ . '/../../..'
         );
     }
 }

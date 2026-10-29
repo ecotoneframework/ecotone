@@ -67,9 +67,9 @@ class ClassDefinition
         );
     }
 
-    public static function createUsingAnnotationParser(Type $classType, AnnotationResolver $annotationParser, ?TypeResolver $typeResolver = null): ClassDefinition
+    public static function createUsingAnnotationParser(Type $classType, AnnotationResolver $annotationParser): ClassDefinition
     {
-        $typeResolver ??= TypeResolver::createWithAnnotationParser($annotationParser);
+        $typeResolver = TypeResolver::createWithAnnotationParser($annotationParser);
 
         $reflectionClass = new ReflectionClass($classType->toString());
 

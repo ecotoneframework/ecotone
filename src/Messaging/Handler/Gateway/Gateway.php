@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\NonProxyGateway;
 use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageConverter\MessageConverter;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Throwable;
@@ -25,12 +26,15 @@ use Throwable;
  */
 class Gateway implements NonProxyGateway
 {
+    /**
+     * @param MessageConverter[] $messageConverters
+     */
     public function __construct(
         private MethodCallToMessageConverter $methodCallToMessageConverter,
         private ?Type $returnType,
+        private array $messageConverters,
         private GatewayReplyConverter $gatewayReplyConverter,
-        private MessageProcessor $gatewayInternalProcessor,
-        private MessageBuilder $messageBuilder,
+        private MessageProcessor $gatewayInternalProcessor
     ) {
     }
 
@@ -43,9 +47,20 @@ class Gateway implements NonProxyGateway
     public function execute(array $methodArgumentValues)
     {
         if (count($methodArgumentValues) === 1 && ($methodArgumentValues[0] instanceof Message)) {
-            $requestMessage = $this->messageBuilder->fromMessage($methodArgumentValues[0]);
+            $requestMessage = MessageBuilder::fromMessage($methodArgumentValues[0]);
         } else {
             $requestMessage = $this->methodCallToMessageConverter->convert($methodArgumentValues);
+
+            foreach ($this->messageConverters as $messageConverter) {
+                $convertedMessageBuilder = $messageConverter->toMessage(
+                    $requestMessage->getPayload(),
+                    $requestMessage->getCurrentHeaders()
+                );
+
+                if ($convertedMessageBuilder) {
+                    $requestMessage = $convertedMessageBuilder;
+                }
+            }
         }
 
         $canReturnValue = $this->returnType?->isVoid() === false;
@@ -65,7 +80,7 @@ class Gateway implements NonProxyGateway
             if ($replyContentType !== null || ! ($this->returnType?->isAnything() || $this->returnType?->isMessage())) {
                 $reply = $this->gatewayReplyConverter->convert($replyMessage, $replyContentType);
                 if (! ($reply instanceof Message)) {
-                    $replyMessage = $this->messageBuilder->fromMessage($replyMessage)
+                    $replyMessage = MessageBuilder::fromMessage($replyMessage)
                                         ->setPayload($reply)
                                         ->build();
                 } else {
@@ -77,7 +92,7 @@ class Gateway implements NonProxyGateway
         if ($replyMessage) {
             if ($this->returnType?->isClassOfType(Message::class)) {
                 if ($previousReplyChannel) {
-                    return $this->messageBuilder->fromMessage($replyMessage)
+                    return MessageBuilder::fromMessage($replyMessage)
                         ->setReplyChannel($previousReplyChannel)
                         ->build();
                 }

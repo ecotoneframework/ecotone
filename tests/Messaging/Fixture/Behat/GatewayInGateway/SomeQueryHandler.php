@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\GatewayInGateway;
 
-use Ecotone\Api\Attribute\QueryHandler;
-use Ecotone\Api\Gateway\QueryBus;
+use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Modelling\QueryBus;
 
 /**
  * licence Apache-2.0

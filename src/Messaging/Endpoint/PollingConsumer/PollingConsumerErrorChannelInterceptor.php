@@ -2,15 +2,15 @@
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
-use Ecotone\Api\Attribute\AsynchronousRunningEndpoint;
-use Ecotone\Api\Attribute\DelayedRetry;
-use Ecotone\Api\Attribute\ErrorChannel;
-use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\Interceptor\MethodInvocation;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Messaging\Attribute\DelayedRetry;
+use Ecotone\Messaging\Attribute\ErrorChannel;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\Gateway\ErrorChannelService;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
 use Throwable;
 
 /**
@@ -22,7 +22,6 @@ class PollingConsumerErrorChannelInterceptor
         private ErrorChannelService $errorChannelService,
         private ChannelResolver $channelResolver,
         private AsyncEndpointAnnotationContext $asyncEndpointAnnotationContext,
-        private PolledMessageFailureAnswer $failureAnswer,
     ) {
     }
 
@@ -31,10 +30,6 @@ class PollingConsumerErrorChannelInterceptor
         try {
             return $methodInvocation->proceed();
         } catch (Throwable $exception) {
-            if ($this->failureAnswer->answered($requestMessage, $exception)) {
-                return;
-            }
-
             if (! $this->tryToSendToErrorChannel($exception, $requestMessage)) {
                 throw $exception;
             }
@@ -47,7 +42,7 @@ class PollingConsumerErrorChannelInterceptor
             /** @var PollingMetadata $pollingMetadata */
             $pollingMetadata = $requestMessage->getHeaders()->get(MessageHeaders::CONSUMER_POLLING_METADATA);
 
-            if ($pollingMetadata->stopOnError) {
+            if ($pollingMetadata->isStoppedOnError()) {
                 return false;
             }
 

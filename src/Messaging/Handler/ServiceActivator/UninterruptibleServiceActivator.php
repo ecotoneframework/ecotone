@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\ServiceActivator;
 
+use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
@@ -14,13 +15,13 @@ use Ecotone\Messaging\Handler\ParameterConverterBuilder;
  */
 final class UninterruptibleServiceActivator implements MessageHandlerBuilderWithParameterConverters
 {
-    private function __construct(private MessageProcessorActivatorBuilder $serviceActivatorBuilder)
+    private function __construct(private ServiceActivatorBuilder $serviceActivatorBuilder)
     {
     }
 
-    public static function create(Definition $objectToInvokeOn, string $methodName): self
+    public static function create(DefinedObject $objectToInvokeOnReferenceName, string $methodName): self
     {
-        return new self(MessageProcessorActivatorBuilder::createForMethod($objectToInvokeOn, $methodName));
+        return new self(ServiceActivatorBuilder::createWithDirectReference($objectToInvokeOnReferenceName, $methodName));
     }
 
     /**

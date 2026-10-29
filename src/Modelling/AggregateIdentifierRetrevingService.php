@@ -5,16 +5,15 @@ namespace Ecotone\Modelling;
 use function array_key_exists;
 use function array_keys;
 
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageHeaders;
-use Ecotone\Messaging\Conversion\ConversionException;
 use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Enricher\PropertyPath;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\AggregateIdMetadata;
 
@@ -42,13 +41,13 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
         private array $identifierMapping,
         private ExpressionEvaluationService $expressionEvaluationService,
         private array $perClassIdentifierMappings,
-        private MessageBuilder $messageBuilder,
     ) {
 
     }
 
     public function process(Message $message): Message
     {
+        /** @TODO Ecotone 2.0 (remove) this. For backward compatibility because it's ran again when message is consumed from Queue e*/
         if ($this->messageContainsCorrectAggregateId($message)) {
             return $message;
         }
@@ -62,7 +61,7 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
             $aggregateIds = $message->getHeaders()->get(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER);
             $aggregateIds = is_array($aggregateIds) ? $aggregateIds : [\array_key_first($messageIdentifierMapping) ?? '' => $aggregateIds];
 
-            return $this->messageBuilder->fromMessage($message)
+            return MessageBuilder::fromMessage($message)
                 ->setHeader(AggregateMessage::AGGREGATE_ID, AggregateIdResolver::resolveArrayOfIdentifiers($this->aggregateClassName, $aggregateIds))
                 ->removeHeader(AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER)
                 ->build();
@@ -102,7 +101,7 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
             return $message;
         }
 
-        return $this->messageBuilder->fromMessage($message)
+        return MessageBuilder::fromMessage($message)
             ->setHeader(AggregateMessage::AGGREGATE_ID, AggregateIdResolver::resolveArrayOfIdentifiers($this->aggregateClassName, $aggregateIdentifiers))
             ->build();
     }
@@ -116,14 +115,6 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
     {
         if ($payloadClass !== null && isset($this->perClassIdentifierMappings[$payloadClass])) {
             return $this->perClassIdentifierMappings[$payloadClass];
-        }
-
-        if ($payloadClass !== null) {
-            foreach ($this->perClassIdentifierMappings as $handledClass => $identifierMapping) {
-                if ($handledClass !== '' && is_a($payloadClass, $handledClass, true)) {
-                    return $identifierMapping;
-                }
-            }
         }
 
         // Fallback to empty-key mapping when payload class is unknown
@@ -186,21 +177,14 @@ class AggregateIdentifierRetrevingService implements MessageProcessor
             $targetType = Type::create($payloadTargetClass),
             MediaType::createApplicationXPHPWithTypeParameter($targetType)
         )) {
-            try {
-                $payload = $this->conversionService
-                    ->convert(
-                        $payload,
-                        Type::createFromVariable($payload),
-                        $mediaType,
-                        $targetType,
-                        MediaType::createApplicationXPHPWithTypeParameter($targetType)
-                    );
-            } catch (ConversionException $exception) {
-                throw ConversionException::createFromPreviousException(
-                    "Payload of the message sent to {$this->aggregateClassName} could not be converted into {$payloadTargetClass}, the type of the first handler parameter without an attribute. If that parameter is a service rather than the message payload, mark it with #[Reference]. " . $exception->getMessage(),
-                    $exception
+            $payload = $this->conversionService
+                ->convert(
+                    $payload,
+                    Type::createFromVariable($payload),
+                    $mediaType,
+                    $targetType,
+                    MediaType::createApplicationXPHPWithTypeParameter($targetType)
                 );
-            }
         }
 
         return $payload;

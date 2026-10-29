@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\Collector;
 
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Messaging\Channel\AbstractChannelInterceptor;
 use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
 
 /**
  * licence Apache-2.0
@@ -17,8 +17,7 @@ final class MessageCollectorChannelInterceptor extends AbstractChannelIntercepto
 {
     public function __construct(
         private CollectorStorage $collectorStorage,
-        private LoggingGateway $logger,
-        private MessageCollectionObserver $observer,
+        private LoggingGateway $logger
     ) {
     }
 
@@ -26,7 +25,6 @@ final class MessageCollectorChannelInterceptor extends AbstractChannelIntercepto
     {
         if ($this->collectorStorage->isEnabled()) {
             $this->collectorStorage->collect($message, $this->logger);
-            $this->observer->collected($message);
 
             $message = null;
         }

@@ -2,9 +2,6 @@
 
 namespace Ecotone\Modelling\AggregateFlow\CallAggregate;
 
-use Ecotone\Api\Attribute\EventSourcingAggregate;
-use Ecotone\Api\Attribute\EventSourcingSaga;
-use Ecotone\Api\Modelling\WithAggregateVersioning;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
@@ -19,8 +16,10 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerAggregateObje
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\Assert;
-use Ecotone\Messaging\Support\MessageBuilder;
-use Ecotone\Modelling\AggregateFlow\AggregateVersionProperty;
+use Ecotone\Modelling\Attribute\AggregateVersion;
+use Ecotone\Modelling\Attribute\EventSourcingAggregate;
+use Ecotone\Modelling\Attribute\EventSourcingSaga;
+use Ecotone\Modelling\WithAggregateVersioning;
 
 /**
  * licence Apache-2.0
@@ -59,7 +58,15 @@ class CallAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
             $eventSourcingAttribute = $interfaceToCall->getSingleClassAnnotationOf($eventSourcedAggregateAnnotation);
         }
 
-        $this->aggregateVersionProperty = AggregateVersionProperty::resolveFor($aggregateClassDefinition)?->propertyName;
+        $aggregateVersionPropertyName = null;
+        $versionAnnotation             = Type::attribute(AggregateVersion::class);
+        foreach ($aggregateClassDefinition->getProperties() as $property) {
+            if ($property->hasAnnotation($versionAnnotation)) {
+                $aggregateVersionPropertyName = $property->getName();
+                // TODO: should throw exception if more than one version property
+            }
+        }
+        $this->aggregateVersionProperty             = $aggregateVersionPropertyName;
 
         if ($this->isEventSourced) {
             Assert::isTrue((bool)$this->aggregateVersionProperty, "{$interfaceToCall->getInterfaceName()} is event sourced aggregate. Event Sourced aggregates are required to define version property. Make use of " . WithAggregateVersioning::class . ' or implement your own.');
@@ -68,7 +75,7 @@ class CallAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
         $this->interfaceToCall = $interfaceToCall;
         $isFactoryMethod = $this->interfaceToCall->isFactoryMethod();
         if ($isFactoryMethod) {
-            if ($this->isEventSourced && ! $eventSourcingAttribute->withInternalEventRecorder) {
+            if ($this->isEventSourced && ! $eventSourcingAttribute->hasInternalEventRecorder()) {
                 return;
             }
 
@@ -117,7 +124,6 @@ class CallAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
                     $this->isCommandHandler,
                     $this->interfaceToCall->isFactoryMethod() ?? false,
                     $this->aggregateVersionProperty,
-                    new Reference(MessageBuilder::class),
                 ])
             )
             ->compile($builder, $aroundInterceptors);

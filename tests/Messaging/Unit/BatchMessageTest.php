@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit;
 
-use Ecotone\Api\Messaging\BatchMessage;
+use Ecotone\Messaging\BatchMessage;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
@@ -27,7 +27,7 @@ final class BatchMessageTest extends TestCase
                 ['payload' => 'first payload', 'headers' => []],
                 ['payload' => $orderPlaced, 'headers' => ['priority' => 5]],
             ],
-            $batch->entries,
+            $batch->getEntries(),
         );
     }
 
@@ -59,7 +59,7 @@ final class BatchMessageTest extends TestCase
                 ['payload' => 'first payload', 'headers' => []],
                 ['payload' => 'second payload', 'headers' => ['priority' => 5]],
             ],
-            $batch->entries,
+            $batch->getEntries(),
         );
     }
 }

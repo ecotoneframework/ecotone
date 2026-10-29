@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\Retry;
 
-use Ecotone\Api\Attribute\ErrorChannel;
-use Ecotone\Api\Attribute\InstantRetry;
-use Ecotone\Api\Gateway\CommandBus;
+use Ecotone\Messaging\Attribute\ErrorChannel;
+use Ecotone\Modelling\Attribute\InstantRetry;
+use Ecotone\Modelling\CommandBus;
 
 /**
  * licence Apache-2.0

@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Channel\DeliveryConfirmation;
 
-use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\Attribute\Reference;
-use Ecotone\Api\Gateway\MessagePublisher;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Messaging\BatchMessage;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Attribute\Parameter\Reference;
+use Ecotone\Messaging\BatchMessage;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\DeliveryFuture;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PendingDeliveryRegistry;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PublishingFailedException;
 use Ecotone\Messaging\Channel\MessageChannelInterceptorAdapter;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\Logger\LoggingService;
-use Ecotone\Test\ChannelTestSupport;
-use Ecotone\Test\StaticMessageBuilder;
+use Ecotone\Messaging\MessagePublisher;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\Attribute\CommandHandler;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\HighThroughputPublishing\AsyncOrderSubscriber;
 use Test\Ecotone\Messaging\Fixture\HighThroughputPublishing\FakeTransactionModule;
@@ -35,7 +35,7 @@ final class HighThroughputPublishingReliabilityTest extends TestCase
     public function test_future_throwing_during_await_keeps_reporting_failure_on_subsequent_resolves(): void
     {
         $throwingDelivery = new InMemoryPendingDelivery(
-            StaticMessageBuilder::withPayload('order')->build(),
+            MessageBuilder::withPayload('order')->build(),
             throwOnAwait: true,
         );
         $future = DeliveryFuture::forPendingDeliveries([$throwingDelivery]);
@@ -55,7 +55,7 @@ final class HighThroughputPublishingReliabilityTest extends TestCase
 
     public function test_future_does_not_reawait_deliveries_already_awaited_by_interceptor_scope(): void
     {
-        $alreadyAwaitedDelivery = new InMemoryPendingDelivery(StaticMessageBuilder::withPayload('order')->build());
+        $alreadyAwaitedDelivery = new InMemoryPendingDelivery(MessageBuilder::withPayload('order')->build());
         $alreadyAwaitedDelivery->awaitDelivery();
 
         DeliveryFuture::forPendingDeliveries([$alreadyAwaitedDelivery])->resolve();
@@ -69,18 +69,19 @@ final class HighThroughputPublishingReliabilityTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, AsyncOrderSubscriber::class, FakeTransactionModule::class],
             [new OrderService($operationsLog), new AsyncOrderSubscriber(), OperationsLog::class => $operationsLog],
-            extensionObjects: [
+            ServiceConfiguration::createWithDefaults()->withExtensionObjects([
                 \Ecotone\Messaging\Channel\PollableChannel\GlobalPollableChannelConfiguration::createWithDefaults()->withErrorChannel('failure_channel'),
+            ]),
+            enableAsynchronousProcessing: [
                 InMemoryHighThroughputPublishingChannelBuilder::create('async_orders'),
                 InMemoryHighThroughputPublishingChannelBuilder::create('failure_channel'),
             ],
-            enabledModules: [],
         );
-        $ordersChannel = ChannelTestSupport::of($ecotoneLite)->getMessageChannel('async_orders');
+        $ordersChannel = $ecotoneLite->getMessageChannel('async_orders');
         assert($ordersChannel instanceof MessageChannelInterceptorAdapter);
         $ordersChannel->getInternalMessageChannel()->failDeliveriesWith('broker not available');
 
-        $ecotoneLite->sendCommandWithRouting('order.place', 'espresso');
+        $ecotoneLite->sendCommandWithRoutingKey('order.place', 'espresso');
 
         $operations = $operationsLog->getOperations();
         $this->assertSame('transaction committed', $operations[count($operations) - 1]);
@@ -94,7 +95,6 @@ final class HighThroughputPublishingReliabilityTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [InMemoryHighThroughputPublisherModule::class, InMemoryHighThroughputOutboundAdapter::class],
             [$outboundAdapter],
-            enabledModules: [],
         );
         $publisher = $ecotoneLite->getGateway(InMemoryHighThroughputPublisherModule::PUBLISHER_REFERENCE);
         $outboundAdapter->failDeliveriesWith('broker down');
@@ -167,8 +167,8 @@ final class HighThroughputPublishingReliabilityTest extends TestCase
     public function test_shutdown_flush_continues_when_one_delivery_throws(): void
     {
         $registry = new PendingDeliveryRegistry(new LoggingService());
-        $throwingDelivery = new InMemoryPendingDelivery(StaticMessageBuilder::withPayload('first order')->build(), throwOnAwait: true);
-        $followingDelivery = new InMemoryPendingDelivery(StaticMessageBuilder::withPayload('second order')->build());
+        $throwingDelivery = new InMemoryPendingDelivery(MessageBuilder::withPayload('first order')->build(), throwOnAwait: true);
+        $followingDelivery = new InMemoryPendingDelivery(MessageBuilder::withPayload('second order')->build());
         $registry->register('orders', $throwingDelivery);
         $registry->register('orders', $followingDelivery);
 
@@ -181,7 +181,7 @@ final class HighThroughputPublishingReliabilityTest extends TestCase
     {
         $registry = new PendingDeliveryRegistry(new LoggingService());
         $registry->openScope();
-        $delivery = new InMemoryPendingDelivery(StaticMessageBuilder::withPayload('order')->build());
+        $delivery = new InMemoryPendingDelivery(MessageBuilder::withPayload('order')->build());
         $registry->register('orders', $delivery);
 
         $registry->closeScope();
@@ -191,8 +191,8 @@ final class HighThroughputPublishingReliabilityTest extends TestCase
 
     public function test_future_awaits_remaining_deliveries_when_earlier_delivery_throws(): void
     {
-        $throwingDelivery = new InMemoryPendingDelivery(StaticMessageBuilder::withPayload('first order')->build(), throwOnAwait: true);
-        $followingDelivery = new InMemoryPendingDelivery(StaticMessageBuilder::withPayload('second order')->build());
+        $throwingDelivery = new InMemoryPendingDelivery(MessageBuilder::withPayload('first order')->build(), throwOnAwait: true);
+        $followingDelivery = new InMemoryPendingDelivery(MessageBuilder::withPayload('second order')->build());
         $future = DeliveryFuture::forPendingDeliveries([$throwingDelivery, $followingDelivery]);
 
         try {
@@ -219,13 +219,12 @@ final class HighThroughputPublishingReliabilityTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$commandHandler::class, InMemoryHighThroughputPublisherModule::class, InMemoryHighThroughputOutboundAdapter::class, FakeTransactionModule::class],
             [$commandHandler, $outboundAdapter, OperationsLog::class => $operationsLog],
-            enabledModules: [],
         );
         $outboundAdapter->failDeliveriesContaining('poisoned', 'broker rejected the batch');
 
         $commandFailed = false;
         try {
-            $ecotoneLite->sendCommandWithRouting('order.placeAllBatches', 'espresso');
+            $ecotoneLite->sendCommandWithRoutingKey('order.placeAllBatches', 'espresso');
         } catch (PublishingFailedException) {
             $commandFailed = true;
         }
@@ -242,7 +241,6 @@ final class HighThroughputPublishingReliabilityTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [InMemoryHighThroughputPublisherModule::class, InMemoryHighThroughputOutboundAdapter::class],
             [$outboundAdapter],
-            enabledModules: [],
         );
         $publisher = $ecotoneLite->getGateway(InMemoryHighThroughputPublisherModule::PUBLISHER_REFERENCE);
 

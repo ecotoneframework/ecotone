@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\PollableChannel\SendRetries;
 
-use Ecotone\Api\Gateway\EcotoneClockInterface;
-use Ecotone\Api\Messaging\BatchMessage;
-use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageChannel;
+use Ecotone\Messaging\BatchMessage;
 use Ecotone\Messaging\Channel\AbstractChannelInterceptor;
 use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\FailedDelivery;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PublishingFailedException;
+use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
 use Ecotone\Messaging\Handler\Gateway\ErrorChannelService;
 use Ecotone\Messaging\Handler\Recoverability\RetryTemplate;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -32,18 +32,16 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
         private ErrorChannelService $errorChannelService,
         private ConfiguredMessagingSystem $configuredMessagingSystem,
         private LoggerInterface $logger,
-        private EcotoneClockInterface $clock,
-        private MessageBuilder $messageBuilder,
+        private EcotoneClockInterface $clock
     ) {
     }
 
     public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?Throwable $exception): bool
     {
-        return $exception !== null && $this->recover($message, $messageChannel, $exception) !== SendRecovery::Failed;
-    }
+        if ($exception === null) {
+            return false;
+        }
 
-    public function recover(Message $message, MessageChannel $messageChannel, Throwable $exception): SendRecovery
-    {
         $messageToRedeliver = $this->messageContainingOnlyFailedDeliveries($message, $exception);
 
         if ($exception !== null) {
@@ -59,7 +57,7 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
 
                     $messageChannel->send($messageToRedeliver);
 
-                    return SendRecovery::Delivered;
+                    return true;
                 } catch (Exception $exception) {
                     $messageToRedeliver = $this->messageContainingOnlyFailedDeliveries($messageToRedeliver, $exception);
                     $attempt++;
@@ -83,10 +81,10 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
                 );
             }
 
-            return SendRecovery::SentToErrorChannel;
+            return true;
         }
 
-        return SendRecovery::Failed;
+        return false;
     }
 
     /**
@@ -100,10 +98,10 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
         }
 
         return array_map(
-            fn (array $entry): Message => $this->messageBuilder->withPayload($entry['payload'])
+            static fn (array $entry): Message => MessageBuilder::withPayload($entry['payload'])
                 ->setMultipleHeaders($entry['headers'])
                 ->build(),
-            $payload->entries,
+            $payload->getEntries(),
         );
     }
 
@@ -126,7 +124,7 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
             $failedDeliveries,
         ));
 
-        return $this->messageBuilder->fromMessage($message)
+        return MessageBuilder::fromMessage($message)
             ->setPayload($batchOfFailedDeliveries)
             ->build();
     }

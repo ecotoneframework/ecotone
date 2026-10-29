@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
 
-use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Message;
 
 /**
  * licence Apache-2.0
@@ -26,6 +27,8 @@ final class InMemoryMessageChannelHolder implements DefinedObject
     /**
      * Receive with timeout using polling metadata
      * Tries to receive message till time out passes
+     *
+     * @param PollingMetadata $pollingMetadata Contains timeout and execution constraints
      */
     public function receiveFor(int $position): ?Message
     {

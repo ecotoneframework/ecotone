@@ -2,10 +2,10 @@
 
 namespace Ecotone\Messaging\Handler\Transformer;
 
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\ResultToMessageConverter;
 use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -19,7 +19,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class TransformerResultToMessageConverter implements ResultToMessageConverter
 {
-    public function __construct(private Type $returnType, private MessageBuilder $messageBuilder)
+    public function __construct(private Type $returnType)
     {
     }
 
@@ -31,10 +31,10 @@ class TransformerResultToMessageConverter implements ResultToMessageConverter
         return match (true) {
             is_null($result) => null,
             $result instanceof Message => $result,
-            is_array($result) => $this->messageBuilder->fromMessage($requestMessage)
+            is_array($result) => MessageBuilder::fromMessage($requestMessage)
                 ->setMultipleHeaders($result)
                 ->build(),
-            default => $this->messageBuilder->fromMessage($requestMessage)
+            default => MessageBuilder::fromMessage($requestMessage)
                 ->setPayload($result)
                 ->setContentType(MediaType::createApplicationXPHPWithTypeParameter($this->returnType->toString()))
                 ->build()

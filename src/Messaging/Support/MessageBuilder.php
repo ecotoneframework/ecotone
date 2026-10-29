@@ -2,57 +2,67 @@
 
 namespace Ecotone\Messaging\Support;
 
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\Gateway\EcotoneClockInterface;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageChannel;
-use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\MessageHeaderDoesNotExistsException;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * Class MessageBuilder
+ * @package Ecotone\Messaging\Support
+ * @author Dariusz Gafka <support@simplycodedsoftware.com>
+ */
 /**
  * licence Apache-2.0
  */
 final class MessageBuilder
 {
-    private mixed $payload = null;
+    private mixed $payload;
     private HeaderAccessor $headerAccessor;
 
-    public function __construct(private EcotoneClockInterface $clock)
-    {
-        $this->headerAccessor = HeaderAccessor::create();
-    }
-
-    public function withPayload(mixed $payload): self
-    {
-        return $this->draft($payload, HeaderAccessor::create());
-    }
-
-    public function fromMessage(Message $message): self
-    {
-        return $this->draft($message->getPayload(), HeaderAccessor::createFrom($message->getHeaders()));
-    }
-
-    public function fromParentMessage(Message $message): self
-    {
-        return $this->fromMessage($message)
-            ->setHeader(MessageHeaders::MESSAGE_ID, Uuid::v7()->toRfc4122())
-            ->removeHeader(MessageHeaders::TIMESTAMP);
-    }
-
-    private function draft(mixed $payload, HeaderAccessor $headerAccessor): self
+    private function __construct(mixed $payload, HeaderAccessor $headerAccessor)
     {
         Assert::notNull($payload, 'Trying to configure message with null payload');
         if ($payload instanceof Message) {
             throw InvalidArgumentException::create("Payload for building message can not be another message for {$payload}");
         }
+        $this->payload = $payload;
+        $this->headerAccessor = $headerAccessor;
 
-        $draft = new self($this->clock);
-        $draft->payload = $payload;
-        $draft->headerAccessor = $headerAccessor;
+        $this->initialize($payload);
+    }
 
-        return $draft;
+    /**
+     * @param $payload
+     * @throws MessagingException
+     */
+    private function initialize($payload): void
+    {
+        Assert::notNull($payload, "Message payload can't be empty");
+    }
+
+    /**
+     * @param mixed $payload
+     * @return MessageBuilder
+     */
+    public static function withPayload($payload): self
+    {
+        return new self($payload, HeaderAccessor::create());
+    }
+
+    public static function fromMessage(Message $message): self
+    {
+        return new self($message->getPayload(), HeaderAccessor::createFrom($message->getHeaders()));
+    }
+
+    public static function fromParentMessage(Message $message): self
+    {
+        return (new self($message->getPayload(), HeaderAccessor::createFrom($message->getHeaders())))
+            ->setHeader(MessageHeaders::MESSAGE_ID, Uuid::v7()->toRfc4122())
+            ->removeHeader(MessageHeaders::TIMESTAMP);
     }
 
     /**
@@ -246,9 +256,6 @@ final class MessageBuilder
 
     public function build(): GenericMessage
     {
-        Assert::notNull($this->payload, 'MessageBuilder is the container service; call withPayload(), fromMessage() or fromParentMessage() on it before build().');
-        $this->headerAccessor->setHeaderIfAbsent(MessageHeaders::TIMESTAMP, $this->clock->now()->unixTime()->inSeconds());
-
         return GenericMessage::create(
             $this->payload,
             MessageHeaders::create(

@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Api\Attribute\Converter;
-use Ecotone\Api\Attribute\MediaTypeConverter;
-use Ecotone\Api\Attribute\ModuleAnnotation;
-use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Messaging\Attribute\Converter;
+use Ecotone\Messaging\Attribute\MediaTypeConverter;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Conversion\ConverterReferenceBuilder;
 use Ecotone\Messaging\Conversion\ReferenceServiceConverter;
@@ -26,7 +26,7 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
 /**
  * licence Apache-2.0
  */
-final class ConverterModule extends NoExternalConfigurationModule implements AnnotationModule
+class ConverterModule extends NoExternalConfigurationModule implements AnnotationModule
 {
     /**
      * ConverterModule constructor.
@@ -87,6 +87,11 @@ final class ConverterModule extends NoExternalConfigurationModule implements Ann
     /**
      * @inheritDoc
      */
+    public function canHandle($extensionObject): bool
+    {
+        return false;
+    }
+
     /**
      * @inheritDoc
      */

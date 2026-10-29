@@ -7,46 +7,59 @@ declare(strict_types=1);
 
 namespace Ecotone\Projecting\Config;
 
-use Ecotone\Api\Attribute\ConsoleCommand;
-use Ecotone\Api\Attribute\ConsoleParameterOption;
-use Ecotone\Projecting\ProjectionOperations;
+use Ecotone\Messaging\Attribute\ConsoleCommand;
+use Ecotone\Messaging\Attribute\ConsoleParameterOption;
+use Ecotone\Projecting\ProjectionRegistry;
 use InvalidArgumentException;
 
 class ProjectingConsoleCommands
 {
-    public function __construct(private ProjectionOperations $operations)
+    public function __construct(private ProjectionRegistry $registry)
     {
     }
 
     #[ConsoleCommand('ecotone:projection:init', 'Initializes given projection or all projections with --all')]
     public function initProjection(?string $name = null, #[ConsoleParameterOption] bool $all = false): void
     {
-        if ($name !== null) {
-            $this->operations->initialize($name);
-
-            return;
+        if ($name === null) {
+            if (! $all) {
+                throw new InvalidArgumentException('You need to provide projection name or use --all option');
+            }
+            foreach ($this->registry->projectionNames() as $projection) {
+                $this->registry->get($projection)->init();
+            }
+        } else {
+            if (! $this->registry->has($name)) {
+                throw new InvalidArgumentException("There is no projection with name {$name}");
+            }
+            $this->registry->get($name)->init();
         }
-        if (! $all) {
-            throw new InvalidArgumentException('You need to provide projection name or use --all option');
-        }
-        $this->operations->initializeAll();
     }
 
     #[ConsoleCommand('ecotone:projection:backfill', 'Prepares given projection to be backfilled with historical events')]
     public function backfillProjection(string $name): void
     {
-        $this->operations->backfill($name);
+        if (! $this->registry->has($name)) {
+            throw new InvalidArgumentException("There is no projection with name {$name}");
+        }
+        $this->registry->get($name)->prepareBackfill();
     }
 
     #[ConsoleCommand('ecotone:projection:rebuild', 'Prepares given projection to be rebuilt from scratch')]
     public function rebuildProjection(string $name): void
     {
-        $this->operations->rebuild($name);
+        if (! $this->registry->has($name)) {
+            throw new InvalidArgumentException("There is no projection with name {$name}");
+        }
+        $this->registry->get($name)->prepareRebuild();
     }
 
     #[ConsoleCommand('ecotone:projection:delete', 'Deletes given projection')]
     public function deleteProjection(string $name): void
     {
-        $this->operations->delete($name);
+        if (! $this->registry->has($name)) {
+            throw new InvalidArgumentException("There is no projection with name {$name}");
+        }
+        $this->registry->get($name)->delete();
     }
 }

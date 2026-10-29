@@ -4,10 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
 
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageChannel;
-use Ecotone\Messaging\Channel\PollableChannel\SendRetries\SendRecovery;
-use Ecotone\Messaging\Channel\PollableChannel\SendRetries\SendRetryChannelInterceptor;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
 use Ecotone\Messaging\Support\Assert;
 use Throwable;
 
@@ -73,17 +71,9 @@ abstract class SendingInterceptorAdapter implements MessageChannelInterceptorAda
         } catch (Throwable $exception) {
             $shouldThrow = true;
             $firstCleanupFailure = null;
-            $reportedFailure = $exception;
             foreach ($executedInterceptors as $channelInterceptor) {
                 try {
-                    if ($reportedFailure !== null && $channelInterceptor instanceof SendRetryChannelInterceptor) {
-                        $recovery = $channelInterceptor->recover($messageToSend, $this->messageChannel, $reportedFailure);
-                        $shouldThrow = $shouldThrow && $recovery === SendRecovery::Failed;
-                        $reportedFailure = $recovery === SendRecovery::Delivered ? null : $reportedFailure;
-
-                        continue;
-                    }
-                    if ($channelInterceptor->afterSendCompletion($messageToSend, $this->messageChannel, $reportedFailure)) {
+                    if ($channelInterceptor->afterSendCompletion($messageToSend, $this->messageChannel, $exception)) {
                         $shouldThrow = false;
                     }
                 } catch (Throwable $cleanupFailure) {

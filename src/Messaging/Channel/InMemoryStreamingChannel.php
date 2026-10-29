@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel;
 
-use Ecotone\Api\ExtensionObject\FinalFailureStrategy;
-use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageHeaders;
-use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Channel\PollableChannel\InMemory\InMemoryStreamingAcknowledgeCallback;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
-use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Consumer\ConsumerPositionTracker;
+use Ecotone\Messaging\Endpoint\FinalFailureStrategy;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -34,10 +33,18 @@ final class InMemoryStreamingChannel implements PollableChannel, DefinedObject
         private string $name,
         private InMemoryMessageChannelHolder $inMemoryMessageChannelHolder,
         private ConsumerPositionTracker $positionTracker,
-        private MessageBuilder $messageBuilder,
         private FinalFailureStrategy $finalFailureStrategy = FinalFailureStrategy::RESEND,
         private bool $isAutoAcked = true,
     ) {
+    }
+
+    public static function create(
+        string $name,
+        ConsumerPositionTracker $positionTracker,
+        FinalFailureStrategy $finalFailureStrategy = FinalFailureStrategy::RESEND,
+        bool $isAutoAcked = true,
+    ): self {
+        return new self($name, $positionTracker, $finalFailureStrategy, $isAutoAcked);
     }
 
     /**
@@ -82,7 +89,7 @@ final class InMemoryStreamingChannel implements PollableChannel, DefinedObject
             isAutoAcked: $this->isAutoAcked,
         );
 
-        return $this->messageBuilder->fromMessage($message)
+        return MessageBuilder::fromMessage($message)
             ->setHeader(MessageHeaders::CONSUMER_ACK_HEADER_LOCATION, InMemoryStreamingAcknowledgeCallback::ECOTONE_IN_MEMORY_SHARED_ACK)
             ->setHeader(InMemoryStreamingAcknowledgeCallback::ECOTONE_IN_MEMORY_SHARED_ACK, $callback)
             ->build();
@@ -109,7 +116,6 @@ final class InMemoryStreamingChannel implements PollableChannel, DefinedObject
             $this->name,
             $this->inMemoryMessageChannelHolder,
             $this->positionTracker,
-            new Reference(MessageBuilder::class),
             $this->finalFailureStrategy,
             $this->isAutoAcked,
         ]);

@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\RepositoryShortcut;
 
-use Ecotone\Api\Attribute\Repository;
+use Ecotone\Modelling\Attribute\Repository;
 
 /**
  * licence Apache-2.0

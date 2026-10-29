@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging;
 
-use Ecotone\Api\Messaging\Message;
-use Stringable;
-
 /**
  * Interface MessageHandler
  * @package Ecotone\Messaging
@@ -15,7 +12,7 @@ use Stringable;
 /**
  * licence Apache-2.0
  */
-interface MessageHandler extends Stringable
+interface MessageHandler
 {
     /**
      * Handles given message

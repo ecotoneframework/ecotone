@@ -96,9 +96,9 @@ class UnionTypeDescriptorTest extends TestCase
     public function test_ignoring_duplicated_types()
     {
         $this->assertEquals(
-            Type::create('array'),
+            Type::create(Type::ARRAY),
             UnionType::createWith([
-                Type::create('array'), Type::create('array'),
+                Type::create(Type::ARRAY), Type::create(Type::ARRAY),
             ])
         );
     }

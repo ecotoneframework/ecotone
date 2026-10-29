@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker;
 
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Message;
 
 /**
  * @licence Apache-2.0

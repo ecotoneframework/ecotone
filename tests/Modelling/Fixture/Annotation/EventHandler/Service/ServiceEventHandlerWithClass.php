@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Annotation\EventHandler\Service;
 
-use Ecotone\Api\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\EventHandler;
 use stdClass;
 
 /**

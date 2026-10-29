@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages;
 
-use Ecotone\Api\Attribute\After;
-use Ecotone\Api\Attribute\Around;
-use Ecotone\Api\Attribute\Before;
-use Ecotone\Api\Interceptor\MethodInvocation;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Test\StaticMessageBuilder;
+use Ecotone\Messaging\Attribute\Interceptor\After;
+use Ecotone\Messaging\Attribute\Interceptor\Around;
+use Ecotone\Messaging\Attribute\Interceptor\Before;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -19,7 +19,7 @@ class InterceptorExample
     #[Before(pointcut: SomeQueryHandler::class . '::sum')]
     public function multiplyBefore(Message $message): Message
     {
-        return StaticMessageBuilder::fromMessage($message)
+        return MessageBuilder::fromMessage($message)
                 ->setPayload($message->getPayload() * 2)
                 ->build();
     }
@@ -29,7 +29,7 @@ class InterceptorExample
     {
         $message = $methodInvocation->proceed();
 
-        return StaticMessageBuilder::fromMessage($message)
+        return MessageBuilder::fromMessage($message)
             ->setPayload($message->getPayload() + 1)
             ->build();
     }
@@ -37,7 +37,7 @@ class InterceptorExample
     #[After(pointcut: SomeQueryHandler::class . '::sum')]
     public function multiplyAfter(Message $message): Message
     {
-        return StaticMessageBuilder::fromMessage($message)
+        return MessageBuilder::fromMessage($message)
             ->setPayload($message->getPayload() * 2)
             ->build();
     }

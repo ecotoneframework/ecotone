@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Projecting;
 
-use Ecotone\Api\EventSourcing\EventStore;
+use Ecotone\EventSourcing\EventStore;
 
 /**
  * Value object representing a filter for stream-based projections.
@@ -23,7 +23,6 @@ final class StreamFilter
         public readonly ?string $aggregateType = null,
         public readonly ?string $eventStoreReferenceName = EventStore::class,
         public readonly array $eventNames = [],
-        public readonly ?string $tag = null,
     ) {
     }
 }

@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\EventSourcingExecutor;
 
-use Ecotone\Api\EventSourcing\Event;
-
-use function implode;
-use function sha1;
-use function sort;
+use Ecotone\Modelling\Event;
 
 /**
  * licence Apache-2.0
@@ -16,19 +12,11 @@ use function sort;
 final class GroupedEventSourcingExecutor
 {
     /**
-     * @param array<string, ApplyMethodExecutor> $eventSourcingExecutors
+     * @param array<string, EventSourcingHandlerExecutor> $eventSourcingExecutors
      */
     public function __construct(private array $eventSourcingExecutors)
     {
 
-    }
-
-    public function foldShapeOf(string $aggregateClassName): string
-    {
-        $handledEventTypeNames = $this->eventSourcingExecutors[$aggregateClassName]->handledEventTypeNames();
-        sort($handledEventTypeNames);
-
-        return sha1($aggregateClassName . "\0" . implode(',', $handledEventTypeNames));
     }
 
     /**

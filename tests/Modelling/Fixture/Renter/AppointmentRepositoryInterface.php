@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\Renter;
 
-use Ecotone\Api\Attribute\Repository;
+use Ecotone\Modelling\Attribute\Repository;
 
 interface AppointmentRepositoryInterface
 {

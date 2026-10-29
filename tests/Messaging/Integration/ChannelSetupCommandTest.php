@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Integration;
 
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Gateway\ConsoleCommandRunner;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
@@ -28,7 +29,7 @@ final class ChannelSetupCommandTest extends TestCase
         $result = $runner->execute('ecotone:migration:channel:setup', []);
 
         self::assertNotNull($result);
-        $rows = $result->rows;
+        $rows = $result->getRows();
 
         // Find the in-memory channel in the results
         $inMemoryChannelRow = null;
@@ -84,7 +85,7 @@ final class ChannelSetupCommandTest extends TestCase
 
         // Should show status, not initialize
         self::assertNotNull($result);
-        self::assertEquals(['Channel', 'Initialized'], $result->columnHeaders);
+        self::assertEquals(['Channel', 'Initialized'], $result->getColumnHeaders());
     }
 
     public function test_channel_delete_respects_string_false_for_force(): void
@@ -98,15 +99,17 @@ final class ChannelSetupCommandTest extends TestCase
 
         // Should show warning, not delete
         self::assertNotNull($result);
-        self::assertEquals(['Channel', 'Warning'], $result->columnHeaders);
+        self::assertEquals(['Channel', 'Warning'], $result->getColumnHeaders());
     }
 
-    private function bootstrapEcotone(): \Ecotone\Api\Lite\Test\FlowTestSupport
+    private function bootstrapEcotone(): \Ecotone\Lite\Test\FlowTestSupport
     {
         return EcotoneLite::bootstrapFlowTesting(
             containerOrAvailableServices: [],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel(self::IN_MEMORY_CHANNEL)],
-            enabledModules: [],
+            configuration: ServiceConfiguration::createWithDefaults()
+                ->withExtensionObjects([
+                    SimpleMessageChannelBuilder::createQueueChannel(self::IN_MEMORY_CHANNEL),
+                ]),
             pathToRootCatalog: __DIR__ . '/../../',
         );
     }

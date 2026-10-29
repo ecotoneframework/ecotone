@@ -2,12 +2,9 @@
 
 namespace Ecotone\Messaging\Handler\Transformer;
 
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Messaging\Handler\ExpressionEvaluationException;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\ExpressionLocation;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Throwable;
 
 /**
  * Class ExpressionTransformer
@@ -20,7 +17,7 @@ use Throwable;
  */
 final class ExpressionTransformer
 {
-    public function __construct(private string $expression, private ExpressionEvaluationService $expressionEvaluationService, private ExpressionLocation $location, private MessageBuilder $messageBuilder)
+    public function __construct(private string $expression, private ExpressionEvaluationService $expressionEvaluationService)
     {
     }
 
@@ -31,19 +28,15 @@ final class ExpressionTransformer
      */
     public function transform(Message $message): Message
     {
-        try {
-            $evaluatedPayload = $this->expressionEvaluationService->evaluate(
-                $this->expression,
-                [
-                    'payload' => $message->getPayload(),
-                    'headers' => $message->getHeaders()->headers(),
-                ],
-            );
-        } catch (Throwable $exception) {
-            throw ExpressionEvaluationException::wrapping($this->location, $exception);
-        }
+        $evaluatedPayload = $this->expressionEvaluationService->evaluate(
+            $this->expression,
+            [
+                'payload' => $message->getPayload(),
+                'headers' => $message->getHeaders()->headers(),
+            ],
+        );
 
-        return $this->messageBuilder->fromMessage($message)
+        return MessageBuilder::fromMessage($message)
                     ->setPayload($evaluatedPayload)
                     ->build();
     }

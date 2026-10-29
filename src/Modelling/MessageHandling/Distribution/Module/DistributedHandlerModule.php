@@ -3,21 +3,14 @@
 namespace Ecotone\Modelling\MessageHandling\Distribution\Module;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\Attribute\Distributed;
-use Ecotone\Api\Attribute\EventHandler;
-use Ecotone\Api\Attribute\ModuleAnnotation;
-use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-use Ecotone\Api\Gateway\CommandBus;
-use Ecotone\Api\Gateway\DistributedBusHeader;
-use Ecotone\Api\Gateway\EventBus;
-use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderBuilder;
@@ -28,8 +21,15 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\AllHeadersBuilde
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
-use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Modelling\Api\Distribution\DistributedBusHeader;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\Distributed;
+use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\Routing\BusRoutingMapBuilder;
+use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributedMessageHandler;
 use Ecotone\Modelling\MessageHandling\Distribution\DistributionEntrypoint;
 
@@ -37,7 +37,7 @@ use Ecotone\Modelling\MessageHandling\Distribution\DistributionEntrypoint;
 /**
  * licence Apache-2.0
  */
-final class DistributedHandlerModule implements AnnotationModule
+class DistributedHandlerModule implements AnnotationModule
 {
     public function __construct(
         private BusRoutingMapBuilder $commandBusDistributedRoutes,
@@ -103,11 +103,11 @@ final class DistributedHandlerModule implements AnnotationModule
             new Definition(DistributedMessageHandler::class, [
                 $this->eventBusDistributedRoutes->compile(),
                 $this->commandBusDistributedRoutes->compile(),
-                $serviceConfiguration->serviceName,
+                $serviceConfiguration->getServiceName(),
             ])
         );
         $messagingConfiguration->registerMessageHandler(
-            MessageProcessorActivatorBuilder::createForMethod(DistributedMessageHandler::class, $interfaceToCallRegistry->getFor(DistributedMessageHandler::class, 'handle'))
+            ServiceActivatorBuilder::create(DistributedMessageHandler::class, $interfaceToCallRegistry->getFor(DistributedMessageHandler::class, 'handle'))
                 ->withInputChannelName(DistributedBusHeader::DISTRIBUTED_ROUTING_SLIP_VALUE)
                 ->withMethodParameterConverters([
                     PayloadBuilder::create('payload'),
@@ -116,22 +116,16 @@ final class DistributedHandlerModule implements AnnotationModule
                     HeaderBuilder::create('routingKey', DistributedBusHeader::DISTRIBUTED_ROUTING_KEY),
                     HeaderBuilder::create('contentType', MessageHeaders::CONTENT_TYPE),
                     HeaderBuilder::createOptional('targetedServiceName', DistributedBusHeader::DISTRIBUTED_TARGET_SERVICE_NAME),
-                    HeaderBuilder::createOptional('replyRoutingKey', DistributedBusHeader::DISTRIBUTED_REPLY_ROUTING_KEY),
                     ReferenceBuilder::create('commandBus', CommandBus::class),
                     ReferenceBuilder::create('eventBus', EventBus::class),
                     ReferenceBuilder::create('messagingEntrypoint', MessagingEntrypointService::class),
                 ])
         );
-        $messagingConfiguration->registerMessageHandler(
-            MessageProcessorActivatorBuilder::createForMethod(DistributedMessageHandler::class, $interfaceToCallRegistry->getFor(DistributedMessageHandler::class, 'reply'))
-                ->withInputChannelName(DistributedMessageHandler::REPLY_CHANNEL)
-                ->withMethodParameterConverters([
-                    PayloadBuilder::create('result'),
-                    AllHeadersBuilder::createWith('metadata'),
-                    HeaderBuilder::create('replyRoutingKey', DistributedBusHeader::DISTRIBUTED_REPLY_ROUTING_KEY),
-                    ReferenceBuilder::create('messagingEntrypoint', MessagingEntrypointService::class),
-                ])
-        );
+    }
+
+    public function canHandle($extensionObject): bool
+    {
+        return $extensionObject instanceof ServiceConfiguration;
     }
 
     public function getModulePackageName(): string

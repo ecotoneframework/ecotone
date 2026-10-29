@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
-use Ecotone\Api\Attribute\Payload;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\ExpressionLocation;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
@@ -30,6 +28,7 @@ class PayloadExpressionBuilder implements ParameterConverterBuilder
     /**
      * @param string $parameterName
      * @param string $expression
+     * @return HeaderExpressionBuilder
      */
     public static function create(string $parameterName, string $expression): self
     {
@@ -49,7 +48,6 @@ class PayloadExpressionBuilder implements ParameterConverterBuilder
         return new Definition(PayloadExpressionConverter::class, [
             new Reference(ExpressionEvaluationService::REFERENCE),
             $this->expression,
-            ExpressionLocation::definitionForParameter(Payload::class, $this->parameterName, $interfaceToCall->getInterfaceName(), $interfaceToCall->getMethodName(), $this->expression),
         ]);
     }
 }

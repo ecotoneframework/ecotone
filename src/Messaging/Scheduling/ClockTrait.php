@@ -7,8 +7,6 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
 
-use Ecotone\Api\Scheduling\Duration;
-
 trait ClockTrait
 {
     abstract public function usleep(int $microseconds): void;

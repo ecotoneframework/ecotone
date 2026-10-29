@@ -2,7 +2,6 @@
 
 namespace Ecotone\Modelling\AggregateFlow\LoadAggregate;
 
-use Ecotone\Api\Attribute\TargetVersion;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
@@ -13,7 +12,7 @@ use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Processor\InterceptedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\Attribute\TargetAggregateVersion;
 use Ecotone\Modelling\Repository\AllAggregateRepository;
 
 /**
@@ -55,7 +54,6 @@ class LoadAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
             $this->messageVersionPropertyName,
             new Reference(PropertyReaderAccessor::class),
             new Definition(LoadAggregateMode::class, [$this->loadAggregateMode->getType()]),
-            new Reference(MessageBuilder::class),
         ]);
     }
 
@@ -63,9 +61,9 @@ class LoadAggregateServiceBuilder implements InterceptedMessageProcessorBuilder
     {
         $aggregateMessageVersionPropertyName = null;
         if ($handledMessageClassName) {
-            $targetVersion            = Type::attribute(TargetVersion::class);
+            $targetAggregateVersion            = Type::attribute(TargetAggregateVersion::class);
             foreach ($handledMessageClassName->getProperties() as $property) {
-                if ($property->hasAnnotation($targetVersion)) {
+                if ($property->hasAnnotation($targetAggregateVersion)) {
                     $aggregateMessageVersionPropertyName = $property->getName();
                 }
             }

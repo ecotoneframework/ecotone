@@ -32,6 +32,9 @@ class CronExpression
     public const MONTH = 3;
     public const WEEKDAY = 4;
 
+    /** @deprecated */
+    public const YEAR = 5;
+
     public const MAPPINGS = [
         '@yearly' => '0 0 1 1 *',
         '@annually' => '0 0 1 1 *',
@@ -46,7 +49,10 @@ class CronExpression
      */
     private $cronParts;
 
-    private FieldFactory $fieldFactory;
+    /**
+     * @var FieldFactoryInterface CRON field factory
+     */
+    private $fieldFactory;
 
     /**
      * @var int Max iteration count when searching for next run date
@@ -57,12 +63,22 @@ class CronExpression
      * @var array Order in which to test of cron parts
      */
     private static $order = [
+        self::YEAR,
         self::MONTH,
         self::DAY,
         self::WEEKDAY,
         self::HOUR,
         self::MINUTE,
     ];
+
+    /**
+     * @deprecated since version 3.0.2, use __construct instead.
+     */
+    public static function factory(string $expression, ?FieldFactoryInterface $fieldFactory = null): CronExpression
+    {
+        /** @phpstan-ignore-next-line */
+        return new static($expression, $fieldFactory);
+    }
 
     /**
      * Validate a CronExpression.
@@ -86,13 +102,14 @@ class CronExpression
      * Parse a CRON expression.
      *
      * @param string $expression CRON expression (e.g. '8 * * * *')
+     * @param null|FieldFactoryInterface $fieldFactory Factory to create cron fields
      */
-    public function __construct(string $expression)
+    public function __construct(string $expression, ?FieldFactoryInterface $fieldFactory = null)
     {
         $shortcut = strtolower($expression);
         $expression = self::MAPPINGS[$shortcut] ?? $expression;
 
-        $this->fieldFactory = new FieldFactory();
+        $this->fieldFactory = $fieldFactory ?: new FieldFactory();
         $this->setExpression($expression);
     }
 

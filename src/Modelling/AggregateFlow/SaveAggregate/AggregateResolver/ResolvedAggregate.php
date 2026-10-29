@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver;
 
-use Ecotone\Api\EventSourcing\AppendCondition;
-use Ecotone\Api\EventSourcing\Event;
+use Ecotone\Modelling\Event;
 
 /**
  * licence Apache-2.0
@@ -13,8 +12,6 @@ use Ecotone\Api\EventSourcing\Event;
 final class ResolvedAggregate
 {
     private ?int $versionAfterHandling;
-
-    private ?AppendCondition $counterCapturedAtLoad = null;
 
     /**
      * @param object $aggregateInstance
@@ -72,35 +69,22 @@ final class ResolvedAggregate
         return $this->versionAfterHandling;
     }
 
-    public function getCounterCapturedAtLoad(): AppendCondition
-    {
-        return $this->counterCapturedAtLoad ?? AppendCondition::empty();
-    }
-
-    public function withCounterCapturedAtLoad(AppendCondition $counterCapturedAtLoad): self
-    {
-        $clone = clone $this;
-        $clone->counterCapturedAtLoad = $counterCapturedAtLoad;
-
-        return $clone;
-    }
-
     /**
      * @param array<string, mixed> $identifiers
      */
     public function withIdentifiers(array $identifiers): self
     {
-        return (new self(
+        return new self(
             $this->aggregateClassDefinition,
             $this->isNewInstance,
             $this->aggregateInstance,
             $this->versionBeforeHandling,
             $identifiers,
             $this->events
-        ))->withCounterCapturedAtLoad($this->getCounterCapturedAtLoad());
+        );
     }
 
-    public function withVersionAfterHandling(?int $versionAfterHandling): self
+    public function withVersionAfterHandling(int $versionAfterHandling): self
     {
         $clone = clone $this;
         $clone->versionAfterHandling = $versionAfterHandling;

@@ -2,8 +2,8 @@
 
 namespace Ecotone\Modelling;
 
-use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Handler\MessageProcessor;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -11,14 +11,10 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class FetchAggregate implements MessageProcessor
 {
-    public function __construct(private MessageBuilder $messageBuilder)
-    {
-    }
-
     public function process(Message $message): ?Message
     {
         if ($message->getHeaders()->containsKey(AggregateMessage::CALLED_AGGREGATE_INSTANCE)) {
-            return $this->messageBuilder->fromMessage($message)
+            return MessageBuilder::fromMessage($message)
                 ->setPayload($message->getHeaders()->get(AggregateMessage::CALLED_AGGREGATE_INSTANCE))
                 ->build();
         }

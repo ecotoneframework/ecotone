@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\CustomRepositories\Standard;
 
-use Ecotone\Api\Attribute\Repository;
+use Ecotone\Modelling\Attribute\Repository;
 
 /**
  * licence Apache-2.0

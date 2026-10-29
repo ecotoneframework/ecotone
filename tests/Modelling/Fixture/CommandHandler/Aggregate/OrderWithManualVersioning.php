@@ -2,11 +2,11 @@
 
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 
-use Ecotone\Api\Attribute\Aggregate;
-use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\Attribute\Identifier;
-use Ecotone\Api\Attribute\Version;
-use Ecotone\Api\Modelling\WithEvents;
+use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\AggregateVersion;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\Identifier;
+use Ecotone\Modelling\WithAggregateEvents;
 
 /**
  * licence Apache-2.0
@@ -14,7 +14,7 @@ use Ecotone\Api\Modelling\WithEvents;
 #[Aggregate]
 class OrderWithManualVersioning implements VersionAggregate
 {
-    use WithEvents;
+    use WithAggregateEvents;
 
     #[Identifier]
     private string $orderId;
@@ -26,7 +26,7 @@ class OrderWithManualVersioning implements VersionAggregate
      * @var string
      */
     private $shippingAddress;
-    #[Version(false)]
+    #[AggregateVersion(false)]
     private $version;
     /**
      * @var string|null
@@ -124,12 +124,12 @@ class OrderWithManualVersioning implements VersionAggregate
         return $this->shippingAddress;
     }
 
-    public function getAggregateVersion(): ?int
+    public function getVersion(): ?int
     {
         return $this->version;
     }
 
-    public function increaseVersion(): void
+    public function increaseAggregateVersion(): void
     {
         $this->version += 1;
     }

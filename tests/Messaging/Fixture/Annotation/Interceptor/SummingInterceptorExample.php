@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\Interceptor;
 
-use Ecotone\Api\Attribute\Around;
-use Ecotone\Api\Interceptor\MethodInvocation;
+use Ecotone\Messaging\Attribute\Interceptor\Around;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 
 /**
  * Class CalculatingService
@@ -39,6 +39,7 @@ class SummingInterceptorExample
     {
         $result = $amount + $this->secondValueForMathOperations;
 
-        return $result;
+        $methodInvocation->replaceArgument('amount', $result);
+        return $methodInvocation->proceed();
     }
 }

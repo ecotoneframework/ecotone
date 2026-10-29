@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 
-use Ecotone\Api\Attribute\TargetIdentifier;
+use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
 
 /**
  * Class FinishOrderCommand
@@ -14,7 +14,7 @@ use Ecotone\Api\Attribute\TargetIdentifier;
  */
 class FinishOrderCommand
 {
-    #[TargetIdentifier]
+    #[TargetAggregateIdentifier]
     private $orderId;
 
     /**

@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Blog;
 
-use Ecotone\Api\Attribute\TargetIdentifier;
+use Ecotone\Modelling\Attribute\TargetAggregateIdentifier;
 
 /**
  * Class PublishArticleCommand
@@ -14,9 +14,9 @@ use Ecotone\Api\Attribute\TargetIdentifier;
  */
 class PublishArticleCommand
 {
-    #[TargetIdentifier]
+    #[TargetAggregateIdentifier]
     private $author;
-    #[TargetIdentifier]
+    #[TargetAggregateIdentifier]
     private $title;
     /**
      * @var string

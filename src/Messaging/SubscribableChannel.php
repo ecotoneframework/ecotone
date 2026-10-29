@@ -2,8 +2,6 @@
 
 namespace Ecotone\Messaging;
 
-use Ecotone\Api\Messaging\MessageChannel;
-
 /**
  * Interface SubscribableChannel
  * @package Ecotone\Messaging

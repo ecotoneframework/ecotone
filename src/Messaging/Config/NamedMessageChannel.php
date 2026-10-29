@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Config;
 
-use Ecotone\Api\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageChannel;
 
 /**
  * Class ResolvableChannel

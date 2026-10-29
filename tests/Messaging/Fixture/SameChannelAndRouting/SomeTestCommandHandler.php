@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\SameChannelAndRouting;
 
-use Ecotone\Api\Attribute\Asynchronous;
-use Ecotone\Api\Attribute\CommandHandler;
+use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Modelling\Attribute\CommandHandler;
 
+/**
+ * @TODO Ecotone 2.0 routing keys are not message channels, so asynchronous channel can be equal to routing key
+ */
 /**
  * licence Apache-2.0
  */
 final class SomeTestCommandHandler
 {
-    public int $handled = 0;
-
-    #[Asynchronous('orders')]
-    #[CommandHandler(routingKey: 'orders', endpointId: 'test')]
+    #[Asynchronous('input')]
+    #[CommandHandler(routingKey: 'input', endpointId: 'test')]
     public function test(): void
     {
-        $this->handled++;
     }
 }

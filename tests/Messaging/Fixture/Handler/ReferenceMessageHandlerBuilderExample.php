@@ -58,6 +58,7 @@ class ReferenceMessageHandlerBuilderExample extends InputOutputMessageHandlerBui
 
     public function compile(MessagingContainerBuilder $builder): Definition|Reference
     {
+        // TODO: this seems useless
         return new Definition(ReplyViaHeadersMessageHandler::class, ['some'], 'create');
     }
 

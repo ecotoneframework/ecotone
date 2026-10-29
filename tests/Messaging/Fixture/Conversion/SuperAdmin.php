@@ -24,6 +24,7 @@ class SuperAdmin extends AbstractSuperAdmin implements Admin
      */
     public function getSuperAdmin()
     {
+        // TODO: Implement getUser() method.
     }
 
     public function getUser(SuperAdmin $user): SuperAdmin
@@ -35,6 +36,7 @@ class SuperAdmin extends AbstractSuperAdmin implements Admin
      */
     public function getAdmin()
     {
+        // TODO: Implement getAdmin() method.
     }
 
     public function getAdminPassword(): AdminPassword

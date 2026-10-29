@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\SymfonyContainer;
 
-use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\Attribute\Payload;
-use Ecotone\Api\Gateway\CommandBus;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Attribute\Parameter\Payload;
+use Ecotone\Messaging\Config\ConfiguredMessagingSystem;
+use Ecotone\Messaging\Config\ModulePackageList;
+use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\CommandBus;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\OneTimeCommand\OneTimeWithResultExample;
@@ -22,14 +24,16 @@ class EcotoneLiteCachedContainerTest extends TestCase
     public function test_bootstrap_with_cache_dumps_symfony_container_and_warm_boot_uses_it(): void
     {
         $cacheDirectory = sys_get_temp_dir() . '/ecotone_lite_dumped_container/' . uniqid('', true);
+        $configuration = ServiceConfiguration::createWithDefaults()
+            ->withCacheDirectoryPath($cacheDirectory)
+            ->withSkippedModulePackageNames(ModulePackageList::allPackages());
         $handler = new CachedCommandHandlerService();
 
         $messagingSystem = EcotoneLite::bootstrap(
             [CachedCommandHandlerService::class],
             [CachedCommandHandlerService::class => $handler],
-            enabledModules: [],
+            $configuration,
             useCachedVersion: true,
-            cacheDirectoryPath: $cacheDirectory,
         );
         $messagingSystem->getCommandBus()->sendWithRouting('cache.command', 'first');
 
@@ -38,9 +42,8 @@ class EcotoneLiteCachedContainerTest extends TestCase
         $warmBootedMessagingSystem = EcotoneLite::bootstrap(
             [CachedCommandHandlerService::class],
             [CachedCommandHandlerService::class => $handler],
-            enabledModules: [],
+            $configuration,
             useCachedVersion: true,
-            cacheDirectoryPath: $cacheDirectory,
         );
         $warmBootedMessagingSystem->getCommandBus()->sendWithRouting('cache.command', 'second');
 
@@ -52,7 +55,8 @@ class EcotoneLiteCachedContainerTest extends TestCase
         $messagingSystem = EcotoneLite::bootstrap(
             [OneTimeWithResultExample::class],
             [OneTimeWithResultExample::class => new OneTimeWithResultExample()],
-            enabledModules: [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
         );
 
         $container = $messagingSystem->getServiceFromContainer(ContainerInterface::class);
@@ -66,7 +70,8 @@ class EcotoneLiteCachedContainerTest extends TestCase
         $messagingSystem = EcotoneLite::bootstrap(
             [CachedCommandHandlerService::class],
             [CachedCommandHandlerService::class => new CachedCommandHandlerService()],
-            enabledModules: [],
+            ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackages()),
         );
         $container = $messagingSystem->getServiceFromContainer(ContainerInterface::class);
 

@@ -12,7 +12,7 @@ use InvalidArgumentException;
 /**
  * licence MIT
  */
-class FieldFactory
+class FieldFactory implements FieldFactoryInterface
 {
     /**
      * @var array Cache of instantiated fields

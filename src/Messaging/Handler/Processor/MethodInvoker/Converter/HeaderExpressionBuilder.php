@@ -4,11 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter;
 
-use Ecotone\Api\Attribute\Header;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\ExpressionLocation;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
@@ -54,7 +52,6 @@ class HeaderExpressionBuilder implements ParameterConverterBuilder
             $this->headerName,
             $this->expression,
             $this->isRequired,
-            ExpressionLocation::definitionForParameter(Header::class, $this->parameterName, $interfaceToCall->getInterfaceName(), $interfaceToCall->getMethodName(), $this->expression),
         ]);
     }
 }

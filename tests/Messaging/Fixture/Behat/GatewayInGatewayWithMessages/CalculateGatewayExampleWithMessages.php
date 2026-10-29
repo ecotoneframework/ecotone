@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\GatewayInGatewayWithMessages;
 
-use Ecotone\Api\Attribute\MessageGateway;
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Attribute\MessageGateway;
+use Ecotone\Messaging\Message;
 
 /**
  * licence Apache-2.0

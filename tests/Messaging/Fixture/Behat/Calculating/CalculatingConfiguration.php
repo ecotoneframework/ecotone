@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Behat\Calculating;
 
-use Ecotone\Api\Attribute\ServiceContext;
-use Ecotone\Api\ExtensionObject\PollingMetadata;
+use Ecotone\Messaging\Attribute\ServiceContext;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 /**
  * licence Apache-2.0
@@ -16,6 +16,6 @@ class CalculatingConfiguration
     public function registerMetadata()
     {
         return PollingMetadata::create('inboundCalculator')
-            ->withHandledMessageLimit(1);
+            ->setHandledMessageLimit(1);
     }
 }

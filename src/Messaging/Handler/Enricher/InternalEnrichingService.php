@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Enricher;
 
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Conversion\ConversionService;
-use Ecotone\Messaging\Handler\ExpressionEvaluationException;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\ExpressionLocation;
+use Ecotone\Messaging\Handler\ReferenceSearchService;
 use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Throwable;
 
 /**
  * Class InternalEnrichingService
@@ -41,12 +39,13 @@ class InternalEnrichingService
      *
      * @param EnrichGateway|null $enrichGateway
      * @param ExpressionEvaluationService $expressionEvaluationService
+     * @param ReferenceSearchService $referenceSearchService
      * @param ConversionService $conversionService
      * @param PropertyEditor[] $setters
      * @param string $requestPayloadExpression
      * @param string[] $requestHeaders
      */
-    public function __construct(?EnrichGateway $enrichGateway, ExpressionEvaluationService $expressionEvaluationService, ConversionService $conversionService, array $setters, ?string $requestPayloadExpression, array $requestHeaders, private ExpressionLocation $requestPayloadLocation, private MessageBuilder $messageBuilder)
+    public function __construct(?EnrichGateway $enrichGateway, ExpressionEvaluationService $expressionEvaluationService, ConversionService $conversionService, array $setters, ?string $requestPayloadExpression, array $requestHeaders)
     {
         $this->enrichGateway               = $enrichGateway;
         $this->setters                     = $setters;
@@ -66,20 +65,16 @@ class InternalEnrichingService
     {
         $replyMessage = null;
         if ($this->enrichGateway) {
-            $requestMessage = $this->messageBuilder->fromMessage($message);
+            $requestMessage = MessageBuilder::fromMessage($message);
 
             if ($this->requestPayloadExpression) {
-                try {
-                    $requestPayload = $this->expressionEvaluationService->evaluate(
-                        $this->requestPayloadExpression,
-                        [
-                            'headers' => $message->getHeaders()->headers(),
-                            'payload' => $message->getPayload(),
-                        ],
-                    );
-                } catch (Throwable $exception) {
-                    throw ExpressionEvaluationException::wrapping($this->requestPayloadLocation, $exception);
-                }
+                $requestPayload = $this->expressionEvaluationService->evaluate(
+                    $this->requestPayloadExpression,
+                    [
+                        'headers' => $message->getHeaders()->headers(),
+                        'payload' => $message->getPayload(),
+                    ],
+                );
 
                 $requestMessage->setPayload($requestPayload);
             }
@@ -99,7 +94,7 @@ class InternalEnrichingService
 
         $enrichedMessage = $this->getConvertedMessage($message);
         foreach ($this->setters as $setter) {
-            $settedMessage = $this->messageBuilder->fromMessage($enrichedMessage);
+            $settedMessage = MessageBuilder::fromMessage($enrichedMessage);
 
             if ($setter->isPayloadSetter()) {
                 $settedMessage = $settedMessage
@@ -119,25 +114,26 @@ class InternalEnrichingService
 
     /**
      * @param Message $message
+     * @return Message|MessageBuilder
      * @throws \Ecotone\Messaging\Handler\TypeDefinitionException
      * @throws \Ecotone\Messaging\MessagingException
      * @throws \Ecotone\Messaging\Support\InvalidArgumentException
      */
     private function getConvertedMessage(Message $message): Message
     {
-        $enrichedMessage = $this->messageBuilder->fromMessage($message);
+        $enrichedMessage = MessageBuilder::fromMessage($message);
 
         if ($message->getHeaders()->containsKey(MessageHeaders::CONTENT_TYPE)) {
             $mediaType = MediaType::parseMediaType($message->getHeaders()->get(MessageHeaders::CONTENT_TYPE));
             if (! $mediaType->isCompatibleWithParsed(MediaType::APPLICATION_X_PHP)) {
                 if ($this->conversionService->canConvert(
-                    $mediaType->hasTypeParameter() ? Type::create($mediaType->getParameter(MediaType::TYPE_PARAMETER)) : Type::createFromVariable($message->getPayload()),
+                    $mediaType->hasTypeParameter() ? $mediaType->getTypeParameter() : Type::createFromVariable($message->getPayload()),
                     $mediaType,
                     Type::array(),
                     MediaType::createApplicationXPHP()
                 )) {
                     $enrichedMessage = $enrichedMessage
-                        ->setContentType(MediaType::createApplicationXPHPWithTypeParameter('array'))
+                        ->setContentType(MediaType::createApplicationXPHPWithTypeParameter(Type::ARRAY))
                         ->setPayload(
                             $this->conversionService->convert(
                                 $message->getPayload(),

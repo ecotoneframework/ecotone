@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\InboundChannelAdapter;
 
-use Ecotone\Api\Attribute\Scheduled;
+use Ecotone\Messaging\Attribute\Scheduled;
 
 /**
  * licence Apache-2.0

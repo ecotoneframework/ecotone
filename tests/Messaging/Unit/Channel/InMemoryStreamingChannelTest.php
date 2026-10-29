@@ -4,14 +4,15 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Channel;
 
-use Ecotone\Api\Attribute\InternalHandler;
-use Ecotone\Api\Attribute\QueryHandler;
-use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Attribute\InternalHandler;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Consumer\ConsumerPositionTracker;
 use Ecotone\Messaging\Consumer\InMemory\InMemoryConsumerPositionTracker;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Modelling\Attribute\QueryHandler;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -46,11 +47,11 @@ final class InMemoryStreamingChannelTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$handler::class],
             [$handler, ConsumerPositionTracker::class => $positionTracker],
-            extensionObjects: [
-                SimpleMessageChannelBuilder::createStreamingChannel('shared_channel'),
-                PollingMetadata::create('consumer1')->withHandledMessageLimit(1),
-            ],
-            enabledModules: [],
+            ServiceConfiguration::createWithDefaults()
+                ->withExtensionObjects([
+                    SimpleMessageChannelBuilder::createStreamingChannel('shared_channel'),
+                    PollingMetadata::create('consumer1')->setHandledMessageLimit(1),
+                ])
         );
 
         // Send 3 messages
@@ -59,13 +60,13 @@ final class InMemoryStreamingChannelTest extends TestCase
         $ecotoneLite->sendDirectToChannel('shared_channel', 'message3');
 
         // Run consumer 3 times with limit of 1
-        $ecotoneLite->run('consumer1', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 1));
+        $ecotoneLite->run('consumer1', ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 1));
         $this->assertEquals(['message1'], $ecotoneLite->sendQueryWithRouting('getConsumed'));
 
-        $ecotoneLite->run('consumer1', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 1));
+        $ecotoneLite->run('consumer1', ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 1));
         $this->assertEquals(['message1', 'message2'], $ecotoneLite->sendQueryWithRouting('getConsumed'));
 
-        $ecotoneLite->run('consumer1', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 1));
+        $ecotoneLite->run('consumer1', ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 1));
         $this->assertEquals(['message1', 'message2', 'message3'], $ecotoneLite->sendQueryWithRouting('getConsumed'));
     }
 
@@ -108,12 +109,12 @@ final class InMemoryStreamingChannelTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$handler1::class, $handler2::class],
             [$handler1, $handler2, ConsumerPositionTracker::class => $positionTracker],
-            extensionObjects: [
-                SimpleMessageChannelBuilder::createStreamingChannel('shared_channel'),
-                PollingMetadata::create('consumer1')->withHandledMessageLimit(1),
-                PollingMetadata::create('consumer2')->withHandledMessageLimit(1),
-            ],
-            enabledModules: [],
+            ServiceConfiguration::createWithDefaults()
+                ->withExtensionObjects([
+                    SimpleMessageChannelBuilder::createStreamingChannel('shared_channel'),
+                    PollingMetadata::create('consumer1')->setHandledMessageLimit(1),
+                    PollingMetadata::create('consumer2')->setHandledMessageLimit(1),
+                ])
         );
 
         // Send 3 messages
@@ -122,19 +123,19 @@ final class InMemoryStreamingChannelTest extends TestCase
         $ecotoneLite->sendDirectToChannel('shared_channel', 'message3');
 
         // Consumer1 consumes first message
-        $ecotoneLite->run('consumer1', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 1));
+        $ecotoneLite->run('consumer1', ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 1));
         $this->assertEquals(['message1'], $ecotoneLite->sendQueryWithRouting('getConsumed1'));
         $this->assertEquals([], $ecotoneLite->sendQueryWithRouting('getConsumed2'));
 
         // Consumer2 consumes first two messages
-        $ecotoneLite->run('consumer2', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 1));
-        $ecotoneLite->run('consumer2', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 1));
+        $ecotoneLite->run('consumer2', ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 1));
+        $ecotoneLite->run('consumer2', ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 1));
         $this->assertEquals(['message1'], $ecotoneLite->sendQueryWithRouting('getConsumed1'));
         $this->assertEquals(['message1', 'message2'], $ecotoneLite->sendQueryWithRouting('getConsumed2'));
 
         // Consumer1 consumes second and third messages
-        $ecotoneLite->run('consumer1', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 1));
-        $ecotoneLite->run('consumer1', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 1));
+        $ecotoneLite->run('consumer1', ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 1));
+        $ecotoneLite->run('consumer1', ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 1));
         $this->assertEquals(['message1', 'message2', 'message3'], $ecotoneLite->sendQueryWithRouting('getConsumed1'));
         $this->assertEquals(['message1', 'message2'], $ecotoneLite->sendQueryWithRouting('getConsumed2'));
     }

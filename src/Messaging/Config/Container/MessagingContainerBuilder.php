@@ -2,10 +2,9 @@
 
 namespace Ecotone\Messaging\Config\Container;
 
-use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-use Ecotone\Messaging\Config\BootstrapConfiguration;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\EndpointRunner;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
@@ -19,11 +18,14 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 class MessagingContainerBuilder
 {
+    private InterfaceToCallRegistry $interfaceToCallRegistry;
+
     /**
      * Map of endpointId => endpointRunnerReferenceName
      * @var array<string, string> $pollingEndpoints
      */
     private array $pollingEndpoints = [];
+    private ServiceConfiguration $applicationConfiguration;
 
     /**
      * @param array<MethodInterceptorBuilder> $beforeInterceptors
@@ -32,14 +34,15 @@ class MessagingContainerBuilder
      */
     public function __construct(
         private ContainerBuilder $builder,
-        private InterfaceToCallRegistry $interfaceToCallRegistry,
-        private ServiceConfiguration $applicationConfiguration,
-        private BootstrapConfiguration $bootstrapConfiguration,
+        ?InterfaceToCallRegistry $interfaceToCallRegistry = null,
+        ?ServiceConfiguration $serviceConfiguration = null,
         private array $pollingMetadata = [],
         private array $beforeInterceptors = [],
         private array $aroundInterceptors = [],
         private array $afterInterceptors = [],
     ) {
+        $this->interfaceToCallRegistry = $interfaceToCallRegistry ?? InterfaceToCallRegistry::createEmpty();
+        $this->applicationConfiguration = $serviceConfiguration ?? ServiceConfiguration::createWithDefaults();
     }
 
     public function getInterfaceToCall(InterfaceToCallReference $interfaceToCallReference): InterfaceToCall
@@ -55,11 +58,6 @@ class MessagingContainerBuilder
     public function getServiceConfiguration(): ServiceConfiguration
     {
         return $this->applicationConfiguration;
-    }
-
-    public function getBootstrapConfiguration(): BootstrapConfiguration
-    {
-        return $this->bootstrapConfiguration;
     }
 
     public function registerPollingEndpoint(string $endpointId, Definition $definition, bool $withContinuousPolling = false): void
@@ -128,21 +126,21 @@ class MessagingContainerBuilder
             $pollingMetadata = PollingMetadata::create($endpointId);
         }
 
-        if ($this->applicationConfiguration->defaultErrorChannel && $pollingMetadata->isErrorChannelEnabled && ! $pollingMetadata->getErrorChannelName()) {
+        if ($this->applicationConfiguration->getDefaultErrorChannel() && $pollingMetadata->isErrorChannelEnabled() && ! $pollingMetadata->getErrorChannelName()) {
             $pollingMetadata = $pollingMetadata
-                ->withErrorChannelName($this->applicationConfiguration->defaultErrorChannel);
+                ->setErrorChannelName($this->applicationConfiguration->getDefaultErrorChannel());
         }
-        if ($this->applicationConfiguration->defaultMemoryLimitInMegabytes && ! $pollingMetadata->memoryLimitInMegabytes) {
+        if ($this->applicationConfiguration->getDefaultMemoryLimitInMegabytes() && ! $pollingMetadata->getMemoryLimitInMegabytes()) {
             $pollingMetadata = $pollingMetadata
-                ->withMemoryLimitInMegaBytes($this->applicationConfiguration->defaultMemoryLimitInMegabytes);
+                ->setMemoryLimitInMegaBytes($this->applicationConfiguration->getDefaultMemoryLimitInMegabytes());
         }
-        if ($this->applicationConfiguration->connectionRetryTemplate && ! $pollingMetadata->connectionRetryTemplate) {
+        if ($this->applicationConfiguration->getConnectionRetryTemplate() && ! $pollingMetadata->getConnectionRetryTemplate()) {
             $pollingMetadata = $pollingMetadata
-                ->withConnectionRetryTemplate($this->applicationConfiguration->connectionRetryTemplate);
+                ->setConnectionRetryTemplate($this->applicationConfiguration->getConnectionRetryTemplate());
         }
 
         if ($withContinuousPolling) {
-            $pollingMetadata = $pollingMetadata->withFixedRateInMilliseconds(1);
+            $pollingMetadata = $pollingMetadata->setFixedRateInMilliseconds(1);
         }
 
         return $pollingMetadata;

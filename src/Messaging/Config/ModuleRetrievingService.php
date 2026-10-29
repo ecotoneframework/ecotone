@@ -15,7 +15,7 @@ namespace Ecotone\Messaging\Config;
 interface ModuleRetrievingService
 {
     /**
-     * @param string[] $skippedModulePackageNames
+     * @var string[] $skippedModulePackageNames
      *
      * @return Module[]
      */

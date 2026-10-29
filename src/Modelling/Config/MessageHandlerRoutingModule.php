@@ -4,34 +4,23 @@ namespace Ecotone\Modelling\Config;
 
 use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Api\Attribute\AsynchronousRunningEndpoint;
-use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\Attribute\ConfigurationVariable;
-use Ecotone\Api\Attribute\EventHandler;
-use Ecotone\Api\Attribute\Header;
-use Ecotone\Api\Attribute\Headers;
-use Ecotone\Api\Attribute\IgnorePayload;
-use Ecotone\Api\Attribute\MessageGateway;
-use Ecotone\Api\Attribute\ModuleAnnotation;
-use Ecotone\Api\Attribute\NamedEvent;
-use Ecotone\Api\Attribute\PropagateHeaders;
-use Ecotone\Api\Attribute\QueryHandler;
-use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-use Ecotone\Api\Gateway\CommandBus;
-use Ecotone\Api\Gateway\EventBus;
-use Ecotone\Api\Gateway\QueryBus;
-use Ecotone\Api\Interceptor\Precedence;
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Messaging\Attribute\MessageGateway;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Messaging\Attribute\Parameter\ConfigurationVariable;
+use Ecotone\Messaging\Attribute\Parameter\Header;
+use Ecotone\Messaging\Attribute\Parameter\Headers;
+use Ecotone\Messaging\Attribute\PropagateHeaders;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
-use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Config\PriorityBasedOnType;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -43,10 +32,15 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInterceptorBuilder;
 use Ecotone\Messaging\Handler\Router\RouterProcessor;
 use Ecotone\Messaging\Handler\Router\RouteToChannelResolver;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
-use Ecotone\Messaging\Handler\Transformer\TransformerBuilder;
-use Ecotone\Messaging\Handler\Transformer\TransformerProcessorBuilder;
 use Ecotone\Messaging\Handler\Type;
-use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Precedence;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Attribute\IgnorePayload;
+use Ecotone\Modelling\Attribute\NamedEvent;
+use Ecotone\Modelling\Attribute\QueryHandler;
+use Ecotone\Modelling\CommandBus;
 use Ecotone\Modelling\Config\Routing\BusRouteSelector;
 use Ecotone\Modelling\Config\Routing\BusRoutingKeyResolver;
 use Ecotone\Modelling\Config\Routing\BusRoutingMapBuilder;
@@ -55,17 +49,17 @@ use Ecotone\Modelling\Config\Routing\EventBusRouteSelector;
 use Ecotone\Modelling\Config\Routing\QueryBusRouteSelector;
 use Ecotone\Modelling\Config\Routing\RoutingEventHandler;
 use Ecotone\Modelling\Config\Routing\TypeAliasResolverProcessor;
+use Ecotone\Modelling\EventBus;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
+use Ecotone\Modelling\QueryBus;
 use ReflectionParameter;
 
 #[ModuleAnnotation]
 /**
  * licence Apache-2.0
  */
-final class MessageHandlerRoutingModule implements AnnotationModule
+class MessageHandlerRoutingModule implements AnnotationModule
 {
-    public const EVENT_BUS_ROUTE_RESOLVER = 'ecotone.eventBus.routeResolver';
-
     public function __construct(
         private InterfaceToCallRegistry $interfaceToCallRegistry,
         private AnnotationFinder $annotationFinder,
@@ -105,7 +99,7 @@ final class MessageHandlerRoutingModule implements AnnotationModule
         $interfaceToCall = $interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName());
 
         if ($interfaceToCall->hasMethodAnnotation(Type::attribute(IgnorePayload::class)) || $interfaceToCall->hasNoParameters()) {
-            return 'array';
+            return Type::ARRAY;
         }
 
         $firstParameterType = $interfaceToCall->getFirstParameter()->getTypeDescriptor();
@@ -114,15 +108,15 @@ final class MessageHandlerRoutingModule implements AnnotationModule
             $reflectionParameter = new ReflectionParameter([$registration->getClassName(), $registration->getMethodName()], 0);
 
             foreach ($reflectionParameter->getAttributes() as $attribute) {
-                if (in_array($attribute->getName(), [ConfigurationVariable::class, Header::class, Headers::class, \Ecotone\Api\Attribute\Reference::class])) {
-                    return 'array';
+                if (in_array($attribute->getName(), [ConfigurationVariable::class, Header::class, Headers::class, \Ecotone\Messaging\Attribute\Parameter\Reference::class])) {
+                    return Type::ARRAY;
                 }
             }
 
             return $firstParameterType;
         }
 
-        return 'array';
+        return Type::ARRAY;
     }
 
     /**
@@ -131,8 +125,6 @@ final class MessageHandlerRoutingModule implements AnnotationModule
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         $routingEventHandlers = ExtensionObjectResolver::resolve(RoutingEventHandler::class, $extensionObjects);
-        $isRunningForFlowTesting = ExtensionObjectResolver::resolveUnique(BootstrapConfiguration::class, $extensionObjects, BootstrapConfiguration::createWithDefaults())
-            ->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE);
         $commandBusRoutingConfig = new BusRoutingMapBuilder(true, $routingEventHandlers, $messagingConfiguration);
         foreach ($this->annotationFinder->findAnnotatedMethods(CommandHandler::class) as $registration) {
             $destinationChannel = $commandBusRoutingConfig->addRoutesFromAnnotatedFinding($registration, $this->interfaceToCallRegistry);
@@ -140,13 +132,10 @@ final class MessageHandlerRoutingModule implements AnnotationModule
             $commandHandler = $registration->getAnnotationForMethod();
             if ($commandHandler->getInputChannelName() && $destinationChannel) {
                 $messagingConfiguration->registerMessageHandler(
-                    MessageProcessorActivatorBuilder::create()
+                    BridgeBuilder::create()
                         ->withInputChannelName($commandHandler->getInputChannelName())
                         ->withOutputMessageChannel($destinationChannel)
                         ->withEndpointAnnotations([PriorityBasedOnType::fromAnnotatedFinding($registration)->toAttributeDefinition()])
-                        ->chain(TransformerProcessorBuilder::create(
-                            TransformerBuilder::createHeaderEnricher([MessageBusChannel::ROUTING_KEY_HEADER => $commandHandler->getInputChannelName()])
-                        ))
                 );
             }
         }
@@ -178,12 +167,12 @@ final class MessageHandlerRoutingModule implements AnnotationModule
             ->registerMessageHandler(
                 MessageProcessorActivatorBuilder::create()
                     ->withInputChannelName(MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME)
-                    ->chain($this->buildRouterProcessor($messagingConfiguration, $commandBusRoutingConfig, MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME, $isRunningForFlowTesting))
+                    ->chain($this->buildRouterProcessor($commandBusRoutingConfig, MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME))
             )
             ->registerMessageHandler(
                 MessageProcessorActivatorBuilder::create()
                     ->withInputChannelName(MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME)
-                    ->chain($this->buildRouterProcessor($messagingConfiguration, $queryBusRouting, MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME, $isRunningForFlowTesting))
+                    ->chain($this->buildRouterProcessor($queryBusRouting, MessageBusChannel::QUERY_CHANNEL_NAME_BY_NAME))
             )
             ->registerMessageHandler(
                 MessageProcessorActivatorBuilder::create()
@@ -191,9 +180,8 @@ final class MessageHandlerRoutingModule implements AnnotationModule
                     ->chain(new Definition(TypeAliasResolverProcessor::class, [
                         $eventBusTypeAliases,
                         MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME,
-                        Reference::to(MessageBuilder::class),
                     ]))
-                    ->chain($this->buildRouterProcessor($messagingConfiguration, $eventBusRouting, MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME, $isRunningForFlowTesting, false))
+                    ->chain($this->buildRouterProcessor($eventBusRouting, MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME, false))
             );
 
         $messagingConfiguration->registerServiceDefinition(
@@ -239,7 +227,7 @@ final class MessageHandlerRoutingModule implements AnnotationModule
             );
     }
 
-    private function buildRouterProcessor(Configuration $messagingConfiguration, BusRoutingMapBuilder $busRoutingConfig, string $channel, bool $isRunningForFlowTesting, bool $isResolutionRequired = true): Definition
+    private function buildRouterProcessor(BusRoutingMapBuilder $busRoutingConfig, string $channel, bool $isResolutionRequired = true): Definition
     {
         $busRouteSelectorClass = match ($channel) {
             MessageBusChannel::COMMAND_CHANNEL_NAME_BY_NAME => CommandBusRouteSelector::class,
@@ -247,31 +235,25 @@ final class MessageHandlerRoutingModule implements AnnotationModule
             MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME => EventBusRouteSelector::class,
             default => BusRouteSelector::class,
         };
-        $busRouteSelectorArguments = [
-            $busRoutingConfig->compile(),
-            new Definition(BusRoutingKeyResolver::class, [$channel]),
-            new Reference(LoggingGateway::class),
-        ];
-        if (in_array($busRouteSelectorClass, [CommandBusRouteSelector::class, QueryBusRouteSelector::class], true)) {
-            $busRouteSelectorArguments[] = $isRunningForFlowTesting;
-        }
-
-        $routeResolver = new Definition(RouteToChannelResolver::class, [new Reference(ChannelResolver::class)]);
-        if ($channel === MessageBusChannel::EVENT_CHANNEL_NAME_BY_NAME) {
-            $messagingConfiguration->registerServiceDefinition(self::EVENT_BUS_ROUTE_RESOLVER, $routeResolver);
-            $routeResolver = new Reference(self::EVENT_BUS_ROUTE_RESOLVER);
-        }
-
         return new Definition(RouterProcessor::class, [
-            new Definition($busRouteSelectorClass, $busRouteSelectorArguments),
-            $routeResolver,
-            $isResolutionRequired,
+            new Definition($busRouteSelectorClass, [
+                $busRoutingConfig->compile(),
+                new Definition(BusRoutingKeyResolver::class, [$channel]), // Yes, the channel name is also used as routing key header
+                new Reference(LoggingGateway::class),
+            ]),
+            new Definition(RouteToChannelResolver::class, [new Reference(ChannelResolver::class)]),
+            $isResolutionRequired, // Single route if resolution is required
         ]);
     }
 
     /**
      * @inheritDoc
      */
+    public function canHandle($extensionObject): bool
+    {
+        return $extensionObject instanceof RoutingEventHandler;
+    }
+
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
     {
         return [];

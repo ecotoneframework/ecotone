@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Handler\Bridge;
 
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Message;
 
 /**
  * Class Bridge

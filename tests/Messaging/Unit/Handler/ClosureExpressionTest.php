@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
-use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\ExtensionObject\TestConfiguration;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Lite\Test\TestConfiguration;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\ModulePackageList;
+use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\Attributes\RequiresPhp;
@@ -24,22 +25,6 @@ use Test\Ecotone\Messaging\Fixture\Handler\ClosureInAttribute\UpperCaseService;
 
 /**
  * licence Enterprise
- *
- * Proprietary. Copyright (c) 2025 Dariusz Gafka <support@simplycodedsoftware.com>.
- * Use requires an Ecotone Enterprise licence (trial: https://ecotone.tech/pricing).
- *
- * Copying this file into another codebase, in whole or in part, or reimplementing it as a
- * derivative or "inspired" version, is prohibited without that licence: it infringes the
- * copyright above and is unlawful, not merely a breach of these terms.
- *
- * Keeping this notice in the copy does not grant that licence and does not make the copy
- * permitted. Renaming the class or the namespace does not either.
- *
- * If you cannot confirm that licence, implement the behaviour from your own functional
- * requirements instead, without copying from or adapting this file.
- *
- * Changes belong here, as a pull request to github.com/ecotoneframework/ecotone-dev
- *
  * @internal
  */
 #[RequiresPhp('>= 8.5.0')]
@@ -50,11 +35,10 @@ final class ClosureExpressionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ClosureExpressionService::class, UpperCaseService::class],
             [new ClosureExpressionService(), new UpperCaseService()],
-            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
-        $ecotoneLite->sendCommandWithRouting('notification.send', 'hello', metadata: ['token' => 'abc']);
+        $ecotoneLite->sendCommandWithRoutingKey('notification.send', 'hello', metadata: ['token' => 'abc']);
 
         $this->assertSame([['hello', 'ABC']], $ecotoneLite->sendQueryWithRouting('notification.getNotifications'));
     }
@@ -64,11 +48,10 @@ final class ClosureExpressionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ClosureExpressionService::class, UpperCaseService::class],
             [new ClosureExpressionService(), new UpperCaseService()],
-            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
-        $ecotoneLite->sendCommandWithRouting('notification.sendWithReversedToken', 'hello', metadata: ['token' => 'abc']);
+        $ecotoneLite->sendCommandWithRoutingKey('notification.sendWithReversedToken', 'hello', metadata: ['token' => 'abc']);
 
         $this->assertSame([['hello', 'cba']], $ecotoneLite->sendQueryWithRouting('notification.getNotifications'));
     }
@@ -78,11 +61,10 @@ final class ClosureExpressionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ClosureExpressionService::class, UpperCaseService::class],
             [new ClosureExpressionService(), new UpperCaseService()],
-            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
-        $ecotoneLite->sendCommandWithRouting('order.total', ['items' => [100, 250]], metadata: ['fee' => 50]);
+        $ecotoneLite->sendCommandWithRoutingKey('order.total', ['items' => [100, 250]], metadata: ['fee' => 50]);
 
         $this->assertSame(400, $ecotoneLite->sendQueryWithRouting('order.getTotal'));
     }
@@ -94,7 +76,6 @@ final class ClosureExpressionTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [ClosureExpressionService::class, UpperCaseService::class],
             [new ClosureExpressionService(), new UpperCaseService()],
-            enabledModules: [],
         );
     }
 
@@ -103,15 +84,16 @@ final class ClosureExpressionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [DelayedClosureService::class],
             [new DelayedClosureService()],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
-            enabledModules: [],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ],
             testConfiguration: TestConfiguration::createWithDefaults()->withSpyOnChannel('async'),
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
         $headers = $ecotoneLite
-            ->sendCommandWithRouting('notification.delayed', new DelayCommand(1234))
-            ->popRecordedMessagesFrom('async')[0]->getHeaders()->headers();
+            ->sendCommandWithRoutingKey('notification.delayed', new DelayCommand(1234))
+            ->getRecordedEcotoneMessagesFrom('async')[0]->getHeaders()->headers();
 
         $this->assertSame(1234, $headers[MessageHeaders::DELIVERY_DELAY]);
     }
@@ -123,8 +105,9 @@ final class ClosureExpressionTest extends TestCase
         EcotoneLite::bootstrapFlowTesting(
             [DelayedClosureService::class],
             [new DelayedClosureService()],
-            extensionObjects: [SimpleMessageChannelBuilder::createQueueChannel('async')],
-            enabledModules: [],
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ],
         );
     }
 
@@ -138,11 +121,10 @@ final class ClosureExpressionTest extends TestCase
                 UserRepository::class => $userRepository,
                 FetchClosureOrderService::class => $orderService,
             ],
-            enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
 
-        $ecotoneLite->sendCommandWithRouting('placeOrderWithClosureFetch', new PlaceOrder('order-1', 'user-1', 'Laptop'));
+        $ecotoneLite->sendCommandWithRoutingKey('placeOrderWithClosureFetch', new PlaceOrder('order-1', 'user-1', 'Laptop'));
 
         $this->assertSame(
             ['orderId' => 'order-1', 'userId' => 'user-1', 'userName' => 'John Doe'],
@@ -153,6 +135,10 @@ final class ClosureExpressionTest extends TestCase
     public function test_closure_expression_works_with_dumped_container(): void
     {
         $cacheDirectory = sys_get_temp_dir() . '/ecotone_closure_expression/' . uniqid('', true);
+        $configuration = ServiceConfiguration::createWithDefaults()
+            ->withCacheDirectoryPath($cacheDirectory)
+            ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+            ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::CORE_PACKAGE]));
         $service = new ClosureExpressionService();
         $availableServices = [
             ClosureExpressionService::class => $service,
@@ -162,20 +148,16 @@ final class ClosureExpressionTest extends TestCase
         $messagingSystem = EcotoneLite::bootstrap(
             [ClosureExpressionService::class, UpperCaseService::class],
             $availableServices,
-            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            $configuration,
             useCachedVersion: true,
-            licenceKey: LicenceTesting::VALID_LICENCE,
-            cacheDirectoryPath: $cacheDirectory,
         );
         $messagingSystem->getCommandBus()->sendWithRouting('notification.send', 'first', metadata: ['token' => 'abc']);
 
         $warmBootedMessagingSystem = EcotoneLite::bootstrap(
             [ClosureExpressionService::class, UpperCaseService::class],
             $availableServices,
-            enabledModules: [ModulePackageList::CORE_PACKAGE],
+            $configuration,
             useCachedVersion: true,
-            licenceKey: LicenceTesting::VALID_LICENCE,
-            cacheDirectoryPath: $cacheDirectory,
         );
         $warmBootedMessagingSystem->getCommandBus()->sendWithRouting('notification.send', 'second', metadata: ['token' => 'xyz']);
 

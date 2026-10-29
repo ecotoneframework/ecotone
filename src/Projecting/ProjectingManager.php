@@ -34,7 +34,6 @@ class ProjectingManager
         private ?string                        $backfillAsyncChannelName = null,
         private int                            $rebuildPartitionBatchSize = self::DEFAULT_REBUILD_PARTITION_BATCH_SIZE,
         private ?string                        $rebuildAsyncChannelName = null,
-        private bool                           $partitioned = false,
     ) {
         if ($eventLoadingBatchSize < 1) {
             throw new InvalidArgumentException('Event loading batch size must be at least 1');
@@ -69,22 +68,8 @@ class ProjectingManager
         } while ($processedEvents > 0 && $this->terminationListener->shouldTerminate() !== true);
     }
 
-    /**
-     * @param string[] $partitionKeyValues
-     */
-    public function executeForPartitions(array $partitionKeyValues, bool $manualInitialization = false): void
-    {
-        foreach ($partitionKeyValues as $partitionKeyValue) {
-            $this->execute($partitionKeyValue, $manualInitialization);
-        }
-    }
-
     public function executePartitionBatch(?string $partitionKeyValue = null, bool $canInitialize = false, bool $shouldReset = false): int
     {
-        if ($canInitialize) {
-            $this->ensurePartitionInitialized($partitionKeyValue);
-        }
-
         $transaction = $this->getProjectionStateStorage()->beginTransaction();
         try {
             $projectionState = $this->loadOrInitializePartitionState($partitionKeyValue, $canInitialize);
@@ -144,7 +129,7 @@ class ProjectingManager
         return 'projecting_manager_batch:' . $projectionName;
     }
 
-    public function loadState(?string $partitionKey = null): ?ProjectionPartitionState
+    public function loadState(?string $partitionKey = null): ProjectionPartitionState
     {
         return $this->getProjectionStateStorage()->loadPartition($this->projectionName, $partitionKey);
     }
@@ -152,26 +137,6 @@ class ProjectingManager
     public function getPartitionProvider(): PartitionProvider
     {
         return $this->partitionProviderRegistry->getPartitionProviderFor($this->projectionName);
-    }
-
-    public function rebuildsAsynchronously(): bool
-    {
-        return $this->rebuildAsyncChannelName !== null;
-    }
-
-    public function backfillsAsynchronously(): bool
-    {
-        return $this->backfillAsyncChannelName !== null;
-    }
-
-    public function isPartitioned(): bool
-    {
-        return $this->partitioned;
-    }
-
-    public function isSetUp(): bool
-    {
-        return $this->getProjectionStateStorage()->loadPartition($this->projectionName, null, lock: false) !== null;
     }
 
     public function getProjectionName(): string
@@ -184,10 +149,6 @@ class ProjectingManager
         $this->getProjectionStateStorage()->init($this->projectionName);
 
         $this->projectorExecutor->init();
-
-        if (! $this->partitioned) {
-            $this->getProjectionStateStorage()->initPartition($this->projectionName);
-        }
     }
 
     public function delete(): void
@@ -202,6 +163,14 @@ class ProjectingManager
         $this->preparePartitionBatches($this->backfillPartitionBatchSize, $this->backfillAsyncChannelName, false);
     }
 
+    /**
+     * @deprecated Use prepareBackfill() instead. This method is kept for backward compatibility.
+     */
+    public function backfill(): void
+    {
+        $this->prepareBackfill();
+    }
+
     public function executeWithReset(?string $partitionKeyValue = null): void
     {
         $this->messagingEntrypoint->sendWithHeaders(
@@ -209,34 +178,10 @@ class ProjectingManager
             [
                 ProjectingHeaders::PROJECTION_PARTITION_KEY => $partitionKeyValue,
                 ProjectingHeaders::PROJECTION_CAN_INITIALIZE => true,
-                ProjectingHeaders::PROJECTION_SHOULD_RESET => true,
+                'projection.shouldReset' => true,
             ],
             self::batchChannelFor($this->projectionName)
         );
-    }
-
-    public function executeAll(bool $manualInitialization = true): void
-    {
-        foreach ($this->partitionsToProcess() as $partitionKeyValue) {
-            $this->execute($partitionKeyValue, $manualInitialization);
-        }
-    }
-
-    public function executeAllWithReset(): void
-    {
-        $this->delete();
-        $this->init();
-        $this->executeAll();
-    }
-
-    /**
-     * @return iterable<string|null>
-     */
-    private function partitionsToProcess(): iterable
-    {
-        foreach ($this->streamFilterRegistry->provide($this->projectionName) as $streamFilter) {
-            yield from $this->getPartitionProvider()->partitions($streamFilter);
-        }
     }
 
     public function prepareRebuild(): void
@@ -246,32 +191,19 @@ class ProjectingManager
 
     private function preparePartitionBatches(int $partitionBatchSize, ?string $asyncChannelName, bool $shouldReset): void
     {
-        $partitionsPerStreamFilter = [];
-        foreach ($this->streamFilterRegistry->provide($this->projectionName) as $streamFilter) {
+        $streamFilters = $this->streamFilterRegistry->provide($this->projectionName);
+
+        foreach ($streamFilters as $streamFilter) {
             $totalPartitions = $this->getPartitionProvider()->count($streamFilter);
-            if ($totalPartitions > 0) {
-                $partitionsPerStreamFilter[] = [$streamFilter, $totalPartitions];
+
+            if ($totalPartitions === 0) {
+                continue;
             }
-        }
 
-        $totalPartitions = array_sum(array_column($partitionsPerStreamFilter, 1));
-        $totalBatches = array_sum(array_map(fn (array $counted): int => (int) ceil($counted[1] / $partitionBatchSize), $partitionsPerStreamFilter));
-        $batchNumber = 0;
-
-        if ($totalBatches === 0) {
-            $this->sendPartitionBatchMessage([
-                ProjectingHeaders::REBUILD_BATCH_NUMBER => 0,
-                ProjectingHeaders::REBUILD_BATCH_COUNT => 0,
-                ProjectingHeaders::REBUILD_PARTITION_COUNT => 0,
-            ], null);
-        }
-
-        foreach ($partitionsPerStreamFilter as [$streamFilter, $partitionsOfFilter]) {
-            $numberOfBatches = (int) ceil($partitionsOfFilter / $partitionBatchSize);
+            $numberOfBatches = (int) ceil($totalPartitions / $partitionBatchSize);
 
             for ($batch = 0; $batch < $numberOfBatches; $batch++) {
                 $offset = $batch * $partitionBatchSize;
-                $batchNumber++;
 
                 $headers = [
                     'partitionBatch.limit' => $partitionBatchSize,
@@ -279,11 +211,7 @@ class ProjectingManager
                     'partitionBatch.streamName' => $streamFilter->streamName,
                     'partitionBatch.aggregateType' => $streamFilter->aggregateType,
                     'partitionBatch.eventStoreReferenceName' => $streamFilter->eventStoreReferenceName,
-                    'partitionBatch.tag' => $streamFilter->tag,
                     'partitionBatch.shouldReset' => $shouldReset,
-                    ProjectingHeaders::REBUILD_BATCH_NUMBER => $batchNumber,
-                    ProjectingHeaders::REBUILD_BATCH_COUNT => $totalBatches,
-                    ProjectingHeaders::REBUILD_PARTITION_COUNT => $totalPartitions,
                 ];
 
                 $this->sendPartitionBatchMessage($headers, $asyncChannelName);
@@ -322,27 +250,14 @@ class ProjectingManager
         }
 
         if ($canInitialize) {
-            return $storage->initPartition($this->projectionName, $partitionKey)
-                ?? $storage->loadPartition($this->projectionName, $partitionKey);
+            $projectionState = $storage->initPartition($this->projectionName, $partitionKey);
+            if ($projectionState) {
+                $this->projectorExecutor->init();
+            } else {
+                $projectionState = $storage->loadPartition($this->projectionName, $partitionKey);
+            }
+            return $projectionState;
         }
         return null;
-    }
-
-    /**
-     * The projector's own #[ProjectionInitialization] handler may run arbitrary SQL, DDL included.
-     * It must run before any database transaction is open: on MySQL, DDL issued mid-transaction
-     * triggers an implicit commit, leaving the transaction object out of sync with the actual
-     * connection state and the later explicit commit failing with "no active transaction".
-     */
-    private function ensurePartitionInitialized(?string $partitionKeyValue): void
-    {
-        $storage = $this->getProjectionStateStorage();
-        if ($storage->loadPartition($this->projectionName, $partitionKeyValue, lock: false) !== null) {
-            return;
-        }
-
-        if ($storage->initPartition($this->projectionName, $partitionKeyValue) !== null) {
-            $this->projectorExecutor->init();
-        }
     }
 }

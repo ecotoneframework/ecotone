@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\AggregateServiceBuilder;
 
-use Ecotone\Api\Attribute\NamedEvent;
+use Ecotone\Modelling\Attribute\NamedEvent;
 
 /**
  * licence Apache-2.0

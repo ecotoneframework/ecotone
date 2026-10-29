@@ -13,7 +13,6 @@ use Ecotone\Messaging\Config\ConfigurationException;
  */
 /**
  * licence Apache-2.0
- * @internal
  */
 abstract class EndpointAnnotation extends IdentifiedAnnotation
 {

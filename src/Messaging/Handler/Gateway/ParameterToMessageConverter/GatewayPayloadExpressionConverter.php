@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter;
 
-use Ecotone\Messaging\Handler\ExpressionEvaluationException;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
-use Ecotone\Messaging\Handler\ExpressionLocation;
 use Ecotone\Messaging\Handler\Gateway\GatewayParameterConverter;
 use Ecotone\Messaging\Handler\MethodArgument;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\MessageBuilder;
-use Throwable;
 
 /**
  * Class GatewayExpressionConverter
@@ -37,7 +34,7 @@ class GatewayPayloadExpressionConverter implements GatewayParameterConverter
      * @param string $parameterName
      * @param string $expression
      */
-    public function __construct(ExpressionEvaluationService $expressionEvaluationService, string $parameterName, string $expression, private ExpressionLocation $location)
+    public function __construct(ExpressionEvaluationService $expressionEvaluationService, string $parameterName, string $expression)
     {
         $this->expressionEvaluationService = $expressionEvaluationService;
         $this->parameterName = $parameterName;
@@ -52,18 +49,15 @@ class GatewayPayloadExpressionConverter implements GatewayParameterConverter
     {
         Assert::notNull($methodArgument, 'Gateway header converter can only be called with method argument');
 
-        try {
-            $evaluatedPayload = $this->expressionEvaluationService->evaluate(
-                $this->expression,
-                [
-                    'value' => $methodArgument->value(),
-                ],
-            );
-        } catch (Throwable $exception) {
-            throw ExpressionEvaluationException::wrapping($this->location, $exception);
-        }
-
-        return $messageBuilder->setPayload($evaluatedPayload);
+        return $messageBuilder
+                ->setPayload(
+                    $this->expressionEvaluationService->evaluate(
+                        $this->expression,
+                        [
+                            'value' => $methodArgument->value(),
+                        ],
+                    )
+                );
     }
 
     /**

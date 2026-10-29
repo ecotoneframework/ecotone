@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\PollableChannel\InMemory;
 
-use Ecotone\Api\ExtensionObject\FinalFailureStrategy;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
-use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Endpoint\FinalFailureStrategy;
 use Ecotone\Messaging\PrecedenceChannelInterceptor;
-use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -36,7 +34,6 @@ final class InMemoryQueueAcknowledgeInterceptorBuilder implements ChannelInterce
         return new Definition(InMemoryQueueAcknowledgeInterceptor::class, [
             $this->finalFailureStrategy,
             $this->isAutoAcked,
-            new Reference(MessageBuilder::class),
         ]);
     }
 }

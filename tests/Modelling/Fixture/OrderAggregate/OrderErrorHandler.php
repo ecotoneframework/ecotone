@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\OrderAggregate;
 
-use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\MessagingException;
 
 /**
@@ -10,7 +10,7 @@ use Ecotone\Messaging\MessagingException;
  */
 class OrderErrorHandler
 {
-    #[InternalHandler(ChannelConfiguration::ERROR_CHANNEL)]
+    #[ServiceActivator(ChannelConfiguration::ERROR_CHANNEL)]
     public function errorConfiguration(MessagingException $exception)
     {
         throw $exception;

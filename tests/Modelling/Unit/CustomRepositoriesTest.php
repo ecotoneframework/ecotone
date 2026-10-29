@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Lite\Test\FlowTestSupport;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Lite\Test\FlowTestSupport;
+use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Test\Ecotone\Messaging\BaseEcotoneTestCase;
-use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStateStoredRepository;
+use Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate\InMemoryStandardRepository;
 use Test\Ecotone\Modelling\Fixture\CustomRepositories\EventSourcing\Comment;
 use Test\Ecotone\Modelling\Fixture\CustomRepositories\Standard\Article;
 use Test\Ecotone\Modelling\Fixture\CustomRepositories\Standard\ArticleRepository;
@@ -34,7 +35,6 @@ final class CustomRepositoriesTest extends BaseEcotoneTestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [Article::class, ArticleRepository::class, RepositoryBusinessInterface::class, Page::class, Author::class],
             [ArticleRepository::class => $articleRepository],
-            enabledModules: [],
             addInMemoryStateStoredRepository: false,
         );
 
@@ -56,7 +56,6 @@ final class CustomRepositoriesTest extends BaseEcotoneTestCase
                 ArticleRepository::class => $articleRepository,
                 PageRepository::class => $pageRepository,
             ],
-            enabledModules: [],
             addInMemoryStateStoredRepository: false,
         );
 
@@ -72,7 +71,7 @@ final class CustomRepositoriesTest extends BaseEcotoneTestCase
         );
     }
 
-    public function test_default_repository_is_used_when_multiple_repositories_are_registered_for_different_standard_aggregate()
+    public function test_default_repository_are_not_used_when_multiple_repositories_provided()
     {
         $articleRepository = ArticleRepository::createEmpty();
         $pageRepository = PageRepository::createEmpty();
@@ -83,9 +82,11 @@ final class CustomRepositoriesTest extends BaseEcotoneTestCase
                 ArticleRepository::class => $articleRepository,
                 PageRepository::class => $pageRepository,
             ],
-            enabledModules: [],
             addInMemoryStateStoredRepository: true,
         );
+
+        // As more than one repository is available, the repository need to be handled explicitly
+        $this->expectException(InvalidArgumentException::class);
 
         $this->verify(Author::create('123'), $ecotoneLite, 'create.author', Author::class, null);
     }
@@ -103,22 +104,21 @@ final class CustomRepositoriesTest extends BaseEcotoneTestCase
                 ArticleRepository::class => $articleRepository,
                 PageRepository::class => $pageRepository,
             ],
-            enabledModules: [],
             licenceKey: $isEnterprise ? LicenceTesting::VALID_LICENCE : null,
         );
 
         // We have provided multiple standard repositories, therefore there is single Event Sourced repository
-        $ecotoneLite->sendCommandWithRouting('create.comment', '123');
+        $ecotoneLite->sendCommandWithRoutingKey('create.comment', '123');
 
         $this->assertNotNull($ecotoneLite->getAggregate(Comment::class, '123'));
     }
 
-    private function verify(object $expectedAggregate, FlowTestSupport $ecotoneLite, string $creationMethod, string $className, ?InMemoryStateStoredRepository $customRepository): void
+    private function verify(object $expectedAggregate, FlowTestSupport $ecotoneLite, string $creationMethod, string $className, ?InMemoryStandardRepository $customRepository): void
     {
         $this->assertEquals(
             $expectedAggregate,
             $ecotoneLite
-                ->sendCommandWithRouting($creationMethod, '123')
+                ->sendCommandWithRoutingKey($creationMethod, '123')
                 ->getAggregate($className, '123')
         );
 

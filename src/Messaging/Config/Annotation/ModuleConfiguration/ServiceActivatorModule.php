@@ -5,22 +5,16 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotatedFinding;
-use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Api\Attribute\Aggregate;
-use Ecotone\Api\Attribute\InternalHandler;
-use Ecotone\Api\Attribute\ModuleAnnotation;
-use Ecotone\Api\Attribute\Saga;
-use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Messaging\Attribute\ServiceActivator;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
-use Ecotone\Messaging\Config\Configuration;
-use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
-use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
-use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
-use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Messaging\Support\LicensingException;
+use Ecotone\Modelling\Attribute\Aggregate;
+use Ecotone\Modelling\Attribute\Saga;
 
 #[ModuleAnnotation]
 /**
@@ -28,36 +22,6 @@ use Ecotone\Messaging\Support\LicensingException;
  */
 class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
 {
-    /**
-     * @var AnnotatedFinding[]
-     */
-    private array $changingHeadersFindings = [];
-
-    public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
-    {
-        $instance = parent::create($annotationRegistrationService, $interfaceToCallRegistry);
-
-        foreach ($annotationRegistrationService->findAnnotatedMethods(static::getMessageHandlerAnnotation()) as $annotationRegistration) {
-            /** @var InternalHandler $annotation */
-            $annotation = $annotationRegistration->getAnnotationForMethod();
-            if ($annotation->changingHeaders) {
-                $instance->changingHeadersFindings[] = $annotationRegistration;
-            }
-        }
-
-        return $instance;
-    }
-
-    public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
-    {
-        if ($this->changingHeadersFindings && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
-            $firstFinding = $this->changingHeadersFindings[0];
-            throw LicensingException::create("{$firstFinding->getClassName()}::{$firstFinding->getMethodName()} is using changingHeaders, which is available only with Ecotone Enterprise licence. See https://docs.ecotone.tech/enterprise for details.");
-        }
-
-        parent::prepare($messagingConfiguration, $extensionObjects, $moduleReferenceSearchService, $interfaceToCallRegistry);
-    }
-
     /**
      * @inheritDoc
      */
@@ -67,20 +31,16 @@ class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
             throw InvalidArgumentException::create("Message Handler or Service Activator works as stateless Handler and can't be used on Aggregate or Saga");
         }
 
-        /** @var InternalHandler $annotation */
+        /** @var ServiceActivator $annotation */
         $annotation = $annotationRegistration->getAnnotationForMethod();
 
-        return MessageProcessorActivatorBuilder::createForMethodInvoker(
-            MethodInvokerBuilder::create(
-                AnnotatedDefinitionReference::getReferenceFor($annotationRegistration),
-                new InterfaceToCallReference($annotationRegistration->getClassName(), $annotationRegistration->getMethodName()),
-            )->withChangeHeaders($annotation->changingHeaders)
-        )
+        return ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($annotationRegistration), $interfaceToCallRegistry->getFor($annotationRegistration->getClassName(), $annotationRegistration->getMethodName()))
             ->withEndpointId($annotation->getEndpointId())
-            ->withRequiredReply($annotation->requiresReply)
+            ->withRequiredReply($annotation->isRequiresReply())
             ->withOutputMessageChannel($annotation->getOutputChannelName())
             ->withInputChannelName($annotation->getInputChannelName())
-            ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames());
+            ->withRequiredInterceptorNames($annotation->getRequiredInterceptorNames())
+            ->withChangingHeaders($annotation->isChangingHeaders());
     }
 
     /**
@@ -88,7 +48,7 @@ class ServiceActivatorModule extends MessageHandlerRegisterConfiguration
      */
     public static function getMessageHandlerAnnotation(): string
     {
-        return InternalHandler::class;
+        return ServiceActivator::class;
     }
 
     public function getModulePackageName(): string

@@ -7,13 +7,13 @@ declare(strict_types=1);
 
 namespace Ecotone\Projecting;
 
-use Ecotone\Api\EventSourcing\Event;
-use Ecotone\Api\Messaging\MessageHeaders;
-use Ecotone\Api\Projecting\PartitionTagValue;
 use Ecotone\Messaging\Channel\QueueChannel;
+use Ecotone\Messaging\Config\LicenceDecider;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\MessageProcessor;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\Event;
 use Ecotone\Modelling\MessageHandling\MetadataPropagator\MessageHeadersPropagatorInterceptor;
 
 use function is_null;
@@ -25,27 +25,28 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
         private MessageHeadersPropagatorInterceptor $messageHeadersPropagatorInterceptor,
         private string $projectionName,
         private MessageProcessor $routerProcessor,
-        private ProjectionNameHeader $projectionNameHeader,
-        private MessageBuilder $messageBuilder,
+        private LicenceDecider $licenceDecider,
         private ?string $initChannel = null,
         private ?string $deleteChannel = null,
         private ?string $flushChannel = null,
         private bool $isLive = true,
         private ?string $resetChannel = null,
-        private bool $partitionedByTag = false,
     ) {
     }
 
     public function project(Event $event, mixed $userState = null, bool $isRebuilding = false): mixed
     {
-        $metadata = $event->metadata;
+        $metadata = $event->getMetadata();
         $metadata[ProjectingHeaders::PROJECTION_STATE] = $userState ?? null;
-        $metadata[ProjectingHeaders::PROJECTION_EVENT_NAME] = $event->eventName;
-        $metadata = $this->withProjectionName($metadata);
+        $metadata[ProjectingHeaders::PROJECTION_EVENT_NAME] = $event->getEventName();
+        if ($this->licenceDecider->hasEnterpriseLicence()) {
+            $metadata[ProjectingHeaders::PROJECTION_NAME] = $this->projectionName;
+        }
         $metadata[ProjectingHeaders::PROJECTION_LIVE] = $this->isLive && ! $isRebuilding;
+        $metadata[MessageHeaders::STREAM_BASED_SOURCED] = true; // this one is required for correct header propagation in EventStreamEmitter...
         $metadata[MessageHeaders::REPLY_CHANNEL] = $responseQueue = new QueueChannel('response_channel');
 
-        $requestMessage = $this->messageBuilder->withPayload($event->getPayload())
+        $requestMessage = MessageBuilder::withPayload($event->getPayload())
             ->setMultipleHeaders($metadata)
             ->build();
 
@@ -88,9 +89,10 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
         $headers = $this->withProjectionName([
             ProjectingHeaders::PROJECTION_STATE => $userState,
             ProjectingHeaders::PROJECTION_LIVE => $this->isLive && ! $isRebuilding,
+            MessageHeaders::STREAM_BASED_SOURCED => true,
         ]);
 
-        $requestMessage = $this->messageBuilder->withPayload([])
+        $requestMessage = MessageBuilder::withPayload([])
             ->setMultipleHeaders($headers)
             ->build();
 
@@ -110,9 +112,6 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
 
             if ($partitionKey !== null) {
                 $headers[ProjectingHeaders::REBUILD_PARTITION_KEY] = $partitionKey;
-                if ($this->partitionedByTag) {
-                    $headers[PartitionTagValue::HEADER_NAME] = $partitionKey;
-                }
 
                 $decomposed = AggregatePartitionKey::decompose($partitionKey);
                 if ($decomposed !== null) {
@@ -127,6 +126,9 @@ class EcotoneProjectorExecutor implements ProjectorExecutor
 
     private function withProjectionName(array $headers): array
     {
-        return $this->projectionNameHeader->applyTo($headers, $this->projectionName);
+        if ($this->licenceDecider->hasEnterpriseLicence()) {
+            $headers[ProjectingHeaders::PROJECTION_NAME] = $this->projectionName;
+        }
+        return $headers;
     }
 }

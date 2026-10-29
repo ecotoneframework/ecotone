@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Test\Ecotone\Messaging\Fixture\HighThroughputPublishing;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Api\Attribute\ModuleAnnotation;
-use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\Config\DeferredPublishingGatewayRegistration;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\NoExternalConfigurationModule;
 use Ecotone\Messaging\Config\Configuration;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
-use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 
 #[ModuleAnnotation]
 /**
@@ -38,10 +38,15 @@ final class InMemoryHighThroughputPublisherModule extends NoExternalConfiguratio
         $messagingConfiguration
             ->registerMessageChannel(SimpleMessageChannelBuilder::createDirectMessageChannel($publisherReference))
             ->registerMessageHandler(
-                MessageProcessorActivatorBuilder::createForMethod(InMemoryHighThroughputOutboundAdapter::class, 'handle')
+                ServiceActivatorBuilder::create(InMemoryHighThroughputOutboundAdapter::class, 'handle')
                     ->withInputChannelName($publisherReference)
                     ->withEndpointId($publisherReference . '.handler')
             );
+    }
+
+    public function canHandle($extensionObject): bool
+    {
+        return false;
     }
 
     public function getModulePackageName(): string

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\HighThroughputPublishing;
 
-use Ecotone\Api\Interceptor\MethodInvocation;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
 use Throwable;
 
 /**

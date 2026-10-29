@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Bridge;
 
-use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Test\ChannelTestSupport;
-use Ecotone\Test\StaticMessageBuilder;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
+use Ecotone\Messaging\Support\MessageBuilder;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\InterceptedBridge\AsynchronousBridgeExample;
 use Test\Ecotone\Messaging\Fixture\InterceptedBridge\BridgeExample;
@@ -23,28 +23,27 @@ final class BridgeTest extends TestCase
 {
     public function test_intercepting_message_handler_should_happen_only_for_given_endpoint()
     {
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+        $ecotoneLite = EcotoneLite::bootstrapForTesting(
             [BridgeExample::class],
-            [new BridgeExample()],
-            enabledModules: [],
+            [new BridgeExample()]
         );
 
         $this->assertEquals(
             4,
-            ChannelTestSupport::of($ecotoneLite)->sendMessageDirectToChannel('bridgeExample', StaticMessageBuilder::withPayload(1)->build())
+            $ecotoneLite->sendMessage('bridgeExample', 1)
         );
     }
 
     public function test_intercepting_asynchronous_endpoint_should_happen_for_whole_asynchronous_processing()
     {
         $asynchronousBridgeExample = new AsynchronousBridgeExample();
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+        $ecotoneLite = EcotoneLite::bootstrapForTesting(
             [AsynchronousBridgeExample::class],
             [$asynchronousBridgeExample],
-            enabledModules: [],
+            ServiceConfiguration::createWithAsynchronicityOnly()
         );
 
-        ChannelTestSupport::of($ecotoneLite)->sendMessageDirectToChannel('bridgeExample', StaticMessageBuilder::withPayload(1)->build());
+        $ecotoneLite->sendMessage('bridgeExample', MessageBuilder::withPayload(1)->build());
         $ecotoneLite->run('async', ExecutionPollingMetadata::createWithTestingSetup());
 
         $this->assertEquals(

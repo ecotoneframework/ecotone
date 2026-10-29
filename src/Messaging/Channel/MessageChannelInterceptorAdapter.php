@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Channel;
 
-use Ecotone\Api\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageChannel;
 
 /**
  * Interface ChannelInterceptorAdapter

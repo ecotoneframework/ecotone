@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer\MessagePoller;
 
-use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageHeaders;
-use Ecotone\Api\Messaging\MessagePoller;
-use Ecotone\Api\Messaging\PollableChannel;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\MessagePoller;
+use Ecotone\Messaging\PollableChannel;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -21,20 +21,20 @@ use Ecotone\Messaging\Support\MessageBuilder;
  */
 class PollableChannelPollerAdapter implements MessagePoller
 {
-    public function __construct(private string $pollableChannelName, private PollableChannel $pollableChannel, private MessageBuilder $messageBuilder)
+    public function __construct(private string $pollableChannelName, private PollableChannel $pollableChannel)
     {
     }
 
     public function receiveWithTimeout(PollingMetadata $pollingMetadata): ?Message
     {
-        $pollingMetadata = $pollingMetadata->withPolledChannelName($this->pollableChannelName);
-        $timeoutInMilliseconds = $pollingMetadata->fixedRateInMilliseconds;
+        $pollingMetadata = $pollingMetadata->setPolledChannelName($this->pollableChannelName);
+        $timeoutInMilliseconds = $pollingMetadata->getFixedRateInMilliseconds();
         $message = $timeoutInMilliseconds
             ? $this->pollableChannel->receiveWithTimeout($pollingMetadata)
             : $this->pollableChannel->receive();
 
         if ($message) {
-            $message = $this->messageBuilder->fromMessage($message)
+            $message = MessageBuilder::fromMessage($message)
                 ->setHeader(MessageHeaders::POLLED_CHANNEL_NAME, $this->pollableChannelName)
                 ->build();
         }

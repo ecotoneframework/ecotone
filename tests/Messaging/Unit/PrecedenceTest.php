@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit;
 
-use Ecotone\Api\Interceptor\Precedence;
+use Ecotone\Messaging\Precedence;
 use PHPUnit\Framework\TestCase;
 
 /**

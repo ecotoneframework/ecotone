@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Processor;
 
-use Ecotone\Api\Attribute\InternalHandler;
-use Ecotone\Api\Interceptor\MethodInvocation;
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Attribute\ServiceActivator;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvocation;
+use Ecotone\Messaging\Message;
 use stdClass;
 
 /**
@@ -132,12 +132,12 @@ class StubCallSavingService
     {
     }
 
-    #[InternalHandler('some')]
+    #[ServiceActivator('some')]
     public function methodWithAnnotation(): void
     {
     }
 
-    #[InternalHandler('some')]
+    #[ServiceActivator('some')]
     public function methodWithAnnotationWithReturnType(Message $message): Message
     {
         return $message;

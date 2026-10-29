@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\Config\Routing;
 
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Message;
 
 use function gettype;
 

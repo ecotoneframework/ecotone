@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Service\ServiceInterface;
 
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Message;
 
 /**
  * Interface ServiceInterface

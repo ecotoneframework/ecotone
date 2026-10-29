@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Handler\Processor\Interceptor;
 
-use Ecotone\Api\Attribute\Around;
-use Ecotone\Api\Attribute\InternalHandler;
+use Ecotone\Messaging\Attribute\Interceptor\Around;
+use Ecotone\Messaging\Attribute\ServiceActivator;
 
 /**
  * Class CallWithAnnotationFromMethodInterceptorExample
@@ -16,7 +16,7 @@ use Ecotone\Api\Attribute\InternalHandler;
 class CallWithAnnotationFromMethodInterceptorExample extends BaseInterceptorExample
 {
     #[Around]
-    public function callWithMethodAnnotation(InternalHandler $methodAnnotation): void
+    public function callWithMethodAnnotation(ServiceActivator $methodAnnotation): void
     {
     }
 }

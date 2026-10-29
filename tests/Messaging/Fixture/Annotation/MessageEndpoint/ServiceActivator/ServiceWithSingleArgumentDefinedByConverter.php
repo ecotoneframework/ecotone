@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Messaging\Fixture\Annotation\MessageEndpoint\ServiceActivator;
 
-use Ecotone\Api\Attribute\InternalHandler;
-use Ecotone\Api\Attribute\Reference;
+use Ecotone\Messaging\Attribute\Parameter\Reference;
+use Ecotone\Messaging\Attribute\ServiceActivator;
 use stdClass;
 
 /**
@@ -11,7 +11,7 @@ use stdClass;
  */
 class ServiceWithSingleArgumentDefinedByConverter
 {
-    #[InternalHandler('requestChannel')]
+    #[ServiceActivator('requestChannel')]
     public function receive(#[Reference] stdClass $data)
     {
         return $data;

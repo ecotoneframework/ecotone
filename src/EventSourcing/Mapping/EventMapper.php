@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\EventSourcing\Mapping;
 
-use Ecotone\Api\EventSourcing\Event;
 use Ecotone\Messaging\Config\Container\Definition;
+use Ecotone\Messaging\Handler\Type;
+use Ecotone\Modelling\Event;
 
 /**
  * licence Apache-2.0
@@ -33,8 +34,8 @@ final class EventMapper
 
     public function mapNameToEventType(string $name): string
     {
-        if ($name === 'array') {
-            return 'array';
+        if ($name === Type::ARRAY) {
+            return Type::ARRAY;
         }
 
         if (array_key_exists($name, $this->nameToEventMapping)) {
@@ -46,7 +47,7 @@ final class EventMapper
 
     public function mapEventToName(object $event): string
     {
-        $type = $event instanceof Event ? $event->eventName : $event::class;
+        $type = $event instanceof Event ? $event->getEventName() : $event::class;
         if (array_key_exists($type, $this->eventToNameMapping)) {
             return $this->eventToNameMapping[$type];
         }

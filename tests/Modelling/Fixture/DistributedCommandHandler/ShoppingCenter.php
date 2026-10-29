@@ -2,9 +2,9 @@
 
 namespace Test\Ecotone\Modelling\Fixture\DistributedCommandHandler;
 
-use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\Attribute\Distributed;
-use Ecotone\Api\Attribute\QueryHandler;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\Distributed;
+use Ecotone\Modelling\Attribute\QueryHandler;
 
 /**
  * licence Apache-2.0

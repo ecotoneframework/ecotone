@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\MessageHeaders;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Uid\Uuid;
 use Test\Ecotone\Modelling\Fixture\MetadataPropagating\FakeLoggingGateway;
@@ -29,21 +29,20 @@ final class HeaderPropagationTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class],
             [new OrderService()],
-            enabledModules: [],
         );
 
         $messageId = Uuid::v7()->toRfc4122();
         $correlationId = Uuid::v7()->toRfc4122();
 
         $headers = $ecotoneTestSupport
-            ->sendCommandWithRouting(
+            ->sendCommandWithRoutingKey(
                 'placeOrder',
                 metadata: [
                     MessageHeaders::MESSAGE_ID => $messageId,
                     MessageHeaders::MESSAGE_CORRELATION_ID => $correlationId,
                 ]
             )
-            ->popRecordedEventHeaders()[0];
+            ->getRecordedEventHeaders()[0];
 
         $this->assertNotSame($messageId, $headers->getMessageId());
         $this->assertSame($correlationId, $headers->getCorrelationId());
@@ -54,18 +53,17 @@ final class HeaderPropagationTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class],
             [new OrderService()],
-            enabledModules: [],
         );
 
         $messageId = Uuid::v7()->toRfc4122();
         $headers = $ecotoneTestSupport
-            ->sendCommandWithRouting(
+            ->sendCommandWithRoutingKey(
                 'placeOrder',
                 metadata: [
                     MessageHeaders::MESSAGE_ID => $messageId,
                 ]
             )
-            ->popRecordedEventHeaders()[0];
+            ->getRecordedEventHeaders()[0];
 
         $this->assertNotSame($messageId, $headers->getMessageId());
         $this->assertSame($messageId, $headers->getParentId());
@@ -76,18 +74,17 @@ final class HeaderPropagationTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class],
             [new OrderService()],
-            enabledModules: [],
         );
 
         $messageId = Uuid::v7()->toRfc4122();
         $headers = $ecotoneTestSupport
-            ->sendCommandWithRouting(
+            ->sendCommandWithRoutingKey(
                 'placeOrderAndPropagateMetadata',
                 metadata: [
                     MessageHeaders::MESSAGE_ID => $messageId,
                 ]
             )
-            ->popRecordedEventHeaders()[0];
+            ->getRecordedEventHeaders()[0];
 
         $this->assertSame($messageId, $headers->getMessageId());
         $this->assertNull($headers->getParentId());
@@ -98,14 +95,13 @@ final class HeaderPropagationTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, PropagatingGateway::class, PropagatingOrderService::class],
             [new OrderService(), new PropagatingOrderService()],
-            enabledModules: [],
         );
 
         $ecotoneTestSupport->getGateway(PropagatingGateway::class)->placeOrderWithPropagation([
             'token' => '123',
         ]);
 
-        $headers = $ecotoneTestSupport->popRecordedEventHeaders()[0];
+        $headers = $ecotoneTestSupport->getRecordedEventHeaders()[0];
 
         $this->assertSame('123', $headers->get('token'));
     }
@@ -115,14 +111,13 @@ final class HeaderPropagationTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, PropagatingGateway::class, PropagatingOrderService::class],
             [new OrderService(), new PropagatingOrderService()],
-            enabledModules: [],
         );
 
         $ecotoneTestSupport->getGateway(PropagatingGateway::class)->placeOrderWithoutPropagation([
             'token' => '123',
         ]);
 
-        $headers = $ecotoneTestSupport->popRecordedEventHeaders()[0];
+        $headers = $ecotoneTestSupport->getRecordedEventHeaders()[0];
 
         $this->assertFalse($headers->containsKey('token'));
     }
@@ -132,14 +127,13 @@ final class HeaderPropagationTest extends TestCase
         $ecotoneTestSupport = EcotoneLite::bootstrapFlowTesting(
             [OrderService::class, FakeLoggingService::class, FakeLoggingGateway::class, PropagatingGateway::class],
             [new OrderService(), new FakeLoggingService()],
-            enabledModules: [],
         );
 
         $ecotoneTestSupport->getGateway(PropagatingGateway::class)->placeOrderWithPropagation([
             'token' => '123',
         ]);
 
-        $headers = $ecotoneTestSupport->popRecordedEventHeaders()[0];
+        $headers = $ecotoneTestSupport->getRecordedEventHeaders()[0];
 
         $this->assertSame('123', $headers->get('token'));
     }

@@ -14,7 +14,7 @@ final class ExtensionObjectResolver
     }
 
     /**
-     * @template T of object
+     * @template T
      * @param class-string<T> $className
      * @param object[] $extensionObjects
      * @return T
@@ -33,7 +33,7 @@ final class ExtensionObjectResolver
     }
 
     /**
-     * @template T of object
+     * @template T
      * @param class-string<T> $className
      * @param object[] $extensionObjects
      * @return T[]

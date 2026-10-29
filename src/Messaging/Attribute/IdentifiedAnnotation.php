@@ -10,7 +10,6 @@ use Symfony\Component\Uid\Uuid;
 #[Attribute()]
 /**
  * licence Apache-2.0
- * @internal
  */
 class IdentifiedAnnotation
 {
@@ -30,11 +29,6 @@ class IdentifiedAnnotation
     public function isEndpointIdGenerated(): bool
     {
         return $this->isGenerated;
-    }
-
-    public function asynchronousExecutionRefusal(): ?string
-    {
-        return null;
     }
 
     public function getEndpointId(): string

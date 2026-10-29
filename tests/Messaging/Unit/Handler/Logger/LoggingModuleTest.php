@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler\Logger;
 
-use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Test\ChannelTestSupport;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Test\StubLogger;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Messaging\Fixture\Handler\FailureHandler\ExampleFailureCommandHandler;
@@ -30,16 +29,14 @@ final class LoggingModuleTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ExampleFailureCommandHandler::class],
             [new ExampleFailureCommandHandler(), 'logger' => $loggerExample],
-            extensionObjects: [
-                \Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
+            enableAsynchronousProcessing: [
                 SimpleMessageChannelBuilder::createQueueChannel(self::CHANNEL_NAME),
-            ],
-            enabledModules: [],
+            ]
         );
 
         $ecotoneLite
-            ->sendCommandWithRouting('handler.fail', ['command' => 2])
-            ->run(self::CHANNEL_NAME, ExecutionPollingMetadata::createWithTestingSetup(stopOnError: false));
+            ->sendCommandWithRoutingKey('handler.fail', ['command' => 2])
+            ->run(self::CHANNEL_NAME, ExecutionPollingMetadata::createWithTestingSetup(failAtError: false));
 
         $this->assertCount(1, $loggerExample->getCritical());
     }
@@ -50,20 +47,19 @@ final class LoggingModuleTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ExampleFailureCommandHandler::class],
             [new ExampleFailureCommandHandler(), 'logger' => $loggerExample],
-            extensionObjects: [
-                \Ecotone\Api\ExtensionObject\InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(false),
+            ServiceConfiguration::createWithDefaults()
+                ->withDefaultErrorChannel('customErrorChannel'),
+            enableAsynchronousProcessing: [
                 SimpleMessageChannelBuilder::createQueueChannel(self::CHANNEL_NAME),
                 SimpleMessageChannelBuilder::createQueueChannel('customErrorChannel'),
-                ServiceConfiguration::createWithDefaults()->withDefaultErrorChannel('customErrorChannel'),
-            ],
-            enabledModules: [],
+            ]
         );
 
         $ecotoneLite
-            ->sendCommandWithRouting('handler.fail', ['command' => 2]);
-        $ecotoneLite->run(self::CHANNEL_NAME, ExecutionPollingMetadata::createWithTestingSetup(stopOnError: false));
+            ->sendCommandWithRoutingKey('handler.fail', ['command' => 2]);
+        $ecotoneLite->run(self::CHANNEL_NAME, ExecutionPollingMetadata::createWithTestingSetup(failAtError: false));
 
-        $this->assertNotNull(ChannelTestSupport::of($ecotoneLite)->getMessageChannel('customErrorChannel')->receive());
+        $this->assertNotNull($ecotoneLite->getMessageChannel('customErrorChannel')->receive());
         $this->assertCount(1, $loggerExample->getError());
     }
 }

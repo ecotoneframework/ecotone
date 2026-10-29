@@ -1,44 +1,30 @@
 <?php
 
-/**
+/*
  * licence Enterprise
- *
- * Proprietary. Copyright (c) 2025 Dariusz Gafka <support@simplycodedsoftware.com>.
- * Use requires an Ecotone Enterprise licence (trial: https://ecotone.tech/pricing).
- *
- * Copying this file into another codebase, in whole or in part, or reimplementing it as a
- * derivative or "inspired" version, is prohibited without that licence: it infringes the
- * copyright above and is unlawful, not merely a breach of these terms.
- *
- * Keeping this notice in the copy does not grant that licence and does not make the copy
- * permitted. Renaming the class or the namespace does not either.
- *
- * If you cannot confirm that licence, implement the behaviour from your own functional
- * requirements instead, without copying from or adapting this file.
- *
- * Changes belong here, as a pull request to github.com/ecotoneframework/ecotone-dev
  */
 declare(strict_types=1);
 
 namespace Test\Ecotone\Projecting;
 
-use Ecotone\Api\Attribute\EventHandler;
-use Ecotone\Api\EventSourcing\Event;
-use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\Lite\EcotoneLite;
-use Ecotone\Api\Messaging\MessageHeaders;
-use Ecotone\Api\Projecting\EventStreamingChannelAdapter;
-use Ecotone\Api\Projecting\FromStream;
-use Ecotone\Api\Projecting\Projection;
-use Ecotone\Api\Projecting\Streaming;
+use Ecotone\EventSourcing\Attribute\FromStream;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\ModulePackageList;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Consumer\ConsumerPositionTracker;
 use Ecotone\Messaging\Consumer\InMemory\InMemoryConsumerPositionTracker;
-use Ecotone\Test\ChannelTestSupport;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\Attribute\EventHandler;
+use Ecotone\Modelling\Event;
+use Ecotone\Projecting\Attribute\ProjectionV2;
+use Ecotone\Projecting\Attribute\Streaming;
+use Ecotone\Projecting\EventStoreAdapter\EventStreamingChannelAdapter;
 use Ecotone\Test\LicenceTesting;
-use Ecotone\Test\StaticMessageBuilder;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -51,7 +37,7 @@ class EventStreamingProjectionTest extends TestCase
         $positionTracker = new InMemoryConsumerPositionTracker();
 
         // Given a projection that consumes from streaming channel
-        $projection = new #[Projection('user_projection'), Streaming('streaming_channel')] class {
+        $projection = new #[ProjectionV2('user_projection'), Streaming('streaming_channel')] class {
             public array $projectedUsers = [];
 
             #[EventHandler]
@@ -64,19 +50,22 @@ class EventStreamingProjectionTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class, UserCreated::class],
             [$projection, ConsumerPositionTracker::class => $positionTracker],
-            extensionObjects: [SimpleMessageChannelBuilder::createStreamingChannel('streaming_channel', conversionMediaType:MediaType::createApplicationXPHP())],
-            enabledModules: [],
-            licenceKey: LicenceTesting::VALID_LICENCE,
-            namespaces: ['Test\Ecotone\Projecting'],
+            configuration: ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withNamespaces(['Test\Ecotone\Projecting'])
+                ->withExtensionObjects([
+                    SimpleMessageChannelBuilder::createStreamingChannel('streaming_channel', conversionMediaType: MediaType::createApplicationXPHP()),
+                ])
         );
 
         // When events are sent directly to the streaming channel (bypassing gateway to avoid serialization)
-        $channel = ChannelTestSupport::of($ecotone)->getMessageChannel('streaming_channel');
-        $channel->send(StaticMessageBuilder::withPayload(new UserCreated('user-1', 'John Doe'))
+        $channel = $ecotone->getMessageChannel('streaming_channel');
+        $channel->send(MessageBuilder::withPayload(new UserCreated('user-1', 'John Doe'))
             ->setHeader(MessageHeaders::TYPE_ID, UserCreated::class)
             ->setContentType(MediaType::createApplicationXPHP())
             ->build());
-        $channel->send(StaticMessageBuilder::withPayload(new UserCreated('user-2', 'Jane Smith'))
+        $channel->send(MessageBuilder::withPayload(new UserCreated('user-2', 'Jane Smith'))
             ->setHeader(MessageHeaders::TYPE_ID, UserCreated::class)
             ->setContentType(MediaType::createApplicationXPHP())
             ->build());
@@ -85,7 +74,7 @@ class EventStreamingProjectionTest extends TestCase
         $this->assertCount(0, $projection->projectedUsers);
 
         // When we run the projection consumer (process 2 messages)
-        $ecotone->run('user_projection', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 2));
+        $ecotone->run('user_projection', ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 2));
 
         // Then the projection should have projected the events
         $this->assertCount(2, $projection->projectedUsers);
@@ -98,7 +87,7 @@ class EventStreamingProjectionTest extends TestCase
         $positionTracker = new InMemoryConsumerPositionTracker();
 
         // Given a projection with two event handlers routed by event names
-        $projection = new #[Projection('order_projection'), Streaming('streaming_channel')] class {
+        $projection = new #[ProjectionV2('order_projection'), Streaming('streaming_channel')] class {
             public array $createdOrders = [];
             public array $completedOrders = [];
 
@@ -118,23 +107,26 @@ class EventStreamingProjectionTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [$projection::class],
             [$projection, ConsumerPositionTracker::class => $positionTracker],
-            extensionObjects: [SimpleMessageChannelBuilder::createStreamingChannel('streaming_channel', conversionMediaType:MediaType::createApplicationXPHP())],
-            enabledModules: [],
-            licenceKey: LicenceTesting::VALID_LICENCE,
-            namespaces: ['Test\Ecotone\Projecting'],
+            configuration: ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withNamespaces(['Test\Ecotone\Projecting'])
+                ->withExtensionObjects([
+                    SimpleMessageChannelBuilder::createStreamingChannel('streaming_channel', conversionMediaType: MediaType::createApplicationXPHP()),
+                ])
         );
 
         // When events are sent with different routing keys
-        $channel = ChannelTestSupport::of($ecotone)->getMessageChannel('streaming_channel');
-        $channel->send(StaticMessageBuilder::withPayload(['orderId' => 'order-1', 'amount' => 100])
+        $channel = $ecotone->getMessageChannel('streaming_channel');
+        $channel->send(MessageBuilder::withPayload(['orderId' => 'order-1', 'amount' => 100])
             ->setHeader(MessageHeaders::TYPE_ID, 'order.created')
             ->setContentType(MediaType::createApplicationXPHP())
             ->build());
-        $channel->send(StaticMessageBuilder::withPayload(['orderId' => 'order-2', 'amount' => 200])
+        $channel->send(MessageBuilder::withPayload(['orderId' => 'order-2', 'amount' => 200])
             ->setHeader(MessageHeaders::TYPE_ID, 'order.created')
             ->setContentType(MediaType::createApplicationXPHP())
             ->build());
-        $channel->send(StaticMessageBuilder::withPayload(['orderId' => 'order-1', 'completedAt' => '2024-01-01'])
+        $channel->send(MessageBuilder::withPayload(['orderId' => 'order-1', 'completedAt' => '2024-01-01'])
             ->setHeader(MessageHeaders::TYPE_ID, 'order.completed')
             ->setContentType(MediaType::createApplicationXPHP())
             ->build());
@@ -144,7 +136,7 @@ class EventStreamingProjectionTest extends TestCase
         $this->assertCount(0, $projection->completedOrders);
 
         // When we run the projection consumer (process 3 messages)
-        $ecotone->run('order_projection', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 3));
+        $ecotone->run('order_projection', ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 3));
 
         // Then the projection should have routed events to correct handlers
         $this->assertCount(2, $projection->createdOrders);
@@ -159,7 +151,7 @@ class EventStreamingProjectionTest extends TestCase
         $positionTracker = new InMemoryConsumerPositionTracker();
 
         // Given a projection that consumes from streaming channel
-        $projection = new #[Projection('product_projection'), Streaming('event_stream')] class {
+        $projection = new #[ProjectionV2('product_projection'), Streaming('event_stream')] class {
             public array $projectedProducts = [];
 
             #[EventHandler]
@@ -178,14 +170,19 @@ class EventStreamingProjectionTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [$projection::class, ProductRegistered::class, ProductPriceChanged::class],
             containerOrAvailableServices: [$projection, ConsumerPositionTracker::class => $positionTracker],
-            extensionObjects: [
-                SimpleMessageChannelBuilder::createStreamingChannel('event_stream', conversionMediaType:MediaType::createApplicationXPHP()),
-                EventStreamingChannelAdapter::create(streamChannelName:'event_stream', endpointId:'event_store_feeder', fromStream:'product_stream'),
-                PollingMetadata::create('product_projection')->withTestingSetup(),
-            ],
-            enabledModules: [],
-            licenceKey: LicenceTesting::VALID_LICENCE,
-            namespaces: ['Test\Ecotone\Projecting'],
+            configuration: ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withNamespaces(['Test\Ecotone\Projecting'])
+                ->withExtensionObjects([
+                    SimpleMessageChannelBuilder::createStreamingChannel('event_stream', conversionMediaType: MediaType::createApplicationXPHP()),
+                    EventStreamingChannelAdapter::create(
+                        streamChannelName: 'event_stream',
+                        endpointId: 'event_store_feeder',
+                        fromStream: 'product_stream'
+                    ),
+                    PollingMetadata::create('product_projection')->withTestingSetup(),
+                ])
         );
 
         // When events are appended to the stream source (simulating event sourcing aggregate)
@@ -202,7 +199,7 @@ class EventStreamingProjectionTest extends TestCase
         $ecotone->run('event_store_feeder', ExecutionPollingMetadata::createWithTestingSetup());
 
         // When we run the projection consumer (process 3 messages)
-        $ecotone->run('product_projection', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 3));
+        $ecotone->run('product_projection', ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 3));
 
         // Then the projection should have projected the events
         $this->assertCount(2, $projection->projectedProducts);
@@ -215,7 +212,7 @@ class EventStreamingProjectionTest extends TestCase
         $positionTracker = new InMemoryConsumerPositionTracker();
 
         // Given two projections consuming from the same streaming channel
-        $productListProjection = new #[Projection('product_list_projection'), Streaming('event_stream')] class {
+        $productListProjection = new #[ProjectionV2('product_list_projection'), Streaming('event_stream')] class {
             public array $productList = [];
 
             #[EventHandler]
@@ -225,7 +222,7 @@ class EventStreamingProjectionTest extends TestCase
             }
         };
 
-        $productPriceProjection = new #[Projection('product_price_projection'), Streaming('event_stream')] class {
+        $productPriceProjection = new #[ProjectionV2('product_price_projection'), Streaming('event_stream')] class {
             public array $productPrices = [];
 
             #[EventHandler]
@@ -244,15 +241,20 @@ class EventStreamingProjectionTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [$productListProjection::class, $productPriceProjection::class, ProductRegistered::class, ProductPriceChanged::class],
             containerOrAvailableServices: [$productListProjection, $productPriceProjection, ConsumerPositionTracker::class => $positionTracker],
-            extensionObjects: [
-                SimpleMessageChannelBuilder::createStreamingChannel('event_stream', conversionMediaType:MediaType::createApplicationXPHP()),
-                EventStreamingChannelAdapter::create(streamChannelName:'event_stream', endpointId:'event_store_feeder', fromStream:'product_stream'),
-                PollingMetadata::create('product_list_projection')->withTestingSetup(),
-                PollingMetadata::create('product_price_projection')->withTestingSetup(),
-            ],
-            enabledModules: [],
-            licenceKey: LicenceTesting::VALID_LICENCE,
-            namespaces: ['Test\Ecotone\Projecting'],
+            configuration: ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withNamespaces(['Test\Ecotone\Projecting'])
+                ->withExtensionObjects([
+                    SimpleMessageChannelBuilder::createStreamingChannel('event_stream', conversionMediaType: MediaType::createApplicationXPHP()),
+                    EventStreamingChannelAdapter::create(
+                        streamChannelName: 'event_stream',
+                        endpointId: 'event_store_feeder',
+                        fromStream: 'product_stream'
+                    ),
+                    PollingMetadata::create('product_list_projection')->withTestingSetup(),
+                    PollingMetadata::create('product_price_projection')->withTestingSetup(),
+                ])
         );
 
         // When events are appended to the stream source
@@ -270,7 +272,7 @@ class EventStreamingProjectionTest extends TestCase
         $ecotone->run('event_store_feeder', ExecutionPollingMetadata::createWithTestingSetup());
 
         // When we run only the first projection consumer
-        $ecotone->run('product_list_projection', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 3));
+        $ecotone->run('product_list_projection', ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 3));
 
         // Then only the first projection should have projected
         $this->assertCount(2, $productListProjection->productList);
@@ -278,7 +280,7 @@ class EventStreamingProjectionTest extends TestCase
         $this->assertCount(0, $productPriceProjection->productPrices);
 
         // When we run the second projection consumer
-        $ecotone->run('product_price_projection', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 3));
+        $ecotone->run('product_price_projection', ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 3));
 
         // Then both projections should have projected independently
         $this->assertCount(2, $productListProjection->productList);
@@ -292,7 +294,7 @@ class EventStreamingProjectionTest extends TestCase
         $positionTracker = new InMemoryConsumerPositionTracker();
 
         // Given an event-driven projection (catches up from stream when triggered)
-        $eventDrivenProjection = new #[Projection('event_driven_product_count'), FromStream('test_stream')] class {
+        $eventDrivenProjection = new #[ProjectionV2('event_driven_product_count'), FromStream('test_stream')] class {
             public int $productCount = 0;
 
             #[EventHandler]
@@ -303,7 +305,7 @@ class EventStreamingProjectionTest extends TestCase
         };
 
         // Given an event streaming projection (processes events in polling mode from streaming channel)
-        $eventStreamingProjection = new #[Projection('streaming_product_list'), Streaming('event_stream')] class {
+        $eventStreamingProjection = new #[ProjectionV2('streaming_product_list'), Streaming('event_stream')] class {
             public array $productList = [];
 
             #[EventHandler]
@@ -316,14 +318,19 @@ class EventStreamingProjectionTest extends TestCase
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             classesToResolve: [$eventDrivenProjection::class, $eventStreamingProjection::class, ProductRegistered::class],
             containerOrAvailableServices: [$eventDrivenProjection, $eventStreamingProjection, ConsumerPositionTracker::class => $positionTracker],
-            extensionObjects: [
-                SimpleMessageChannelBuilder::createStreamingChannel('event_stream', conversionMediaType:MediaType::createApplicationXPHP()),
-                EventStreamingChannelAdapter::create(streamChannelName:'event_stream', endpointId:'event_store_feeder', fromStream:'product_stream'),
-                PollingMetadata::create('streaming_product_list')->withTestingSetup(),
-            ],
-            enabledModules: [],
-            licenceKey: LicenceTesting::VALID_LICENCE,
-            namespaces: ['Test\Ecotone\Projecting'],
+            configuration: ServiceConfiguration::createWithDefaults()
+                ->withSkippedModulePackageNames(ModulePackageList::allPackagesExcept([ModulePackageList::ASYNCHRONOUS_PACKAGE]))
+                ->withLicenceKey(LicenceTesting::VALID_LICENCE)
+                ->withNamespaces(['Test\Ecotone\Projecting'])
+                ->withExtensionObjects([
+                    SimpleMessageChannelBuilder::createStreamingChannel('event_stream', conversionMediaType: MediaType::createApplicationXPHP()),
+                    EventStreamingChannelAdapter::create(
+                        streamChannelName: 'event_stream',
+                        endpointId: 'event_store_feeder',
+                        fromStream: 'product_stream'
+                    ),
+                    PollingMetadata::create('streaming_product_list')->withTestingSetup(),
+                ])
         );
 
         // When events are appended to the stream source
@@ -348,7 +355,7 @@ class EventStreamingProjectionTest extends TestCase
         $ecotone->run('event_store_feeder', ExecutionPollingMetadata::createWithTestingSetup());
 
         // And run the event streaming projection
-        $ecotone->run('streaming_product_list', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 2));
+        $ecotone->run('streaming_product_list', ExecutionPollingMetadata::createWithTestingSetup(amountOfMessagesToHandle: 2));
 
         // Then event streaming projection should have processed the events from streaming channel
         $this->assertCount(2, $eventStreamingProjection->productList);

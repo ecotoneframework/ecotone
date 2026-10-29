@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\Interceptor;
 
-use Ecotone\Api\Gateway\EcotoneClockInterface;
-use Ecotone\Api\Scheduling\DatePoint;
-use Ecotone\Api\Scheduling\Duration;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Endpoint\ConsumerInterceptor;
 use Ecotone\Messaging\Endpoint\ConsumerInterceptorTrait;
-use Throwable;
+use Ecotone\Messaging\Scheduling\DatePoint;
+use Ecotone\Messaging\Scheduling\Duration;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 
 /**
  * Class LimitConsumedMessagesExtension
@@ -26,7 +25,6 @@ class TimeLimitInterceptor implements ConsumerInterceptor
 
     private ?DatePoint $startTime;
     private Duration $timeout;
-    private bool $hasPolledSinceStartup = false;
 
     /**
      * LimitMemoryUsageInterceptor constructor.
@@ -47,12 +45,6 @@ class TimeLimitInterceptor implements ConsumerInterceptor
     public function onStartup(): void
     {
         $this->startTime = $this->clock->now();
-        $this->hasPolledSinceStartup = false;
-    }
-
-    public function postRun(?Throwable $unhandledFailure): void
-    {
-        $this->hasPolledSinceStartup = true;
     }
 
     /**
@@ -60,7 +52,6 @@ class TimeLimitInterceptor implements ConsumerInterceptor
      */
     public function shouldBeStopped(): bool
     {
-        return $this->hasPolledSinceStartup
-            && $this->clock->now()->durationSince($this->startTime)->isGreaterThan($this->timeout);
+        return $this->clock->now()->durationSince($this->startTime)->isGreaterThan($this->timeout);
     }
 }

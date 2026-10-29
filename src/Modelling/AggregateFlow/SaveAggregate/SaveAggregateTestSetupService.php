@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\AggregateFlow\SaveAggregate;
 
-use Ecotone\Api\Gateway\EcotoneClockInterface;
-use Ecotone\Api\Messaging\Message;
 use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\Messaging\Conversion\ConversionService;
 use Ecotone\Messaging\Handler\Enricher\PropertyReaderAccessor;
 use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\Message;
 use Ecotone\Messaging\MessageConverter\HeaderMapper;
-use Ecotone\Messaging\Support\FrameworkHeaders;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\AggregateDefinitionRegistry;
 use Ecotone\Modelling\AggregateFlow\SaveAggregate\AggregateResolver\ResolvedAggregate;
@@ -31,23 +30,24 @@ final class SaveAggregateTestSetupService implements MessageProcessor
         private HeaderMapper $headerMapper,
         private EventMapper $eventMapper,
         private AggregateRepository $aggregateRepository,
-        private EcotoneClockInterface $clock,
-        private MessageBuilder $messageBuilder,
     ) {
     }
 
     public function process(Message $message): Message|null
     {
         $resolvedAggregate = $this->resolveAggregate($message);
-        $metadata = FrameworkHeaders::unsetNonUserKeys($message->getHeaders()->headers());
+        $metadata = MessageHeaders::unsetNonUserKeys($message->getHeaders()->headers());
 
         if (! $resolvedAggregate) {
             return null;
         }
 
+        $version = $resolvedAggregate->getVersionBeforeHandling();
+
         $this->aggregateRepository->save(
             $resolvedAggregate,
             $metadata,
+            $version
         );
 
         /** Clear internally recorded events */
@@ -75,7 +75,7 @@ final class SaveAggregateTestSetupService implements MessageProcessor
         $events = SaveAggregateServiceTemplate::buildEcotoneEvents(
             $this->resolveEvents($message),
             $aggregateDefinition->getDefinition()->getClassName(),
-            $this->messageBuilder->fromMessage($message)
+            MessageBuilder::fromMessage($message)
                 ->removeHeaders([
                     AggregateMessage::TEST_SETUP_AGGREGATE_CLASS,
                     AggregateMessage::TEST_SETUP_AGGREGATE_INSTANCE,
@@ -85,7 +85,6 @@ final class SaveAggregateTestSetupService implements MessageProcessor
             $this->headerMapper,
             $this->conversionService,
             $this->eventMapper,
-            $this->clock,
         );
 
         $enrichedEvents = SaveAggregateServiceTemplate::enrichAggregateEvents(

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit;
 
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLite;
 use Ecotone\Messaging\Config\ConfigurationException;
 use PHPUnit\Framework\TestCase;
 use Test\Ecotone\Modelling\Fixture\AnnotatedConstructor\ConstructorAsCommandHandler;
@@ -25,7 +25,7 @@ final class AnnotationAggregateConstructorTest extends TestCase
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessage('Test\Ecotone\Modelling\Fixture\AnnotatedConstructor\ConstructorAsCommandHandler::__construct cannot be annotated as command handler');
 
-        EcotoneLite::bootstrapFlowTesting([ConstructorAsCommandHandler::class], enabledModules: []);
+        EcotoneLite::bootstrapFlowTesting([ConstructorAsCommandHandler::class]);
     }
 
     public function test_aggregate_cannot_have_constructor_being_annotated_as_event_handler(): void
@@ -33,7 +33,7 @@ final class AnnotationAggregateConstructorTest extends TestCase
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessage('Test\Ecotone\Modelling\Fixture\AnnotatedConstructor\ConstructorAsEventHandler::__construct cannot be annotated as event handler');
 
-        EcotoneLite::bootstrapFlowTesting([ConstructorAsEventHandler::class], enabledModules: []);
+        EcotoneLite::bootstrapFlowTesting([ConstructorAsEventHandler::class]);
     }
 
     public function test_aggregate_cannot_have_constructor_being_annotated_as_query_handler(): void
@@ -41,6 +41,6 @@ final class AnnotationAggregateConstructorTest extends TestCase
         $this->expectException(ConfigurationException::class);
         $this->expectExceptionMessage('Test\Ecotone\Modelling\Fixture\AnnotatedConstructor\ConstructorAsQueryHandler::__construct cannot be annotated as query handler');
 
-        EcotoneLite::bootstrapFlowTesting([ConstructorAsQueryHandler::class], enabledModules: []);
+        EcotoneLite::bootstrapFlowTesting([ConstructorAsQueryHandler::class]);
     }
 }

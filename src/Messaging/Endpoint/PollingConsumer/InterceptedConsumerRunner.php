@@ -2,21 +2,20 @@
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
-use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
-use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\Gateway\EcotoneClockInterface;
-use Ecotone\Api\Messaging\MessagePoller;
 use Ecotone\Messaging\Endpoint\ConsumerLifecycle;
 use Ecotone\Messaging\Endpoint\EndpointRunner;
+use Ecotone\Messaging\Endpoint\ExecutionPollingMetadata;
 use Ecotone\Messaging\Endpoint\Interceptor\PcntlTerminationListener;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Messaging\Handler\NonProxyGateway;
+use Ecotone\Messaging\MessagePoller;
 use Ecotone\Messaging\Scheduling\CronTrigger;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Ecotone\Messaging\Scheduling\PeriodicTrigger;
 use Ecotone\Messaging\Scheduling\SyncTaskScheduler;
-use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -34,7 +33,6 @@ class InterceptedConsumerRunner implements EndpointRunner
         private ExpressionEvaluationService $expressionEvaluationService,
         private AsyncHandlerAnnotationRegistry $asyncHandlerAnnotationRegistry,
         private AsyncEndpointAnnotationContext $asyncEndpointAnnotationContext,
-        private MessageBuilder $messageBuilder,
     ) {
     }
 
@@ -55,14 +53,7 @@ class InterceptedConsumerRunner implements EndpointRunner
         $interceptedConsumer = new ScheduledTaskConsumer(
             SyncTaskScheduler::createWithEmptyTriggerContext($this->clock, $pollingMetadata),
             $trigger,
-            new PollToGatewayTaskExecutor(
-                messagePoller: $this->messagePoller,
-                gateway: $interceptedGateway,
-                messagingEntrypoint: $this->messagingEntrypoint,
-                asyncHandlerAnnotationRegistry: $this->asyncHandlerAnnotationRegistry,
-                asyncEndpointAnnotationContext: $this->asyncEndpointAnnotationContext,
-                messageBuilder: $this->messageBuilder,
-            ),
+            new PollToGatewayTaskExecutor($this->messagePoller, $interceptedGateway, $this->messagingEntrypoint, $this->asyncHandlerAnnotationRegistry, $this->asyncEndpointAnnotationContext),
         );
 
         if ($interceptors) {
@@ -83,7 +74,7 @@ class InterceptedConsumerRunner implements EndpointRunner
         // Evaluate cron expression if provided
         if ($pollingMetadata->hasCronExpression()) {
             $cronValue = $this->expressionEvaluationService->evaluate(
-                $pollingMetadata->cronExpression,
+                $pollingMetadata->getCronExpression(),
                 []
             );
             return CronTrigger::createWith((string) $cronValue);
@@ -92,16 +83,16 @@ class InterceptedConsumerRunner implements EndpointRunner
         // Evaluate fixed rate expression if provided
         if ($pollingMetadata->hasFixedRateExpression()) {
             $fixedRateValue = $this->expressionEvaluationService->evaluate(
-                $pollingMetadata->fixedRateExpression,
+                $pollingMetadata->getFixedRateExpression(),
                 []
             );
 
-            return PeriodicTrigger::create((int) $fixedRateValue, $pollingMetadata->initialDelayInMilliseconds);
+            return PeriodicTrigger::create((int) $fixedRateValue, $pollingMetadata->getInitialDelayInMilliseconds());
         }
 
         // Fall back to static values
-        return $pollingMetadata->cron
-            ? CronTrigger::createWith($pollingMetadata->cron)
-            : PeriodicTrigger::create($pollingMetadata->fixedRateInMilliseconds, $pollingMetadata->initialDelayInMilliseconds);
+        return $pollingMetadata->getCron()
+            ? CronTrigger::createWith($pollingMetadata->getCron())
+            : PeriodicTrigger::create($pollingMetadata->getFixedRateInMilliseconds(), $pollingMetadata->getInitialDelayInMilliseconds());
     }
 }

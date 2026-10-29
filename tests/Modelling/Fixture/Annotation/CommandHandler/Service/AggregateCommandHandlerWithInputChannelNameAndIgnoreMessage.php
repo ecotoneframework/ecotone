@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Modelling\Fixture\Annotation\CommandHandler\Service;
 
-use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\Attribute\IgnorePayload;
+use Ecotone\Modelling\Attribute\CommandHandler;
+use Ecotone\Modelling\Attribute\IgnorePayload;
 use stdClass;
 
 /**

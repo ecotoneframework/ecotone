@@ -13,7 +13,6 @@ use Attribute;
  * and #[ChannelAdapter] (the base for #[Scheduled]).
  *
  * licence Apache-2.0
- * @internal
  */
 class MessageConsumer extends IdentifiedAnnotation
 {

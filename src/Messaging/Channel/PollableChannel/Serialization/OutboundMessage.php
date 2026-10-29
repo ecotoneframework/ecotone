@@ -2,7 +2,7 @@
 
 namespace Ecotone\Messaging\Channel\PollableChannel\Serialization;
 
-use Ecotone\Api\Scheduling\TimeSpan;
+use Ecotone\Messaging\Scheduling\TimeSpan;
 
 /**
  * licence Apache-2.0

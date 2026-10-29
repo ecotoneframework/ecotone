@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Handler;
 
-use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\Attribute\Header;
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Attribute\Parameter\Header;
+use Ecotone\Messaging\Channel\SimpleMessageChannelBuilder;
+use Ecotone\Messaging\Config\ServiceConfiguration;
+use Ecotone\Messaging\Conversion\MediaType;
+use Ecotone\Modelling\Attribute\CommandHandler;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
@@ -32,12 +32,16 @@ final class HeaderConversionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConvertedHeaderEndpoint::class, JsonConverter::class],
             [$convertedHeaderEndpoint, new JsonConverter()],
-            extensionObjects: [$serviceConfiguration, SimpleMessageChannelBuilder::createQueueChannel('async')],
-            enabledModules: [],
+            $serviceConfiguration,
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel(
+                    'async'
+                ),
+            ]
         );
 
         $ecotoneLite
-            ->sendCommandWithRouting('withScalarConversion', metadata: [
+            ->sendCommandWithRoutingKey('withScalarConversion', metadata: [
                 'token' => '537edce7-7e56-4777-b6ec-a012c40b9d1b',
             ])
             ->run('async');
@@ -55,12 +59,16 @@ final class HeaderConversionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConvertedHeaderEndpoint::class, JsonConverter::class],
             [$convertedHeaderEndpoint, new JsonConverter()],
-            extensionObjects: [$serviceConfiguration, SimpleMessageChannelBuilder::createQueueChannel('async')],
-            enabledModules: [],
+            $serviceConfiguration,
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel(
+                    'async'
+                ),
+            ]
         );
 
         $ecotoneLite
-            ->sendCommandWithRouting('withScalarConversion', metadata: [
+            ->sendCommandWithRoutingKey('withScalarConversion', metadata: [
                 'token' => Uuid::fromString('537edce7-7e56-4777-b6ec-a012c40b9d1b'),
             ])
             ->run('async');
@@ -78,12 +86,16 @@ final class HeaderConversionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [ConvertedHeaderEndpoint::class, JsonConverter::class],
             [$convertedHeaderEndpoint, new JsonConverter()],
-            extensionObjects: [$serviceConfiguration, SimpleMessageChannelBuilder::createQueueChannel('async')],
-            enabledModules: [],
+            $serviceConfiguration,
+            enableAsynchronousProcessing: [
+                SimpleMessageChannelBuilder::createQueueChannel(
+                    'async'
+                ),
+            ]
         );
 
         $ecotoneLite
-            ->sendCommandWithRouting('withFallbackConversion', metadata: [
+            ->sendCommandWithRoutingKey('withFallbackConversion', metadata: [
                 'tokens' => [1, 2, 3, 4, 5],
             ])
             ->run('async');
@@ -110,10 +122,9 @@ final class HeaderConversionTest extends TestCase
         $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
             [$handler::class],
             [$handler],
-            enabledModules: [],
         );
 
-        $ecotoneLite->sendCommandWithRouting('withNullableEnumConversion', metadata: [
+        $ecotoneLite->sendCommandWithRoutingKey('withNullableEnumConversion', metadata: [
             'deliveryMethod' => DeliveryMethod::Email->value,
         ]);
 
@@ -127,11 +138,11 @@ final class HeaderConversionTest extends TestCase
     public static function differentDefaultSerializations(): iterable
     {
         yield [
-            ServiceConfiguration::createWithDefaults()
+            ServiceConfiguration::createWithAsynchronicityOnly()
                 ->withDefaultSerializationMediaType(MediaType::APPLICATION_X_PHP_SERIALIZED),
         ];
         yield [
-            ServiceConfiguration::createWithDefaults()
+            ServiceConfiguration::createWithAsynchronicityOnly()
                 ->withDefaultSerializationMediaType(MediaType::APPLICATION_JSON),
         ];
     }

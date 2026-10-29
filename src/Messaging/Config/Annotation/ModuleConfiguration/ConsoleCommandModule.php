@@ -6,24 +6,24 @@ namespace Ecotone\Messaging\Config\Annotation\ModuleConfiguration;
 
 use Ecotone\AnnotationFinder\AnnotatedMethod;
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Api\Attribute\ConsoleCommand;
-use Ecotone\Api\Attribute\ConsoleParameterOption;
-use Ecotone\Api\Attribute\ModuleAnnotation;
-use Ecotone\Api\Console\ConsoleCommandResultSet;
-use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Messaging\Attribute\ConsoleCommand;
+use Ecotone\Messaging\Attribute\ConsoleParameterOption;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConsoleCommandConfiguration;
 use Ecotone\Messaging\Config\ConsoleCommandParameter;
+use Ecotone\Messaging\Config\ConsoleCommandResultSet;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ReferenceBuilder;
-use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
+use Ecotone\Messaging\Handler\ServiceActivator\ServiceActivatorBuilder;
 use Ecotone\Messaging\Handler\Type;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
@@ -34,10 +34,10 @@ use Ecotone\Messaging\Support\InvalidArgumentException;
  */
 final class ConsoleCommandModule extends NoExternalConfigurationModule implements AnnotationModule
 {
-    public const ECOTONE_COMMAND_PARAMETER_PREFIX = 'ecotone_console_one_time_command_';
+    public const ECOTONE_COMMAND_PARAMETER_PREFIX = 'ecotone.oneTimeCommand.';
 
     /**
-     * @var MessageProcessorActivatorBuilder[]
+     * @var ServiceActivatorBuilder[]
      */
     private array $oneTimeCommandHandlers;
     /**
@@ -63,7 +63,7 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
             $className    = $annotationRegistration->getClassName();
             $methodName               = $annotationRegistration->getMethodName();
 
-            [$messageHandlerBuilder, $oneTimeCommandConfiguration] = self::prepareConsoleCommand($interfaceToCallRegistry, $annotationRegistration, $className, $methodName, $commandName, $annotation->description);
+            [$messageHandlerBuilder, $oneTimeCommandConfiguration] = self::prepareConsoleCommand($interfaceToCallRegistry, $annotationRegistration, $className, $methodName, $commandName, $annotation->getDescription());
 
             $messageHandlerBuilders[] = $messageHandlerBuilder;
             $oneTimeConfigurations[]     = $oneTimeCommandConfiguration;
@@ -81,7 +81,7 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
 
         $inputChannel                = 'ecotone.channel.' . $commandName;
 
-        $messageHandlerBuilder       = MessageProcessorActivatorBuilder::createForMethod(AnnotatedDefinitionReference::getReferenceFor($annotatedMethod), $interfaceToCallRegistry->getFor($annotatedMethod->getClassName(), $methodName))
+        $messageHandlerBuilder       = ServiceActivatorBuilder::create(AnnotatedDefinitionReference::getReferenceFor($annotatedMethod), $interfaceToCallRegistry->getFor($annotatedMethod->getClassName(), $methodName))
             ->withEndpointId('ecotone.endpoint.' . $commandName)
             ->withInputChannelName($inputChannel)
             ->withMethodParameterConverters($parameterConverters);
@@ -100,7 +100,7 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
         [$parameterConverters, $parameters] = self::prepareParameter($interfaceToCallRegistry, $className, $methodName, $parameterConverters, $parameters);
 
         $inputChannel                = 'ecotone.channel.' . $commandName;
-        $messageHandlerBuilder       = MessageProcessorActivatorBuilder::createForMethod($reference->getId(), $interfaceToCallReference)
+        $messageHandlerBuilder       = ServiceActivatorBuilder::create($reference->getId(), $interfaceToCallReference)
             ->withEndpointId('ecotone.endpoint.' . $commandName)
             ->withEndpointAnnotations($discoverableByConsoleCommandAttribute ? [new AttributeDefinition(ConsoleCommand::class, [$commandName])] : [])
             ->withInputChannelName($inputChannel)
@@ -148,6 +148,11 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
         foreach ($this->oneTimeCommandConfigurations as $oneTimeCommandConfiguration) {
             $messagingConfiguration->registerConsoleCommand($oneTimeCommandConfiguration);
         }
+    }
+
+    public function canHandle($extensionObject): bool
+    {
+        return false;
     }
 
     public function getModulePackageName(): string

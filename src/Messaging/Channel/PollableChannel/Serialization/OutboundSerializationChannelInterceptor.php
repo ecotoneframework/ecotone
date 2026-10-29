@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\PollableChannel\Serialization;
 
-use Ecotone\Api\Messaging\BatchMessage;
-use Ecotone\Api\Messaging\ErrorMessage;
-use Ecotone\Api\Messaging\Message;
-use Ecotone\Api\Messaging\MessageChannel;
-use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Messaging\BatchMessage;
 use Ecotone\Messaging\Channel\AbstractChannelInterceptor;
 use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\MessageChannel;
+use Ecotone\Messaging\MessageHeaders;
+use Ecotone\Messaging\Support\ErrorMessage;
 use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
@@ -20,8 +20,7 @@ final class OutboundSerializationChannelInterceptor extends AbstractChannelInter
 {
     public function __construct(
         private OutboundMessageConverter $outboundMessageConverter,
-        private ConversionService $conversionService,
-        private MessageBuilder $messageBuilder,
+        private ConversionService $conversionService
     ) {
     }
 
@@ -39,7 +38,7 @@ final class OutboundSerializationChannelInterceptor extends AbstractChannelInter
         }
 
         $outboundMessage = $this->outboundMessageConverter->prepare($message, $this->conversionService);
-        $preparedMessage = $this->messageBuilder->withPayload($outboundMessage->getPayload())
+        $preparedMessage = MessageBuilder::withPayload($outboundMessage->getPayload())
             ->setMultipleHeaders($outboundMessage->getHeaders());
 
         if ($outboundMessage->getDeliveryDelay()) {

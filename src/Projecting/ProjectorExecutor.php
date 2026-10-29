@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Projecting;
 
-use Ecotone\Api\EventSourcing\Event;
+use Ecotone\Modelling\Event;
 
 interface ProjectorExecutor
 {

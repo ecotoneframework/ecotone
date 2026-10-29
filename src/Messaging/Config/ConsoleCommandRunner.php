@@ -35,12 +35,11 @@ class ConsoleCommandRunner
 
                 continue;
             }
-            $commandParameter = $this->findParameterWithGivenName($argumentName);
-            if ($commandParameter === null) {
+            if (! $this->hasParameterWithGivenName($argumentName)) {
                 continue;
             }
 
-            $arguments[$this->commandConfiguration->getHeaderNameForParameterName($argumentName)] = $this->isFlagGivenWithoutValue($commandParameter, $value) ? true : $value;
+            $arguments[$this->commandConfiguration->getHeaderNameForParameterName($argumentName)] = $value;
         }
         foreach ($this->commandConfiguration->getParameters() as $commandParameter) {
             if (
@@ -58,19 +57,14 @@ class ConsoleCommandRunner
         return $this->entrypoint->sendWithHeadersPropagation([], $arguments, $this->commandConfiguration->getChannelName());
     }
 
-    private function findParameterWithGivenName(int|string $argumentName): ?ConsoleCommandParameter
+    private function hasParameterWithGivenName(int|string $argumentName): bool
     {
         foreach ($this->commandConfiguration->getParameters() as $commandParameter) {
             if ($commandParameter->getName() === $argumentName) {
-                return $commandParameter;
+                return true;
             }
         }
 
-        return null;
-    }
-
-    private function isFlagGivenWithoutValue(ConsoleCommandParameter $commandParameter, mixed $value): bool
-    {
-        return $value === null && $commandParameter->isOption() && is_bool($commandParameter->getDefaultValue());
+        return false;
     }
 }

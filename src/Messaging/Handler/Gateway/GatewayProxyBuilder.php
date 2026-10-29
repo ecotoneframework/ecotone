@@ -4,11 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Gateway;
 
-use Ecotone\Api\Attribute\Asynchronous;
-use Ecotone\Api\ExtensionObject\MediaType;
-use Ecotone\Api\Interceptor\Precedence;
-use Ecotone\Api\Messaging\MessageHeaders;
-use Ecotone\Api\Messaging\PollableChannel;
+use Ecotone\Messaging\Attribute\Asynchronous;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\ChannelReference;
 use Ecotone\Messaging\Config\Container\CompilableBuilder;
@@ -17,11 +13,14 @@ use Ecotone\Messaging\Config\Container\GatewayProxyMethodReference;
 use Ecotone\Messaging\Config\Container\GatewayProxyReference;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
+use Ecotone\Messaging\Config\Container\ProxyBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Conversion\ConversionService;
+use Ecotone\Messaging\Conversion\MediaType;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeadersBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayHeaderValueBuilder;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadBuilder;
+use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadConverter;
 use Ecotone\Messaging\Handler\Gateway\ParameterToMessageConverter\GatewayPayloadExpressionBuilder;
 use Ecotone\Messaging\Handler\InterceptedEndpoint;
 use Ecotone\Messaging\Handler\InterfaceToCall;
@@ -29,11 +28,14 @@ use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\ChainedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
 use Ecotone\Messaging\Handler\Type;
+use Ecotone\Messaging\MessageHeaders;
 use Ecotone\Messaging\MessagingException;
+use Ecotone\Messaging\PollableChannel;
+use Ecotone\Messaging\Precedence;
+use Ecotone\Messaging\Scheduling\EcotoneClockInterface;
 use Ecotone\Messaging\SubscribableChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
-use Ecotone\Messaging\Support\MessageBuilder;
 
 use function is_a;
 
@@ -47,7 +49,7 @@ use Symfony\Component\Uid\Uuid;
 /**
  * licence Apache-2.0
  */
-class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder
+class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder, ProxyBuilder
 {
     public const DEFAULT_REPLY_MILLISECONDS_TIMEOUT = -1;
 
@@ -63,6 +65,10 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder
      */
     private array $methodArgumentConverters = [];
     private ?string $errorChannelName = null;
+    /**
+     * @var string[]
+     */
+    private array $messageConverterReferenceNames = [];
     /**
      * @var AroundInterceptorBuilder[]
      */
@@ -194,6 +200,17 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder
     }
 
     /**
+     * @param string[] $messageConverterReferenceNames
+     * @return $this
+     */
+    public function withMessageConverters(array $messageConverterReferenceNames): self
+    {
+        $this->messageConverterReferenceNames = array_unique(array_merge($this->messageConverterReferenceNames, $messageConverterReferenceNames));
+
+        return $this;
+    }
+
+    /**
      * @return $this
      */
     public function addAroundInterceptor(AroundInterceptorBuilder $aroundInterceptorReference): self
@@ -275,7 +292,7 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder
         $interfaceToCall = $builder->getInterfaceToCall($interfaceToCallReference);
 
         // Choose resolver based on Enterprise license
-        $isEnterprise = $builder->getBootstrapConfiguration()->isRunningForEnterprise();
+        $isEnterprise = $builder->getServiceConfiguration()->isRunningForEnterprise();
         $errorChannelResolver = $isEnterprise
             ? new EnterpriseGatewayErrorChannelResolver()
             : new StandardGatewayErrorChannelResolver();
@@ -321,12 +338,17 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder
             }
         }
 
+        $messageConverters = [];
+        foreach ($this->messageConverterReferenceNames as $messageConverterReferenceName) {
+            $messageConverters[] = new Reference($messageConverterReferenceName);
+        }
+
         if (empty($methodArgumentConverters) && $interfaceToCall->hasMoreThanOneParameter()) {
             throw InvalidArgumentException::create("You need to pass method argument converts for {$interfaceToCall}");
         }
 
         if (empty($methodArgumentConverters) && $interfaceToCall->hasSingleParameter()) {
-            $methodArgumentConverters = [GatewayPayloadBuilder::create($interfaceToCall->getFirstParameter()->getName())->compile($builder, $interfaceToCall)];
+            $methodArgumentConverters = [GatewayPayloadConverter::create($interfaceToCall->getFirstParameter())];
         }
 
         $internalHandlerReference = $this->compileGatewayInternalProcessor($builder, $errorChannelResolver);
@@ -335,17 +357,17 @@ class GatewayProxyBuilder implements InterceptedEndpoint, CompilableBuilder
             new Definition(MethodCallToMessageConverter::class, [
                 $methodArgumentConverters,
                 $interfaceToCall->getInterfaceParametersNames(),
-                new Reference(MessageBuilder::class),
+                new Reference(EcotoneClockInterface::class),
             ]),
             $interfaceToCall->getReturnType(),
+            $messageConverters,
             new Definition(GatewayReplyConverter::class, [
                 new Reference(ConversionService::REFERENCE_NAME),
                 $interfaceToCall->toString(),
                 $interfaceToCall->getReturnType(),
-                new Reference(MessageBuilder::class),
+                $messageConverters,
             ]),
             $internalHandlerReference,
-            new Reference(MessageBuilder::class),
         ]);
     }
 

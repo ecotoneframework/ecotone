@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Fixture\HighThroughputPublishing;
 
-use Ecotone\Api\Attribute\Reference;
-use Ecotone\Api\Messaging\BatchMessage;
-use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Attribute\Parameter\Reference;
+use Ecotone\Messaging\BatchMessage;
 use Ecotone\Messaging\Channel\DeliveryConfirmation\PendingDeliveryRegistry;
-use Ecotone\Test\StaticMessageBuilder;
+use Ecotone\Messaging\Message;
+use Ecotone\Messaging\Support\MessageBuilder;
 
 /**
  * licence Apache-2.0
@@ -101,9 +101,9 @@ final class InMemoryHighThroughputOutboundAdapter
         }
 
         $failedMessages = [];
-        foreach ($payload->entries as $entry) {
+        foreach ($payload->getEntries() as $entry) {
             if ($this->matchesFailingFragment($entry['payload'])) {
-                $failedMessages[] = StaticMessageBuilder::withPayload($entry['payload'])
+                $failedMessages[] = MessageBuilder::withPayload($entry['payload'])
                     ->setMultipleHeaders($entry['headers'])
                     ->build();
             }

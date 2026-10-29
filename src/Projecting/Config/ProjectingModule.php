@@ -8,15 +8,10 @@ declare(strict_types=1);
 namespace Ecotone\Projecting\Config;
 
 use Ecotone\AnnotationFinder\AnnotationFinder;
-use Ecotone\Api\Attribute\Asynchronous;
-use Ecotone\Api\Attribute\ModuleAnnotation;
-use Ecotone\Api\Attribute\PropagateHeaders;
-use Ecotone\Api\Attribute\WithoutDatabaseTransaction;
-use Ecotone\Api\Attribute\WithoutMessageCollector;
-use Ecotone\Api\ExtensionObject\ModulePackageList;
-use Ecotone\Api\ExtensionObject\ServiceConfiguration;
-use Ecotone\Api\Projecting\ProjectionFlush;
-use Ecotone\Api\Pulse\PulseConfiguration;
+use Ecotone\Messaging\Attribute\Asynchronous;
+use Ecotone\Messaging\Attribute\ModuleAnnotation;
+use Ecotone\Messaging\Attribute\WithoutDatabaseTransaction;
+use Ecotone\Messaging\Attribute\WithoutMessageCollector;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\Configuration;
@@ -24,7 +19,9 @@ use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Config\ModulePackageList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
+use Ecotone\Messaging\Config\ServiceConfiguration;
 use Ecotone\Messaging\Endpoint\Interceptor\TerminationListener;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -34,24 +31,17 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Support\LicensingException;
-use Ecotone\Modelling\MessageHandling\Distribution\Pulse\PulseSnapshotSectionRegistration;
-use Ecotone\Projecting\EnterpriseProjectionNameHeader;
+use Ecotone\Projecting\Attribute\ProjectionFlush;
 use Ecotone\Projecting\InMemory\InMemoryProjectionRegistry;
-use Ecotone\Projecting\OpenCoreProjectionNameHeader;
 use Ecotone\Projecting\PartitionBatchExecutorHandler;
 use Ecotone\Projecting\PartitionProviderRegistry;
 use Ecotone\Projecting\ProjectingHeaders;
 use Ecotone\Projecting\ProjectingManager;
-use Ecotone\Projecting\ProjectionOperationEndpoint;
-use Ecotone\Projecting\ProjectionOperations;
 use Ecotone\Projecting\ProjectionRegistry;
 use Ecotone\Projecting\ProjectionStateStorageRegistry;
-use Ecotone\Projecting\ProjectionTriggerEndpoint;
-use Ecotone\Projecting\Pulse\PulseProjections;
 use Ecotone\Projecting\SinglePartitionProvider;
 use Ecotone\Projecting\StreamFilterRegistry;
 use Ecotone\Projecting\StreamSourceRegistry;
-use Ecotone\Projecting\TaggedStream\TagPartitionKeysBuilder;
 
 /**
  * This module allows to configure projections in a standard way
@@ -59,10 +49,8 @@ use Ecotone\Projecting\TaggedStream\TagPartitionKeysBuilder;
  * It allows to register ProjectionExecutorBuilder and ProjectionComponentBuilder implementations
  */
 #[ModuleAnnotation]
-final class ProjectingModule implements AnnotationModule
+class ProjectingModule implements AnnotationModule
 {
-    private const PROJECTING_MANAGER_CHANNEL_PREFIX = 'projecting_manager_handler:';
-
     public static function getProjectorExecutorReference(string $projectionName): string
     {
         return 'projection_executor:' . $projectionName;
@@ -80,11 +68,8 @@ final class ProjectingModule implements AnnotationModule
 
         if (! empty($projectionBuilders) && ! $messagingConfiguration->isRunningForEnterpriseLicence()) {
             foreach ($projectionBuilders as $builder) {
-                if ($builder->partitionTag() !== null) {
-                    throw LicensingException::create("#[FromTaggedStream] on projection '{$builder->projectionName()}' requires Ecotone Enterprise licence. Partitioning a projection by the value of the tag '{$builder->partitionTag()}' is part of Ecotone Enterprise: either obtain a licence (see https://docs.ecotone.tech/enterprise) and pass it as the licenceKey of your framework's Ecotone configuration or of EcotoneLite::bootstrap(), or read the events with #[FromStream] for a projection over the whole stream.");
-                }
                 if (! $builder instanceof EcotoneProjectionExecutorBuilder || ! $builder->isOpenSourceEligible()) {
-                    throw LicensingException::create('Projections with enterprise features (Partitioned, Streaming, Polling, ProjectionRebuild, ProjectionDeployment, async backfill) require Ecotone Enterprise licence. See https://docs.ecotone.tech/enterprise for details.');
+                    throw LicensingException::create('Projections with enterprise features (Partitioned, Streaming, Polling, ProjectionRebuild, ProjectionDeployment, async backfill) require Ecotone Enterprise licence.');
                 }
             }
         }
@@ -93,17 +78,8 @@ final class ProjectingModule implements AnnotationModule
             SinglePartitionProvider::class,
             new Definition(SinglePartitionProvider::class)
         );
-        $messagingConfiguration->registerServiceDefinition(
-            OpenCoreProjectionNameHeader::class,
-            new Definition(OpenCoreProjectionNameHeader::class)
-        );
-        $messagingConfiguration->registerServiceDefinition(
-            EnterpriseProjectionNameHeader::class,
-            new Definition(EnterpriseProjectionNameHeader::class)
-        );
 
         $projectionRegistryMap = [];
-        $projectionDescriptions = [];
         foreach ($projectionBuilders as $projectionBuilder) {
             $projectionName = $projectionBuilder->projectionName();
             $reference = self::getProjectorExecutorReference($projectionName);
@@ -126,63 +102,41 @@ final class ProjectingModule implements AnnotationModule
                     $projectionBuilder->backfillAsyncChannelName(),
                     $projectionBuilder->rebuildPartitionBatchSize(),
                     $projectionBuilder->rebuildAsyncChannelName(),
-                    $projectionBuilder->isPartitioned(),
                 ])
             );
             $projectionRegistryMap[$projectionName] = new Reference($projectingManagerReference);
-            $projectionDescriptions[$projectionName] = [
-                'mode' => match (true) {
-                    $projectionBuilder instanceof EcotoneProjectionExecutorBuilder && $projectionBuilder->isPolling() => 'polling',
-                    $projectionBuilder->asyncChannelName() !== null => 'asynchronous',
-                    default => 'synchronous',
-                },
-                'partitioned' => $projectionBuilder->isPartitioned(),
-                'manualKickOff' => ! $projectionBuilder->automaticInitialization(),
-                'asyncChannel' => $projectionBuilder->asyncChannelName(),
-                'rebuildAsyncChannel' => $projectionBuilder->rebuildAsyncChannelName(),
-                'backfillAsyncChannel' => $projectionBuilder->backfillAsyncChannelName(),
-            ];
 
             $handlerBuilder = MessageProcessorActivatorBuilder::create()
                 ->chainInterceptedProcessor(
-                    $projectionBuilder->partitionTag() !== null
-                        ? MethodInvokerBuilder::create(
-                            $projectingManagerReference,
-                            InterfaceToCallReference::create(ProjectingManager::class, 'executeForPartitions'),
-                            [
-                                new TagPartitionKeysBuilder('partitionKeyValues', $projectionBuilder->partitionTag()),
-                                HeaderBuilder::createOptional('manualInitialization', ProjectingHeaders::MANUAL_INITIALIZATION),
-                            ],
-                        )
-                        : MethodInvokerBuilder::create(
-                            $projectingManagerReference,
-                            InterfaceToCallReference::create(ProjectingManager::class, 'execute'),
-                            [
-                                $projectionBuilder->partitionHeader()
-                                    ? HeaderBuilder::create('partitionKeyValue', $projectionBuilder->partitionHeader())
-                                    : ($projectionBuilder->isPartitioned()
-                                        ? new PartitionHeaderBuilder('partitionKeyValue')
-                                        : ValueBuilder::create('partitionKeyValue', null)),
-                                HeaderBuilder::createOptional('manualInitialization', ProjectingHeaders::MANUAL_INITIALIZATION),
-                            ],
-                        )
+                    MethodInvokerBuilder::create(
+                        $projectingManagerReference,
+                        InterfaceToCallReference::create(ProjectingManager::class, 'execute'),
+                        [
+                            $projectionBuilder->partitionHeader()
+                                ? HeaderBuilder::create('partitionKeyValue', $projectionBuilder->partitionHeader())
+                                : ($projectionBuilder->isPartitioned()
+                                    ? new PartitionHeaderBuilder('partitionKeyValue')
+                                    : ValueBuilder::create('partitionKeyValue', null)),
+                            HeaderBuilder::createOptional('manualInitialization', ProjectingHeaders::MANUAL_INITIALIZATION),
+                        ],
+                    )
                 )
                 ->withEndpointId(self::endpointIdForProjection($projectionName))
                 ->withInputChannelName(self::inputChannelForProjectingManager($projectionName));
 
-            $triggerEndpointAnnotations = [AttributeDefinition::fromObject(new ProjectionTriggerEndpoint($projectionName))];
             $asyncAttribute = $projectionBuilder instanceof EcotoneProjectionExecutorBuilder ? $projectionBuilder->getAsyncAttribute() : null;
             if ($asyncAttribute !== null) {
-                $endpointAnnotations = $asyncAttribute->asynchronousExecution;
+                $endpointAnnotations = $asyncAttribute->getAsynchronousExecution();
                 if ($messagingConfiguration->isRunningForEnterpriseLicence()) {
                     $endpointAnnotations = array_merge($endpointAnnotations, [new WithoutDatabaseTransaction(), new WithoutMessageCollector()]);
                 }
-                $triggerEndpointAnnotations[] = AttributeDefinition::fromObject(new Asynchronous(
-                    $asyncAttribute->getChannelName(),
-                    $endpointAnnotations,
-                ));
+                $handlerBuilder = $handlerBuilder->withEndpointAnnotations([
+                    AttributeDefinition::fromObject(new Asynchronous(
+                        $asyncAttribute->getChannelName(),
+                        $endpointAnnotations,
+                    )),
+                ]);
             }
-            $handlerBuilder = $handlerBuilder->withEndpointAnnotations($triggerEndpointAnnotations);
 
             $messagingConfiguration->registerMessageHandler($handlerBuilder);
 
@@ -195,7 +149,7 @@ final class ProjectingModule implements AnnotationModule
                             [
                                 HeaderBuilder::createOptional('partitionKeyValue', ProjectingHeaders::PROJECTION_PARTITION_KEY),
                                 HeaderBuilder::create('canInitialize', ProjectingHeaders::PROJECTION_CAN_INITIALIZE),
-                                HeaderBuilder::createOptional('shouldReset', ProjectingHeaders::PROJECTION_SHOULD_RESET),
+                                HeaderBuilder::createOptional('shouldReset', 'projection.shouldReset'),
                             ],
                         )
                     )
@@ -203,29 +157,11 @@ final class ProjectingModule implements AnnotationModule
                     ->withEndpointAnnotations([AttributeDefinition::fromObject(new ProjectionFlush())])
             );
 
-            foreach ([
-                ProjectionOperationEndpoint::INITIALIZE => ['init', []],
-                ProjectionOperationEndpoint::TRIGGER => ['executeAll', [ValueBuilder::create('manualInitialization', true)]],
-                ProjectionOperationEndpoint::RESET => ['executeAllWithReset', []],
-                ProjectionOperationEndpoint::BACKFILL => ['prepareBackfill', []],
-                ProjectionOperationEndpoint::REBUILD => ['prepareRebuild', []],
-                ProjectionOperationEndpoint::DELETE => ['delete', []],
-            ] as $operation => [$method, $parameterConverters]) {
-                $messagingConfiguration->registerMessageHandler(
-                    MessageProcessorActivatorBuilder::create()
-                        ->chainInterceptedProcessor(
-                            MethodInvokerBuilder::create(
-                                $projectingManagerReference,
-                                InterfaceToCallReference::create(ProjectingManager::class, $method),
-                                $parameterConverters,
-                            )
-                        )
-                        ->withInputChannelName(ProjectionOperationEndpoint::channelFor($projectionName, $operation))
-                        ->withEndpointAnnotations([AttributeDefinition::fromObject(new ProjectionOperationEndpoint($projectionName, $operation)), new AttributeDefinition(PropagateHeaders::class)])
-                );
-            }
-
-            if ($projectionBuilder->asyncChannelName() !== null) {
+            // Should the projection be triggered asynchronously?
+            if (
+                $serviceConfiguration->isModulePackageEnabled(ModulePackageList::ASYNCHRONOUS_PACKAGE)
+                && $projectionBuilder->asyncChannelName() !== null
+            ) {
                 $messagingConfiguration->registerAsynchronousEndpoint(
                     $projectionBuilder->asyncChannelName(),
                     self::endpointIdForProjection($projectionName),
@@ -233,25 +169,10 @@ final class ProjectingModule implements AnnotationModule
             }
         }
 
-        foreach (ExtensionObjectResolver::resolve(StreamingProjectionDescription::class, $extensionObjects) as $streaming) {
-            $projectionDescriptions[$streaming->projectionName] = ['mode' => 'streaming', 'partitioned' => false, 'manualKickOff' => false, 'asyncChannel' => $streaming->channelName, 'rebuildAsyncChannel' => null, 'backfillAsyncChannel' => null];
-        }
-
         // Register ProjectionRegistry
         $messagingConfiguration->registerServiceDefinition(
             ProjectionRegistry::class,
             new Definition(InMemoryProjectionRegistry::class, [$projectionRegistryMap])
-        );
-
-        $messagingConfiguration->registerServiceDefinition(
-            PulseProjections::class,
-            new Definition(PulseProjections::class, [
-                $projectionDescriptions,
-                new Reference(ProjectionStateStorageRegistry::class),
-                new Reference(StreamSourceRegistry::class),
-                new Reference(PartitionProviderRegistry::class),
-                new Reference(StreamFilterRegistry::class),
-            ])
         );
 
         // Register PartitionBatchExecutorHandler and its message handler
@@ -277,8 +198,6 @@ final class ProjectingModule implements AnnotationModule
                             HeaderBuilder::createOptional('aggregateType', 'partitionBatch.aggregateType'),
                             HeaderBuilder::createOptional('eventStoreReferenceName', 'partitionBatch.eventStoreReferenceName'),
                             HeaderBuilder::createOptional('shouldReset', 'partitionBatch.shouldReset'),
-                            HeaderBuilder::createOptional('batchCount', ProjectingHeaders::REBUILD_BATCH_COUNT),
-                            HeaderBuilder::createOptional('tag', 'partitionBatch.tag'),
                         ],
                     )
                 )
@@ -287,21 +206,18 @@ final class ProjectingModule implements AnnotationModule
         );
 
         // Register console commands
-        $messagingConfiguration->registerServiceDefinition(
-            ProjectionOperations::class,
-            new Definition(ProjectionOperations::class, [new Reference(ProjectionRegistry::class), new Reference(MessagingEntrypointService::class)])
-        );
-        $messagingConfiguration->registerServiceDefinition(ProjectingConsoleCommands::class, new Definition(ProjectingConsoleCommands::class, [new Reference(ProjectionOperations::class)]));
+        $messagingConfiguration->registerServiceDefinition(ProjectingConsoleCommands::class, new Definition(ProjectingConsoleCommands::class, [new Reference(ProjectionRegistry::class)]));
+    }
+
+    public function canHandle($extensionObject): bool
+    {
+        return $extensionObject instanceof ServiceConfiguration
+            || $extensionObject instanceof ProjectionExecutorBuilder;
     }
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions, ?InterfaceToCallRegistry $interfaceToCallRegistry = null): array
     {
-        $extensions = [new ProjectingModuleRoutingExtension(self::inputChannelForProjectingManager(...))];
-        if (ExtensionObjectResolver::resolve(PulseConfiguration::class, $serviceExtensions) !== []) {
-            $extensions[] = new PulseSnapshotSectionRegistration(sectionName: 'projections', serviceReference: PulseProjections::class, tenantScoped: true);
-        }
-
-        return $extensions;
+        return [new ProjectingModuleRoutingExtension(self::inputChannelForProjectingManager(...))];
     }
 
     public function getModulePackageName(): string
@@ -316,15 +232,6 @@ final class ProjectingModule implements AnnotationModule
 
     public static function inputChannelForProjectingManager(string $projectionName): string
     {
-        return self::PROJECTING_MANAGER_CHANNEL_PREFIX . $projectionName;
-    }
-
-    public static function projectionNameOfTriggerChannel(string $channelName): ?string
-    {
-        if (! str_starts_with($channelName, self::PROJECTING_MANAGER_CHANNEL_PREFIX)) {
-            return null;
-        }
-
-        return substr($channelName, strlen(self::PROJECTING_MANAGER_CHANNEL_PREFIX));
+        return 'projecting_manager_handler:' . $projectionName;
     }
 }

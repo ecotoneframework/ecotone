@@ -9,10 +9,10 @@ namespace Ecotone\Projecting\InMemory;
 
 use function count;
 
-use Ecotone\Api\EventSourcing\FieldType;
-use Ecotone\Api\EventSourcing\MetadataMatcher;
-use Ecotone\Api\EventSourcing\Operator;
+use Ecotone\EventSourcing\EventStore\FieldType;
 use Ecotone\EventSourcing\EventStore\InMemoryEventStore;
+use Ecotone\EventSourcing\EventStore\MetadataMatcher;
+use Ecotone\EventSourcing\EventStore\Operator;
 use Ecotone\Projecting\StreamPage;
 use Ecotone\Projecting\StreamSource;
 
@@ -33,16 +33,11 @@ class InMemoryEventStoreStreamSource implements StreamSource
         private ?string $streamName = null,
         private ?string $partitionHeader = null,
         private array $eventNames = [],
-        private array $tagPartitionedProjectionNames = [],
     ) {
     }
 
     public function canHandle(string $projectionName): bool
     {
-        if (in_array($projectionName, $this->tagPartitionedProjectionNames, true)) {
-            return false;
-        }
-
         return $this->projectionNames === null || in_array($projectionName, $this->projectionNames, true);
     }
 

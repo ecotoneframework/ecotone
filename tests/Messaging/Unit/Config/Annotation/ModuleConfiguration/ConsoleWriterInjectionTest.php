@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Annotation\ModuleConfiguration;
 
-use Ecotone\Api\Attribute\ConsoleCommand;
-use Ecotone\Api\Console\ConsoleWriter;
-use Ecotone\Api\Console\InMemoryConsoleWriter;
-use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Lite\EcotoneLite;
+use Ecotone\Messaging\Attribute\ConsoleCommand;
+use Ecotone\Messaging\Console\ConsoleWriter;
 use Ecotone\Messaging\Console\DelegatingConsoleWriter;
+use Ecotone\Messaging\Console\InMemoryConsoleWriter;
 use Exception;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -28,11 +28,7 @@ final class ConsoleWriterInjectionTest extends TestCase
                 $writer->success('Hello ' . $name);
             }
         };
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            [$handler::class],
-            [$handler],
-            enabledModules: [],
-        );
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([$handler::class], [$handler]);
 
         $inMemoryWriter = new InMemoryConsoleWriter();
         /** @var DelegatingConsoleWriter $delegatingWriter */
@@ -54,11 +50,7 @@ final class ConsoleWriterInjectionTest extends TestCase
                 $writer->success('Hello ' . $name);
             }
         };
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            [$handler::class],
-            [$handler],
-            enabledModules: [],
-        );
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([$handler::class], [$handler]);
 
         $ecotoneLite->runConsoleCommand('app:greet', ['name' => 'John']);
 
@@ -78,11 +70,7 @@ final class ConsoleWriterInjectionTest extends TestCase
                 $progressBar->finish();
             }
         };
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            [$handler::class],
-            [$handler],
-            enabledModules: [],
-        );
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([$handler::class], [$handler]);
 
         $inMemoryWriter = new InMemoryConsoleWriter();
         /** @var DelegatingConsoleWriter $delegatingWriter */
@@ -95,7 +83,7 @@ final class ConsoleWriterInjectionTest extends TestCase
         $this->assertSame([['columnHeaders' => ['Name'], 'rows' => [['Order']]]], $inMemoryWriter->getTables());
         $progressBar = $inMemoryWriter->getProgressBars()[0];
         $this->assertSame(2, $progressBar->getCurrentStep());
-        $this->assertSame(2, $progressBar->maxSteps);
+        $this->assertSame(2, $progressBar->getMaxSteps());
         $this->assertTrue($progressBar->isFinished());
     }
 
@@ -108,11 +96,7 @@ final class ConsoleWriterInjectionTest extends TestCase
                 throw new RuntimeException('failure');
             }
         };
-        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
-            [$handler::class],
-            [$handler],
-            enabledModules: [],
-        );
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting([$handler::class], [$handler]);
 
         $commandWriter = new InMemoryConsoleWriter();
         $restoredWriter = new InMemoryConsoleWriter();

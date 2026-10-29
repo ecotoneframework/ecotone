@@ -2,8 +2,8 @@
 
 namespace Test\Ecotone\Modelling\Fixture\CommandHandler\Aggregate;
 
-use Ecotone\Api\Attribute\TargetIdentifier;
-use Ecotone\Api\Attribute\TargetVersion;
+use Ecotone\Modelling\Attribute\TargetIdentifier;
+use Ecotone\Modelling\Attribute\TargetVersion;
 
 /**
  * Class MultiplyAmountCommand
@@ -59,7 +59,7 @@ class MultiplyAmountCommand
     /**
      * @return int
      */
-    public function getAggregateVersion(): ?int
+    public function getVersion(): ?int
     {
         return $this->version;
     }

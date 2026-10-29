@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Fixture\InterceptedQueryAggregate;
 
-use Ecotone\Api\Attribute\Repository;
-use Ecotone\Modelling\InMemoryStateStoredRepository;
+use Ecotone\Modelling\Attribute\Repository;
+use Ecotone\Modelling\InMemoryStandardRepository;
 
 #[Repository]
 /**
  * licence Apache-2.0
  */
-class ShopRepository extends InMemoryStateStoredRepository
+class ShopRepository extends InMemoryStandardRepository
 {
 }

@@ -2,7 +2,7 @@
 
 namespace Test\Ecotone\Modelling\Fixture\EventSourcingRepositoryShortcut;
 
-use Ecotone\Api\Attribute\Repository;
+use Ecotone\Modelling\Attribute\Repository;
 
 /**
  * licence Apache-2.0

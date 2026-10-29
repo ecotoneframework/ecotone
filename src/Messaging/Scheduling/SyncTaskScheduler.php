@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Scheduling;
 
-use Ecotone\Api\ExtensionObject\PollingMetadata;
-use Ecotone\Api\Gateway\EcotoneClockInterface;
-use Ecotone\Api\Scheduling\Duration;
-use Ecotone\Messaging\Endpoint\PollingConsumer\PollToGatewayTaskExecutor;
+use Ecotone\Messaging\Endpoint\PollingMetadata;
 
 /**
  * Class SyncTaskScheduler
@@ -17,9 +14,9 @@ use Ecotone\Messaging\Endpoint\PollingConsumer\PollToGatewayTaskExecutor;
 /**
  * licence Apache-2.0
  */
-class SyncTaskScheduler
+class SyncTaskScheduler implements TaskScheduler
 {
-    private function __construct(private EcotoneClockInterface $clock, private SimpleTriggerContext $triggerContext, private PollingMetadata $pollingMetadata)
+    private function __construct(private EcotoneClockInterface $clock, private TriggerContext $triggerContext, private PollingMetadata $pollingMetadata)
     {
     }
 
@@ -33,7 +30,10 @@ class SyncTaskScheduler
         return new self($clock, $triggerContext, $pollingMetadata);
     }
 
-    public function schedule(PollToGatewayTaskExecutor $taskExecutor, Trigger $trigger): void
+    /**
+     * @inheritDoc
+     */
+    public function schedule(TaskExecutor $taskExecutor, Trigger $trigger): void
     {
         $nextExecution = $trigger->nextExecutionTime($this->clock, $this->triggerContext);
         $this->triggerContext = $this->triggerContext->withLastScheduledExecutionTime($nextExecution);
@@ -66,6 +66,9 @@ class SyncTaskScheduler
         return $this->clock->now() >= $this->triggerContext->lastScheduledTime();
     }
 
+    /**
+     * @return int
+     */
     private function waitTime(): Duration
     {
         return $this->triggerContext->lastScheduledTime()->durationSince($this->clock->now());

@@ -34,6 +34,7 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\Support\LicensingException;
+use Ecotone\Modelling\Config\DatabaseTransaction\ManagesOwnTransaction;
 use Ecotone\Modelling\MessageHandling\Distribution\Pulse\PulseSnapshotSectionRegistration;
 use Ecotone\Projecting\EnterpriseProjectionNameHeader;
 use Ecotone\Projecting\InMemory\InMemoryProjectionRegistry;
@@ -173,7 +174,7 @@ final class ProjectingModule implements AnnotationModule
             $triggerEndpointAnnotations = [AttributeDefinition::fromObject(new ProjectionTriggerEndpoint($projectionName))];
             $asyncAttribute = $projectionBuilder instanceof EcotoneProjectionExecutorBuilder ? $projectionBuilder->getAsyncAttribute() : null;
             if ($asyncAttribute !== null) {
-                $endpointAnnotations = $asyncAttribute->asynchronousExecution;
+                $endpointAnnotations = [...$asyncAttribute->asynchronousExecution, new ManagesOwnTransaction()];
                 if ($messagingConfiguration->isRunningForEnterpriseLicence()) {
                     $endpointAnnotations = array_merge($endpointAnnotations, [new WithoutDatabaseTransaction(), new WithoutMessageCollector()]);
                 }

@@ -11,6 +11,7 @@ use function count;
 use Ecotone\Api\EventSourcing\AppendCondition;
 use Ecotone\Api\EventSourcing\Event;
 use Ecotone\Api\EventSourcing\EventCriteria;
+use Ecotone\EventSourcing\Mapping\EventMapper;
 
 use function is_object;
 use function min;
@@ -40,6 +41,7 @@ final class TagResolver
     public function __construct(
         private readonly EventTagRegistry $eventTagRegistry,
         private readonly AggregateCounterTags $aggregateCounterTags,
+        private readonly EventMapper $eventMapper,
     ) {
     }
 
@@ -164,6 +166,13 @@ final class TagResolver
         return $page;
     }
 
+    public function matchesEventTypeOf(EventCriteria $criteria, Event $event): bool
+    {
+        $payload = $event->getPayload();
+
+        return $criteria->matchesEventType(is_object($payload) ? $payload::class : $this->eventMapper->mapNameToEventType($event->eventName));
+    }
+
     /**
      * @param Event[] $events
      * @return Event[]
@@ -175,7 +184,7 @@ final class TagResolver
 
         $matching = [];
         foreach ($events as $event) {
-            if (! $criteria->matchesEventType($event->eventName) || ! $this->carriesAll($event, $criteria->tags)) {
+            if (! $this->matchesEventTypeOf($criteria, $event) || ! $this->carriesAll($event, $criteria->tags)) {
                 continue;
             }
 

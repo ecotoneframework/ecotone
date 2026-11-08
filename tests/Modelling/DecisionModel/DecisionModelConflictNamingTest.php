@@ -61,6 +61,7 @@ final class DecisionModelConflictNamingTest extends TestCase
         } catch (DecisionModelConcurrencyException $exception) {
             $this->assertStringContainsString('on tag course:course-1 (expected version 0, moved since it was read) while deciding ' . SeatCountForConflictNaming::class, $exception->getMessage());
             $this->assertStringContainsString('retry the command: InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 3, [DecisionModelConcurrencyException::class])', $exception->getMessage());
+            $this->assertStringContainsString('The command bus retries by default when DbalConfiguration runs it in a database transaction', $exception->getMessage());
         }
     }
 

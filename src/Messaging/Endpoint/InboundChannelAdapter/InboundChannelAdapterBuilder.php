@@ -125,6 +125,11 @@ class InboundChannelAdapterBuilder extends InterceptedChannelAdapterBuilder
         return $this;
     }
 
+    protected function drainsAQueue(): bool
+    {
+        return false;
+    }
+
     protected function withContinuesPolling(): bool
     {
         return $this->continuousPolling;

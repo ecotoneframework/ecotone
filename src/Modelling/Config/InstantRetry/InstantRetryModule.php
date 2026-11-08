@@ -18,6 +18,7 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
+use Ecotone\Modelling\Config\DatabaseTransaction\CommandsWithoutDatabaseTransaction;
 use Ecotone\Modelling\Config\DatabaseTransaction\TransactionStatusTracker;
 use Symfony\Component\Uid\Uuid;
 
@@ -27,7 +28,7 @@ use Symfony\Component\Uid\Uuid;
  */
 final class InstantRetryModule implements AnnotationModule
 {
-    private function __construct()
+    private function __construct(private CommandsWithoutDatabaseTransaction $commandsWithoutDatabaseTransaction)
     {
     }
 
@@ -36,7 +37,7 @@ final class InstantRetryModule implements AnnotationModule
      */
     public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
-        return new self();
+        return new self(CommandsWithoutDatabaseTransaction::find($annotationRegistrationService, $interfaceToCallRegistry));
     }
 
     /**
@@ -45,14 +46,34 @@ final class InstantRetryModule implements AnnotationModule
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
     {
         $configuration = ExtensionObjectResolver::resolveUnique(InstantRetryConfiguration::class, $extensionObjects, InstantRetryConfiguration::createWithDefaults());
+        $defaults = InstantRetryDefaults::from($extensionObjects);
         $messagingConfiguration->registerServiceDefinition(RetryStatusTracker::class, Definition::createFor(RetryStatusTracker::class, [false]));
         $messagingConfiguration->registerServiceDefinition(TransactionStatusTracker::class, Definition::createFor(TransactionStatusTracker::class, [false]));
+        $messagingConfiguration->registerServiceDefinition(CommandsWithoutDatabaseTransaction::class, $this->commandsWithoutDatabaseTransaction->getDefinition());
 
-        if ($configuration->isEnabledForCommandBus) {
+        if ($configuration->isEnabledForCommandBus === true) {
             $this->registerInterceptor($messagingConfiguration, $interfaceToCallRegistry, $configuration->commandBusRetryTimes, $configuration->commandBuExceptions, CommandBus::class, Precedence::GLOBAL_INSTANT_RETRY_PRECEDENCE);
         }
-        if ($configuration->isEnabledForAsynchronousEndpoints) {
+        if ($configuration->isEnabledForCommandBus === null && $defaults->forCommandBus()) {
+            $this->registerRetryByDefault(
+                $messagingConfiguration,
+                $interfaceToCallRegistry,
+                CommandBusInstantRetryByDefault::class,
+                [$this->instantRetry($configuration->commandBusRetryTimes, $configuration->commandBuExceptions), Reference::to(CommandsWithoutDatabaseTransaction::class)],
+                CommandBus::class,
+            );
+        }
+        if ($configuration->isEnabledForAsynchronousEndpoints === true) {
             $this->registerInterceptor($messagingConfiguration, $interfaceToCallRegistry, $configuration->asynchronousRetryTimes, $configuration->asynchronousExceptions, AsynchronousRunningEndpoint::class, Precedence::GLOBAL_INSTANT_RETRY_PRECEDENCE);
+        }
+        if ($configuration->isEnabledForAsynchronousEndpoints === null && $defaults->apply) {
+            $this->registerRetryByDefault(
+                $messagingConfiguration,
+                $interfaceToCallRegistry,
+                AsynchronousEndpointInstantRetryByDefault::class,
+                [$this->instantRetry($configuration->asynchronousRetryTimes, $configuration->asynchronousExceptions), $defaults->databaseTransactions->onAsynchronousEndpoints, $defaults->databaseTransactions->asynchronousEndpointsWithoutTransaction],
+                AsynchronousRunningEndpoint::class,
+            );
         }
     }
 
@@ -92,5 +113,33 @@ final class InstantRetryModule implements AnnotationModule
                     $pointcut
                 )
             );
+    }
+
+    /**
+     * @param string[] $exceptions
+     */
+    private function instantRetry(int $retryAttempt, array $exceptions): Definition
+    {
+        return Definition::createFor(InstantRetryInterceptor::class, [$retryAttempt, $exceptions, Reference::to(RetryStatusTracker::class), Reference::to(TransactionStatusTracker::class)]);
+    }
+
+    private function registerRetryByDefault(
+        Configuration $messagingConfiguration,
+        InterfaceToCallRegistry $interfaceToCallRegistry,
+        string $interceptorClass,
+        array $arguments,
+        string $pointcut,
+    ): void {
+        $interceptorId = Uuid::v7()->toRfc4122();
+        $messagingConfiguration->registerServiceDefinition($interceptorId, Definition::createFor($interceptorClass, $arguments));
+
+        $messagingConfiguration->registerAroundMethodInterceptor(
+            AroundInterceptorBuilder::create(
+                $interceptorId,
+                $interfaceToCallRegistry->getFor($interceptorClass, 'retry'),
+                Precedence::GLOBAL_INSTANT_RETRY_PRECEDENCE,
+                $pointcut
+            )
+        );
     }
 }

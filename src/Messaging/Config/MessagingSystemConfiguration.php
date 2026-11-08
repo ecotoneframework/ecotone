@@ -72,6 +72,7 @@ use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\Config\DatabaseTransaction\ManagesOwnTransaction;
 use Ecotone\Modelling\Config\MessageBusChannel;
 use Exception;
 
@@ -498,7 +499,8 @@ final class MessagingSystemConfiguration implements Configuration
                         }
                     }
                     $endpointAnnotations = $asyncAttribute ? $asyncAttribute->asynchronousExecution : [];
-                    if ($endpointAnnotations && ! $this->isRunningForEnterpriseLicence) {
+                    $applicationEndpointAnnotations = array_filter($endpointAnnotations, static fn (object $annotation): bool => ! $annotation instanceof ManagesOwnTransaction);
+                    if ($applicationEndpointAnnotations && ! $this->isRunningForEnterpriseLicence) {
                         throw LicensingException::create(Annotation\ModuleConfiguration\ErrorChannelExceptionMessages::asynchronousExecutionRequiresEnterprise($targetEndpointId));
                     }
 

@@ -30,10 +30,13 @@ final class ProjectionOperations
         $this->run($projectionName, ProjectionOperationEndpoint::INITIALIZE, $headers);
     }
 
-    public function initializeAll(): void
+    /**
+     * @param array<string, mixed> $headers
+     */
+    public function initializeAll(array $headers = []): void
     {
         foreach ($this->registry->projectionNames() as $projectionName) {
-            $this->initialize($projectionName);
+            $this->initialize($projectionName, $headers);
         }
     }
 

@@ -64,6 +64,7 @@ use Ecotone\Projecting\InMemory\InMemoryEventStoreStreamSource;
 use Ecotone\Projecting\InMemory\InMemoryProjectionStateStorage;
 use Ecotone\Projecting\InMemory\InMemoryTagPartitionProvider;
 use Ecotone\Projecting\PartitionProviderReference;
+use Ecotone\Projecting\ProjectionOperations;
 use Ecotone\Projecting\ProjectionStateStorageReference;
 use Ecotone\Projecting\StreamSourceReference;
 use Ecotone\Test\StaticPsrClock;
@@ -154,7 +155,7 @@ final class EcotoneTestSupportModule extends NoExternalConfigurationModule imple
         $messagingConfiguration->registerServiceDefinition(
             DatabaseTablesSetUp::class,
             $databaseTablesSetUp === null
-                ? new Definition(WithoutDatabaseTables::class)
+                ? new Definition(WithoutDatabaseTables::class, [new Reference(ProjectionOperations::class)])
                 : new Reference($databaseTablesSetUp->referenceName)
         );
 

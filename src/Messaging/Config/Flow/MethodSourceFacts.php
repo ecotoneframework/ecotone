@@ -26,18 +26,19 @@ final class MethodSourceFacts
 {
     /**
      * @param list<array{class: string, returned: bool, receiver: string|null, enclosingCall: string|null}> $instantiations
-     * @param list<array{receiver: string|null, method: string, enclosingCall: string|null, literalArguments: list<string>, firstArgumentClass: string|null}> $calls
+     * @param list<array{receiver: string|null, method: string, enclosingCall: string|null, arguments: array<int|string, array{kind: string, value: string}>, literalArguments: list<string>, firstArgumentClass: string|null, unresolvedFrom: int|null}> $calls
      * @param list<string> $stringLiterals
      */
     public function __construct(
         public readonly array $instantiations,
         public readonly array $calls,
         public readonly array $stringLiterals,
+        public readonly ?string $returnedLiteral,
     ) {
     }
 
     public static function none(): self
     {
-        return new self([], [], []);
+        return new self([], [], [], null);
     }
 }

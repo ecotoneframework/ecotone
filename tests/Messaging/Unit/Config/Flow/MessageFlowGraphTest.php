@@ -413,7 +413,7 @@ final class MessageFlowGraphTest extends TestCase
             [FlowEdgeKind::SENDS_TO, $placeId, $busId],
         ], $graph);
         $direct = $graph->edgesOfKind(FlowEdgeKind::SENDS_TO, from: $placeId, to: $busId)[0];
-        self::assertSame(['inferred' => true, 'via' => 'sendMessage', 'targetService' => 'billing', 'targetChannel' => 'billing.notifications'], $direct->attributes);
+        self::assertSame(['inferred' => true, 'via' => 'sendMessage', 'targetService' => 'billing', 'targetChannel' => 'billing.notifications', 'withoutReply' => true], $direct->attributes);
         self::assertSame('convertAndSendCommand', $graph->edgesOfKind(FlowEdgeKind::EMITS, from: $placeId, to: 'message:invoice.create')[0]->attributes['via']);
     }
 

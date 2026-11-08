@@ -15,7 +15,6 @@ use Ecotone\Api\ExtensionObject\MediaType;
 use Ecotone\Api\ExtensionObject\PollingMetadata;
 use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
-use Ecotone\Api\ExtensionObject\TestConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Lite\Test\FlowTestSupport;
 use Ecotone\Api\Pulse\PulseConfiguration;
@@ -184,7 +183,7 @@ final class PulseFailureRepliesTest extends TestCase
             extensionObjects: [...$extensionObjects, ServiceConfiguration::createWithDefaults()->withServiceName($serviceName)],
             enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
-            testConfiguration: TestConfiguration::createWithDefaults()->withTimeAt(new DateTimeImmutable('2026-10-20 12:00:00', new DateTimeZone('UTC'))),
+            initialTime: new DateTimeImmutable('2026-10-20 12:00:00', new DateTimeZone('UTC')),
         );
     }
 

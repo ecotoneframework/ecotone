@@ -83,7 +83,7 @@ final class PulseProjections implements PulseSnapshotSection
     private function withEventsBehind(array $projection): array
     {
         $name = $projection['name'];
-        $state = $this->stateStorages->getFor($name)->loadPartition($name, null, lock: false);
+        $state = $this->stateStorages->getFor($name)->loadPartition($name);
         $events = $this->streamSources->getFor($name)->load($name, $state?->lastPosition, self::EVENTS_BEHIND_CAP + 1)->events;
 
         return [
@@ -113,7 +113,7 @@ final class PulseProjections implements PulseSnapshotSection
                 continue;
             }
             foreach ($partitionProvider->partitions($streamFilter, $room) as $partitionKey) {
-                $state = $stateStorage->loadPartition($name, $partitionKey, lock: false);
+                $state = $stateStorage->loadPartition($name, $partitionKey);
                 $inspected++;
                 $positions[] = $partitionKey . '=' . ($state?->lastPosition ?? '');
                 $allInitialized = $allInitialized && $state?->status === ProjectionInitializationStatus::INITIALIZED;

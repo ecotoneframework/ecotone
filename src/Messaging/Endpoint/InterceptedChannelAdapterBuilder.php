@@ -49,6 +49,11 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
         return false;
     }
 
+    protected function drainsAQueue(): bool
+    {
+        return true;
+    }
+
     abstract protected function getInterceptedInterface(InterfaceToCallRegistry $interfaceToCallRegistry): InterfaceToCall;
 
     protected function compileGateway(MessagingContainerBuilder $builder): Definition|Reference|DefinedObject
@@ -78,6 +83,7 @@ abstract class InterceptedChannelAdapterBuilder implements ChannelAdapterConsume
             new Reference(AsyncHandlerAnnotationRegistry::class),
             new Reference(AsyncEndpointAnnotationContext::class),
             new Reference(MessageBuilder::class),
+            $this->drainsAQueue(),
         ]);
         $builder->registerPollingEndpoint($this->endpointId, $consumerRunner, $this->withContinuesPolling());
     }

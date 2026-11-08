@@ -7,6 +7,7 @@ namespace Ecotone\Messaging\Channel\PollableChannel\SendRetries;
 use Ecotone\Api\Gateway\EcotoneClockInterface;
 use Ecotone\Api\Messaging\BatchMessage;
 use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
+use Ecotone\Api\Messaging\DatabaseTransactionLost;
 use Ecotone\Api\Messaging\Message;
 use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Messaging\Channel\AbstractChannelInterceptor;
@@ -44,6 +45,15 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
 
     public function recover(Message $message, MessageChannel $messageChannel, Throwable $exception): SendRecovery
     {
+        if ($exception instanceof DatabaseTransactionLost) {
+            $this->logger->info($exception->getMessage(), [
+                'exception' => $exception->getPrevious()?->getMessage(),
+                'relatedChannel' => $this->relatedChannel,
+            ]);
+
+            return SendRecovery::Failed;
+        }
+
         $messageToRedeliver = $this->messageContainingOnlyFailedDeliveries($message, $exception);
 
         if ($exception !== null) {
@@ -61,6 +71,9 @@ final class SendRetryChannelInterceptor extends AbstractChannelInterceptor imple
 
                     return SendRecovery::Delivered;
                 } catch (Exception $exception) {
+                    if ($exception instanceof DatabaseTransactionLost) {
+                        return $this->recover($message, $messageChannel, $exception);
+                    }
                     $messageToRedeliver = $this->messageContainingOnlyFailedDeliveries($messageToRedeliver, $exception);
                     $attempt++;
                 }

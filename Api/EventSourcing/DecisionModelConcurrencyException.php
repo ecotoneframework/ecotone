@@ -25,7 +25,8 @@ final class DecisionModelConcurrencyException extends ConcurrencyException
 
     public const CONFLICT_MODEL_FIELD = 'ecotone.dcb.conflict.model';
 
-    private const RETRY_INSTRUCTION = 'Otherwise retry the command: InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 3, [DecisionModelConcurrencyException::class]) '
+    private const RETRY_INSTRUCTION = 'Otherwise retry the command. The command bus retries by default when DbalConfiguration runs it in a database transaction; '
+        . 'without one, retry the command: InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 3, [DecisionModelConcurrencyException::class]) '
         . 'in a #[ServiceContext], or #[InstantRetry(retryTimes: 3, exceptions: [DecisionModelConcurrencyException::class])] on a command bus interface.';
 
     private string $conflictingTagName = '';

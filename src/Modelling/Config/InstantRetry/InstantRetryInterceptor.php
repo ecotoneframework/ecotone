@@ -6,6 +6,7 @@ use Ecotone\Api\Attribute\Reference;
 use Ecotone\Api\ExtensionObject\PollingMetadata;
 use Ecotone\Api\Interceptor\MethodInvocation;
 use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Ecotone\Modelling\Config\DatabaseTransaction\TransactionStatusTracker;
 use Exception;
@@ -85,6 +86,9 @@ class InstantRetryInterceptor
 
     private function canRetryThrownException(Exception $thrownException): bool
     {
+        if ($thrownException instanceof ConfigurationException) {
+            return false;
+        }
         if ($this->exceptions === []) {
             return true;
         }

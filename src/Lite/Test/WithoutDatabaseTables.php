@@ -5,12 +5,17 @@ declare(strict_types=1);
 namespace Ecotone\Lite\Test;
 
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Projecting\ProjectionOperations;
 
 /**
  * licence Apache-2.0
  */
 final class WithoutDatabaseTables implements DatabaseTablesSetUp
 {
+    public function __construct(private ProjectionOperations $projectionOperations)
+    {
+    }
+
     public function setUpEveryTable(): void
     {
         throw ConfigurationException::create(
@@ -23,5 +28,10 @@ final class WithoutDatabaseTables implements DatabaseTablesSetUp
 
     public function setUpTablesOfProvidedConnections(): void
     {
+    }
+
+    public function initializeProjections(): void
+    {
+        $this->projectionOperations->initializeAll();
     }
 }

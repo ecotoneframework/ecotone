@@ -10,7 +10,6 @@ use Ecotone\Api\Attribute\Apply;
 use Ecotone\Api\Attribute\EventSourcingAggregate;
 use Ecotone\Api\Attribute\Identifier;
 use Ecotone\Api\EventSourcing\Event;
-use Ecotone\Api\ExtensionObject\TestConfiguration;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Api\Modelling\WithAggregateVersioning;
@@ -25,7 +24,7 @@ final class SeededEventsAtTimeTest extends TestCase
     public function test_a_stream_seeded_at_a_time_loads_back_with_that_timestamp(): void
     {
         $ecotone = EcotoneLite::bootstrapFlowTesting(
-            testConfiguration: TestConfiguration::createWithDefaults()->withTimeAt(new DateTimeImmutable('2024-03-01 10:00:00')),
+            initialTime: new DateTimeImmutable('2024-03-01 10:00:00'),
         );
 
         $ecotone
@@ -51,7 +50,7 @@ final class SeededEventsAtTimeTest extends TestCase
     {
         $ecotone = EcotoneLite::bootstrapFlowTesting(
             [TicketForSeeding::class],
-            testConfiguration: TestConfiguration::createWithDefaults()->withTimeAt(new DateTimeImmutable('2024-03-01 10:00:00')),
+            initialTime: new DateTimeImmutable('2024-03-01 10:00:00'),
         );
 
         $ecotone

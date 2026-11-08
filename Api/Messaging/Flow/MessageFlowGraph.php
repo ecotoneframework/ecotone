@@ -37,7 +37,7 @@ final class MessageFlowGraph implements DefinedObject
         foreach ($edges as $edge) {
             $graph->nodes[$edge->from] ?? throw InvalidArgumentException::create("Flow edge {$edge->kind->value} starts at `{$edge->from}`, which is not a node of this graph. Add the node first with MessageFlowGraph::create() or withNode().");
             $graph->nodes[$edge->to] ?? throw InvalidArgumentException::create("Flow edge {$edge->kind->value} ends at `{$edge->to}`, which is not a node of this graph. Add the node first with MessageFlowGraph::create() or withNode().");
-            $key = $edge->kind->value . '|' . strlen($edge->from) . '|' . $edge->from . $edge->to . '|' . ($edge->attributes['targetService'] ?? '');
+            $key = $edge->kind->value . '|' . strlen($edge->from) . '|' . $edge->from . $edge->to . '|' . ($edge->kind === FlowEdgeKind::SENDS_TO ? $edge->attributes['via'] ?? '' : '') . '|' . ($edge->attributes['targetService'] ?? '') . '|' . ($edge->attributes['targetChannel'] ?? '');
             if (! isset($seenEdges[$key])) {
                 $graph->edges[] = $edge;
                 $seenEdges[$key] = true;
@@ -185,6 +185,9 @@ final class MessageFlowGraph implements DefinedObject
         }
         $edgeLines = [];
         foreach ($this->edges as $edge) {
+            if ($edge->kind === FlowEdgeKind::PROJECTS_INTO) {
+                continue;
+            }
             $asynchronousChannels = $edge->kind === FlowEdgeKind::ROUTED_TO ? $this->edgesOfKind(FlowEdgeKind::ASYNCHRONOUS, to: $edge->to) : [];
             if ($asynchronousChannels === []) {
                 $edgeLines[] = sprintf('    %s %s %s', $mermaidIds[$edge->from], $this->mermaidArrow($edge), $mermaidIds[$edge->to]);
@@ -233,7 +236,7 @@ final class MessageFlowGraph implements DefinedObject
             FlowEdgeKind::ROUTES_TO => 'routes',
             FlowEdgeKind::DISTRIBUTES => 'distributed',
             FlowEdgeKind::INTERCEPTED_BY => 'intercepted by',
-            FlowEdgeKind::SENDS_TO => $edge->isInferred() ? 'sends (' . ($edge->attributes['via'] ?? '') . ')' : (isset($edge->attributes['targetService']) ? 'to ' . $edge->attributes['targetService'] : ''),
+            FlowEdgeKind::SENDS_TO => trim(($edge->isInferred() ? 'sends (' . ($edge->attributes['via'] ?? '') . ')' : '') . (isset($edge->attributes['targetService']) ? ' to ' . $edge->attributes['targetService'] : '')),
             default => '',
         };
         $labelPart = $label === '' ? '' : '|"' . $this->mermaidText($label) . '"|';

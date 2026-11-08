@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Projecting;
 
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Endpoint\Interceptor\TerminationListener;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use InvalidArgumentException;
@@ -81,13 +82,11 @@ class ProjectingManager
 
     public function executePartitionBatch(?string $partitionKeyValue = null, bool $canInitialize = false, bool $shouldReset = false): int
     {
-        if ($canInitialize) {
-            $this->ensurePartitionInitialized($partitionKeyValue);
-        }
+        $this->ensurePartitionStateExists($partitionKeyValue);
 
         $transaction = $this->getProjectionStateStorage()->beginTransaction();
         try {
-            $projectionState = $this->loadOrInitializePartitionState($partitionKeyValue, $canInitialize);
+            $projectionState = $this->loadPartitionStateToProcess($partitionKeyValue, $canInitialize);
             if ($projectionState === null) {
                 $transaction->commit();
                 return 0;
@@ -101,6 +100,7 @@ class ProjectingManager
                     null,
                     null,
                     $projectionState->status,
+                    $projectionState->version,
                 );
             }
 
@@ -171,7 +171,7 @@ class ProjectingManager
 
     public function isSetUp(): bool
     {
-        return $this->getProjectionStateStorage()->loadPartition($this->projectionName, null, lock: false) !== null;
+        return $this->getProjectionStateStorage()->loadPartition($this->projectionName) !== null;
     }
 
     public function getProjectionName(): string
@@ -182,12 +182,12 @@ class ProjectingManager
     public function init(): void
     {
         $this->getProjectionStateStorage()->init($this->projectionName);
+        if ($this->isSetUp()) {
+            return;
+        }
 
         $this->projectorExecutor->init();
-
-        if (! $this->partitioned) {
-            $this->getProjectionStateStorage()->initPartition($this->projectionName);
-        }
+        $this->getProjectionStateStorage()->initPartition($this->projectionName);
     }
 
     public function delete(): void
@@ -309,40 +309,34 @@ class ProjectingManager
         }
     }
 
-    private function loadOrInitializePartitionState(?string $partitionKey, bool $canInitialize): ?ProjectionPartitionState
+    private function loadPartitionStateToProcess(?string $partitionKey, bool $canInitialize): ?ProjectionPartitionState
     {
-        $storage = $this->getProjectionStateStorage();
-        $projectionState = $storage->loadPartition($this->projectionName, $partitionKey);
+        $projectionState = $this->getProjectionStateStorage()->loadPartition($this->projectionName, $partitionKey);
 
         if (! $canInitialize && $projectionState?->status === ProjectionInitializationStatus::UNINITIALIZED) {
             return null;
         }
-        if ($projectionState) {
-            return $projectionState;
-        }
 
-        if ($canInitialize) {
-            return $storage->initPartition($this->projectionName, $partitionKey)
-                ?? $storage->loadPartition($this->projectionName, $partitionKey);
-        }
-        return null;
+        return $projectionState;
     }
 
-    /**
-     * The projector's own #[ProjectionInitialization] handler may run arbitrary SQL, DDL included.
-     * It must run before any database transaction is open: on MySQL, DDL issued mid-transaction
-     * triggers an implicit commit, leaving the transaction object out of sync with the actual
-     * connection state and the later explicit commit failing with "no active transaction".
-     */
-    private function ensurePartitionInitialized(?string $partitionKeyValue): void
+    private function ensurePartitionStateExists(?string $partitionKeyValue): void
     {
         $storage = $this->getProjectionStateStorage();
-        if ($storage->loadPartition($this->projectionName, $partitionKeyValue, lock: false) !== null) {
+        if ($storage->loadPartition($this->projectionName, $partitionKeyValue) !== null) {
             return;
         }
-
-        if ($storage->initPartition($this->projectionName, $partitionKeyValue) !== null) {
-            $this->projectorExecutor->init();
+        if ($partitionKeyValue === null || ! $this->isSetUp()) {
+            throw ConfigurationException::create(
+                "Projection '{$this->projectionName}' has not been initialized, so its #[ProjectionInitialization] has not run and what it projects into may not exist. "
+                . 'Ecotone never initializes a projection while it handles a message, because initializing it can run DDL that a transaction cannot hold. '
+                . "Initialize it before its first event: run `ecotone:projection:init {$this->projectionName}` (or `ecotone:projection:init --all`) when you deploy "
+                . '(bin/console in Symfony, php artisan in Laravel, ./tempest in Tempest), or create what it projects into in your own migrations and initialize it the same way. '
+                . 'In an EcotoneLite flow test, the bootstrap initializes every projection unless TestConfiguration::createWithDefaults()->withDatabaseTablesSetUpOnBootstrap(false) turned that off; '
+                . "then call \$ecotone->initializeProjection('{$this->projectionName}') or \$ecotone->setupDatabaseTables()."
+            );
         }
+
+        $storage->initPartition($this->projectionName, $partitionKeyValue);
     }
 }

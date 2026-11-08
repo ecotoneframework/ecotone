@@ -28,6 +28,7 @@ final class TracingFlowConformanceTest extends TracingTestCase
             enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
+        $recorder->clear();
 
         foreach (array_keys($scenario->stages) as $index) {
             self::assertNull($scenario->runStage($index, $ecotone));

@@ -122,10 +122,11 @@ final class ImmutableConfigurationCopyTest extends TestCase
             ->withSpyOnChannel('audit')
             ->withInMemoryConsumerPositionTracker(false)
             ->withDatabaseTablesSetUpOnBootstrap(false)
-            ->withTimeAt(new DateTimeImmutable('2024-03-01 10:00:00'));
+            ->withTimeAt(new DateTimeImmutable('2024-03-01 10:00:00'))
+            ->withDefaultInstantRetries(false);
 
         self::assertSame(
-            ['failOnNotFoundHandler', 'pollableChannelMediaTypeConversion', 'channelToConvertOn', 'spiedChannelNames', 'inMemoryConsumerPositionTracker', 'databaseTablesSetUpOnBootstrap', 'timeAt'],
+            ['failOnNotFoundHandler', 'pollableChannelMediaTypeConversion', 'channelToConvertOn', 'spiedChannelNames', 'inMemoryConsumerPositionTracker', 'databaseTablesSetUpOnBootstrap', 'timeAt', 'defaultInstantRetries'],
             array_keys(get_object_vars($original)),
         );
         self::assertCopyChangesOnly($original, fn (TestConfiguration $configuration) => $configuration->withFailOnNotFoundHandler(true), ['failOnNotFoundHandler' => true]);
@@ -138,6 +139,7 @@ final class ImmutableConfigurationCopyTest extends TestCase
         self::assertCopyChangesOnly($original, fn (TestConfiguration $configuration) => $configuration->withInMemoryConsumerPositionTracker(true), ['inMemoryConsumerPositionTracker' => true]);
         self::assertCopyChangesOnly($original, fn (TestConfiguration $configuration) => $configuration->withDatabaseTablesSetUpOnBootstrap(true), ['databaseTablesSetUpOnBootstrap' => true]);
         self::assertCopyChangesOnly($original, fn (TestConfiguration $configuration) => $configuration->withTimeAt(new DateTimeImmutable('2025-01-01 00:00:00')), ['timeAt' => new DateTimeImmutable('2025-01-01 00:00:00')]);
+        self::assertCopyChangesOnly($original, fn (TestConfiguration $configuration) => $configuration->withDefaultInstantRetries(true), ['defaultInstantRetries' => true]);
     }
 
     public function test_execution_polling_metadata_copy_changes_only_the_named_fields(): void
@@ -277,12 +279,7 @@ final class ImmutableConfigurationCopyTest extends TestCase
         self::assertCopyChangesOnly($original, fn (PollingMetadata $metadata) => $metadata->withTriggerReferenceName('other_trigger'), ['triggerReferenceName' => 'other_trigger'], $observe);
         self::assertCopyChangesOnly($original, fn (PollingMetadata $metadata) => $metadata->withTaskExecutorName('other_executor'), ['taskExecutorName' => 'other_executor'], $observe);
         self::assertCopyChangesOnly($original, fn (PollingMetadata $metadata) => $metadata->withStopOnError(true), ['stopOnError' => true, 'errorChannelName' => ''], $observe);
-        self::assertCopyChangesOnly(
-            $original,
-            fn (PollingMetadata $metadata) => $metadata->withFinishWhenNoMessages(true),
-            ['finishWhenNoMessages' => true, 'handledMessageLimit' => 0, 'executionAmountLimit' => 0, 'executionTimeLimitInMilliseconds' => 0],
-            $observe,
-        );
+        self::assertCopyChangesOnly($original, fn (PollingMetadata $metadata) => $metadata->withFinishWhenNoMessages(true), ['finishWhenNoMessages' => true], $observe);
         self::assertCopyChangesOnly($original, fn (PollingMetadata $metadata) => $metadata->withFixedRateExpression('2000'), ['fixedRateExpression' => '2000'], $observe);
         self::assertCopyChangesOnly($original, fn (PollingMetadata $metadata) => $metadata->withCronExpression(null), ['cronExpression' => null], $observe);
         self::assertCopyChangesOnly($original, fn (PollingMetadata $metadata) => $metadata->withPolledChannelName('payments_channel'), ['polledChannelName' => 'payments_channel'], $observe);

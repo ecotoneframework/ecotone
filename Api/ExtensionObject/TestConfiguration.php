@@ -23,12 +23,13 @@ final class TestConfiguration
         public readonly bool $inMemoryConsumerPositionTracker,
         public readonly bool $databaseTablesSetUpOnBootstrap,
         public readonly ?DateTimeImmutable $timeAt,
+        public readonly bool $defaultInstantRetries,
     ) {
     }
 
     public static function createWithDefaults(): self
     {
-        return new self(true, null, '', [], true, true, null);
+        return new self(true, null, '', [], true, true, null, true);
     }
 
     public function withTimeAt(DateTimeImmutable $time): self
@@ -66,5 +67,10 @@ final class TestConfiguration
     public function withDatabaseTablesSetUpOnBootstrap(bool $enabled): self
     {
         return new self(...[...get_object_vars($this), 'databaseTablesSetUpOnBootstrap' => $enabled]);
+    }
+
+    public function withDefaultInstantRetries(bool $enabled): self
+    {
+        return new self(...[...get_object_vars($this), 'defaultInstantRetries' => $enabled]);
     }
 }

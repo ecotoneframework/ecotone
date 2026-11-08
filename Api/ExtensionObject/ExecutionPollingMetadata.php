@@ -39,7 +39,8 @@ final class ExecutionPollingMetadata
             ->withFinishWhenNoMessages(true)
             ->withStopOnError($stopOnError)
             ->withExecutionTimeLimitInMilliseconds(0)
-            ->withHandledMessageLimit(0);
+            ->withHandledMessageLimit(0)
+            ->withExecutionAmountLimit(0);
     }
 
     public function withCron(string $cron): ExecutionPollingMetadata

@@ -12,4 +12,6 @@ interface DatabaseTablesSetUp
     public function setUpEveryTable(): void;
 
     public function setUpTablesOfProvidedConnections(): void;
+
+    public function initializeProjections(): void;
 }

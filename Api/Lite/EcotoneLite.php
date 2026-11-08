@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Ecotone\Api\Lite;
 
+use DateTimeImmutable;
+use DateTimeInterface;
 use Ecotone\AnnotationFinder\FileSystem\FileSystemAnnotationFinder;
 use Ecotone\AnnotationFinder\FileSystem\RootCatalogNotFound;
 use Ecotone\Api\ExtensionObject\ModulePackageList;
@@ -87,13 +89,14 @@ final class EcotoneLite
         bool                     $addInMemoryStateStoredRepository = true,
         bool                     $addInMemoryEventSourcedRepository = true,
         ?TestConfiguration       $testConfiguration = null,
+        ?DateTimeInterface       $initialTime = null,
         ?string                  $licenceKey = null,
         array                    $namespaces = [],
         string                   $environment = BootstrapConfiguration::DEFAULT_ENVIRONMENT,
         ?string                  $cacheDirectoryPath = null,
     ): FlowTestSupport {
         $bootstrapConfiguration = self::bootstrapConfiguration($extensionObjects, $enabledModules ?? self::installedModulePackageNames(), $licenceKey, $namespaces, $environment, $cacheDirectoryPath);
-        $bootstrapConfiguration = self::prepareForFlowTesting($bootstrapConfiguration, $addInMemoryStateStoredRepository, $testConfiguration);
+        $bootstrapConfiguration = self::prepareForFlowTesting($bootstrapConfiguration, $addInMemoryStateStoredRepository, $testConfiguration, $initialTime);
 
         if ($addInMemoryEventSourcedRepository && ! $bootstrapConfiguration->isModulePackageEnabled(ModulePackageList::EVENT_SOURCING_PACKAGE) && ! $bootstrapConfiguration->hasExtensionObject(BaseEventSourcingConfiguration::class)) {
             $bootstrapConfiguration = $bootstrapConfiguration->addExtensionObject(InMemoryRepositoryBuilder::createDefaultEventSourcedRepository());
@@ -135,6 +138,7 @@ final class EcotoneLite
         foreach ($bootstrapConfiguration->extensionObjects as $extensionObject) {
             if ($extensionObject instanceof TestConfiguration && $extensionObject->databaseTablesSetUpOnBootstrap) {
                 $messagingSystem->getServiceFromContainer(DatabaseTablesSetUp::class)->setUpTablesOfProvidedConnections();
+                $messagingSystem->getServiceFromContainer(DatabaseTablesSetUp::class)->initializeProjections();
             }
         }
 
@@ -233,13 +237,32 @@ final class EcotoneLite
         );
     }
 
+    private static function withInitialTime(TestConfiguration $testConfiguration, ?DateTimeInterface $initialTime): TestConfiguration
+    {
+        if ($initialTime === null) {
+            return $testConfiguration;
+        }
+
+        if ($testConfiguration->timeAt !== null && $testConfiguration->timeAt != $initialTime) {
+            throw ConfigurationException::create(
+                'EcotoneLite::bootstrapFlowTesting() was given initialTime: ' . $initialTime->format('Y-m-d H:i:s.u P')
+                . ' and a testConfiguration: pinned by withTimeAt() to ' . $testConfiguration->timeAt->format('Y-m-d H:i:s.u P') . '. '
+                . 'A flow test starts its clock at one instant, so one of the two would be ignored. '
+                . 'Pin the time once: pass initialTime: and remove withTimeAt() from the testConfiguration:, or keep withTimeAt() and drop initialTime:.'
+            );
+        }
+
+        return $testConfiguration->withTimeAt(DateTimeImmutable::createFromInterface($initialTime));
+    }
+
     private static function prepareForFlowTesting(
         BootstrapConfiguration $bootstrapConfiguration,
         bool                   $addInMemoryStateStoredRepository,
         ?TestConfiguration     $testConfiguration,
+        ?DateTimeInterface     $initialTime,
     ): BootstrapConfiguration {
         self::refuseTestConfigurationPassedAsExtensionObject($bootstrapConfiguration);
-        $testConfiguration ??= TestConfiguration::createWithDefaults();
+        $testConfiguration = self::withInitialTime($testConfiguration ?? TestConfiguration::createWithDefaults(), $initialTime);
 
         $bootstrapConfiguration = $bootstrapConfiguration
             ->addExtensionObject($testConfiguration);

@@ -38,27 +38,26 @@ final class MessageFlowGraphBuilder
     private const ROUTING_KEY_CALLS = ['publishWithRouting', 'sendWithRouting'];
     private const DISTRIBUTED_COMMAND_CALLS = ['sendCommand', 'convertAndSendCommand'];
     private const DISTRIBUTED_EVENT_CALLS = ['publishEvent', 'convertAndPublishEvent'];
+    private const SCANNED_KINDS = [FlowNodeKind::COMMAND_HANDLER, FlowNodeKind::EVENT_HANDLER, FlowNodeKind::QUERY_HANDLER, FlowNodeKind::INTERNAL_HANDLER, FlowNodeKind::ROUTER, FlowNodeKind::SPLITTER, FlowNodeKind::TRANSFORMER, FlowNodeKind::ORCHESTRATOR, FlowNodeKind::SCHEDULED, FlowNodeKind::INTERCEPTOR];
 
     /**
      * @param array<string, array<string, string>> $collaborators handler node id => (receiver => class)
      * @param array<string, string> $namedEvents event name => event class
+     * @param array<string, list<string>> $distributedBusParameters method => parameter names
      */
     public function __construct(
         private MessageFlowGraph $declared,
         private array $collaborators,
         private array $namedEvents,
+        private array $distributedBusParameters,
         private HandlerSourceScanner $scanner,
     ) {
     }
 
     public function build(): MessageFlowGraph
     {
-        $handlers = $this->declared->nodesOfKind(FlowNodeKind::COMMAND_HANDLER, FlowNodeKind::EVENT_HANDLER, FlowNodeKind::QUERY_HANDLER, FlowNodeKind::INTERNAL_HANDLER, FlowNodeKind::ROUTER, FlowNodeKind::SPLITTER, FlowNodeKind::TRANSFORMER, FlowNodeKind::ORCHESTRATOR, FlowNodeKind::SCHEDULED, FlowNodeKind::INTERCEPTOR);
-        $targets = [];
-        foreach ($handlers as $handler) {
-            $targets[$handler->id] = [(string) $handler->attributes['class'], (string) $handler->attributes['method']];
-        }
-        $facts = $this->scanner->scan($targets);
+        $handlers = $this->declared->nodesOfKind(...self::SCANNED_KINDS);
+        $facts = $this->factsOf($handlers);
 
         $inferred = new InferredFlow($this->declared);
         foreach ($handlers as $handler) {
@@ -73,6 +72,20 @@ final class MessageFlowGraphBuilder
         $this->connectEventRoutes($inferred);
 
         return $inferred->graph();
+    }
+
+    /**
+     * @param list<FlowNode> $handlers
+     * @return array<string, MethodSourceFacts>
+     */
+    private function factsOf(array $handlers): array
+    {
+        $targets = [];
+        foreach ($handlers as $handler) {
+            $targets[$handler->id] = [(string) $handler->attributes['class'], (string) $handler->attributes['method']];
+        }
+
+        return $this->scanner->scan($targets);
     }
 
     private function connectEventRoutes(InferredFlow $flow): void
@@ -182,17 +195,49 @@ final class MessageFlowGraphBuilder
             if (! $flow->hasNode($busId)) {
                 $flow->addNode(new FlowNode($busId, FlowNodeKind::DISTRIBUTED_BUS, MessageFlowDiscovery::distributedBusLabel($receiverType), ['reference' => $receiverType]));
             }
-            $arguments = $call['literalArguments'];
-            if (in_array($call['method'], self::DISTRIBUTED_COMMAND_CALLS, true) && isset($arguments[1])) {
-                $this->addDistributedMessage($flow, $handler->id, $busId, $arguments[1], FlowNodeKind::COMMAND, $call['method'], ['targetService' => $arguments[0]]);
-            } elseif (in_array($call['method'], self::DISTRIBUTED_EVENT_CALLS, true) && isset($arguments[0])) {
-                $this->addDistributedMessage($flow, $handler->id, $busId, $arguments[0], FlowNodeKind::EVENT, $call['method'], []);
-            } elseif ($call['method'] === 'sendMessage' && isset($arguments[1])) {
-                $flow->addEdge(new FlowEdge($handler->id, $busId, FlowEdgeKind::SENDS_TO, ['inferred' => true, 'via' => 'sendMessage', 'targetService' => $arguments[0], 'targetChannel' => $arguments[1]]));
+            $targetService = $this->distributedArgument($call, 'targetServiceName');
+            $routingKey = $this->distributedArgument($call, 'routingKey');
+            if (in_array($call['method'], self::DISTRIBUTED_COMMAND_CALLS, true) && $targetService !== null && $routingKey !== null) {
+                $this->addDistributedMessage($flow, $handler->id, $busId, $routingKey, FlowNodeKind::COMMAND, $call['method'], ['targetService' => $targetService]);
+            } elseif (in_array($call['method'], self::DISTRIBUTED_EVENT_CALLS, true) && $routingKey !== null) {
+                $this->addDistributedMessage($flow, $handler->id, $busId, $routingKey, FlowNodeKind::EVENT, $call['method'], []);
+            } elseif ($call['method'] === 'sendMessage' && $targetService !== null && $routingKey !== null) {
+                $replyChannel = $this->distributedArgument($call, 'replyRoutingKey');
+                $sentWithoutReply = ($this->distributedArgumentOf($call, 'replyRoutingKey')['kind'] ?? 'null') === 'null';
+                $flow->addEdge(new FlowEdge($handler->id, $busId, FlowEdgeKind::SENDS_TO, ['inferred' => true, 'via' => 'sendMessage', 'targetService' => $targetService, 'targetChannel' => $routingKey] + match (true) {
+                    $replyChannel !== null => ['replyChannel' => $replyChannel],
+                    $sentWithoutReply => ['withoutReply' => true],
+                    default => [],
+                }));
             } elseif (in_array($call['method'], [...self::DISTRIBUTED_COMMAND_CALLS, ...self::DISTRIBUTED_EVENT_CALLS, 'sendMessage'], true)) {
-                $flow->addEdge(new FlowEdge($handler->id, $busId, FlowEdgeKind::SENDS_TO, ['inferred' => true, 'via' => $call['method']]));
+                $flow->addEdge(new FlowEdge($handler->id, $busId, FlowEdgeKind::SENDS_TO, ['inferred' => true, 'via' => $call['method']] + ($targetService === null || in_array($call['method'], self::DISTRIBUTED_EVENT_CALLS, true) ? [] : ['targetService' => $targetService, 'targetChannel' => null])));
             }
         }
+    }
+
+    /**
+     * @param array{method: string, arguments: array<int|string, array{kind: string, value: string}>, unresolvedFrom: int|null} $call
+     */
+    private function distributedArgument(array $call, string $parameter): ?string
+    {
+        $argument = $this->distributedArgumentOf($call, $parameter);
+
+        return ($argument['kind'] ?? null) === 'literal' ? $argument['value'] : null;
+    }
+
+    /**
+     * @param array{method: string, arguments: array<int|string, array{kind: string, value: string}>, unresolvedFrom: int|null} $call
+     * @return array{kind: string, value: string}|null
+     */
+    private function distributedArgumentOf(array $call, string $parameter): ?array
+    {
+        $position = array_search($parameter, $this->distributedBusParameters[$call['method']] ?? [], true);
+        $argument = $call['arguments'][$parameter] ?? ($position === false ? null : ($call['arguments'][$position] ?? null));
+        if ($argument === null && $position !== false && $call['unresolvedFrom'] !== null && $position >= $call['unresolvedFrom']) {
+            return ['kind' => 'unresolved', 'value' => ''];
+        }
+
+        return $argument;
     }
 
     /**

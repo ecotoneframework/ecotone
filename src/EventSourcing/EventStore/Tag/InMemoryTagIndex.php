@@ -78,7 +78,7 @@ final class InMemoryTagIndex
                 }
 
                 $event = $eventStore->eventAt($reference['stream'], $reference['eventNo']);
-                if ($event !== null && $branch->matchesEventType($event->eventName)) {
+                if ($event !== null && $tagResolver->matchesEventTypeOf($branch, $event)) {
                     $matched->consider($reference['stream'], $reference['eventNo'], $sequence, $event, $sequencesByTagKey);
                 }
             }

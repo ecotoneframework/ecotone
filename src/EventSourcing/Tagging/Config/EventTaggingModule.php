@@ -16,6 +16,7 @@ use Ecotone\Api\Attribute\WithoutDatabaseTransaction;
 use Ecotone\Api\EventSourcing\EventStore;
 use Ecotone\Api\ExtensionObject\ModulePackageList;
 use Ecotone\EventSourcing\EventStore\GuardedTagBump;
+use Ecotone\EventSourcing\Mapping\EventMapper;
 use Ecotone\EventSourcing\Tagging\AggregateCounterTagGuard;
 use Ecotone\EventSourcing\Tagging\AggregateCounterTags;
 use Ecotone\EventSourcing\Tagging\EventStoreAggregateCounter;
@@ -112,7 +113,7 @@ final class EventTaggingModule extends NoExternalConfigurationModule implements 
         );
         $messagingConfiguration->registerServiceDefinition(
             TagResolver::class,
-            new Definition(TagResolver::class, [Reference::to(EventTagRegistry::class), Reference::to(AggregateCounterTags::class)]),
+            new Definition(TagResolver::class, [Reference::to(EventTagRegistry::class), Reference::to(AggregateCounterTags::class), Reference::to(EventMapper::class)]),
         );
         $messagingConfiguration->registerServiceDefinition(
             OpenCoreAggregateCounter::class,

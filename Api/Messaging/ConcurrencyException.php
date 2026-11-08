@@ -19,8 +19,9 @@ class ConcurrencyException extends MessagingException
             'Aggregate %s %s was loaded at version %d, but %s: another transaction saved it after it was loaded, '
             . 'or an earlier save in the same transaction did (for example a command sent from inside the handler whose own handler saves the same aggregate). '
             . 'Load it again and retry the command against its current version: send the command again, '
-            . 'let Ecotone retry it with InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 3, [ConcurrencyException::class]), '
-            . 'or rely on an asynchronous endpoint\'s default retries. A save made earlier in the same transaction fails on every retry, so decide both in one handler instead.',
+            . 'or let Ecotone retry it: the command bus and asynchronous endpoints retry by default when DbalConfiguration runs them in a database transaction, '
+            . 'and without one InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 3, [ConcurrencyException::class]) enables it. '
+            . 'A save made earlier in the same transaction fails on every retry, so decide both in one handler instead.',
             $aggregateType,
             $aggregateId,
             $expectedVersion,
@@ -48,7 +49,8 @@ class ConcurrencyException extends MessagingException
             'Aggregate %s %s already has version %s recorded in stream %s, so nothing from this append was recorded: '
             . 'an aggregate type, id and version are recorded once per stream. '
             . 'Another save of the same aggregate recorded that version first. Load the aggregate again and retry the command against its current version: '
-            . 'send the command again, or let Ecotone retry it with InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 3, [ConcurrencyException::class]). '
+            . 'send the command again, or let Ecotone retry it: the command bus retries by default when DbalConfiguration runs it in a database transaction, '
+            . 'and without one InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 3, [ConcurrencyException::class]) enables it. '
             . 'When appending through EventStore::appendTo() directly, give each event of the aggregate the next free MessageHeaders::EVENT_AGGREGATE_VERSION.',
             $aggregateType,
             $aggregateId,
@@ -77,6 +79,20 @@ class ConcurrencyException extends MessagingException
             $messageId,
             $consumerEndpointId,
             $routingSlip,
+        ), self::errorCode());
+    }
+
+    public static function forStaleProjection(string $projectionName, ?string $partitionKey, int $loadedVersion): self
+    {
+        return new self(sprintf(
+            "Projection '%s' (partition: %s) was loaded at version %d, but another run of the same partition saved it first. "
+            . 'Nothing this run projected was saved: its transaction is rolled back, and the events are projected from the position the other run stored when it runs again. '
+            . 'For a synchronous projection that run is the command, for an asynchronous one the message: the command bus and asynchronous endpoints retry by default when DbalConfiguration runs them in a database transaction, '
+            . 'and an asynchronous projection is always retried. Without one, enable InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 3, [ConcurrencyException::class]), '
+            . 'or send the command again.',
+            $projectionName,
+            $partitionKey ?? 'global',
+            $loadedVersion,
         ), self::errorCode());
     }
 

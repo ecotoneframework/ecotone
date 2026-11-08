@@ -195,12 +195,7 @@ final class PollingMetadata implements DefinedObject
 
     public function withFinishWhenNoMessages(bool $finishWhenNoMessages): PollingMetadata
     {
-        return $this->copyWith([
-            'finishWhenNoMessages' => $finishWhenNoMessages,
-            'handledMessageLimit' => 0,
-            'executionAmountLimit' => 0,
-            'executionTimeLimitInMilliseconds' => 0,
-        ]);
+        return $this->copyWith(['finishWhenNoMessages' => $finishWhenNoMessages]);
     }
 
     public function getErrorChannelName(): string

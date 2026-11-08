@@ -122,7 +122,7 @@ class InterceptedConsumer implements ConsumerLifecycle
             $interceptors[] = new TimeLimitInterceptor($clock, $pollingMetadata->executionTimeLimitInMilliseconds);
         }
         if ($pollingMetadata->finishWhenNoMessages) {
-            $interceptors[] = new FinishWhenNoMessagesInterceptor($clock);
+            $interceptors[] = new FinishWhenNoMessagesInterceptor();
         }
         $interceptors[] = new ConnectionExceptionRetryInterceptor($clock, $logger, $pollingMetadata->connectionRetryTemplate, $pollingMetadata->stopOnError);
 

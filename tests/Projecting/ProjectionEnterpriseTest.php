@@ -335,7 +335,7 @@ final class ProjectionEnterpriseTest extends TestCase
                 return true;
             }
 
-            public function loadPartition(string $projectionName, ?string $partitionKey = null, bool $lock = true): ?ProjectionPartitionState
+            public function loadPartition(string $projectionName, ?string $partitionKey = null): ?ProjectionPartitionState
             {
                 return null;
             }

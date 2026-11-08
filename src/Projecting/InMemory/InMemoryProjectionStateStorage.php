@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Projecting\InMemory;
 
+use Ecotone\Api\Messaging\ConcurrencyException;
 use Ecotone\Projecting\NoOpTransaction;
 use Ecotone\Projecting\ProjectionInitializationStatus;
 use Ecotone\Projecting\ProjectionPartitionState;
@@ -35,7 +36,7 @@ class InMemoryProjectionStateStorage implements ProjectionStateStorage
         return $this->projectionNames === null || in_array($projectionName, $this->projectionNames, true);
     }
 
-    public function loadPartition(string $projectionName, ?string $partitionKey = null, bool $lock = true): ?ProjectionPartitionState
+    public function loadPartition(string $projectionName, ?string $partitionKey = null): ?ProjectionPartitionState
     {
         $key = $this->getKey($projectionName, $partitionKey);
         return $this->projectionStates[$key] ?? null;
@@ -56,7 +57,18 @@ class InMemoryProjectionStateStorage implements ProjectionStateStorage
     public function savePartition(ProjectionPartitionState $projectionState): void
     {
         $key = $this->getKey($projectionState->projectionName, $projectionState->partitionKey);
-        $this->projectionStates[$key] = $projectionState;
+        if (($this->projectionStates[$key] ?? null)?->version !== $projectionState->version) {
+            throw ConcurrencyException::forStaleProjection($projectionState->projectionName, $projectionState->partitionKey, $projectionState->version);
+        }
+
+        $this->projectionStates[$key] = new ProjectionPartitionState(
+            $projectionState->projectionName,
+            $projectionState->partitionKey,
+            $projectionState->lastPosition,
+            $projectionState->userState,
+            $projectionState->status,
+            $projectionState->version + 1,
+        );
     }
 
     private function getKey(string $projectionName, ?string $partitionKey): string

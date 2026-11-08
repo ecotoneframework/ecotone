@@ -418,10 +418,10 @@ class ProjectingTest extends TestCase
             Event::createWithType($projection::TICKET_CREATED, [], [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']),
         ]);
 
-        // Trigger event - should skip processing since not initialized
+        // Trigger event - should skip processing since the initialized projection has not been kicked off
         $ecotone->publishEventWithRouting($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-1']);
 
-        self::assertEquals(0, $projection->initCallCount, 'Init should not be called in skip mode');
+        self::assertEquals(1, $projection->initCallCount, 'Init should only be called by the initialization, never by an event');
         self::assertCount(0, $projection->projectedEvents, 'No events should be processed in skip mode');
     }
 
@@ -464,7 +464,7 @@ class ProjectingTest extends TestCase
         $ecotone->publishEventWithRouting($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-2']);
         $ecotone->publishEventWithRouting($projection::TICKET_CREATED, [MessageHeaders::EVENT_AGGREGATE_ID => 'ticket-3']);
 
-        self::assertEquals(0, $projection->initCallCount, 'Init should not be called in skip mode');
+        self::assertEquals(1, $projection->initCallCount, 'Init should only be called by the initialization, never by an event');
         self::assertCount(0, $projection->projectedEvents, 'No events should be processed in skip mode');
     }
 
@@ -1013,7 +1013,7 @@ class ProjectingTest extends TestCase
                 return $projectionName === 'userland_storage_projection';
             }
 
-            public function loadPartition(string $projectionName, ?string $partitionKey = null, bool $lock = true): ?ProjectionPartitionState
+            public function loadPartition(string $projectionName, ?string $partitionKey = null): ?ProjectionPartitionState
             {
                 $this->wasUsed = true;
                 $key = $projectionName . ($partitionKey ? '-' . $partitionKey : '');

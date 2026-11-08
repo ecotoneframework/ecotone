@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Modelling\Unit\Config\InstantRetry;
 
+use Ecotone\Api\Attribute\Asynchronous;
+use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
 use Ecotone\Api\ExtensionObject\InstantRetryConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
+use Ecotone\Messaging\Config\ConfigurationException;
 use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -267,5 +270,77 @@ final class InstantRetryModuleTest extends TestCase
             ],
             $ecotoneLite->sendQueryWithRouting('interceptor.getCalls')
         );
+    }
+
+    public function test_without_a_database_transaction_neither_the_command_bus_nor_an_asynchronous_endpoint_is_retried_by_default()
+    {
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [RetriedCommandHandler::class],
+            [
+                new RetriedCommandHandler(),
+            ],
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+            ],
+            enabledModules: [],
+        );
+
+        try {
+            $ecotoneLite->sendCommandWithRouting('retried.synchronous', 2);
+            $this->fail('RuntimeException was not thrown');
+        } catch (RuntimeException) {
+        }
+        $this->assertEquals(1, $ecotoneLite->sendQueryWithRouting('retried.getCallCount'));
+
+        $ecotoneLite
+            ->sendCommandWithRouting('retried.asynchronous', 3)
+            ->run('async', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 1, stopOnError: false));
+        $this->assertEquals(2, $ecotoneLite->sendQueryWithRouting('retried.getCallCount'));
+    }
+
+    public function test_a_configuration_exception_is_never_retried_on_the_command_bus_nor_on_an_asynchronous_endpoint()
+    {
+        $handler = new class () {
+            public int $attempts = 0;
+
+            #[CommandHandler('misconfigured')]
+            public function misconfigured(): void
+            {
+                $this->attempts++;
+                throw ConfigurationException::create('misconfigured');
+            }
+
+            #[Asynchronous('async')]
+            #[CommandHandler('misconfigured.async', endpointId: 'misconfigured.async.endpoint')]
+            public function misconfiguredAsynchronous(): void
+            {
+                $this->attempts++;
+                throw ConfigurationException::create('misconfigured');
+            }
+        };
+        $ecotoneLite = EcotoneLite::bootstrapFlowTesting(
+            [$handler::class],
+            [$handler],
+            extensionObjects: [
+                SimpleMessageChannelBuilder::createQueueChannel('async'),
+                InstantRetryConfiguration::createWithDefaults()->withCommandBusRetry(true, 3)->withAsynchronousEndpointsRetry(true, 3),
+            ],
+            enabledModules: [],
+        );
+
+        try {
+            $ecotoneLite->sendCommandWithRouting('misconfigured');
+            $this->fail('ConfigurationException was not thrown');
+        } catch (ConfigurationException) {
+        }
+        $this->assertSame(1, $handler->attempts);
+
+        $ecotoneLite->sendCommandWithRouting('misconfigured.async');
+        try {
+            $ecotoneLite->run('async', ExecutionPollingMetadata::createWithTestingSetup(handledMessageLimit: 1));
+            $this->fail('ConfigurationException was not thrown');
+        } catch (ConfigurationException) {
+        }
+        $this->assertSame(2, $handler->attempts);
     }
 }

@@ -53,8 +53,10 @@ final class StreamFilterRegistryModule implements AnnotationModule
      */
     public static function collectStreamFilters(AnnotationFinder $annotationFinder, ?InterfaceToCallRegistry $interfaceToCallRegistry = null): array
     {
+        $namedEvents = self::namedEventsOf($annotationFinder);
+        $eventClassesByName = array_flip($namedEvents);
         $projectionEventNames = $interfaceToCallRegistry !== null
-            ? self::collectProjectionEventNames($annotationFinder, $interfaceToCallRegistry)
+            ? self::collectProjectionEventNames($annotationFinder, $interfaceToCallRegistry, $namedEvents)
             : [];
 
         $streamFilters = [];
@@ -79,7 +81,7 @@ final class StreamFilterRegistryModule implements AnnotationModule
             }
 
             foreach ($annotationFinder->getAnnotationsForClass($classname, FromTaggedStream::class) as $taggedStreamAttribute) {
-                $streamFilters[$projectionName][] = new StreamFilter('', null, $taggedStreamAttribute->eventStoreReferenceName, $eventNames, $taggedStreamAttribute->tag);
+                $streamFilters[$projectionName][] = new StreamFilter('', null, $taggedStreamAttribute->eventStoreReferenceName, array_map(static fn (string $eventName): string => $eventClassesByName[$eventName] ?? $eventName, $eventNames), $taggedStreamAttribute->tag);
             }
 
             $isStreamingProjection = $annotationFinder->findAttributeForClass($classname, Streaming::class) !== null;
@@ -94,18 +96,27 @@ final class StreamFilterRegistryModule implements AnnotationModule
     }
 
     /**
+     * @return array<class-string, string>
+     */
+    private static function namedEventsOf(AnnotationFinder $annotationFinder): array
+    {
+        $namedEvents = [];
+        foreach ($annotationFinder->findAnnotatedClasses(NamedEvent::class) as $className) {
+            $namedEvents[$className] = $annotationFinder->getAttributeForClass($className, NamedEvent::class)->getName();
+        }
+
+        return $namedEvents;
+    }
+
+    /**
+     * @param array<class-string, string> $namedEvents
      * @return array<string, array<string>> Map of projection name to event names (empty array means no filtering)
      */
     public static function collectProjectionEventNames(
         AnnotationFinder $annotationFinder,
         InterfaceToCallRegistry $interfaceToCallRegistry,
+        array $namedEvents,
     ): array {
-        $namedEvents = [];
-        foreach ($annotationFinder->findAnnotatedClasses(NamedEvent::class) as $className) {
-            $attribute = $annotationFinder->getAttributeForClass($className, NamedEvent::class);
-            $namedEvents[$className] = $attribute->getName();
-        }
-
         $projectionEventNames = [];
         $disabledFiltering = [];
         $routingMapBuilder = new BusRoutingMapBuilder();

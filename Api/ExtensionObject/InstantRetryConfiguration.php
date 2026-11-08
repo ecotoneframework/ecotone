@@ -11,13 +11,13 @@ namespace Ecotone\Api\ExtensionObject;
  */
 final class InstantRetryConfiguration
 {
-    private function __construct(public readonly bool $isEnabledForCommandBus, public readonly int $commandBusRetryTimes, public readonly array $commandBuExceptions, public readonly bool $isEnabledForAsynchronousEndpoints, public readonly int $asynchronousRetryTimes, public readonly array $asynchronousExceptions)
+    private function __construct(public readonly ?bool $isEnabledForCommandBus, public readonly int $commandBusRetryTimes, public readonly array $commandBuExceptions, public readonly ?bool $isEnabledForAsynchronousEndpoints, public readonly int $asynchronousRetryTimes, public readonly array $asynchronousExceptions)
     {
     }
 
     public static function createWithDefaults(): self
     {
-        return new self(false, 3, [], true, 3, []);
+        return new self(null, 3, [], null, 3, []);
     }
 
     public function withCommandBusRetry(bool $isEnabled, int $retryTimes = 3, array $retryExceptions = []): self

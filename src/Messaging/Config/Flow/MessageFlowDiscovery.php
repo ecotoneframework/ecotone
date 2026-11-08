@@ -56,6 +56,9 @@ use Ecotone\Api\Messaging\Flow\FlowEdgeKind;
 use Ecotone\Api\Messaging\Flow\FlowNode;
 use Ecotone\Api\Messaging\Flow\FlowNodeKind;
 use Ecotone\Api\Messaging\Flow\MessageFlowGraph;
+use Ecotone\Api\Projecting\FromAggregateStream;
+use Ecotone\Api\Projecting\FromStream;
+use Ecotone\Api\Projecting\FromTaggedStream;
 use Ecotone\Api\Projecting\Projection;
 use Ecotone\Api\Projecting\ProjectionBackfill;
 use Ecotone\Api\Projecting\ProjectionRebuild;
@@ -207,7 +210,7 @@ final class MessageFlowDiscovery
             /** @var Projection $projection */
             $projection = $this->annotationFinder->getAttributeForClass($projectionClass, Projection::class);
             $id = 'projection:' . $projection->getName();
-            $this->nodes[$id] = new FlowNode($id, FlowNodeKind::PROJECTION, $projection->getName(), ['class' => $projectionClass]);
+            $this->nodes[$id] = new FlowNode($id, FlowNodeKind::PROJECTION, $projection->getName(), ['class' => $projectionClass] + $this->projectionSourcesOf($projectionClass));
             $polling = $this->annotationFinder->findAttributeForClass($projectionClass, Polling::class);
             if ($polling instanceof Polling) {
                 $this->nodes[$id] = $this->nodes[$id]->withAttributes(['endpointId' => $polling->endpointId]);
@@ -228,6 +231,20 @@ final class MessageFlowDiscovery
         }
     }
 
+    /**
+     * @return array{fromStreams?: list<string>, fromAggregateStreams?: list<string>, fromTags?: list<string>}
+     */
+    private function projectionSourcesOf(string $projectionClass): array
+    {
+        $sources = [
+            'fromStreams' => array_map(fn (FromStream $source) => $source->stream, $this->annotationFinder->getAnnotationsForClass($projectionClass, FromStream::class)),
+            'fromAggregateStreams' => array_map(fn (FromAggregateStream $source) => $source->aggregateClass, $this->annotationFinder->getAnnotationsForClass($projectionClass, FromAggregateStream::class)),
+            'fromTags' => array_map(fn (FromTaggedStream $source) => $source->tag, $this->annotationFinder->getAnnotationsForClass($projectionClass, FromTaggedStream::class)),
+        ];
+
+        return array_filter(array_map(array_values(...), $sources), fn (array $names) => $names !== []);
+    }
+
     private function discoverBusHandlers(string $attribute, FlowNodeKind $handlerKind, FlowNodeKind $messageKind): void
     {
         $routing = new BusRoutingMapBuilder();
@@ -242,11 +259,12 @@ final class MessageFlowDiscovery
                 $message = $this->messageNode($routingKey, $messageKind, handled: true);
                 $this->edges[] = new FlowEdge($message->id, $handlerId, FlowEdgeKind::ROUTED_TO);
                 if ($distributed) {
-                    /** @var Distributed $distributedAttribute */
-                    $distributedAttribute = $registration->getAnnotationsByImportanceOrder(Distributed::class)[0];
                     $this->nodes[$message->id] = $message->withAttributes(['distributed' => true]);
-                    $this->edges[] = new FlowEdge($this->distributedBusNode($distributedAttribute->distributionReference)->id, $message->id, FlowEdgeKind::DISTRIBUTES);
+                    $this->edges[] = new FlowEdge($this->distributedBusOf($registration)->id, $message->id, FlowEdgeKind::DISTRIBUTES);
                 }
+            }
+            if ($distributed && $handlerKind === FlowNodeKind::COMMAND_HANDLER && $this->replies($registration)) {
+                $this->edges[] = new FlowEdge($handlerId, $this->distributedBusOf($registration)->id, FlowEdgeKind::SENDS_TO, ['via' => 'replyRoutingKey']);
             }
             $this->registerOutput($handlerId, $annotation->getOutputChannelName());
             if ($handlerKind !== FlowNodeKind::QUERY_HANDLER) {
@@ -270,15 +288,32 @@ final class MessageFlowDiscovery
         }
     }
 
-    private function registerDistributedChannelHandler(string $handlerId, string $inputChannelName, AnnotatedFinding $registration): void
+    private function distributedBusOf(AnnotatedFinding $registration): FlowNode
     {
         /** @var Distributed $distributedAttribute */
         $distributedAttribute = $registration->getAnnotationsByImportanceOrder(Distributed::class)[0];
-        $busId = $this->distributedBusNode($distributedAttribute->distributionReference)->id;
+
+        return $this->distributedBusNode($distributedAttribute->distributionReference);
+    }
+
+    private function registerDistributedChannelHandler(string $handlerId, string $inputChannelName, AnnotatedFinding $registration): void
+    {
+        $busId = $this->distributedBusOf($registration)->id;
         $this->edges[] = new FlowEdge($busId, $this->channelNode($inputChannelName)->id, FlowEdgeKind::DISTRIBUTES);
-        if ($this->interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName())->canReturnValue()) {
+        if ($this->replies($registration)) {
             $this->edges[] = new FlowEdge($handlerId, $busId, FlowEdgeKind::SENDS_TO, ['via' => 'replyRoutingKey']);
         }
+    }
+
+    private function replies(AnnotatedFinding $registration): bool
+    {
+        $handler = $this->interfaceToCallRegistry->getFor($registration->getClassName(), $registration->getMethodName());
+        if ($registration->hasClassAnnotation(Aggregate::class) && $handler->isFactoryMethod()) {
+            return true;
+        }
+        $returnType = $handler->getReturnType();
+
+        return $returnType !== null && ! $returnType->isVoid() && ! $returnType->isAnything() && ! $returnType->equals(Type::object($registration->getClassName()));
     }
 
     private function discoverRouters(): void
@@ -455,6 +490,10 @@ final class MessageFlowDiscovery
         ], $attributes));
         $this->collaborators[$id] = $this->collaboratorsOf($registration);
         $this->handlerRegistrations[$id] = $registration;
+        $owner = $this->ownerByClass[$registration->getClassName()] ?? null;
+        if ($kind === FlowNodeKind::EVENT_HANDLER && $owner !== null && $this->nodes[$owner]->kind === FlowNodeKind::PROJECTION) {
+            $this->edges[] = new FlowEdge($id, $owner, FlowEdgeKind::PROJECTS_INTO);
+        }
 
         return $id;
     }

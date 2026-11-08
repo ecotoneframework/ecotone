@@ -35,6 +35,7 @@ class InterceptedConsumerRunner implements EndpointRunner
         private AsyncHandlerAnnotationRegistry $asyncHandlerAnnotationRegistry,
         private AsyncEndpointAnnotationContext $asyncEndpointAnnotationContext,
         private MessageBuilder $messageBuilder,
+        private bool $drainsAQueue,
     ) {
     }
 
@@ -56,7 +57,7 @@ class InterceptedConsumerRunner implements EndpointRunner
             SyncTaskScheduler::createWithEmptyTriggerContext($this->clock, $pollingMetadata),
             $trigger,
             new PollToGatewayTaskExecutor(
-                messagePoller: $this->messagePoller,
+                messagePoller: new InterceptedMessagePoller($this->messagePoller, $interceptors, $this->drainsAQueue),
                 gateway: $interceptedGateway,
                 messagingEntrypoint: $this->messagingEntrypoint,
                 asyncHandlerAnnotationRegistry: $this->asyncHandlerAnnotationRegistry,

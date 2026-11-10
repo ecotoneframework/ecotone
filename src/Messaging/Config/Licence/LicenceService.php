@@ -56,7 +56,7 @@ final class LicenceService
 
         /** @var array{email: string, expireAt: string, isEnterprisePlus: bool} $data */
         $data = $licence['data'];
-        $licenceExpirationTime = new DateTimeImmutable($data['expireAt'], new DateTimeZone('UTC'));
+        $licenceExpirationTime = $this->expiresAt($licenceKey);
 
         if ($data['isEnterprisePlus']) {
             $mainComposer = json_decode(file_get_contents(__DIR__.'/../../../../composer.json'), true, JSON_THROW_ON_ERROR);
@@ -73,5 +73,12 @@ final class LicenceService
         if ($licenceExpirationTime < $currentTime) {
             throw LicensingException::create(sprintf('Licence has expired at %s UTC. Please renew the licence or contact us at: "support@simplycodedsoftware.com"', $licenceExpirationTime->format('Y-m-d H:i:s')));
         }
+    }
+
+    public function expiresAt(string $licenceKey): DateTimeImmutable
+    {
+        $licence = \json_decode(base64_decode($licenceKey), true, JSON_THROW_ON_ERROR);
+
+        return new DateTimeImmutable($licence['data']['expireAt'], new DateTimeZone('UTC'));
     }
 }

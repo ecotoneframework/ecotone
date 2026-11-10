@@ -2,6 +2,7 @@
 
 namespace Ecotone\Modelling\MessageHandling\Distribution\Module;
 
+use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\Attribute\Distributed;
@@ -39,9 +40,13 @@ use Ecotone\Modelling\MessageHandling\Distribution\DistributionEntrypoint;
  */
 final class DistributedHandlerModule implements AnnotationModule
 {
+    /**
+     * @param AnnotatedFinding[] $distributedRegistrations
+     */
     public function __construct(
         private BusRoutingMapBuilder $commandBusDistributedRoutes,
         private BusRoutingMapBuilder $eventBusDistributedRoutes,
+        private array $distributedRegistrations,
     ) {
     }
 
@@ -60,7 +65,7 @@ final class DistributedHandlerModule implements AnnotationModule
                 $eventBusDistributedRoutes->addRoutesFromAnnotatedFinding($registration, $interfaceToCallRegistry);
             }
         }
-        return new self($commandBusDistributedRoutes, $eventBusDistributedRoutes);
+        return new self(commandBusDistributedRoutes: $commandBusDistributedRoutes, eventBusDistributedRoutes: $eventBusDistributedRoutes, distributedRegistrations: DistributedBusPulseFeatures::distributedHandlersOf($annotationFinder));
     }
 
     /**
@@ -73,7 +78,7 @@ final class DistributedHandlerModule implements AnnotationModule
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
     {
-        return [$this];
+        return [$this, ...DistributedBusPulseFeatures::reportedFor($serviceExtensions, $this->distributedRegistrations)];
     }
 
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void

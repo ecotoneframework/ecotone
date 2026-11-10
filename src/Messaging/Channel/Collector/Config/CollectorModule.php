@@ -10,6 +10,7 @@ use Ecotone\Api\Attribute\ModuleAnnotation;
 use Ecotone\Api\ExtensionObject\DynamicMessageChannelBuilder;
 use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
 use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\CommandBus;
 use Ecotone\Api\Interceptor\Precedence;
 use Ecotone\Messaging\Channel\Collector\CollectorSenderInterceptor;
@@ -100,6 +101,11 @@ final class CollectorModule extends NoExternalConfigurationModule implements Ann
     public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
         return new self();
+    }
+
+    public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
+    {
+        return ChannelPulseFeatures::reportedFor($serviceExtensions);
     }
 
     public function getModulePackageName(): string

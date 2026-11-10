@@ -28,7 +28,7 @@ use Symfony\Component\Uid\Uuid;
  */
 final class InstantRetryModule implements AnnotationModule
 {
-    private function __construct(private CommandsWithoutDatabaseTransaction $commandsWithoutDatabaseTransaction)
+    private function __construct(private CommandsWithoutDatabaseTransaction $commandsWithoutDatabaseTransaction, private InstantRetryPulseAnnotations $pulseAnnotations)
     {
     }
 
@@ -37,7 +37,10 @@ final class InstantRetryModule implements AnnotationModule
      */
     public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
-        return new self(CommandsWithoutDatabaseTransaction::find($annotationRegistrationService, $interfaceToCallRegistry));
+        return new self(
+            commandsWithoutDatabaseTransaction: CommandsWithoutDatabaseTransaction::find($annotationRegistrationService, $interfaceToCallRegistry),
+            pulseAnnotations: InstantRetryPulseAnnotations::of($annotationRegistrationService),
+        );
     }
 
     /**
@@ -82,7 +85,7 @@ final class InstantRetryModule implements AnnotationModule
      */
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
     {
-        return [];
+        return InstantRetryPulseFeatures::reportedFor($serviceExtensions, $this->pulseAnnotations);
     }
 
     public function getModulePackageName(): string

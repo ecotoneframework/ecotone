@@ -35,6 +35,7 @@ use Ecotone\Messaging\Support\Assert;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Messaging\Support\MessageBuilder;
+use Ecotone\Modelling\MessageHandling\Distribution\Pulse\PulseFeature;
 
 #[ModuleAnnotation]
 /**
@@ -63,10 +64,12 @@ final class OrchestratorModule implements AnnotationModule
     /**
      * @param MessageHandlerBuilderWithParameterConverters[] $orchestratorsServiceActivators
      * @param GatewayProxyBuilder[] $orchestratorGateways
+     * @param list<string> $orchestrators
      */
     private function __construct(
         private array $orchestratorsServiceActivators,
         private array $orchestratorGateways,
+        private array $orchestrators,
     ) {
 
     }
@@ -77,8 +80,10 @@ final class OrchestratorModule implements AnnotationModule
     public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
         $messageHandlerBuilders = [];
+        $orchestrators = [];
         foreach ($annotationRegistrationService->findAnnotatedMethods(Orchestrator::class) as $annotationRegistration) {
             $messageHandlerBuilders[] = self::createMessageHandlerFrom($annotationRegistration, $interfaceToCallRegistry);
+            $orchestrators[] = $annotationRegistration->getAnnotationForMethod()->getInputChannelName() . ' → ' . $annotationRegistration->getMethodName();
         }
         $orchestratorGateways = [];
         foreach ($annotationRegistrationService->findAnnotatedMethods(OrchestratorGateway::class) as $annotationRegistration) {
@@ -121,7 +126,7 @@ final class OrchestratorModule implements AnnotationModule
                 ->withInputChannelName(self::ORCHESTRATOR_GATEWAY_ENTRYPOINT_CHANNEL);
         }
 
-        return new self($messageHandlerBuilders, $orchestratorGateways);
+        return new self(orchestratorsServiceActivators: $messageHandlerBuilders, orchestratorGateways: $orchestratorGateways, orchestrators: $orchestrators);
     }
 
     /**
@@ -149,7 +154,21 @@ final class OrchestratorModule implements AnnotationModule
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
     {
-        return [];
+        if (! PulseFeature::isReportedFor($serviceExtensions)) {
+            return [];
+        }
+
+        return [new PulseFeature(
+            package: ModulePackageList::CORE_PACKAGE,
+            name: 'Orchestrators',
+            enabled: $this->orchestrators !== [],
+            settings: ['Orchestrators' => (string) count($this->orchestrators)],
+            handlers: $this->orchestrators,
+            hint: $this->orchestrators === []
+                ? 'No method of this service is an #[Orchestrator]. An orchestrator returns the list of steps a message goes through, so the order of a workflow is decided in one place instead of in every handler.'
+                : 'Each orchestrator listed here returns the steps its message goes through, in order, as a routing slip: a message sent to its channel visits each step channel in turn, so the workflow is changed in one place.',
+            configuration: "#[Orchestrator(inputChannelName: 'order.fulfil')] on a method returning the list of step channels, e.g. ['order.reserve', 'order.charge']",
+        )];
     }
 
     public static function createMessageHandlerFrom(AnnotatedFinding $annotationRegistration, InterfaceToCallRegistry $interfaceToCallRegistry): MessageHandlerBuilderWithParameterConverters

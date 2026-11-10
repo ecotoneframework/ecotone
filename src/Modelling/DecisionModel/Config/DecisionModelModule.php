@@ -8,6 +8,7 @@ use function array_diff;
 use function array_keys;
 use function array_map;
 
+use Ecotone\AnnotationFinder\AnnotatedFinding;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Api\Attribute\DecisionBoundary;
 use Ecotone\Api\Attribute\DecisionModel;
@@ -16,6 +17,7 @@ use Ecotone\Api\Attribute\ModuleAnnotation;
 use Ecotone\Api\Attribute\Saga;
 use Ecotone\Api\EventSourcing\EventStore;
 use Ecotone\Api\ExtensionObject\ModulePackageList;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Gateway\EcotoneClockInterface;
 use Ecotone\Api\Gateway\EventBus;
 use Ecotone\Api\Interceptor\Precedence;
@@ -53,6 +55,7 @@ use Ecotone\Modelling\DecisionModel\DecisionModelHandlers;
 use Ecotone\Modelling\DecisionModel\DecisionModelTagResolvabilityGuard;
 use Ecotone\Modelling\DecisionModel\Snapshot\DecisionModelSnapshotStore;
 use Ecotone\Modelling\EventSourcingExecutor\ApplyMethodExecutorBuilder;
+use Ecotone\Modelling\MessageHandling\Distribution\Pulse\PulseFeature;
 
 use function implode;
 use function in_array;
@@ -234,6 +237,38 @@ final class DecisionModelModule extends NoExternalConfigurationModule implements
                 $pointcut,
             )
         );
+    }
+
+    public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
+    {
+        if (! PulseFeature::isReportedFor($serviceExtensions)) {
+            return [];
+        }
+        $boundary = DynamicConsistencyBoundary::resolveFrom($serviceExtensions);
+        $handlers = [
+            ...array_map(static fn (string $decisionModel): string => 'decision model ' . PulseFeature::shortNameOf($decisionModel), $this->decisionModelClasses),
+            ...array_map(static fn (AnnotatedFinding $boundaryMethod): string => 'decision boundary ' . PulseFeature::shortNameOf($boundaryMethod->getClassName()) . '::' . $boundaryMethod->getMethodName(), $this->annotationFinder->findAnnotatedMethods(DecisionBoundary::class)),
+        ];
+        $snapshots = [];
+        foreach ($boundary->snapshottedModelClasses() as $modelClass => $snapshot) {
+            $snapshots[] = PulseFeature::shortNameOf($modelClass) . ' every ' . $snapshot['thresholdTrigger'] . ' events';
+        }
+
+        return [new PulseFeature(
+            package: ModulePackageList::CORE_PACKAGE,
+            name: 'Dynamic consistency boundary',
+            enabled: $boundary->isEnabled(),
+            settings: $boundary->isEnabled() ? [
+                'Filter-only tags' => implode(', ', $boundary->filterOnlyTagNames()) ?: 'none',
+                'Snapshotted decision models' => implode(', ', $snapshots) ?: 'none',
+                'Aggregates without a counter tag' => implode(', ', array_map(PulseFeature::shortNameOf(...), $boundary->classesWithoutCounterTag())) ?: 'none',
+            ] : [],
+            handlers: $handlers,
+            hint: $boundary->isEnabled()
+                ? 'Events are appended with the tags of their #[EventTag] properties, and an append bumps a counter per tag, except for the aggregates listed without a counter tag. A decision taken through a decision model or a #[DecisionBoundary] reads only the events carrying the tags it scopes on; when another event with one of those tags was appended before it commits, its append is refused with DecisionModelConcurrencyException, so two decisions on the same tag never both pass, and the decision is taken again on the newer events when instant retries cover the command bus or asynchronous endpoint it runs on and retry DecisionModelConcurrencyException. Tags come from the class scan: a tagged event outside the scanned namespaces is appended without tags. A filter-only tag narrows what a decision reads without a counter of its own; a snapshotted decision model folds only the events after its last snapshot.'
+                : 'The dynamic consistency boundary is off: #[EventTag] is ignored, appends write no tags, and a #[DecisionModel] or #[DecisionBoundary] is refused at bootstrap.',
+            configuration: 'DynamicConsistencyBoundaryConfiguration::createWithDefaults()',
+        )];
     }
 
     public function getModulePackageName(): string

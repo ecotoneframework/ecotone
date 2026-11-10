@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Api\Lite\Test;
 
+use Closure;
 use DateTimeImmutable;
 use Ecotone\Api\Console\InMemoryConsoleWriter;
 use Ecotone\Api\EventSourcing\Event;
@@ -221,6 +222,16 @@ final class FlowTestSupport
         $psrClock->setCurrentTime(
             DateTimeImmutable::createFromInterface($psrClock->now())->modify("+{$duration->inMicroseconds()} microseconds")
         );
+
+        return $this;
+    }
+
+    /**
+     * @param Closure(DateTimeImmutable): void $step
+     */
+    public function whenWaiting(Closure $step): self
+    {
+        $this->getStaticPsrClockFromContainer()->whenWaiting($step);
 
         return $this;
     }

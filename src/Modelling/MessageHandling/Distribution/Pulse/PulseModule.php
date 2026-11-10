@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\MessageHandling\Distribution\Pulse;
 
+use DateTimeInterface;
 use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\Attribute\ModuleAnnotation;
@@ -19,6 +20,7 @@ use Ecotone\Messaging\Channel\DepthProbedMessageChannelBuilder;
 use Ecotone\Messaging\Channel\MessageChannelBuilderOnSameConnection;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
+use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ExtensionObjectResolver;
 use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Config\Configuration;
@@ -26,6 +28,8 @@ use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Config\Licence\LicenceService;
+use Ecotone\Messaging\Config\ModuleClassList;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Endpoint\PollingConsumer\PolledMessageFailureAnswer;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
@@ -36,6 +40,10 @@ use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
 use Ecotone\Messaging\Handler\ServiceActivator\MessageProcessorActivatorBuilder;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\LicensingException;
+use Ecotone\Modelling\Config\InstantRetry\InstantRetryDefaults;
+use Ecotone\Modelling\Config\InstantRetry\InstantRetryPulseFeatures;
+use Ecotone\Projecting\Config\ProjectionExecutorBuilder;
+use Ecotone\Test\LicenceTesting;
 
 #[ModuleAnnotation]
 /**
@@ -123,6 +131,17 @@ final class PulseModule implements AnnotationModule
                 self::sectionReferences($sectionRegistrations, tenantScoped: false),
                 self::sectionReferences($sectionRegistrations, tenantScoped: true),
                 $tenancy === null ? [] : ['header' => $tenancy->tenantHeaderName, 'tenants' => $tenancy->tenants],
+                self::licenceOf((string) $bootstrapConfiguration->licenceKey),
+                self::packagesOf($bootstrapConfiguration, [
+                    self::serviceConfigurationFeature($serviceConfiguration),
+                    ...ExtensionObjectResolver::resolve(PulseFeature::class, $extensionObjects),
+                    ...array_merge(...array_map(static fn (InstantRetryPulseFeatures $instantRetries): array => $instantRetries->under(InstantRetryDefaults::from($extensionObjects), self::projectionChannels($extensionObjects)), ExtensionObjectResolver::resolve(InstantRetryPulseFeatures::class, $extensionObjects))),
+                ]),
+                [
+                    ...array_map(static fn (PulseConsumerFeature $feature): array => $feature->toArray(), ExtensionObjectResolver::resolve(PulseConsumerFeature::class, $extensionObjects)),
+                    ...array_map(static fn (PulseConsumerFeature $feature): array => $feature->toArray(), array_merge(...array_map(static fn (InstantRetryPulseFeatures $instantRetries): array => $instantRetries->consumerFeaturesUnder(InstantRetryDefaults::from($extensionObjects), self::projectionChannels($extensionObjects)), ExtensionObjectResolver::resolve(InstantRetryPulseFeatures::class, $extensionObjects)))),
+                ],
+                self::endpointsByChannel($extensionObjects),
                 new Reference(ConfiguredMessagingSystem::class),
                 new Reference(EcotoneClockInterface::class),
                 new Reference(ExtensionObjectResolver::resolve(PulseSectionIsolationRegistration::class, $extensionObjects)[0]->serviceReference ?? NoPulseSectionIsolation::class),
@@ -181,6 +200,58 @@ final class PulseModule implements AnnotationModule
         return ['channels' => array_values($channels), 'probes' => $probes];
     }
 
+    /**
+     * @param object[] $extensionObjects
+     * @return list<string>
+     */
+    private static function projectionChannels(array $extensionObjects): array
+    {
+        return array_values(array_unique(array_filter(array_map(
+            static fn (ProjectionExecutorBuilder $projection): ?string => $projection->asyncChannelName(),
+            ExtensionObjectResolver::resolve(ProjectionExecutorBuilder::class, $extensionObjects),
+        ))));
+    }
+
+    /**
+     * @param object[] $extensionObjects
+     * @return array<string, list<string>>
+     */
+    private static function endpointsByChannel(array $extensionObjects): array
+    {
+        $endpointsByChannel = [];
+        foreach (ExtensionObjectResolver::resolve(AsynchronousModule::class, $extensionObjects) as $asynchronousModule) {
+            foreach ($asynchronousModule->resolveChannels($extensionObjects) as $endpointId => $channels) {
+                $endpointsByChannel[$channels[array_key_last($channels)]][] = $endpointId;
+            }
+        }
+
+        return $endpointsByChannel;
+    }
+
+    private static function serviceConfigurationFeature(ServiceConfiguration $serviceConfiguration): PulseFeature
+    {
+        $memoryLimit = $serviceConfiguration->defaultMemoryLimitInMegabytes;
+        $connectionRetries = $serviceConfiguration->connectionRetryTemplate === null ? 'none' : PulseFeature::retryScheduleOf($serviceConfiguration->connectionRetryTemplate->build());
+
+        return new PulseFeature(
+            package: ModulePackageList::CORE_PACKAGE,
+            name: 'Service configuration',
+            enabled: true,
+            settings: [
+                'Default serialization' => (string) $serviceConfiguration->defaultSerializationMediaType,
+                'Consumer memory limit' => $memoryLimit === null || $memoryLimit === 0 ? 'none' : $memoryLimit . ' MB',
+                'Connection retries' => $connectionRetries,
+                'Headers in log context' => implode(', ', $serviceConfiguration->headersInLogContext) ?: 'none',
+            ],
+            handlers: [],
+            hint: sprintf('Messages sent to asynchronous channels and across services are serialized as %s unless a channel names its own media type.', $serviceConfiguration->defaultSerializationMediaType)
+                . ($memoryLimit === null || $memoryLimit === 0 ? ' A consumer has no memory limit.' : sprintf(' A consumer stops after the message it is handling once it uses more than %d MB, so the process manager can start a fresh one.', $memoryLimit))
+                . sprintf(' A consumer that loses its broker or database connection reconnects: %s.', $connectionRetries)
+                . ($serviceConfiguration->headersInLogContext === [] ? '' : ' Log lines carry the headers ' . implode(', ', $serviceConfiguration->headersInLogContext) . ' of the message being handled.'),
+            configuration: 'ServiceConfiguration::createWithDefaults()->withDefaultSerializationMediaType(MediaType::APPLICATION_JSON)->withConsumerMemoryLimit(512)->withHeadersInLogContext([\'tenant\'])',
+        );
+    }
+
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
     {
         $pulseConfigurations = ExtensionObjectResolver::resolve(PulseConfiguration::class, $serviceExtensions);
@@ -212,6 +283,37 @@ final class PulseModule implements AnnotationModule
     public function getModulePackageName(): string
     {
         return ModulePackageList::CORE_PACKAGE;
+    }
+
+    /**
+     * @param PulseFeature[] $features
+     * @return list<array{name: string, composerPackage: string, features: list<array<string, mixed>>}>
+     */
+    private static function packagesOf(BootstrapConfiguration $bootstrapConfiguration, array $features): array
+    {
+        return array_map(
+            static fn (string $packageName): array => [
+                'name' => $packageName,
+                'composerPackage' => ModuleClassList::composerPackageNameOf($packageName),
+                'features' => array_values(array_map(
+                    static fn (PulseFeature $feature): array => $feature->toArray(),
+                    array_filter($features, static fn (PulseFeature $feature): bool => $feature->package === $packageName),
+                )),
+            ],
+            ModuleClassList::installedPackageNames($bootstrapConfiguration->getEnabledModulePackageNames()),
+        );
+    }
+
+    /**
+     * @return array{enterprise: bool, expiresAt: string, testing: bool}
+     */
+    private static function licenceOf(string $licenceKey): array
+    {
+        return [
+            'enterprise' => true,
+            'expiresAt' => (new LicenceService())->expiresAt($licenceKey)->format(DateTimeInterface::ATOM),
+            'testing' => $licenceKey === LicenceTesting::VALID_LICENCE,
+        ];
     }
 
     /**

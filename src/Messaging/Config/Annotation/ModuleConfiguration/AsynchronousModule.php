@@ -152,11 +152,12 @@ final class AsynchronousModule implements AnnotationModule
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
     {
         $bootstrapConfiguration = ExtensionObjectResolver::resolveUnique(BootstrapConfiguration::class, $serviceExtensions, BootstrapConfiguration::createWithDefaults());
+        $pulseFeatures = AsynchronousPulseFeatures::reportedFor($serviceExtensions, $this->asyncEndpoints);
         if (! $bootstrapConfiguration->isModulePackageEnabled(ModulePackageList::TEST_PACKAGE)) {
-            return [$this];
+            return [$this, ...$pulseFeatures];
         }
 
-        return array_merge([$this], $this->inMemoryChannelsForUnconfiguredAsynchronousChannels($serviceExtensions));
+        return array_merge([$this], $this->inMemoryChannelsForUnconfiguredAsynchronousChannels($serviceExtensions), $pulseFeatures);
     }
 
     /**

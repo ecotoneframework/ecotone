@@ -130,8 +130,69 @@ final class MessageFlowSourcedTest extends TestCase
         self::assertSame(['inferred' => true, 'via' => 'recordThat'], $edges[0]->attributes);
     }
 
+    public function test_event_sourced_events_mapped_from_a_list_show_their_emitted_event(): void
+    {
+        $aggregate = new #[EventSourcingAggregate] class () {
+            use WithAggregateVersioning;
+
+            #[Identifier]
+            private string $id = 'order';
+
+            #[CommandHandler('sourced.create')]
+            public static function create(array $lines): array
+            {
+                return array_map(fn ($line) => new SourcedEvent(), $lines);
+            }
+
+            #[Apply]
+            public function apply(SourcedEvent $event): void
+            {
+                $this->id = 'order';
+            }
+        };
+        $graph = EcotoneLite::bootstrapFlowTesting([$aggregate::class], enabledModules: [], licenceKey: LicenceTesting::VALID_LICENCE)->getMessageFlowGraph();
+
+        self::assertCount(1, $edges = $graph->edgesOfKind(FlowEdgeKind::EMITS, 'handler:' . $aggregate::class . '::create', 'message:' . SourcedEvent::class));
+        self::assertSame(['inferred' => true, 'via' => 'return'], $edges[0]->attributes);
+    }
+
+    public function test_event_sourced_events_merged_into_a_list_show_their_emitted_events(): void
+    {
+        $aggregate = new #[EventSourcingAggregate] class () {
+            use WithAggregateVersioning;
+
+            #[Identifier]
+            private string $id = 'order';
+
+            #[CommandHandler('sourced.create')]
+            public static function create(array $lines): array
+            {
+                return array_merge([new SourcedEvent()], array_map(fn ($line) => new OtherSourcedEvent(), $lines));
+            }
+
+            #[Apply]
+            public function apply(SourcedEvent $event): void
+            {
+                $this->id = 'order';
+            }
+
+            #[Apply]
+            public function applyOther(OtherSourcedEvent $event): void
+            {
+                $this->id = 'order';
+            }
+        };
+        $graph = EcotoneLite::bootstrapFlowTesting([$aggregate::class], enabledModules: [], licenceKey: LicenceTesting::VALID_LICENCE)->getMessageFlowGraph();
+
+        self::assertCount(1, $graph->edgesOfKind(FlowEdgeKind::EMITS, 'handler:' . $aggregate::class . '::create', 'message:' . SourcedEvent::class));
+        self::assertCount(1, $graph->edgesOfKind(FlowEdgeKind::EMITS, 'handler:' . $aggregate::class . '::create', 'message:' . OtherSourcedEvent::class));
+    }
 }
 
 final class SourcedEvent
+{
+}
+
+final class OtherSourcedEvent
 {
 }

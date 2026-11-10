@@ -255,6 +255,46 @@ class ModuleClassList
         };
     }
 
+    public static function composerPackageNameOf(string $packageName): string
+    {
+        return match ($packageName) {
+            ModulePackageList::CORE_PACKAGE, ModulePackageList::TEST_PACKAGE => 'ecotone/ecotone',
+            ModulePackageList::AMQP_PACKAGE => 'ecotone/amqp',
+            ModulePackageList::DBAL_PACKAGE => 'ecotone/dbal',
+            ModulePackageList::REDIS_PACKAGE => 'ecotone/redis',
+            ModulePackageList::SQS_PACKAGE => 'ecotone/sqs',
+            ModulePackageList::KAFKA_PACKAGE => 'ecotone/kafka',
+            ModulePackageList::EVENT_SOURCING_PACKAGE => 'ecotone/pdo-event-sourcing',
+            ModulePackageList::JMS_CONVERTER_PACKAGE => 'ecotone/jms-converter',
+            ModulePackageList::TRACING_PACKAGE => 'ecotone/open-telemetry',
+            ModulePackageList::LARAVEL_PACKAGE => 'ecotone/laravel',
+            ModulePackageList::SYMFONY_PACKAGE => 'ecotone/symfony-bundle',
+            ModulePackageList::TEMPEST_PACKAGE => 'ecotone/tempest',
+            ModulePackageList::DATA_PROTECTION_PACKAGE => 'ecotone/data-protection',
+            default => throw ConfigurationException::create(sprintf('Given unknown package name %s. Available packages name are: %s', $packageName, implode(',', self::packageNames())))
+        };
+    }
+
+    /**
+     * @param string[] $enabledPackageNames
+     * @return string[]
+     */
+    public static function installedPackageNames(array $enabledPackageNames): array
+    {
+        return array_values(array_filter(
+            array_intersect(self::packageNames(), $enabledPackageNames),
+            static function (string $packageName): bool {
+                foreach (self::forPackage($packageName) as $moduleClassName) {
+                    if (class_exists($moduleClassName) || interface_exists($moduleClassName)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        ));
+    }
+
     /**
      * @return string[]
      */

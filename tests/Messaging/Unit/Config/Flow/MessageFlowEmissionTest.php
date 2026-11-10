@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Messaging\Unit\Config\Flow;
 
+use DomainException;
 use Ecotone\Api\Attribute\Aggregate;
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\Attribute\EventHandler;
@@ -18,6 +19,7 @@ use Ecotone\Api\Messaging\Flow\FlowNodeKind;
 use Ecotone\Api\Modelling\WithEvents;
 use Ecotone\Test\LicenceTesting;
 use PHPUnit\Framework\TestCase;
+use SensitiveParameter;
 
 /**
  * licence Apache-2.0
@@ -321,6 +323,88 @@ final class MessageFlowEmissionTest extends TestCase
         self::assertCount(1, $graph->edgesOfKind(FlowEdgeKind::EMITS, 'handler:' . $service::class . '::handle', "message:literal\path\n\e\u{1F680}"));
     }
 
+    public function test_values_built_for_a_sent_command_constructor_are_not_shown_as_commands(): void
+    {
+        $service = new class () {
+            #[CommandHandler('outbound.arguments')]
+            public function handle(CommandBus $bus): void
+            {
+                $bus->send(new EmissionCommandWithCode(EmissionCode::of('A-1'), new EmissionCode('B-2'), sprintf('pay_%s', EmissionCode::of('C-3')->value)));
+            }
+        };
+        $graph = EcotoneLite::bootstrapFlowTesting([$service::class], [$service], enabledModules: [], licenceKey: LicenceTesting::VALID_LICENCE)->getMessageFlowGraph();
+
+        self::assertCount(1, $graph->edgesOfKind(FlowEdgeKind::EMITS, 'handler:' . $service::class . '::handle', 'message:' . EmissionCommandWithCode::class));
+        self::assertFalse($graph->hasNode('message:' . EmissionCode::class));
+    }
+
+    public function test_value_returned_from_a_helper_for_a_sent_command_constructor_is_not_shown_as_command(): void
+    {
+        $service = new class () {
+            #[CommandHandler('outbound.helper.argument')]
+            public function handle(CommandBus $bus): void
+            {
+                $bus->send(new EmissionCommandWithCode($this->code(), $this->code(), 'reference'));
+            }
+
+            private function code(): EmissionCode
+            {
+                return new EmissionCode('A-1');
+            }
+        };
+        $graph = EcotoneLite::bootstrapFlowTesting([$service::class], [$service], enabledModules: [], licenceKey: LicenceTesting::VALID_LICENCE)->getMessageFlowGraph();
+
+        self::assertCount(1, $graph->edgesOfKind(FlowEdgeKind::EMITS, 'handler:' . $service::class . '::handle', 'message:' . EmissionCommandWithCode::class));
+        self::assertFalse($graph->hasNode('message:' . EmissionCode::class));
+    }
+
+    public function test_exception_thrown_from_a_sent_match_is_not_shown_as_command(): void
+    {
+        $service = new class () {
+            #[CommandHandler('outbound.match')]
+            public function handle(array $payload, CommandBus $bus): void
+            {
+                $bus->send(match ($payload['outcome']) {
+                    'sent' => new EmissionCommand(),
+                    default => throw new DomainException('Unknown outcome'),
+                });
+            }
+        };
+        $graph = EcotoneLite::bootstrapFlowTesting([$service::class], [$service], enabledModules: [], licenceKey: LicenceTesting::VALID_LICENCE)->getMessageFlowGraph();
+
+        self::assertCount(1, $graph->edgesOfKind(FlowEdgeKind::EMITS, 'handler:' . $service::class . '::handle', 'message:' . EmissionCommand::class));
+        self::assertFalse($graph->hasNode('message:' . DomainException::class));
+    }
+
+    public function test_metadata_values_of_a_published_event_are_not_shown_as_events(): void
+    {
+        $service = new class () {
+            #[CommandHandler('outbound.metadata')]
+            public function handle(EventBus $bus): void
+            {
+                $bus->publish(new EmissionEvent(), ['code' => EmissionCode::of('A-1')->value]);
+            }
+        };
+        $graph = EcotoneLite::bootstrapFlowTesting([$service::class], [$service], enabledModules: [], licenceKey: LicenceTesting::VALID_LICENCE)->getMessageFlowGraph();
+
+        self::assertCount(1, $graph->edgesOfKind(FlowEdgeKind::EMITS, 'handler:' . $service::class . '::handle', 'message:' . EmissionEvent::class));
+        self::assertFalse($graph->hasNode('message:' . EmissionCode::class));
+    }
+
+    public function test_metadata_values_after_an_attributed_closure_are_not_shown_as_events(): void
+    {
+        $service = new class () {
+            #[CommandHandler('outbound.metadata.attributed')]
+            public function handle(EventBus $bus): void
+            {
+                $bus->publish(new EmissionEvent(), ['reference' => (fn (#[SensitiveParameter] string $value) => $value)('A-1'), 'code' => EmissionCode::of('A-1')->value]);
+            }
+        };
+        $graph = EcotoneLite::bootstrapFlowTesting([$service::class], [$service], enabledModules: [], licenceKey: LicenceTesting::VALID_LICENCE)->getMessageFlowGraph();
+
+        self::assertCount(1, $graph->edgesOfKind(FlowEdgeKind::EMITS, 'handler:' . $service::class . '::handle', 'message:' . EmissionEvent::class));
+        self::assertFalse($graph->hasNode('message:' . EmissionCode::class));
+    }
 }
 
 final class EmissionEvent
@@ -349,4 +433,23 @@ final class EmissionCommand
 
 final class EmissionQuery
 {
+}
+
+final class EmissionCode
+{
+    public function __construct(public readonly string $value)
+    {
+    }
+
+    public static function of(string $value): self
+    {
+        return new self($value);
+    }
+}
+
+final class EmissionCommandWithCode
+{
+    public function __construct(public readonly EmissionCode $code, public readonly EmissionCode $otherCode, public readonly string $reference)
+    {
+    }
 }

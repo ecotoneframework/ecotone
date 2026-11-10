@@ -9,6 +9,7 @@ use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Channel\DelayableQueueChannel;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\ExceptionalQueueChannel;
+use Ecotone\Messaging\Channel\FinalFailureStrategyChannelBuilder;
 use Ecotone\Messaging\Channel\InMemoryMessageChannelHolder;
 use Ecotone\Messaging\Channel\InMemoryStreamingChannel;
 use Ecotone\Messaging\Channel\MessageChannelWithSerializationBuilder;
@@ -27,7 +28,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
 /**
  * licence Apache-2.0
  */
-class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuilder
+class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuilder, FinalFailureStrategyChannelBuilder
 {
     private function __construct(
         private string                        $messageChannelName,
@@ -107,6 +108,11 @@ class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuil
     public function isStreamingChannel(): bool
     {
         return $this->isStreamingChannel;
+    }
+
+    public function getDefaultFinalFailureStrategy(): FinalFailureStrategy
+    {
+        return $this->isStreamingChannel ? FinalFailureStrategy::RELEASE : FinalFailureStrategy::RESEND;
     }
 
     public function getFinalFailureStrategy(): FinalFailureStrategy

@@ -13,6 +13,7 @@ use Ecotone\Api\ExtensionObject\ErrorHandlerConfiguration;
 use Ecotone\Api\ExtensionObject\InstantRetryConfiguration;
 use Ecotone\Api\ExtensionObject\ModulePackageList;
 use Ecotone\Api\ExtensionObject\RetryTemplateBuilder;
+use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Gateway\EcotoneClockInterface;
 use Ecotone\Api\Messaging\MessageHeaders;
@@ -43,7 +44,7 @@ final class ErrorHandlerModule extends NoExternalConfigurationModule implements 
     /**
      * @param ErrorHandlerConfiguration[] $perHandlerRetryConfigurations
      */
-    private function __construct(private array $perHandlerRetryConfigurations)
+    private function __construct(private array $perHandlerRetryConfigurations, private ErrorHandlerPulseAnnotations $pulseAnnotations)
     {
     }
 
@@ -134,7 +135,26 @@ final class ErrorHandlerModule extends NoExternalConfigurationModule implements 
             $perHandlerRetryConfigurations[] = self::buildErrorHandlerConfig($generatedErrorChannelName, $retryTemplateBuilder, $delayedRetry->deadLetterChannel);
         }
 
-        return new self($perHandlerRetryConfigurations);
+        return new self(perHandlerRetryConfigurations: $perHandlerRetryConfigurations, pulseAnnotations: ErrorHandlerPulseAnnotations::of($annotationRegistrationService));
+    }
+
+    public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions): array
+    {
+        return [
+            ...ErrorHandlerPulseFeatures::reportedFor(
+                serviceExtensions: $serviceExtensions,
+                serviceConfiguration: $serviceConfiguration,
+                endpointDelayedRetries: $this->pulseAnnotations->endpointDelayedRetries,
+                gatewayDelayedRetries: $this->pulseAnnotations->gatewayDelayedRetries,
+            ),
+            ...ErrorHandlerPulseFeatures::finalFailureStrategyFor($serviceExtensions),
+            ...ErrorHandlerPulseFeatures::consumerFeaturesFor(
+                serviceExtensions: $serviceExtensions,
+                serviceConfiguration: $serviceConfiguration,
+                endpointDelayedRetries: $this->pulseAnnotations->endpointDelayedRetries,
+                endpointErrorChannels: $this->pulseAnnotations->endpointErrorChannels,
+            ),
+        ];
     }
 
     private static function buildErrorHandlerConfig(string $errorChannelName, RetryTemplateBuilder $retryTemplateBuilder, ?string $deadLetterChannel): ErrorHandlerConfiguration

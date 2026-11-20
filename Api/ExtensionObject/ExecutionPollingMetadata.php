@@ -2,6 +2,8 @@
 
 namespace Ecotone\Api\ExtensionObject;
 
+use Ecotone\Messaging\Config\ConfigurationException;
+
 /**
  * licence Apache-2.0
  *
@@ -17,6 +19,7 @@ final class ExecutionPollingMetadata
         public readonly ?bool $stopOnError = null,
         public readonly ?bool $finishWhenNoMessages = null,
         public readonly ?int $executionAmountLimit = null,
+        public readonly ?int $coroutines = null,
     ) {
     }
 
@@ -87,5 +90,17 @@ final class ExecutionPollingMetadata
     public function withExecutionAmountLimit(int $limit): self
     {
         return new self(...[...get_object_vars($this), 'executionAmountLimit' => $limit]);
+    }
+
+    public function withCoroutines(int $coroutines): self
+    {
+        if ($coroutines < 1) {
+            throw ConfigurationException::create(
+                "A consumer cannot consume on {$coroutines} coroutines: it needs at least one. "
+                . 'Pass a positive number to ExecutionPollingMetadata::withCoroutines() or to the `coroutines` option of ecotone:run, or leave it out to consume one message at a time.'
+            );
+        }
+
+        return new self(...[...get_object_vars($this), 'coroutines' => $coroutines]);
     }
 }

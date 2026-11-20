@@ -24,11 +24,14 @@ use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Config\LicenceDecider;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
 use Ecotone\Messaging\Endpoint\Interceptor\TerminationListener;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
+use Ecotone\Messaging\Handler\Gathering\GatheredGroupStore;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\HeaderBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\MessageConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\PayloadBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ValueBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
@@ -37,8 +40,10 @@ use Ecotone\Messaging\Support\LicensingException;
 use Ecotone\Modelling\Config\DatabaseTransaction\ManagesOwnTransaction;
 use Ecotone\Modelling\MessageHandling\Distribution\Pulse\PulseSnapshotSectionRegistration;
 use Ecotone\Projecting\EnterpriseProjectionNameHeader;
+use Ecotone\Projecting\GatheredPartitionBatchDispatcher;
 use Ecotone\Projecting\InMemory\InMemoryProjectionRegistry;
 use Ecotone\Projecting\OpenCoreProjectionNameHeader;
+use Ecotone\Projecting\PartitionBatchDispatcher;
 use Ecotone\Projecting\PartitionBatchExecutorHandler;
 use Ecotone\Projecting\PartitionProviderRegistry;
 use Ecotone\Projecting\ProjectingHeaders;
@@ -53,6 +58,7 @@ use Ecotone\Projecting\SinglePartitionProvider;
 use Ecotone\Projecting\StreamFilterRegistry;
 use Ecotone\Projecting\StreamSourceRegistry;
 use Ecotone\Projecting\TaggedStream\TagPartitionKeysBuilder;
+use Ecotone\Projecting\UngatheredPartitionBatchDispatcher;
 
 /**
  * This module allows to configure projections in a standard way
@@ -121,6 +127,7 @@ final class ProjectingModule implements AnnotationModule
                     $projectionName,
                     new Reference(TerminationListener::class),
                     new Reference(MessagingEntrypointService::class),
+                    new Reference(PartitionBatchDispatcher::class),
                     $projectionBuilder->eventLoadingBatchSize(),
                     $projectionBuilder->automaticInitialization(),
                     $projectionBuilder->backfillPartitionBatchSize(),
@@ -142,6 +149,8 @@ final class ProjectingModule implements AnnotationModule
                 'asyncChannel' => $projectionBuilder->asyncChannelName(),
                 'rebuildAsyncChannel' => $projectionBuilder->rebuildAsyncChannelName(),
                 'backfillAsyncChannel' => $projectionBuilder->backfillAsyncChannelName(),
+                'rebuildBatchCompletionChannel' => $projectionBuilder->rebuildBatchCompletionChannelName(),
+                'backfillBatchCompletionChannel' => $projectionBuilder->backfillBatchCompletionChannelName(),
             ];
 
             $handlerBuilder = MessageProcessorActivatorBuilder::create()
@@ -208,8 +217,8 @@ final class ProjectingModule implements AnnotationModule
                 ProjectionOperationEndpoint::INITIALIZE => ['init', []],
                 ProjectionOperationEndpoint::TRIGGER => ['executeAll', [ValueBuilder::create('manualInitialization', true)]],
                 ProjectionOperationEndpoint::RESET => ['executeAllWithReset', []],
-                ProjectionOperationEndpoint::BACKFILL => ['prepareBackfill', []],
-                ProjectionOperationEndpoint::REBUILD => ['prepareRebuild', []],
+                ProjectionOperationEndpoint::BACKFILL => ['prepareBackfill', [MessageConverterBuilder::create('prepare')]],
+                ProjectionOperationEndpoint::REBUILD => ['prepareRebuild', [MessageConverterBuilder::create('prepare')]],
                 ProjectionOperationEndpoint::DELETE => ['delete', []],
             ] as $operation => [$method, $parameterConverters]) {
                 $messagingConfiguration->registerMessageHandler(
@@ -235,8 +244,10 @@ final class ProjectingModule implements AnnotationModule
         }
 
         foreach (ExtensionObjectResolver::resolve(StreamingProjectionDescription::class, $extensionObjects) as $streaming) {
-            $projectionDescriptions[$streaming->projectionName] = ['mode' => 'streaming', 'partitioned' => false, 'manualKickOff' => false, 'asyncChannel' => $streaming->channelName, 'rebuildAsyncChannel' => null, 'backfillAsyncChannel' => null];
+            $projectionDescriptions[$streaming->projectionName] = ['mode' => 'streaming', 'partitioned' => false, 'manualKickOff' => false, 'asyncChannel' => $streaming->channelName, 'rebuildAsyncChannel' => null, 'backfillAsyncChannel' => null, 'rebuildBatchCompletionChannel' => null, 'backfillBatchCompletionChannel' => null];
         }
+
+        $this->registerPartitionBatchDispatcher($messagingConfiguration, $projectionBuilders);
 
         // Register ProjectionRegistry
         $messagingConfiguration->registerServiceDefinition(
@@ -260,7 +271,6 @@ final class ProjectingModule implements AnnotationModule
             PartitionBatchExecutorHandler::class,
             new Definition(PartitionBatchExecutorHandler::class, [
                 new Reference(ProjectionRegistry::class),
-                new Reference(TerminationListener::class),
             ])
         );
 
@@ -278,7 +288,6 @@ final class ProjectingModule implements AnnotationModule
                             HeaderBuilder::createOptional('aggregateType', 'partitionBatch.aggregateType'),
                             HeaderBuilder::createOptional('eventStoreReferenceName', 'partitionBatch.eventStoreReferenceName'),
                             HeaderBuilder::createOptional('shouldReset', 'partitionBatch.shouldReset'),
-                            HeaderBuilder::createOptional('batchCount', ProjectingHeaders::REBUILD_BATCH_COUNT),
                             HeaderBuilder::createOptional('tag', 'partitionBatch.tag'),
                         ],
                     )
@@ -293,6 +302,26 @@ final class ProjectingModule implements AnnotationModule
             new Definition(ProjectionOperations::class, [new Reference(ProjectionRegistry::class), new Reference(MessagingEntrypointService::class)])
         );
         $messagingConfiguration->registerServiceDefinition(ProjectingConsoleCommands::class, new Definition(ProjectingConsoleCommands::class, [new Reference(ProjectionOperations::class)]));
+    }
+
+    /**
+     * @param ProjectionExecutorBuilder[] $projectionBuilders
+     */
+    private function registerPartitionBatchDispatcher(Configuration $messagingConfiguration, array $projectionBuilders): void
+    {
+        $messagingConfiguration->registerServiceDefinition(UngatheredPartitionBatchDispatcher::class, new Definition(UngatheredPartitionBatchDispatcher::class, [new Reference(MessagingEntrypointService::class)]));
+        $runsAsynchronously = array_filter($projectionBuilders, static fn (ProjectionExecutorBuilder $builder): bool => $builder->rebuildAsyncChannelName() !== null || $builder->backfillAsyncChannelName() !== null);
+        if ($runsAsynchronously === []) {
+            $messagingConfiguration->registerServiceDefinition(PartitionBatchDispatcher::class, new Reference(UngatheredPartitionBatchDispatcher::class));
+
+            return;
+        }
+        $messagingConfiguration->registerServiceDefinition(GatheredPartitionBatchDispatcher::class, new Definition(GatheredPartitionBatchDispatcher::class, [
+            new Reference(UngatheredPartitionBatchDispatcher::class),
+            new Reference(GatheredGroupStore::class),
+            new Reference(MessagingEntrypointService::class),
+        ]));
+        $messagingConfiguration->registerServiceDefinition(PartitionBatchDispatcher::class, LicenceDecider::prepareDefinition(className: PartitionBatchDispatcher::class, openCoreServiceReference: UngatheredPartitionBatchDispatcher::class, enterpriseServiceReference: GatheredPartitionBatchDispatcher::class));
     }
 
     public function getModuleExtensions(ServiceConfiguration $serviceConfiguration, array $serviceExtensions, ?InterfaceToCallRegistry $interfaceToCallRegistry = null): array

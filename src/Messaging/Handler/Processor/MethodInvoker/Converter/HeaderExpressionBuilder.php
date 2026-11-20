@@ -55,6 +55,8 @@ class HeaderExpressionBuilder implements ParameterConverterBuilder
             $this->expression,
             $this->isRequired,
             ExpressionLocation::definitionForParameter(Header::class, $this->parameterName, $interfaceToCall->getInterfaceName(), $interfaceToCall->getMethodName(), $this->expression),
+            ArgumentTypeConversion::definition(),
+            $interfaceToCall->getParameterWithName($this->parameterName)->getTypeDescriptor(),
         ]);
     }
 }

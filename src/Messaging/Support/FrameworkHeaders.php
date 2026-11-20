@@ -8,6 +8,7 @@ use Ecotone\Api\Gateway\DistributedBusHeader;
 use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\EventSourcing\Tagging\MatchedTagSequences;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
+use Ecotone\Messaging\Handler\Gathering\GatheringHeaders;
 use Ecotone\Modelling\AggregateMessage;
 use Ecotone\Modelling\Config\MessageBusChannel;
 use Ecotone\Modelling\DecisionModel\DecisionModelLoadedState;
@@ -39,6 +40,17 @@ final class FrameworkHeaders
         $metadata = self::unsetBusKeys($metadata);
 
         return self::unsetAggregateKeys($metadata);
+    }
+
+    public static function unsetHeadersNotPropagatedToFollowingMessages(array $metadata): array
+    {
+        $metadata = self::unsetAllFrameworkHeaders($metadata);
+        unset(
+            $metadata[AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER],
+            $metadata[AggregateMessage::AGGREGATE_ID],
+        );
+
+        return $metadata;
     }
 
     public static function unsetNonUserKeys(array $metadata): array
@@ -131,6 +143,13 @@ final class FrameworkHeaders
     private static function getFrameworksHeaderNames(): array
     {
         return [
+            GatheringHeaders::MANUAL_RELEASE,
+            GatheringHeaders::TIMEOUT,
+            GatheringHeaders::GROUP_ID,
+            GatheringHeaders::PART_NUMBER,
+            GatheringHeaders::SIZE,
+            GatheringHeaders::CHANNEL_NAME,
+            GatheringHeaders::NO_RESULT,
             MessageHeaders::MESSAGE_ID,
             MessageHeaders::MESSAGE_CORRELATION_ID,
             MessageHeaders::PARENT_MESSAGE_ID,

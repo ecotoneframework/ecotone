@@ -10,7 +10,9 @@ use Ecotone\AnnotationFinder\AnnotationFinder;
 use Ecotone\AnnotationFinder\AnnotationFinderFactory;
 use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\Attribute\AsynchronousRunningEndpoint;
+use Ecotone\Api\Attribute\ConsoleCommand;
 use Ecotone\Api\ExtensionObject\CombinedMessageChannel;
+use Ecotone\Api\ExtensionObject\DynamicMessageChannelBuilder;
 use Ecotone\Api\ExtensionObject\MessageChannelBuilder;
 use Ecotone\Api\ExtensionObject\ModulePackageList;
 use Ecotone\Api\ExtensionObject\PollingMetadata;
@@ -21,6 +23,7 @@ use Ecotone\Api\ExtensionObject\TestConfiguration;
 use Ecotone\Api\Messaging\ConfiguredMessagingSystem;
 use Ecotone\Api\Messaging\PollableChannel;
 use Ecotone\Messaging\Channel\ChannelInterceptorBuilder;
+use Ecotone\Messaging\Channel\DynamicChannel\StreamsReceivedByDynamicChannel;
 use Ecotone\Messaging\Channel\EventDrivenChannelInterceptorAdapter;
 use Ecotone\Messaging\Channel\OutboxForwardingChannel;
 use Ecotone\Messaging\Channel\PollableChannelInterceptorAdapter;
@@ -53,6 +56,8 @@ use Ecotone\Messaging\Endpoint\PollingConsumer\AsyncHandlerAnnotationRegistry;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
 use Ecotone\Messaging\Handler\Bridge\BridgeBuilder;
 use Ecotone\Messaging\Handler\Gateway\GatewayProxyBuilder;
+use Ecotone\Messaging\Handler\Gathering\NullPartCompletion;
+use Ecotone\Messaging\Handler\Gathering\PartCompletion;
 use Ecotone\Messaging\Handler\InterceptedEndpoint;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -339,6 +344,7 @@ final class MessagingSystemConfiguration implements Configuration
         foreach ($this->channelAdapters as $channelAdapter) {
             $channelAdapter->withEndpointAnnotations(array_merge($channelAdapter->getEndpointAnnotations(), [new AttributeDefinition(AsynchronousRunningEndpoint::class, [$channelAdapter->getEndpointId()])]));
         }
+        $this->markConsoleCommandHandlers($interfaceToCallRegistry);
 
         if ($this->beforeSendInterceptors) {
             /** @var array<string, MethodInterceptorBuilder[]> $beforeSendInterceptorsByChannel */
@@ -1093,6 +1099,8 @@ final class MessagingSystemConfiguration implements Configuration
             }
         }
 
+        $this->registerServiceDefinition(PartCompletion::class, new Definition(NullPartCompletion::class));
+
         foreach ($this->serviceDefinitions as $id => $definition) {
             $messagingBuilder->register($id, $definition);
         }
@@ -1164,7 +1172,15 @@ final class MessagingSystemConfiguration implements Configuration
             $inputChannelBuilder = $this->channelBuilders[$messageHandlerBuilder->getInputMessageChannelName()] ?? throw ConfigurationException::create("Missing channel with name {$messageHandlerBuilder->getInputMessageChannelName()} for {$messageHandlerBuilder}");
             foreach ($this->consumerFactories as $consumerFactory) {
                 if ($consumerFactory->isSupporting($messageHandlerBuilder, $inputChannelBuilder)) {
-                    $consumerFactory->registerConsumer($messagingBuilder, $messageHandlerBuilder);
+                    $consumerFactory->registerConsumer(
+                        $messagingBuilder,
+                        $messageHandlerBuilder,
+                        match (true) {
+                            $inputChannelBuilder instanceof DynamicMessageChannelBuilder => StreamsReceivedByDynamicChannel::of($inputChannelBuilder, $this->channelBuilders),
+                            $inputChannelBuilder->isStreamingChannel() => [$inputChannelBuilder->getMessageChannelName()],
+                            default => [],
+                        },
+                    );
                     break;
                 }
             }
@@ -1239,6 +1255,34 @@ final class MessagingSystemConfiguration implements Configuration
         $this->consoleCommands[] = $consoleCommandConfiguration;
 
         return $this;
+    }
+
+    private function markConsoleCommandHandlers(InterfaceToCallRegistry $interfaceToCallRegistry): void
+    {
+        $commandNameByChannel = [];
+        foreach ($this->consoleCommands as $consoleCommand) {
+            if ($consoleCommand->isInterceptedAsConsoleCommand()) {
+                $commandNameByChannel[$consoleCommand->getChannelName()] = $consoleCommand->getName();
+            }
+        }
+        foreach ($this->messageHandlerBuilders as $key => $messageHandlerBuilder) {
+            $commandName = $commandNameByChannel[$messageHandlerBuilder->getInputMessageChannelName()] ?? null;
+            if ($commandName === null || ! $messageHandlerBuilder instanceof InterceptedEndpoint || $this->alreadyRunsAsConsoleCommand($messageHandlerBuilder, $interfaceToCallRegistry)) {
+                continue;
+            }
+            $this->messageHandlerBuilders[$key] = $messageHandlerBuilder->withEndpointAnnotations([...$messageHandlerBuilder->getEndpointAnnotations(), new AttributeDefinition(ConsoleCommand::class, [$commandName])]);
+        }
+    }
+
+    private function alreadyRunsAsConsoleCommand(InterceptedEndpoint $messageHandlerBuilder, InterfaceToCallRegistry $interfaceToCallRegistry): bool
+    {
+        foreach ($messageHandlerBuilder->getEndpointAnnotations() as $endpointAnnotation) {
+            if ($endpointAnnotation->getClassName() === ConsoleCommand::class) {
+                return true;
+            }
+        }
+
+        return $messageHandlerBuilder->getInterceptedInterface($interfaceToCallRegistry)->hasMethodAnnotation(ConsoleCommand::class);
     }
 
     /**

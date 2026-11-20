@@ -35,6 +35,10 @@ final class ModellingFlowScenarios
     public static function all(): array
     {
         return [
+            self::routedFactoryAndActionWithGeneratedEndpointIds(),
+            self::routedFactoryAndActionWithExplicitEndpointIds(),
+            self::routedSagaFactoryAndActionWithGeneratedEndpointIds(),
+            self::routedSagaFactoryAndActionWithExplicitEndpointIds(),
             self::stateStoredAggregateRecordingAnEvent(),
             self::eventSourcedAggregateReturningAnEvent(),
             self::sagaStartedByAnEventSendingACommand(),
@@ -42,6 +46,130 @@ final class ModellingFlowScenarios
             self::eventForAnUnknownSagaIsDropped(),
             self::eventSourcedAggregateFeedingAProjection(),
         ];
+    }
+
+    private static function routedFactoryAndActionWithGeneratedEndpointIds(): FlowScenario
+    {
+        $order = new #[Aggregate] class () {
+            #[Identifier]
+            public string $orderId = '';
+
+            #[CommandHandler('order.place')]
+            public static function place(array $command): self
+            {
+                $order = new self();
+                $order->orderId = $command['orderId'];
+
+                return $order;
+            }
+
+            #[CommandHandler('order.place')]
+            public function placeAgain(array $command): void
+            {
+            }
+        };
+
+        return new FlowScenario('routed factory and action with generated endpoint ids', [$order::class], [], [], [
+            FlowStage::when(fn (FlowTestSupport $ecotone, array $metadata) => $ecotone->sendCommandWithRouting('order.place', ['orderId' => '1'], metadata: $metadata))
+                ->expect(ExpectedSpan::named('send command')->containing(ExpectedSpan::named('process class@anonymous::place')->withAttributeOtherThan(SpanAttribute::ENDPOINT_ID, '')))
+                ->withNoOtherSpans(),
+            FlowStage::when(fn (FlowTestSupport $ecotone, array $metadata) => $ecotone->sendCommandWithRouting('order.place', ['orderId' => '1'], metadata: $metadata))
+                ->expect(ExpectedSpan::named('send command')->containing(ExpectedSpan::named('process class@anonymous::placeAgain')->withAttributeOtherThan(SpanAttribute::ENDPOINT_ID, '')))
+                ->withNoOtherSpans(),
+        ]);
+    }
+
+    private static function routedFactoryAndActionWithExplicitEndpointIds(): FlowScenario
+    {
+        $order = new #[Aggregate] class () {
+            #[Identifier]
+            public string $orderId = '';
+
+            #[CommandHandler('order.place', endpointId: 'order.factory')]
+            public static function place(array $command): self
+            {
+                $order = new self();
+                $order->orderId = $command['orderId'];
+
+                return $order;
+            }
+
+            #[CommandHandler('order.place', endpointId: 'order.action')]
+            public function placeAgain(array $command): void
+            {
+            }
+        };
+
+        return new FlowScenario('routed factory and action with explicit endpoint ids', [$order::class], [], [], [
+            FlowStage::when(fn (FlowTestSupport $ecotone, array $metadata) => $ecotone->sendCommandWithRouting('order.place', ['orderId' => '1'], metadata: $metadata))
+                ->expect(ExpectedSpan::named('send command')->containing(ExpectedSpan::named('process class@anonymous::place')->withAttributes([SpanAttribute::ENDPOINT_ID => 'order.factory'])))
+                ->withNoOtherSpans(),
+            FlowStage::when(fn (FlowTestSupport $ecotone, array $metadata) => $ecotone->sendCommandWithRouting('order.place', ['orderId' => '1'], metadata: $metadata))
+                ->expect(ExpectedSpan::named('send command')->containing(ExpectedSpan::named('process class@anonymous::placeAgain')->withAttributes([SpanAttribute::ENDPOINT_ID => 'order.action'])))
+                ->withNoOtherSpans(),
+        ]);
+    }
+
+    private static function routedSagaFactoryAndActionWithGeneratedEndpointIds(): FlowScenario
+    {
+        $order = new #[Saga] class () {
+            #[Identifier]
+            public string $orderId = '';
+
+            #[CommandHandler('order.place')]
+            public static function place(array $command): self
+            {
+                $order = new self();
+                $order->orderId = $command['orderId'];
+
+                return $order;
+            }
+
+            #[CommandHandler('order.place')]
+            public function placeAgain(array $command): void
+            {
+            }
+        };
+
+        return new FlowScenario('routed saga factory and action with generated endpoint ids', [$order::class], [], [], [
+            FlowStage::when(fn (FlowTestSupport $ecotone, array $metadata) => $ecotone->sendCommandWithRouting('order.place', ['orderId' => '1'], metadata: $metadata))
+                ->expect(ExpectedSpan::named('send command')->containing(ExpectedSpan::named('process class@anonymous::place')->withAttributeOtherThan(SpanAttribute::ENDPOINT_ID, '')))
+                ->withNoOtherSpans(),
+            FlowStage::when(fn (FlowTestSupport $ecotone, array $metadata) => $ecotone->sendCommandWithRouting('order.place', ['orderId' => '1'], metadata: $metadata))
+                ->expect(ExpectedSpan::named('send command')->containing(ExpectedSpan::named('process class@anonymous::placeAgain')->withAttributeOtherThan(SpanAttribute::ENDPOINT_ID, '')))
+                ->withNoOtherSpans(),
+        ]);
+    }
+
+    private static function routedSagaFactoryAndActionWithExplicitEndpointIds(): FlowScenario
+    {
+        $order = new #[Saga] class () {
+            #[Identifier]
+            public string $orderId = '';
+
+            #[CommandHandler('order.place', endpointId: 'order.factory')]
+            public static function place(array $command): self
+            {
+                $order = new self();
+                $order->orderId = $command['orderId'];
+
+                return $order;
+            }
+
+            #[CommandHandler('order.place', endpointId: 'order.action')]
+            public function placeAgain(array $command): void
+            {
+            }
+        };
+
+        return new FlowScenario('routed saga factory and action with explicit endpoint ids', [$order::class], [], [], [
+            FlowStage::when(fn (FlowTestSupport $ecotone, array $metadata) => $ecotone->sendCommandWithRouting('order.place', ['orderId' => '1'], metadata: $metadata))
+                ->expect(ExpectedSpan::named('send command')->containing(ExpectedSpan::named('process class@anonymous::place')->withAttributes([SpanAttribute::ENDPOINT_ID => 'order.factory'])))
+                ->withNoOtherSpans(),
+            FlowStage::when(fn (FlowTestSupport $ecotone, array $metadata) => $ecotone->sendCommandWithRouting('order.place', ['orderId' => '1'], metadata: $metadata))
+                ->expect(ExpectedSpan::named('send command')->containing(ExpectedSpan::named('process class@anonymous::placeAgain')->withAttributes([SpanAttribute::ENDPOINT_ID => 'order.action'])))
+                ->withNoOtherSpans(),
+        ]);
     }
 
     private static function stateStoredAggregateRecordingAnEvent(): FlowScenario

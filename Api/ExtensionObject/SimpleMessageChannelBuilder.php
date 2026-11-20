@@ -6,6 +6,7 @@ namespace Ecotone\Api\ExtensionObject;
 
 use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Api\Messaging\PollableChannel;
+use Ecotone\Api\Scheduling\TimeSpan;
 use Ecotone\Messaging\Channel\DelayableQueueChannel;
 use Ecotone\Messaging\Channel\DirectChannel;
 use Ecotone\Messaging\Channel\ExceptionalQueueChannel;
@@ -28,7 +29,7 @@ use Ecotone\Messaging\Support\MessageBuilder;
 /**
  * licence Apache-2.0
  */
-class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuilder, FinalFailureStrategyChannelBuilder
+class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuilder, FinalFailureStrategyChannelBuilder, DelayedMessageChannelBuilder
 {
     private function __construct(
         private string                        $messageChannelName,
@@ -93,6 +94,16 @@ class SimpleMessageChannelBuilder implements MessageChannelWithSerializationBuil
         $instance->inMemoryMessageChannelHolder = new InMemoryMessageChannelHolder();
         $instance->messageGroupId = $messageGroupId ?? $messageChannelName;
         return $instance;
+    }
+
+    public function supportsDelayedMessages(): bool
+    {
+        return $this->messageChannel instanceof DelayableQueueChannel && ! $this->isStreamingChannel;
+    }
+
+    public function maximumDelay(): ?TimeSpan
+    {
+        return null;
     }
 
     public function isPollable(): bool

@@ -60,34 +60,13 @@ final class TracingModule extends NoExternalConfigurationModule implements Annot
 {
     private const USER_MESSAGE_GATEWAYS_POINTCUT = MessageGateway::class . '&&not(' . CommandBus::class . ')&&not(' . EventBus::class . ')&&not(' . QueryBus::class . ')';
 
-    /**
-     * @param array<string, string> $endpointIdsByHandler
-     */
-    private function __construct(
-        private array $endpointIdsByHandler,
-    ) {
+    private function __construct()
+    {
     }
 
     public static function create(AnnotationFinder $annotationRegistrationService, InterfaceToCallRegistry $interfaceToCallRegistry): static
     {
-        return new self(self::endpointIdsByHandler($annotationRegistrationService));
-    }
-
-
-
-    /**
-     * @return array<string, string>
-     */
-    private static function endpointIdsByHandler(AnnotationFinder $annotationFinder): array
-    {
-        $endpointIds = [];
-        foreach ([CommandHandler::class, QueryHandler::class, EventHandler::class, InternalHandler::class] as $attributeClassName) {
-            foreach ($annotationFinder->findAnnotatedMethods($attributeClassName) as $annotatedMethod) {
-                $endpointIds[$annotatedMethod->getClassName() . '::' . $annotatedMethod->getMethodName()] = $annotatedMethod->getAnnotationForMethod()->getEndpointId();
-            }
-        }
-
-        return $endpointIds;
+        return new self();
     }
 
     public function prepare(Configuration $messagingConfiguration, array $extensionObjects, ModuleReferenceSearchService $moduleReferenceSearchService, InterfaceToCallRegistry $interfaceToCallRegistry): void
@@ -122,7 +101,7 @@ final class TracingModule extends NoExternalConfigurationModule implements Annot
         $messagingConfiguration->addCompilerPass(new TraceDynamicConsistencyBoundaryCompilerPass());
         $messagingConfiguration->registerServiceDefinition(
             TracingInterceptor::class,
-            new Definition(TracingInterceptor::class, [new Reference(Tracer::class), new Reference(MessageBuilder::class), new Reference(MessageSpanAttributes::class), $this->endpointIdsByHandler])
+            new Definition(TracingInterceptor::class, [new Reference(Tracer::class), new Reference(MessageBuilder::class), new Reference(MessageSpanAttributes::class)])
         );
         $messagingConfiguration->registerServiceDefinition(
             MessageSpanAttributes::class,
@@ -130,10 +109,7 @@ final class TracingModule extends NoExternalConfigurationModule implements Annot
         );
 
         foreach ([
-            'traceCommandHandler' => [CommandHandler::class, Precedence::TRACING_HANDLER_PRECEDENCE],
-            'traceQueryHandler' => [QueryHandler::class, Precedence::TRACING_HANDLER_PRECEDENCE],
-            'traceEventHandler' => [EventHandler::class, Precedence::TRACING_HANDLER_PRECEDENCE],
-            'traceMessageHandler' => [InternalHandler::class . '&&not(' . MessageHeadersPropagatorInterceptor::class . ')', Precedence::TRACING_HANDLER_PRECEDENCE],
+            'traceHandlerEndpoint' => ['(' . implode('||', [CommandHandler::class, QueryHandler::class, EventHandler::class, InternalHandler::class]) . ')&&not(' . MessageHeadersPropagatorInterceptor::class . ')', Precedence::TRACING_HANDLER_PRECEDENCE],
             'traceProjection' => [ProjectionTriggerEndpoint::class, Precedence::TRACING_HANDLER_PRECEDENCE],
             'traceProjectionBatch' => [PartitionBatchExecutorHandler::class, Precedence::TRACING_HANDLER_PRECEDENCE],
             'traceProjectionOperation' => [ProjectionOperationEndpoint::class, Precedence::TRACING_PRECEDENCE],

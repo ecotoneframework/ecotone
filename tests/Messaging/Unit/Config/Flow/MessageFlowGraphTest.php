@@ -44,6 +44,42 @@ use PHPUnit\Framework\TestCase;
  */
 final class MessageFlowGraphTest extends TestCase
 {
+    public function test_each_explicit_endpoint_on_a_method_has_its_own_node(): void
+    {
+        $service = new class () {
+            #[CommandHandler('order.first', endpointId: 'order.first.handler')]
+            #[CommandHandler('order.second', endpointId: 'order.second.handler')]
+            public function handle(string $orderId): void
+            {
+            }
+        };
+        $graph = EcotoneLite::bootstrapFlowTesting([$service::class], [$service], enabledModules: [], licenceKey: LicenceTesting::VALID_LICENCE)->getMessageFlowGraph();
+
+        self::assertSame(['handler:order.first.handler', 'handler:order.second.handler'], array_map(fn ($node) => $node->id, $graph->nodesOfKind(FlowNodeKind::COMMAND_HANDLER)));
+        self::assertEdges([
+            [FlowEdgeKind::ROUTED_TO, 'message:order.first', 'handler:order.first.handler'],
+            [FlowEdgeKind::ROUTED_TO, 'message:order.second', 'handler:order.second.handler'],
+        ], $graph);
+    }
+
+    public function test_explicit_endpoint_identifies_a_handler_in_the_graph(): void
+    {
+        $service = new class () {
+            #[CommandHandler('order.identity', endpointId: 'order.identity.handler')]
+            public function handle(string $orderId): void
+            {
+            }
+        };
+        $graph = EcotoneLite::bootstrapFlowTesting([$service::class], [$service], enabledModules: [], licenceKey: LicenceTesting::VALID_LICENCE)->getMessageFlowGraph();
+
+        self::assertTrue($graph->hasNode('handler:order.identity.handler'));
+        self::assertSame($service::class, $graph->node('handler:order.identity.handler')->attributes['class']);
+        self::assertSame('handle', $graph->node('handler:order.identity.handler')->attributes['method']);
+        self::assertEdges([
+            [FlowEdgeKind::ROUTED_TO, 'message:order.identity', 'handler:order.identity.handler'],
+        ], $graph);
+    }
+
     public function test_command_routed_by_class_reaches_service_handler_whose_output_channel_feeds_an_internal_handler(): void
     {
         $service = new class () {
@@ -60,8 +96,8 @@ final class MessageFlowGraphTest extends TestCase
         };
         $graph = EcotoneLite::bootstrapFlowTesting([$service::class], [$service], enabledModules: [], licenceKey: LicenceTesting::VALID_LICENCE)->getMessageFlowGraph();
 
-        $handlerId = 'handler:' . $service::class . '::place';
-        $internalId = 'handler:' . $service::class . '::notify';
+        $handlerId = 'handler:order.place';
+        $internalId = 'handler:order.notify';
 
         self::assertSame(FlowNodeKind::COMMAND, $graph->node('message:' . PlaceOrderForFlowGraph::class)->kind);
         self::assertSame(FlowNodeKind::COMMAND_HANDLER, $graph->node($handlerId)->kind);
@@ -93,10 +129,10 @@ final class MessageFlowGraphTest extends TestCase
 
         self::assertSame(FlowNodeKind::COMMAND, $graph->node('message:order.cancel')->kind);
         self::assertSame(FlowNodeKind::QUERY, $graph->node('message:order.status')->kind);
-        self::assertSame(FlowNodeKind::QUERY_HANDLER, $graph->node('handler:' . $service::class . '::status')->kind);
+        self::assertSame(FlowNodeKind::QUERY_HANDLER, $graph->node('handler:order.status.handler')->kind);
         self::assertEdges([
-            [FlowEdgeKind::ROUTED_TO, 'message:order.cancel', 'handler:' . $service::class . '::cancel'],
-            [FlowEdgeKind::ROUTED_TO, 'message:order.status', 'handler:' . $service::class . '::status'],
+            [FlowEdgeKind::ROUTED_TO, 'message:order.cancel', 'handler:order.cancel.handler'],
+            [FlowEdgeKind::ROUTED_TO, 'message:order.status', 'handler:order.status.handler'],
         ], $graph);
     }
 
@@ -117,7 +153,7 @@ final class MessageFlowGraphTest extends TestCase
             licenceKey: LicenceTesting::VALID_LICENCE,
         )->getMessageFlowGraph();
 
-        $handlerId = 'handler:' . $service::class . '::mail';
+        $handlerId = 'handler:order.placed.mail';
         self::assertSame(FlowNodeKind::EVENT, $graph->node('message:' . OrderPlacedForFlowGraph::class)->kind);
         self::assertTrue($graph->node('channel:orders')->attributes['pollable']);
         self::assertEdges([
@@ -148,8 +184,8 @@ final class MessageFlowGraphTest extends TestCase
             licenceKey: LicenceTesting::VALID_LICENCE,
         )->getMessageFlowGraph();
 
-        self::assertEdges([[FlowEdgeKind::ASYNCHRONOUS, 'channel:orders', 'handler:' . $service::class . '::place']], $graph);
-        self::assertSame([], $graph->edgesOfKind(FlowEdgeKind::ASYNCHRONOUS, to: 'handler:' . $service::class . '::find'));
+        self::assertEdges([[FlowEdgeKind::ASYNCHRONOUS, 'channel:orders', 'handler:order.place']], $graph);
+        self::assertSame([], $graph->edgesOfKind(FlowEdgeKind::ASYNCHRONOUS, to: 'handler:order.find'));
     }
 
     public function test_event_sourced_aggregate_applies_declared_events_and_handlers_belong_to_the_aggregate(): void
@@ -216,7 +252,7 @@ final class MessageFlowGraphTest extends TestCase
         self::assertFalse($graph->node('aggregate:' . $aggregate::class)->attributes['eventSourced']);
         self::assertEdges([
             [FlowEdgeKind::EMITS, $handlerId, 'message:' . OrderPlacedForFlowGraph::class],
-            [FlowEdgeKind::ROUTED_TO, 'message:' . OrderPlacedForFlowGraph::class, 'handler:' . $subscriber::class . '::audit'],
+            [FlowEdgeKind::ROUTED_TO, 'message:' . OrderPlacedForFlowGraph::class, 'handler:order.placed.audit'],
         ], $graph);
         $emits = $graph->edgesOfKind(FlowEdgeKind::EMITS, from: $handlerId)[0];
         self::assertTrue($emits->isInferred());
@@ -249,11 +285,11 @@ final class MessageFlowGraphTest extends TestCase
         };
         $graph = EcotoneLite::bootstrapFlowTesting([$service::class], [$service], enabledModules: [], licenceKey: LicenceTesting::VALID_LICENCE)->getMessageFlowGraph();
 
-        $placeId = 'handler:' . $service::class . '::place';
+        $placeId = 'handler:order.place';
         self::assertEdges([
             [FlowEdgeKind::EMITS, $placeId, 'message:' . OrderPlacedForFlowGraph::class],
             [FlowEdgeKind::EMITS, $placeId, 'message:order.ship'],
-            [FlowEdgeKind::ROUTED_TO, 'message:order.ship', 'handler:' . $service::class . '::ship'],
+            [FlowEdgeKind::ROUTED_TO, 'message:order.ship', 'handler:order.ship.handler'],
         ], $graph);
         $viaByTarget = [];
         foreach ($graph->edgesOfKind(FlowEdgeKind::EMITS, from: $placeId) as $edge) {
@@ -301,9 +337,9 @@ final class MessageFlowGraphTest extends TestCase
         $gatewayId = 'gateway:' . OrderShippingForFlowGraph::class . '::ship';
         self::assertSame(FlowNodeKind::GATEWAY, $graph->node($gatewayId)->kind);
         self::assertEdges([
-            [FlowEdgeKind::CALLS, 'handler:' . $service::class . '::place', $gatewayId],
+            [FlowEdgeKind::CALLS, 'handler:order.place', $gatewayId],
             [FlowEdgeKind::SENDS_TO, $gatewayId, 'channel:shipping.ship'],
-            [FlowEdgeKind::INPUT, 'channel:shipping.ship', 'handler:' . $service::class . '::doShip'],
+            [FlowEdgeKind::INPUT, 'channel:shipping.ship', 'handler:shipping.handler'],
         ], $graph);
     }
 
@@ -328,7 +364,7 @@ final class MessageFlowGraphTest extends TestCase
         };
         $graph = EcotoneLite::bootstrapFlowTesting([$service::class], [$service], enabledModules: [], licenceKey: LicenceTesting::VALID_LICENCE)->getMessageFlowGraph();
 
-        $routerId = 'handler:' . $service::class . '::route';
+        $routerId = 'handler:order.router';
         self::assertSame(FlowNodeKind::ROUTER, $graph->node($routerId)->kind);
         self::assertEdges([
             [FlowEdgeKind::INPUT, 'channel:order.route', $routerId],
@@ -348,9 +384,9 @@ final class MessageFlowGraphTest extends TestCase
         $graph = EcotoneLite::bootstrapFlowTesting([$projection::class], [$projection], enabledModules: [], licenceKey: LicenceTesting::VALID_LICENCE)->getMessageFlowGraph();
 
         self::assertSame(FlowNodeKind::PROJECTION, $graph->node('projection:orders_list')->kind);
-        self::assertSame('projection:orders_list', $graph->node('handler:' . $projection::class . '::whenPlaced')->attributes['owner']);
+        self::assertSame('projection:orders_list', $graph->node('handler:orders_list.placed')->attributes['owner']);
         self::assertEdges([
-            [FlowEdgeKind::ROUTED_TO, 'message:' . OrderPlacedForFlowGraph::class, 'handler:' . $projection::class . '::whenPlaced'],
+            [FlowEdgeKind::ROUTED_TO, 'message:' . OrderPlacedForFlowGraph::class, 'handler:orders_list.placed'],
         ], $graph);
     }
 
@@ -374,11 +410,11 @@ final class MessageFlowGraphTest extends TestCase
         $busId = 'distributed:' . DistributedBus::class;
         self::assertSame(FlowNodeKind::DISTRIBUTED_BUS, $graph->node($busId)->kind);
         self::assertTrue($graph->node('message:ticket.register')->attributes['distributed']);
-        self::assertTrue($graph->node('handler:' . $service::class . '::register')->attributes['distributed']);
+        self::assertTrue($graph->node('handler:ticket.register.handler')->attributes['distributed']);
         self::assertEdges([
             [FlowEdgeKind::DISTRIBUTES, $busId, 'message:ticket.register'],
             [FlowEdgeKind::DISTRIBUTES, $busId, 'message:user.registered'],
-            [FlowEdgeKind::ROUTED_TO, 'message:ticket.register', 'handler:' . $service::class . '::register'],
+            [FlowEdgeKind::ROUTED_TO, 'message:ticket.register', 'handler:ticket.register.handler'],
         ], $graph);
     }
 
@@ -400,7 +436,7 @@ final class MessageFlowGraphTest extends TestCase
         $graph = EcotoneLite::bootstrapFlowTesting([$service::class], [$service], enabledModules: [], licenceKey: LicenceTesting::VALID_LICENCE)->getMessageFlowGraph();
 
         $busId = 'distributed:' . DistributedBus::class;
-        $placeId = 'handler:' . $service::class . '::place';
+        $placeId = 'handler:order.place';
         self::assertSame(FlowNodeKind::COMMAND, $graph->node('message:invoice.create')->kind);
         self::assertSame('billing', $graph->node('message:invoice.create')->attributes['targetService']);
         self::assertFalse($graph->node('message:invoice.create')->attributes['handled']);

@@ -13,6 +13,7 @@ use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\InterfaceParameter;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ArgumentTypeConversion;
 
 /**
  * licence Enterprise
@@ -64,6 +65,8 @@ final class ClosureExpressionParameterConverterBuilder implements ParameterConve
     {
         return new Definition(ClosureExpressionParameterConverter::class, [
             AttributeExpressionExecutorCompiler::compile($this->attributeWithExpression, $this->attributeDeclaration, $interfaceToCall, $this->parameterName),
+            ArgumentTypeConversion::definition(),
+            $interfaceToCall->getParameterWithName($this->parameterName)->getTypeDescriptor(),
             ...$this->additionalContextSpecification($interfaceToCall),
         ]);
     }

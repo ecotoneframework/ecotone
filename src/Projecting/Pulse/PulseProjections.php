@@ -42,7 +42,7 @@ final class PulseProjections implements PulseSnapshotSection
     public const UNINITIALIZED = 'uninitialized';
 
     /**
-     * @param array<string, array{mode: string, partitioned: bool, manualKickOff: bool, asyncChannel: string|null, rebuildAsyncChannel: string|null, backfillAsyncChannel: string|null}> $descriptions
+     * @param array<string, array{mode: string, partitioned: bool, manualKickOff: bool, asyncChannel: string|null, rebuildAsyncChannel: string|null, backfillAsyncChannel: string|null, rebuildBatchCompletionChannel: string|null, backfillBatchCompletionChannel: string|null}> $descriptions
      */
     public function __construct(
         private array $descriptions,
@@ -54,7 +54,7 @@ final class PulseProjections implements PulseSnapshotSection
     }
 
     /**
-     * @return list<array{name: string, mode: string, partitioned: bool, manualKickOff: bool, asyncChannel: string|null, rebuildAsyncChannel: string|null, backfillAsyncChannel: string|null, initialization: string|null, positionDigest: string|null, eventsBehind: array{events: int, atLeast: bool}|null, partitions: array{total: int, inspected: int, behind: int, atLeast: bool}|null, unavailable: string|null}>
+     * @return list<array{name: string, mode: string, partitioned: bool, manualKickOff: bool, asyncChannel: string|null, rebuildAsyncChannel: string|null, backfillAsyncChannel: string|null, rebuildBatchCompletionChannel: string|null, backfillBatchCompletionChannel: string|null, initialization: string|null, positionDigest: string|null, eventsBehind: array{events: int, atLeast: bool}|null, partitions: array{total: int, inspected: int, behind: int, atLeast: bool}|null, unavailable: string|null}>
      */
     public function snapshot(): array
     {
@@ -138,5 +138,10 @@ final class PulseProjections implements PulseSnapshotSection
             $state->status === ProjectionInitializationStatus::INITIALIZED => self::INITIALIZED,
             default => self::PREPARED,
         };
+    }
+
+    public function revision(): ?string
+    {
+        return null;
     }
 }

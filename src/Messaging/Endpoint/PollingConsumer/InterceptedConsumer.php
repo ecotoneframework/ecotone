@@ -77,16 +77,18 @@ class InterceptedConsumer implements ConsumerLifecycle
                 }
             }
         } finally {
-            $this->messagePoller->onConsumerStop();
+            try {
+                $this->messagePoller->onConsumerStop();
 
-            $this->messagingEntrypoint->sendWithHeaders(
-                $this->endpointId,
-                [],
-                OnConsumerStop::CONSUMER_STOP_CHANNEL_NAME
-            );
-
-            foreach ($this->consumerInterceptors as $consumerInterceptor) {
-                $consumerInterceptor->onShutdown();
+                $this->messagingEntrypoint->sendWithHeaders(
+                    $this->endpointId,
+                    [],
+                    OnConsumerStop::CONSUMER_STOP_CHANNEL_NAME
+                );
+            } finally {
+                foreach ($this->consumerInterceptors as $consumerInterceptor) {
+                    $consumerInterceptor->onShutdown();
+                }
             }
         }
     }

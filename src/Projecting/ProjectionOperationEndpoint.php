@@ -23,6 +23,11 @@ final class ProjectionOperationEndpoint
     {
     }
 
+    public static function batchCompletionChannelOf(?string $batchCompletionChannelName, ?string $asyncChannelName): ?string
+    {
+        return $batchCompletionChannelName ?? $asyncChannelName;
+    }
+
     public static function channelFor(string $projectionName, string $operation): string
     {
         return 'projecting_manager_' . $operation . ':' . $projectionName;

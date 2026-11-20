@@ -5,6 +5,7 @@ namespace Ecotone\Messaging\Handler;
 use Ecotone\Api\Messaging\Message;
 use Ecotone\Api\Messaging\MessageChannel;
 use Ecotone\Api\Messaging\MessageHeaders;
+use Ecotone\Messaging\Handler\Gathering\PartCompletion;
 use Ecotone\Messaging\MessageDeliveryException;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -21,6 +22,7 @@ class RequestReplyProducer implements MessageHandler
         private ChannelResolver  $channelResolver,
         private bool             $isReplyRequired,
         private MessageBuilder   $messageBuilder,
+        private PartCompletion $partCompletion,
         private string           $name = '',
     ) {
     }
@@ -33,6 +35,7 @@ class RequestReplyProducer implements MessageHandler
             if ($this->isReplyRequired) {
                 throw MessageDeliveryException::createWithFailedMessage("Requires response but got none. {$this}", $message);
             }
+            $this->partCompletion->complete($message, null);
             return;
         }
 
@@ -54,6 +57,8 @@ class RequestReplyProducer implements MessageHandler
                         ->removeHeader(MessageHeaders::ROUTING_SLIP)
                         ->build();
                 }
+            } elseif ($this->partCompletion->complete($message, $replyMessage)) {
+                return;
             } elseif ($message->getHeaders()->containsKey(MessageHeaders::REPLY_CHANNEL)) {
                 $replyChannel = $message->getHeaders()->getReplyChannel();
             }

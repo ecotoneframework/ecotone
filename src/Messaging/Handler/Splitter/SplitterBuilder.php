@@ -4,18 +4,26 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler\Splitter;
 
+use Ecotone\Api\Gateway\EcotoneClockInterface;
 use Ecotone\Messaging\Config\Container\ChannelReference;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
+use Ecotone\Messaging\Config\LicenceDecider;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gathering\GatheredGroupStore;
+use Ecotone\Messaging\Handler\Gathering\GatheredHandlerEndpoints;
+use Ecotone\Messaging\Handler\Gathering\GatheringSplitterProcessor;
+use Ecotone\Messaging\Handler\Gathering\GatheringTimeouts;
+use Ecotone\Messaging\Handler\Gathering\UngatheredSplitterProcessor;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithOutputChannel;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
+use Ecotone\Messaging\Handler\MessageProcessor;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
 use Ecotone\Messaging\Handler\Processor\ChainedMessageProcessorBuilder;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\MethodInvokerBuilder;
@@ -36,9 +44,17 @@ use function is_string;
 class SplitterBuilder extends InputOutputMessageHandlerBuilder implements MessageHandlerBuilderWithParameterConverters, MessageHandlerBuilderWithOutputChannel
 {
     private array $methodParameterConverterBuilders = [];
+    private string $gatherChannelName = '';
 
     private function __construct(private Reference|Definition|DefinedObject $reference, private InterfaceToCallReference $interfaceToCallReference)
     {
+    }
+
+    public function withGatherChannelName(string $gatherChannelName): self
+    {
+        $this->gatherChannelName = $gatherChannelName;
+
+        return $this;
     }
 
     public static function create(string $referenceName, InterfaceToCall $interfaceToCall): self
@@ -111,6 +127,30 @@ class SplitterBuilder extends InputOutputMessageHandlerBuilder implements Messag
                 $this->methodParameterConverterBuilders,
             ))
             ->compileProcessor($builder, $interceptorsConfiguration);
+
+        $processorReference = 'ecotone.gathering.splitter.processor.' . $this->getEndpointId();
+        $coreProcessorReference = 'ecotone.gathering.splitter.core.' . $this->getEndpointId();
+        $enterpriseProcessorReference = 'ecotone.gathering.splitter.enterprise.' . $this->getEndpointId();
+        $builder->register($coreProcessorReference, $processor);
+        $enterpriseProcessor = $this->gatherChannelName === ''
+            ? new Definition(UngatheredSplitterProcessor::class, [new Reference($coreProcessorReference), $this->getEndpointId()])
+            : new Definition(GatheringSplitterProcessor::class, [
+                new Reference($coreProcessorReference),
+                new Reference(ChannelResolver::class),
+                new Reference(MessageBuilder::class),
+                $this->gatherChannelName,
+                $this->getEndpointId(),
+                new Reference(GatheredGroupStore::class),
+                new Reference(GatheringTimeouts::class),
+                new Reference(GatheredHandlerEndpoints::class),
+                new Reference(EcotoneClockInterface::class),
+            ]);
+        $builder->register($enterpriseProcessorReference, $enterpriseProcessor);
+        $processor = $builder->register($processorReference, LicenceDecider::prepareDefinition(
+            className: MessageProcessor::class,
+            openCoreServiceReference: $coreProcessorReference,
+            enterpriseServiceReference: $enterpriseProcessorReference,
+        ));
 
         return new Definition(SplitterHandler::class, [
             $this->outputMessageChannelName ? new ChannelReference($this->outputMessageChannelName) : null,

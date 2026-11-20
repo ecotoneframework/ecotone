@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Handler;
 
+use Ecotone\Messaging\Attribute\EndpointId;
 use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Support\Assert;
 
@@ -84,7 +85,7 @@ abstract class InputOutputMessageHandlerBuilder implements MessageHandlerBuilder
      */
     public function getEndpointAnnotations(): array
     {
-        return $this->endpointAnnotations;
+        return [...$this->endpointAnnotations, new AttributeDefinition(EndpointId::class, [$this->getEndpointId()])];
     }
 
     /**

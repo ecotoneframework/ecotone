@@ -7,15 +7,12 @@ declare(strict_types=1);
 
 namespace Ecotone\Projecting;
 
-use Ecotone\Messaging\Endpoint\Interceptor\TerminationListener;
-
 class PartitionBatchExecutorHandler
 {
     public const PARTITION_BATCH_EXECUTOR_CHANNEL = 'ecotone.projection.partition_batch.executor';
 
     public function __construct(
         private ProjectionRegistry $projectionRegistry,
-        private TerminationListener $terminationListener,
     ) {
     }
 
@@ -27,13 +24,8 @@ class PartitionBatchExecutorHandler
         ?string $aggregateType = null,
         string $eventStoreReferenceName = '',
         bool $shouldReset = false,
-        ?int $batchCount = null,
         ?string $tag = null,
     ): void {
-        if ($batchCount === 0) {
-            return;
-        }
-
         $projectingManager = $this->projectionRegistry->get($projectionName);
         $streamFilter = new StreamFilter($streamName, $aggregateType, $eventStoreReferenceName, tag: $tag);
 
@@ -41,10 +33,7 @@ class PartitionBatchExecutorHandler
             if ($shouldReset) {
                 $projectingManager->executeWithReset($partition);
             } else {
-                $projectingManager->execute($partition, true);
-            }
-            if ($this->terminationListener->shouldTerminate()) {
-                break;
+                $projectingManager->executeUntilCaughtUp($partition);
             }
         }
     }

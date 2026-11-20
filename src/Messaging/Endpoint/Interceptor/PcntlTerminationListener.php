@@ -14,6 +14,7 @@ class PcntlTerminationListener implements TerminationListener
 {
     private bool $terminationRequested = false;
     private bool $enabled = false;
+    private int $consumersListening = 0;
 
     /**
      * @var array<int, callable|int|string>
@@ -27,7 +28,7 @@ class PcntlTerminationListener implements TerminationListener
 
     /**
      * Enable signal handling by registering handlers for termination signals.
-     * If already enabled, resets the termination flag.
+     * While a consumer is already listening, a termination requested meanwhile stays requested for every consumer.
      */
     public function enable(): void
     {
@@ -35,8 +36,8 @@ class PcntlTerminationListener implements TerminationListener
             return;
         }
 
+        $this->consumersListening++;
         if ($this->enabled) {
-            $this->terminationRequested = false;
             return;
         }
 
@@ -63,6 +64,11 @@ class PcntlTerminationListener implements TerminationListener
         }
 
         if (! $this->enabled) {
+            return;
+        }
+
+        $this->consumersListening = max(0, $this->consumersListening - 1);
+        if ($this->consumersListening > 0) {
             return;
         }
 

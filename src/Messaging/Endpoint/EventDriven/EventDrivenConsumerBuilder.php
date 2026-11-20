@@ -26,7 +26,7 @@ class EventDrivenConsumerBuilder implements MessageHandlerConsumerBuilder
     /**
      * @inheritDoc
      */
-    public function registerConsumer(MessagingContainerBuilder $builder, MessageHandlerBuilder $messageHandlerBuilder): void
+    public function registerConsumer(MessagingContainerBuilder $builder, MessageHandlerBuilder $messageHandlerBuilder, array $streamsConsumed): void
     {
         $inputChannel = $messageHandlerBuilder->getInputMessageChannelName();
         $channelDefinition = $builder->getDefinition(new ChannelReference($inputChannel));

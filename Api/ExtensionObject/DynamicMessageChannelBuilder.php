@@ -34,12 +34,14 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
 {
     /**
      * @param MessageChannelBuilder[] $internalMessageChannels
+     * @param string[] $receivingChannelNames
      */
     private function __construct(
-        private string     $thisMessageChannelName,
-        private Definition $channelSendingStrategy,
-        private Definition $channelReceivingStrategy,
-        private array      $internalMessageChannels = []
+        private readonly string     $thisMessageChannelName,
+        private readonly Definition $channelSendingStrategy,
+        private readonly Definition $channelReceivingStrategy,
+        public readonly array       $internalMessageChannels = [],
+        public readonly array       $receivingChannelNames = [],
     ) {
         Assert::allInstanceOfType($internalMessageChannels, MessageChannelBuilder::class);
     }
@@ -57,6 +59,7 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
             $thisMessageChannelName,
             new Definition(RoundRobinSendingStrategy::class, [$sendingChannelNames]),
             new Definition(RoundRobinReceivingStrategy::class, [$receivingChannelNames]),
+            receivingChannelNames: $receivingChannelNames,
         );
     }
 
@@ -76,6 +79,7 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
             $thisMessageChannelName,
             new Definition(RoundRobinSendingStrategy::class, [$channelNames]),
             new Definition(RoundRobinReceivingStrategy::class, [$channelNames]),
+            receivingChannelNames: $channelNames,
         );
     }
 
@@ -116,6 +120,7 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
                 $defaultChannelName,
             ]),
             new Definition(RoundRobinReceivingStrategy::class, [array_unique(array_merge(array_values($headerMapping)))]),
+            receivingChannelNames: array_values(array_unique(array_values($headerMapping))),
         );
     }
 
@@ -136,6 +141,7 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
                 new Definition(RoundRobinReceivingStrategy::class, [$channelNames]),
                 $requestChannelName,
             ]),
+            receivingChannelNames: $channelNames,
         );
     }
 
@@ -144,22 +150,16 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
      */
     public function withInternalChannels(array $internalMessageChannels): self
     {
-        Assert::allInstanceOfType($internalMessageChannels, MessageChannelBuilder::class);
-
-        $this->internalMessageChannels = $internalMessageChannels;
-
-        return $this;
+        return new self(...[...get_object_vars($this), 'internalMessageChannels' => $internalMessageChannels]);
     }
 
     public function withCustomSendingStrategy(string $requestChannelName): self
     {
-        $this->channelSendingStrategy = new Definition(CustomSendingStrategy::class, [
+        return new self(...[...get_object_vars($this), 'channelSendingStrategy' => new Definition(CustomSendingStrategy::class, [
             Reference::to(MessagingEntrypointService::class),
             $requestChannelName,
             Reference::to(MessageBuilder::class),
-        ]);
-
-        return $this;
+        ])]);
     }
 
     /**
@@ -167,23 +167,19 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
      */
     public function withHeaderSendingStrategy(string $headerName, ?array $headerMapping = null, ?string $defaultChannelName = null): self
     {
-        $this->channelSendingStrategy = new Definition(HeaderSendingStrategy::class, [
+        return new self(...[...get_object_vars($this), 'channelSendingStrategy' => new Definition(HeaderSendingStrategy::class, [
             $headerName,
             $headerMapping,
             $defaultChannelName,
-        ]);
-
-        return $this;
+        ])]);
     }
 
     public function withCustomReceivingStrategy(string $requestChannelName): self
     {
-        $this->channelReceivingStrategy = new Definition(CustomReceivingStrategy::class, [
+        return new self(...[...get_object_vars($this), 'receivingChannelNames' => [], 'channelReceivingStrategy' => new Definition(CustomReceivingStrategy::class, [
             Reference::to(MessagingEntrypointService::class),
             $requestChannelName,
-        ]);
-
-        return $this;
+        ])]);
     }
 
     public function compile(MessagingContainerBuilder $builder): Definition|Reference
@@ -230,5 +226,10 @@ final class DynamicMessageChannelBuilder implements MessageChannelBuilder
     public function isStreamingChannel(): bool
     {
         return false;
+    }
+
+    public function hasCustomReceivingStrategy(): bool
+    {
+        return $this->channelReceivingStrategy->getClassName() === CustomReceivingStrategy::class;
     }
 }

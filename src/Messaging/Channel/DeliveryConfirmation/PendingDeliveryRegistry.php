@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Channel\DeliveryConfirmation;
 
+use Ecotone\Messaging\Execution\ExecutionScope;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 use Throwable;
 use WeakMap;
@@ -28,9 +29,6 @@ use WeakMap;
  */
 final class PendingDeliveryRegistry
 {
-    /** @var array<int, array{channelName: string, pendingDelivery: PendingDelivery, scopeOwned: bool}> */
-    private array $pendingDeliveries = [];
-
     /** @var WeakMap<self, bool>|null */
     private static ?WeakMap $registriesFlushedOnShutdown = null;
 
@@ -42,40 +40,34 @@ final class PendingDeliveryRegistry
 
     private const MAX_UNAWAITED_BACKLOG = 1024;
 
-    private int $nextRegistrationIndex = 0;
-
-    private int $registrationsSinceLastPrune = 0;
-
-    private bool $scopeActive = false;
-
     public function openScope(): void
     {
-        $this->scopeActive = true;
+        $this->registered()->scopeActive = true;
     }
 
     public function isScopeActive(): bool
     {
-        return $this->scopeActive;
+        return $this->registered()->scopeActive;
     }
 
     public function closeScope(): void
     {
-        $this->scopeActive = false;
-        foreach ($this->pendingDeliveries as $index => $registration) {
+        $this->registered()->scopeActive = false;
+        foreach ($this->registered()->pendingDeliveries as $index => $registration) {
             if ($registration['scopeOwned']) {
                 if (! $registration['pendingDelivery']->isAwaited()) {
                     $this->awaitAndLogFailures($registration['pendingDelivery']);
                 }
-                unset($this->pendingDeliveries[$index]);
+                unset($this->registered()->pendingDeliveries[$index]);
             }
         }
     }
 
     public function markRegisteredSinceAsPublisherOwned(int $collectionPoint): void
     {
-        for ($index = $collectionPoint; $index < $this->nextRegistrationIndex; $index++) {
-            if (isset($this->pendingDeliveries[$index])) {
-                $this->pendingDeliveries[$index]['scopeOwned'] = false;
+        for ($index = $collectionPoint; $index < $this->registered()->nextRegistrationIndex; $index++) {
+            if (isset($this->registered()->pendingDeliveries[$index])) {
+                $this->registered()->pendingDeliveries[$index]['scopeOwned'] = false;
             }
         }
     }
@@ -83,7 +75,7 @@ final class PendingDeliveryRegistry
     public function awaitAll(): DeliveryResult
     {
         $failedDeliveries = [];
-        foreach ($this->pendingDeliveries as $registration) {
+        foreach ($this->registered()->pendingDeliveries as $registration) {
             if (! $registration['scopeOwned'] || $registration['pendingDelivery']->isAwaited()) {
                 continue;
             }
@@ -100,16 +92,16 @@ final class PendingDeliveryRegistry
     public function register(string $channelName, PendingDelivery $pendingDelivery): void
     {
         $this->flushUnawaitedDeliveriesOnShutdown();
-        if (++$this->registrationsSinceLastPrune >= self::PRUNE_INTERVAL) {
+        if (++$this->registered()->registrationsSinceLastPrune >= self::PRUNE_INTERVAL) {
             $this->pruneAwaitedDeliveries();
-            $this->registrationsSinceLastPrune = 0;
+            $this->registered()->registrationsSinceLastPrune = 0;
         }
-        $this->pendingDeliveries[$this->nextRegistrationIndex++] = ['channelName' => $channelName, 'pendingDelivery' => $pendingDelivery, 'scopeOwned' => $this->scopeActive];
+        $this->registered()->pendingDeliveries[$this->registered()->nextRegistrationIndex++] = ['channelName' => $channelName, 'pendingDelivery' => $pendingDelivery, 'scopeOwned' => $this->registered()->scopeActive];
     }
 
     public function collectionPoint(): int
     {
-        return $this->nextRegistrationIndex;
+        return $this->registered()->nextRegistrationIndex;
     }
 
     /**
@@ -118,9 +110,9 @@ final class PendingDeliveryRegistry
     public function registeredSince(int $collectionPoint): array
     {
         $registered = [];
-        for ($index = $collectionPoint; $index < $this->nextRegistrationIndex; $index++) {
-            if (isset($this->pendingDeliveries[$index])) {
-                $registered[] = $this->pendingDeliveries[$index]['pendingDelivery'];
+        for ($index = $collectionPoint; $index < $this->registered()->nextRegistrationIndex; $index++) {
+            if (isset($this->registered()->pendingDeliveries[$index])) {
+                $registered[] = $this->registered()->pendingDeliveries[$index]['pendingDelivery'];
             }
         }
 
@@ -143,19 +135,32 @@ final class PendingDeliveryRegistry
 
     public function flushUnawaitedDeliveries(): void
     {
-        foreach ($this->pendingDeliveries as $registration) {
+        $this->flushUnawaited($this->registered());
+    }
+
+    private function flushUnawaited(RegisteredDeliveries $registered): void
+    {
+        foreach ($registered->pendingDeliveries as $registration) {
             if (! $registration['pendingDelivery']->isAwaited()) {
                 $this->awaitAndLogFailures($registration['pendingDelivery']);
             }
         }
-        $this->pendingDeliveries = [];
+        $registered->pendingDeliveries = [];
+    }
+
+    private function registered(): RegisteredDeliveries
+    {
+        return ExecutionScope::stateOf(
+            $this,
+            fn () => new RegisteredDeliveries(ExecutionScope::isConcurrent() ? $this->flushUnawaited(...) : null)
+        );
     }
 
     private function pruneAwaitedDeliveries(): void
     {
-        foreach ($this->pendingDeliveries as $index => $registration) {
+        foreach ($this->registered()->pendingDeliveries as $index => $registration) {
             if ($registration['pendingDelivery']->isAwaited()) {
-                unset($this->pendingDeliveries[$index]);
+                unset($this->registered()->pendingDeliveries[$index]);
             }
         }
 
@@ -164,18 +169,18 @@ final class PendingDeliveryRegistry
 
     private function flushOldestPublisherOwnedDeliveriesAboveBacklogLimit(): void
     {
-        $exceedingBacklogLimit = count($this->pendingDeliveries) - self::MAX_UNAWAITED_BACKLOG;
+        $exceedingBacklogLimit = count($this->registered()->pendingDeliveries) - self::MAX_UNAWAITED_BACKLOG;
         if ($exceedingBacklogLimit <= 0) {
             return;
         }
 
-        foreach ($this->pendingDeliveries as $index => $registration) {
+        foreach ($this->registered()->pendingDeliveries as $index => $registration) {
             if ($registration['scopeOwned']) {
                 continue;
             }
 
             $this->awaitAndLogFailures($registration['pendingDelivery']);
-            unset($this->pendingDeliveries[$index]);
+            unset($this->registered()->pendingDeliveries[$index]);
 
             if (--$exceedingBacklogLimit <= 0) {
                 return;

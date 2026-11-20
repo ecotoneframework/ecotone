@@ -160,6 +160,7 @@ final class PulseModule implements AnnotationModule
             MessageProcessorActivatorBuilder::createForMethod(PulseSnapshot::class, $interfaceToCallRegistry->getFor(PulseSnapshot::class, 'snapshotJson'))
                 ->withInputChannelName(PulseSnapshot::ROUTING_KEY)
                 ->withMethodParameterConverters([
+                    PulseRequestBodyBuilder::create('payload'),
                     HeaderBuilder::createOptional('sourceService', DistributedBusHeader::DISTRIBUTED_SOURCE_SERVICE_NAME),
                     AllHeadersBuilder::createWith('headers'),
                 ])

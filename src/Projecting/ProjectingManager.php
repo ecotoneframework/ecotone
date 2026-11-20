@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Projecting;
 
+use Ecotone\Api\Messaging\Message;
 use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Endpoint\Interceptor\TerminationListener;
 use Ecotone\Messaging\Gateway\MessagingEntrypointService;
@@ -29,6 +30,7 @@ class ProjectingManager
         private string                         $projectionName,
         private TerminationListener            $terminationListener,
         private MessagingEntrypointService      $messagingEntrypoint,
+        private PartitionBatchDispatcher       $partitionBatchDispatcher,
         private int                            $eventLoadingBatchSize = 1000,
         private bool                           $automaticInitialization = true,
         private int                            $backfillPartitionBatchSize = self::DEFAULT_BACKFILL_PARTITION_BATCH_SIZE,
@@ -59,15 +61,27 @@ class ProjectingManager
     public function execute(?string $partitionKeyValue = null, bool $manualInitialization = false): void
     {
         do {
-            $processedEvents = $this->messagingEntrypoint->sendWithHeaders(
-                [],
-                [
-                    ProjectingHeaders::PROJECTION_PARTITION_KEY => $partitionKeyValue,
-                    ProjectingHeaders::PROJECTION_CAN_INITIALIZE => $manualInitialization || $this->automaticInitialization,
-                ],
-                self::batchChannelFor($this->projectionName)
-            );
+            $processedEvents = $this->executeNextEventsOf($partitionKeyValue, $manualInitialization);
         } while ($processedEvents > 0 && $this->terminationListener->shouldTerminate() !== true);
+    }
+
+    public function executeUntilCaughtUp(?string $partitionKeyValue): void
+    {
+        do {
+            $processedEvents = $this->executeNextEventsOf($partitionKeyValue, true);
+        } while ($processedEvents > 0);
+    }
+
+    private function executeNextEventsOf(?string $partitionKeyValue, bool $manualInitialization): int
+    {
+        return $this->messagingEntrypoint->sendWithHeaders(
+            [],
+            [
+                ProjectingHeaders::PROJECTION_PARTITION_KEY => $partitionKeyValue,
+                ProjectingHeaders::PROJECTION_CAN_INITIALIZE => $manualInitialization || $this->automaticInitialization,
+            ],
+            self::batchChannelFor($this->projectionName)
+        );
     }
 
     /**
@@ -197,9 +211,9 @@ class ProjectingManager
         $this->projectorExecutor->delete();
     }
 
-    public function prepareBackfill(): void
+    public function prepareBackfill(Message $prepare): void
     {
-        $this->preparePartitionBatches($this->backfillPartitionBatchSize, $this->backfillAsyncChannelName, false);
+        $this->preparePartitionBatches(operation: ProjectionOperationEndpoint::BACKFILL, partitionBatchSize: $this->backfillPartitionBatchSize, asyncChannelName: $this->backfillAsyncChannelName, shouldReset: false, prepare: $prepare);
     }
 
     public function executeWithReset(?string $partitionKeyValue = null): void
@@ -239,12 +253,12 @@ class ProjectingManager
         }
     }
 
-    public function prepareRebuild(): void
+    public function prepareRebuild(Message $prepare): void
     {
-        $this->preparePartitionBatches($this->rebuildPartitionBatchSize, $this->rebuildAsyncChannelName, true);
+        $this->preparePartitionBatches(operation: ProjectionOperationEndpoint::REBUILD, partitionBatchSize: $this->rebuildPartitionBatchSize, asyncChannelName: $this->rebuildAsyncChannelName, shouldReset: true, prepare: $prepare);
     }
 
-    private function preparePartitionBatches(int $partitionBatchSize, ?string $asyncChannelName, bool $shouldReset): void
+    private function preparePartitionBatches(string $operation, int $partitionBatchSize, ?string $asyncChannelName, bool $shouldReset, Message $prepare): void
     {
         $partitionsPerStreamFilter = [];
         foreach ($this->streamFilterRegistry->provide($this->projectionName) as $streamFilter) {
@@ -254,59 +268,25 @@ class ProjectingManager
             }
         }
 
-        $totalPartitions = array_sum(array_column($partitionsPerStreamFilter, 1));
-        $totalBatches = array_sum(array_map(fn (array $counted): int => (int) ceil($counted[1] / $partitionBatchSize), $partitionsPerStreamFilter));
-        $batchNumber = 0;
-
-        if ($totalBatches === 0) {
-            $this->sendPartitionBatchMessage([
-                ProjectingHeaders::REBUILD_BATCH_NUMBER => 0,
-                ProjectingHeaders::REBUILD_BATCH_COUNT => 0,
-                ProjectingHeaders::REBUILD_PARTITION_COUNT => 0,
-            ], null);
-        }
+        $batches = [];
 
         foreach ($partitionsPerStreamFilter as [$streamFilter, $partitionsOfFilter]) {
             $numberOfBatches = (int) ceil($partitionsOfFilter / $partitionBatchSize);
 
             for ($batch = 0; $batch < $numberOfBatches; $batch++) {
-                $offset = $batch * $partitionBatchSize;
-                $batchNumber++;
-
-                $headers = [
+                $batches[] = [
                     'partitionBatch.limit' => $partitionBatchSize,
-                    'partitionBatch.offset' => $offset,
+                    'partitionBatch.offset' => $batch * $partitionBatchSize,
                     'partitionBatch.streamName' => $streamFilter->streamName,
                     'partitionBatch.aggregateType' => $streamFilter->aggregateType,
                     'partitionBatch.eventStoreReferenceName' => $streamFilter->eventStoreReferenceName,
                     'partitionBatch.tag' => $streamFilter->tag,
                     'partitionBatch.shouldReset' => $shouldReset,
-                    ProjectingHeaders::REBUILD_BATCH_NUMBER => $batchNumber,
-                    ProjectingHeaders::REBUILD_BATCH_COUNT => $totalBatches,
-                    ProjectingHeaders::REBUILD_PARTITION_COUNT => $totalPartitions,
                 ];
-
-                $this->sendPartitionBatchMessage($headers, $asyncChannelName);
             }
         }
-    }
 
-    private function sendPartitionBatchMessage(array $headers, ?string $asyncChannelName): void
-    {
-        if ($asyncChannelName !== null) {
-            $this->messagingEntrypoint->sendWithHeaders(
-                $this->projectionName,
-                $headers,
-                $asyncChannelName,
-                PartitionBatchExecutorHandler::PARTITION_BATCH_EXECUTOR_CHANNEL
-            );
-        } else {
-            $this->messagingEntrypoint->sendWithHeaders(
-                $this->projectionName,
-                $headers,
-                PartitionBatchExecutorHandler::PARTITION_BATCH_EXECUTOR_CHANNEL
-            );
-        }
+        $this->partitionBatchDispatcher->dispatch(projectionName: $this->projectionName, operation: $operation, asyncChannelName: $asyncChannelName, prepare: $prepare, batches: $batches);
     }
 
     private function loadPartitionStateToProcess(?string $partitionKey, bool $canInitialize): ?ProjectionPartitionState

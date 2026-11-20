@@ -63,7 +63,7 @@ final class PulseSnapshotResponderTest extends TestCase
 
         self::assertCount(1, $pulse->snapshots);
         $snapshot = json_decode($pulse->snapshots[0], true, flags: JSON_THROW_ON_ERROR);
-        self::assertSame(1, $snapshot['schemaVersion']);
+        self::assertSame(2, $snapshot['schemaVersion']);
         self::assertSame('order_service', $snapshot['serviceName']);
         self::assertSame('2026-10-20T12:00:00+00:00', $snapshot['takenAt']);
         self::assertSame(PHP_VERSION, $snapshot['overview']['phpVersion']);
@@ -144,7 +144,7 @@ final class PulseSnapshotResponderTest extends TestCase
         $pulseService->run('pulse_channel', ExecutionPollingMetadata::createWithTestingSetup());
 
         $snapshot = json_decode($pulse->snapshots[0], true, flags: JSON_THROW_ON_ERROR);
-        self::assertSame(1, $snapshot['schemaVersion']);
+        self::assertSame(2, $snapshot['schemaVersion']);
         self::assertSame([
             ['name' => 'order_channel', 'kind' => 'queue', 'consumerToRun' => 'order_channel', 'handlers' => [], 'ready' => null, 'delayed' => null, 'inFlight' => null, 'consumers' => null, 'probeError' => null, 'setUp' => null],
             ['name' => 'orders_async', 'kind' => 'async', 'consumerToRun' => 'orders_async', 'handlers' => ['order.place_later → placeLater'], 'ready' => null, 'delayed' => null, 'inFlight' => null, 'consumers' => null, 'probeError' => null, 'setUp' => null],
@@ -431,6 +431,82 @@ final class PulseSnapshotResponderTest extends TestCase
             enabledModules: [],
             licenceKey: LicenceTesting::VALID_LICENCE,
         );
+    }
+
+    public function test_the_reply_carries_a_digest_of_every_section_it_answers(): void
+    {
+        $pulse = $this->pulseReplies();
+        $channels = $this->channels();
+        $orderService = $this->orderService($this->orders(), $channels);
+        $pulseService = $this->pulseService($pulse, $channels);
+
+        $snapshot = $this->snapshotAnsweredTo('{}', $pulseService, $orderService, $pulse);
+
+        self::assertSame(['overview', 'flowGraph', 'topology', 'channels', 'consumers', 'packages', 'projections'], array_keys($snapshot['digests']));
+        foreach ($snapshot['digests'] as $section => $digest) {
+            self::assertNotSame('', $digest);
+            self::assertArrayHasKey($section, $snapshot);
+        }
+        self::assertArrayNotHasKey('partial', $snapshot);
+    }
+
+    public function test_a_section_whose_digest_pulse_already_holds_is_left_out_of_the_reply(): void
+    {
+        $pulse = $this->pulseReplies();
+        $channels = $this->channels();
+        $orderService = $this->orderService($this->orders(), $channels);
+        $pulseService = $this->pulseService($pulse, $channels);
+        $first = $this->snapshotAnsweredTo('{}', $pulseService, $orderService, $pulse);
+
+        $second = $this->snapshotAnsweredTo(
+            json_encode(['known' => ['flowGraph' => $first['digests']['flowGraph'], 'packages' => $first['digests']['packages']]], JSON_THROW_ON_ERROR),
+            $pulseService,
+            $orderService,
+            $pulse,
+        );
+
+        self::assertArrayNotHasKey('flowGraph', $second);
+        self::assertArrayNotHasKey('packages', $second);
+        self::assertSame($first['digests'], $second['digests']);
+        self::assertSame($first['overview'], $second['overview']);
+        self::assertSame($first['topology'], $second['topology']);
+        self::assertSame('order_service', $second['serviceName']);
+    }
+
+    public function test_a_section_that_differs_from_the_digest_pulse_holds_is_sent_again(): void
+    {
+        $pulse = $this->pulseReplies();
+        $channels = $this->channels();
+        $orderService = $this->orderService($this->orders(), $channels);
+        $pulseService = $this->pulseService($pulse, $channels);
+        $first = $this->snapshotAnsweredTo('{}', $pulseService, $orderService, $pulse);
+
+        $second = $this->snapshotAnsweredTo('{"known": {"flowGraph": "00000000000000000000000000000000", "noLongerReported": "11111111111111111111111111111111"}}', $pulseService, $orderService, $pulse);
+
+        self::assertSame($first['flowGraph'], $second['flowGraph']);
+        self::assertSame($first['digests'], $second['digests']);
+    }
+
+    public function test_known_digests_that_are_not_a_map_of_section_to_digest_are_refused(): void
+    {
+        $pulse = $this->pulseReplies();
+        $channels = $this->channels();
+        $orderService = $this->orderService($this->orders(), $channels);
+        $pulseService = $this->pulseService($pulse, $channels);
+
+        $failure = $this->snapshotAnsweredTo('{"known": ["flowGraph"]}', $pulseService, $orderService, $pulse);
+
+        self::assertSame('ecotone.pulse.snapshot', $failure['requestKind']);
+        self::assertSame('A Pulse snapshot request names the sections Pulse already holds as `known`, a JSON object of section name to the digest of that section, but `{"known": ["flowGraph"]}` was sent. Send {"known": {"flowGraph": "<digest>"}}, taking each digest from `digests` of an earlier snapshot, or send {} to receive every section.', $failure['message']);
+    }
+
+    private function snapshotAnsweredTo(string $request, FlowTestSupport $pulseService, FlowTestSupport $orderService, object $pulse): array
+    {
+        $pulseService->getDistributedBus()->sendMessage('order_service', 'ecotone.pulse.snapshot', $request, MediaType::APPLICATION_JSON, replyRoutingKey: 'ecotone.pulse.snapshot_received');
+        $orderService->run('order_channel', ExecutionPollingMetadata::createWithTestingSetup());
+        $pulseService->run('pulse_channel', ExecutionPollingMetadata::createWithTestingSetup());
+
+        return json_decode($pulse->snapshots[array_key_last($pulse->snapshots)], true, flags: JSON_THROW_ON_ERROR);
     }
 
     private function pulseMap(): DistributedServiceMap

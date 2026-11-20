@@ -8,7 +8,6 @@ use Ecotone\Api\Messaging\Message;
 use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Api\Tracing\SpanAttribute;
 use Ecotone\Messaging\Support\FrameworkHeaders;
-use Ecotone\Projecting\ProjectingHeaders;
 
 use function is_scalar;
 
@@ -17,7 +16,6 @@ use function is_scalar;
  */
 final class MessageSpanAttributes
 {
-    private const ALWAYS_REPORTED = [ProjectingHeaders::REBUILD_BATCH_NUMBER, ProjectingHeaders::REBUILD_BATCH_COUNT, ProjectingHeaders::REBUILD_PARTITION_COUNT];
     private const RESERVED_PREFIXES = ['ecotone.', 'messaging.', 'code.'];
 
     /**
@@ -55,9 +53,6 @@ final class MessageSpanAttributes
 
     private function isReported(string $headerName): bool
     {
-        if (in_array($headerName, self::ALWAYS_REPORTED, true)) {
-            return true;
-        }
         foreach (self::RESERVED_PREFIXES as $prefix) {
             if (str_starts_with($headerName, $prefix)) {
                 return false;

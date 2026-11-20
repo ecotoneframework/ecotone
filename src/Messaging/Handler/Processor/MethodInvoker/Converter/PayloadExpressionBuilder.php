@@ -50,6 +50,8 @@ class PayloadExpressionBuilder implements ParameterConverterBuilder
             new Reference(ExpressionEvaluationService::REFERENCE),
             $this->expression,
             ExpressionLocation::definitionForParameter(Payload::class, $this->parameterName, $interfaceToCall->getInterfaceName(), $interfaceToCall->getMethodName(), $this->expression),
+            ArgumentTypeConversion::definition(),
+            $interfaceToCall->getParameterWithName($this->parameterName)->getTypeDescriptor(),
         ]);
     }
 }

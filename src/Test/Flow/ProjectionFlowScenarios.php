@@ -111,6 +111,9 @@ final class ProjectionFlowScenarios
                 ->expect(
                     ExpectedSpan::named('receive ' . $operation)->ofKind(SpanKind::Consumer)->containing(
                         self::projectionHandled($operation),
+                        ExpectedSpan::named('send ' . $operation)->ofKind(SpanKind::Producer)->containing(
+                            ExpectedSpan::named('receive ' . $operation)->ofKind(SpanKind::Consumer),
+                        ),
                     ),
                 )
                 ->withNoOtherSpans(),

@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Ecotone\Messaging\Endpoint\PollingConsumer;
 
+use Ecotone\Messaging\Execution\ExecutionList;
+use Ecotone\Messaging\Execution\ExecutionScope;
+
 /**
  * licence Enterprise
  *
@@ -24,15 +27,12 @@ namespace Ecotone\Messaging\Endpoint\PollingConsumer;
  */
 class AsyncEndpointAnnotationContext
 {
-    /** @var object[] */
-    private array $currentAnnotations = [];
-
     /**
      * @param object[] $annotations
      */
     public function setAnnotations(array $annotations): void
     {
-        $this->currentAnnotations = $annotations;
+        $this->currentAnnotations()->items = $annotations;
     }
 
     /**
@@ -40,11 +40,16 @@ class AsyncEndpointAnnotationContext
      */
     public function getCurrentAnnotations(): array
     {
-        return $this->currentAnnotations;
+        return $this->currentAnnotations()->items;
     }
 
     public function clear(): void
     {
-        $this->currentAnnotations = [];
+        $this->currentAnnotations()->items = [];
+    }
+
+    private function currentAnnotations(): ExecutionList
+    {
+        return ExecutionScope::stateOf($this, static fn () => new ExecutionList());
     }
 }

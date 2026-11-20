@@ -20,11 +20,13 @@ use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Api\Modelling\EventSourcedRepository;
 use Ecotone\Api\Modelling\StateStoredRepository;
 use Ecotone\EventSourcing\Mapping\EventMapper;
+use Ecotone\Messaging\Attribute\EndpointId;
 use Ecotone\Messaging\Config\Annotation\AnnotatedDefinitionReference;
 use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\ParameterConverterAnnotationFactory;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConfigurationException;
+use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\Definition;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -638,7 +640,8 @@ final class AggregateModule implements AnnotationModule, RoutingEventHandler
             CallAggregateServiceBuilder::create($aggregateClassDefinition, $factoryRegistration->getMethodName(), true, $this->interfaceToCallRegistry)
                 ->withMethodParameterConverters($factoryParameterConverters)
         )
-            ->withRequiredInterceptorNames($factoryAnnotation->getRequiredInterceptorNames());
+            ->withRequiredInterceptorNames($factoryAnnotation->getRequiredInterceptorNames())
+            ->withEndpointAnnotations([new AttributeDefinition(EndpointId::class, [$factoryAnnotation->getEndpointId()])]);
 
         // action processor
         /** @var CommandHandler|EventHandler $actionAnnotation */
@@ -649,7 +652,8 @@ final class AggregateModule implements AnnotationModule, RoutingEventHandler
             CallAggregateServiceBuilder::create($aggregateClassDefinition, $actionRegistration->getMethodName(), true, $this->interfaceToCallRegistry)
                 ->withMethodParameterConverters($actionParameterConverters)
         )
-            ->withRequiredInterceptorNames($actionAnnotation->getRequiredInterceptorNames());
+            ->withRequiredInterceptorNames($actionAnnotation->getRequiredInterceptorNames())
+            ->withEndpointAnnotations([new AttributeDefinition(EndpointId::class, [$actionAnnotation->getEndpointId()])]);
 
         // This is executed before sending to async channel
         $aggregateIdentifierHandlerPreCheck = MessageProcessorActivatorBuilder::create()

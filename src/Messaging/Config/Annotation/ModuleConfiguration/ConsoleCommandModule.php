@@ -16,7 +16,6 @@ use Ecotone\Messaging\Config\Annotation\AnnotationModule;
 use Ecotone\Messaging\Config\Configuration;
 use Ecotone\Messaging\Config\ConsoleCommandConfiguration;
 use Ecotone\Messaging\Config\ConsoleCommandParameter;
-use Ecotone\Messaging\Config\Container\AttributeDefinition;
 use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Config\ModuleReferenceSearchService;
@@ -90,7 +89,7 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
         return [$messageHandlerBuilder, $oneTimeCommandConfiguration];
     }
 
-    public static function prepareConsoleCommandForReference(Reference $reference, InterfaceToCallReference $interfaceToCallReference, string $commandName, bool $discoverableByConsoleCommandAttribute, InterfaceToCallRegistry $interfaceToCallRegistry, string $description = '')
+    public static function prepareConsoleCommandForReference(Reference $reference, InterfaceToCallReference $interfaceToCallReference, string $commandName, InterfaceToCallRegistry $interfaceToCallRegistry, string $description = '')
     {
         $className = $interfaceToCallReference->getClassName();
         $methodName = $interfaceToCallReference->getMethodName();
@@ -102,7 +101,6 @@ final class ConsoleCommandModule extends NoExternalConfigurationModule implement
         $inputChannel                = 'ecotone.channel.' . $commandName;
         $messageHandlerBuilder       = MessageProcessorActivatorBuilder::createForMethod($reference->getId(), $interfaceToCallReference)
             ->withEndpointId('ecotone.endpoint.' . $commandName)
-            ->withEndpointAnnotations($discoverableByConsoleCommandAttribute ? [new AttributeDefinition(ConsoleCommand::class, [$commandName])] : [])
             ->withInputChannelName($inputChannel)
             ->withMethodParameterConverters($parameterConverters);
         $oneTimeCommandConfiguration = ConsoleCommandConfiguration::create($inputChannel, $commandName, $parameters, $description);

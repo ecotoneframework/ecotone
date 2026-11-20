@@ -154,7 +154,7 @@ final class ImmutableConfigurationCopyTest extends TestCase
             ->withExecutionAmountLimit(5);
 
         self::assertSame(
-            ['handledMessageLimit', 'executionTimeLimitInMilliseconds', 'memoryLimitInMegabytes', 'cron', 'stopOnError', 'finishWhenNoMessages', 'executionAmountLimit'],
+            ['handledMessageLimit', 'executionTimeLimitInMilliseconds', 'memoryLimitInMegabytes', 'cron', 'stopOnError', 'finishWhenNoMessages', 'executionAmountLimit', 'coroutines'],
             array_keys(get_object_vars($original)),
         );
         self::assertCopyChangesOnly($original, fn (ExecutionPollingMetadata $metadata) => $metadata->withCron('0 * * * *'), ['cron' => '0 * * * *']);
@@ -164,6 +164,7 @@ final class ImmutableConfigurationCopyTest extends TestCase
         self::assertCopyChangesOnly($original, fn (ExecutionPollingMetadata $metadata) => $metadata->withStopOnError(true), ['stopOnError' => true]);
         self::assertCopyChangesOnly($original, fn (ExecutionPollingMetadata $metadata) => $metadata->withFinishWhenNoMessages(true), ['finishWhenNoMessages' => true]);
         self::assertCopyChangesOnly($original, fn (ExecutionPollingMetadata $metadata) => $metadata->withExecutionAmountLimit(7), ['executionAmountLimit' => 7]);
+        self::assertCopyChangesOnly($original, fn (ExecutionPollingMetadata $metadata) => $metadata->withCoroutines(4), ['coroutines' => 4]);
         self::assertCopyChangesOnly(
             $original,
             fn (ExecutionPollingMetadata $metadata) => $metadata->withTestingSetup(handledMessageLimit: 3, executionTimeLimitInMilliseconds: 30, stopOnError: true),
@@ -261,7 +262,7 @@ final class ImmutableConfigurationCopyTest extends TestCase
         ];
 
         self::assertEqualsCanonicalizing(
-            ['withSignalInterceptors', 'cron', 'isErrorChannelEnabled', 'fixedRateInMilliseconds', 'initialDelayInMilliseconds', 'handledMessageLimit', 'memoryLimitInMegabytes', 'executionAmountLimit', 'maxMessagePerPoll', 'executionTimeLimitInMilliseconds', 'connectionRetryTemplate', 'triggerReferenceName', 'taskExecutorName', 'stopOnError', 'finishWhenNoMessages', 'fixedRateExpression', 'cronExpression', 'polledChannelName'],
+            ['withSignalInterceptors', 'cron', 'isErrorChannelEnabled', 'fixedRateInMilliseconds', 'initialDelayInMilliseconds', 'handledMessageLimit', 'memoryLimitInMegabytes', 'executionAmountLimit', 'maxMessagePerPoll', 'executionTimeLimitInMilliseconds', 'connectionRetryTemplate', 'triggerReferenceName', 'taskExecutorName', 'stopOnError', 'finishWhenNoMessages', 'fixedRateExpression', 'cronExpression', 'polledChannelName', 'coroutines'],
             array_keys(get_object_vars($original)),
         );
         self::assertCopyChangesOnly($original, fn (PollingMetadata $metadata) => $metadata->withCron('0 * * * *'), ['cron' => '0 * * * *'], $observe);
@@ -280,6 +281,7 @@ final class ImmutableConfigurationCopyTest extends TestCase
         self::assertCopyChangesOnly($original, fn (PollingMetadata $metadata) => $metadata->withTaskExecutorName('other_executor'), ['taskExecutorName' => 'other_executor'], $observe);
         self::assertCopyChangesOnly($original, fn (PollingMetadata $metadata) => $metadata->withStopOnError(true), ['stopOnError' => true, 'errorChannelName' => ''], $observe);
         self::assertCopyChangesOnly($original, fn (PollingMetadata $metadata) => $metadata->withFinishWhenNoMessages(true), ['finishWhenNoMessages' => true], $observe);
+        self::assertCopyChangesOnly($original, fn (PollingMetadata $metadata) => $metadata->withCoroutines(4), ['coroutines' => 4], $observe);
         self::assertCopyChangesOnly($original, fn (PollingMetadata $metadata) => $metadata->withFixedRateExpression('2000'), ['fixedRateExpression' => '2000'], $observe);
         self::assertCopyChangesOnly($original, fn (PollingMetadata $metadata) => $metadata->withCronExpression(null), ['cronExpression' => null], $observe);
         self::assertCopyChangesOnly($original, fn (PollingMetadata $metadata) => $metadata->withPolledChannelName('payments_channel'), ['polledChannelName' => 'payments_channel'], $observe);

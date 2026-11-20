@@ -28,6 +28,7 @@ use Ecotone\Projecting\EnterpriseProjectionNameHeader;
 use Ecotone\Projecting\OpenCoreProjectionNameHeader;
 use Ecotone\Projecting\ProjectingHeaders;
 use Ecotone\Projecting\ProjectionNameHeader;
+use Ecotone\Projecting\ProjectionOperationEndpoint;
 
 class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
 {
@@ -60,6 +61,8 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         private bool    $hasDeployment = false,
         private bool    $polling = false,
         private ?string $partitionTag = null,
+        private ?string $backfillBatchCompletionChannelName = null,
+        private ?string $rebuildBatchCompletionChannelName = null,
     ) {
         if ($this->partitionHeader && ! $this->automaticInitialization) {
             throw new ConfigurationException("Cannot set partition header for projection {$this->projectionName} with automatic initialization disabled");
@@ -159,6 +162,11 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
         return $this->backfillAsyncChannelName;
     }
 
+    public function backfillBatchCompletionChannelName(): ?string
+    {
+        return ProjectionOperationEndpoint::batchCompletionChannelOf($this->backfillBatchCompletionChannelName, $this->backfillAsyncChannelName);
+    }
+
     public function rebuildPartitionBatchSize(): int
     {
         return $this->rebuildPartitionBatchSize ?? self::DEFAULT_REBUILD_PARTITION_BATCH_SIZE;
@@ -167,6 +175,11 @@ class EcotoneProjectionExecutorBuilder implements ProjectionExecutorBuilder
     public function rebuildAsyncChannelName(): ?string
     {
         return $this->rebuildAsyncChannelName;
+    }
+
+    public function rebuildBatchCompletionChannelName(): ?string
+    {
+        return ProjectionOperationEndpoint::batchCompletionChannelOf($this->rebuildBatchCompletionChannelName, $this->rebuildAsyncChannelName);
     }
 
     public function isOpenSourceEligible(): bool

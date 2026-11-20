@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Handler\ClosureExpression;
 
 use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Handler\ExpressionEvaluationException;
 use Ecotone\Messaging\Handler\ParameterConverter;
+use Ecotone\Messaging\Handler\Processor\MethodInvoker\Converter\ArgumentTypeConversion;
+use Ecotone\Messaging\Handler\Type;
+use Throwable;
 
 /**
  * licence Enterprise
@@ -29,6 +33,8 @@ final class ClosureExpressionParameterConverter implements ParameterConverter
 {
     public function __construct(
         private AttributeExpressionExecutor $attributeExpressionExecutor,
+        private ArgumentTypeConversion $argumentTypeConversion,
+        private Type $parameterType,
         private ?string $valueFromHeaderName = null,
         private bool $valueFromPayload = false,
         private array $staticAdditionalContext = [],
@@ -37,6 +43,12 @@ final class ClosureExpressionParameterConverter implements ParameterConverter
 
     public function getArgumentFrom(Message $message): mixed
     {
-        return $this->attributeExpressionExecutor->execute($message, AdditionalContextResolver::resolve($message, $this->staticAdditionalContext, $this->valueFromHeaderName, $this->valueFromPayload));
+        $result = $this->attributeExpressionExecutor->execute($message, AdditionalContextResolver::resolve($message, $this->staticAdditionalContext, $this->valueFromHeaderName, $this->valueFromPayload));
+
+        try {
+            return $this->argumentTypeConversion->convertExpressionResult($result, $this->parameterType);
+        } catch (Throwable $exception) {
+            throw ExpressionEvaluationException::wrapping($this->attributeExpressionExecutor->location(), $exception);
+        }
     }
 }

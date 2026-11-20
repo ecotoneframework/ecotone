@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Modelling\MessageHandling\Distribution\Pulse;
 
+use Closure;
 use Composer\InstalledVersions;
 use DateTimeInterface;
 use Ecotone\Api\ExtensionObject\MediaType;
@@ -41,11 +42,11 @@ use Throwable;
  */
 final class PulseSnapshot
 {
-    public const SCHEMA_VERSION = 1;
+    public const SCHEMA_VERSION = 2;
     public const ROUTING_KEY = 'ecotone.pulse.snapshot';
     public const REPLY_ROUTING_KEY = 'ecotone.pulse.snapshot_received';
     public const PROBE_BUDGET_IN_MILLISECONDS = 2000;
-    public const CORE_KEYS = ['schemaVersion', 'serviceName', 'takenAt', 'overview', 'flowGraph', 'topology', 'channels', 'tenancy', 'tenant', 'sectionErrors', 'packages', 'consumers'];
+    public const CORE_KEYS = ['schemaVersion', 'serviceName', 'takenAt', 'overview', 'flowGraph', 'topology', 'channels', 'tenancy', 'tenant', 'sectionErrors', 'packages', 'consumers', 'digests', 'partial'];
 
     /**
      * @param array<array{referenceName: string, commandMapping: array<string, string>, eventSubscriptions: array<array{channel: string, subscriptionKeys: string[], excludePublishingServices: string[], includePublishingServices: string[]}>, asynchronousChannel: string|null}> $serviceMaps
@@ -82,13 +83,23 @@ final class PulseSnapshot
     /**
      * @param array<string, mixed> $headers
      */
-    public function snapshotJson(?string $sourceService, array $headers): string
+    public function snapshotJson(string $payload, ?string $sourceService, array $headers): string
     {
         $this->authorizeRequestFrom($sourceService);
 
-        $tenant = $this->isMultiTenant() && isset($headers[$this->tenancy['header']]) ? $this->advertisedTenant($headers[$this->tenancy['header']]) : null;
+        return self::encoded($this->answer(tenant: $this->tenantOfScopedRequest($headers), onlySections: null, knownDigests: $this->knownDigestsOf($payload)));
+    }
 
-        return json_encode($tenant === null ? $this->snapshot() : $this->tenantSnapshot($tenant), JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
+    /**
+     * @param list<string> $sections
+     * @param array<string, mixed> $actionResult
+     * @param array<string, mixed> $headers
+     */
+    public function sectionsJson(array $sections, array $actionResult, ?string $sourceService, array $headers): string
+    {
+        $this->authorizeRequestFrom($sourceService);
+
+        return self::encoded([...$this->answer(tenant: $this->tenantOfScopedRequest($headers), onlySections: $sections, knownDigests: []), ...$actionResult]);
     }
 
     /**
@@ -119,97 +130,175 @@ final class PulseSnapshot
     }
 
     /**
-     * @return array<string, mixed>
+     * @return array<string, string>
      */
-    private function tenantSnapshot(string $tenant): array
+    private function knownDigestsOf(string $payload): array
     {
-        $snapshot = [
-            'schemaVersion' => self::SCHEMA_VERSION,
-            'serviceName' => $this->serviceName,
-            'takenAt' => $this->clock->now()->format(DateTimeInterface::ATOM),
-            'tenant' => $tenant,
-            'channels' => $this->channelsWithDepth(forTenant: true),
-        ];
-
-        $sectionErrors = [];
-        foreach ($this->tenantScopedSections as $sectionName => $section) {
-            $this->addSection($snapshot, $sectionErrors, $sectionName, $section);
+        $request = json_decode($payload, true);
+        if (! is_array($request) || ! array_key_exists('known', $request)) {
+            return [];
         }
 
-        return $this->withSectionErrors($snapshot, $sectionErrors);
+        $known = $request['known'];
+        if (! is_array($known) || ($known !== [] && array_is_list($known)) || array_filter($known, static fn (mixed $digest): bool => ! is_string($digest)) !== []) {
+            throw InvalidArgumentException::create("A Pulse snapshot request names the sections Pulse already holds as `known`, a JSON object of section name to the digest of that section, but `{$payload}` was sent. Send {\"known\": {\"flowGraph\": \"<digest>\"}}, taking each digest from `digests` of an earlier snapshot, or send {} to receive every section.");
+        }
+
+        return $known;
     }
 
     /**
-     * @return array{
-     *     schemaVersion: int,
-     *     serviceName: string,
-     *     takenAt: string,
-     *     overview: array{ecotoneVersion: string|null, phpVersion: string, framework: string, licence: array{enterprise: bool, expiresAt: string, testing: bool}},
-     *     flowGraph: array<string, mixed>,
-     *     topology: array{serviceMaps: array<mixed>},
-     *     channels: list<array{name: string, kind: string, ready: int|null, delayed: int|null, inFlight: int|null, consumers: int|null, probeError: string|null, consumerToRun: string|null, handlers: list<string>, setUp: bool|null}>,
-     * }&array<string, mixed>
+     * @param list<string>|null $onlySections
+     * @param array<string, string> $knownDigests
+     * @return array<string, mixed>
      */
-    private function snapshot(): array
+    private function answer(?string $tenant, ?array $onlySections, array $knownDigests): array
     {
-        $snapshot = [
+        $asked = static fn (string $sectionName): bool => $onlySections === null || in_array($sectionName, $onlySections, true);
+        $sections = [];
+        $digests = [];
+        $sectionErrors = [];
+
+        foreach ($this->describedSections($tenant) as $sectionName => $describe) {
+            if ($asked($sectionName)) {
+                $section = $describe();
+                $digests[$sectionName] = self::digestOf($section);
+                $sections[$sectionName] = $section;
+            }
+        }
+        foreach ($this->registeredSections($tenant) as $sectionName => $parts) {
+            if (! $asked($sectionName)) {
+                continue;
+            }
+            try {
+                $revision = $this->revisionOf($parts);
+                if ($revision !== null && ($knownDigests[$sectionName] ?? null) === $revision) {
+                    $digests[$sectionName] = $revision;
+                    continue;
+                }
+                $section = $this->readOf($parts);
+                $digests[$sectionName] = $revision ?? self::digestOf($section);
+                $sections[$sectionName] = $section;
+            } catch (Throwable $exception) {
+                $sectionErrors[$sectionName] = $exception->getMessage();
+            }
+        }
+
+        return [
             'schemaVersion' => self::SCHEMA_VERSION,
             'serviceName' => $this->serviceName,
             'takenAt' => $this->clock->now()->format(DateTimeInterface::ATOM),
-            'overview' => [
+            ...($tenant === null ? [] : ['tenant' => $tenant]),
+            ...self::differingFrom($knownDigests, $sections, $digests),
+            ...($sectionErrors === [] ? [] : ['sectionErrors' => $sectionErrors]),
+            'digests' => $digests,
+            ...($onlySections === null ? [] : ['partial' => true]),
+        ];
+    }
+
+    /**
+     * @param array<string, string> $knownDigests
+     * @param array<string, array<mixed>> $sections
+     * @param array<string, string> $digests
+     * @return array<string, array<mixed>>
+     */
+    private static function differingFrom(array $knownDigests, array $sections, array $digests): array
+    {
+        return array_filter($sections, static fn (string $sectionName): bool => ($knownDigests[$sectionName] ?? null) !== $digests[$sectionName], ARRAY_FILTER_USE_KEY);
+    }
+
+    /**
+     * @param list<PulseSnapshotSection> $parts
+     * @return array<mixed>
+     */
+    private function readOf(array $parts): array
+    {
+        $section = [];
+        foreach ($parts as $part) {
+            $section = [...$section, ...$this->sectionIsolation->readOnly($part->snapshot(...))];
+        }
+
+        return $section;
+    }
+
+    /**
+     * @return array<string, Closure(): array<mixed>>
+     */
+    private function describedSections(?string $tenant): array
+    {
+        if ($tenant !== null) {
+            return ['channels' => fn (): array => $this->channelsWithDepth(forTenant: true)];
+        }
+
+        return [
+            'overview' => fn (): array => [
                 'ecotoneVersion' => InstalledVersions::isInstalled('ecotone/ecotone') ? InstalledVersions::getPrettyVersion('ecotone/ecotone') : null,
                 'phpVersion' => PHP_VERSION,
                 'framework' => $this->framework,
                 'licence' => $this->licence,
             ],
-            'flowGraph' => $this->messagingSystem->getMessageFlowGraph()->toArray(),
-            'topology' => ['serviceMaps' => $this->serviceMaps],
-            'channels' => $this->channelsWithDepth(forTenant: false),
-            'consumers' => $this->consumers(),
-            'packages' => array_map(
+            'flowGraph' => fn (): array => $this->messagingSystem->getMessageFlowGraph()->toArray(),
+            'topology' => fn (): array => ['serviceMaps' => $this->serviceMaps],
+            'channels' => fn (): array => $this->channelsWithDepth(forTenant: false),
+            'consumers' => fn (): array => $this->consumers(),
+            'packages' => fn (): array => array_map(
                 static fn (array $package): array => [...$package, 'version' => InstalledVersions::isInstalled($package['composerPackage']) ? InstalledVersions::getPrettyVersion($package['composerPackage']) : null],
                 $this->packages,
             ),
+            ...($this->isMultiTenant() ? ['tenancy' => fn (): array => $this->tenancy] : []),
         ];
+    }
 
-        if ($this->isMultiTenant()) {
-            $snapshot['tenancy'] = $this->tenancy;
+    /**
+     * @return array<string, list<PulseSnapshotSection>>
+     */
+    private function registeredSections(?string $tenant): array
+    {
+        if ($tenant !== null) {
+            return array_map(static fn (PulseSnapshotSection $section): array => [$section], $this->tenantScopedSections);
         }
 
-        $sectionErrors = [];
-        foreach ($this->tenantIndependentSections as $sectionName => $section) {
-            $this->addSection($snapshot, $sectionErrors, $sectionName, $section);
-        }
+        $sections = array_map(static fn (PulseSnapshotSection $section): array => [$section], $this->tenantIndependentSections);
         if (! $this->isMultiTenant()) {
             foreach ($this->tenantScopedSections as $sectionName => $section) {
-                $this->addSection($snapshot, $sectionErrors, $sectionName, $section);
+                $sections[$sectionName][] = $section;
             }
         }
 
-        return $this->withSectionErrors($snapshot, $sectionErrors);
+        return $sections;
     }
 
     /**
-     * @param array<string, mixed> $snapshot
-     * @param array<string, string> $sectionErrors
+     * @param list<PulseSnapshotSection> $sections
      */
-    private function addSection(array &$snapshot, array &$sectionErrors, string $sectionName, PulseSnapshotSection $section): void
+    private function revisionOf(array $sections): ?string
     {
-        try {
-            $snapshot[$sectionName] = [...($snapshot[$sectionName] ?? []), ...$this->sectionIsolation->readOnly($section->snapshot(...))];
-        } catch (Throwable $exception) {
-            $sectionErrors[$sectionName] = $exception->getMessage();
+        $revisions = [];
+        foreach ($sections as $section) {
+            $revision = $this->sectionIsolation->readOnly(static fn (): array => ['revision' => $section->revision()])['revision'];
+            if ($revision === null) {
+                return null;
+            }
+            $revisions[] = $revision;
         }
+
+        return md5(implode("\n", $revisions));
     }
 
     /**
-     * @param array<string, mixed> $snapshot
-     * @param array<string, string> $sectionErrors
-     * @return array<string, mixed>
+     * @param array<mixed> $section
      */
-    private function withSectionErrors(array $snapshot, array $sectionErrors): array
+    private static function digestOf(array $section): string
     {
-        return $sectionErrors === [] ? $snapshot : [...$snapshot, 'sectionErrors' => $sectionErrors];
+        return md5(self::encoded($section));
+    }
+
+    /**
+     * @param array<mixed> $value
+     */
+    private static function encoded(array $value): string
+    {
+        return json_encode($value, JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
     }
 
     /**

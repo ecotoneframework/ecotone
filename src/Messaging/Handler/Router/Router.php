@@ -6,6 +6,7 @@ use Ecotone\Api\Messaging\Message;
 use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Messaging\Handler\ChannelResolver;
 use Ecotone\Messaging\Handler\DestinationResolutionException;
+use Ecotone\Messaging\Handler\Gathering\PartCompletion;
 use Ecotone\Messaging\MessageHandler;
 use Ecotone\Messaging\Support\MessageBuilder;
 
@@ -27,6 +28,7 @@ final class Router implements MessageHandler
         private ?string         $defaultResolutionChannelName,
         private bool            $applySequence,
         private MessageBuilder  $messageBuilder,
+        private PartCompletion $partCompletion,
     ) {
     }
 
@@ -44,6 +46,13 @@ final class Router implements MessageHandler
         if (empty($resolutionChannels) && $this->isResolutionRequired) {
             throw DestinationResolutionException::create("Can't resolve destination, because there are no channels to send message to.");
         }
+
+        if (empty($resolutionChannels)) {
+            $this->partCompletion->complete($message, null);
+            return;
+        }
+
+        $this->partCompletion->validateRoute($message, $resolutionChannels);
 
         $sequenceSize = count($resolutionChannels);
         $sequenceNumber = 1;

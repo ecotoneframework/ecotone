@@ -139,6 +139,8 @@ final class ProjectingAttributeModule implements AnnotationModule
                 hasDeployment: $projectionDeployment !== null,
                 polling: $pollingAttribute !== null,
                 partitionTag: $partitionTag,
+                backfillBatchCompletionChannelName: $backfillAttribute?->batchCompletionChannelName,
+                rebuildBatchCompletionChannelName: $rebuildAttribute?->batchCompletionChannelName,
             );
 
             $asyncAttribute = self::getProjectionAsynchronousAttribute($annotationRegistrationService, $projectionClassName);

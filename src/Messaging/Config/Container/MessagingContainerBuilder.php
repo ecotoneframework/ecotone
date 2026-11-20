@@ -6,6 +6,7 @@ use Ecotone\Api\ExtensionObject\PollingMetadata;
 use Ecotone\Api\ExtensionObject\ServiceConfiguration;
 use Ecotone\Messaging\Config\BootstrapConfiguration;
 use Ecotone\Messaging\Endpoint\EndpointRunner;
+use Ecotone\Messaging\Endpoint\PollingConsumer\ConsumerCoroutines;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
 use Ecotone\Messaging\Handler\Processor\MethodInvoker\AroundInterceptorBuilder;
@@ -62,7 +63,7 @@ class MessagingContainerBuilder
         return $this->bootstrapConfiguration;
     }
 
-    public function registerPollingEndpoint(string $endpointId, Definition $definition, bool $withContinuousPolling = false): void
+    public function registerPollingEndpoint(string $endpointId, Definition $definition, bool $withContinuousPolling, bool $drainsAQueue, array $streamsConsumed): void
     {
         if (isset($this->pollingEndpoints[$endpointId])) {
             throw InvalidArgumentException::create("Endpoint with id {$endpointId} already exists");
@@ -74,6 +75,7 @@ class MessagingContainerBuilder
         }
 
         $pollingMetadata = $this->getPollingConfigurationForPolledEndpoint($endpointId, $withContinuousPolling);
+        ConsumerCoroutines::refuseEndpointWhoseMessagesCannotBeHandledAtOnce($endpointId, $pollingMetadata->coroutines, $drainsAQueue, $streamsConsumed);
         $this->registerPollingMetadata($pollingMetadata);
         $this->register($runnerReference, $definition);
         $this->pollingEndpoints[$endpointId] = $endpointId;

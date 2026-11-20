@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ecotone\Api\ExtensionObject;
 
+use Ecotone\Messaging\Config\ConfigurationException;
 use Ecotone\Messaging\Config\Container\DefinedObject;
 use Ecotone\Messaging\Config\Container\Definition;
 
@@ -23,6 +24,7 @@ final class PollingMetadata implements DefinedObject
     public const DEFAULT_EXECUTION_TIME_LIMIT_IN_MILLISECONDS = 0;
     public const DEFAULT_STOP_ON_ERROR = false;
     public const DEFAULT_FINISH_WHEN_NO_MESSAGES = false;
+    public const DEFAULT_COROUTINES = 1;
 
     public readonly bool $withSignalInterceptors;
 
@@ -50,6 +52,7 @@ final class PollingMetadata implements DefinedObject
         public readonly ?string $fixedRateExpression = null,
         public readonly ?string $cronExpression = null,
         public readonly ?string $polledChannelName = null,
+        public readonly int $coroutines = self::DEFAULT_COROUTINES,
     ) {
         $this->withSignalInterceptors = $withSignalInterceptors ?? extension_loaded('pcntl');
     }
@@ -125,6 +128,9 @@ final class PollingMetadata implements DefinedObject
         if (! is_null($executionPollingMetadata->executionAmountLimit)) {
             $copy = $copy->withExecutionAmountLimit($executionPollingMetadata->executionAmountLimit);
         }
+        if (! is_null($executionPollingMetadata->coroutines)) {
+            $copy = $copy->withCoroutines($executionPollingMetadata->coroutines);
+        }
 
         return $copy;
     }
@@ -191,6 +197,18 @@ final class PollingMetadata implements DefinedObject
     public function withExecutionAmountLimit(int $executionAmountLimit): PollingMetadata
     {
         return $this->copyWith(['executionAmountLimit' => $executionAmountLimit]);
+    }
+
+    public function withCoroutines(int $coroutines): PollingMetadata
+    {
+        if ($coroutines < 1) {
+            throw ConfigurationException::create(
+                "Consumer `{$this->endpointId}` cannot consume on {$coroutines} coroutines: a consumer needs at least one. "
+                . 'Pass a positive number to PollingMetadata::withCoroutines(), or leave it out to consume one message at a time.'
+            );
+        }
+
+        return $this->copyWith(['coroutines' => $coroutines]);
     }
 
     public function withFinishWhenNoMessages(bool $finishWhenNoMessages): PollingMetadata
@@ -260,6 +278,8 @@ final class PollingMetadata implements DefinedObject
             $this->finishWhenNoMessages,
             $this->fixedRateExpression,
             $this->cronExpression,
+            $this->polledChannelName,
+            $this->coroutines,
         ]);
     }
 }

@@ -54,13 +54,12 @@ final class MessagingCommandsModule extends NoExternalConfigurationModule implem
             new Reference(MessagingBaseCommand::class),
             new InterfaceToCallReference(MessagingBaseCommand::class, $methodName),
             $commandName,
-            false,
             $interfaceToCallRegistry,
             $description
         );
         $configuration
             ->registerMessageHandler($messageHandlerBuilder)
-            ->registerConsoleCommand($oneTimeCommandConfiguration);
+            ->registerConsoleCommand($oneTimeCommandConfiguration->withoutConsoleCommandInterception());
     }
 
     public function getModulePackageName(): string

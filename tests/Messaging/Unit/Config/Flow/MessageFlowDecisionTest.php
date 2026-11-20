@@ -31,7 +31,7 @@ final class MessageFlowDecisionTest extends TestCase
                 return EventCriteria::tag('order', $command->orderId);
             }
 
-            #[CommandHandler]
+            #[CommandHandler(endpointId: 'decision.handle')]
             public function handle(DecisionCommandForFlow $command): array
             {
                 return [new DecisionEventForFlow($command->orderId)];
@@ -45,14 +45,14 @@ final class MessageFlowDecisionTest extends TestCase
             licenceKey: LicenceTesting::VALID_LICENCE,
         )->getMessageFlowGraph();
 
-        self::assertCount(1, $edges = $graph->edgesOfKind(FlowEdgeKind::EMITS, 'handler:' . $service::class . '::handle', 'message:' . DecisionEventForFlow::class));
+        self::assertCount(1, $edges = $graph->edgesOfKind(FlowEdgeKind::EMITS, 'handler:decision.handle', 'message:' . DecisionEventForFlow::class));
         self::assertSame(['inferred' => true, 'via' => 'return'], $edges[0]->attributes);
     }
 
     public function test_decision_model_handler_return_is_shown_as_emitted_event(): void
     {
         $service = new class () {
-            #[CommandHandler]
+            #[CommandHandler(endpointId: 'decision.handle')]
             public function handle(DecisionCommandForFlow $command, DecisionStateForFlow $state): array
             {
                 return [new DecisionEventForFlow($command->orderId)];
@@ -66,7 +66,7 @@ final class MessageFlowDecisionTest extends TestCase
             licenceKey: LicenceTesting::VALID_LICENCE,
         )->getMessageFlowGraph();
 
-        self::assertCount(1, $edges = $graph->edgesOfKind(FlowEdgeKind::EMITS, 'handler:' . $service::class . '::handle', 'message:' . DecisionEventForFlow::class));
+        self::assertCount(1, $edges = $graph->edgesOfKind(FlowEdgeKind::EMITS, 'handler:decision.handle', 'message:' . DecisionEventForFlow::class));
         self::assertSame(['inferred' => true, 'via' => 'return'], $edges[0]->attributes);
     }
 }

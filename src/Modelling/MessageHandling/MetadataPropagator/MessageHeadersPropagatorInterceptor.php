@@ -9,8 +9,8 @@ use Ecotone\Api\Interceptor\MethodInvocation;
 use Ecotone\Api\Messaging\Message;
 use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Api\Modelling\AggregateNotFoundException;
+use Ecotone\Messaging\Execution\ExecutionScope;
 use Ecotone\Messaging\Support\FrameworkHeaders;
-use Ecotone\Modelling\AggregateMessage;
 use WeakMap;
 
 /**
@@ -22,11 +22,7 @@ class MessageHeadersPropagatorInterceptor
     public const ENABLE_POLLING_CONSUMER_PROPAGATION_CONTEXT = 'ecotone.enablePollingConsumerPropagation';
     public const DISABLE_POLLING_CONSUMER_PROPAGATION_CONTEXT = 'ecotone.disablePollingConsumerPropagation';
     public const IS_POLLING_CONSUMER_PROPAGATION_CONTEXT = 'ecotone.isPollingConsumerPropagation';
-    private array $currentlyPropagatedHeaders = [];
-    /** @var MessageCausation[] */
-    private array $causationChain = [];
     private WeakMap $exceptionsWithCausationChain;
-    private bool $isPollingConsumer = false;
 
     public function __construct()
     {
@@ -38,21 +34,17 @@ class MessageHeadersPropagatorInterceptor
         if ($propagateHeaders !== null && ! $propagateHeaders->doPropagation) {
             $userlandHeaders = [];
         } else {
-            $userlandHeaders = FrameworkHeaders::unsetAllFrameworkHeaders($message->getHeaders()->headers());
-            unset(
-                $userlandHeaders[AggregateMessage::OVERRIDE_AGGREGATE_IDENTIFIER],
-                $userlandHeaders[AggregateMessage::AGGREGATE_ID],
-                $userlandHeaders[AggregateMessage::CALLED_AGGREGATE_CLASS],
-                $userlandHeaders[AggregateMessage::CALLED_AGGREGATE_INSTANCE],
-                $userlandHeaders[AggregateMessage::CALLED_AGGREGATE_COUNTER_CAPTURED_AT_LOAD],
-                $userlandHeaders[AggregateMessage::TARGET_VERSION],
-            );
+            $userlandHeaders = FrameworkHeaders::unsetHeadersNotPropagatedToFollowingMessages($message->getHeaders()->headers());
             $userlandHeaders[MessageHeaders::MESSAGE_ID] = $message->getHeaders()->getMessageId();
             $userlandHeaders[MessageHeaders::MESSAGE_CORRELATION_ID] = $message->getHeaders()->getCorrelationId();
         }
 
-        $this->currentlyPropagatedHeaders[] = $userlandHeaders;
-        $this->causationChain[] = MessageCausation::from($methodInvocation, $message);
+        $propagated = $this->propagatedHeaders();
+        if ($propagated->headersOfHandledMessages === []) {
+            $propagated->lastCoroutineStartedBeforeTheHandledMessage = ExecutionScope::lastStartedCoroutineId();
+        }
+        $propagated->headersOfHandledMessages[] = $userlandHeaders;
+        $propagated->causationChain[] = MessageCausation::from($methodInvocation, $message);
         try {
             if ($methodInvocation instanceof MethodInvocation) {
                 $reply = $methodInvocation->proceed();
@@ -62,8 +54,8 @@ class MessageHeadersPropagatorInterceptor
         } catch (AggregateNotFoundException $exception) {
             throw $this->withCausationChain($exception);
         } finally {
-            array_pop($this->currentlyPropagatedHeaders);
-            array_pop($this->causationChain);
+            array_pop($propagated->headersOfHandledMessages);
+            array_pop($propagated->causationChain);
         }
 
         return $reply;
@@ -71,12 +63,13 @@ class MessageHeadersPropagatorInterceptor
 
     private function withCausationChain(AggregateNotFoundException $exception): AggregateNotFoundException
     {
-        if (count($this->causationChain) < 2 || isset($this->exceptionsWithCausationChain[$exception])) {
+        $causationChain = $this->propagatedHeaders()->causationChain;
+        if (count($causationChain) < 2 || isset($this->exceptionsWithCausationChain[$exception])) {
             return $exception;
         }
 
         $exceptionWithCausationChain = AggregateNotFoundException::createFromPreviousException(
-            $exception->getMessage() . '. ' . MessageCausation::describeChain($this->causationChain, $exception),
+            $exception->getMessage() . '. ' . MessageCausation::describeChain($causationChain, $exception),
             $exception
         );
         $this->exceptionsWithCausationChain[$exceptionWithCausationChain] = true;
@@ -95,7 +88,7 @@ class MessageHeadersPropagatorInterceptor
     #[InternalHandler(self::GET_CURRENTLY_PROPAGATED_HEADERS_CHANNEL)]
     public function getLastHeaders(): array
     {
-        $headers = end($this->currentlyPropagatedHeaders);
+        $headers = end($this->propagatedHeaders()->headersOfHandledMessages);
 
         if ($this->isCalledForFirstTime($headers)) {
             return [];
@@ -107,19 +100,24 @@ class MessageHeadersPropagatorInterceptor
     #[InternalHandler(self::ENABLE_POLLING_CONSUMER_PROPAGATION_CONTEXT)]
     public function enablePollingConsumerPropagation(): void
     {
-        $this->isPollingConsumer = true;
+        $this->propagatedHeaders()->isPollingConsumer = true;
     }
 
     #[InternalHandler(self::DISABLE_POLLING_CONSUMER_PROPAGATION_CONTEXT)]
     public function disablePollingConsumerPropagation(): void
     {
-        $this->isPollingConsumer = false;
+        $this->propagatedHeaders()->isPollingConsumer = false;
     }
 
     #[InternalHandler(self::IS_POLLING_CONSUMER_PROPAGATION_CONTEXT)]
     public function isPollingConsumer(): bool
     {
-        return $this->isPollingConsumer;
+        return $this->propagatedHeaders()->isPollingConsumer;
+    }
+
+    private function propagatedHeaders(): PropagatedHeaders
+    {
+        return ExecutionScope::stateOf($this, static fn () => new PropagatedHeaders());
     }
 
     private function isCalledForFirstTime($headers): bool

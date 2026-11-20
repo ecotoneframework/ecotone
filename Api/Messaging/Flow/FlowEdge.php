@@ -30,6 +30,11 @@ final class FlowEdge
         return new self($data['from'], $data['to'], FlowEdgeKind::from($data['kind']), $data['attributes']);
     }
 
+    public function identity(): string
+    {
+        return $this->kind->value . '|' . strlen($this->from) . '|' . $this->from . $this->to . '|' . ($this->kind === FlowEdgeKind::SENDS_TO ? $this->attributes['via'] ?? '' : '') . '|' . ($this->attributes['targetService'] ?? '') . '|' . ($this->attributes['targetChannel'] ?? '');
+    }
+
     public function isInferred(): bool
     {
         return ($this->attributes['inferred'] ?? false) === true;

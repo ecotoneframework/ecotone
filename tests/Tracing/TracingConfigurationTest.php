@@ -4,14 +4,17 @@ declare(strict_types=1);
 
 namespace Test\Ecotone\Tracing;
 
+use Ecotone\Api\Attribute\Aggregate;
 use Ecotone\Api\Attribute\Asynchronous;
 use Ecotone\Api\Attribute\CommandHandler;
 use Ecotone\Api\Attribute\Headers;
+use Ecotone\Api\Attribute\Identifier;
 use Ecotone\Api\ExtensionObject\ExecutionPollingMetadata;
 use Ecotone\Api\ExtensionObject\SimpleMessageChannelBuilder;
 use Ecotone\Api\Lite\EcotoneLite;
 use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Api\Tracing\InMemorySpanRecorder;
+use Ecotone\Api\Tracing\SpanAttribute;
 
 /**
  * licence Apache-2.0
@@ -19,6 +22,38 @@ use Ecotone\Api\Tracing\InMemorySpanRecorder;
  */
 final class TracingConfigurationTest extends TracingTestCase
 {
+    public function test_routed_factory_and_action_record_distinct_generated_endpoint_ids(): void
+    {
+        $recorder = new InMemorySpanRecorder();
+        $order = new #[Aggregate] class () {
+            #[Identifier]
+            public string $orderId = '';
+
+            #[CommandHandler('order.place')]
+            public static function place(array $command): self
+            {
+                $order = new self();
+                $order->orderId = $command['orderId'];
+
+                return $order;
+            }
+
+            #[CommandHandler('order.place')]
+            public function placeAgain(array $command): void
+            {
+            }
+        };
+        EcotoneLite::bootstrapFlowTesting([$order::class], self::recordingSpansInto($recorder), [self::tracingConfiguration()], enabledModules: [])
+            ->sendCommandWithRouting('order.place', ['orderId' => '1'])
+            ->sendCommandWithRouting('order.place', ['orderId' => '1']);
+        $processSpans = array_values(array_filter($recorder->recordedSpans(), fn ($span) => str_starts_with($span->name, 'process ')));
+
+        self::assertCount(2, $processSpans);
+        self::assertNotEmpty($processSpans[0]->attributes[SpanAttribute::ENDPOINT_ID]);
+        self::assertNotEmpty($processSpans[1]->attributes[SpanAttribute::ENDPOINT_ID]);
+        self::assertNotSame($processSpans[0]->attributes[SpanAttribute::ENDPOINT_ID], $processSpans[1]->attributes[SpanAttribute::ENDPOINT_ID]);
+    }
+
     public function test_without_a_configured_recorder_nothing_is_recorded_and_no_trace_carrier_is_stamped(): void
     {
         $recorder = new InMemorySpanRecorder();

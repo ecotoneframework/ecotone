@@ -45,11 +45,19 @@ class ReferenceBuilder implements ParameterConverterBuilder
 
     public function compile(InterfaceToCall $interfaceToCall): Definition
     {
-        return new Definition(ReferenceConverter::class, [
+        if ($this->expression === null) {
+            return new Definition(ReferenceConverter::class, [
+                new Reference($this->referenceServiceName),
+            ]);
+        }
+
+        return new Definition(ReferenceExpressionConverter::class, [
             new Reference(ExpressionEvaluationService::REFERENCE),
             new Reference($this->referenceServiceName),
             $this->expression,
             ExpressionLocation::definitionForParameter(ReferenceAttribute::class, $this->parameterName, $interfaceToCall->getInterfaceName(), $interfaceToCall->getMethodName(), $this->expression),
+            ArgumentTypeConversion::definition(),
+            $interfaceToCall->getParameterWithName($this->parameterName)->getTypeDescriptor(),
         ]);
     }
 }

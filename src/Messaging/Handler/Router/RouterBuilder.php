@@ -10,6 +10,7 @@ use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gathering\PartCompletion;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\MessageHandlerBuilderWithParameterConverters;
 use Ecotone\Messaging\Handler\ParameterConverterBuilder;
@@ -151,6 +152,7 @@ class RouterBuilder implements MessageHandlerBuilderWithParameterConverters
             $this->defaultResolution,
             $this->applySequence,
             new Reference(MessageBuilder::class),
+            new Reference(PartCompletion::class),
         ]);
     }
 

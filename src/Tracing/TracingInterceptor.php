@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace Ecotone\Tracing;
 
-use Ecotone\Api\Attribute\CommandHandler;
-use Ecotone\Api\Attribute\EventHandler;
-use Ecotone\Api\Attribute\InternalHandler;
 use Ecotone\Api\Attribute\MessageGateway;
-use Ecotone\Api\Attribute\QueryHandler;
 use Ecotone\Api\Interceptor\MethodInvocation;
 use Ecotone\Api\Messaging\Message;
 use Ecotone\Api\Messaging\MessageHeaders;
 use Ecotone\Api\Tracing\SpanAttribute;
 use Ecotone\Api\Tracing\SpanContext;
 use Ecotone\Api\Tracing\SpanKind;
+use Ecotone\Messaging\Attribute\EndpointId;
 use Ecotone\Messaging\NullableMessageChannel;
 use Ecotone\Messaging\Support\InvalidArgumentException;
 use Ecotone\Messaging\Support\MessageBuilder;
@@ -31,14 +28,10 @@ final class TracingInterceptor
 {
     public const DISTRIBUTED_SEND_SPAN = 'send distributed';
 
-    /**
-     * @param array<string, string> $endpointIdsByHandler
-     */
     public function __construct(
         private Tracer $tracer,
         private MessageBuilder $messageBuilder,
         private MessageSpanAttributes $messageSpanAttributes,
-        private array $endpointIdsByHandler,
     ) {
     }
 
@@ -66,24 +59,9 @@ final class TracingInterceptor
         ]);
     }
 
-    public function traceCommandHandler(MethodInvocation $methodInvocation, Message $message, CommandHandler $endpoint): mixed
+    public function traceHandlerEndpoint(MethodInvocation $methodInvocation, Message $message, EndpointId $endpoint): mixed
     {
-        return $this->traceHandler($methodInvocation, $message, $this->endpointIdOf($methodInvocation, $endpoint->getEndpointId()));
-    }
-
-    public function traceQueryHandler(MethodInvocation $methodInvocation, Message $message, QueryHandler $endpoint): mixed
-    {
-        return $this->traceHandler($methodInvocation, $message, $this->endpointIdOf($methodInvocation, $endpoint->getEndpointId()));
-    }
-
-    public function traceEventHandler(MethodInvocation $methodInvocation, Message $message, EventHandler $endpoint): mixed
-    {
-        return $this->traceHandler($methodInvocation, $message, $this->endpointIdOf($methodInvocation, $endpoint->getEndpointId()));
-    }
-
-    public function traceMessageHandler(MethodInvocation $methodInvocation, Message $message, InternalHandler $endpoint): mixed
-    {
-        return $this->traceHandler($methodInvocation, $message, $this->endpointIdOf($methodInvocation, $endpoint->getEndpointId()));
+        return $this->traceHandler($methodInvocation, $message, $endpoint->endpointId);
     }
 
     public function traceAsynchronousEndpoint(MethodInvocation $methodInvocation, Message $message): mixed
@@ -234,21 +212,6 @@ final class TracingInterceptor
         }
 
         return new SpanContext(TracingId::normalize((string) $headers->get(MessageHeaders::TRACING_ID)), bin2hex(random_bytes(8)));
-    }
-
-    private function endpointIdOf(MethodInvocation $methodInvocation, string $declaredEndpointId): string
-    {
-        $object = $methodInvocation->getObjectToInvokeOn();
-        $class = is_string($object) ? $object : $object::class;
-        while ($class !== false) {
-            $endpointId = $this->endpointIdsByHandler[$class . '::' . $methodInvocation->getMethodName()] ?? null;
-            if ($endpointId !== null) {
-                return $endpointId;
-            }
-            $class = get_parent_class($class);
-        }
-
-        return $declaredEndpointId;
     }
 
     private function traceHandler(MethodInvocation $methodInvocation, Message $message, string $endpointId): mixed

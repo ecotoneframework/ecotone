@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Ecotone\Messaging\Channel\Collector;
 
 use Ecotone\Api\Messaging\Message;
+use Ecotone\Messaging\Execution\ExecutionScope;
 use Ecotone\Messaging\Handler\Logger\LoggingGateway;
 
 /**
@@ -21,25 +22,26 @@ final class CollectorStorage
      * @param Message[] $collectedMessages
      */
     public function __construct(
-        private bool $enabled = false,
-        private array $collectedMessages = []
+        private readonly bool $enabled = false,
+        private readonly array $collectedMessages = []
     ) {
     }
 
     public function enable(): void
     {
-        $this->enabled = true;
+        $this->collected()->isCollecting = true;
     }
 
     public function disable(): void
     {
-        $this->collectedMessages = [];
-        $this->enabled = false;
+        $collected = $this->collected();
+        $collected->messages = [];
+        $collected->isCollecting = false;
     }
 
     public function isEnabled(): bool
     {
-        return $this->enabled;
+        return $this->collected()->isCollecting;
     }
 
     public function collect(Message $message, LoggingGateway $logger): void
@@ -48,7 +50,7 @@ final class CollectorStorage
             sprintf('Collecting message with id: %s', $message->getHeaders()->getMessageId()),
             $message
         );
-        $this->collectedMessages[] = $message;
+        $this->collected()->messages[] = $message;
     }
 
     /**
@@ -56,12 +58,17 @@ final class CollectorStorage
      */
     public function releaseMessages(LoggingGateway $logger, Message $message): array
     {
-        if (count($this->collectedMessages) > 0) {
-            $logger->info(sprintf('Releasing collected %s message(s) to send them to Message Channels', count($this->collectedMessages)), $message);
+        $collectedMessages = $this->collected()->messages;
+        if (count($collectedMessages) > 0) {
+            $logger->info(sprintf('Releasing collected %s message(s) to send them to Message Channels', count($collectedMessages)), $message);
         }
-        $collectedMessages = $this->collectedMessages;
         $this->disable();
 
         return $collectedMessages;
+    }
+
+    private function collected(): CollectedMessages
+    {
+        return ExecutionScope::stateOf($this, fn () => new CollectedMessages($this->enabled, $this->collectedMessages));
     }
 }

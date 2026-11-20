@@ -9,6 +9,7 @@ use Ecotone\Messaging\Handler\ExpressionEvaluationException;
 use Ecotone\Messaging\Handler\ExpressionEvaluationService;
 use Ecotone\Messaging\Handler\ExpressionLocation;
 use Ecotone\Messaging\Handler\ParameterConverter;
+use Ecotone\Messaging\Handler\Type;
 use Throwable;
 
 /**
@@ -21,7 +22,7 @@ use Throwable;
  */
 class HeaderExpressionConverter implements ParameterConverter
 {
-    public function __construct(private ExpressionEvaluationService $expressionEvaluationService, private string $headerName, private string $expression, private bool $isRequired, private ExpressionLocation $location)
+    public function __construct(private ExpressionEvaluationService $expressionEvaluationService, private string $headerName, private string $expression, private bool $isRequired, private ExpressionLocation $location, private ArgumentTypeConversion $argumentTypeConversion, private Type $parameterType)
     {
     }
 
@@ -35,10 +36,13 @@ class HeaderExpressionConverter implements ParameterConverter
         }
 
         try {
-            return $this->expressionEvaluationService->evaluateWithMessage(
-                $this->expression,
-                $message,
-                ['value' => $message->getHeaders()->containsKey($this->headerName) ? $message->getHeaders()->get($this->headerName) : null],
+            return $this->argumentTypeConversion->convertExpressionResult(
+                $this->expressionEvaluationService->evaluateWithMessage(
+                    $this->expression,
+                    $message,
+                    ['value' => $message->getHeaders()->containsKey($this->headerName) ? $message->getHeaders()->get($this->headerName) : null],
+                ),
+                $this->parameterType,
             );
         } catch (Throwable $exception) {
             throw ExpressionEvaluationException::wrapping($this->location, $exception);

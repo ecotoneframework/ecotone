@@ -22,11 +22,14 @@ class ConsoleCommandConfiguration implements DefinedObject
 
     private string $description;
 
+    private bool $interceptedAsConsoleCommand;
+
     /**
      * @param ConsoleCommandParameter[] $parameterNames
      */
-    private function __construct(string $channelName, string $name, array $parameterNames, string $description)
+    private function __construct(string $channelName, string $name, array $parameterNames, string $description, bool $interceptedAsConsoleCommand)
     {
+        $this->interceptedAsConsoleCommand = $interceptedAsConsoleCommand;
         $this->name               = $name;
         $this->channelName = $channelName;
         $this->description = $description;
@@ -55,9 +58,22 @@ class ConsoleCommandConfiguration implements DefinedObject
     /**
      * @param ConsoleCommandParameter[] $parameterNames
      */
-    public static function create(string $channelName, string $name, array $parameterNames, string $description = ''): self
+    public static function create(string $channelName, string $name, array $parameterNames, string $description = '', bool $interceptedAsConsoleCommand = true): self
     {
-        return new self($channelName, $name, $parameterNames, $description);
+        return new self($channelName, $name, $parameterNames, $description, $interceptedAsConsoleCommand);
+    }
+
+    public function withoutConsoleCommandInterception(): self
+    {
+        $self = clone $this;
+        $self->interceptedAsConsoleCommand = false;
+
+        return $self;
+    }
+
+    public function isInterceptedAsConsoleCommand(): bool
+    {
+        return $this->interceptedAsConsoleCommand;
     }
 
     public function getName(): string
@@ -90,6 +106,7 @@ class ConsoleCommandConfiguration implements DefinedObject
             $this->name,
             $this->parameterNames,
             $this->description,
+            $this->interceptedAsConsoleCommand,
         ], [self::class, 'create']);
     }
 }

@@ -13,6 +13,20 @@ use function sprintf;
  */
 class ConcurrencyException extends MessagingException
 {
+    public static function forGatheredGroup(string $groupId): self
+    {
+        return new self(sprintf(
+            'Gathered group or collected batch %s changed after it was read: another consumer won the optimistic write. '
+            . 'An asynchronous endpoint running in the DbalConfiguration database transaction retries it by default, each attempt in a new transaction; '
+            . 'raise those attempts with InstantRetryConfiguration::createWithDefaults()->withAsynchronousEndpointsRetry(true, 5). '
+            . 'An endpoint running without a database transaction (DbalConfiguration::withTransactionOnAsynchronousEndpoints(false) or #[WithoutDatabaseTransaction]) is not retried by default: '
+            . 'turn its transaction back on, or configure delayed retries with ErrorHandlerConfiguration. '
+            . 'For a hot group or key run one consumer on the gathered or collected handler\'s channel, or give that handler its own channel. '
+            . 'After retries are exhausted the message follows the normal error channel and dead letter; replay it to try again.',
+            $groupId,
+        ), self::errorCode());
+    }
+
     public static function forStaleAggregate(string $aggregateType, string $aggregateId, int $expectedVersion, int $currentVersion): static
     {
         return static::create(sprintf(

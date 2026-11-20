@@ -16,6 +16,8 @@ use Ecotone\Api\Tracing\SpanAttribute;
 use Ecotone\Api\Tracing\SpanKind;
 use Ecotone\Messaging\Channel\ChannelInterceptor;
 use Ecotone\Messaging\Config\Annotation\ModuleConfiguration\AsynchronousModule;
+use Ecotone\Messaging\Execution\ExecutionList;
+use Ecotone\Messaging\Execution\ExecutionScope;
 use Ecotone\Messaging\Support\MessageBuilder;
 use Ecotone\Modelling\Config\Routing\BusRoutingMapBuilder;
 use Throwable;
@@ -25,9 +27,6 @@ use Throwable;
  */
 final class TracingChannelInterceptor implements ChannelInterceptor
 {
-    /** @var list<list<ActiveSpan>> */
-    private array $openSendSpans = [];
-
     public function __construct(
         private string $channelName,
         private Tracer $tracer,
@@ -45,7 +44,7 @@ final class TracingChannelInterceptor implements ChannelInterceptor
 
         $isFirstChannel = self::deliveryChannelOf($message) === null;
         $span = $this->startSendSpan($message, $isFirstChannel ? $this->deliveryAttributes($message) : [], $this->tracer->currentSpan() === null);
-        $this->openSendSpans[] = [$span];
+        $this->openSendSpans()->items[] = [$span];
 
         $carrier = TracingInterceptor::carrierOf($span);
         $sent = $this->messageBuilder->fromMessage($message)->setMultipleHeaders($carrier);
@@ -86,7 +85,7 @@ final class TracingChannelInterceptor implements ChannelInterceptor
                 $entries[$index] = [...$entry, 'headers' => [...($entry['headers'] ?? []), ...$carrier]];
             }
         }
-        $this->openSendSpans[] = $spans;
+        $this->openSendSpans()->items[] = $spans;
 
         $sent = $this->messageBuilder->fromMessage($message)->setPayload(BatchMessage::fromEntries(array_values($entries)));
         if ($spans !== []) {
@@ -201,7 +200,7 @@ final class TracingChannelInterceptor implements ChannelInterceptor
 
     public function afterSendCompletion(Message $message, MessageChannel $messageChannel, ?Throwable $exception): bool
     {
-        foreach (array_reverse(array_pop($this->openSendSpans) ?? []) as $span) {
+        foreach (array_reverse(array_pop($this->openSendSpans()->items) ?? []) as $span) {
             if ($exception !== null) {
                 $span->fail($exception);
             } else {
@@ -237,5 +236,10 @@ final class TracingChannelInterceptor implements ChannelInterceptor
     public function postReceive(Message $message, MessageChannel $messageChannel): ?Message
     {
         return $message;
+    }
+
+    private function openSendSpans(): ExecutionList
+    {
+        return ExecutionScope::stateOf($this, static fn () => new ExecutionList());
     }
 }

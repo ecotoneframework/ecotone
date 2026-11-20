@@ -11,6 +11,8 @@ use Ecotone\Messaging\Config\Container\InterfaceToCallReference;
 use Ecotone\Messaging\Config\Container\MessagingContainerBuilder;
 use Ecotone\Messaging\Config\Container\Reference;
 use Ecotone\Messaging\Handler\ChannelResolver;
+use Ecotone\Messaging\Handler\Gathering\GatheringHandlerCompiler;
+use Ecotone\Messaging\Handler\Gathering\PartCompletion;
 use Ecotone\Messaging\Handler\InputOutputMessageHandlerBuilder;
 use Ecotone\Messaging\Handler\InterfaceToCall;
 use Ecotone\Messaging\Handler\InterfaceToCallRegistry;
@@ -130,7 +132,7 @@ class MessageProcessorActivatorBuilder extends InputOutputMessageHandlerBuilder 
             ->withRequiredInterceptorNames($this->getRequiredInterceptorNames())
             ->withEndpointAnnotations($this->getEndpointAnnotations());
 
-        return new Definition(
+        $handler = new Definition(
             RequestReplyProducer::class,
             [
                 $this->outputMessageChannelName ? new ChannelReference($this->outputMessageChannelName) : null,
@@ -138,8 +140,16 @@ class MessageProcessorActivatorBuilder extends InputOutputMessageHandlerBuilder 
                 new Reference(ChannelResolver::class),
                 $this->isReplyRequired,
                 new Reference(MessageBuilder::class),
+                new Reference(PartCompletion::class),
                 $chainedMessageProcessorBuilder->getInterceptedInterface()?->getName() ?? '',
             ]
+        );
+        return GatheringHandlerCompiler::compile(
+            builder: $builder,
+            handler: $handler,
+            interface: $chainedMessageProcessorBuilder->getInterceptedInterface(),
+            endpointId: $this->getEndpointId(),
+            inputChannelName: $this->getInputMessageChannelName(),
         );
     }
 
